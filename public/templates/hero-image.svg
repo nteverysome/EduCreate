@@ -1,0 +1,71 @@
+<svg width="800" height="500" viewBox="0 0 800 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="800" height="500" rx="20" fill="#F9FAFB" />
+  
+  <!-- 編輯器界面框架 -->
+  <rect x="50" y="50" width="700" height="400" rx="10" fill="white" stroke="#E5E7EB" stroke-width="2" />
+  
+  <!-- 頂部工具欄 -->
+  <rect x="50" y="50" width="700" height="50" rx="10" fill="#F3F4F6" />
+  
+  <!-- 工具欄按鈕 -->
+  <circle cx="85" cy="75" r="10" fill="#6366F1" />
+  <circle cx="120" cy="75" r="10" fill="#8B5CF6" />
+  <circle cx="155" cy="75" r="10" fill="#EC4899" />
+  
+  <!-- 側邊欄 -->
+  <rect x="50" y="100" width="150" height="350" fill="#F9FAFB" />
+  
+  <!-- 側邊欄項目 -->
+  <rect x="70" y="130" width="110" height="30" rx="5" fill="#EEF2FF" />
+  <rect x="70" y="180" width="110" height="30" rx="5" fill="#F3F4F6" />
+  <rect x="70" y="230" width="110" height="30" rx="5" fill="#F3F4F6" />
+  <rect x="70" y="280" width="110" height="30" rx="5" fill="#F3F4F6" />
+  
+  <!-- 主內容區域 -->
+  <rect x="200" y="100" width="550" height="350" fill="white" />
+  
+  <!-- 卡片元素 -->
+  <g transform="translate(250, 150)">
+    <rect width="200" height="120" rx="8" fill="#EEF2FF" stroke="#6366F1" stroke-width="2" />
+    <rect x="20" y="20" width="160" height="20" rx="4" fill="#6366F1" opacity="0.3" />
+    <rect x="20" y="50" width="120" height="15" rx="4" fill="#6366F1" opacity="0.2" />
+    <rect x="20" y="75" width="140" height="15" rx="4" fill="#6366F1" opacity="0.2" />
+  </g>
+  
+  <!-- 測驗元素 -->
+  <g transform="translate(500, 150)">
+    <rect width="200" height="120" rx="8" fill="#FCE7F3" stroke="#EC4899" stroke-width="2" />
+    <rect x="20" y="20" width="160" height="20" rx="4" fill="#EC4899" opacity="0.3" />
+    <circle cx="30" cy="60" r="8" fill="#EC4899" opacity="0.5" />
+    <rect x="45" y="55" width="120" height="10" rx="4" fill="#EC4899" opacity="0.2" />
+    <circle cx="30" cy="85" r="8" fill="#EC4899" opacity="0.5" />
+    <rect x="45" y="80" width="120" height="10" rx="4" fill="#EC4899" opacity="0.2" />
+  </g>
+  
+  <!-- 配對元素 -->
+  <g transform="translate(250, 300)">
+    <rect width="200" height="120" rx="8" fill="#EDE9FE" stroke="#8B5CF6" stroke-width="2" />
+    <rect x="20" y="20" width="70" height="30" rx="4" fill="#8B5CF6" opacity="0.3" />
+    <rect x="110" y="20" width="70" height="30" rx="4" fill="#8B5CF6" opacity="0.3" />
+    <rect x="20" y="70" width="70" height="30" rx="4" fill="#8B5CF6" opacity="0.3" />
+    <rect x="110" y="70" width="70" height="30" rx="4" fill="#8B5CF6" opacity="0.3" />
+    <line x1="95" y1="35" x2="105" y2="85" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="4 4" />
+  </g>
+  
+  <!-- 數據圖表元素 -->
+  <g transform="translate(500, 300)">
+    <rect width="200" height="120" rx="8" fill="#DBEAFE" stroke="#3B82F6" stroke-width="2" />
+    <rect x="30" y="90" width="20" height="20" rx="2" fill="#3B82F6" opacity="0.7" />
+    <rect x="60" y="70" width="20" height="40" rx="2" fill="#3B82F6" opacity="0.6" />
+    <rect x="90" y="50" width="20" height="60" rx="2" fill="#3B82F6" opacity="0.5" />
+    <rect x="120" y="30" width="20" height="80" rx="2" fill="#3B82F6" opacity="0.4" />
+    <rect x="150" y="60" width="20" height="50" rx="2" fill="#3B82F6" opacity="0.3" />
+    <rect x="20" y="20" width="160" height="15" rx="4" fill="#3B82F6" opacity="0.2" />
+  </g>
+  
+  <!-- 裝飾元素 -->
+  <circle cx="700" cy="120" r="15" fill="#EEF2FF" />
+  <circle cx="730" cy="150" r="10" fill="#DBEAFE" />
+  <circle cx="710" cy="170" r="5" fill="#FCE7F3" />
+</svg>

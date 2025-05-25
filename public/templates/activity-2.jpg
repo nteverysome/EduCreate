@@ -1,0 +1,84 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="800" height="600" fill="#F5F3FF" />
+  
+  <!-- 測驗背景 -->
+  <rect x="100" y="50" width="600" height="500" rx="20" fill="white" stroke="#8B5CF6" stroke-width="3" />
+  
+  <!-- 測驗標題 -->
+  <rect x="150" y="100" width="500" height="60" rx="10" fill="#F5F3FF" />
+  <text x="400" y="140" font-family="Arial" font-size="32" font-weight="bold" fill="#7C3AED" text-anchor="middle">數學概念測驗</text>
+  
+  <!-- 測驗問題 -->
+  <g transform="translate(150, 200)">
+    <text x="0" y="0" font-family="Arial" font-size="24" font-weight="bold" fill="#7C3AED">1. 下列哪個是質數？</text>
+    
+    <!-- 選項A -->
+    <g transform="translate(0, 40)">
+      <circle cx="15" cy="15" r="15" fill="white" stroke="#8B5CF6" stroke-width="2" />
+      <text x="15" y="22" font-family="Arial" font-size="18" font-weight="bold" fill="#8B5CF6" text-anchor="middle">A</text>
+      <text x="50" y="20" font-family="Arial" font-size="20" fill="#4B5563">9</text>
+    </g>
+    
+    <!-- 選項B -->
+    <g transform="translate(0, 90)">
+      <circle cx="15" cy="15" r="15" fill="#8B5CF6" />
+      <text x="15" y="22" font-family="Arial" font-size="18" font-weight="bold" fill="white" text-anchor="middle">B</text>
+      <text x="50" y="20" font-family="Arial" font-size="20" fill="#4B5563">11</text>
+    </g>
+    
+    <!-- 選項C -->
+    <g transform="translate(0, 140)">
+      <circle cx="15" cy="15" r="15" fill="white" stroke="#8B5CF6" stroke-width="2" />
+      <text x="15" y="22" font-family="Arial" font-size="18" font-weight="bold" fill="#8B5CF6" text-anchor="middle">C</text>
+      <text x="50" y="20" font-family="Arial" font-size="20" fill="#4B5563">15</text>
+    </g>
+    
+    <!-- 選項D -->
+    <g transform="translate(0, 190)">
+      <circle cx="15" cy="15" r="15" fill="white" stroke="#8B5CF6" stroke-width="2" />
+      <text x="15" y="22" font-family="Arial" font-size="18" font-weight="bold" fill="#8B5CF6" text-anchor="middle">D</text>
+      <text x="50" y="20" font-family="Arial" font-size="20" fill="#4B5563">21</text>
+    </g>
+  </g>
+  
+  <!-- 第二個問題 -->
+  <g transform="translate(400, 200)">
+    <text x="0" y="0" font-family="Arial" font-size="24" font-weight="bold" fill="#7C3AED">2. 計算 5² + 3³ = ?</text>
+    
+    <!-- 選項A -->
+    <g transform="translate(0, 40)">
+      <circle cx="15" cy="15" r="15" fill="white" stroke="#8B5CF6" stroke-width="2" />
+      <text x="15" y="22" font-family="Arial" font-size="18" font-weight="bold" fill="#8B5CF6" text-anchor="middle">A</text>
+      <text x="50" y="20" font-family="Arial" font-size="20" fill="#4B5563">25</text>
+    </g>
+    
+    <!-- 選項B -->
+    <g transform="translate(0, 90)">
+      <circle cx="15" cy="15" r="15" fill="white" stroke="#8B5CF6" stroke-width="2" />
+      <text x="15" y="22" font-family="Arial" font-size="18" font-weight="bold" fill="#8B5CF6" text-anchor="middle">B</text>
+      <text x="50" y="20" font-family="Arial" font-size="20" fill="#4B5563">34</text>
+    </g>
+    
+    <!-- 選項C -->
+    <g transform="translate(0, 140)">
+      <circle cx="15" cy="15" r="15" fill="#8B5CF6" />
+      <text x="15" y="22" font-family="Arial" font-size="18" font-weight="bold" fill="white" text-anchor="middle">C</text>
+      <text x="50" y="20" font-family="Arial" font-size="20" fill="#4B5563">52</text>
+    </g>
+    
+    <!-- 選項D -->
+    <g transform="translate(0, 190)">
+      <circle cx="15" cy="15" r="15" fill="white" stroke="#8B5CF6" stroke-width="2" />
+      <text x="15" y="22" font-family="Arial" font-size="18" font-weight="bold" fill="#8B5CF6" text-anchor="middle">D</text>
+      <text x="50" y="20" font-family="Arial" font-size="20" fill="#4B5563">64</text>
+    </g>
+  </g>
+  
+  <!-- 進度指示器 -->
+  <g transform="translate(300, 500)">
+    <rect width="200" height="10" rx="5" fill="#E5E7EB" />
+    <rect width="80" height="10" rx="5" fill="#8B5CF6" />
+    <text x="100" y="30" font-family="Arial" font-size="14" fill="#6B7280" text-anchor="middle">問題 2/5</text>
+  </g>
+</svg>

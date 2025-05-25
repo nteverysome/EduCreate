@@ -1,0 +1,7 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f3f4f6" />
+  <text x="200" y="150" font-family="Arial" font-size="24" text-anchor="middle" fill="#9ca3af">模板縮略圖</text>
+  <path d="M160,120 L240,120 L240,180 L160,180 Z" stroke="#9ca3af" stroke-width="2" fill="none" />
+  <path d="M180,140 L220,140" stroke="#9ca3af" stroke-width="2" />
+  <path d="M180,160 L220,160" stroke="#9ca3af" stroke-width="2" />
+</svg>

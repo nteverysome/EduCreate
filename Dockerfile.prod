@@ -1,0 +1,50 @@
+FROM node:18-alpine AS deps
+WORKDIR /app
+
+# 安裝依賴
+COPY package*.json ./
+RUN npm ci --only=production
+
+# 構建階段
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# 設置環境變量
+ENV NODE_ENV production
+
+# 構建應用
+RUN npm run build
+
+# 生產階段
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+# 創建非root用戶運行應用
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# 設置環境變量
+ENV NODE_ENV production
+
+# 複製構建產物和依賴
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/next.config.js ./next.config.js
+COPY --from=builder /app/prisma ./prisma
+
+# 創建日誌目錄並設置權限
+RUN mkdir -p /app/logs
+RUN chown -R nextjs:nodejs /app/logs
+
+# 切換到非root用戶
+USER nextjs
+
+# 暴露端口
+EXPOSE 3000
+
+# 啟動應用
+CMD ["npm", "run", "start"]

@@ -1,0 +1,11 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#ecfdf5" />
+  <rect x="100" y="70" width="200" height="160" rx="5" fill="#ffffff" stroke="#10b981" stroke-width="2" />
+  <line x1="100" y1="120" x2="300" y2="120" stroke="#10b981" stroke-width="1" stroke-dasharray="5,5" />
+  <text x="200" y="105" font-family="Arial" font-size="18" text-anchor="middle" fill="#064e3b">蘋果</text>
+  <text x="200" y="170" font-family="Arial" font-size="18" text-anchor="middle" fill="#064e3b">Apple</text>
+  <rect x="120" y="200" width="50" height="20" rx="10" fill="#d1fae5" />
+  <text x="145" y="215" font-family="Arial" font-size="12" text-anchor="middle" fill="#064e3b">水果</text>
+  <text x="200" y="50" font-family="Arial" font-size="20" font-weight="bold" text-anchor="middle" fill="#064e3b">語言學習卡片</text>
+  <path d="M320,150 A20,20 0 0,1 340,170 L340,230 A20,20 0 0,1 320,250 L80,250 A20,20 0 0,1 60,230 L60,170 A20,20 0 0,1 80,150" stroke="#10b981" stroke-width="1" fill="none" opacity="0.3" />
+</svg>

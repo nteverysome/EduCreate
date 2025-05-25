@@ -1,0 +1,8 @@
+# EduCreate 備份任務的cron配置
+# 將此文件添加到/etc/cron.d/目錄下
+
+# 每天凌晨3點執行數據庫和文件備份
+0 3 * * * root /path/to/educreate/scripts/backup.sh /var/backups/educreate >> /var/log/educreate-backup.log 2>&1
+
+# 每週日凌晨2點執行完整備份並上傳到遠程存儲
+0 2 * * 0 root /path/to/educreate/scripts/backup.sh /var/backups/educreate-weekly && /path/to/educreate/scripts/upload-backup.sh /var/backups/educreate-weekly >> /var/log/educreate-weekly-backup.log 2>&1

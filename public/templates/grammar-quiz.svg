@@ -1,0 +1,16 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f5f3ff" />
+  <rect x="50" y="70" width="300" height="50" rx="5" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
+  <text x="200" y="100" font-family="Arial" font-size="16" text-anchor="middle" fill="#5b21b6">蘋果的英文是什麼？</text>
+  <rect x="70" y="140" width="120" height="30" rx="15" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
+  <rect x="210" y="140" width="120" height="30" rx="15" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
+  <rect x="70" y="180" width="120" height="30" rx="15" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
+  <rect x="210" y="180" width="120" height="30" rx="15" fill="#ddd6fe" stroke="#8b5cf6" stroke-width="2" />
+  <text x="130" y="160" font-family="Arial" font-size="14" text-anchor="middle" fill="#5b21b6">Apple</text>
+  <text x="270" y="160" font-family="Arial" font-size="14" text-anchor="middle" fill="#5b21b6">Banana</text>
+  <text x="130" y="200" font-family="Arial" font-size="14" text-anchor="middle" fill="#5b21b6">Orange</text>
+  <text x="270" y="200" font-family="Arial" font-size="14" text-anchor="middle" fill="#5b21b6">Strawberry</text>
+  <text x="200" y="50" font-family="Arial" font-size="20" font-weight="bold" text-anchor="middle" fill="#5b21b6">語法測驗</text>
+  <circle cx="200" y="240" r="15" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" />
+  <text x="200" y="245" font-family="Arial" font-size="14" text-anchor="middle" fill="#5b21b6">?</text>
+</svg>

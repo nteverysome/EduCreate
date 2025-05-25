@@ -1,0 +1,15 @@
+diff --git a/node_modules/react-diff-viewer/package.json b/node_modules/react-diff-viewer/package.json
+index 0c7e3e7..a5c5e9c 100644
+--- a/node_modules/react-diff-viewer/package.json
++++ b/node_modules/react-diff-viewer/package.json
+@@ -82,8 +82,8 @@
+ 		"webpack-dev-server": "^3.1.9"
+ 	},
+ 	"peerDependencies": {
+-		"react": "^15.3.0 || ^16.0.0",
+-		"react-dom": "^15.3.0 || ^16.0.0"
++		"react": "^15.3.0 || ^16.0.0 || ^17.0.0 || ^18.0.0",
++		"react-dom": "^15.3.0 || ^16.0.0 || ^17.0.0 || ^18.0.0"
+ 	},
+ 	"engines": {
+ 		"node": ">= 8"

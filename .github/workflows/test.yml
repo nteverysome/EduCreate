@@ -1,0 +1,51 @@
+name: 自動化測試
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 使用 Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: 安裝依賴
+      run: npm ci
+    
+    - name: 運行 ESLint
+      run: npm run lint
+    
+    - name: 運行單元測試
+      run: npm test
+    
+    - name: 運行 E2E 測試
+      uses: cypress-io/github-action@v5
+      with:
+        build: npm run build
+        start: npm start
+        wait-on: 'http://localhost:3000'
+      env:
+        NEXTAUTH_URL: http://localhost:3000
+        NEXTAUTH_SECRET: test_secret
+        DATABASE_URL: file:./test.db
+    
+    - name: 上傳測試覆蓋率報告
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: coverage-report
+        path: coverage/

@@ -1,0 +1,60 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="800" height="600" fill="#FCE7F3" />
+  
+  <!-- 配對遊戲背景 -->
+  <rect x="100" y="50" width="600" height="500" rx="20" fill="white" stroke="#EC4899" stroke-width="3" />
+  
+  <!-- 配對遊戲標題 -->
+  <rect x="150" y="100" width="500" height="60" rx="10" fill="#FCE7F3" />
+  <text x="400" y="140" font-family="Arial" font-size="32" font-weight="bold" fill="#DB2777" text-anchor="middle">歷史人物配對</text>
+  
+  <!-- 左側卡片 -->
+  <g transform="translate(150, 200)">
+    <!-- 卡片1 -->
+    <rect width="200" height="80" rx="10" fill="white" stroke="#EC4899" stroke-width="2" />
+    <text x="100" y="45" font-family="Arial" font-size="20" font-weight="bold" fill="#DB2777" text-anchor="middle">孫中山</text>
+    
+    <!-- 卡片2 -->
+    <rect y="100" width="200" height="80" rx="10" fill="white" stroke="#EC4899" stroke-width="2" />
+    <text x="100" y="145" font-family="Arial" font-size="20" font-weight="bold" fill="#DB2777" text-anchor="middle">愛因斯坦</text>
+    
+    <!-- 卡片3 -->
+    <rect y="200" width="200" height="80" rx="10" fill="white" stroke="#EC4899" stroke-width="2" />
+    <text x="100" y="245" font-family="Arial" font-size="20" font-weight="bold" fill="#DB2777" text-anchor="middle">莎士比亞</text>
+    
+    <!-- 卡片4 -->
+    <rect y="300" width="200" height="80" rx="10" fill="white" stroke="#EC4899" stroke-width="2" />
+    <text x="100" y="345" font-family="Arial" font-size="20" font-weight="bold" fill="#DB2777" text-anchor="middle">居里夫人</text>
+  </g>
+  
+  <!-- 右側卡片 -->
+  <g transform="translate(450, 200)">
+    <!-- 卡片A -->
+    <rect width="200" height="80" rx="10" fill="white" stroke="#EC4899" stroke-width="2" />
+    <text x="100" y="45" font-family="Arial" font-size="18" fill="#6B7280" text-anchor="middle">相對論創立者</text>
+    
+    <!-- 卡片B -->
+    <rect y="100" width="200" height="80" rx="10" fill="#FCE7F3" stroke="#EC4899" stroke-width="2" />
+    <text x="100" y="145" font-family="Arial" font-size="18" fill="#6B7280" text-anchor="middle">發現放射性元素</text>
+    
+    <!-- 卡片C -->
+    <rect y="200" width="200" height="80" rx="10" fill="white" stroke="#EC4899" stroke-width="2" />
+    <text x="100" y="245" font-family="Arial" font-size="18" fill="#6B7280" text-anchor="middle">中國民主革命先驅</text>
+    
+    <!-- 卡片D -->
+    <rect y="300" width="200" height="80" rx="10" fill="white" stroke="#EC4899" stroke-width="2" />
+    <text x="100" y="345" font-family="Arial" font-size="18" fill="#6B7280" text-anchor="middle">《哈姆雷特》作者</text>
+  </g>
+  
+  <!-- 連接線 -->
+  <line x1="350" y1="240" x2="450" y2="340" stroke="#EC4899" stroke-width="2" stroke-dasharray="5 5" />
+  <line x1="350" y1="340" x2="450" y2="240" stroke="#EC4899" stroke-width="2" />
+  
+  <!-- 進度指示器 -->
+  <g transform="translate(300, 520)">
+    <rect width="200" height="10" rx="5" fill="#E5E7EB" />
+    <rect width="120" height="10" rx="5" fill="#EC4899" />
+    <text x="100" y="30" font-family="Arial" font-size="14" fill="#6B7280" text-anchor="middle">已完成 3/5 組</text>
+  </g>
+</svg>
