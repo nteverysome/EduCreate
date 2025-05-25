@@ -1,16 +1,21 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 import { PrismaClient } from '@prisma/client';
+import { withTestAuth } from '../../../middleware/withTestAuth';
 
 const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getSession({ req });
-  
-  // 檢查用戶是否已登入
-  if (!session || !session.user) {
+  // 使用測試認證中間件
+  await new Promise<void>((resolve) => {
+    withTestAuth(req, res, resolve);
+  }).catch(() => {
     return res.status(401).json({ error: '未授權' });
-  }
+  });
+  
+  // 獲取用戶信息（可能來自會話或測試令牌）
+  const session = await getSession({ req });
+  const user = session?.user || (req as any).testUser;
   
   // 只允許GET請求
   if (req.method !== 'GET') {

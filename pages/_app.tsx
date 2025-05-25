@@ -30,6 +30,20 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
     // 初始化網絡監控並檢查API健康狀態
     const checkApiEndpoints = async () => {
       try {
+        // 在開發環境中獲取測試令牌
+        if (process.env.NODE_ENV !== 'production') {
+          try {
+            const testTokenResponse = await fetch('/api/auth/test-token');
+            if (testTokenResponse.ok) {
+              const tokenData = await testTokenResponse.json();
+              console.log('開發環境：已獲取測試令牌');
+              localStorage.setItem('eduCreateTestToken', tokenData.token);
+            }
+          } catch (tokenError) {
+            console.warn('獲取測試令牌失敗:', tokenError);
+          }
+        }
+        
         // 檢查基本搜索API
         const searchApiStatus = await networkMonitor.checkApiConnection('/api/search');
         console.log('基本搜索API狀態:', searchApiStatus.connected ? '正常' : '連接失敗');

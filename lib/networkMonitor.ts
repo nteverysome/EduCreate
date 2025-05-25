@@ -195,11 +195,22 @@ class NetworkMonitor {
   }> {
     const startTime = Date.now();
     try {
+      // 準備請求頭
+      const headers: HeadersInit = {
+        'Accept': 'application/json'
+      };
+      
+      // 如果在瀏覽器環境中，嘗試從localStorage獲取測試令牌
+      if (typeof window !== 'undefined') {
+        const testToken = localStorage.getItem('eduCreateTestToken');
+        if (testToken) {
+          headers['Authorization'] = `Bearer ${testToken}`;
+        }
+      }
+      
       const response = await fetch(endpoint, {
         method: 'GET',
-        headers: {
-          'Accept': 'application/json'
-        },
+        headers,
         signal: AbortSignal.timeout(5000) // 5秒超時
       });
 
