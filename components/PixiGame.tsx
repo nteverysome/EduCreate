@@ -102,7 +102,7 @@ export default function PixiGame({
         container.x = item.x || Math.random() * (width - 100);
         container.y = item.y || Math.random() * (height - 100);
         container.interactive = true;
-        container.buttonMode = true;
+        (container as any).buttonMode = true;
 
         // 創建背景
         const background = new PIXI.Graphics();
@@ -152,7 +152,7 @@ export default function PixiGame({
 
   // 拖動開始
   const onDragStart = (event: PIXI.FederatedPointerEvent) => {
-    const obj = event.currentTarget as PIXI.Container;
+    const obj = event.currentTarget as any;
     obj.alpha = 0.8;
     obj.data = event;
     obj.dragging = true;
@@ -160,7 +160,7 @@ export default function PixiGame({
 
   // 拖動結束
   const onDragEnd = (event: PIXI.FederatedPointerEvent) => {
-    const obj = event.currentTarget as PIXI.Container;
+    const obj = event.currentTarget as any;
     obj.alpha = 1;
     obj.dragging = false;
     obj.data = null;
@@ -171,7 +171,7 @@ export default function PixiGame({
 
   // 拖動移動
   const onDragMove = (event: PIXI.FederatedPointerEvent) => {
-    const obj = event.currentTarget as PIXI.Container;
+    const obj = event.currentTarget as any;
     if (obj.dragging) {
       const newPosition = obj.data.getLocalPosition(obj.parent);
       obj.x = newPosition.x - 50;
