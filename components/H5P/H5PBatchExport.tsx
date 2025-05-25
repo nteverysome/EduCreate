@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { DownloadIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 interface H5PBatchExportProps {
   contentIds: string[];
@@ -94,7 +94,7 @@ export default function H5PBatchExport({
         </>
       ) : (
         <>
-          <DownloadIcon className="-ml-0.5 mr-2 h-4 w-4" />
+          <ArrowDownTrayIcon className="-ml-0.5 mr-2 h-4 w-4" />
           批量導出 ({contentIds.length})
         </>
       )}
