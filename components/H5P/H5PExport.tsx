@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { DownloadIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 interface H5PExportProps {
   contentId: string;
@@ -79,7 +79,7 @@ export default function H5PExport({ contentId, title, className = '' }: H5PExpor
         </>
       ) : (
         <>
-          <DownloadIcon className="-ml-0.5 mr-2 h-4 w-4" />
+          <ArrowDownTrayIcon className="-ml-0.5 mr-2 h-4 w-4" />
           導出H5P
         </>
       )}
