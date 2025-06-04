@@ -46,6 +46,7 @@ export default function ActivityEditor({ activityId, templateId, templateType }:
   const [showSavedMessage, setShowSavedMessage] = useState(false);
   const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   // 監聽未保存更改
   useEffect(() => {
@@ -148,6 +149,16 @@ export default function ActivityEditor({ activityId, templateId, templateType }:
   // 處理預覽切換
   const handleTogglePreview = () => {
     togglePreviewMode();
+  };
+
+  // 處理標題變更
+  const handleTitleChange = (newTitle: string) => {
+    if (currentActivity) {
+      // 更新活動標題
+      // 這裡需要調用store中的更新標題方法
+      // 暫時設置為dirty狀態
+      setIsDirty(true);
+    }
   };
   
   // 處理版本恢復後的操作
