@@ -60,7 +60,22 @@ export default function ResetPassword() {
 
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message);
+      // 確保錯誤訊息是字串格式
+      let errorMessage = '重設密碼時發生錯誤';
+      
+      if (typeof err === 'string') {
+        errorMessage = err;
+      } else if (err && typeof err === 'object') {
+        if (err.message && typeof err.message === 'string') {
+          errorMessage = err.message;
+        } else if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
+        } else {
+          errorMessage = '重設密碼失敗，請稍後再試';
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

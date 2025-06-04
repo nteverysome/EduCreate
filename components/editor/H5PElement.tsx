@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { EditorElement } from '../../store/editorStore';
-import H5PEmbed from '../H5PEmbed';
+import H5PEmbed from '../H5P/H5PEmbed';
 
 interface H5PElementProps {
   element: EditorElement;

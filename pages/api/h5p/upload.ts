@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
+// 需要先安装formidable: npm install formidable @types/formidable
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
@@ -35,18 +36,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // 使用formidable解析上傳的文件
-    const form = new formidable.IncomingForm();
-    form.keepExtensions = true;
-    
-    const [fields, files] = await new Promise<[formidable.Fields, formidable.Files]>((resolve, reject) => {
-      form.parse(req, (err, fields, files) => {
-        if (err) reject(err);
-        resolve([fields, files]);
-      });
+    const form = formidable({
+      keepExtensions: true,
     });
+    
+    const [fields, files] = await form.parse(req);
 
     // 檢查是否有上傳的H5P文件
-    const uploadedFile = files.h5pFile as formidable.File;
+    const uploadedFile = Array.isArray(files.h5pFile) ? files.h5pFile[0] : files.h5pFile;
     if (!uploadedFile) {
       return res.status(400).json({ error: '未找到上傳的H5P文件' });
     }

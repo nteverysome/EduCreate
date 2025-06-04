@@ -69,7 +69,22 @@ export default function UsersPage({ users: initialUsers }: UsersPageProps) {
       setMessage(`已成功將用戶角色更新為 ${selectedRole}`);
       setIsModalOpen(false);
     } catch (err) {
-      setError(err.message);
+      // 確保錯誤訊息是字串格式
+      let errorMessage = '載入用戶數據時發生錯誤';
+      
+      if (typeof err === 'string') {
+        errorMessage = err;
+      } else if (err && typeof err === 'object') {
+        if (err.message && typeof err.message === 'string') {
+          errorMessage = err.message;
+        } else if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
+        } else {
+          errorMessage = '載入用戶數據失敗，請稍後再試';
+        }
+      }
+      
+      setError(errorMessage);
     }
   };
 

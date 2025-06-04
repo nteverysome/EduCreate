@@ -42,7 +42,22 @@ export default function Login() {
       const callbackUrl = router.query.callbackUrl as string || '/dashboard';
       router.push(callbackUrl);
     } catch (err: any) {
-      setError(err.message);
+      // 確保錯誤訊息是字串格式
+      let errorMessage = '登入過程中發生未知錯誤';
+      
+      if (typeof err === 'string') {
+        errorMessage = err;
+      } else if (err && typeof err === 'object') {
+        if (err.message && typeof err.message === 'string') {
+          errorMessage = err.message;
+        } else if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
+        } else {
+          errorMessage = '登入失敗，請檢查您的憑證';
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

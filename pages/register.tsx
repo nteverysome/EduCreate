@@ -42,6 +42,8 @@ export default function Register() {
       setLoading(true);
       
       // 註冊用戶
+      console.log('🚀 開始註冊請求...', { name: formData.name, email: formData.email });
+      
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
@@ -53,13 +55,31 @@ export default function Register() {
           password: formData.password
         })
       });
+      
+      console.log('📡 註冊響應狀態:', response.status, response.statusText);
 
       const data = await response.json();
+      console.log('📋 註冊響應數據:', data);
 
       if (!response.ok) {
-        throw new Error(data.message || '註冊失敗');
+        // 顯示詳細的錯誤信息
+        const errorMessage = data.error || data.message || `註冊失敗 (${response.status})`;
+        console.error('❌ 註冊失敗:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: data.error,
+          message: data.message,
+          details: data.details,
+          fullResponse: data
+        });
+        throw new Error(errorMessage);
       }
 
+      console.log('✅ 註冊成功，準備自動登入...');
+
+      // 註冊成功，顯示成功消息
+      console.log('註冊成功:', data);
+      
       // 註冊成功後自動登入
       const result = await signIn('credentials', {
         redirect: false,
@@ -68,13 +88,39 @@ export default function Register() {
       });
 
       if (result?.error) {
-        throw new Error(result.error || '登入失敗');
+        // 如果自動登入失敗，提示用戶手動登入
+        setError('註冊成功，但自動登入失敗。請手動登入。');
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+        return;
       }
 
       // 重定向到儀表板
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message);
+      console.error('註冊錯誤:', err);
+      // 確保錯誤訊息是字串格式
+      let errorMessage = '註冊過程中發生未知錯誤';
+      
+      if (typeof err === 'string') {
+        errorMessage = err;
+      } else if (err && typeof err === 'object') {
+        if (err.message && typeof err.message === 'string') {
+          errorMessage = err.message;
+        } else if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
+        } else {
+          // 如果錯誤是物件但沒有有效的訊息，嘗試序列化
+          try {
+            errorMessage = JSON.stringify(err);
+          } catch {
+            errorMessage = '註冊失敗，請檢查輸入資料';
+          }
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

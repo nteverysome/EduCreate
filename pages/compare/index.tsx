@@ -5,18 +5,37 @@ import { ActivityVersion } from '@/models/activityVersion';
 import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { GetServerSidePropsContext } from 'next';
+
+// 定义版本数据类型
+interface VersionData {
+  id: string;
+  versionName: string;
+  createdAt: string;
+  versionNotes?: string;
+  user?: {
+    name: string;
+  };
+}
+
+// 定义组件Props类型
+interface CompareVersionsProps {
+  versions: VersionData[];
+  activityId: string;
+  error?: string;
+}
 
 const prisma = new PrismaClient();
 
 // 版本比較頁面
-export default function CompareVersions({ versions, activityId }) {
+export default function CompareVersions({ versions, activityId }: CompareVersionsProps) {
   const router = useRouter();
-  const [selectedVersions, setSelectedVersions] = useState([]);
+  const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
   // 選擇版本進行比較
-  const toggleVersionSelection = (versionId) => {
+  const toggleVersionSelection = (versionId: string) => {
     setSelectedVersions(prev => {
       if (prev.includes(versionId)) {
         return prev.filter(id => id !== versionId);
@@ -31,7 +50,7 @@ export default function CompareVersions({ versions, activityId }) {
   };
   
   // 恢復到特定版本
-  const restoreVersion = async (versionId) => {
+  const restoreVersion = async (versionId: string) => {
     try {
       setLoading(true);
       setError('');
@@ -54,8 +73,23 @@ export default function CompareVersions({ versions, activityId }) {
       
       // 恢復成功，重定向到編輯器
       router.push(`/editor/${activityId}?restored=true`);
-    } catch (err) {
-      setError(err.message);
+    } catch (err: any) {
+      // 確保錯誤訊息是字串格式
+        let errorMessage = '載入比較數據時發生錯誤';
+        
+        if (typeof err === 'string') {
+          errorMessage = err;
+        } else if (err && typeof err === 'object') {
+          if (err.message && typeof err.message === 'string') {
+            errorMessage = err.message;
+          } else if (err.error && typeof err.error === 'string') {
+            errorMessage = err.error;
+          } else {
+            errorMessage = '載入比較數據失敗，請稍後再試';
+          }
+        }
+        
+        setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -112,7 +146,7 @@ export default function CompareVersions({ versions, activityId }) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {versions.map((version) => (
+            {versions.map((version: VersionData) => (
               <tr key={version.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
@@ -124,17 +158,17 @@ export default function CompareVersions({ versions, activityId }) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    v{version.versionNumber}
+                    {version.versionName}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {format(new Date(version.createdAt), 'yyyy-MM-dd HH:mm:ss')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {version.createdByUser?.name || '未知用戶'}
+                  {version.user?.name || '未知用戶'}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
-                  {version.description || '無描述'}
+                  {version.versionNotes || '無描述'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
@@ -160,7 +194,7 @@ export default function CompareVersions({ versions, activityId }) {
 }
 
 // 服務器端獲取版本數據
-export async function getServerSideProps(context) {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
   
   // 檢查用戶是否已登入
@@ -197,9 +231,9 @@ export async function getServerSideProps(context) {
     // 獲取活動的所有版本
     const versions = await prisma.activityVersion.findMany({
       where: { activityId: activityId as string },
-      orderBy: { versionNumber: 'desc' },
+      orderBy: { createdAt: 'desc' },
       include: {
-        createdByUser: {
+        user: {
           select: {
             name: true,
           },

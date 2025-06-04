@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
-import { PlusIcon, SearchIcon, AdjustmentsIcon, ClockIcon, ChartBarIcon, DocumentTextIcon, TagIcon, EyeIcon, UserGroupIcon, LightningBoltIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon as SearchIcon, AdjustmentsHorizontalIcon as AdjustmentsIcon, ClockIcon, ChartBarIcon, DocumentTextIcon, TagIcon, EyeIcon, UserGroupIcon, BoltIcon as LightningBoltIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
 interface Activity {
@@ -126,12 +126,12 @@ export default function Dashboard() {
 
           // 計算統計數據
           const totalActivities = data.pagination.total || formattedActivities.length;
-          const publishedActivities = formattedActivities.filter(a => a.published).length;
-          const totalViews = formattedActivities.reduce((sum, a) => sum + (a.views || 0), 0);
-          const totalInteractions = formattedActivities.reduce((sum, a) => sum + (a.interactions || 0), 0);
+          const publishedActivities = formattedActivities.filter((a: Activity) => a.published).length;
+          const totalViews = formattedActivities.reduce((sum: number, a: Activity) => sum + (a.views || 0), 0);
+          const totalInteractions = formattedActivities.reduce((sum: number, a: Activity) => sum + (a.interactions || 0), 0);
           
           // 獲取最近30天內創建的活動數量
-          const recentActivities = formattedActivities.filter(a => {
+          const recentActivities = formattedActivities.filter((a: Activity) => {
             const date = new Date(a.createdAt);
             const now = new Date();
             const diffTime = Math.abs(now.getTime() - date.getTime());
@@ -143,8 +143,8 @@ export default function Dashboard() {
 
           // 提取所有可用標籤
           const tags = new Set<string>();
-          formattedActivities.forEach(activity => {
-            activity.tags?.forEach(tag => tags.add(tag));
+          formattedActivities.forEach((activity: Activity) => {
+            activity.tags?.forEach((tag: string) => tags.add(tag));
           });
 
           setActivities(formattedActivities);

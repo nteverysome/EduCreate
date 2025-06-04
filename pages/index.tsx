@@ -2,78 +2,96 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import UserMenu from '../components/UserMenu';
 
 export default function Home() {
   const { data: session } = useSession();
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [resourceCount, setResourceCount] = useState(93172361);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  // 遊戲模板數據
+  // 模擬資源數量增長動畫
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setResourceCount(prev => prev + Math.floor(Math.random() * 10) + 1);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // 遊戲模板數據 - 模仿 Wordwall 風格
   const gameTemplates = [
     {
       id: 1,
       title: '配對遊戲',
-      description: '創建配對練習，幫助學生建立概念聯繫',
-      image: '/templates/vocab-matching.svg',
-      color: 'bg-blue-500',
-      hoverColor: 'bg-blue-600'
+      description: '拖放配對練習',
+      icon: '🎯',
+      color: 'from-blue-400 to-blue-600',
+      bgColor: 'bg-blue-50',
+      textColor: 'text-blue-700'
     },
     {
       id: 2,
-      title: '填空題',
-      description: '設計填空練習，強化關鍵詞彙和語法理解',
-      image: '/templates/grammar-quiz.svg',
-      color: 'bg-green-500',
-      hoverColor: 'bg-green-600'
+      title: '問答遊戲',
+      description: '互動式問答',
+      icon: '❓',
+      color: 'from-green-400 to-green-600',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-700'
     },
     {
       id: 3,
-      title: '選擇題',
-      description: '創建多選題測驗，快速評估學生理解程度',
-      image: '/templates/language-flashcards.svg',
-      color: 'bg-purple-500',
-      hoverColor: 'bg-purple-600'
+      title: '單字遊戲',
+      description: '詞彙學習卡片',
+      icon: '📚',
+      color: 'from-purple-400 to-purple-600',
+      bgColor: 'bg-purple-50',
+      textColor: 'text-purple-700'
     },
     {
       id: 4,
-      title: '單字卡片',
-      description: '製作互動式詞彙學習卡片，提高記憶效果',
-      image: '/templates/placeholder.svg',
-      color: 'bg-pink-500',
-      hoverColor: 'bg-pink-600'
+      title: '隨機輪盤',
+      description: '幸運轉盤選擇',
+      icon: '🎡',
+      color: 'from-pink-400 to-pink-600',
+      bgColor: 'bg-pink-50',
+      textColor: 'text-pink-700'
     },
     {
       id: 5,
-      title: '隨機輪盤',
-      description: '創建隨機選擇輪盤，增加課堂趣味性',
-      image: '/templates/placeholder.svg',
-      color: 'bg-yellow-500',
-      hoverColor: 'bg-yellow-600'
+      title: '迷宮遊戲',
+      description: '知識探索迷宮',
+      icon: '🌟',
+      color: 'from-yellow-400 to-yellow-600',
+      bgColor: 'bg-yellow-50',
+      textColor: 'text-yellow-700'
     },
     {
       id: 6,
-      title: '文字排序',
-      description: '設計文字排序活動，提升邏輯思維能力',
-      image: '/templates/placeholder.svg',
-      color: 'bg-red-500',
-      hoverColor: 'bg-red-600'
+      title: '排序遊戲',
+      description: '邏輯排序練習',
+      icon: '🔢',
+      color: 'from-red-400 to-red-600',
+      bgColor: 'bg-red-50',
+      textColor: 'text-red-700'
     },
     {
       id: 7,
-      title: '迷宮遊戲',
-      description: '創建知識迷宮，讓學習過程更加有趣',
-      image: '/templates/placeholder.svg',
-      color: 'bg-indigo-500',
-      hoverColor: 'bg-indigo-600'
+      title: '記憶遊戲',
+      description: '翻牌記憶挑戰',
+      icon: '🧠',
+      color: 'from-indigo-400 to-indigo-600',
+      bgColor: 'bg-indigo-50',
+      textColor: 'text-indigo-700'
     },
     {
       id: 8,
-      title: '記憶配對',
-      description: '設計記憶配對遊戲，訓練專注力和記憶力',
-      image: '/templates/placeholder.svg',
-      color: 'bg-teal-500',
-      hoverColor: 'bg-teal-600'
+      title: '填字遊戲',
+      description: '互動填字練習',
+      icon: '✏️',
+      color: 'from-teal-400 to-teal-600',
+      bgColor: 'bg-teal-50',
+      textColor: 'text-teal-700'
     }
   ];
 
@@ -88,54 +106,60 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <Head>
-        <title>EduCreate - 互動教育資源創建平台</title>
-        <meta name="description" content="創建互動式教育資源，提升教學效果" />
+        <title>EduCreate | 創建更好的課程，更快速</title>
+        <meta name="description" content="輕鬆創建您的教學資源。製作課堂自定義活動。問答、配對、單字遊戲等等。" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {/* 導航欄 */}
-      <nav className="bg-white shadow-sm sticky top-0 z-10">
+      {/* 導航欄 - Wordwall 風格 */}
+      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
+          <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <span className="text-2xl font-bold text-blue-600">EduCreate</span>
+              <Link href="/" className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">E</span>
+                </div>
+                <span className="text-xl font-bold text-gray-800">EduCreate</span>
               </Link>
             </div>
 
             {/* 導航菜單 */}
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="/templates" className="text-gray-600 hover:text-blue-600 transition">
-                模板庫
+            <div className="hidden md:flex items-center space-x-1">
+              <Link href="/templates" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition">
+                教師
               </Link>
-              <Link href="/pricing" className="text-gray-600 hover:text-blue-600 transition">
-                價格方案
+              <Link href="/printables" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition">
+                列印資源
               </Link>
-              <Link href="/help-center" className="text-gray-600 hover:text-blue-600 transition">
-                幫助中心
-              </Link>
-              <Link href="/about" className="text-gray-600 hover:text-blue-600 transition">
-                關於我們
+              <Link href="/interactives" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition">
+                互動遊戲
               </Link>
             </div>
 
+            {/* 統計數據 */}
+            <div className="hidden lg:flex items-center text-sm text-gray-600">
+              <span className="font-medium">{resourceCount.toLocaleString()}</span>
+              <span className="ml-1">個資源已創建</span>
+            </div>
+
             {/* 用戶菜單 */}
-            <div className="flex items-center">
+            <div className="flex items-center space-x-3">
               {session ? (
-                <div className="flex items-center space-x-4">
-                  <Link href="/create" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    創建活動
+                <div className="flex items-center space-x-3">
+                  <Link href="/create" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-blue-600 hover:to-purple-700 transition shadow-sm">
+                    開始創建
                   </Link>
                   <UserMenu />
                 </div>
               ) : (
-                <div className="flex items-center space-x-4">
-                  <Link href="/login" className="text-gray-600 hover:text-blue-600 transition">
+                <div className="flex items-center space-x-3">
+                  <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-blue-600 transition">
                     登入
                   </Link>
-                  <Link href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    免費註冊
+                  <Link href="/register" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-blue-600 hover:to-purple-700 transition shadow-sm">
+                    註冊開始創建
                   </Link>
                 </div>
               )}
@@ -146,93 +170,163 @@ export default function Home() {
 
       {/* 主要內容 */}
       <main className="flex-grow">
-        {/* 英雄區塊 */}
-        <section className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* 英雄區塊 - Wordwall 風格 */}
+        <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">創建互動式教學活動</h1>
-              <p className="text-xl mb-8 max-w-3xl mx-auto">在幾分鐘內製作專業的互動教學資源，提升學生參與度和學習效果</p>
-              <div className="flex justify-center space-x-4">
-                <Link href="/templates" className="bg-white text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition">
-                  瀏覽模板
+              {/* 統計數據徽章 */}
+              <div className="inline-flex items-center bg-white rounded-full px-4 py-2 shadow-sm border border-gray-200 mb-8">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-gray-700">
+                    <span className="font-bold text-blue-600">{resourceCount.toLocaleString()}</span> 個資源已創建
+                  </span>
+                </div>
+              </div>
+              
+              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                創建更好的課程，
+                <br />
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  更快速
+                </span>
+              </h1>
+              
+              <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+                輕鬆創建您的教學資源。
+                <br />
+                製作課堂自定義活動。
+                <br />
+                問答、配對、單字遊戲等等。
+              </p>
+              
+              <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <Link href="/register" className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                  註冊開始創建
                 </Link>
-                <Link href="/register" className="bg-yellow-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-yellow-600 transition">
-                  立即開始
-                </Link>
+                <div className="flex items-center space-x-2 text-gray-600">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium">免費使用</span>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 遊戲模板區塊 */}
-        <section className="py-16 bg-gray-50">
+        {/* 遊戲模板區塊 - Wordwall 風格 */}
+        <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-center mb-12">互動遊戲模板</h2>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">選擇您的活動類型</h2>
+              <p className="text-lg text-gray-600">從多種互動模板中選擇，快速創建引人入勝的學習活動</p>
+            </div>
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {gameTemplates.map((template) => (
                 <div 
                   key={template.id}
-                  className="relative overflow-hidden rounded-lg shadow-md transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
+                  className="group relative overflow-hidden rounded-2xl transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl cursor-pointer"
                   onMouseEnter={() => setHoveredCard(template.id)}
                   onMouseLeave={() => setHoveredCard(null)}
                 >
-                  <div className={`h-48 ${template.color} flex items-center justify-center transition-colors duration-300 ${hoveredCard === template.id ? template.hoverColor : ''}`}>
-                    {template.image && (
-                      <div className="w-24 h-24 text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4 bg-white">
-                    <h3 className="text-lg font-semibold mb-1">{template.title}</h3>
-                    {hoveredCard === template.id && (
-                      <p className="text-sm text-gray-600">{template.description}</p>
-                    )}
-                    <div className="mt-4">
-                      <Link href={`/editor/create?template=${template.id}`} className="w-full inline-block text-center bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-700 transition">
-                        使用此模板
-                      </Link>
+                  {/* 背景漸變 */}
+                  <div className={`absolute inset-0 bg-gradient-to-br ${template.color} opacity-90 group-hover:opacity-100 transition-opacity duration-300`}></div>
+                  
+                  {/* 內容 */}
+                  <div className="relative p-8 h-48 flex flex-col justify-center items-center text-center">
+                    <div className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
+                      {template.icon}
                     </div>
+                    <h3 className="text-xl font-bold text-white mb-2">{template.title}</h3>
+                    <p className="text-white/90 text-sm">{template.description}</p>
+                  </div>
+                  
+                  {/* 懸停效果 */}
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <Link href={`/editor/create?template=${template.id}`} className="bg-white text-gray-900 px-6 py-2 rounded-full font-semibold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                      開始創建
+                    </Link>
                   </div>
                 </div>
               ))}
             </div>
+            
+            {/* 查看更多按鈕 */}
+            <div className="text-center mt-12">
+              <Link href="/templates" className="inline-flex items-center px-6 py-3 border border-gray-300 rounded-full text-gray-700 font-medium hover:bg-gray-50 transition">
+                查看所有模板
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
           </div>
         </section>
 
-        {/* 功能亮點區塊 */}
-        <section className="py-16">
+        {/* 功能亮點區塊 - Wordwall 風格 */}
+        <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-center mb-12">為何選擇 EduCreate</h2>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">輕鬆創建教學資源</h2>
+              <p className="text-lg text-gray-600">專為教師設計的直觀工具，讓您專注於教學內容</p>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {/* 快速創建 */}
+              <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">快速創建</h3>
-                <p className="text-gray-600">使用直觀的拖放界面，在幾分鐘內創建專業的互動教學活動</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">幾分鐘內完成</h3>
+                <p className="text-gray-600 leading-relaxed">選擇模板，輸入內容，立即生成。無需複雜的設計技能，專注於教學內容創作。</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              
+              {/* 多樣化模板 */}
+              <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">高度自定義</h3>
-                <p className="text-gray-600">根據您的教學需求自定義模板，調整顏色、字體和布局</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">豐富的活動類型</h3>
+                <p className="text-gray-600 leading-relaxed">問答、配對、填空、輪盤等多種互動模板，滿足不同學科和年級的教學需求。</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              
+              {/* 學生參與 */}
+              <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">學生參與</h3>
-                <p className="text-gray-600">提高學生參與度，通過互動遊戲和活動使學習更加有趣</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">提升課堂參與</h3>
+                <p className="text-gray-600 leading-relaxed">互動式遊戲讓學習變得有趣，提高學生專注度和學習動機，創造活躍的課堂氛圍。</p>
+              </div>
+            </div>
+            
+            {/* 統計數據 */}
+            <div className="mt-16 bg-white rounded-2xl p-8 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-blue-600 mb-2">{resourceCount.toLocaleString()}</div>
+                  <div className="text-gray-600">已創建資源</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-green-600 mb-2">500K+</div>
+                  <div className="text-gray-600">活躍教師</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-purple-600 mb-2">180+</div>
+                  <div className="text-gray-600">國家地區</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-pink-600 mb-2">24/7</div>
+                  <div className="text-gray-600">技術支援</div>
+                </div>
               </div>
             </div>
           </div>

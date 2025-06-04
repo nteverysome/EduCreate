@@ -5,17 +5,19 @@ import { withTestAuth } from '../../../middleware/withTestAuth';
 
 const prisma = new PrismaClient();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // 使用測試認證中間件
-  await new Promise<void>((resolve) => {
-    withTestAuth(req, res, resolve);
-  }).catch(() => {
-    return res.status(401).json({ error: '未授權' });
-  });
-  
+async function searchHandler(req: NextApiRequest, res: NextApiResponse) {
   // 獲取用戶信息（可能來自會話或測試令牌）
   const session = await getSession({ req });
   const user = session?.user || (req as any).testUser;
+  
+  // 檢查用戶認證狀態
+  if (!session && !(req as any).testUser) {
+    return res.status(401).json({ 
+      error: '未授權訪問',
+      message: '請先登入以使用搜索功能',
+      code: 'UNAUTHORIZED'
+    });
+  }
   
   // 只允許GET請求
   if (req.method !== 'GET') {
@@ -85,7 +87,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     });
   } catch (error) {
-    console.error('搜索失敗:', error);
+    console.error('搜索錯誤:', error);
     return res.status(500).json({ error: '搜索失敗' });
+  } finally {
+    await prisma.$disconnect();
   }
 }
+
+// 使用測試認證中間件包裝處理器
+export default withTestAuth(searchHandler);

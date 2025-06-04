@@ -4,7 +4,7 @@ import { GetServerSideProps } from 'next';
 import { getSession } from 'next-auth/react';
 import Head from 'next/head';
 import Link from 'next/link';
-import H5PEmbed from '../../../components/H5PEmbed';
+import H5PEmbed from '../../../components/H5P/H5PEmbed';
 import prisma from '../../../lib/prisma';
 
 interface H5PContentProps {
@@ -77,11 +77,10 @@ export default function H5PContentPreview({ content, error }: H5PContentProps) {
 
           <div className="border rounded-lg p-4 bg-gray-50">
             <H5PEmbed 
-              contentId={content.id} 
+              contentId={content.id}
               contentPath={content.contentPath}
               title={content.title}
-              height={600}
-            />
+              height={600} width={''}            />
           </div>
         </div>
       </div>

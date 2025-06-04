@@ -69,8 +69,23 @@ export default function Profile({ userProfile }: ProfileProps) {
 
       setMessage('個人資料已成功更新');
       setIsEditing(false);
-    } catch (err) {
-      setError(err.message);
+    } catch (err: any) {
+      // 確保錯誤訊息是字串格式
+      let errorMessage = '更新個人資料時發生錯誤';
+      
+      if (typeof err === 'string') {
+        errorMessage = err;
+      } else if (err && typeof err === 'object') {
+        if (err.message && typeof err.message === 'string') {
+          errorMessage = err.message;
+        } else if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
+        } else {
+          errorMessage = '更新個人資料失敗，請稍後再試';
+        }
+      }
+      
+      setError(errorMessage);
     }
   };
 
@@ -328,3 +343,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   } finally {
     await prisma.$disconnect();
   }
+};

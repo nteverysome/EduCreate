@@ -38,6 +38,16 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
               const tokenData = await testTokenResponse.json();
               console.log('開發環境：已獲取測試令牌');
               localStorage.setItem('eduCreateTestToken', tokenData.token);
+              
+              // 設置默認的請求頭，包含測試令牌
+              const originalFetch = window.fetch;
+              window.fetch = function(input, init = {}) {
+                const headers = new Headers(init.headers);
+                if (!headers.has('Authorization') && tokenData.token) {
+                  headers.set('Authorization', `Bearer ${tokenData.token}`);
+                }
+                return originalFetch(input, { ...init, headers });
+              };
             }
           } catch (tokenError) {
             console.warn('獲取測試令牌失敗:', tokenError);
