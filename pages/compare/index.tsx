@@ -1,31 +1,20 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
 import { ActivityVersion } from '@/models/activityVersion';
 import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { GetServerSidePropsContext } from 'next';
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 
-// 定义版本数据类型
-interface VersionData {
-  id: string;
-  versionName: string;
-  createdAt: string;
-  versionNotes?: string;
-  user?: {
-    name: string;
-  };
-}
+const prisma = new PrismaClient();
 
-// 定义组件Props类型
+// 定义组件props类型
 interface CompareVersionsProps {
-  versions: VersionData[];
+  versions: any[];
   activityId: string;
   error?: string;
 }
-
-const prisma = new PrismaClient();
 
 // 版本比較頁面
 export default function CompareVersions({ versions, activityId }: CompareVersionsProps) {
@@ -73,17 +62,17 @@ export default function CompareVersions({ versions, activityId }: CompareVersion
       
       // 恢復成功，重定向到編輯器
       router.push(`/editor/${activityId}?restored=true`);
-    } catch (err: any) {
+    } catch (err) {
       // 確保錯誤訊息是字串格式
         let errorMessage = '載入比較數據時發生錯誤';
         
         if (typeof err === 'string') {
           errorMessage = err;
         } else if (err && typeof err === 'object') {
-          if (err.message && typeof err.message === 'string') {
-            errorMessage = err.message;
-          } else if (err.error && typeof err.error === 'string') {
-            errorMessage = err.error;
+          if ((err as any).message && typeof (err as any).message === 'string') {
+            errorMessage = (err as any).message;
+          } else if ((err as any).error && typeof (err as any).error === 'string') {
+            errorMessage = (err as any).error;
           } else {
             errorMessage = '載入比較數據失敗，請稍後再試';
           }
@@ -146,7 +135,7 @@ export default function CompareVersions({ versions, activityId }: CompareVersion
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {versions.map((version: VersionData) => (
+            {versions.map((version: any) => (
               <tr key={version.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input
@@ -158,7 +147,7 @@ export default function CompareVersions({ versions, activityId }: CompareVersion
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    {version.versionName}
+                    v{version.versionNumber}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -168,7 +157,7 @@ export default function CompareVersions({ versions, activityId }: CompareVersion
                   {version.user?.name || '未知用戶'}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
-                  {version.versionNotes || '無描述'}
+                  {version.description || '無描述'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
@@ -194,7 +183,7 @@ export default function CompareVersions({ versions, activityId }: CompareVersion
 }
 
 // 服務器端獲取版本數據
-export async function getServerSideProps(context: GetServerSidePropsContext) {
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
   const session = await getSession(context);
   
   // 檢查用戶是否已登入

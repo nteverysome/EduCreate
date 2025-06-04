@@ -2,7 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserMenu from '../components/UserMenu';
 
 export default function Home() {
@@ -228,7 +228,7 @@ export default function Home() {
                 <div 
                   key={template.id}
                   className="group relative overflow-hidden rounded-2xl transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl cursor-pointer"
-                  onMouseEnter={() => setHoveredCard(template.id)}
+                  onMouseEnter={() => setHoveredCard(template.id as any)}
                   onMouseLeave={() => setHoveredCard(null)}
                 >
                   {/* 背景漸變 */}

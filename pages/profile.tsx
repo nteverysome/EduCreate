@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { PrismaClient } from '@prisma/client';
@@ -69,17 +69,18 @@ export default function Profile({ userProfile }: ProfileProps) {
 
       setMessage('個人資料已成功更新');
       setIsEditing(false);
-    } catch (err: any) {
+    } catch (err) {
       // 確保錯誤訊息是字串格式
       let errorMessage = '更新個人資料時發生錯誤';
       
       if (typeof err === 'string') {
         errorMessage = err;
       } else if (err && typeof err === 'object') {
-        if (err.message && typeof err.message === 'string') {
-          errorMessage = err.message;
-        } else if (err.error && typeof err.error === 'string') {
-          errorMessage = err.error;
+        const errorObj = err as any;
+        if (errorObj.message && typeof errorObj.message === 'string') {
+          errorMessage = errorObj.message;
+        } else if (errorObj.error && typeof errorObj.error === 'string') {
+          errorMessage = errorObj.error;
         } else {
           errorMessage = '更新個人資料失敗，請稍後再試';
         }

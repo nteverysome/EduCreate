@@ -1,15 +1,11 @@
-import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import { PrismaClient } from '@prisma/client';
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
 import bcrypt from 'bcryptjs';
+import { supabaseAdmin } from './supabase';
 
-const prisma = new PrismaClient();
-
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+export const authOptionsSupabase: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -18,7 +14,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "密碼", type: "password" }
       },
       async authorize(credentials) {
-        console.log('🔐 NextAuth authorize 被調用:', {
+        console.log('🔐 Supabase NextAuth authorize 被調用:', {
           email: credentials?.email,
           hasPassword: !!credentials?.password,
           timestamp: new Date().toISOString()
@@ -34,14 +30,15 @@ export const authOptions: NextAuthOptions = {
 
         try {
           console.log('🔍 查找用戶:', credentials.email);
-          const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email
-            }
-          });
+          
+          const { data: user, error } = await supabaseAdmin
+            .from('User')
+            .select('id, email, name, password, role, image')
+            .eq('email', credentials.email)
+            .single();
 
-          if (!user) {
-            console.log('❌ 用戶不存在:', credentials.email);
+          if (error || !user) {
+            console.log('❌ 用戶不存在:', credentials.email, error?.message);
             return null;
           }
 
@@ -76,7 +73,7 @@ export const authOptions: NextAuthOptions = {
             role: user.role
           };
         } catch (error) {
-          console.error('❌ NextAuth authorize 錯誤:', error);
+          console.error('❌ Supabase NextAuth authorize 錯誤:', error);
           return null;
         }
       }
@@ -100,24 +97,19 @@ export const authOptions: NextAuthOptions = {
     error: '/login',
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
         token.role = user.role;
-      }
-      // 保存提供者信息
-      if (account) {
-        token.provider = account.provider;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
+      if (token) {
+        session.user.id = token.sub!;
         session.user.role = token.role as string;
-        session.user.provider = token.provider as string;
       }
       return session;
-    }
-  }
+    },
+  },
+  debug: process.env.NODE_ENV === 'development',
 };

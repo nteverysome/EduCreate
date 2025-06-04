@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { PrismaClient } from '@prisma/client';
@@ -75,10 +75,11 @@ export default function UsersPage({ users: initialUsers }: UsersPageProps) {
       if (typeof err === 'string') {
         errorMessage = err;
       } else if (err && typeof err === 'object') {
-        if (err.message && typeof err.message === 'string') {
-          errorMessage = err.message;
-        } else if (err.error && typeof err.error === 'string') {
-          errorMessage = err.error;
+        const errorObj = err as any;
+        if (errorObj.message && typeof errorObj.message === 'string') {
+          errorMessage = errorObj.message;
+        } else if (errorObj.error && typeof errorObj.error === 'string') {
+          errorMessage = errorObj.error;
         } else {
           errorMessage = '載入用戶數據失敗，請稍後再試';
         }
@@ -101,7 +102,7 @@ export default function UsersPage({ users: initialUsers }: UsersPageProps) {
   }
 
   // 角色顯示名稱映射
-  const roleDisplayNames = {
+  const roleDisplayNames: Record<string, string> = {
     USER: '基本用戶',
     PREMIUM_USER: '高級用戶',
     TEACHER: '教師',
