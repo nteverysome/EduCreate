@@ -22,6 +22,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:seed-fixed": "node prisma/seed-fixed.js",
     "db:studio": "prisma studio"
   },
   "dependencies": {
@@ -71,7 +72,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8",
-    "prisma": "^5.4.2",
+    "prisma": "^6.9.0",
     "tailwindcss": "^3",
     "ts-node": "^10.9.1",
     "typescript": "^5"

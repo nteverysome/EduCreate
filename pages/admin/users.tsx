@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { PrismaClient } from '@prisma/client';
@@ -68,18 +68,17 @@ export default function UsersPage({ users: initialUsers }: UsersPageProps) {
 
       setMessage(`已成功將用戶角色更新為 ${selectedRole}`);
       setIsModalOpen(false);
-    } catch (err) {
+    } catch (err: any) {
       // 確保錯誤訊息是字串格式
       let errorMessage = '載入用戶數據時發生錯誤';
       
       if (typeof err === 'string') {
         errorMessage = err;
       } else if (err && typeof err === 'object') {
-        const errorObj = err as any;
-        if (errorObj.message && typeof errorObj.message === 'string') {
-          errorMessage = errorObj.message;
-        } else if (errorObj.error && typeof errorObj.error === 'string') {
-          errorMessage = errorObj.error;
+        if (err.message && typeof err.message === 'string') {
+          errorMessage = err.message;
+        } else if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
         } else {
           errorMessage = '載入用戶數據失敗，請稍後再試';
         }
@@ -102,7 +101,7 @@ export default function UsersPage({ users: initialUsers }: UsersPageProps) {
   }
 
   // 角色顯示名稱映射
-  const roleDisplayNames: Record<string, string> = {
+  const roleDisplayNames: { [key: string]: string } = {
     USER: '基本用戶',
     PREMIUM_USER: '高級用戶',
     TEACHER: '教師',

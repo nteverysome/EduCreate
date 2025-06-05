@@ -11,6 +11,7 @@ interface EditorToolbarProps {
   isPreviewMode: boolean;
   isSaving: boolean;
   isPublishing: boolean;
+  isPublished: boolean;
   showSavedMessage: boolean;
   onSave: () => void;
   onPublish: () => void;
@@ -25,6 +26,7 @@ export default function EditorToolbar({
   isPreviewMode,
   isSaving,
   isPublishing,
+  isPublished,
   showSavedMessage,
   onSave,
   onPublish,

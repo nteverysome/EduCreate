@@ -24,6 +24,11 @@ function DraggableElement({ element, isSelected }: { element: EditorElement; isS
     selectElement(element.id);
   };
 
+  // 處理選擇元素（不需要事件參數）
+  const handleSelect = () => {
+    selectElement(element.id);
+  };
+
   // 處理內容變更
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     updateElement(element.id, { content: e.target.value });
@@ -95,7 +100,7 @@ function DraggableElement({ element, isSelected }: { element: EditorElement; isS
           <H5PElement
             element={element}
             isSelected={isSelected}
-            onSelect={handleClick}
+            onSelect={handleSelect}
           />
         );
         
