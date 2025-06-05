@@ -58,14 +58,14 @@ export default function TemplateConfig({ templateId, templateType, onConfigCompl
 
   // 處理表單輸入變化
   const handleInputChange = (fieldId: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev: any) => ({
       ...prev,
       [fieldId]: value
     }));
     
     // 清除錯誤
     if (errors[fieldId]) {
-      setErrors(prev => {
+      setErrors((prev: {[key: string]: string}) => {
         const newErrors = { ...prev };
         delete newErrors[fieldId];
         return newErrors;

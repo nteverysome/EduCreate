@@ -247,7 +247,7 @@ const WordWallPreview = ({ words, settings }) => {
  * Main WordWallBuilder Component
  * Manages the entire word wall building experience
  */
-const WordWallBuilder = ({ initialWords = [], initialSettings = {}, onSave }) => {
+const WordWallBuilder = ({ initialWords = [], initialSettings = {}, onSave, onWordsChange, readOnly = false }) => {
   const [words, setWords] = useState(initialWords);
   const [settings, setSettings] = useState({
     title: 'My Word Wall',
@@ -274,7 +274,9 @@ const WordWallBuilder = ({ initialWords = [], initialSettings = {}, onSave }) =>
         const oldIndex = items.findIndex(item => item.id === active.id);
         const newIndex = items.findIndex(item => item.id === over.id);
         
-        return arrayMove(items, oldIndex, newIndex);
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        if (onWordsChange) onWordsChange(newItems);
+        return newItems;
       });
     }
   };
@@ -285,7 +287,9 @@ const WordWallBuilder = ({ initialWords = [], initialSettings = {}, onSave }) =>
       ...wordData
     };
     
-    setWords([...words, newWord]);
+    const newWords = [...words, newWord];
+    setWords(newWords);
+    if (onWordsChange) onWordsChange(newWords);
     setShowForm(false);
   };
   
@@ -298,15 +302,19 @@ const WordWallBuilder = ({ initialWords = [], initialSettings = {}, onSave }) =>
   };
   
   const handleUpdateWord = (wordData) => {
-    setWords(words.map(word => 
+    const updatedWords = words.map(word => 
       word.id === editingWord.id ? { ...word, ...wordData } : word
-    ));
+    );
+    setWords(updatedWords);
+    if (onWordsChange) onWordsChange(updatedWords);
     setEditingWord(null);
     setShowForm(false);
   };
   
   const handleDeleteWord = (id) => {
-    setWords(words.filter(word => word.id !== id));
+    const filteredWords = words.filter(word => word.id !== id);
+    setWords(filteredWords);
+    if (onWordsChange) onWordsChange(filteredWords);
   };
   
   const handleSave = () => {
@@ -319,12 +327,14 @@ const WordWallBuilder = ({ initialWords = [], initialSettings = {}, onSave }) =>
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Word Wall Builder</h1>
-        <button
-          onClick={handleSave}
-          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-        >
-          Save Word Wall
-        </button>
+        {!readOnly && (
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          >
+            Save Word Wall
+          </button>
+        )}
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -336,7 +346,7 @@ const WordWallBuilder = ({ initialWords = [], initialSettings = {}, onSave }) =>
           
           <div className="mb-4 flex justify-between items-center">
             <h2 className="text-lg font-medium text-gray-900">Words</h2>
-            {!showForm && (
+            {!showForm && !readOnly && (
               <button
                 onClick={() => setShowForm(true)}
                 className="flex items-center text-blue-600 hover:text-blue-800"
@@ -347,7 +357,7 @@ const WordWallBuilder = ({ initialWords = [], initialSettings = {}, onSave }) =>
             )}
           </div>
           
-          {showForm && (
+          {showForm && !readOnly && (
             <WordForm 
               word={editingWord?.word || ''}
               definition={editingWord?.definition || ''}
@@ -360,26 +370,42 @@ const WordWallBuilder = ({ initialWords = [], initialSettings = {}, onSave }) =>
             />
           )}
           
-          <DndContext 
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={words.map(word => word.id)}>
-              <div className="space-y-3">
-                {words.map(word => (
-                  <WordItem 
-                    key={word.id}
-                    id={word.id}
-                    word={word.word}
-                    definition={word.definition}
-                    onEdit={handleEditWord}
-                    onDelete={handleDeleteWord}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+          {readOnly ? (
+            <div className="space-y-3">
+              {words.map(word => (
+                <WordItem 
+                  key={word.id}
+                  id={word.id}
+                  word={word.word}
+                  definition={word.definition}
+                  onEdit={null}
+                  onDelete={null}
+                  readOnly={true}
+                />
+              ))}
+            </div>
+          ) : (
+            <DndContext 
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={words.map(word => word.id)}>
+                <div className="space-y-3">
+                  {words.map(word => (
+                    <WordItem 
+                      key={word.id}
+                      id={word.id}
+                      word={word.word}
+                      definition={word.definition}
+                      onEdit={handleEditWord}
+                      onDelete={handleDeleteWord}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
           
           {words.length === 0 && !showForm && (
             <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">

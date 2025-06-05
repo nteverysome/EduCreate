@@ -143,10 +143,10 @@ export default function VersionHistory({ activityId, onVersionRestore, isOpen, o
                           版本 {version.versionNumber}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {version.description || '無描述'}
+                          {version.comment || '無描述'}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {version.createdByUser?.name || '未知用戶'}
+                          {version.createdBy || '未知用戶'}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {format(new Date(version.createdAt), 'yyyy-MM-dd HH:mm:ss')}
