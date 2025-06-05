@@ -18,6 +18,7 @@ interface EditorToolbarProps {
   onTogglePreview: () => void;
   onTitleChange: (title: string) => void;
   onOpenVersionHistory?: () => void;
+  onBack?: () => void;
 }
 
 export default function EditorToolbar({
@@ -31,7 +32,8 @@ export default function EditorToolbar({
   onSave,
   onPublish,
   onTogglePreview,
-  onOpenVersionHistory
+  onOpenVersionHistory,
+  onBack
 }: EditorToolbarProps) {
   const updateActivity = useEditorStore(state => state.updateActivity);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -72,11 +74,19 @@ export default function EditorToolbar({
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
       <div className="flex items-center space-x-4">
-        <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-        </Link>
+        {onBack ? (
+          <button onClick={onBack} className="text-gray-500 hover:text-gray-700">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+        ) : (
+          <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </Link>
+        )}
 
         <div className="flex items-center">
           <span className="text-sm text-gray-500 mr-2">{getActivityTypeName(activityType)}:</span>

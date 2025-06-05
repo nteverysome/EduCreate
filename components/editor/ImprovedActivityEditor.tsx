@@ -23,6 +23,7 @@ export default function ImprovedActivityEditor({ activityId, templateId, templat
     loadActivity,
     saveActivity,
     publishActivity,
+    updateActivity,
     selectElement,
     moveElement,
     togglePreviewMode,
@@ -35,6 +36,7 @@ export default function ImprovedActivityEditor({ activityId, templateId, templat
     state.loadActivity,
     state.saveActivity,
     state.publishActivity,
+    state.updateActivity,
     state.selectElement,
     state.moveElement,
     state.togglePreviewMode,
@@ -168,12 +170,16 @@ export default function ImprovedActivityEditor({ activityId, templateId, templat
       {/* 工具欄 */}
       <EditorToolbar
         activityTitle={currentActivity.title}
+        activityType={currentActivity.type}
         isPreviewMode={previewMode}
         isSaving={isSaving}
         isPublishing={isPublishing}
+        isPublished={currentActivity.published || false}
+        showSavedMessage={false}
         onSave={handleSave}
         onPublish={handlePublish}
         onTogglePreview={handleTogglePreview}
+        onTitleChange={(title) => updateActivity({ title })}
         onBack={handleBack}
       />
       
@@ -187,7 +193,7 @@ export default function ImprovedActivityEditor({ activityId, templateId, templat
         {/* 編輯器/預覽 */}
         <div className="flex-1 overflow-auto">
           {previewMode ? (
-            <EditorPreview activity={currentActivity} />
+            <EditorPreview />
           ) : (
             <EnhancedDragDropEditor
               elements={currentActivity.elements}

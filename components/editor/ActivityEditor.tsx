@@ -197,6 +197,7 @@ export default function ActivityEditor({ activityId, templateId, templateType }:
           isPreviewMode={previewMode}
           isSaving={isSaving}
           isPublishing={isPublishing}
+          isPublished={currentActivity?.published || false}
           showSavedMessage={showSavedMessage}
           onSave={handleSave}
           onPublish={() => {}}

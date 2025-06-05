@@ -4,7 +4,23 @@ import { zhTW } from 'date-fns/locale';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import ReactDiffViewer from 'react-diff-viewer';
+// Simple diff viewer component to replace react-diff-viewer-2
+const SimpleDiffViewer = ({ oldValue, newValue }: { oldValue: string; newValue: string }) => {
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <div className="grid grid-cols-2 gap-0">
+        <div className="bg-red-50 p-4 border-r">
+          <div className="text-sm font-medium text-red-700 mb-2">舊版本</div>
+          <pre className="text-sm whitespace-pre-wrap text-red-800">{oldValue}</pre>
+        </div>
+        <div className="bg-green-50 p-4">
+          <div className="text-sm font-medium text-green-700 mb-2">新版本</div>
+          <pre className="text-sm whitespace-pre-wrap text-green-800">{newValue}</pre>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface VersionCompareProps {
   versionA: any;
@@ -266,13 +282,9 @@ export default function VersionCompare({ versionA, versionB, differences, onClos
                     <li key={index} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
                       <h4 className="text-md font-medium text-gray-700 mb-2">{fieldName}</h4>
                       
-                      <ReactDiffViewer
+                      <SimpleDiffViewer
                         oldValue={oldValue}
                         newValue={newValue}
-                        splitView={true}
-                        leftTitle={`版本 ${versionA.versionNumber}`}
-                        rightTitle={`版本 ${versionB.versionNumber}`}
-                        useDarkTheme={false}
                       />
                     </li>
                   );

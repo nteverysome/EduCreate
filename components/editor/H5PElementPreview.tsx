@@ -28,6 +28,7 @@ export default function H5PElementPreview({ element }: H5PElementPreviewProps) {
       <div className="h5p-preview-content border rounded-md overflow-hidden">
         <H5PEmbed
           contentId={contentId}
+          contentPath={`/h5p/content/${contentId}`}
           title={content}
           height={size?.height || 400}
           width="100%"

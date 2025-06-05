@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, useSensor, useSensors, PointerSensor, KeyboardSensor, Modifier } from '@dnd-kit/core';
-import { SortableContext, useSortable, verticalListSortingStrategy, horizontalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableContext, useSortable, verticalListSortingStrategy, horizontalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
 import { useEditorStore, EditorElement } from '../../store/editorStore';
@@ -339,20 +339,4 @@ export default function EnhancedDragDropEditor({
       </DndContext>
     </div>
   );
-}
-
-// 鍵盤導航輔助函數
-function sortableKeyboardCoordinates(event: KeyboardEvent) {
-  const { active, context } = event;
-  const { elements } = context;
-  const activeElement = elements.find(el => el.id === active.id);
-  
-  if (!activeElement) {
-    return { x: 0, y: 0 };
-  }
-  
-  return {
-    x: activeElement.rect.current.left + activeElement.rect.current.width / 2,
-    y: activeElement.rect.current.top + activeElement.rect.current.height / 2,
-  };
 }

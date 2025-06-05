@@ -63,6 +63,7 @@ export default function H5PElement({ element, isSelected, onSelect }: H5PElement
       <div className="h5p-element-content" style={{ height: 'calc(100% - 36px)' }}>
         <H5PEmbed
           contentId={contentId}
+          contentPath={`/h5p/content/${contentId}`}
           title={content}
           height={size?.height ? size.height - 36 : 300}
           width="100%"
