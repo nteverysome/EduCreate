@@ -8,13 +8,22 @@ import { PlusCircleIcon, XCircleIcon, PencilIcon } from '@heroicons/react/24/out
  * Word Item Component
  * Represents a single word in the word wall
  */
-const WordItem = ({ id, word, definition, onEdit, onDelete }) => {
+const WordItem = ({ id, word, definition, onEdit, onDelete, readOnly = false }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
+  
+  if (readOnly) {
+    return (
+      <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+        <h3 className="font-medium text-gray-900">{word}</h3>
+        <p className="text-sm text-gray-500">{definition}</p>
+      </div>
+    );
+  }
   
   return (
     <div 
@@ -27,20 +36,24 @@ const WordItem = ({ id, word, definition, onEdit, onDelete }) => {
         <p className="text-sm text-gray-500">{definition}</p>
       </div>
       <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button 
-          onClick={() => onEdit(id)} 
-          className="text-blue-500 hover:text-blue-700"
-          aria-label="Edit word"
-        >
-          <PencilIcon className="h-5 w-5" />
-        </button>
-        <button 
-          onClick={() => onDelete(id)} 
-          className="text-red-500 hover:text-red-700"
-          aria-label="Delete word"
-        >
-          <XCircleIcon className="h-5 w-5" />
-        </button>
+        {onEdit && (
+          <button 
+            onClick={() => onEdit(id)} 
+            className="text-blue-500 hover:text-blue-700"
+            aria-label="Edit word"
+          >
+            <PencilIcon className="h-5 w-5" />
+          </button>
+        )}
+        {onDelete && (
+          <button 
+            onClick={() => onDelete(id)} 
+            className="text-red-500 hover:text-red-700"
+            aria-label="Delete word"
+          >
+            <XCircleIcon className="h-5 w-5" />
+          </button>
+        )}
       </div>
     </div>
   );
