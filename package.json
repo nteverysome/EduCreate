@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "node scripts/generate-prisma.js && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
@@ -24,7 +24,7 @@
     "db:seed": "prisma db seed",
     "db:seed-fixed": "node prisma/seed-fixed.js",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "node scripts/generate-prisma.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.0.8",
