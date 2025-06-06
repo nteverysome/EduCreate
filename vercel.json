@@ -19,7 +19,10 @@
   },
   "functions": {
     "pages/api/**/*.js": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "runtime": "nodejs18.x"
     }
-  }
+  },
+  "buildCommand": "npm run build",
+  "installCommand": "npm install"
 }
