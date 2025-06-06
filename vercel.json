@@ -6,23 +6,14 @@
       "use": "@vercel/next"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "env": {
-    "NEXTAUTH_URL": "@nextauth_url",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "DATABASE_URL": "@database_url"
-  },
   "functions": {
     "pages/api/**/*.js": {
-      "maxDuration": 30,
-      "runtime": "nodejs18.x"
+      "maxDuration": 30
+    },
+    "pages/api/**/*.ts": {
+      "maxDuration": 30
     }
   },
-  "buildCommand": "npm run build",
-  "installCommand": "npm install"
+  "regions": ["iad1"],
+  "framework": "nextjs"
 }
