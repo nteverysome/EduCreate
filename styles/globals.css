@@ -34,25 +34,25 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gray-50 text-gray-900;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition duration-200;
+    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200;
   }
   
   .btn-secondary {
-    @apply bg-white text-primary px-4 py-2 rounded-lg border border-primary hover:bg-gray-50 transition duration-200;
+    @apply bg-white text-blue-600 px-4 py-2 rounded-lg border border-blue-600 hover:bg-gray-50 transition duration-200;
   }
   
   .card {
-    @apply bg-card rounded-lg shadow-md p-6;
+    @apply bg-white rounded-lg shadow-md p-6;
   }
   
   .input {
-    @apply border border-input rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-ring;
+    @apply border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500;
   }
   
   .badge {
@@ -60,19 +60,19 @@
   }
   
   .badge-primary {
-    @apply bg-primary/10 text-primary;
+    @apply bg-blue-100 text-blue-800;
   }
   
   .badge-secondary {
-    @apply bg-secondary/10 text-secondary;
+    @apply bg-purple-100 text-purple-800;
   }
   
   .badge-accent {
-    @apply bg-accent/10 text-accent;
+    @apply bg-pink-100 text-pink-800;
   }
   
   .hero-gradient {
-    @apply bg-gradient-to-r from-primary to-secondary;
+    @apply bg-gradient-to-r from-blue-600 to-purple-600;
   }
   
   .section {
