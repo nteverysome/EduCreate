@@ -1031,3 +1031,864 @@ Require stack:
   ]
 }
 Time 0.35201
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Time 0.28957
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Time 0.29326
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Time 0.30266
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Time 0.30646
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Time 1.56275
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Time 0.43283
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Time 0.302581
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Time 0.28524
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Time 0.40131
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './9209.js'
+Require stack:
+- /workspace/EduCreate/build/server/webpack-runtime.js
+- /workspace/EduCreate/build/server/pages/_document.js
+- /workspace/EduCreate/node_modules/next/dist/server/require.js
+- /workspace/EduCreate/node_modules/next/dist/server/load-components.js
+- /workspace/EduCreate/node_modules/next/dist/build/utils.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js
+- /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js
+- /workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js
+    at Function.<anonymous> (node:internal/modules/cjs/loader:1401:15)
+    at /workspace/EduCreate/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1487:12)
+    at mod.require (/workspace/EduCreate/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:135:16)
+    at __webpack_require__.f.require (/workspace/EduCreate/build/server/webpack-runtime.js:250:28)
+    at /workspace/EduCreate/build/server/webpack-runtime.js:177:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/workspace/EduCreate/build/server/webpack-runtime.js:176:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/workspace/EduCreate/build/server/webpack-runtime.js',
+    '/workspace/EduCreate/build/server/pages/_document.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/require.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/load-components.js',
+    '/workspace/EduCreate/node_modules/next/dist/build/utils.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/router-server.js',
+    '/workspace/EduCreate/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Time 0.47761
+ ⚠ Found a change in next.config.js. Restarting the server to apply the changes...
+   ▲ Next.js 14.0.1
+   - Local:        http://localhost:12000
+   - Network:      http://0.0.0.0:12000
+   - Environments: .env
+   - Experiments (use at your own risk):
+     · optimizeCss
+     · scrollRestoration
+
+Error: The key "NODE_ENV" under "env" in next.config.js is not allowed. https://nextjs.org/docs/messages/env-key-not-allowed
+    at errorIfEnvConflicted (/workspace/EduCreate/node_modules/next/dist/build/webpack/plugins/define-env-plugin.js:29:15)
+    at /workspace/EduCreate/node_modules/next/dist/build/webpack/plugins/define-env-plugin.js:44:13
+    at Array.reduce (<anonymous>)
+    at getDefineEnv (/workspace/EduCreate/node_modules/next/dist/build/webpack/plugins/define-env-plugin.js:43:36)
+    at getDefineEnvPlugin (/workspace/EduCreate/node_modules/next/dist/build/webpack/plugins/define-env-plugin.js:131:46)
+    at getBaseWebpackConfig (/workspace/EduCreate/node_modules/next/dist/build/webpack-config.js:1307:53)
+    at /workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js:508:48
+    at async Span.traceAsyncFn (/workspace/EduCreate/node_modules/next/dist/trace/trace.js:105:20)
+    at async Span.traceAsyncFn (/workspace/EduCreate/node_modules/next/dist/trace/trace.js:105:20)
+    at async HotReloader.start (/workspace/EduCreate/node_modules/next/dist/server/dev/hot-reloader-webpack.js:595:37)
+[?25h
