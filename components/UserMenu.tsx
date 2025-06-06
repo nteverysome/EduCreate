@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import Image from 'next/image';
 import { Menu, Transition } from '@headlessui/react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
@@ -27,9 +28,11 @@ export default function UserMenu() {
         <Menu.Button className="flex items-center space-x-2">
           <span className="hidden md:block">{session.user.name}</span>
           {session.user.image ? (
-            <img
+            <Image
               src={session.user.image}
               alt={session.user.name || '用戶頭像'}
+              width={32}
+              height={32}
               className="w-8 h-8 rounded-full"
             />
           ) : (

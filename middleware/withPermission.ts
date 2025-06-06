@@ -38,8 +38,15 @@ export function withPermission(handler: ApiHandler, requiredPermissions: string[
         return res.status(403).json({ message: '禁止訪問' });
       }
 
-      // 將用戶信息添加到請求對象中，以便處理函數使用
-      req.session = { user: session.user };
+      // 将用戶信息添加到請求對象中，以便處理函數使用
+      req.session = { 
+        user: {
+          ...session.user,
+          name: session.user.name || undefined,
+          email: session.user.email || undefined,
+          image: session.user.image || undefined
+        }
+      };
 
       // 調用原始處理函數
       return handler(req, res);

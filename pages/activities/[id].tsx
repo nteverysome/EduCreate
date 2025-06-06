@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { ArrowLeftIcon, ShareIcon, HeartIcon, EyeIcon, UserGroupIcon, ClockIcon, TagIcon, DownloadIcon, PlayIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ShareIcon, HeartIcon, EyeIcon, UserGroupIcon, ClockIcon, TagIcon, ArrowDownTrayIcon, PlayIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
@@ -276,15 +277,15 @@ export default function ActivityDetail() {
   };
 
   // 渲染單字卡片預覽
-  const renderFlashcardsPreview = () => {
-    if (!activity?.content?.cards || activity.content.cards.length === 0) {
-      return <div className="text-center text-gray-500">沒有可用的卡片內容</div>;
-    }
-
+  const FlashcardsPreview = () => {
     const [activeCardIndex, setActiveCardIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
     const [isLearningMode, setIsLearningMode] = useState(false);
     const [learnedCards, setLearnedCards] = useState<Set<number>>(new Set());
+
+    if (!activity?.content?.cards || activity.content.cards.length === 0) {
+      return <div className="text-center text-gray-500">沒有可用的卡片內容</div>;
+    }
 
     const handleCardFlip = () => {
       setIsFlipped(!isFlipped);
@@ -462,7 +463,7 @@ export default function ActivityDetail() {
               onMouseLeave={() => setHoverRating(null)}
             >
               <svg
-                className={`w-6 h-6 ${(hoverRating || userRating) >= star ? 'text-yellow-400' : 'text-gray-300'}`}
+                className={`w-6 h-6 ${((hoverRating ?? 0) || (userRating ?? 0)) >= star ? 'text-yellow-400' : 'text-gray-300'}`}
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -591,9 +592,11 @@ export default function ActivityDetail() {
           <h3 className="text-lg font-semibold mb-4">作者信息</h3>
           <div className="flex items-center">
             {activity.author?.avatar && (
-              <img 
+              <Image 
                 src={activity.author.avatar} 
                 alt={activity.author.name} 
+                width={48}
+                height={48}
                 className="w-12 h-12 rounded-full mr-4"
               />
             )}
@@ -608,7 +611,7 @@ export default function ActivityDetail() {
   };
 
   // 渲染評論區
-  const renderComments = () => {
+  const CommentsSection = () => {
     const [commentText, setCommentText] = useState('');
     const [comments, setComments] = useState([
       {
@@ -708,9 +711,11 @@ export default function ActivityDetail() {
                 transition={{ duration: 0.3 }}
               >
                 <div className="flex items-start mb-2">
-                  <img 
+                  <Image 
                     src={comment.user.avatar} 
                     alt={comment.user.name} 
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full mr-3"
                   />
                   <div className="flex-1">
@@ -752,9 +757,11 @@ export default function ActivityDetail() {
           >
             <h3 className="text-lg font-semibold mb-4">添加評論</h3>
             <div className="flex items-start mb-4">
-              <img 
+              <Image 
                 src={session.user?.image || 'https://randomuser.me/api/portraits/lego/1.jpg'} 
                 alt={session.user?.name || '用戶'} 
+                width={40}
+                height={40}
                 className="w-10 h-10 rounded-full mr-3"
               />
               <div className="flex-1">
@@ -993,7 +1000,7 @@ export default function ActivityDetail() {
               onClick={() => handleDownload()}
               className="flex items-center px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              <DownloadIcon className="h-5 w-5 mr-1 text-gray-500" />
+              <ArrowDownTrayIcon className="h-5 w-5 mr-1 text-gray-500" />
               <span>下載</span>
             </button>
           </div>
@@ -1002,9 +1009,11 @@ export default function ActivityDetail() {
         {/* 作者信息 */}
         <div className="flex items-center mb-6">
           {activity.author?.avatar && (
-            <img 
+            <Image 
               src={activity.author.avatar} 
               alt={activity.author.name} 
+              width={40}
+              height={40}
               className="w-10 h-10 rounded-full mr-3"
             />
           )}
@@ -1056,9 +1065,9 @@ export default function ActivityDetail() {
 
         {/* 標籤頁內容 */}
         <div className="mb-8">
-          {activeTab === 'preview' && renderFlashcardsPreview()}
+          {activeTab === 'preview' && <FlashcardsPreview />}
           {activeTab === 'details' && renderActivityDetails()}
-          {activeTab === 'comments' && renderComments()}
+          {activeTab === 'comments' && <CommentsSection />}
         </div>
 
         {/* 相關活動 */}

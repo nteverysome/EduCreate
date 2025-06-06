@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as PIXI from 'pixi.js';
 
 interface PixiGameProps {
@@ -30,9 +30,136 @@ export default function PixiGame({
   const [score, setScore] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
 
+  // 動畫遊戲對象
+  const animateGameObjects = useCallback(() => {
+    gameObjects.current.forEach((obj) => {
+      // 簡單的浮動動畫
+      obj.y += Math.sin(Date.now() * 0.001 + obj.x * 0.01) * 0.5;
+    });
+  }, []);
+
+  // 檢查遊戲完成
+  const checkGameCompletion = useCallback(() => {
+    // 模擬遊戲完成條件
+    const totalItems = gameData.items?.length || 0;
+    const currentScore = Math.floor(Math.random() * totalItems) + 1;
+    
+    setScore(currentScore);
+    
+    if (currentScore >= totalItems) {
+      setGameCompleted(true);
+      onComplete?.(currentScore, totalItems);
+    }
+  }, [gameData.items, onComplete]);
+
+  // 拖動開始
+  const onDragStart = useCallback((event: any) => {
+    const obj = event.currentTarget;
+    obj.alpha = 0.5;
+    obj.data = event.data;
+    obj.dragging = true;
+  }, []);
+
+  // 拖動結束
+  const onDragEnd = useCallback((event: any) => {
+    const obj = event.currentTarget;
+    obj.alpha = 1;
+    obj.dragging = false;
+    obj.data = null;
+    
+    // 檢查遊戲完成
+    checkGameCompletion();
+  }, [checkGameCompletion]);
+
+  // 拖動移動
+  const onDragMove = useCallback((event: any) => {
+    const obj = event.currentTarget;
+    if (obj.dragging) {
+      const newPosition = obj.data.getLocalPosition(obj.parent);
+      obj.x = newPosition.x;
+      obj.y = newPosition.y;
+    }
+  }, []);
+
+  // 更新遊戲元素
+  const updateGame = useCallback(() => {
+    if (!app.current) return;
+
+    // 清除現有遊戲對象
+    gameObjects.current.forEach((obj) => {
+      app.current?.stage.removeChild(obj);
+    });
+    gameObjects.current.clear();
+
+    // 添加新的遊戲對象
+    if (gameData.items && gameData.items.length > 0) {
+      gameData.items.forEach((item) => {
+        // 創建遊戲對象
+        const container = new PIXI.Container();
+        container.x = item.x || Math.random() * (width - 100);
+        container.y = item.y || Math.random() * (height - 50);
+        container.interactive = true;
+        (container as any).buttonMode = true;
+
+        // 創建背景
+        const background = new PIXI.Graphics();
+        background.beginFill(item.color || 0x3498db);
+        background.drawRoundedRect(0, 0, 100, 50, 10);
+        background.endFill();
+
+        // 創建文本
+        const text = new PIXI.Text(item.text, {
+          fontFamily: 'Arial',
+          fontSize: 16,
+          fill: 0xffffff,
+          align: 'center'
+        });
+        text.x = 50 - text.width / 2;
+        text.y = 25 - text.height / 2;
+
+        // 添加到容器
+        container.addChild(background);
+        container.addChild(text);
+
+        // 添加拖動事件
+        container.on('pointerdown', onDragStart)
+                 .on('pointerup', onDragEnd)
+                 .on('pointerupoutside', onDragEnd)
+                 .on('pointermove', onDragMove);
+
+        // 添加到舞台
+        if (app.current && app.current.stage) {
+          app.current.stage.addChild(container);
+          gameObjects.current.set(item.id, container);
+        }
+      });
+    }
+  }, [gameData.items, width, height, onDragStart, onDragEnd, onDragMove]);
+
+  // 初始化遊戲
+  const initGame = useCallback(() => {
+    if (!app.current || !app.current.stage || !app.current.ticker) return;
+
+    // 創建遊戲容器
+    const gameContainer = new PIXI.Container();
+    app.current.stage.addChild(gameContainer);
+
+    // 添加遊戲元素
+    updateGame();
+
+    // 設置遊戲循環
+    app.current.ticker.add(() => {
+      // 遊戲循環邏輯
+      animateGameObjects();
+    });
+  }, [updateGame, animateGameObjects]);
+
   // 初始化 PixiJS 應用
   useEffect(() => {
     if (!pixiContainer.current) return;
+
+    // 在 effect 开始时复制 ref 值
+    const currentGameObjects = gameObjects.current;
 
     // 創建 PIXI 應用
     app.current = new PIXI.Application({
@@ -55,147 +182,22 @@ export default function PixiGame({
         app.current.destroy(true, true);
         app.current = null;
       }
-      gameObjects.current.clear();
+      // 使用在 effect 开始时复制的值
+      if (currentGameObjects) {
+        currentGameObjects.clear();
+      }
     };
-  }, []);
+  }, [width, height, backgroundColor, initGame]);
 
   // 當遊戲數據變化時更新遊戲
   useEffect(() => {
     if (app.current) {
       updateGame();
     }
-  }, [gameData]);
+  }, [gameData, updateGame]);
 
-  // 初始化遊戲
-  const initGame = () => {
-    if (!app.current) return;
 
-    // 創建遊戲容器
-    const gameContainer = new PIXI.Container();
-    app.current.stage.addChild(gameContainer);
 
-    // 添加遊戲元素
-    updateGame();
-
-    // 設置遊戲循環
-    app.current.ticker.add(() => {
-      // 遊戲循環邏輯
-      animateGameObjects();
-    });
-  };
-
-  // 更新遊戲元素
-  const updateGame = () => {
-    if (!app.current) return;
-
-    // 清除現有遊戲對象
-    gameObjects.current.forEach((obj) => {
-      app.current?.stage.removeChild(obj);
-    });
-    gameObjects.current.clear();
-
-    // 添加新的遊戲對象
-    if (gameData.items && gameData.items.length > 0) {
-      gameData.items.forEach((item) => {
-        // 創建遊戲對象
-        const container = new PIXI.Container();
-        container.x = item.x || Math.random() * (width - 100);
-        container.y = item.y || Math.random() * (height - 100);
-        container.interactive = true;
-        (container as any).buttonMode = true;
-
-        // 創建背景
-        const background = new PIXI.Graphics();
-        background.beginFill(item.color || 0x3498db);
-        background.drawRoundedRect(0, 0, 100, 50, 10);
-        background.endFill();
-
-        // 創建文本
-        const text = new PIXI.Text(item.text, {
-          fontFamily: 'Arial',
-          fontSize: 16,
-          fill: 0xffffff,
-          align: 'center',
-        });
-        text.anchor.set(0.5);
-        text.x = 50;
-        text.y = 25;
-
-        // 將背景和文本添加到容器
-        container.addChild(background);
-        container.addChild(text);
-
-        // 添加拖動功能
-        container
-          .on('pointerdown', onDragStart)
-          .on('pointerup', onDragEnd)
-          .on('pointerupoutside', onDragEnd)
-          .on('pointermove', onDragMove);
-
-        // 將容器添加到舞台
-        app.current?.stage.addChild(container);
-
-        // 存儲遊戲對象引用
-        gameObjects.current.set(item.id, container);
-      });
-    }
-  };
-
-  // 動畫遊戲對象
-  const animateGameObjects = () => {
-    // 在這裡添加動畫邏輯
-    gameObjects.current.forEach((obj) => {
-      // 簡單的動畫效果，例如輕微浮動
-      obj.rotation += 0.001;
-    });
-  };
-
-  // 拖動開始
-  const onDragStart = (event: PIXI.FederatedPointerEvent) => {
-    const obj = event.currentTarget as any;
-    obj.alpha = 0.8;
-    obj.data = event;
-    obj.dragging = true;
-  };
-
-  // 拖動結束
-  const onDragEnd = (event: PIXI.FederatedPointerEvent) => {
-    const obj = event.currentTarget as any;
-    obj.alpha = 1;
-    obj.dragging = false;
-    obj.data = null;
-
-    // 檢查遊戲是否完成
-    checkGameCompletion();
-  };
-
-  // 拖動移動
-  const onDragMove = (event: PIXI.FederatedPointerEvent) => {
-    const obj = event.currentTarget as any;
-    if (obj.dragging) {
-      const newPosition = obj.data.getLocalPosition(obj.parent);
-      obj.x = newPosition.x - 50;
-      obj.y = newPosition.y - 25;
-    }
-  };
-
-  // 檢查遊戲是否完成
-  const checkGameCompletion = () => {
-    // 這裡實現遊戲完成的邏輯
-    // 例如，檢查所有項目是否都放在正確的位置
-    const totalItems = gameData.items?.length || 0;
-    const newScore = Math.floor(Math.random() * (totalItems + 1)); // 模擬得分
-
-    setScore(newScore);
-
-    // 如果所有項目都放在正確的位置，遊戲完成
-    if (Math.random() > 0.7) { // 模擬遊戲完成條件
-      setGameCompleted(true);
-      if (onComplete) {
-        onComplete(newScore, totalItems);
-      }
-    }
-  };
 
   return (
     <div className="pixi-game-container">

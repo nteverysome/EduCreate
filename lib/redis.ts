@@ -18,7 +18,7 @@ export function getRedisClient() {
   if (!redis) {
     try {
       redis = new Redis(redisUrl);
-      redis.on('error', (err) => {
+      redis.on('error', (err: Error) => {
         console.error('Redis連接錯誤:', err);
         redis = null;
       });
@@ -105,13 +105,13 @@ export async function invalidateCache(key: string): Promise<void> {
             keys.forEach((k) => {
               pipeline.del(k);
             });
-            pipeline.exec().catch((err) => {
+            pipeline.exec().catch((err: Error) => {
               console.error('Redis批量刪除錯誤:', err);
             });
           }
         });
 
-        stream.on('error', (err) => {
+        stream.on('error', (err: Error) => {
           console.error('Redis掃描錯誤:', err);
         });
       } else {

@@ -5,6 +5,7 @@ import { usePermission } from '../hooks/usePermission';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  permission?: string;
   requiredPermission?: string;
   requiredPermissions?: string[];
   requireAllPermissions?: boolean;
@@ -19,6 +20,7 @@ interface ProtectedRouteProps {
  */
 export default function ProtectedRoute({
   children,
+  permission,
   requiredPermission,
   requiredPermissions,
   requireAllPermissions = false,
@@ -26,6 +28,8 @@ export default function ProtectedRoute({
   premiumOnly = false,
   redirectTo = '/login',
 }: ProtectedRouteProps) {
+  // Use permission prop as fallback for requiredPermission
+  const effectivePermission = requiredPermission || permission;
   const { data: session, status } = useSession();
   const router = useRouter();
   const { 
@@ -61,7 +65,7 @@ export default function ProtectedRoute({
     }
 
     // 檢查單一權限
-    if (requiredPermission && !checkPermission(requiredPermission)) {
+    if (effectivePermission && !checkPermission(effectivePermission)) {
       router.push('/');
       return;
     }
@@ -77,7 +81,7 @@ export default function ProtectedRoute({
         return;
       }
     }
-  }, [status, router, requiredPermission, requiredPermissions, requireAllPermissions, adminOnly, premiumOnly, redirectTo]);
+  }, [status, router, effectivePermission, requiredPermissions, requireAllPermissions, adminOnly, premiumOnly, redirectTo, checkPermission, checkAnyPermission, checkAllPermissions, isAdmin, isPremiumUser]);
 
   // 如果用戶未登入或正在加載中，顯示加載狀態
   if (status === 'loading' || status === 'unauthenticated') {

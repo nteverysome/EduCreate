@@ -51,7 +51,7 @@ async function getActivityVersions(req: NextApiRequest, res: NextApiResponse, se
     // 獲取活動的所有版本
     const versions = await prisma.activityVersion.findMany({
       where: { activityId: id as string },
-      orderBy: { versionNumber: 'desc' },
+      orderBy: { createdAt: 'desc' },
       include: {
         user: {
           select: {
@@ -93,18 +93,21 @@ async function createActivityVersion(req: NextApiRequest, res: NextApiResponse, 
     // 獲取當前活動的最新版本號
     const latestVersion = await prisma.activityVersion.findFirst({
       where: { activityId: id as string },
-      orderBy: { versionNumber: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
     
-    const versionNumber = latestVersion ? latestVersion.versionNumber + 1 : 1;
+    // Generate version name based on existing versions count
+    const existingVersionsCount = await prisma.activityVersion.count({
+      where: { activityId: id as string }
+    });
+    const versionNumber = existingVersionsCount + 1;
     
     // 創建新版本
     const newVersion = await prisma.activityVersion.create({
       data: {
-        activityId: id as string,
-        versionNumber,
-        content: activity.content,
-        elements: activity.elements,
+          activityId: id as string,
+        content: activity.content as any,
+        elements: activity.elements as any,
         published: activity.published,
         versionName: `版本 ${versionNumber}`,
         versionNotes: description || '',
@@ -119,7 +122,7 @@ async function createActivityVersion(req: NextApiRequest, res: NextApiResponse, 
         activityId: id as string,
         versionId: newVersion.id,
         userId: session.user.id,
-        details: { description },
+        details: JSON.stringify({ description }),
       },
     });
     

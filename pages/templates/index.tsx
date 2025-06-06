@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import ProtectedRoute from '../../components/ProtectedRoute';
@@ -223,9 +224,11 @@ export default function TemplatesPage() {
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="h-48 bg-gray-200 flex items-center justify-center">
-                  <img
+                  <Image
                     src={template.thumbnail}
                     alt={template.name}
+                    width={400}
+                    height={192}
                     className="h-full w-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;

@@ -38,8 +38,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     case 'POST':
       try {
         // 使用formidable解析上傳的文件
-        const form = new formidable.IncomingForm();
-        form.keepExtensions = true;
+        const form = new formidable.IncomingForm({
+          keepExtensions: true
+        });
         
         const [fields, files] = await new Promise<[formidable.Fields, formidable.Files]>((resolve, reject) => {
           form.parse(req, (err, fields, files) => {
@@ -49,7 +50,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
 
         // 檢查是否有上傳的H5P庫文件
-        const uploadedFile = files.libraryFile as formidable.File;
+        const libraryFileArray = files.libraryFile;
+        const uploadedFile = Array.isArray(libraryFileArray) ? libraryFileArray[0] : libraryFileArray;
         if (!uploadedFile) {
           return res.status(400).json({ error: '未找到上傳的H5P庫文件' });
         }

@@ -1,20 +1,25 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
 import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
-import ReactDiffViewer from 'react-diff-viewer';
 
 const prisma = new PrismaClient();
 
+interface VersionDiffProps {
+  v1Data: any;
+  v2Data: any;
+  activityId: string;
+}
+
 // 版本差異比較頁面
-export default function VersionDiff({ v1Data, v2Data, activityId }) {
+export default function VersionDiff({ v1Data, v2Data, activityId }: VersionDiffProps) {
   const router = useRouter();
   const { v1, v2 } = router.query;
   const [theme, setTheme] = useState('light');
 
   // 格式化JSON以便更好地顯示差異
-  const formatJSON = (json) => {
+  const formatJSON = (json: any) => {
     try {
       return JSON.stringify(json, null, 2);
     } catch (e) {
@@ -55,20 +60,25 @@ export default function VersionDiff({ v1Data, v2Data, activityId }) {
           </div>
         </div>
         
-        <ReactDiffViewer
-          oldValue={formatJSON(v1Data.content)}
-          newValue={formatJSON(v2Data.content)}
-          splitView={true}
-          useDarkTheme={theme === 'dark'}
-          hideLineNumbers={false}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-red-50 p-4 rounded">
+            <h3 className="font-semibold mb-2">Version {v1}</h3>
+            <pre className="text-sm overflow-auto">{formatJSON(v1Data)}</pre>
+          </div>
+          <div className="bg-green-50 p-4 rounded">
+            <h3 className="font-semibold mb-2">Version {v2}</h3>
+            <pre className="text-sm overflow-auto">{formatJSON(v2Data)}</pre>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
+import { GetServerSideProps } from 'next';
+
 // 服務器端獲取版本數據
-export async function getServerSideProps(context) {
+export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession(context);
   
   // 檢查用戶是否已登入

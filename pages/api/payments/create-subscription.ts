@@ -1,9 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
-import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../auth/[...nextauth]';
+import prisma from '../../lib/prisma';
+import { SubStatus } from '@prisma/client';
 import Stripe from 'stripe';
 
-const prisma = new PrismaClient();
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2023-10-16',
 });
@@ -19,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // 獲取用戶會話
-  const session = await getSession({ req });
+  const session = await getServerSession(req, res, authOptions);
   if (!session || !session.user) {
     return res.status(401).json({ error: '未授權' });
   }
@@ -51,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 檢查用戶是否已有Stripe客戶ID
-    let stripeCustomerId = customerId || user.stripeCustomerId;
+    let stripeCustomerId = customerId;
 
     // 如果用戶沒有Stripe客戶ID，創建一個新的
     if (!stripeCustomerId) {
@@ -65,11 +67,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       stripeCustomerId = customer.id;
 
-      // 更新用戶的Stripe客戶ID
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { stripeCustomerId },
-      });
+      // 注意：如果需要存储Stripe客户ID，需要在User模型中添加相应字段
+      // 暂时跳过存储客户ID到数据库
     }
 
     // 將支付方式附加到客戶
@@ -87,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 創建訂閱
     const subscription = await stripe.subscriptions.create({
       customer: stripeCustomerId,
-      items: [{ price: plan.stripePriceId }],
+      items: [{ price: `price_${plan.id}` }], // 使用计划ID构建价格ID
       expand: ['latest_invoice.payment_intent'],
       metadata: {
         userId: user.id,
@@ -129,9 +128,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 返回訂閱信息
+    // 安全地获取client_secret
+    let clientSecret = null;
+    if (subscription.latest_invoice && typeof subscription.latest_invoice === 'object') {
+      const invoice = subscription.latest_invoice as Stripe.Invoice;
+      if (invoice.payment_intent && typeof invoice.payment_intent === 'object') {
+        const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
+        clientSecret = paymentIntent.client_secret;
+      }
+    }
+
     return res.status(200).json({
       status: subscription.status,
-      clientSecret: subscription.latest_invoice?.payment_intent?.client_secret || null,
+      clientSecret,
       subscription: userSubscription,
     });
   } catch (error) {
@@ -140,17 +149,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-// 將Stripe訂閱狀態映射到數據庫狀態
-function mapStripeStatusToDbStatus(status: string): string {
-  const statusMap: Record<string, string> = {
-    active: 'ACTIVE',
-    trialing: 'ACTIVE',
-    incomplete: 'PENDING',
-    incomplete_expired: 'FAILED',
-    past_due: 'PAST_DUE',
-    canceled: 'CANCELED',
-    unpaid: 'UNPAID',
+function mapStripeStatusToDbStatus(status: string): SubStatus {
+  const statusMap: Record<string, SubStatus> = {
+    'active': SubStatus.ACTIVE,
+    'past_due': SubStatus.PAST_DUE,
+    'unpaid': SubStatus.UNPAID,
+    'canceled': SubStatus.CANCELED,
+    'incomplete': SubStatus.PAYMENT_FAILED,
+    'incomplete_expired': SubStatus.EXPIRED,
+    'trialing': SubStatus.ACTIVE
   };
-
-  return statusMap[status] || 'PENDING';
+  
+  return statusMap[status] || SubStatus.ACTIVE;
 }

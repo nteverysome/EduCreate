@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { SearchIcon, AdjustmentsIcon, FilterIcon, XIcon, ExclamationIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon as SearchIcon, AdjustmentsHorizontalIcon as AdjustmentsIcon, FunnelIcon as FilterIcon, XMarkIcon as XIcon, ExclamationTriangleIcon as ExclamationIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { networkMonitor, checkApiHealth } from '../lib/networkMonitor';
+import { get } from '../lib/fetch';
 
 interface Activity {
   id: string;
@@ -61,8 +62,7 @@ export default function Search() {
     checkHealth();
   }, []);
 
-  // 導入fetch工具函數
-  import { get } from '../lib/fetch';
+  // fetch工具函數已在頂部導入
 
   // 獲取活動數據
   useEffect(() => {
@@ -135,17 +135,18 @@ export default function Search() {
         }
         
         // 檢查activities字段
-        if (!data.activities) {
+        let processedData = data;
+        if (!processedData.activities) {
           // 嘗試自動修復數據結構
-          if (Array.isArray(data)) {
+          if (Array.isArray(processedData)) {
             // 如果直接返回了數組，將其包裝為預期的格式
-            data = { activities: data };
+            processedData = { activities: processedData };
             console.log('自動修復API返回的數據結構');
           } else {
             // 查找可能的替代字段
-            const possibleArrayFields = Object.keys(data).find(key => Array.isArray(data[key]));
+            const possibleArrayFields = Object.keys(processedData).find(key => Array.isArray(processedData[key]));
             if (possibleArrayFields) {
-              data = { activities: data[possibleArrayFields] };
+              processedData = { activities: processedData[possibleArrayFields] };
               console.log(`使用替代字段 '${possibleArrayFields}' 作為活動數據`);
             } else {
               throw new Error('API返回的數據中找不到活動列表');
@@ -153,13 +154,13 @@ export default function Search() {
           }
         }
         
-        if (!Array.isArray(data.activities)) {
-          console.error('API返回的數據格式不正確:', data);
-          throw new Error(`API返回的數據格式不正確: 預期 'activities' 為數組，但收到 ${typeof data.activities}`);
+        if (!Array.isArray(processedData.activities)) {
+          console.error('API返回的數據格式不正確:', processedData);
+          throw new Error(`API返回的數據格式不正確: 預期 'activities' 為數組，但收到 ${typeof processedData.activities}`);
         }
         
         // 格式化API返回的數據以匹配我們的Activity接口
-        const formattedActivities = data.activities.map((item: any) => {
+        const formattedActivities = processedData.activities.map((item: any) => {
           try {
             // 使用可選鏈和空值合併運算符確保數據的健壯性
             return {
@@ -174,7 +175,7 @@ export default function Search() {
                 id: item?.user?.id || '',
                 name: item?.user?.name || '未知作者'
               },
-              tags: Array.isArray(item?.tags) ? item.tags.filter(tag => tag && typeof tag === 'string') : [],
+              tags: Array.isArray(item?.tags) ? item.tags.filter((tag: any) => tag && typeof tag === 'string') : [],
               views: typeof item?.stats?.views === 'number' ? item.stats.views : 0
             };
           } catch (itemError) {

@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     case 'GET':
       try {
         // 獲取所有H5P內容
-        const h5pContents = await prisma.h5pContent.findMany({
+        const h5pContents = await prisma.h5PContent.findMany({
           where: { userId },
           orderBy: { updatedAt: 'desc' },
           include: {
@@ -56,13 +56,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // 創建新的H5P內容記錄
-        const newH5pContent = await prisma.h5pContent.create({
+        const newH5pContent = await prisma.h5PContent.create({
           data: {
             title,
             description: description || '',
             contentType,
             userId,
-            status: 'draft',
+            status: 'DRAFT',
             contentPath: `/h5p/content/${Date.now()}`,
           },
         });

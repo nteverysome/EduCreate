@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // 檢查內容是否存在並屬於當前用戶
-  const h5pContent = await prisma.h5pContent.findFirst({
+  const h5pContent = await prisma.h5PContent.findFirst({
     where: {
       id: contentId,
       userId
@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const { title, description, status } = req.body;
         
-        const updatedContent = await prisma.h5pContent.update({
+        const updatedContent = await prisma.h5PContent.update({
           where: { id: contentId },
           data: {
             title: title || h5pContent.title,
@@ -71,7 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     case 'DELETE':
       try {
         // 刪除數據庫記錄
-        await prisma.h5pContent.delete({
+        await prisma.h5PContent.delete({
           where: { id: contentId }
         });
 

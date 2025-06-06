@@ -100,7 +100,7 @@ async function createInvoice(req: NextApiRequest, res: NextApiResponse, session:
         stripeInvoiceId: invoice.id,
         amount: invoice.total / 100, // 轉換為元
         currency: invoice.currency,
-        status: invoice.status,
+        status: invoice.status || 'unknown',
         invoiceUrl: invoice.hosted_invoice_url || null,
         invoicePdf: invoice.invoice_pdf || null,
         paidAt: invoice.status === 'paid' ? new Date() : null,

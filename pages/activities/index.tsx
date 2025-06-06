@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { SearchIcon, FilterIcon, ViewGridIcon, ViewListIcon, ChevronDownIcon, EyeIcon, UserGroupIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { useSession } from 'next-auth/react';
+import { MagnifyingGlassIcon, FunnelIcon, Squares2X2Icon, ListBulletIcon, ChevronDownIcon, EyeIcon, UserGroupIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
 interface Activity {
@@ -275,9 +277,11 @@ export default function ActivitiesBrowse() {
       >
         <Link href={`/activities/${activity.id}`} className="block">
           <div className="relative h-48 overflow-hidden">
-            <img 
+            <Image 
               src={activity.thumbnail || '/templates/placeholder.svg'} 
               alt={activity.title} 
+              width={400}
+              height={192}
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
             />
             <div className="absolute top-2 right-2">
@@ -301,9 +305,11 @@ export default function ActivitiesBrowse() {
             <div className="flex justify-between items-center text-sm text-gray-500">
               <div className="flex items-center">
                 {activity.author?.avatar && (
-                  <img 
+                  <Image 
                     src={activity.author.avatar} 
                     alt={activity.author.name} 
+                    width={24}
+                    height={24}
                     className="w-6 h-6 rounded-full mr-2"
                   />
                 )}
@@ -336,9 +342,11 @@ export default function ActivitiesBrowse() {
           <div className="flex flex-col md:flex-row md:items-center">
             <div className="md:w-1/4 mb-4 md:mb-0 md:mr-4">
               <div className="relative h-32 md:h-24 overflow-hidden rounded-lg">
-                <img 
+                <Image 
                   src={activity.thumbnail || '/templates/placeholder.svg'} 
                   alt={activity.title} 
+                  width={200}
+                  height={128}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -363,9 +371,11 @@ export default function ActivitiesBrowse() {
               <div className="flex flex-wrap justify-between items-center text-sm text-gray-500">
                 <div className="flex items-center">
                   {activity.author?.avatar && (
-                    <img 
+                    <Image 
                       src={activity.author.avatar} 
                       alt={activity.author.name} 
+                      width={24}
+                      height={24}
                       className="w-6 h-6 rounded-full mr-2"
                     />
                   )}
@@ -419,14 +429,14 @@ export default function ActivitiesBrowse() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             </div>
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <FilterIcon className="h-5 w-5 mr-2 text-gray-500" />
+                <FunnelIcon className="h-5 w-5 mr-2 text-gray-500" />
                 <span>過濾</span>
                 <ChevronDownIcon className={`h-5 w-5 ml-1 text-gray-500 transition-transform ${showFilters ? 'transform rotate-180' : ''}`} />
               </button>
@@ -435,13 +445,13 @@ export default function ActivitiesBrowse() {
                   onClick={() => setViewMode('grid')}
                   className={`flex items-center justify-center p-2 ${viewMode === 'grid' ? 'bg-primary text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                 >
-                  <ViewGridIcon className="h-5 w-5" />
+                  <Squares2X2Icon className="h-5 w-5" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
                   className={`flex items-center justify-center p-2 ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                 >
-                  <ViewListIcon className="h-5 w-5" />
+                  <ListBulletIcon className="h-5 w-5" />
                 </button>
               </div>
               <select

@@ -30,10 +30,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // 獲取H5P內容信息
-    const h5pContent = await prisma.h5pContent.findUnique({
+    const h5pContent = await prisma.h5PContent.findUnique({
       where: { id },
       include: {
-        activity: true
+        activities: true
       }
     });
 
@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 檢查用戶是否有權限下載該內容
     // 注意：這裡可以根據實際需求調整權限檢查邏輯
     // 例如，公開的內容可以允許任何登入用戶下載
-    if (h5pContent.activity && h5pContent.activity.userId !== session.user.id && !h5pContent.isPublic) {
+    if (h5pContent.activities.length > 0 && h5pContent.activities[0].userId !== session.user.id) {
       return res.status(403).json({ error: '無權下載此內容' });
     }
 

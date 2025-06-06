@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { buffer } from 'micro';
 import Stripe from 'stripe';
 import { PrismaClient } from '@prisma/client';
 
@@ -7,6 +6,15 @@ const prisma = new PrismaClient();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: '2023-10-16',
 });
+
+// 获取原始请求体的函数
+async function getRawBody(req: NextApiRequest): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
 
 // 禁用Next.js的請求體解析，因為我們需要原始請求體來驗證Stripe簽名
 export const config = {
@@ -21,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const rawBody = await buffer(req);
+    const rawBody = await getRawBody(req);
     const signature = req.headers['stripe-signature'] as string;
 
     if (!signature) {
@@ -38,7 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       );
     } catch (err) {
       console.error(`Webhook簽名驗證失敗:`, err);
-      return res.status(400).json({ message: `Webhook錯誤: ${err.message}` });
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      return res.status(400).json({ message: `Webhook錯誤: ${errorMessage}` });
     }
 
     // 處理不同類型的事件

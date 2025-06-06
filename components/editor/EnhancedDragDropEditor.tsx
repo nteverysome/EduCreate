@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, useSensor, useSensors, PointerSensor, KeyboardSensor, Modifier } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, horizontalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
@@ -62,7 +63,7 @@ function DraggableItem({ element, isSelected, isDragging }: DraggableItemProps) 
         return (
           <div className="p-3 flex justify-center items-center">
             {element.content ? (
-              <img src={element.content} alt="圖片" className="max-w-full max-h-full" />
+              <Image src={element.content} alt="圖片" width={200} height={150} className="max-w-full max-h-full" />
             ) : (
               <div className="text-gray-400">圖片元素</div>
             )}

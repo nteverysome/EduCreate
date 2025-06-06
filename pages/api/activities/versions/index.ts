@@ -106,8 +106,8 @@ async function createActivityVersion(req: NextApiRequest, res: NextApiResponse, 
       data: {
         versionName: versionName || `版本 ${new Date().toLocaleString('zh-TW')}`,
         versionNotes: versionNotes || '',
-        content: activity.content,
-        elements: activity.elements,
+        content: activity.content as any,
+        elements: activity.elements as any,
         published: activity.published,
         activity: { connect: { id: activityId } },
         user: { connect: { id: userId } }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
 import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getServerSession } from 'next-auth/next';
@@ -164,9 +165,11 @@ export default function Profile({ userProfile }: ProfileProps) {
           <div>
             <div className="flex items-center mb-4">
               {userProfile.image && (
-                <img
+                <Image
                   src={userProfile.image}
                   alt={userProfile.name}
+                  width={80}
+                  height={80}
                   className="w-20 h-20 rounded-full mr-4 object-cover"
                 />
               )}

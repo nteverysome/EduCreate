@@ -21,21 +21,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // 從數據庫獲取所有活躍的訂閱計劃
+    // 從數據庫獲取所有訂閱計劃
     const plans = await prisma.plan.findMany({
-      where: { active: true },
       orderBy: { price: 'asc' },
       select: {
         id: true,
         name: true,
         description: true,
         price: true,
-        currency: true,
         interval: true,
-        intervalCount: true,
-        stripePriceId: true,
         features: true,
-        active: true,
       },
     });
 

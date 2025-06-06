@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
-import { PlusIcon, TrashIcon, SaveIcon, EyeIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, DocumentArrowDownIcon as SaveIcon, EyeIcon, PencilIcon } from '@heroicons/react/24/outline';
 import PixiGame from '../../components/PixiGame';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import { PERMISSIONS } from '../../lib/permissions';

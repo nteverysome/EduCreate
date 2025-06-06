@@ -180,6 +180,8 @@ export default function CreateActivity() {
     }
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   if (status === 'loading' || isSubscriptionLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex justify-center items-center">
@@ -190,8 +192,6 @@ export default function CreateActivity() {
       </div>
     );
   }
-
-  const [isSaving, setIsSaving] = useState(false);
   
   return (
     <div className="min-h-screen bg-gray-50">

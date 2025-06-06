@@ -3,7 +3,7 @@ import { GetServerSideProps } from 'next';
 import { getSession } from 'next-auth/react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { PlusIcon, UploadIcon, TrashIcon, DownloadIcon, RefreshIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ArrowUpTrayIcon, TrashIcon, ArrowDownTrayIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
 export default function H5PLibrariesManagement({ user }: { user: any }) {
@@ -88,7 +88,7 @@ export default function H5PLibrariesManagement({ user }: { user: any }) {
           onClick={() => setUploadModalOpen(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center"
         >
-          <UploadIcon className="h-5 w-5 mr-2" />
+          <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
           上傳H5P庫
         </button>
       </div>

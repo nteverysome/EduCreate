@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
-import { prisma } from '../../../lib/prisma';
+import prisma from '../../../lib/prisma';
 
 // 確保在服務器端運行
 if (typeof window !== 'undefined') {

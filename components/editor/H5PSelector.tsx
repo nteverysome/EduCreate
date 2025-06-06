@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useEditorStore } from '../../store/editorStore';
 
 interface H5PContent {
@@ -92,12 +93,12 @@ export default function H5PSelector({ onSelect, onCancel }: H5PSelectorProps) {
                 {searchTerm ? '沒有符合搜索條件的H5P內容' : '尚未上傳任何H5P內容'}
               </p>
               {!searchTerm && (
-                <a
+                <Link
                   href="/h5p"
                   className="mt-2 inline-block text-blue-600 hover:underline"
                 >
                   前往上傳H5P內容
-                </a>
+                </Link>
               )}
             </div>
           ) : (

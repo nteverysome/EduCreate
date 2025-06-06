@@ -10,6 +10,7 @@ export const PERMISSIONS = {
   CREATE_ACTIVITY: 'create:activity',
   READ_ACTIVITY: 'read:activity',
   UPDATE_ACTIVITY: 'update:activity',
+  EDIT_ACTIVITY: 'edit:activity',
   DELETE_ACTIVITY: 'delete:activity',
   PUBLISH_ACTIVITY: 'publish:activity',
 
@@ -53,7 +54,7 @@ const PREMIUM_USER_PERMISSIONS = [
   PERMISSIONS.EXPORT_H5P,
 ];
 
-export const ROLE_PERMISSIONS = {
+export const ROLE_PERMISSIONS: Record<string, string[]> = {
   USER: USER_PERMISSIONS,
   PREMIUM_USER: PREMIUM_USER_PERMISSIONS,
   ADMIN: [

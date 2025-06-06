@@ -4,7 +4,7 @@ import { GetServerSideProps } from 'next';
 import { getSession } from 'next-auth/react';
 import Link from 'next/link';
 import Head from 'next/head';
-import { PlusIcon, PencilIcon, TrashIcon, UploadIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, ArrowUpTrayIcon as UploadIcon, CheckIcon } from '@heroicons/react/24/outline';
 import H5PExport from '../../components/H5P/H5PExport';
 import H5PBatchExport from '../../components/H5P/H5PBatchExport';
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { PlusIcon, PencilIcon, TrashIcon, SearchIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon as SearchIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { PERMISSIONS } from '../lib/permissions';

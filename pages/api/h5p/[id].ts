@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // 檢查內容是否存在並屬於當前用戶
-  const content = await prisma.h5pContent.findFirst({
+  const content = await prisma.h5PContent.findFirst({
     where: {
       id: contentId,
       userId,
@@ -38,12 +38,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     case 'GET':
       try {
         // 允許公開訪問已發布的內容
-        const h5pContent = await prisma.h5pContent.findFirst({
+        const h5pContent = await prisma.h5PContent.findFirst({
           where: {
             id: contentId,
             OR: [
               { userId },
-              { status: 'published' },
+              { status: 'PUBLISHED' },
             ],
           },
         });
@@ -62,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const { title, description, status, contentPath } = req.body;
         
-        const updatedContent = await prisma.h5pContent.update({
+        const updatedContent = await prisma.h5PContent.update({
           where: { id: contentId },
           data: {
             ...(title && { title }),
@@ -81,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     case 'DELETE':
       try {
-        await prisma.h5pContent.delete({
+        await prisma.h5PContent.delete({
           where: { id: contentId },
         });
 

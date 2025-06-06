@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   switch (req.method) {
     case 'GET':
       try {
-        const h5pContents = await prisma.h5pContent.findMany({
+        const h5pContents = await prisma.h5PContent.findMany({
           where: { userId },
           orderBy: { updatedAt: 'desc' },
         });
@@ -37,13 +37,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(400).json({ error: '標題和內容類型為必填項' });
         }
 
-        const newH5pContent = await prisma.h5pContent.create({
+        const newH5pContent = await prisma.h5PContent.create({
           data: {
             title,
             description: description || '',
             contentType,
             userId,
-            status: 'draft',
+            status: 'DRAFT',
             contentPath: '', // 將在上傳處理後更新
           },
         });

@@ -166,7 +166,7 @@ export default function Dashboard() {
       
       fetchUserActivities();
     }
-  }, [status, session]);
+  }, [status, session, searchQuery, filter, sortBy, selectedTags]);
 
   // 過濾和排序活動
   const filteredActivities = activities

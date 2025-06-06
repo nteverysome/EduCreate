@@ -73,8 +73,8 @@ async function restoreVersion(req: NextApiRequest, res: NextApiResponse, session
         data: {
           versionName: `恢復前自動備份 ${new Date().toLocaleString('zh-TW')}`,
           versionNotes: '系統在恢復版本前自動創建的備份',
-          content: currentActivity.content,
-          elements: currentActivity.elements,
+          content: currentActivity.content as any,
+          elements: currentActivity.elements as any,
           published: currentActivity.published,
           activity: { connect: { id: version.activityId } },
           user: { connect: { id: session.user.id } }
@@ -86,8 +86,8 @@ async function restoreVersion(req: NextApiRequest, res: NextApiResponse, session
     const updatedActivity = await prisma.activity.update({
       where: { id: version.activityId },
       data: {
-        content: version.content,
-        elements: version.elements,
+        content: version.content as any,
+        elements: version.elements as any,
         published: version.published,
         updatedAt: new Date()
       }
@@ -100,7 +100,7 @@ async function restoreVersion(req: NextApiRequest, res: NextApiResponse, session
         activityId: version.activityId,
         versionId: version.id,
         userId: session.user.id,
-        details: `恢復到版本: ${version.versionNumber}`
+        details: `恢復到版本: ${version.versionName}`
       }
     });
     

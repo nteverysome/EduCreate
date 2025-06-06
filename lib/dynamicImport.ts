@@ -1,4 +1,4 @@
-import dynamic from 'next/dynamic';
+import dynamic, { DynamicOptionsLoadingProps } from 'next/dynamic';
 import { ComponentType } from 'react';
 
 /**
@@ -11,7 +11,7 @@ import { ComponentType } from 'react';
  */
 export function dynamicComponent<T>(importFunc: () => Promise<{ default: ComponentType<T> }>, options: {
   ssr?: boolean;
-  loading?: ComponentType;
+  loading?: (loadingProps: DynamicOptionsLoadingProps) => JSX.Element | null;
   displayName?: string;
 } = {}) {
   const {

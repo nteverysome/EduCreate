@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 
 interface ShareActivityProps {
@@ -134,9 +135,11 @@ export default function ShareActivity({ activityId, activityTitle, onClose }: Sh
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-500 mb-2">掃描二維碼分享到微信</p>
             <div className="inline-block p-2 bg-white border rounded-md">
-              <img 
+              <Image 
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shareUrl)}`} 
                 alt="QR Code" 
+                width={128}
+                height={128}
                 className="w-32 h-32"
               />
             </div>

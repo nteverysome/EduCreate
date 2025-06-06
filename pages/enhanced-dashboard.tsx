@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -66,14 +66,8 @@ export default function EnhancedDashboard() {
   }, [status, router]);
 
   // 獲取用戶活動和統計數據
-  useEffect(() => {
-    if (status === 'authenticated' && session) {
-      fetchUserActivities();
-    }
-  }, [status, session, searchQuery, filter, sortBy, selectedTags]);
-
   // 獲取用戶活動數據
-  const fetchUserActivities = async () => {
+  const fetchUserActivities = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -185,7 +179,13 @@ export default function EnhancedDashboard() {
       console.error('獲取活動數據失敗:', error);
       setIsLoading(false);
     }
-  };
+  }, [session, searchQuery, filter, sortBy, selectedTags]);
+
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      fetchUserActivities();
+    }
+  }, [status, session, fetchUserActivities]);
 
   // 獲取模板類型的顯示名稱和顏色
   const getTemplateInfo = (type: string) => {

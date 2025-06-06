@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, SubStatus } from '@prisma/client';
 import nodemailer from 'nodemailer';
 
 const prisma = new PrismaClient();
@@ -228,18 +228,18 @@ async function handleSubscriptionDeleted(subscription: any) {
 }
 
 // 將Stripe訂閱狀態映射到數據庫狀態
-function mapStripeStatusToDbStatus(stripeStatus: string): string {
-  const statusMap: Record<string, string> = {
-    'active': 'ACTIVE',
-    'past_due': 'PAST_DUE',
-    'unpaid': 'UNPAID',
-    'canceled': 'CANCELED',
-    'incomplete': 'PAYMENT_FAILED',
-    'incomplete_expired': 'EXPIRED',
-    'trialing': 'ACTIVE'
+function mapStripeStatusToDbStatus(stripeStatus: string): SubStatus {
+  const statusMap: Record<string, SubStatus> = {
+    'active': SubStatus.ACTIVE,
+    'past_due': SubStatus.PAST_DUE,
+    'unpaid': SubStatus.UNPAID,
+    'canceled': SubStatus.CANCELED,
+    'incomplete': SubStatus.PAYMENT_FAILED,
+    'incomplete_expired': SubStatus.EXPIRED,
+    'trialing': SubStatus.ACTIVE
   };
   
-  return statusMap[stripeStatus] || 'ACTIVE';
+  return statusMap[stripeStatus] || SubStatus.ACTIVE;
 }
 
 // 手動發送支付通知

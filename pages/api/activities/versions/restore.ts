@@ -50,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await prisma.activity.update({
       where: { id: activityId },
       data: {
-        content: restoredVersion.content,
+        content: restoredVersion.content as any,
         updatedAt: new Date(),
       },
     });
