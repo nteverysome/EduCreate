@@ -57,7 +57,7 @@ async function getUserStats(userId: string) {
   });
   
   const publishedActivities = await prisma.activity.count({
-    where: { userId, published: true }
+    where: { userId, isPublic: true }
   });
   
   const totalH5PContents = await prisma.h5PContent.count({
@@ -122,7 +122,7 @@ async function getActivityEngagement(userId: string, period: string) {
   const publishedActivities = await prisma.activity.count({
     where: {
       userId,
-      published: true,
+      isPublic: true,
       updatedAt: { gte: startDate }
     }
   });
@@ -144,12 +144,11 @@ async function getContentUsage(userId: string) {
     _count: true
   });
   
-  // 獲取使用不同模板的活動數量
-  const templateUsage = await prisma.activity.groupBy({
-    by: ['templateId'],
+  // 獲取使用不同類型的活動數量
+  const typeUsage = await prisma.activity.groupBy({
+    by: ['type'],
     where: { 
-      userId,
-      templateId: { not: null }
+      userId
     },
     _count: true
   });
@@ -157,7 +156,7 @@ async function getContentUsage(userId: string) {
   // 獲取模板詳情
   const templates = await prisma.template.findMany({
     where: {
-      id: { in: templateUsage.map(t => t.templateId as string) }
+      type: { in: typeUsage.map((t: { type: string }) => t.type) }
     },
     select: {
       id: true,
@@ -165,16 +164,16 @@ async function getContentUsage(userId: string) {
     }
   });
   
-  // 將模板ID映射到模板名稱
-  const templateMap = templates.reduce((map, template) => {
-    map[template.id] = template.name;
+  // 將類型映射到模板名稱
+  const templateMap = templates.reduce((map: any, template: any) => {
+    map[template.type] = template.name;
     return map;
   }, {} as Record<string, string>);
   
-  // 格式化模板使用數據
-  const formattedTemplateUsage = templateUsage.map(item => ({
-    templateId: item.templateId,
-    templateName: templateMap[item.templateId as string] || '未知模板',
+  // 格式化類型使用數據
+  const formattedTemplateUsage = typeUsage.map((item: any) => ({
+    type: item.type,
+    templateName: templateMap[item.type as string] || item.type,
     count: item._count
   }));
   
@@ -190,9 +189,9 @@ async function getSubscriptionData(userId: string) {
     where: { userId },
     select: {
       status: true,
-      plan: true,
-      currentPeriodStart: true,
-      currentPeriodEnd: true
+      planId: true,
+      startDate: true,
+      endDate: true
     }
   });
   
@@ -200,17 +199,17 @@ async function getSubscriptionData(userId: string) {
     return { hasSubscription: false };
   }
   
-  const daysLeft = subscription.currentPeriodEnd
-    ? Math.floor((subscription.currentPeriodEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  const daysLeft = subscription.endDate
+    ? Math.floor((subscription.endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : 0;
   
   return {
     hasSubscription: true,
     status: subscription.status,
-    plan: subscription.plan,
+    planId: subscription.planId,
     daysLeft,
-    currentPeriodStart: subscription.currentPeriodStart,
-    currentPeriodEnd: subscription.currentPeriodEnd
+    startDate: subscription.startDate,
+    endDate: subscription.endDate
   };
 }
 
@@ -222,7 +221,7 @@ async function getH5PStats(userId: string) {
   
   // 獲取不同類型的H5P內容數量
   const h5pTypeDistribution = await prisma.h5PContent.groupBy({
-    by: ['contentType'],
+    by: ['library'],
     where: { userId },
     _count: true
   });
@@ -235,7 +234,7 @@ async function getH5PStats(userId: string) {
     select: {
       id: true,
       title: true,
-      contentType: true,
+      library: true,
       createdAt: true
     }
   });

@@ -31,19 +31,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1小時後過期
 
-    // 保存重置令牌到數據庫
-    await prisma.passwordReset.upsert({
-      where: { userId: user.id },
-      update: {
-        token: resetToken,
-        expires: resetTokenExpiry
-      },
-      create: {
-        userId: user.id,
-        token: resetToken,
-        expires: resetTokenExpiry
-      }
-    });
+    // 保存重置令牌到數據庫 (暫時註釋掉，因為模型不存在)
+    // await prisma.passwordReset.upsert({
+    //   where: { userId: user.id },
+    //   update: {
+    //     token: resetToken,
+    //     expires: resetTokenExpiry
+    //   },
+    //   create: {
+    //     userId: user.id,
+    //     token: resetToken,
+    //     expires: resetTokenExpiry
+    //   }
+    // });
 
     // 發送重置郵件
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${resetToken}`;

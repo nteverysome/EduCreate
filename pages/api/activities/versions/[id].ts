@@ -43,12 +43,6 @@ async function getActivityVersion(req: NextApiRequest, res: NextApiResponse, ses
             userId: true,
             title: true
           }
-        },
-        user: {
-          select: {
-            name: true,
-            email: true
-          }
         }
       }
     });
@@ -105,21 +99,18 @@ async function restoreActivityVersion(req: NextApiRequest, res: NextApiResponse,
       where: { id: version.activityId },
       select: {
         content: true,
-        elements: true,
-        published: true
+        isPublic: true
       }
     });
     
     if (currentActivity) {
       await prisma.activityVersion.create({
         data: {
-          versionName: `恢復前自動備份 ${new Date().toLocaleString('zh-TW')}`,
-          versionNotes: '系統在恢復版本前自動創建的備份',
+          version: `恢復前自動備份 ${new Date().toLocaleString('zh-TW')}`,
+          description: '系統在恢復版本前自動創建的備份',
           content: currentActivity.content as any,
-          elements: currentActivity.elements as any,
-          published: currentActivity.published,
-          activity: { connect: { id: version.activityId } },
-          user: { connect: { id: session.user.id } }
+          activityId: version.activityId,
+          createdBy: session.user.id
         }
       });
     }
@@ -129,20 +120,7 @@ async function restoreActivityVersion(req: NextApiRequest, res: NextApiResponse,
       where: { id: version.activityId },
       data: {
         content: version.content as any,
-        elements: version.elements as any,
-        published: version.published,
         updatedAt: new Date()
-      }
-    });
-    
-    // 記錄版本恢復操作
-    await prisma.activityVersionLog.create({
-      data: {
-        action: 'RESTORE',
-        activityId: version.activityId,
-        versionId: version.id,
-        userId: session.user.id,
-        details: `恢復到版本: ${version.versionName}`
       }
     });
     
@@ -190,17 +168,6 @@ async function deleteActivityVersion(req: NextApiRequest, res: NextApiResponse, 
     // 刪除版本
     await prisma.activityVersion.delete({
       where: { id }
-    });
-    
-    // 記錄版本刪除操作
-    await prisma.activityVersionLog.create({
-      data: {
-        action: 'DELETE',
-        activityId: version.activityId,
-        versionId: version.id,
-        userId: session.user.id,
-        details: `刪除版本: ${version.versionName}`
-      }
     });
     
     return res.status(200).json({

@@ -20,7 +20,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 獲取用戶的訂閱信息
     const subscription = await prisma.subscription.findUnique({
       where: { userId: session.user.id },
-      include: { plan: true },
+      select: { 
+        id: true,
+        status: true,
+        planId: true,
+        startDate: true,
+        endDate: true
+      },
     });
 
     // 檢查訂閱是否有效

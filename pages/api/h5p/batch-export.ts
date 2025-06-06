@@ -39,10 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     for (const contentId of contentIds) {
       // 獲取H5P內容信息
       const h5pContent = await prisma.h5PContent.findUnique({
-        where: { id: contentId },
-        include: {
-          activities: true
-        }
+        where: { id: contentId }
       });
 
       if (!h5pContent) {
@@ -51,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // 檢查用戶是否有權限導出該內容
-      if (h5pContent.activities.length > 0 && h5pContent.activities[0].userId !== session.user.id) {
+      if (h5pContent.userId !== session.user.id) {
         console.warn(`用戶無權導出內容: ${contentId}`);
         continue;
       }

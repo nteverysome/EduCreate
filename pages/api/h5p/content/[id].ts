@@ -56,8 +56,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           where: { id: contentId },
           data: {
             title: title || h5pContent.title,
-            description: description !== undefined ? description : h5pContent.description,
-            status: status || h5pContent.status,
             updatedAt: new Date()
           }
         });
@@ -76,12 +74,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
 
         // 如果有關聯的文件，也需要刪除
-        if (h5pContent.contentPath) {
-          const contentDirPath = path.join(process.cwd(), 'public', h5pContent.contentPath);
-          if (fs.existsSync(contentDirPath)) {
-            fs.rmSync(contentDirPath, { recursive: true, force: true });
-          }
-        }
+        // if (h5pContent.contentPath) {
+        //   const contentDirPath = path.join(process.cwd(), 'public', h5pContent.contentPath);
+        //   if (fs.existsSync(contentDirPath)) {
+        //     fs.rmSync(contentDirPath, { recursive: true, force: true });
+        //   }
+        // }
 
         return res.status(200).json({ success: true, message: 'H5P內容已刪除' });
       } catch (error) {

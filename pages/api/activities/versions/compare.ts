@@ -35,11 +35,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               userId: true,
               title: true
             }
-          },
-          user: {
-            select: {
-              name: true
-            }
           }
         }
       }),
@@ -51,11 +46,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               id: true,
               userId: true,
               title: true
-            }
-          },
-          user: {
-            select: {
-              name: true
             }
           }
         }

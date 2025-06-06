@@ -27,11 +27,10 @@ export async function createActivityVersion(activityId: string, content: any, us
   return prisma.activityVersion.create({
     data: {
       activityId,
-      versionName,
+      version: versionName,
       content,
-      elements: content,
-      userId,
-      versionNotes: description,
+      createdBy: userId,
+      description,
     },
   });
 }
@@ -41,13 +40,6 @@ export async function getActivityVersions(activityId: string) {
   return prisma.activityVersion.findMany({
     where: { activityId },
     orderBy: { createdAt: 'desc' },
-    include: {
-      user: {
-        select: {
-          name: true,
-        },
-      },
-    },
   });
 }
 
@@ -74,6 +66,6 @@ export async function restoreActivityVersion(activityId: string, versionId: stri
     activityId,
     versionToRestore.content,
     userId,
-    `從版本 ${versionToRestore.versionName} 恢復`
+    `從版本 ${versionToRestore.version} 恢復`
   );
 }

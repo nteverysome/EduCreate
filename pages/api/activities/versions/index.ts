@@ -51,10 +51,9 @@ async function getActivityVersions(req: NextApiRequest, res: NextApiResponse, se
       where: { activityId },
       orderBy: { createdAt: 'desc' },
       include: {
-        user: {
+        activity: {
           select: {
-            name: true,
-            email: true
+            title: true
           }
         }
       }
@@ -85,11 +84,7 @@ async function createActivityVersion(req: NextApiRequest, res: NextApiResponse, 
         title: true,
         description: true,
         content: true,
-        elements: true,
-        type: true,
-        published: true,
-        templateId: true,
-        h5pContentId: true
+        type: true
       }
     });
     
@@ -104,13 +99,11 @@ async function createActivityVersion(req: NextApiRequest, res: NextApiResponse, 
     // 創建新的活動版本
     const newVersion = await prisma.activityVersion.create({
       data: {
-        versionName: versionName || `版本 ${new Date().toLocaleString('zh-TW')}`,
-        versionNotes: versionNotes || '',
+        version: versionName || `版本 ${new Date().toLocaleString('zh-TW')}`,
+        description: versionNotes || '',
         content: activity.content as any,
-        elements: activity.elements as any,
-        published: activity.published,
-        activity: { connect: { id: activityId } },
-        user: { connect: { id: userId } }
+        activityId: activityId,
+        createdBy: userId
       }
     });
     

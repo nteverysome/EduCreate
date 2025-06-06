@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!passwordReset) {
       return res.status(400).json({ message: '無效或已過期的重置令牌' });
     }
-
+    
     // 加密新密碼
     const hashedPassword = await bcrypt.hash(password, 12);
 

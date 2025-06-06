@@ -126,22 +126,11 @@ async function advancedSearchHandler(req: NextApiRequest, res: NextApiResponse) 
           title: true,
           description: true,
           type: true,
-          published: true,
+          isPublic: true,
           createdAt: true,
           updatedAt: true,
           content: true,
-          elements: true,
-          templateId: true,
           userId: true,
-          h5pContentId: true,
-          template: {
-            select: {
-              id: true,
-              name: true,
-              type: true,
-              thumbnail: true
-            }
-          },
           user: {
             select: {
               id: true,
@@ -152,8 +141,7 @@ async function advancedSearchHandler(req: NextApiRequest, res: NextApiResponse) 
           ...(includeStats === 'true' ? {
             _count: {
               select: {
-                versions: true,
-                versionLogs: true
+                versions: true
               }
             }
           } : {})
@@ -166,7 +154,7 @@ async function advancedSearchHandler(req: NextApiRequest, res: NextApiResponse) 
     ]);
     
     // 格式化結果
-    const formattedActivities = activities.map(activity => ({
+    const formattedActivities = activities.map((activity: any) => ({
       ...activity,
       templateType: activity.template?.type || null,
       templateName: activity.template?.name || null,

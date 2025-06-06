@@ -40,11 +40,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const newH5pContent = await prisma.h5PContent.create({
           data: {
             title,
-            description: description || '',
-            contentType,
+            content: {},
             userId,
-            status: 'DRAFT',
-            contentPath: '', // 將在上傳處理後更新
+            library: contentType || 'H5P.InteractiveVideo',
+            isPublic: false
           },
         });
 

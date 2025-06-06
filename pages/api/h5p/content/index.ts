@@ -29,16 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // 獲取所有H5P內容
         const h5pContents = await prisma.h5PContent.findMany({
           where: { userId },
-          orderBy: { updatedAt: 'desc' },
-          include: {
-            user: {
-              select: {
-                name: true,
-                email: true,
-                image: true
-              }
-            }
-          }
+          orderBy: { updatedAt: 'desc' }
         });
         
         return res.status(200).json(h5pContents);
@@ -59,11 +50,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const newH5pContent = await prisma.h5PContent.create({
           data: {
             title,
-            description: description || '',
-            contentType,
+            content: contentData || {},
             userId,
-            status: 'DRAFT',
-            contentPath: `/h5p/content/${Date.now()}`,
+            library: contentType || 'H5P.InteractiveVideo',
+            isPublic: false
           },
         });
 

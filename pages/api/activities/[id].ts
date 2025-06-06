@@ -53,7 +53,7 @@ async function getActivity(req: NextApiRequest, res: NextApiResponse, session: a
     }
     
     // 檢查用戶是否有權限訪問該活動
-    if (activity.userId !== userId && !activity.published) {
+    if (activity.userId !== userId && !activity.isPublic) {
       return res.status(403).json({ error: '無權訪問此活動' });
     }
     
@@ -83,13 +83,13 @@ async function updateActivity(req: NextApiRequest, res: NextApiResponse, session
     }
     
     // 更新活動
-    const { title, description, elements } = req.body;
+    const { title, description, content } = req.body;
     const updatedActivity = await prisma.activity.update({
       where: { id },
       data: {
         title: title || existingActivity.title,
         description: description !== undefined ? description : existingActivity.description,
-        elements: elements || existingActivity.elements,
+        content: content || existingActivity.content,
         updatedAt: new Date()
       }
     });
@@ -153,7 +153,7 @@ async function publishActivity(req: NextApiRequest, res: NextApiResponse, sessio
     const publishedActivity = await prisma.activity.update({
       where: { id },
       data: {
-        published: true,
+        isPublic: true,
         updatedAt: new Date()
       }
     });

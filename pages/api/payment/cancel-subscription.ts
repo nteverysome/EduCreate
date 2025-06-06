@@ -62,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // 設置結束日期為當前計費週期結束時間
         endDate: new Date(stripeSubscriptions.data[0].current_period_end * 1000),
       },
-      include: { plan: true },
+
     });
 
     return res.status(200).json({

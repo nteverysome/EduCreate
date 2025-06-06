@@ -59,12 +59,6 @@ async function searchHandler(req: NextApiRequest, res: NextApiResponse) {
         skip,
         take: limitNum,
         include: {
-          template: {
-            select: {
-              name: true,
-              description: true
-            }
-          },
           user: {
             select: {
               name: true,

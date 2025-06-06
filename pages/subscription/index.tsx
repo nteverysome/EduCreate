@@ -279,7 +279,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     // 獲取用戶的訂閱信息
     const subscription = await prisma.subscription.findUnique({
       where: { userId: session.user.id },
-      include: { plan: true },
+      select: {
+        id: true,
+        status: true,
+        planId: true,
+        startDate: true,
+        endDate: true
+      },
     });
 
     return {

@@ -222,9 +222,14 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
       where: { activityId: activityId as string },
       orderBy: { createdAt: 'desc' },
       include: {
-        user: {
+        activity: {
           select: {
-            name: true,
+            title: true,
+            user: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
       },

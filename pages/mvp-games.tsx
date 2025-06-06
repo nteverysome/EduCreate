@@ -182,7 +182,7 @@ function MatchingGame({ data }: { data: any }) {
             <button
               key={index}
               onClick={() => handleLeftClick(pair.left)}
-              disabled={matches[pair.left]}
+              disabled={!!matches[pair.left]}
               className={`w-full p-3 rounded border-2 transition-colors ${
                 matches[pair.left]
                   ? 'border-green-500 bg-green-100'

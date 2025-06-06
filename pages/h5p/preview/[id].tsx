@@ -125,7 +125,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           // 如果用戶已登錄，允許查看自己的內容
           { userId: session?.user?.id },
           // 允許查看已發布的內容
-          { status: 'PUBLISHED' },
+          { isPublic: true },
         ],
       },
     });

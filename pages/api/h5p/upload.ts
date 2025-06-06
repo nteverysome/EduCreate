@@ -72,7 +72,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       h5pContent = await prisma.h5PContent.update({
         where: { id: contentId },
         data: {
-          contentPath: `/h5p/content/${contentDirId}`,
           updatedAt: new Date(),
         },
       });
@@ -81,11 +80,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       h5pContent = await prisma.h5PContent.create({
         data: {
           title: h5pInfo.title || '未命名H5P內容',
-          description: h5pInfo.description || '',
-          contentType: h5pInfo.contentType || 'unknown',
-          contentPath: `/h5p/content/${contentDirId}`,
-          status: 'DRAFT',
+          content: {},
+          library: h5pInfo.contentType || 'H5P.InteractiveVideo',
           userId,
+          isPublic: false
         },
       });
     }
