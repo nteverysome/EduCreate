@@ -1,11 +1,6 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
+  "framework": "nextjs",
   "functions": {
     "pages/api/**/*.js": {
       "maxDuration": 30
@@ -13,7 +8,5 @@
     "pages/api/**/*.ts": {
       "maxDuration": 30
     }
-  },
-  "regions": ["iad1"],
-  "framework": "nextjs"
+  }
 }
