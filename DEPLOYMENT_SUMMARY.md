@@ -1,10 +1,15 @@
-# 🎉 EduCreate 專案部署總結
+# 🚀 EduCreate Vercel 部署總結 - 最終版本
 
 ## ✅ 專案狀態：完全準備就緒！
 
 您的 EduCreate 專案已經成功修復所有問題，現在可以直接部署到 Vercel！
 
-### 🔧 已完成的修復：
+### 🔧 最新修復 (2025-06-06)：
+- ✅ **修復 next.config.js 中的 NODE_ENV 衝突**
+- ✅ **優化 vercel.json 配置以提高兼容性**
+- ✅ **生成安全的 NEXTAUTH_SECRET**
+- ✅ **創建詳細的部署指南和故障排除文檔**
+- ✅ **本地構建測試成功 (npm run build)**
 - ✅ **所有 TypeScript 編譯錯誤已修復**
 - ✅ **Prisma 模型字段引用錯誤已修復**
 - ✅ **Neon 資料庫連接已配置並測試成功**
@@ -27,15 +32,32 @@
 - 點擊 "New Project"
 - 選擇 GitHub 倉庫：`nteverysome/EduCreate`
 
-### 3. 配置環境變量
-在 Vercel 專案設置中添加：
+### 3. 配置環境變量 ⚠️ 立即執行
+**訪問**: https://vercel.com/minamisums-projects/edu-create/settings/environment-variables
+
+**添加以下環境變數**:
 
 ```bash
-DATABASE_URL=postgresql://neondb_owner:npg_JiVYrWK7L6Ff@ep-curly-salad-a85exs3f-pooler.eastus2.azure.neon.tech/neondb?sslmode=require
-NEXTAUTH_URL=https://your-app-name.vercel.app
-NEXTAUTH_SECRET=your-production-secret-key
-NEXT_PUBLIC_H5P_BASE_PATH=""
+# 1. NEXTAUTH_URL
+Name: NEXTAUTH_URL
+Value: https://edu-create.vercel.app
+Environments: ✅ Production ✅ Preview ✅ Development
+
+# 2. NEXTAUTH_SECRET (已生成安全密鑰)
+Name: NEXTAUTH_SECRET
+Value: 602be0cd8063b79b5ac949fae32f61f1e6db40b0e5ac32b15b03341e0d0b3b45
+Environments: ✅ Production ✅ Preview ✅ Development
+
+# 3. DATABASE_URL (從 NeonDB 獲取)
+Name: DATABASE_URL
+Value: [從 https://console.neon.tech/app/projects/dry-cloud-00816876 複製連接字符串]
+Environments: ✅ Production ✅ Preview ✅ Development
 ```
+
+**獲取 NeonDB 連接字符串**:
+1. 訪問: https://console.neon.tech/app/projects/dry-cloud-00816876
+2. 點擊 "Connection string"
+3. 複製 "Pooled connection" 字符串
 
 ### 4. 部署設置
 - Framework Preset: **Next.js**
@@ -43,8 +65,12 @@ NEXT_PUBLIC_H5P_BASE_PATH=""
 - Output Directory: `.next`
 - Install Command: `npm install`
 
-### 5. 點擊部署
-等待構建完成（約 2-3 分鐘）
+### 4. 重新部署 🚀 立即執行
+1. **保存所有環境變數後**
+2. **訪問**: https://vercel.com/minamisums-projects/edu-create
+3. **點擊最新的部署**
+4. **點擊 "Redeploy" 按鈕**
+5. **等待構建完成** (約 2-3 分鐘)
 
 ## 🎯 部署後測試
 
