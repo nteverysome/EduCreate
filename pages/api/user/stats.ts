@@ -57,7 +57,7 @@ async function getUserStats(userId: string) {
   });
   
   const publishedActivities = await prisma.activity.count({
-    where: { userId, isPublic: true }
+    where: { userId, published: true }
   });
   
   const totalH5PContents = await prisma.h5PContent.count({
@@ -122,7 +122,7 @@ async function getActivityEngagement(userId: string, period: string) {
   const publishedActivities = await prisma.activity.count({
     where: {
       userId,
-      isPublic: true,
+      published: true,
       updatedAt: { gte: startDate }
     }
   });
@@ -156,7 +156,7 @@ async function getContentUsage(userId: string) {
   // 獲取模板詳情
   const templates = await prisma.template.findMany({
     where: {
-      type: { in: typeUsage.map((t: { type: string }) => t.type) }
+      type: { in: typeUsage.map((t: { type: string }) => t.type as any) }
     },
     select: {
       id: true,
@@ -221,7 +221,7 @@ async function getH5PStats(userId: string) {
   
   // 獲取不同類型的H5P內容數量
   const h5pTypeDistribution = await prisma.h5PContent.groupBy({
-    by: ['library'],
+    by: ['library'] as any,
     where: { userId },
     _count: true
   });

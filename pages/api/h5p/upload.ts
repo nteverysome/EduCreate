@@ -81,9 +81,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: {
           title: h5pInfo.title || '未命名H5P內容',
           content: {},
+          contentType: h5pInfo.contentType || 'H5P.InteractiveVideo',
+          contentPath: `/h5p/uploads/${Date.now()}`,
           library: h5pInfo.contentType || 'H5P.InteractiveVideo',
           userId,
-          isPublic: false
+          published: false
         },
       });
     }

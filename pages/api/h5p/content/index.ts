@@ -51,9 +51,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           data: {
             title,
             content: contentData || {},
+            contentType: contentType || 'H5P.InteractiveVideo',
+            contentPath: `/h5p/content/${Date.now()}`,
             userId,
             library: contentType || 'H5P.InteractiveVideo',
-            isPublic: false
+            published: false
           },
         });
 

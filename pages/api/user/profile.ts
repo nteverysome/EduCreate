@@ -29,7 +29,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
               id: true,
               title: true,
               type: true,
-              isPublic: true,
+              published: true,
               updatedAt: true
             }
           }
@@ -39,7 +39,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       // 獲取活動統計
       const [total, published] = await Promise.all([
         prisma.activity.count({ where: { userId: user.id } }),
-        prisma.activity.count({ where: { userId: user.id, isPublic: true } })
+        prisma.activity.count({ where: { userId: user.id, published: true } })
       ]);
 
       return res.status(200).json({

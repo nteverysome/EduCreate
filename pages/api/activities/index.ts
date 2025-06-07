@@ -87,7 +87,7 @@ async function createActivity(req: NextApiRequest, res: NextApiResponse, session
         description: description || '',
         type,
         content: elements || [],
-        isPublic: false,
+        published: false,
         userId
       }
     });

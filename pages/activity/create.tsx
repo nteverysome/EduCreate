@@ -231,7 +231,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
           id: h5pId,
           OR: [
             { userId: session.user.id },
-            { isPublic: true },
+            { published: true },
           ],
         },
       });

@@ -6,15 +6,17 @@ const prisma = new PrismaClient();
 export interface ActivityVersion {
   id: string;
   activityId: string;
-  versionNumber: number;
+  versionName: string;
+  versionNotes?: string;
   content: any; // 活動內容的JSON數據
+  elements: any;
+  published: boolean;
   createdAt: Date;
-  createdBy: string;
-  description?: string;
+  userId: string;
 }
 
 // 創建新版本
-export async function createActivityVersion(activityId: string, content: any, userId: string, description?: string) {
+export async function createActivityVersion(activityId: string, content: any, userId: string, versionNotes?: string) {
   // 獲取當前活動的最新版本名稱
   const latestVersion = await prisma.activityVersion.findFirst({
     where: { activityId },
@@ -27,10 +29,11 @@ export async function createActivityVersion(activityId: string, content: any, us
   return prisma.activityVersion.create({
     data: {
       activityId,
-      version: versionName,
+      versionName: versionName,
       content,
-      createdBy: userId,
-      description,
+      userId: userId,
+      versionNotes: versionNotes,
+      elements: content || {},
     },
   });
 }
@@ -66,6 +69,6 @@ export async function restoreActivityVersion(activityId: string, versionId: stri
     activityId,
     versionToRestore.content,
     userId,
-    `從版本 ${versionToRestore.version} 恢復`
+    `從版本 ${versionToRestore.versionName} 恢復`
   );
 }

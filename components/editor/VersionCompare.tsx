@@ -88,17 +88,17 @@ export default function VersionCompare({ versionA, versionB, differences, onClos
       <div className="space-y-6">
         <div className="grid grid-cols-2 gap-6">
           <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">版本 {versionA.versionNumber}</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{versionA.versionName}</h3>
             <p className="text-sm text-gray-500 mb-1">創建於: {formatDate(versionA.createdAt)}</p>
-            <p className="text-sm text-gray-500 mb-1">創建者: {versionA.createdByUser?.name || '未知'}</p>
-            <p className="text-sm text-gray-500">描述: {versionA.description || '無描述'}</p>
+            <p className="text-sm text-gray-500 mb-1">創建者: {versionA.user?.name || '未知'}</p>
+            <p className="text-sm text-gray-500">描述: {versionA.versionNotes || '無描述'}</p>
           </div>
           
           <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">版本 {versionB.versionNumber}</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{versionB.versionName}</h3>
             <p className="text-sm text-gray-500 mb-1">創建於: {formatDate(versionB.createdAt)}</p>
-            <p className="text-sm text-gray-500 mb-1">創建者: {versionB.createdByUser?.name || '未知'}</p>
-            <p className="text-sm text-gray-500">描述: {versionB.description || '無描述'}</p>
+            <p className="text-sm text-gray-500 mb-1">創建者: {versionB.user?.name || '未知'}</p>
+            <p className="text-sm text-gray-500">描述: {versionB.versionNotes || '無描述'}</p>
           </div>
         </div>
         
@@ -206,14 +206,14 @@ export default function VersionCompare({ versionA, versionB, differences, onClos
                               className="grid grid-cols-2 gap-4"
                             >
                               <div className="bg-red-50 p-3 rounded-md">
-                                <h5 className="text-sm font-medium text-red-800 mb-1">版本 {versionA.versionNumber}</h5>
+                                <h5 className="text-sm font-medium text-red-800 mb-1">{versionA.versionName}</h5>
                                 <pre className="text-sm text-red-700 whitespace-pre-wrap overflow-auto max-h-60">
                                   {JSON.stringify(diff.valueA, null, 2)}
                                 </pre>
                               </div>
                               
                               <div className="bg-green-50 p-3 rounded-md">
-                                <h5 className="text-sm font-medium text-green-800 mb-1">版本 {versionB.versionNumber}</h5>
+                                <h5 className="text-sm font-medium text-green-800 mb-1">{versionB.versionName}</h5>
                                 <pre className="text-sm text-green-700 whitespace-pre-wrap overflow-auto max-h-60">
                                   {JSON.stringify(diff.valueB, null, 2)}
                                 </pre>

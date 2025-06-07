@@ -99,11 +99,12 @@ async function createActivityVersion(req: NextApiRequest, res: NextApiResponse, 
     // 創建新的活動版本
     const newVersion = await prisma.activityVersion.create({
       data: {
-        version: versionName || `版本 ${new Date().toLocaleString('zh-TW')}`,
-        description: versionNotes || '',
+        versionName: versionName || `版本 ${new Date().toLocaleString('zh-TW')}`,
+        versionNotes: versionNotes || '',
         content: activity.content as any,
+        elements: activity.content as any,
         activityId: activityId,
-        createdBy: userId
+        userId: userId
       }
     });
     

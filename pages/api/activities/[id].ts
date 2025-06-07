@@ -153,7 +153,7 @@ async function publishActivity(req: NextApiRequest, res: NextApiResponse, sessio
     const publishedActivity = await prisma.activity.update({
       where: { id },
       data: {
-        isPublic: true,
+        published: true,
         updatedAt: new Date()
       }
     });

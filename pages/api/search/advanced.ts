@@ -126,7 +126,7 @@ async function advancedSearchHandler(req: NextApiRequest, res: NextApiResponse) 
           title: true,
           description: true,
           type: true,
-          isPublic: true,
+          published: true,
           createdAt: true,
           updatedAt: true,
           content: true,

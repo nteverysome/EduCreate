@@ -9,11 +9,13 @@ import { toast } from 'react-hot-toast';
 interface Version {
   id: string;
   activityId: string;
-  versionNumber: number;
+  versionName: string;
+  versionNotes?: string;
+  content: any;
+  elements: any;
+  published: boolean;
   createdAt: Date;
-  createdBy: string;
-  snapshot: string; // JSON字符串，包含活動的完整狀態
-  comment?: string;
+  userId: string;
 }
 
 interface VersionHistoryProps {
@@ -140,13 +142,13 @@ export default function VersionHistory({ activityId, onVersionRestore, isOpen, o
                     {versions.map((version) => (
                       <tr key={version.id}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                          版本 {version.versionNumber}
+                          {version.versionName}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {version.comment || '無描述'}
+                          {version.versionNotes || '無描述'}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {version.createdBy || '未知用戶'}
+                          {version.userId || '未知用戶'}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {format(new Date(version.createdAt), 'yyyy-MM-dd HH:mm:ss')}

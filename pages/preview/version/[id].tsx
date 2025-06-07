@@ -13,7 +13,7 @@ interface Version {
   versionNumber: number;
   content: any;
   createdAt: string;
-  createdBy: string;
+  userId: string;
   description?: string;
   createdByUser?: {
     name: string;

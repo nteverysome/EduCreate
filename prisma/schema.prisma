@@ -43,6 +43,7 @@ model Activity {
   elements     Json                 @default("[]")
   type         String
   published    Boolean              @default(false)
+  isPublic     Boolean              @default(false)
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
   templateId   String?
@@ -96,9 +97,12 @@ model H5PContent {
   id          String           @id @default(cuid())
   title       String
   description String?
+  content     Json             @default("{}")
+  library     String           @default("H5P.InteractiveVideo")
   contentType String
   contentPath String
   status      H5PContentStatus @default(DRAFT)
+  published   Boolean          @default(false)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   userId      String
