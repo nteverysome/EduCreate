@@ -1,0 +1,208 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String                @id @default(cuid())
+  name                 String?
+  email                String                @unique
+  password             String
+  emailVerified        DateTime?
+  image                String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  role                 Role                  @default(USER)
+  activities           Activity[]
+  activityVersions     ActivityVersion[]
+  activityVersionLogs  ActivityVersionLog[]
+  h5pContents          H5PContent[]
+  invoices             Invoice[]
+  notificationSettings NotificationSettings?
+  passwordReset        PasswordReset?
+  subscription         Subscription?
+}
+
+model PasswordReset {
+  id      String   @id @default(cuid())
+  token   String   @unique
+  expires DateTime
+  userId  String   @unique
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id           String               @id @default(cuid())
+  title        String
+  description  String?
+  content      Json?
+  elements     Json                 @default("[]")
+  type         String
+  published    Boolean              @default(false)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  templateId   String?
+  userId       String
+  h5pContentId String?
+  h5pContent   H5PContent?          @relation(fields: [h5pContentId], references: [id])
+  template     Template?            @relation(fields: [templateId], references: [id])
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions     ActivityVersion[]
+  versionLogs  ActivityVersionLog[]
+}
+
+model Template {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  type        TemplateType
+  thumbnail   String?
+  config      Json
+  activities  Activity[]
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  planId               String
+  status               SubStatus @default(ACTIVE)
+  startDate            DateTime  @default(now())
+  endDate              DateTime?
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  invoices             Invoice[]
+  plan                 Plan      @relation(fields: [planId], references: [id])
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Plan {
+  id            String          @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  interval      BillingInterval
+  features      String[]
+  subscriptions Subscription[]
+}
+
+model H5PContent {
+  id          String           @id @default(cuid())
+  title       String
+  description String?
+  contentType String
+  contentPath String
+  status      H5PContentStatus @default(DRAFT)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  userId      String
+  activities  Activity[]
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ActivityVersion {
+  id           String               @id @default(cuid())
+  versionName  String
+  versionNotes String?
+  content      Json?
+  elements     Json
+  published    Boolean              @default(false)
+  createdAt    DateTime             @default(now())
+  activityId   String
+  userId       String
+  activity     Activity             @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs         ActivityVersionLog[]
+}
+
+model ActivityVersionLog {
+  id         String           @id @default(cuid())
+  action     String
+  details    String?
+  createdAt  DateTime         @default(now())
+  activityId String
+  versionId  String?
+  userId     String
+  activity   Activity         @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  version    ActivityVersion? @relation(fields: [versionId], references: [id])
+}
+
+model Invoice {
+  id               String            @id @default(cuid())
+  stripeInvoiceId  String            @unique
+  amount           Float
+  currency         String            @default("usd")
+  status           String
+  invoiceUrl       String?
+  invoicePdf       String?
+  createdAt        DateTime          @default(now())
+  paidAt           DateTime?
+  subscriptionId   String
+  userId           String
+  subscription     Subscription      @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notificationLogs NotificationLog[]
+}
+
+model NotificationSettings {
+  id                       String   @id @default(cuid())
+  paymentSuccess           Boolean  @default(true)
+  paymentFailed            Boolean  @default(true)
+  subscriptionRenewal      Boolean  @default(true)
+  subscriptionCancellation Boolean  @default(true)
+  promotions               Boolean  @default(false)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  userId                   String   @unique
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model NotificationLog {
+  id               String   @id @default(cuid())
+  type             String
+  recipient        String
+  content          String?
+  sentAt           DateTime @default(now())
+  sentBy           String
+  relatedInvoiceId String?
+  relatedInvoice   Invoice? @relation(fields: [relatedInvoiceId], references: [id])
+}
+
+enum Role {
+  USER
+  PREMIUM_USER
+  TEACHER
+  ADMIN
+}
+
+enum TemplateType {
+  MATCHING
+  FLASHCARDS
+  QUIZ
+}
+
+enum SubStatus {
+  ACTIVE
+  CANCELED
+  PAYMENT_FAILED
+  PAST_DUE
+  UNPAID
+  EXPIRED
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum H5PContentStatus {
+  DRAFT
+  PUBLISHED
+}

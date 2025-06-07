@@ -35,4 +35,9 @@ next-env.d.ts
 node_modules/
 build/
 cache/
-prisma/
+
+# prisma
+prisma/migrations/
+!prisma/schema.prisma
+
+# 建議保留 schema.prisma，方便團隊/雲端部署
