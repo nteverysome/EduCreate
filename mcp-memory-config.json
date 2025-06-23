@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "filesystem-mcp": {
+      "command": "npx",
+      "args": ["@shtse8/filesystem-mcp"],
+      "name": "Filesystem MCP Server",
+      "description": "Secure filesystem access for AI agents"
+    },
+    "memory-mcp-online": {
+      "command": "curl",
+      "args": [
+        "-X", "POST",
+        "-H", "Content-Type: application/json",
+        "-H", "User-Agent: MCP-Client/1.0",
+        "https://memory.mcpgenerator.com/mcp"
+      ],
+      "name": "Online Memory MCP Server",
+      "description": "Online memory storage service with vector search"
+    }
+  }
+}

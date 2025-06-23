@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "filesystem-mcp": {
+      "command": "npx",
+      "args": ["@shtse8/filesystem-mcp"],
+      "name": "Filesystem MCP Server",
+      "description": "Secure filesystem access for AI agents like Cline/Claude"
+    },
+    "memory-bank-mcp": {
+      "command": "npx",
+      "args": ["@movibe/memory-bank-mcp"],
+      "name": "Memory Bank MCP Server",
+      "description": "Persistent memory storage for AI conversations"
+    },
+    "mem0-mcp": {
+      "command": "python",
+      "args": ["mem0-mcp/main.py"],
+      "name": "Mem0 MCP Server",
+      "description": "Advanced coding preferences management with Mem0 AI"
+    }
+  }
+}
