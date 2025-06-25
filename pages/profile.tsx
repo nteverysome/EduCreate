@@ -307,12 +307,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       },
       include: {
         subscription: {
-          select: {
-            id: true,
-            status: true,
-            planId: true,
-            startDate: true,
-            endDate: true
+          include: {
+            plan: true
           }
         }
       }

@@ -86,11 +86,11 @@ function compareVersions(versionA: any, versionB: any) {
   const differences = [];
   
   // 比較基本信息
-  if (versionA.versionNumber !== versionB.versionNumber) {
+  if (versionA.versionName !== versionB.versionName) {
     differences.push({
-      field: 'versionNumber',
-      valueA: versionA.versionNumber,
-      valueB: versionB.versionNumber
+      field: 'versionName',
+      valueA: versionA.versionName,
+      valueB: versionB.versionName
     });
   }
   

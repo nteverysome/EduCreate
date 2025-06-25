@@ -12,12 +12,10 @@ interface Version {
   id: string;
   versionName: string;
   content: any;
-  elements: any;
-  published: boolean;
   createdAt: string;
   userId: string;
   versionNotes?: string;
-  user?: {
+  createdByUser?: {
     name: string;
   };
 }
@@ -179,28 +177,28 @@ export default function CompareVersions() {
             <div className="px-4 py-5 sm:p-6">
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <h2 className="text-lg font-medium text-blue-800">{versionA.versionName}</h2>
+                  <h2 className="text-lg font-medium text-blue-800">版本 {versionA.versionName}</h2>
                   <p className="text-sm text-gray-500">
                     創建於 {format(new Date(versionA.createdAt), 'yyyy-MM-dd HH:mm:ss', { locale: zhTW })}
                   </p>
                   <p className="text-sm text-gray-500">
-                    創建者: {versionA.user?.name || '未知用戶'}
+                    創建者: {versionA.createdByUser?.name || '未知用戶'}
                   </p>
-                  {versionA.versionNotes && (
-                    <p className="text-sm mt-2">{versionA.versionNotes}</p>
+                  {versionA.description && (
+                    <p className="text-sm mt-2">{versionA.description}</p>
                   )}
                 </div>
                 
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <h2 className="text-lg font-medium text-green-800">{versionB.versionName}</h2>
+                  <h2 className="text-lg font-medium text-green-800">版本 {versionB.versionName}</h2>
                   <p className="text-sm text-gray-500">
                     創建於 {format(new Date(versionB.createdAt), 'yyyy-MM-dd HH:mm:ss', { locale: zhTW })}
                   </p>
                   <p className="text-sm text-gray-500">
-                    創建者: {versionB.user?.name || '未知用戶'}
+                    創建者: {versionB.createdByUser?.name || '未知用戶'}
                   </p>
-                  {versionB.versionNotes && (
-                    <p className="text-sm mt-2">{versionB.versionNotes}</p>
+                  {versionB.description && (
+                    <p className="text-sm mt-2">{versionB.description}</p>
                   )}
                 </div>
               </div>
@@ -220,10 +218,10 @@ export default function CompareVersions() {
                           欄位
                         </th>
                         <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                          {versionA.versionName}
+                          版本 {versionA.versionName}
                         </th>
                         <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                          {versionB.versionName}
+                          版本 {versionB.versionName}
                         </th>
                       </tr>
                     </thead>

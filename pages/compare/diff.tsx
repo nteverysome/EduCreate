@@ -47,13 +47,13 @@ export default function VersionDiff({ v1Data, v2Data, activityId }: VersionDiffP
       <div className="bg-white shadow-md rounded-lg overflow-hidden p-4">
         <div className="flex justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold">版本 {v1Data.versionNumber}</h2>
+            <h2 className="text-lg font-semibold">版本 {v1Data.versionName}</h2>
             <p className="text-sm text-gray-500">
               創建於 {new Date(v1Data.createdAt).toLocaleString()}
             </p>
           </div>
           <div>
-            <h2 className="text-lg font-semibold">版本 {v2Data.versionNumber}</h2>
+            <h2 className="text-lg font-semibold">版本 {v2Data.versionName}</h2>
             <p className="text-sm text-gray-500">
               創建於 {new Date(v2Data.createdAt).toLocaleString()}
             </p>

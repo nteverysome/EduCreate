@@ -31,9 +31,9 @@ export async function createActivityVersion(activityId: string, content: any, us
       activityId,
       versionName: versionName,
       content,
+      elements: content || {},
       userId: userId,
       versionNotes: versionNotes,
-      elements: content || {},
     },
   });
 }
@@ -69,6 +69,6 @@ export async function restoreActivityVersion(activityId: string, versionId: stri
     activityId,
     versionToRestore.content,
     userId,
-    `從版本 ${versionToRestore.versionName} 恢復`
+    `從版本 ${versionToRestore.version} 恢復`
   );
 }

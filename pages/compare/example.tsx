@@ -7,9 +7,9 @@ import { toast } from 'react-hot-toast';
 // 模擬版本數據
 const mockVersionA = {
   id: 'v1',
-  versionNumber: 1,
+  versionName: "版本 1",
   createdAt: '2023-10-01T10:00:00Z',
-  createdBy: 'user1',
+  userId: 'user1',
   createdByUser: {
     name: '張三'
   },
@@ -34,9 +34,9 @@ const mockVersionA = {
 
 const mockVersionB = {
   id: 'v2',
-  versionNumber: 2,
+  versionName: "版本 2",
   createdAt: '2023-10-05T14:30:00Z',
-  createdBy: 'user2',
+  userId: 'user2',
   createdByUser: {
     name: '李四'
   },

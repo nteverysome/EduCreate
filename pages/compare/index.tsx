@@ -147,7 +147,7 @@ export default function CompareVersions({ versions, activityId }: CompareVersion
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    v{version.versionNumber}
+                    {version.versionName}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

@@ -10,7 +10,7 @@ import { toast } from 'react-hot-toast';
 
 interface Version {
   id: string;
-  versionNumber: number;
+  versionName: string;
   content: any;
   createdAt: string;
   userId: string;
@@ -109,7 +109,7 @@ export default function VersionPreview() {
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <div className="px-4 py-5 sm:p-6">
               <div className="mb-6">
-                <h2 className="text-lg font-medium text-gray-900">版本 {version.versionNumber}</h2>
+                <h2 className="text-lg font-medium text-gray-900">版本 {version.versionName}</h2>
                 <p className="text-sm text-gray-500">
                   創建於 {format(new Date(version.createdAt), 'yyyy-MM-dd HH:mm:ss', { locale: zhTW })}
                 </p>

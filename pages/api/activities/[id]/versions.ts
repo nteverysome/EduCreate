@@ -99,9 +99,8 @@ async function createActivityVersion(req: NextApiRequest, res: NextApiResponse, 
         activityId: id as string,
         content: activity.content as any,
         versionName: `版本 ${versionNumber}`,
-        versionNotes: description || '',
+        description: description || '',
         userId: session.user.id,
-        elements: activity.content || {},
       },
     });
     
