@@ -1,0 +1,389 @@
+// Prisma Schema for Wordwall Clone
+// 這是 Wordwall 克隆項目的完整數據庫架構
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ===== 用戶相關模型 =====
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  username         String    @unique
+  passwordHash     String    @map("password_hash")
+  displayName      String    @map("display_name")
+  avatarUrl        String?   @map("avatar_url")
+  role             UserRole  @default(TEACHER)
+  subscriptionType SubscriptionType @default(FREE) @map("subscription_type")
+  emailVerified    Boolean   @default(false) @map("email_verified")
+  isActive         Boolean   @default(true) @map("is_active")
+  lastLoginAt      DateTime? @map("last_login_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // 關聯
+  activities       Activity[]
+  gameSessions     GameSession[]
+  gameResults      GameResult[]
+  assignments      Assignment[]
+  submissions      AssignmentSubmission[]
+  activityLikes    ActivityLike[]
+  userSessions     UserSession[]
+
+  @@map("users")
+}
+
+model UserSession {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  sessionToken String   @unique @map("session_token")
+  refreshToken String?  @unique @map("refresh_token")
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  expiresAt    DateTime @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // 關聯
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("user_sessions")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum SubscriptionType {
+  FREE
+  PREMIUM
+  SCHOOL
+}
+
+// ===== 模板相關模型 =====
+
+model Template {
+  id              String    @id @default(cuid())
+  name            String
+  type            TemplateType
+  description     String?
+  iconUrl         String?   @map("icon_url")
+  config          Json      @default("{}")
+  defaultSettings Json      @default("{}") @map("default_settings")
+  isActive        Boolean   @default(true) @map("is_active")
+  isPremium       Boolean   @default(false) @map("is_premium")
+  sortOrder       Int       @default(0) @map("sort_order")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // 關聯
+  activities      Activity[]
+  categories      TemplateCategoryRelation[]
+
+  @@index([type])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("templates")
+}
+
+model TemplateCategory {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String?  // HEX 顏色代碼
+  icon        String?
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // 關聯
+  templates   TemplateCategoryRelation[]
+
+  @@map("template_categories")
+}
+
+model TemplateCategoryRelation {
+  templateId String @map("template_id")
+  categoryId String @map("category_id")
+
+  // 關聯
+  template   Template         @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  category   TemplateCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([templateId, categoryId])
+  @@map("template_category_relations")
+}
+
+enum TemplateType {
+  QUIZ
+  MATCH_UP
+  SPIN_WHEEL
+  GROUP_SORT
+  FLASH_CARDS
+  ANAGRAM
+  FIND_MATCH
+  OPEN_BOX
+}
+
+// ===== 活動相關模型 =====
+
+model Activity {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  templateId        String   @map("template_id")
+  title             String
+  description       String?
+  content           Json     @default("{}")
+  settings          Json     @default("{}")
+  visualStyle       String   @default("default") @map("visual_style")
+  isPublic          Boolean  @default(false) @map("is_public")
+  isFeatured        Boolean  @default(false) @map("is_featured")
+  viewCount         Int      @default(0) @map("view_count")
+  playCount         Int      @default(0) @map("play_count")
+  likeCount         Int      @default(0) @map("like_count")
+  copyCount         Int      @default(0) @map("copy_count")
+  tags              String[] @default([])
+  language          String   @default("en")
+  difficultyLevel   Int      @default(1) @map("difficulty_level")
+  estimatedDuration Int?     @map("estimated_duration") // 秒
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // 關聯
+  user              User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template          Template               @relation(fields: [templateId], references: [id])
+  versions          ActivityVersion[]
+  gameSessions      GameSession[]
+  gameResults       GameResult[]
+  assignments       Assignment[]
+  shares            ActivityShare[]
+  likes             ActivityLike[]
+
+  @@index([userId])
+  @@index([templateId])
+  @@index([isPublic])
+  @@index([createdAt])
+  @@index([playCount])
+  @@index([tags])
+  @@map("activities")
+}
+
+model ActivityVersion {
+  id                String   @id @default(cuid())
+  activityId        String   @map("activity_id")
+  versionNumber     Int      @map("version_number")
+  content           Json
+  settings          Json     @default("{}")
+  changeDescription String?  @map("change_description")
+  createdBy         String?  @map("created_by")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // 關聯
+  activity          Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  creator           User?    @relation(fields: [createdBy], references: [id])
+
+  @@unique([activityId, versionNumber])
+  @@index([activityId])
+  @@index([createdAt])
+  @@map("activity_versions")
+}
+
+// ===== 遊戲相關模型 =====
+
+model GameSession {
+  id          String      @id @default(cuid())
+  activityId  String      @map("activity_id")
+  playerName  String      @map("player_name")
+  playerEmail String?     @map("player_email")
+  playerId    String?     @map("player_id")
+  sessionType SessionType @default(SINGLE) @map("session_type")
+  startedAt   DateTime    @default(now()) @map("started_at")
+  completedAt DateTime?   @map("completed_at")
+  isCompleted Boolean     @default(false) @map("is_completed")
+  ipAddress   String?     @map("ip_address")
+  userAgent   String?     @map("user_agent")
+
+  // 關聯
+  activity    Activity     @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  player      User?        @relation(fields: [playerId], references: [id])
+  results     GameResult[]
+
+  @@index([activityId])
+  @@index([playerId])
+  @@index([startedAt])
+  @@map("game_sessions")
+}
+
+model GameResult {
+  id          String   @id @default(cuid())
+  sessionId   String   @map("session_id")
+  activityId  String   @map("activity_id")
+  playerName  String   @map("player_name")
+  playerEmail String?  @map("player_email")
+  score       Int      @default(0)
+  maxScore    Int      @map("max_score")
+  percentage  Decimal  @map("percentage") @db.Decimal(5, 2)
+  timeTaken   Int?     @map("time_taken") // 秒
+  answers     Json     @default("{}")
+  metadata    Json     @default("{}")
+  completedAt DateTime @default(now()) @map("completed_at")
+
+  // 關聯
+  session     GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  activity    Activity    @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([activityId])
+  @@index([score])
+  @@index([completedAt])
+  @@map("game_results")
+}
+
+enum SessionType {
+  SINGLE
+  MULTIPLAYER
+  ASSIGNMENT
+}
+
+// ===== 作業相關模型 =====
+
+model Assignment {
+  id                 String   @id @default(cuid())
+  activityId         String   @map("activity_id")
+  teacherId          String   @map("teacher_id")
+  title              String
+  description        String?
+  instructions       String?
+  accessCode         String   @unique @map("access_code")
+  password           String?
+  maxAttempts        Int      @default(1) @map("max_attempts")
+  timeLimit          Int?     @map("time_limit") // 秒
+  showResults        Boolean  @default(true) @map("show_results")
+  showCorrectAnswers Boolean  @default(false) @map("show_correct_answers")
+  allowReview        Boolean  @default(true) @map("allow_review")
+  startDate          DateTime? @map("start_date")
+  dueDate            DateTime? @map("due_date")
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  // 關聯
+  activity           Activity               @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  teacher            User                   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  submissions        AssignmentSubmission[]
+
+  @@index([activityId])
+  @@index([teacherId])
+  @@index([accessCode])
+  @@index([dueDate])
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id            String   @id @default(cuid())
+  assignmentId  String   @map("assignment_id")
+  studentName   String   @map("student_name")
+  studentEmail  String?  @map("student_email")
+  studentId     String?  @map("student_id")
+  attemptNumber Int      @default(1) @map("attempt_number")
+  score         Int      @default(0)
+  maxScore      Int      @map("max_score")
+  timeTaken     Int?     @map("time_taken") // 秒
+  answers       Json     @default("{}")
+  submittedAt   DateTime @default(now()) @map("submitted_at")
+
+  // 關聯
+  assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student       User?      @relation(fields: [studentId], references: [id])
+
+  @@unique([assignmentId, studentEmail, attemptNumber])
+  @@index([assignmentId])
+  @@index([studentId])
+  @@index([submittedAt])
+  @@map("assignment_submissions")
+}
+
+// ===== 分享與社交模型 =====
+
+model ActivityShare {
+  id         String    @id @default(cuid())
+  activityId String    @map("activity_id")
+  shareType  ShareType @map("share_type")
+  shareToken String    @unique @map("share_token")
+  settings   Json      @default("{}")
+  viewCount  Int       @default(0) @map("view_count")
+  isActive   Boolean   @default(true) @map("is_active")
+  expiresAt  DateTime? @map("expires_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  // 關聯
+  activity   Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
+  @@index([shareToken])
+  @@map("activity_shares")
+}
+
+model ActivityLike {
+  id         String   @id @default(cuid())
+  activityId String   @map("activity_id")
+  userId     String   @map("user_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // 關聯
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, userId])
+  @@index([activityId])
+  @@index([userId])
+  @@map("activity_likes")
+}
+
+enum ShareType {
+  LINK
+  EMBED
+  QR_CODE
+}
+
+// ===== 系統管理模型 =====
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String?  @map("user_id")
+  action       String
+  resourceType String   @map("resource_type")
+  resourceId   String?  @map("resource_id")
+  oldValues    Json?    @map("old_values")
+  newValues    Json?    @map("new_values")
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([action])
+  @@index([resourceType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  description String?
+  isPublic    Boolean  @default(false) @map("is_public")
+  updatedBy   String?  @map("updated_by")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([key])
+  @@map("system_settings")
+}

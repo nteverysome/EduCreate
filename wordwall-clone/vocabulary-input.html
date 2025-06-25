@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>詞彙輸入系統 - Wordwall Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+        .slide-up-enter-active {
+            transition: all 0.3s ease-out;
+        }
+        .slide-up-enter-from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        .word-row {
+            transition: all 0.2s ease;
+        }
+        .word-row:hover {
+            background-color: #f8fafc;
+            transform: translateX(4px);
+        }
+        .drag-over {
+            border-color: #3b82f6 !important;
+            background-color: #dbeafe !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app">
+        <!-- 導航欄 -->
+        <nav class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <div class="text-2xl font-bold text-blue-600">📚 詞彙管理系統</div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="saveActivity" 
+                                :disabled="!canSave"
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            💾 保存活動
+                        </button>
+                        <a href="interactive-demo.html" class="text-blue-600 hover:text-blue-800">返回演示</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- 活動信息設置 -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">📝 活動信息</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">活動名稱</label>
+                        <input v-model="activity.title" 
+                               type="text" 
+                               placeholder="例如：小學英語基礎詞彙"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">目標受眾</label>
+                        <select v-model="activity.targetAudience" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="elementary">小學</option>
+                            <option value="middle">中學</option>
+                            <option value="high">高中</option>
+                            <option value="adult">成人</option>
+                        </select>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">活動描述</label>
+                        <textarea v-model="activity.description" 
+                                  rows="3" 
+                                  placeholder="描述這個活動的學習目標和內容..."
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 詞彙輸入區域 -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">🔤 詞彙輸入</h2>
+                    <div class="flex space-x-3">
+                        <button @click="addWord" 
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            ➕ 添加詞彙
+                        </button>
+                        <button @click="importFromExcel" 
+                                class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            📊 Excel導入
+                        </button>
+                        <button @click="generateSampleData" 
+                                class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">
+                            🎲 示例數據
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 批量操作工具欄 -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex items-center">
+                            <span class="text-sm font-medium text-gray-700 mr-2">批量操作:</span>
+                            <button @click="selectAll" 
+                                    class="text-blue-600 hover:text-blue-800 text-sm">全選</button>
+                            <span class="mx-2 text-gray-300">|</span>
+                            <button @click="clearSelection" 
+                                    class="text-blue-600 hover:text-blue-800 text-sm">取消選擇</button>
+                            <span class="mx-2 text-gray-300">|</span>
+                            <button @click="deleteSelected" 
+                                    :disabled="selectedWords.length === 0"
+                                    class="text-red-600 hover:text-red-800 text-sm disabled:opacity-50">
+                                刪除選中 ({{ selectedWords.length }})
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center ml-auto">
+                            <span class="text-sm text-gray-600">
+                                總計: {{ vocabulary.length }} 個詞彙
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 詞彙列表 -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-3 px-4 font-medium text-gray-700 w-12">
+                                    <input type="checkbox" 
+                                           @change="toggleSelectAll"
+                                           :checked="isAllSelected"
+                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                </th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">#</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">英文</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">中文</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">發音</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">類別</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">難度</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700 w-24">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(word, index) in vocabulary" 
+                                :key="word.id"
+                                class="word-row border-b border-gray-100 hover:bg-gray-50"
+                                :class="{ 'bg-blue-50': selectedWords.includes(word.id) }">
+                                
+                                <td class="py-3 px-4">
+                                    <input type="checkbox" 
+                                           :value="word.id"
+                                           v-model="selectedWords"
+                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                </td>
+                                
+                                <td class="py-3 px-4 text-gray-600 font-medium">{{ index + 1 }}</td>
+                                
+                                <td class="py-3 px-4">
+                                    <input v-model="word.english" 
+                                           type="text" 
+                                           placeholder="English word"
+                                           @input="validateWord(word)"
+                                           class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                           :class="{ 'border-red-300 bg-red-50': word.errors?.english }">
+                                    <div v-if="word.errors?.english" class="text-red-500 text-xs mt-1">
+                                        {{ word.errors.english }}
+                                    </div>
+                                </td>
+                                
+                                <td class="py-3 px-4">
+                                    <input v-model="word.chinese" 
+                                           type="text" 
+                                           placeholder="中文翻譯"
+                                           @input="validateWord(word)"
+                                           class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                           :class="{ 'border-red-300 bg-red-50': word.errors?.chinese }">
+                                    <div v-if="word.errors?.chinese" class="text-red-500 text-xs mt-1">
+                                        {{ word.errors.chinese }}
+                                    </div>
+                                </td>
+                                
+                                <td class="py-3 px-4">
+                                    <input v-model="word.pronunciation" 
+                                           type="text" 
+                                           placeholder="/prəˌnʌnsiˈeɪʃn/"
+                                           class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                                </td>
+                                
+                                <td class="py-3 px-4">
+                                    <select v-model="word.category" 
+                                            class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">選擇類別</option>
+                                        <option value="food">食物</option>
+                                        <option value="animals">動物</option>
+                                        <option value="colors">顏色</option>
+                                        <option value="numbers">數字</option>
+                                        <option value="family">家庭</option>
+                                        <option value="school">學校</option>
+                                        <option value="daily">日常</option>
+                                    </select>
+                                </td>
+                                
+                                <td class="py-3 px-4">
+                                    <select v-model="word.difficulty" 
+                                            class="w-full px-2 py-1 border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="beginner">初級</option>
+                                        <option value="intermediate">中級</option>
+                                        <option value="advanced">高級</option>
+                                    </select>
+                                </td>
+                                
+                                <td class="py-3 px-4">
+                                    <button @click="removeWord(index)" 
+                                            class="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50">
+                                        🗑️
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 空狀態 -->
+                <div v-if="vocabulary.length === 0" class="text-center py-12">
+                    <div class="text-6xl mb-4">📝</div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">還沒有詞彙</h3>
+                    <p class="text-gray-600 mb-4">開始添加一些詞彙來創建你的學習活動</p>
+                    <button @click="addWord" 
+                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        添加第一個詞彙
+                    </button>
+                </div>
+            </div>
+
+            <!-- 遊戲預覽和生成 -->
+            <div v-if="vocabulary.length > 0" class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">🎮 遊戲預覽</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+                        <div class="text-3xl mb-3">❓</div>
+                        <h3 class="font-semibold mb-2">選擇題遊戲</h3>
+                        <p class="text-sm text-gray-600 mb-4">適合 {{ vocabulary.length }} 個詞彙</p>
+                        <button @click="generateGame('quiz')" 
+                                class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            生成遊戲
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+                        <div class="text-3xl mb-3">🔗</div>
+                        <h3 class="font-semibold mb-2">配對遊戲</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            {{ vocabulary.length <= 16 ? '完美適合' : '建議選擇前16個詞彙' }}
+                        </p>
+                        <button @click="generateGame('match')" 
+                                :disabled="vocabulary.length < 2"
+                                class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors">
+                            生成遊戲
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-200">
+                        <div class="text-3xl mb-3">🃏</div>
+                        <h3 class="font-semibold mb-2">閃卡遊戲</h3>
+                        <p class="text-sm text-gray-600 mb-4">適合所有詞彙數量</p>
+                        <button @click="generateGame('cards')" 
+                                class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            生成遊戲
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 隱藏的文件輸入 -->
+        <input ref="fileInput" 
+               type="file" 
+               accept=".xlsx,.xls,.csv" 
+               @change="handleFileImport" 
+               class="hidden">
+
+        <!-- 成功提示 -->
+        <transition name="fade">
+            <div v-if="showSuccessMessage" 
+                 class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+                ✅ {{ successMessage }}
+            </div>
+        </transition>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activity: {
+                        title: '',
+                        description: '',
+                        targetAudience: 'elementary'
+                    },
+                    vocabulary: [],
+                    selectedWords: [],
+                    showSuccessMessage: false,
+                    successMessage: '',
+                    nextId: 1
+                };
+            },
+            computed: {
+                canSave() {
+                    return this.activity.title.trim() && this.vocabulary.length > 0 && 
+                           this.vocabulary.every(word => word.english.trim() && word.chinese.trim());
+                },
+                isAllSelected() {
+                    return this.vocabulary.length > 0 && this.selectedWords.length === this.vocabulary.length;
+                }
+            },
+            methods: {
+                addWord() {
+                    this.vocabulary.push({
+                        id: this.nextId++,
+                        english: '',
+                        chinese: '',
+                        pronunciation: '',
+                        category: '',
+                        difficulty: 'beginner',
+                        errors: {}
+                    });
+                },
+                removeWord(index) {
+                    const word = this.vocabulary[index];
+                    this.selectedWords = this.selectedWords.filter(id => id !== word.id);
+                    this.vocabulary.splice(index, 1);
+                },
+                validateWord(word) {
+                    word.errors = {};
+                    
+                    if (!word.english.trim()) {
+                        word.errors.english = '請輸入英文單詞';
+                    } else if (!/^[a-zA-Z\s\-']+$/.test(word.english)) {
+                        word.errors.english = '英文只能包含字母、空格、連字符和撇號';
+                    }
+                    
+                    if (!word.chinese.trim()) {
+                        word.errors.chinese = '請輸入中文翻譯';
+                    }
+                },
+                selectAll() {
+                    this.selectedWords = this.vocabulary.map(word => word.id);
+                },
+                clearSelection() {
+                    this.selectedWords = [];
+                },
+                toggleSelectAll() {
+                    if (this.isAllSelected) {
+                        this.clearSelection();
+                    } else {
+                        this.selectAll();
+                    }
+                },
+                deleteSelected() {
+                    if (confirm(`確定要刪除選中的 ${this.selectedWords.length} 個詞彙嗎？`)) {
+                        this.vocabulary = this.vocabulary.filter(word => !this.selectedWords.includes(word.id));
+                        this.selectedWords = [];
+                    }
+                },
+                importFromExcel() {
+                    this.$refs.fileInput.click();
+                },
+                handleFileImport(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        // 這裡應該集成真實的Excel解析庫
+                        this.showSuccess('Excel導入功能開發中...');
+                    }
+                },
+                generateSampleData() {
+                    const sampleWords = [
+                        { english: 'apple', chinese: '蘋果', pronunciation: '/ˈæpəl/', category: 'food', difficulty: 'beginner' },
+                        { english: 'book', chinese: '書', pronunciation: '/bʊk/', category: 'school', difficulty: 'beginner' },
+                        { english: 'cat', chinese: '貓', pronunciation: '/kæt/', category: 'animals', difficulty: 'beginner' },
+                        { english: 'dog', chinese: '狗', pronunciation: '/dɔːɡ/', category: 'animals', difficulty: 'beginner' },
+                        { english: 'elephant', chinese: '大象', pronunciation: '/ˈeləfənt/', category: 'animals', difficulty: 'intermediate' }
+                    ];
+                    
+                    sampleWords.forEach(word => {
+                        this.vocabulary.push({
+                            id: this.nextId++,
+                            ...word,
+                            errors: {}
+                        });
+                    });
+                    
+                    this.showSuccess('已添加示例詞彙');
+                },
+                async saveActivity() {
+                    if (!this.canSave) return;
+
+                    const activityData = {
+                        ...this.activity,
+                        vocabulary: this.vocabulary.map(word => ({
+                            english: word.english.trim(),
+                            chinese: word.chinese.trim(),
+                            pronunciation: word.pronunciation.trim(),
+                            category: word.category,
+                            difficulty: word.difficulty
+                        })),
+                        createdAt: new Date().toISOString()
+                    };
+
+                    try {
+                        // 保存到後端API
+                        const response = await fetch('/api/activities', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(activityData)
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            // 同時保存到localStorage作為備份
+                            localStorage.setItem('currentActivity', JSON.stringify(activityData));
+                            this.showSuccess(`活動已保存成功！ID: ${result.activityId}`);
+                        } else {
+                            throw new Error('保存失敗');
+                        }
+                    } catch (error) {
+                        console.error('保存到後端失敗，使用本地存儲:', error);
+                        // 降級到localStorage
+                        localStorage.setItem('currentActivity', JSON.stringify(activityData));
+                        this.showSuccess('活動已保存到本地存儲！');
+                    }
+                },
+                async generateGame(gameType) {
+                    if (!this.canSave) {
+                        alert('請先完善活動信息和詞彙內容');
+                        return;
+                    }
+
+                    try {
+                        // 先保存活動
+                        await this.saveActivity();
+
+                        // 調用智能遊戲生成API
+                        const gameData = {
+                            gameType,
+                            vocabulary: this.vocabulary.map(word => ({
+                                english: word.english.trim(),
+                                chinese: word.chinese.trim(),
+                                pronunciation: word.pronunciation.trim(),
+                                category: word.category,
+                                difficulty: word.difficulty
+                            }))
+                        };
+
+                        const response = await fetch('/api/games/generate', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(gameData)
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            this.showSuccess(`${gameType} 遊戲生成成功！`);
+
+                            // 保存遊戲配置到localStorage
+                            localStorage.setItem('generatedGame', JSON.stringify(result));
+
+                            // 跳轉到對應的遊戲頁面
+                            const gameUrls = {
+                                quiz: 'interactive-demo.html#quiz',
+                                match: 'interactive-demo.html#match',
+                                cards: 'interactive-demo.html#cards'
+                            };
+
+                            setTimeout(() => {
+                                window.location.href = gameUrls[gameType] || 'interactive-demo.html';
+                            }, 1000);
+                        } else {
+                            throw new Error('遊戲生成失敗');
+                        }
+
+                    } catch (error) {
+                        console.error('遊戲生成錯誤:', error);
+                        this.showSuccess('使用本地模式生成遊戲...');
+
+                        // 降級到本地模式
+                        const gameUrls = {
+                            quiz: 'interactive-demo.html#quiz',
+                            match: 'interactive-demo.html#match',
+                            cards: 'interactive-demo.html#cards'
+                        };
+
+                        setTimeout(() => {
+                            window.location.href = gameUrls[gameType] || 'interactive-demo.html';
+                        }, 1000);
+                    }
+                },
+                showSuccess(message) {
+                    this.successMessage = message;
+                    this.showSuccessMessage = true;
+                    setTimeout(() => {
+                        this.showSuccessMessage = false;
+                    }, 3000);
+                }
+            },
+            mounted() {
+                // 嘗試從localStorage加載之前的活動
+                const savedActivity = localStorage.getItem('currentActivity');
+                if (savedActivity) {
+                    try {
+                        const data = JSON.parse(savedActivity);
+                        this.activity = {
+                            title: data.title || '',
+                            description: data.description || '',
+                            targetAudience: data.targetAudience || 'elementary'
+                        };
+                        
+                        if (data.vocabulary) {
+                            this.vocabulary = data.vocabulary.map(word => ({
+                                id: this.nextId++,
+                                ...word,
+                                errors: {}
+                            }));
+                        }
+                    } catch (e) {
+                        console.error('載入保存的活動失敗:', e);
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

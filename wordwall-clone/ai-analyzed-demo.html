@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基于AI分析的内容管理系统 Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+        .slide-enter-active, .slide-leave-active {
+            transition: all 0.3s ease;
+        }
+        .slide-enter-from {
+            transform: translateY(-10px);
+            opacity: 0;
+        }
+        .slide-leave-to {
+            transform: translateY(10px);
+            opacity: 0;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app">
+        <!-- 顶部导航栏 (基于AI检测的Navigation元素) -->
+        <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-blue-600">📚 统一内容管理系统</h1>
+                        <div v-if="vocabulary.length > 0" class="ml-4 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                            {{ vocabulary.length }} 个词汇
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="exportData" 
+                                class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                            📤 导出数据
+                        </button>
+                        <button @click="saveContent" 
+                                :disabled="!canSave"
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                            💾 保存内容
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- 主要内容区域 (基于AI检测的Layout Grid) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- 左侧：词汇输入表单 (基于AI检测的Form元素) -->
+                <div class="lg:col-span-2">
+                    <div class="card-hover bg-white rounded-xl shadow-lg p-6 mb-8">
+                        <h2 class="text-xl font-bold text-gray-900 mb-6">📝 添加词汇</h2>
+                        
+                        <!-- 快速输入表单 -->
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">English</label>
+                                    <input v-model="newWord.english" 
+                                           @keyup.enter="addWord"
+                                           type="text" 
+                                           placeholder="输入英文单词"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">中文</label>
+                                    <input v-model="newWord.chinese" 
+                                           @keyup.enter="addWord"
+                                           type="text" 
+                                           placeholder="输入中文翻译"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                            </div>
+                            
+                            <!-- 操作按钮 (基于AI检测的Button元素) -->
+                            <div class="flex justify-between items-center">
+                                <div class="flex space-x-2">
+                                    <button @click="addWord" 
+                                            :disabled="!newWord.english || !newWord.chinese"
+                                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                                        ➕ 添加词汇
+                                    </button>
+                                    <button @click="clearForm" 
+                                            class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                                        🗑️ 清空
+                                    </button>
+                                </div>
+                                <div v-if="isLoading" class="text-blue-600">
+                                    <span class="animate-spin">⏳</span> 处理中...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 词汇数据表格 (基于AI检测的Table元素) -->
+                    <div class="card-hover bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-xl font-bold text-gray-900">📊 词汇列表</h2>
+                            <div class="flex items-center space-x-4">
+                                <input v-model="searchQuery" 
+                                       type="text" 
+                                       placeholder="搜索词汇..."
+                                       class="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                                <button @click="clearAll" 
+                                        v-if="vocabulary.length > 0"
+                                        class="text-red-600 hover:text-red-800 text-sm">
+                                    🗑️ 清空所有
+                                </button>
+                            </div>
+                        </div>
+
+                        <div v-if="filteredVocabulary.length === 0" class="text-center py-12 text-gray-500">
+                            <div class="text-4xl mb-4">📝</div>
+                            <p>{{ vocabulary.length === 0 ? '还没有添加任何词汇' : '没有找到匹配的词汇' }}</p>
+                        </div>
+
+                        <div v-else class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">#</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">English</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">中文</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">添加时间</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700 w-24">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <transition-group name="slide" tag="tbody">
+                                        <tr v-for="(word, index) in filteredVocabulary" 
+                                            :key="word.id"
+                                            class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                            <td class="py-3 px-4 text-gray-600">{{ index + 1 }}</td>
+                                            <td class="py-3 px-4 font-medium">{{ word.english }}</td>
+                                            <td class="py-3 px-4">{{ word.chinese }}</td>
+                                            <td class="py-3 px-4 text-sm text-gray-500">{{ formatTime(word.createdAt) }}</td>
+                                            <td class="py-3 px-4">
+                                                <button @click="removeWord(word.id)" 
+                                                        class="text-red-500 hover:text-red-700 text-sm transition-colors">
+                                                    🗑️
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </transition-group>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧：游戏选择和统计 -->
+                <div class="space-y-6">
+                    <!-- 统计卡片 -->
+                    <div class="card-hover bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">📈 统计信息</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">总词汇数</span>
+                                <span class="font-bold text-blue-600">{{ vocabulary.length }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">今日添加</span>
+                                <span class="font-bold text-green-600">{{ todayCount }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">平均长度</span>
+                                <span class="font-bold text-purple-600">{{ averageLength }} 字符</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 游戏选择 (基于AI分析建议) -->
+                    <div class="card-hover bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">🎮 选择游戏</h3>
+                        <div v-if="vocabulary.length < 2" class="text-center py-6 text-gray-500">
+                            <div class="text-3xl mb-2">🎯</div>
+                            <p class="text-sm">至少需要2个词汇才能开始游戏</p>
+                        </div>
+                        <div v-else class="space-y-3">
+                            <button v-for="game in availableGames" 
+                                    :key="game.id"
+                                    @click="selectGame(game)"
+                                    :class="selectedGame?.id === game.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                                    class="w-full p-3 rounded-lg transition-colors text-left">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-medium">{{ game.icon }} {{ game.name }}</div>
+                                        <div class="text-xs opacity-75">{{ game.description }}</div>
+                                    </div>
+                                    <div v-if="selectedGame?.id === game.id" class="text-white">✓</div>
+                                </div>
+                            </button>
+                            
+                            <button v-if="selectedGame" 
+                                    @click="startGame"
+                                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105">
+                                🚀 开始 {{ selectedGame.name }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 快速操作 -->
+                    <div class="card-hover bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">⚡ 快速操作</h3>
+                        <div class="space-y-2">
+                            <button @click="importSample" 
+                                    class="w-full bg-green-600 text-white p-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
+                                📥 导入示例数据
+                            </button>
+                            <button @click="randomWord" 
+                                    :disabled="vocabulary.length === 0"
+                                    class="w-full bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors text-sm">
+                                🎲 随机选择词汇
+                            </button>
+                            <button @click="showStats" 
+                                    class="w-full bg-orange-600 text-white p-2 rounded-lg hover:bg-orange-700 transition-colors text-sm">
+                                📊 详细统计
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 成功提示 -->
+        <transition name="fade">
+            <div v-if="successMessage" 
+                 class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+                {{ successMessage }}
+            </div>
+        </transition>
+
+        <!-- 随机词汇模态框 -->
+        <transition name="fade">
+            <div v-if="showRandomModal" 
+                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                 @click="showRandomModal = false">
+                <div class="bg-white rounded-xl p-8 max-w-md mx-4" @click.stop>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4 text-center">🎲 随机词汇</h3>
+                    <div v-if="randomSelectedWord" class="text-center">
+                        <div class="text-3xl font-bold text-blue-600 mb-2">{{ randomSelectedWord.english }}</div>
+                        <div class="text-xl text-gray-700 mb-4">{{ randomSelectedWord.chinese }}</div>
+                        <button @click="randomWord" 
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors mr-2">
+                            🔄 再来一个
+                        </button>
+                        <button @click="showRandomModal = false" 
+                                class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                            关闭
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    // 基于AI分析的数据结构
+                    vocabulary: [],
+                    currentContent: {},
+                    selectedGame: null,
+                    isLoading: false,
+
+                    // 新词汇输入
+                    newWord: {
+                        english: '',
+                        chinese: ''
+                    },
+
+                    // UI状态
+                    successMessage: '',
+                    searchQuery: '',
+                    showRandomModal: false,
+                    randomSelectedWord: null,
+
+                    // 游戏配置 (基于AI分析建议)
+                    availableGames: [
+                        {
+                            id: 'quiz',
+                            name: '选择题',
+                            icon: '❓',
+                            description: '多选题测试',
+                            minWords: 2
+                        },
+                        {
+                            id: 'match',
+                            name: '配对游戏',
+                            icon: '🔗',
+                            description: '拖拽配对',
+                            minWords: 2
+                        },
+                        {
+                            id: 'cards',
+                            name: '闪卡记忆',
+                            icon: '🃏',
+                            description: '翻卡记忆',
+                            minWords: 1
+                        },
+                        {
+                            id: 'wheel',
+                            name: '转盘游戏',
+                            icon: '🎡',
+                            description: '随机选择',
+                            minWords: 3
+                        }
+                    ]
+                };
+            },
+
+            computed: {
+                canSave() {
+                    return this.vocabulary.length > 0;
+                },
+
+                filteredVocabulary() {
+                    if (!this.searchQuery) return this.vocabulary;
+                    const query = this.searchQuery.toLowerCase();
+                    return this.vocabulary.filter(word =>
+                        word.english.toLowerCase().includes(query) ||
+                        word.chinese.toLowerCase().includes(query)
+                    );
+                },
+
+                todayCount() {
+                    const today = new Date().toDateString();
+                    return this.vocabulary.filter(word =>
+                        new Date(word.createdAt).toDateString() === today
+                    ).length;
+                },
+
+                averageLength() {
+                    if (this.vocabulary.length === 0) return 0;
+                    const total = this.vocabulary.reduce((sum, word) =>
+                        sum + word.english.length + word.chinese.length, 0);
+                    return Math.round(total / this.vocabulary.length);
+                }
+            },
+
+            mounted() {
+                this.loadSavedData();
+                this.showSuccess('基于AI分析的内容管理系统已加载！');
+            },
+
+            methods: {
+                // 基于AI分析建议的核心方法
+                addWord() {
+                    if (!this.newWord.english.trim() || !this.newWord.chinese.trim()) {
+                        return;
+                    }
+
+                    this.isLoading = true;
+
+                    // 模拟处理延迟
+                    setTimeout(() => {
+                        const word = {
+                            id: Date.now() + Math.random(),
+                            english: this.newWord.english.trim(),
+                            chinese: this.newWord.chinese.trim(),
+                            createdAt: new Date()
+                        };
+
+                        this.vocabulary.push(word);
+                        this.clearForm();
+                        this.showSuccess(`词汇 "${word.english}" 已添加！`);
+                        this.isLoading = false;
+
+                        // 自动保存
+                        this.autoSave();
+                    }, 500);
+                },
+
+                removeWord(id) {
+                    const index = this.vocabulary.findIndex(word => word.id === id);
+                    if (index > -1) {
+                        const word = this.vocabulary[index];
+                        this.vocabulary.splice(index, 1);
+                        this.showSuccess(`词汇 "${word.english}" 已删除！`);
+                        this.autoSave();
+                    }
+                },
+
+                clearForm() {
+                    this.newWord.english = '';
+                    this.newWord.chinese = '';
+                },
+
+                clearAll() {
+                    if (confirm('确定要清空所有词汇吗？')) {
+                        this.vocabulary = [];
+                        this.showSuccess('所有词汇已清空！');
+                        this.autoSave();
+                    }
+                },
+
+                // 游戏相关方法 (基于AI检测的游戏选择功能)
+                selectGame(game) {
+                    if (this.vocabulary.length < game.minWords) {
+                        this.showSuccess(`${game.name} 至少需要 ${game.minWords} 个词汇！`);
+                        return;
+                    }
+                    this.selectedGame = game;
+                    this.showSuccess(`已选择 ${game.name}！`);
+                },
+
+                startGame() {
+                    if (!this.selectedGame) return;
+
+                    // 准备游戏数据
+                    const gameData = {
+                        type: this.selectedGame.id,
+                        vocabulary: this.vocabulary,
+                        timestamp: new Date()
+                    };
+
+                    // 保存游戏数据
+                    localStorage.setItem('currentGameData', JSON.stringify(gameData));
+
+                    this.showSuccess(`正在启动 ${this.selectedGame.name}...`);
+
+                    // 模拟跳转到游戏页面
+                    setTimeout(() => {
+                        alert(`游戏数据已准备完成！\n游戏类型: ${this.selectedGame.name}\n词汇数量: ${this.vocabulary.length}\n\n在实际应用中，这里会跳转到对应的游戏页面。`);
+                    }, 1000);
+                },
+
+                // 数据管理方法 (基于AI分析的数据管理建议)
+                saveContent() {
+                    const data = {
+                        vocabulary: this.vocabulary,
+                        savedAt: new Date(),
+                        version: '1.0'
+                    };
+
+                    localStorage.setItem('vocabularyData', JSON.stringify(data));
+                    this.showSuccess('内容已保存到本地存储！');
+                },
+
+                loadSavedData() {
+                    const saved = localStorage.getItem('vocabularyData');
+                    if (saved) {
+                        try {
+                            const data = JSON.parse(saved);
+                            this.vocabulary = data.vocabulary || [];
+                        } catch (error) {
+                            console.error('加载数据失败:', error);
+                        }
+                    }
+                },
+
+                autoSave() {
+                    // 自动保存功能
+                    this.saveContent();
+                },
+
+                exportData() {
+                    if (this.vocabulary.length === 0) {
+                        this.showSuccess('没有数据可以导出！');
+                        return;
+                    }
+
+                    const data = {
+                        vocabulary: this.vocabulary,
+                        exportedAt: new Date(),
+                        totalCount: this.vocabulary.length
+                    };
+
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `vocabulary-${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                    this.showSuccess('数据已导出！');
+                },
+
+                // 快速操作方法
+                importSample() {
+                    const sampleData = [
+                        { id: Date.now() + 1, english: 'apple', chinese: '苹果', createdAt: new Date() },
+                        { id: Date.now() + 2, english: 'book', chinese: '书', createdAt: new Date() },
+                        { id: Date.now() + 3, english: 'computer', chinese: '电脑', createdAt: new Date() },
+                        { id: Date.now() + 4, english: 'dog', chinese: '狗', createdAt: new Date() },
+                        { id: Date.now() + 5, english: 'elephant', chinese: '大象', createdAt: new Date() }
+                    ];
+
+                    this.vocabulary = [...this.vocabulary, ...sampleData];
+                    this.showSuccess('示例数据已导入！');
+                    this.autoSave();
+                },
+
+                randomWord() {
+                    if (this.vocabulary.length === 0) {
+                        this.showSuccess('没有词汇可以选择！');
+                        return;
+                    }
+
+                    const randomIndex = Math.floor(Math.random() * this.vocabulary.length);
+                    this.randomSelectedWord = this.vocabulary[randomIndex];
+                    this.showRandomModal = true;
+                },
+
+                showStats() {
+                    const stats = {
+                        total: this.vocabulary.length,
+                        today: this.todayCount,
+                        avgLength: this.averageLength,
+                        longest: this.vocabulary.reduce((max, word) =>
+                            word.english.length > max.length ? word.english : max, ''),
+                        shortest: this.vocabulary.reduce((min, word) =>
+                            word.english.length < min.length ? word.english : min,
+                            this.vocabulary[0]?.english || '')
+                    };
+
+                    alert(`📊 详细统计信息：\n\n总词汇数: ${stats.total}\n今日添加: ${stats.today}\n平均长度: ${stats.avgLength} 字符\n最长单词: ${stats.longest}\n最短单词: ${stats.shortest}`);
+                },
+
+                // 工具方法
+                formatTime(date) {
+                    return new Date(date).toLocaleString('zh-TW', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                showSuccess(message) {
+                    this.successMessage = message;
+                    setTimeout(() => {
+                        this.successMessage = '';
+                    }, 3000);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

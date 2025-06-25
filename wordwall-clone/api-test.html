@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordwall Clone - API 測試</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-center mb-8">🔧 Wordwall Clone API 測試</h1>
+            
+            <!-- API 測試區域 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4">API 端點測試</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <button onclick="testAPI('health')" class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                        🔍 健康檢查
+                    </button>
+                    <button onclick="testAPI('stats')" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                        📊 統計數據
+                    </button>
+                    <button onclick="testAPI('activities')" class="bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors">
+                        🎮 公開活動
+                    </button>
+                    <button onclick="testAPI('activity-detail')" class="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors">
+                        📝 活動詳情
+                    </button>
+                </div>
+                
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">API 響應：</h3>
+                    <pre id="apiResponse" class="text-sm overflow-auto max-h-64">點擊上方按鈕測試 API...</pre>
+                </div>
+            </div>
+
+            <!-- 演示登入測試 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4">演示登入測試</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <button onclick="demoLogin('TEACHER')" class="bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 transition-colors">
+                        👨‍🏫 教師登入
+                    </button>
+                    <button onclick="demoLogin('STUDENT')" class="bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                        👨‍🎓 學生登入
+                    </button>
+                </div>
+                
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">登入狀態：</h3>
+                    <div id="loginStatus">未登入</div>
+                </div>
+            </div>
+
+            <!-- 認證 API 測試 -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">認證 API 測試</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <button onclick="testAuthAPI('profile')" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                        👤 獲取個人資料
+                    </button>
+                    <button onclick="testAuthAPI('user-stats')" class="bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 transition-colors">
+                        📈 用戶統計
+                    </button>
+                </div>
+                
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <h3 class="font-semibold mb-2">認證 API 響應：</h3>
+                    <pre id="authApiResponse" class="text-sm overflow-auto max-h-64">需要先登入...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let accessToken = null;
+
+        // 更新登入狀態顯示
+        function updateLoginStatus() {
+            const statusDiv = document.getElementById('loginStatus');
+            if (currentUser) {
+                statusDiv.innerHTML = `
+                    <div class="text-green-600">
+                        ✅ 已登入<br>
+                        <strong>姓名：</strong>${currentUser.displayName}<br>
+                        <strong>角色：</strong>${currentUser.role}<br>
+                        <strong>Email：</strong>${currentUser.email}
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = '<div class="text-gray-600">❌ 未登入</div>';
+            }
+        }
+
+        // 演示登入
+        async function demoLogin(role) {
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/demo-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ role }),
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentUser = data.data.user;
+                    accessToken = data.data.accessToken;
+                    updateLoginStatus();
+                    
+                    document.getElementById('authApiResponse').textContent = 
+                        `✅ 登入成功！\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    document.getElementById('authApiResponse').textContent = 
+                        `❌ 登入失敗：${data.error}`;
+                }
+            } catch (error) {
+                document.getElementById('authApiResponse').textContent = 
+                    `❌ 登入錯誤：${error.message}`;
+            }
+        }
+
+        // 測試公開 API
+        async function testAPI(endpoint) {
+            const responseDiv = document.getElementById('apiResponse');
+            responseDiv.textContent = '🔄 正在請求...';
+
+            try {
+                let url;
+                switch (endpoint) {
+                    case 'health':
+                        url = 'http://localhost:5000/health';
+                        break;
+                    case 'stats':
+                        url = 'http://localhost:5000/api/stats';
+                        break;
+                    case 'activities':
+                        url = 'http://localhost:5000/api/activities/public';
+                        break;
+                    case 'activity-detail':
+                        url = 'http://localhost:5000/api/activities/1';
+                        break;
+                    default:
+                        throw new Error('未知的端點');
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                responseDiv.textContent = `✅ 請求成功 (${response.status})\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                responseDiv.textContent = `❌ 請求失敗：${error.message}`;
+            }
+        }
+
+        // 測試認證 API
+        async function testAuthAPI(endpoint) {
+            const responseDiv = document.getElementById('authApiResponse');
+            
+            if (!accessToken) {
+                responseDiv.textContent = '❌ 請先登入';
+                return;
+            }
+
+            responseDiv.textContent = '🔄 正在請求...';
+
+            try {
+                let url;
+                switch (endpoint) {
+                    case 'profile':
+                        url = 'http://localhost:5000/api/auth/me';
+                        break;
+                    case 'user-stats':
+                        url = 'http://localhost:5000/api/users/me/stats';
+                        break;
+                    default:
+                        throw new Error('未知的端點');
+                }
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+                
+                responseDiv.textContent = `✅ 請求成功 (${response.status})\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                responseDiv.textContent = `❌ 請求失敗：${error.message}`;
+            }
+        }
+
+        // 頁面載入時初始化
+        window.addEventListener('load', function() {
+            updateLoginStatus();
+            
+            // 自動測試健康檢查
+            setTimeout(() => {
+                testAPI('health');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

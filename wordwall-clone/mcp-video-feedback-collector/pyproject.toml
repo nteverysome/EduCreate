@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-video-feedback-collector"
+version = "1.1.0"
+description = "Enhanced MCP Feedback Collector with Video Support - 增強版 MCP 反饋收集器，支持影片上傳"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    {name = "Enhanced MCP Team", email = "enhanced@mcp.dev"}
+]
+keywords = ["mcp", "feedback", "video", "interactive", "ai"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Communications",
+    "Topic :: Multimedia :: Video",
+]
+
+dependencies = [
+    "mcp>=1.0.0",
+    "pillow>=9.0.0",
+    "fastmcp>=0.2.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/enhanced-mcp/mcp-video-feedback-collector"
+Repository = "https://github.com/enhanced-mcp/mcp-video-feedback-collector"
+Documentation = "https://github.com/enhanced-mcp/mcp-video-feedback-collector#readme"
+"Bug Tracker" = "https://github.com/enhanced-mcp/mcp-video-feedback-collector/issues"
+
+[project.scripts]
+mcp-video-feedback-collector = "mcp_video_feedback_collector.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.txt", "*.md", "*.json"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true

@@ -1,0 +1,7 @@
+setup.py
+mcp_video_feedback_collector.egg-info/PKG-INFO
+mcp_video_feedback_collector.egg-info/SOURCES.txt
+mcp_video_feedback_collector.egg-info/dependency_links.txt
+mcp_video_feedback_collector.egg-info/entry_points.txt
+mcp_video_feedback_collector.egg-info/requires.txt
+mcp_video_feedback_collector.egg-info/top_level.txt

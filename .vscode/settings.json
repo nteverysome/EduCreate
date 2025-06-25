@@ -17,6 +17,59 @@
       "args": ["mem0-mcp/main.py"],
       "name": "Mem0 MCP Server",
       "description": "Advanced coding preferences management with Mem0 AI"
+    },
+    "prisma-mcp": {
+      "command": "npx",
+      "args": ["prisma", "mcp"],
+      "name": "Prisma MCP Server",
+      "description": "Database management and ORM operations with Prisma"
+    },
+    "puppeteer-mcp": {
+      "command": "npx",
+      "args": ["puppeteer-mcp-server"],
+      "name": "Puppeteer MCP Server",
+      "description": "Browser automation and web scraping with Puppeteer"
+    },
+    "sqlite-mcp": {
+      "command": "node",
+      "args": ["mcp-sqlite-jparkerweb/mcp-sqlite-server.js"],
+      "name": "SQLite MCP Server",
+      "description": "SQLite database management and queries"
+    },
+    "playwright-mcp": {
+      "command": "node",
+      "args": ["playwright-mcp-microsoft/index.js"],
+      "name": "Microsoft Playwright MCP Server",
+      "description": "Official Microsoft Playwright browser automation"
+    },
+    "sequential-thinking-mcp": {
+      "command": "node",
+      "args": ["sequential-thinking-zalab/src/index.js"],
+      "name": "Sequential Thinking MCP Server",
+      "description": "Chain of thought reasoning and sequential thinking"
+    },
+    "unstructured-mcp": {
+      "command": "python",
+      "args": ["unstructured-mcp/uns_mcp/server.py"],
+      "name": "Unstructured MCP Server",
+      "description": "Document processing and unstructured data handling"
+    },
+    "mcp-memory-alt": {
+      "command": "node",
+      "args": ["mcp-memory-sdimitrov/src/index.js"],
+      "name": "Alternative Memory MCP Server",
+      "description": "Alternative memory storage implementation"
+    },
+    "amazon-rekognition-mcp": {
+      "command": "uvx",
+      "args": ["awslabs.amazon-rekognition-mcp-server@latest"],
+      "name": "Amazon Rekognition MCP Server",
+      "description": "Image analysis using Amazon Rekognition computer vision",
+      "env": {
+        "AWS_REGION": "us-east-1",
+        "BASE_DIR": "C:\\Users\\Administrator\\Desktop\\EduCreate\\EduCreate",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
     }
   }
 }

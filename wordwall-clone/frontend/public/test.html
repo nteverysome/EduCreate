@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordwall Clone - 測試頁面</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-16">
+        <div class="text-center">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                🎮 Wordwall Clone
+            </h1>
+            <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+                創建和分享互動教育遊戲，讓學習變得更有趣！
+            </p>
+            
+            <!-- 系統狀態 -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-12 max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6">🔧 系統狀態</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="text-green-500 text-2xl mr-3">✅</div>
+                            <div>
+                                <h3 class="font-semibold text-green-800">後端服務器</h3>
+                                <p class="text-green-600 text-sm">http://localhost:5000 - 正常運行</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="text-blue-500 text-2xl mr-3">🌐</div>
+                            <div>
+                                <h3 class="font-semibold text-blue-800">前端應用</h3>
+                                <p class="text-blue-600 text-sm">靜態頁面 - 正常顯示</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 遊戲模板展示 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                    <div class="text-4xl mb-4">❓</div>
+                    <h3 class="text-xl font-semibold mb-2">測驗遊戲</h3>
+                    <p class="text-gray-600 mb-4">多選題測驗，測試知識掌握程度</p>
+                    <div class="text-sm text-green-600 font-semibold">✅ 已完成</div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                    <div class="text-4xl mb-4">🔗</div>
+                    <h3 class="text-xl font-semibold mb-2">配對遊戲</h3>
+                    <p class="text-gray-600 mb-4">拖拽配對遊戲，連接相關的項目</p>
+                    <div class="text-sm text-green-600 font-semibold">✅ 已完成</div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                    <div class="text-4xl mb-4">🎡</div>
+                    <h3 class="text-xl font-semibold mb-2">轉盤遊戲</h3>
+                    <p class="text-gray-600 mb-4">旋轉轉盤選擇答案或做決定</p>
+                    <div class="text-sm text-green-600 font-semibold">✅ 已完成</div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                    <div class="text-4xl mb-4">📂</div>
+                    <h3 class="text-xl font-semibold mb-2">分組排序</h3>
+                    <p class="text-gray-600 mb-4">將項目拖拽到正確的組別中</p>
+                    <div class="text-sm text-green-600 font-semibold">✅ 已完成</div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                    <div class="text-4xl mb-4">🃏</div>
+                    <h3 class="text-xl font-semibold mb-2">閃卡學習</h3>
+                    <p class="text-gray-600 mb-4">翻轉卡片學習和記憶</p>
+                    <div class="text-sm text-green-600 font-semibold">✅ 已完成</div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow opacity-60">
+                    <div class="text-4xl mb-4">🔤</div>
+                    <h3 class="text-xl font-semibold mb-2">字謎重組</h3>
+                    <p class="text-gray-600 mb-4">重新排列字母組成正確的單詞</p>
+                    <div class="text-sm text-yellow-600 font-semibold">🚧 開發中</div>
+                </div>
+            </div>
+
+            <!-- API 測試 -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-12 max-w-4xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6">🔌 API 測試</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="testAPI('/api/games/templates')" 
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        測試遊戲模板 API
+                    </button>
+                    
+                    <button onclick="testAPI('/api/activities')" 
+                            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        測試活動列表 API
+                    </button>
+                    
+                    <button onclick="testAPI('/api/stats')" 
+                            class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                        測試統計數據 API
+                    </button>
+                    
+                    <button onclick="testAPI('/api/demo/quiz')" 
+                            class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">
+                        測試演示遊戲 API
+                    </button>
+                </div>
+                
+                <div id="api-result" class="mt-6 p-4 bg-gray-50 rounded-lg hidden">
+                    <h3 class="font-semibold mb-2">API 響應:</h3>
+                    <pre id="api-content" class="text-sm text-gray-700 overflow-auto max-h-64"></pre>
+                </div>
+            </div>
+
+            <!-- 功能按鈕 -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="http://localhost:5000/health" target="_blank" 
+                   class="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors">
+                    檢查後端狀態
+                </a>
+                
+                <a href="../game-templates-showcase.html" target="_blank"
+                   class="bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition-colors">
+                    查看模板展示
+                </a>
+                
+                <a href="../interactive-demo.html" target="_blank"
+                   class="bg-purple-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-purple-700 transition-colors">
+                    體驗互動演示
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testAPI(endpoint) {
+            const resultDiv = document.getElementById('api-result');
+            const contentPre = document.getElementById('api-content');
+            
+            try {
+                resultDiv.classList.remove('hidden');
+                contentPre.textContent = '載入中...';
+                
+                const response = await fetch(`http://localhost:5000${endpoint}`);
+                const data = await response.json();
+                
+                contentPre.textContent = JSON.stringify(data, null, 2);
+                resultDiv.className = 'mt-6 p-4 bg-green-50 border border-green-200 rounded-lg';
+            } catch (error) {
+                contentPre.textContent = `錯誤: ${error.message}`;
+                resultDiv.className = 'mt-6 p-4 bg-red-50 border border-red-200 rounded-lg';
+            }
+        }
+
+        // 頁面載入時檢查後端狀態
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('http://localhost:5000/health');
+                if (response.ok) {
+                    console.log('✅ 後端服務器連接正常');
+                } else {
+                    console.warn('⚠️ 後端服務器響應異常');
+                }
+            } catch (error) {
+                console.error('❌ 無法連接到後端服務器:', error);
+            }
+        });
+    </script>
+</body>
+</html>

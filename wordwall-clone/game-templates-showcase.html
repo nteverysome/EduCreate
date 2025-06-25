@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordwall Clone - 遊戲模板展示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .template-card {
+            transition: all 0.3s ease;
+        }
+        
+        .template-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .feature-dot {
+            width: 6px;
+            height: 6px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 導航欄 -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold text-blue-600">🎮 Wordwall Clone</div>
+                    <div class="ml-4 text-sm text-gray-600">遊戲模板展示</div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="demo.html" class="text-blue-600 hover:text-blue-800">返回主頁</a>
+                    <a href="interactive-demo.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        體驗遊戲
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- 頁面標題 -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                🎯 遊戲模板庫
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                8 種精心設計的互動遊戲模板，滿足不同教學需求
+            </p>
+        </div>
+
+        <!-- 統計概覽 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="text-3xl font-bold text-green-600 mb-2">5</div>
+                <div class="text-sm text-gray-600">已完成模板</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="text-3xl font-bold text-yellow-600 mb-2">3</div>
+                <div class="text-sm text-gray-600">開發中模板</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="text-3xl font-bold text-blue-600 mb-2">6</div>
+                <div class="text-sm text-gray-600">遊戲分類</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="text-3xl font-bold text-purple-600 mb-2">∞</div>
+                <div class="text-sm text-gray-600">創作可能</div>
+            </div>
+        </div>
+
+        <!-- 已完成的遊戲模板 -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+                <span class="text-green-500 mr-3">✅</span>
+                已完成的遊戲模板
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Quiz 模板 -->
+                <div class="template-card bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
+                        <div class="text-4xl mb-3">❓</div>
+                        <h3 class="text-xl font-bold mb-2">Quiz 測驗</h3>
+                        <p class="text-blue-100">多選題測驗，測試知識掌握程度</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">簡單</span>
+                            <span class="text-sm text-gray-500">5-15分鐘</span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>多選題支持
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>計時功能
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>即時反饋
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>分數統計
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            支持：1-50 個問題 | 文字、圖片
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match Up 模板 -->
+                <div class="template-card bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 p-6 text-white">
+                        <div class="text-4xl mb-3">🔗</div>
+                        <h3 class="text-xl font-bold mb-2">Match Up 配對</h3>
+                        <p class="text-purple-100">拖拽配對遊戲，連接相關的項目</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">中等</span>
+                            <span class="text-sm text-gray-500">3-10分鐘</span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>拖拽操作
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>視覺配對
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>多種佈局
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>動畫效果
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            支持：3-20 個配對 | 文字、圖片
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spin Wheel 模板 -->
+                <div class="template-card bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 p-6 text-white">
+                        <div class="text-4xl mb-3">🎡</div>
+                        <h3 class="text-xl font-bold mb-2">Spin Wheel 轉盤</h3>
+                        <p class="text-green-100">旋轉轉盤選擇答案或做決定</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">簡單</span>
+                            <span class="text-sm text-gray-500">2-5分鐘</span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>隨機選擇
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>自定義段落
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>權重控制
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>音效支持
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            支持：2-12 個段落 | 文字
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group Sort 模板 -->
+                <div class="template-card bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-6 text-white">
+                        <div class="text-4xl mb-3">📂</div>
+                        <h3 class="text-xl font-bold mb-2">Group Sort 分組</h3>
+                        <p class="text-orange-100">將項目拖拽到正確的組別中</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">中等</span>
+                            <span class="text-sm text-gray-500">5-12分鐘</span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>拖拽分組
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>多組別支持
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>容量限制
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>實時驗證
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            支持：4-30 個項目 | 文字、圖片
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flash Cards 模板 -->
+                <div class="template-card bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 p-6 text-white">
+                        <div class="text-4xl mb-3">🃏</div>
+                        <h3 class="text-xl font-bold mb-2">Flash Cards 閃卡</h3>
+                        <p class="text-indigo-100">翻轉卡片學習和記憶</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">簡單</span>
+                            <span class="text-sm text-gray-500">10-30分鐘</span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>翻轉動畫
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>間隔重複
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>信心評估
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>學習追蹤
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            支持：1-100 張卡片 | 文字、圖片
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 開發中的遊戲模板 -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+                <span class="text-yellow-500 mr-3">🚧</span>
+                開發中的遊戲模板
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Anagram 模板 -->
+                <div class="template-card bg-white rounded-xl shadow-lg overflow-hidden opacity-75">
+                    <div class="bg-gradient-to-r from-red-400 to-red-500 p-6 text-white">
+                        <div class="text-4xl mb-3">🔤</div>
+                        <h3 class="text-xl font-bold mb-2">Anagram 字謎</h3>
+                        <p class="text-red-100">重新排列字母組成正確的單詞</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full">困難</span>
+                            <span class="text-sm text-gray-500">5-15分鐘</span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>字母重組
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>提示系統
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>難度調節
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            即將推出...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Find Match 模板 -->
+                <div class="template-card bg-white rounded-xl shadow-lg overflow-hidden opacity-75">
+                    <div class="bg-gradient-to-r from-teal-400 to-teal-500 p-6 text-white">
+                        <div class="text-4xl mb-3">🔍</div>
+                        <h3 class="text-xl font-bold mb-2">Find Match 找配對</h3>
+                        <p class="text-teal-100">在網格中找到匹配的項目對</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">中等</span>
+                            <span class="text-sm text-gray-500">3-8分鐘</span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>記憶挑戰
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>網格佈局
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>翻轉動畫
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            即將推出...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Open Box 模板 -->
+                <div class="template-card bg-white rounded-xl shadow-lg overflow-hidden opacity-75">
+                    <div class="bg-gradient-to-r from-pink-400 to-pink-500 p-6 text-white">
+                        <div class="text-4xl mb-3">📦</div>
+                        <h3 class="text-xl font-bold mb-2">Open Box 開箱</h3>
+                        <p class="text-pink-100">點擊打開盒子揭示隱藏的內容</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">簡單</span>
+                            <span class="text-sm text-gray-500">2-6分鐘</span>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>隨機揭示
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>懸念效果
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <span class="feature-dot"></span>獎勵機制
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            即將推出...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 技術特性 -->
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-8 text-center">🔧 技術特性</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">⚡</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">高性能</h3>
+                    <p class="text-sm text-gray-600">React + TypeScript 構建，流暢的用戶體驗</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">📱</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">響應式</h3>
+                    <p class="text-sm text-gray-600">完美適配桌面、平板和手機設備</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="h-16 w-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">🎨</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">美觀設計</h3>
+                    <p class="text-sm text-gray-600">現代化 UI 設計，豐富的動畫效果</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="h-16 w-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl">🔧</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">易擴展</h3>
+                    <p class="text-sm text-gray-600">模塊化架構，輕鬆添加新遊戲類型</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 行動呼籲 -->
+        <div class="text-center mt-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                準備開始創建您的互動遊戲了嗎？
+            </h2>
+            <p class="text-gray-600 mb-8">
+                選擇合適的模板，幾分鐘內就能創建出精彩的教育遊戲
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="interactive-demo.html" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    立即體驗
+                </a>
+                <a href="demo.html" class="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+                    了解更多
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 頁腳 -->
+    <footer class="bg-white border-t mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center text-gray-600">
+                <p>🤖 由 AI Agent 全自動開發 | Wordwall Clone 項目</p>
+                <p class="mt-2 text-sm">展示現代 AI 在軟件開發中的強大能力</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

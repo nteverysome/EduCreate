@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英文單字學習遊戲 - Wordwall Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .game-card {
+            transition: all 0.3s ease;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .word-input-row {
+            transition: all 0.2s ease;
+        }
+        
+        .word-input-row:hover {
+            background-color: #f9fafb;
+        }
+        
+        .quiz-option {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .quiz-option:hover {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+        
+        .quiz-option.selected {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #1d4ed8;
+        }
+        
+        .quiz-option.correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+        
+        .quiz-option.incorrect {
+            background-color: #ef4444;
+            color: white;
+            border-color: #dc2626;
+        }
+        
+        .match-item {
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+        
+        .match-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .match-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+        
+        .drop-zone {
+            min-height: 60px;
+            border: 2px dashed #d1d5db;
+            transition: all 0.2s ease;
+        }
+        
+        .drop-zone.drag-over {
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+        }
+        
+        .drop-zone.matched {
+            border-color: #10b981;
+            background-color: #d1fae5;
+        }
+        
+        .flash-card {
+            perspective: 1000px;
+            width: 350px;
+            height: 250px;
+            margin: 0 auto;
+        }
+        
+        .flash-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        
+        .flash-card.flipped .flash-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flash-card-front, .flash-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .flash-card-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .flash-card-back {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            transform: rotateY(180deg);
+        }
+        
+        .spin-wheel {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+            border: 8px solid #374151;
+        }
+        
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ef4444;
+            z-index: 10;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .spinning {
+            animation: spin 3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+        
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        .word-stats {
+            font-size: 12px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 導航欄 -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold text-blue-600">📚 英文單字學習遊戲</div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="showSection('setup')" class="text-blue-600 hover:text-blue-800">單字管理</button>
+                    <button onclick="showSection('games')" class="text-blue-600 hover:text-blue-800">開始遊戲</button>
+                </div>
+
+        <!-- 遊戲選擇區域 -->
+        <div id="games-section" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">選擇學習遊戲</h2>
+
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <button onclick="showGame('quiz')"
+                            class="game-selector p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors text-center"
+                            id="selector-quiz">
+                        <div class="text-3xl mb-2">❓</div>
+                        <div class="font-semibold">單字測驗</div>
+                        <div class="text-xs text-gray-500">選擇正確翻譯</div>
+                    </button>
+
+                    <button onclick="showGame('match')"
+                            class="game-selector p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors text-center"
+                            id="selector-match">
+                        <div class="text-3xl mb-2">🔗</div>
+                        <div class="font-semibold">英中配對</div>
+                        <div class="text-xs text-gray-500">拖拽配對單字</div>
+                    </button>
+
+                    <button onclick="showGame('wheel')"
+                            class="game-selector p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors text-center"
+                            id="selector-wheel">
+                        <div class="text-3xl mb-2">🎡</div>
+                        <div class="font-semibold">單字轉盤</div>
+                        <div class="text-xs text-gray-500">隨機單字練習</div>
+                    </button>
+
+                    <button onclick="showGame('sort')"
+                            class="game-selector p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors text-center"
+                            id="selector-sort">
+                        <div class="text-3xl mb-2">📂</div>
+                        <div class="font-semibold">單字分組</div>
+                        <div class="text-xs text-gray-500">按類別分組</div>
+                    </button>
+
+                    <button onclick="showGame('cards')"
+                            class="game-selector p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors text-center"
+                            id="selector-cards">
+                        <div class="text-3xl mb-2">🃏</div>
+                        <div class="font-semibold">單字閃卡</div>
+                        <div class="text-xs text-gray-500">記憶卡片練習</div>
+                    </button>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <button onclick="showSection('setup')" class="text-blue-600 hover:text-blue-800 underline">
+                        ← 返回單字管理
+                    </button>
+                </div>
+            </div>
+
+            <!-- 學習進度統計 -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h3 class="text-lg font-semibold mb-4">📊 學習進度</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600" id="total-words">0</div>
+                        <div class="text-sm text-gray-600">總單字數</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" id="learned-words">0</div>
+                        <div class="text-sm text-gray-600">已學會</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-yellow-600" id="learning-words">0</div>
+                        <div class="text-sm text-gray-600">學習中</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-red-600" id="difficult-words">0</div>
+                        <div class="text-sm text-gray-600">需加強</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 遊戲內容區域 -->
+            <div id="game-content" class="bg-white rounded-xl shadow-lg p-8 min-h-96">
+                <!-- 歡迎頁面 -->
+                <div id="welcome-screen" class="text-center">
+                    <div class="text-6xl mb-6">🎮</div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">選擇遊戲開始學習</h2>
+                    <p class="text-lg text-gray-600 mb-8">
+                        您已準備了 <span id="ready-words-count" class="font-bold text-blue-600">0</span> 個單字
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                        <div class="bg-blue-50 rounded-lg p-6">
+                            <div class="text-2xl mb-3">🎯</div>
+                            <h3 class="font-semibold mb-2">多樣化練習</h3>
+                            <p class="text-sm text-gray-600">5種不同的遊戲方式，全方位提升記憶效果</p>
+                        </div>
+
+                        <div class="bg-green-50 rounded-lg p-6">
+                            <div class="text-2xl mb-3">🔄</div>
+                            <h3 class="font-semibold mb-2">重複練習</h3>
+                            <p class="text-sm text-gray-600">錯誤的單字會重複出現，直到完全掌握</p>
+                        </div>
+
+                        <div class="bg-purple-50 rounded-lg p-6">
+                            <div class="text-2xl mb-3">📈</div>
+                            <h3 class="font-semibold mb-2">進度追蹤</h3>
+                            <p class="text-sm text-gray-600">實時追蹤學習進度，了解掌握情況</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 單字測驗遊戲 -->
+                <div id="quiz-game" class="hidden">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">❓ 單字測驗</h2>
+                        <p class="text-gray-600">選擇正確的中文翻譯</p>
+                    </div>
+
+                    <div class="max-w-2xl mx-auto">
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm font-medium text-gray-600">
+                                    第 <span id="quiz-current">1</span> 題 / 共 <span id="quiz-total">10</span> 題
+                                </span>
+                                <span class="text-sm font-medium text-gray-600">
+                                    正確率: <span id="quiz-accuracy">0</span>%
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="quiz-progress" class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 10%"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-8 mb-6 text-center">
+                            <div class="text-4xl font-bold text-blue-800 mb-4" id="quiz-word">Loading...</div>
+                            <div class="text-lg text-gray-600">請選擇正確的中文翻譯</div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3 mb-6">
+                            <button class="quiz-option p-4 rounded-lg border-2 border-gray-300 text-left font-medium"
+                                    onclick="selectQuizOption(this, 0)">
+                                A) 選項1
+                            </button>
+                            <button class="quiz-option p-4 rounded-lg border-2 border-gray-300 text-left font-medium"
+                                    onclick="selectQuizOption(this, 1)">
+                                B) 選項2
+                            </button>
+                            <button class="quiz-option p-4 rounded-lg border-2 border-gray-300 text-left font-medium"
+                                    onclick="selectQuizOption(this, 2)">
+                                C) 選項3
+                            </button>
+                            <button class="quiz-option p-4 rounded-lg border-2 border-gray-300 text-left font-medium"
+                                    onclick="selectQuizOption(this, 3)">
+                                D) 選項4
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <button id="quiz-next" onclick="nextQuizQuestion()"
+                                    class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                    disabled>
+                                下一題
+                            </button>
+                        </div>
+
+                        <div id="quiz-result" class="hidden mt-6 p-6 rounded-lg text-center bg-green-50 border border-green-200">
+                            <h3 class="text-2xl font-bold mb-4 text-green-800">測驗完成！🎉</h3>
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <div class="text-3xl font-bold text-green-600" id="quiz-final-score">0</div>
+                                    <div class="text-sm text-gray-600">正確題數</div>
+                                </div>
+                                <div>
+                                    <div class="text-3xl font-bold text-blue-600" id="quiz-final-accuracy">0</div>
+                                    <div class="text-sm text-gray-600">正確率</div>
+                                </div>
+                            </div>
+                            <div class="space-x-4">
+                                <button onclick="restartQuiz()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                    重新測驗
+                                </button>
+                                <button onclick="reviewMistakes()" class="bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition-colors">
+                                    複習錯題
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 英中配對遊戲 -->
+                <div id="match-game" class="hidden">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">🔗 英中配對</h2>
+                        <p class="text-gray-600">將英文單字與中文翻譯配對</p>
+                    </div>
+
+                    <div class="max-w-5xl mx-auto">
+                        <div class="mb-6 text-center">
+                            <span class="text-lg font-semibold">配對進度: </span>
+                            <span id="match-score" class="text-blue-600 font-bold text-xl">0</span> /
+                            <span id="match-total" class="text-blue-600 font-bold text-xl">8</span>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                <div id="match-progress" class="bg-green-600 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <!-- 左側：英文單字 -->
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4 text-center bg-blue-100 py-2 rounded-lg">
+                                    🇺🇸 English Words
+                                </h3>
+                                <div id="english-words" class="space-y-3">
+                                    <!-- 英文單字將在這裡顯示 -->
+                                </div>
+                            </div>
+
+                            <!-- 右側：中文翻譯 -->
+                            <div>
+                                <h3 class="text-lg font-semibold mb-4 text-center bg-red-100 py-2 rounded-lg">
+                                    🇨🇳 中文翻譯
+                                </h3>
+                                <div id="chinese-meanings" class="space-y-3">
+                                    <!-- 中文翻譯將在這裡顯示 -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-8">
+                            <button onclick="resetMatch()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors mr-4">
+                                重新開始
+                            </button>
+                            <button onclick="shuffleMatch()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                重新排列
+                            </button>
+                        </div>
+
+                        <div id="match-complete" class="hidden mt-6 p-6 rounded-lg text-center bg-green-50 border border-green-200">
+                            <h3 class="text-2xl font-bold mb-4 text-green-800">配對完成！🎉</h3>
+                            <p class="text-gray-600 mb-4">所有單字都配對正確！</p>
+                            <button onclick="nextMatchRound()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                下一輪練習
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 單字轉盤遊戲 -->
+                <div id="wheel-game" class="hidden">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">🎡 單字轉盤</h2>
+                        <p class="text-gray-600">轉動轉盤，說出英文單字的中文意思</p>
+                    </div>
+
+                    <div class="max-w-2xl mx-auto text-center">
+                        <div class="mb-6">
+                            <div class="text-lg font-semibold mb-2">
+                                練習進度: <span id="wheel-progress-text">0/10</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="wheel-progress" class="bg-purple-600 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="relative mb-8">
+                            <div class="wheel-pointer"></div>
+                            <div id="spin-wheel" class="spin-wheel mx-auto">
+                                <!-- 轉盤段落將動態生成 -->
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <button id="spin-button" onclick="spinWheel()"
+                                    class="bg-purple-600 text-white px-8 py-4 rounded-lg text-xl font-bold hover:bg-purple-700 transition-colors">
+                                🎡 轉動轉盤
+                            </button>
+                        </div>
+
+                        <div id="wheel-question" class="hidden mb-6 p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <h3 class="text-xl font-bold mb-4">請選擇 "<span id="wheel-word"></span>" 的中文意思：</h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button class="wheel-option p-3 rounded-lg border-2 border-gray-300 hover:border-yellow-500 transition-colors"
+                                        onclick="selectWheelAnswer(this, 0)">選項1</button>
+                                <button class="wheel-option p-3 rounded-lg border-2 border-gray-300 hover:border-yellow-500 transition-colors"
+                                        onclick="selectWheelAnswer(this, 1)">選項2</button>
+                                <button class="wheel-option p-3 rounded-lg border-2 border-gray-300 hover:border-yellow-500 transition-colors"
+                                        onclick="selectWheelAnswer(this, 2)">選項3</button>
+                                <button class="wheel-option p-3 rounded-lg border-2 border-gray-300 hover:border-yellow-500 transition-colors"
+                                        onclick="selectWheelAnswer(this, 3)">選項4</button>
+                            </div>
+                        </div>
+
+                        <div id="wheel-result" class="hidden p-4 rounded-lg">
+                            <h3 class="text-xl font-bold mb-2">結果</h3>
+                            <p id="wheel-result-text" class="text-lg mb-4"></p>
+                            <button onclick="continueWheel()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                                繼續練習
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 單字分組遊戲 -->
+                <div id="sort-game" class="hidden">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">📂 單字分組</h2>
+                        <p class="text-gray-600">將單字按照類別分組</p>
+                    </div>
+
+                    <div class="max-w-5xl mx-auto">
+                        <div class="mb-6 text-center">
+                            <span class="text-lg font-semibold">分組進度: </span>
+                            <span id="sort-score" class="text-blue-600 font-bold text-xl">0</span> /
+                            <span id="sort-total" class="text-blue-600 font-bold text-xl">12</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <!-- 分組容器將動態生成 -->
+                            <div id="sort-categories" class="contents">
+                                <!-- 分類組別將在這裡顯示 -->
+                            </div>
+                        </div>
+
+                        <!-- 待分組的單字 -->
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-center mb-4">📝 待分組的單字</h3>
+                            <div id="unsorted-words" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                                <!-- 待分組單字將在這裡顯示 -->
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-6">
+                            <button onclick="resetSort()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors mr-4">
+                                重新開始
+                            </button>
+                            <button onclick="showSortHint()" class="bg-yellow-600 text-white px-6 py-2 rounded-lg hover:bg-yellow-700 transition-colors">
+                                顯示提示
+                            </button>
+                        </div>
+
+                        <div id="sort-complete" class="hidden mt-6 p-6 rounded-lg text-center bg-green-50 border border-green-200">
+                            <h3 class="text-2xl font-bold mb-4 text-green-800">分組完成！🎉</h3>
+                            <p class="text-gray-600 mb-4">所有單字都分組正確！</p>
+                            <button onclick="nextSortRound()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                下一輪練習
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 單字閃卡遊戲 -->
+                <div id="cards-game" class="hidden">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">🃏 單字閃卡</h2>
+                        <p class="text-gray-600">點擊卡片翻轉，標記您的掌握程度</p>
+                    </div>
+
+                    <div class="max-w-2xl mx-auto text-center">
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-lg font-semibold">
+                                    卡片 <span id="card-current" class="text-blue-600">1</span> /
+                                    <span id="card-total" class="text-blue-600">10</span>
+                                </span>
+                                <span class="text-sm text-gray-600">
+                                    掌握度: <span id="card-mastery">0</span>%
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="card-progress" class="bg-indigo-600 h-2 rounded-full progress-bar" style="width: 10%"></div>
+                            </div>
+                        </div>
+
+                        <div class="flash-card mb-8" onclick="flipCard()">
+                            <div class="flash-card-inner">
+                                <div class="flash-card-front">
+                                    <div class="text-sm text-blue-200 mb-2">English</div>
+                                    <div id="card-front-text" class="text-3xl">Loading...</div>
+                                    <div class="text-sm text-blue-200 mt-4">點擊翻轉查看中文</div>
+                                </div>
+                                <div class="flash-card-back">
+                                    <div class="text-sm text-pink-200 mb-2">中文</div>
+                                    <div id="card-back-text" class="text-3xl">載入中...</div>
+                                    <div class="text-sm text-pink-200 mt-4">您記住了嗎？</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-4">您對這個單字的掌握程度：</h3>
+                            <div class="flex justify-center space-x-4">
+                                <button onclick="markCard('difficult')"
+                                        class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors">
+                                    😰 不認識
+                                </button>
+                                <button onclick="markCard('learning')"
+                                        class="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition-colors">
+                                    🤔 有印象
+                                </button>
+                                <button onclick="markCard('known')"
+                                        class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors">
+                                    😊 很熟悉
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center space-x-4 mb-6">
+                            <button onclick="prevCard()" id="prev-card"
+                                    class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50">
+                                ← 上一張
+                            </button>
+                            <button onclick="nextCard()" id="next-card"
+                                    class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                下一張 →
+                            </button>
+                        </div>
+
+                        <div id="cards-complete" class="hidden mt-6 p-6 rounded-lg text-center bg-green-50 border border-green-200">
+                            <h3 class="text-2xl font-bold mb-4 text-green-800">閃卡練習完成！🎉</h3>
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div>
+                                    <div class="text-2xl font-bold text-green-600" id="cards-known-count">0</div>
+                                    <div class="text-sm text-gray-600">很熟悉</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-yellow-600" id="cards-learning-count">0</div>
+                                    <div class="text-sm text-gray-600">有印象</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-red-600" id="cards-difficult-count">0</div>
+                                    <div class="text-sm text-gray-600">不認識</div>
+                                </div>
+                            </div>
+                            <div class="space-x-4">
+                                <button onclick="reviewDifficultCards()" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                    複習不熟悉的
+                                </button>
+                                <button onclick="restartCards()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                                    重新練習
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局變量
+        let vocabularyList = [];
+        let currentGame = 'welcome';
+        let learningProgress = {
+            known: new Set(),
+            learning: new Set(),
+            difficult: new Set()
+        };
+
+        // 示例單字庫
+        const sampleWords = {
+            animals: [
+                { english: 'cat', chinese: '貓', category: 'animals' },
+                { english: 'dog', chinese: '狗', category: 'animals' },
+                { english: 'bird', chinese: '鳥', category: 'animals' },
+                { english: 'fish', chinese: '魚', category: 'animals' },
+                { english: 'rabbit', chinese: '兔子', category: 'animals' },
+                { english: 'elephant', chinese: '大象', category: 'animals' },
+                { english: 'tiger', chinese: '老虎', category: 'animals' },
+                { english: 'lion', chinese: '獅子', category: 'animals' }
+            ],
+            food: [
+                { english: 'apple', chinese: '蘋果', category: 'food' },
+                { english: 'banana', chinese: '香蕉', category: 'food' },
+                { english: 'orange', chinese: '橘子', category: 'food' },
+                { english: 'bread', chinese: '麵包', category: 'food' },
+                { english: 'milk', chinese: '牛奶', category: 'food' },
+                { english: 'rice', chinese: '米飯', category: 'food' },
+                { english: 'chicken', chinese: '雞肉', category: 'food' },
+                { english: 'water', chinese: '水', category: 'food' }
+            ],
+            colors: [
+                { english: 'red', chinese: '紅色', category: 'colors' },
+                { english: 'blue', chinese: '藍色', category: 'colors' },
+                { english: 'green', chinese: '綠色', category: 'colors' },
+                { english: 'yellow', chinese: '黃色', category: 'colors' },
+                { english: 'black', chinese: '黑色', category: 'colors' },
+                { english: 'white', chinese: '白色', category: 'colors' },
+                { english: 'purple', chinese: '紫色', category: 'colors' },
+                { english: 'orange', chinese: '橘色', category: 'colors' }
+            ],
+            family: [
+                { english: 'father', chinese: '父親', category: 'family' },
+                { english: 'mother', chinese: '母親', category: 'family' },
+                { english: 'brother', chinese: '兄弟', category: 'family' },
+                { english: 'sister', chinese: '姐妹', category: 'family' },
+                { english: 'grandfather', chinese: '祖父', category: 'family' },
+                { english: 'grandmother', chinese: '祖母', category: 'family' },
+                { english: 'uncle', chinese: '叔叔', category: 'family' },
+                { english: 'aunt', chinese: '阿姨', category: 'family' }
+            ]
+        };
+
+        // 單字管理功能
+        function addWord() {
+            const englishInput = document.getElementById('english-input');
+            const chineseInput = document.getElementById('chinese-input');
+
+            const english = englishInput.value.trim();
+            const chinese = chineseInput.value.trim();
+
+            if (english && chinese) {
+                // 檢查是否已存在
+                const exists = vocabularyList.some(word =>
+                    word.english.toLowerCase() === english.toLowerCase()
+                );
+
+                if (exists) {
+                    alert('這個單字已經存在！');
+                    return;
+                }
+
+                vocabularyList.push({
+                    english: english,
+                    chinese: chinese,
+                    category: 'custom'
+                });
+
+                englishInput.value = '';
+                chineseInput.value = '';
+
+                updateWordList();
+                updateStartButton();
+            } else {
+                alert('請輸入英文單字和中文翻譯！');
+            }
+        }
+
+        function loadSampleWords(category) {
+            if (sampleWords[category]) {
+                // 清空現有單字
+                vocabularyList = [];
+                // 添加示例單字
+                vocabularyList = [...sampleWords[category]];
+                updateWordList();
+                updateStartButton();
+            }
+        }
+
+        function clearWords() {
+            vocabularyList = [];
+            updateWordList();
+            updateStartButton();
+        }
+
+        function updateWordList() {
+            const wordTable = document.getElementById('word-table');
+            const wordCount = document.getElementById('word-count');
+
+            wordCount.textContent = vocabularyList.length;
+
+            if (vocabularyList.length === 0) {
+                wordTable.innerHTML = '<div class="text-gray-500 text-center py-4">還沒有添加任何單字</div>';
+                return;
+            }
+
+            wordTable.innerHTML = vocabularyList.map((word, index) => `
+                <div class="word-input-row flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div class="flex-1">
+                        <span class="font-semibold text-blue-800">${word.english}</span>
+                        <span class="mx-2 text-gray-400">→</span>
+                        <span class="text-gray-700">${word.chinese}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs px-2 py-1 bg-gray-100 rounded-full">${getCategoryName(word.category)}</span>
+                        <button onclick="removeWord(${index})" class="text-red-500 hover:text-red-700">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                animals: '動物',
+                food: '食物',
+                colors: '顏色',
+                family: '家庭',
+                custom: '自定義'
+            };
+            return names[category] || '其他';
+        }
+
+        function removeWord(index) {
+            vocabularyList.splice(index, 1);
+            updateWordList();
+            updateStartButton();
+        }
+
+        function updateStartButton() {
+            const startBtn = document.getElementById('start-games-btn');
+            const canStart = vocabularyList.length >= 4;
+
+            startBtn.disabled = !canStart;
+            startBtn.textContent = canStart
+                ? `🎮 開始遊戲學習 (${vocabularyList.length} 個單字)`
+                : '🎮 開始遊戲學習 (需要至少4個單字)';
+        }
+
+        // 頁面切換功能
+        function showSection(section) {
+            document.getElementById('setup-section').style.display = section === 'setup' ? 'block' : 'none';
+            document.getElementById('games-section').style.display = section === 'games' ? 'block' : 'none';
+
+            if (section === 'games') {
+                updateGameStats();
+                document.getElementById('ready-words-count').textContent = vocabularyList.length;
+            }
+        }
+
+        function startGames() {
+            if (vocabularyList.length >= 4) {
+                showSection('games');
+                showGame('welcome');
+            }
+        }
+
+        function updateGameStats() {
+            document.getElementById('total-words').textContent = vocabularyList.length;
+            document.getElementById('learned-words').textContent = learningProgress.known.size;
+            document.getElementById('learning-words').textContent = learningProgress.learning.size;
+            document.getElementById('difficult-words').textContent = learningProgress.difficult.size;
+        }
+
+        // 遊戲通用功能
+        function showGame(gameType) {
+            // 隱藏所有遊戲
+            document.querySelectorAll('#game-content > div').forEach(div => {
+                div.classList.add('hidden');
+            });
+
+            // 重置所有選擇器樣式
+            document.querySelectorAll('.game-selector').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50');
+                btn.classList.add('border-gray-200');
+            });
+
+            // 高亮當前選擇器
+            if (gameType !== 'welcome') {
+                const selector = document.getElementById(`selector-${gameType}`);
+                if (selector) {
+                    selector.classList.remove('border-gray-200');
+                    selector.classList.add('border-blue-500', 'bg-blue-50');
+                }
+            }
+
+            // 顯示對應遊戲
+            currentGame = gameType;
+            switch(gameType) {
+                case 'quiz':
+                    document.getElementById('quiz-game').classList.remove('hidden');
+                    initQuizGame();
+                    break;
+                case 'match':
+                    document.getElementById('match-game').classList.remove('hidden');
+                    initMatchGame();
+                    break;
+                case 'wheel':
+                    document.getElementById('wheel-game').classList.remove('hidden');
+                    initWheelGame();
+                    break;
+                case 'sort':
+                    document.getElementById('sort-game').classList.remove('hidden');
+                    initSortGame();
+                    break;
+                case 'cards':
+                    document.getElementById('cards-game').classList.remove('hidden');
+                    initCardsGame();
+                    break;
+                default:
+                    document.getElementById('welcome-screen').classList.remove('hidden');
+            }
+        }
+
+        // 工具函數
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function getRandomWords(excludeWord, count = 3) {
+            const otherWords = vocabularyList.filter(word => word.english !== excludeWord.english);
+            return shuffleArray(otherWords).slice(0, count);
+        }
+
+        // 測驗遊戲邏輯
+        let quizState = {
+            questions: [],
+            currentQuestion: 0,
+            score: 0,
+            mistakes: []
+        };
+
+        function initQuizGame() {
+            // 準備測驗題目
+            const shuffledWords = shuffleArray(vocabularyList);
+            quizState.questions = shuffledWords.slice(0, Math.min(10, vocabularyList.length));
+            quizState.currentQuestion = 0;
+            quizState.score = 0;
+            quizState.mistakes = [];
+
+            document.getElementById('quiz-total').textContent = quizState.questions.length;
+            document.getElementById('quiz-result').classList.add('hidden');
+
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            if (quizState.currentQuestion >= quizState.questions.length) {
+                showQuizResult();
+                return;
+            }
+
+            const question = quizState.questions[quizState.currentQuestion];
+            const wrongAnswers = getRandomWords(question, 3);
+            const allOptions = shuffleArray([question, ...wrongAnswers]);
+
+            document.getElementById('quiz-word').textContent = question.english;
+            document.getElementById('quiz-current').textContent = quizState.currentQuestion + 1;
+
+            const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
+            document.getElementById('quiz-progress').style.width = `${progress}%`;
+
+            const accuracy = quizState.currentQuestion > 0 ? Math.round((quizState.score / quizState.currentQuestion) * 100) : 0;
+            document.getElementById('quiz-accuracy').textContent = accuracy;
+
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach((opt, index) => {
+                opt.textContent = `${String.fromCharCode(65 + index)}) ${allOptions[index].chinese}`;
+                opt.onclick = () => selectQuizOption(opt, allOptions[index].english === question.english);
+                opt.classList.remove('selected', 'correct', 'incorrect');
+                opt.disabled = false;
+            });
+
+            document.getElementById('quiz-next').disabled = true;
+        }
+
+        function selectQuizOption(button, isCorrect) {
+            // 禁用所有選項
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.disabled = true;
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            // 標記選中的選項
+            button.classList.add('selected');
+
+            // 顯示正確答案
+            setTimeout(() => {
+                const currentWord = quizState.questions[quizState.currentQuestion];
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    const optionText = opt.textContent.substring(3); // 移除 "A) " 前綴
+                    if (optionText === currentWord.chinese) {
+                        opt.classList.add('correct');
+                    } else if (opt.classList.contains('selected') && !isCorrect) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+
+                if (isCorrect) {
+                    quizState.score++;
+                    learningProgress.known.add(currentWord.english);
+                } else {
+                    quizState.mistakes.push(currentWord);
+                    learningProgress.difficult.add(currentWord.english);
+                }
+
+                document.getElementById('quiz-next').disabled = false;
+            }, 500);
+        }
+
+        function nextQuizQuestion() {
+            quizState.currentQuestion++;
+            loadQuizQuestion();
+        }
+
+        function showQuizResult() {
+            document.getElementById('quiz-result').classList.remove('hidden');
+            document.getElementById('quiz-final-score').textContent = `${quizState.score}/${quizState.questions.length}`;
+
+            const accuracy = Math.round((quizState.score / quizState.questions.length) * 100);
+            document.getElementById('quiz-final-accuracy').textContent = `${accuracy}%`;
+
+            updateGameStats();
+        }
+
+        function restartQuiz() {
+            initQuizGame();
+        }
+
+        function reviewMistakes() {
+            if (quizState.mistakes.length > 0) {
+                // 用錯誤的單字重新開始測驗
+                quizState.questions = [...quizState.mistakes];
+                quizState.currentQuestion = 0;
+                quizState.score = 0;
+                quizState.mistakes = [];
+
+                document.getElementById('quiz-total').textContent = quizState.questions.length;
+                document.getElementById('quiz-result').classList.add('hidden');
+
+                loadQuizQuestion();
+            }
+        }
+
+        // 配對遊戲邏輯
+        let matchState = {
+            currentWords: [],
+            matchedCount: 0,
+            draggedElement: null
+        };
+
+        function initMatchGame() {
+            const wordsToMatch = shuffleArray(vocabularyList).slice(0, 8);
+            matchState.currentWords = wordsToMatch;
+            matchState.matchedCount = 0;
+
+            document.getElementById('match-total').textContent = wordsToMatch.length;
+            document.getElementById('match-score').textContent = '0';
+            document.getElementById('match-progress').style.width = '0%';
+            document.getElementById('match-complete').classList.add('hidden');
+
+            // 生成英文單字
+            const englishContainer = document.getElementById('english-words');
+            englishContainer.innerHTML = shuffleArray(wordsToMatch).map(word => `
+                <div class="match-item bg-blue-100 p-4 rounded-lg text-center font-medium cursor-pointer border-2 border-blue-200"
+                     draggable="true" ondragstart="dragStart(event)" data-english="${word.english}" data-chinese="${word.chinese}">
+                    ${word.english}
+                </div>
+            `).join('');
+
+            // 生成中文翻譯
+            const chineseContainer = document.getElementById('chinese-meanings');
+            chineseContainer.innerHTML = shuffleArray(wordsToMatch).map(word => `
+                <div class="drop-zone p-4 rounded-lg text-center font-medium border-2 border-dashed border-gray-300"
+                     ondrop="dropMatch(event)" ondragover="allowDrop(event)" data-chinese="${word.chinese}">
+                    ${word.chinese}
+                </div>
+            `).join('');
+        }
+
+        function dragStart(event) {
+            matchState.draggedElement = event.target;
+            event.target.classList.add('dragging');
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+            if (!event.target.classList.contains('matched')) {
+                event.target.classList.add('drag-over');
+            }
+        }
+
+        function dropMatch(event) {
+            event.preventDefault();
+            event.target.classList.remove('drag-over');
+
+            if (matchState.draggedElement && !event.target.classList.contains('matched')) {
+                const draggedChinese = matchState.draggedElement.getAttribute('data-chinese');
+                const targetChinese = event.target.getAttribute('data-chinese');
+
+                if (draggedChinese === targetChinese) {
+                    // 配對正確
+                    event.target.appendChild(matchState.draggedElement);
+                    event.target.classList.add('matched');
+                    matchState.draggedElement.classList.remove('dragging');
+                    matchState.draggedElement.style.cursor = 'default';
+                    matchState.draggedElement.draggable = false;
+
+                    matchState.matchedCount++;
+                    document.getElementById('match-score').textContent = matchState.matchedCount;
+
+                    const progress = (matchState.matchedCount / matchState.currentWords.length) * 100;
+                    document.getElementById('match-progress').style.width = `${progress}%`;
+
+                    // 記錄學習進度
+                    const word = matchState.currentWords.find(w => w.chinese === targetChinese);
+                    if (word) {
+                        learningProgress.known.add(word.english);
+                        updateGameStats();
+                    }
+
+                    if (matchState.matchedCount === matchState.currentWords.length) {
+                        setTimeout(() => {
+                            document.getElementById('match-complete').classList.remove('hidden');
+                        }, 500);
+                    }
+                } else {
+                    // 配對錯誤
+                    matchState.draggedElement.classList.remove('dragging');
+                    setTimeout(() => {
+                        matchState.draggedElement.style.transform = 'translateX(10px)';
+                        setTimeout(() => {
+                            matchState.draggedElement.style.transform = '';
+                        }, 200);
+                    }, 100);
+                }
+
+                matchState.draggedElement = null;
+            }
+        }
+
+        function resetMatch() {
+            initMatchGame();
+        }
+
+        function shuffleMatch() {
+            // 重新排列未配對的項目
+            const englishContainer = document.getElementById('english-words');
+            const chineseContainer = document.getElementById('chinese-meanings');
+
+            const unmatchedEnglish = Array.from(englishContainer.children).filter(child =>
+                child.classList.contains('match-item') && child.draggable
+            );
+            const unmatchedChinese = Array.from(chineseContainer.children).filter(child =>
+                !child.classList.contains('matched')
+            );
+
+            // 重新排列英文單字
+            const shuffledEnglish = shuffleArray(unmatchedEnglish);
+            shuffledEnglish.forEach(item => englishContainer.appendChild(item));
+
+            // 重新排列中文翻譯
+            const shuffledChinese = shuffleArray(unmatchedChinese);
+            shuffledChinese.forEach(item => chineseContainer.appendChild(item));
+        }
+
+        function nextMatchRound() {
+            initMatchGame();
+        }
+
+        // 轉盤遊戲邏輯
+        let wheelState = {
+            currentWords: [],
+            currentWordIndex: 0,
+            progress: 0,
+            totalQuestions: 10
+        };
+
+        function initWheelGame() {
+            wheelState.currentWords = shuffleArray(vocabularyList).slice(0, Math.min(8, vocabularyList.length));
+            wheelState.currentWordIndex = 0;
+            wheelState.progress = 0;
+
+            generateWheelSegments();
+            updateWheelProgress();
+
+            document.getElementById('wheel-question').classList.add('hidden');
+            document.getElementById('wheel-result').classList.add('hidden');
+            document.getElementById('spin-button').disabled = false;
+        }
+
+        function generateWheelSegments() {
+            const wheel = document.getElementById('spin-wheel');
+            const words = wheelState.currentWords;
+            const segmentAngle = 360 / words.length;
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#ff9ff3', '#54a0ff'];
+
+            wheel.innerHTML = words.map((word, index) => {
+                const rotation = index * segmentAngle;
+                const color = colors[index % colors.length];
+
+                return `
+                    <div class="wheel-segment" style="
+                        background: ${color};
+                        transform: rotate(${rotation}deg);
+                        clip-path: polygon(0 0, 50% 0, 100% 100%, 0 100%);
+                    ">
+                        <div style="
+                            position: absolute;
+                            top: 25%;
+                            left: 25%;
+                            transform: rotate(${segmentAngle/2}deg);
+                            font-weight: bold;
+                            color: white;
+                            font-size: 12px;
+                            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                        ">
+                            ${word.english}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function spinWheel() {
+            const wheel = document.getElementById('spin-wheel');
+            const button = document.getElementById('spin-button');
+
+            button.disabled = true;
+            button.textContent = '轉動中...';
+
+            // 隨機角度 (3-5圈 + 隨機角度)
+            const spins = 3 + Math.random() * 2;
+            const finalAngle = Math.random() * 360;
+            const totalRotation = spins * 360 + finalAngle;
+
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+            wheel.style.transition = 'transform 3s cubic-bezier(0.23, 1, 0.32, 1)';
+
+            setTimeout(() => {
+                // 計算結果
+                const segmentAngle = 360 / wheelState.currentWords.length;
+                const normalizedAngle = (360 - (finalAngle % 360)) % 360;
+                const segmentIndex = Math.floor(normalizedAngle / segmentAngle);
+
+                const selectedWord = wheelState.currentWords[segmentIndex];
+                showWheelQuestion(selectedWord);
+
+                button.textContent = '🎡 轉動轉盤';
+            }, 3000);
+        }
+
+        function showWheelQuestion(word) {
+            document.getElementById('wheel-word').textContent = word.english;
+
+            const wrongAnswers = getRandomWords(word, 3);
+            const allOptions = shuffleArray([word, ...wrongAnswers]);
+
+            const optionButtons = document.querySelectorAll('.wheel-option');
+            optionButtons.forEach((btn, index) => {
+                btn.textContent = allOptions[index].chinese;
+                btn.onclick = () => selectWheelAnswer(btn, allOptions[index].english === word.english);
+                btn.classList.remove('correct', 'incorrect');
+                btn.disabled = false;
+            });
+
+            document.getElementById('wheel-question').classList.remove('hidden');
+            document.getElementById('wheel-result').classList.add('hidden');
+        }
+
+        function selectWheelAnswer(button, isCorrect) {
+            document.querySelectorAll('.wheel-option').forEach(btn => btn.disabled = true);
+
+            if (isCorrect) {
+                button.classList.add('correct');
+                document.getElementById('wheel-result-text').textContent = '🎉 答對了！';
+                document.getElementById('wheel-result').className = 'p-4 rounded-lg bg-green-50 border border-green-200';
+
+                wheelState.progress++;
+                const currentWord = wheelState.currentWords.find(w =>
+                    w.english === document.getElementById('wheel-word').textContent
+                );
+                if (currentWord) {
+                    learningProgress.known.add(currentWord.english);
+                }
+            } else {
+                button.classList.add('incorrect');
+                document.getElementById('wheel-result-text').textContent = '❌ 答錯了，再試一次！';
+                document.getElementById('wheel-result').className = 'p-4 rounded-lg bg-red-50 border border-red-200';
+
+                const currentWord = wheelState.currentWords.find(w =>
+                    w.english === document.getElementById('wheel-word').textContent
+                );
+                if (currentWord) {
+                    learningProgress.difficult.add(currentWord.english);
+                }
+            }
+
+            document.getElementById('wheel-result').classList.remove('hidden');
+            updateWheelProgress();
+            updateGameStats();
+        }
+
+        function continueWheel() {
+            document.getElementById('wheel-question').classList.add('hidden');
+            document.getElementById('wheel-result').classList.add('hidden');
+            document.getElementById('spin-button').disabled = false;
+
+            if (wheelState.progress >= wheelState.totalQuestions) {
+                alert(`🎉 轉盤練習完成！您答對了 ${wheelState.progress} 題！`);
+                wheelState.progress = 0;
+                updateWheelProgress();
+            }
+        }
+
+        function updateWheelProgress() {
+            const progressText = document.getElementById('wheel-progress-text');
+            const progressBar = document.getElementById('wheel-progress');
+
+            progressText.textContent = `${wheelState.progress}/${wheelState.totalQuestions}`;
+            const percentage = (wheelState.progress / wheelState.totalQuestions) * 100;
+            progressBar.style.width = `${percentage}%`;
+        }
+
+        // 分組遊戲邏輯
+        let sortState = {
+            categories: [],
+            wordsToSort: [],
+            sortedCount: 0
+        };
+
+        function initSortGame() {
+            // 根據現有單字的類別創建分組
+            const availableCategories = [...new Set(vocabularyList.map(word => word.category))];
+
+            if (availableCategories.length < 2) {
+                // 如果類別不足，創建人工分組
+                sortState.categories = [
+                    { id: 'group1', name: '第一組', color: 'blue' },
+                    { id: 'group2', name: '第二組', color: 'green' },
+                    { id: 'group3', name: '第三組', color: 'purple' }
+                ];
+
+                // 隨機分配單字到組別
+                sortState.wordsToSort = vocabularyList.slice(0, 12).map((word, index) => ({
+                    ...word,
+                    targetGroup: `group${(index % 3) + 1}`
+                }));
+            } else {
+                // 使用實際類別
+                sortState.categories = availableCategories.slice(0, 3).map((cat, index) => ({
+                    id: cat,
+                    name: getCategoryName(cat),
+                    color: ['blue', 'green', 'purple'][index]
+                }));
+
+                sortState.wordsToSort = vocabularyList.filter(word =>
+                    sortState.categories.some(cat => cat.id === word.category)
+                ).slice(0, 12).map(word => ({
+                    ...word,
+                    targetGroup: word.category
+                }));
+            }
+
+            sortState.sortedCount = 0;
+
+            generateSortCategories();
+            generateUnsortedWords();
+            updateSortProgress();
+        }
+
+        function generateSortCategories() {
+            const container = document.getElementById('sort-categories');
+            container.innerHTML = sortState.categories.map(category => `
+                <div class="bg-${category.color}-50 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-center mb-4 text-${category.color}-800">
+                        📁 ${category.name}
+                    </h3>
+                    <div class="drop-zone min-h-32 p-2 rounded-lg border-2 border-dashed border-${category.color}-300"
+                         ondrop="dropSort(event)" ondragover="allowDrop(event)" data-category="${category.id}">
+                        <!-- 單字會被拖拽到這裡 -->
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generateUnsortedWords() {
+            const container = document.getElementById('unsorted-words');
+            const shuffledWords = shuffleArray(sortState.wordsToSort);
+
+            container.innerHTML = shuffledWords.map(word => `
+                <div class="match-item bg-white p-3 rounded-lg text-center font-medium border-2 border-gray-200 cursor-grab"
+                     draggable="true" ondragstart="dragStart(event)"
+                     data-word="${word.english}" data-target="${word.targetGroup}">
+                    <div class="font-bold text-blue-800">${word.english}</div>
+                    <div class="text-sm text-gray-600">${word.chinese}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('sort-total').textContent = sortState.wordsToSort.length;
+        }
+
+        function dropSort(event) {
+            event.preventDefault();
+            event.target.classList.remove('drag-over');
+
+            if (matchState.draggedElement) {
+                const wordTarget = matchState.draggedElement.getAttribute('data-target');
+                const dropTarget = event.target.getAttribute('data-category');
+
+                if (wordTarget === dropTarget) {
+                    // 分組正確
+                    event.target.appendChild(matchState.draggedElement);
+                    event.target.classList.add('matched');
+                    matchState.draggedElement.classList.remove('dragging');
+                    matchState.draggedElement.style.cursor = 'default';
+                    matchState.draggedElement.draggable = false;
+
+                    sortState.sortedCount++;
+                    updateSortProgress();
+
+                    // 記錄學習進度
+                    const wordEnglish = matchState.draggedElement.getAttribute('data-word');
+                    learningProgress.known.add(wordEnglish);
+                    updateGameStats();
+
+                    if (sortState.sortedCount === sortState.wordsToSort.length) {
+                        setTimeout(() => {
+                            document.getElementById('sort-complete').classList.remove('hidden');
+                        }, 500);
+                    }
+                } else {
+                    // 分組錯誤
+                    matchState.draggedElement.classList.remove('dragging');
+                    setTimeout(() => {
+                        matchState.draggedElement.style.transform = 'translateX(10px)';
+                        setTimeout(() => {
+                            matchState.draggedElement.style.transform = '';
+                        }, 200);
+                    }, 100);
+
+                    // 記錄錯誤
+                    const wordEnglish = matchState.draggedElement.getAttribute('data-word');
+                    learningProgress.difficult.add(wordEnglish);
+                    updateGameStats();
+                }
+
+                matchState.draggedElement = null;
+            }
+        }
+
+        function updateSortProgress() {
+            document.getElementById('sort-score').textContent = sortState.sortedCount;
+        }
+
+        function resetSort() {
+            initSortGame();
+        }
+
+        function showSortHint() {
+            alert('提示：將單字拖拽到對應的類別中。注意觀察單字的含義和類別的關係！');
+        }
+
+        function nextSortRound() {
+            initSortGame();
+        }
+
+        // 閃卡遊戲邏輯
+        let cardsState = {
+            cards: [],
+            currentCard: 0,
+            cardStatuses: new Map(), // 'known', 'learning', 'difficult'
+            isFlipped: false
+        };
+
+        function initCardsGame() {
+            cardsState.cards = shuffleArray(vocabularyList);
+            cardsState.currentCard = 0;
+            cardsState.cardStatuses.clear();
+            cardsState.isFlipped = false;
+
+            document.getElementById('card-total').textContent = cardsState.cards.length;
+            document.getElementById('cards-complete').classList.add('hidden');
+
+            updateCard();
+        }
+
+        function updateCard() {
+            if (cardsState.currentCard >= cardsState.cards.length) {
+                showCardsComplete();
+                return;
+            }
+
+            const card = cardsState.cards[cardsState.currentCard];
+            document.getElementById('card-front-text').textContent = card.english;
+            document.getElementById('card-back-text').textContent = card.chinese;
+            document.getElementById('card-current').textContent = cardsState.currentCard + 1;
+
+            // 重置卡片狀態
+            document.querySelector('.flash-card').classList.remove('flipped');
+            cardsState.isFlipped = false;
+
+            // 更新進度
+            const progress = ((cardsState.currentCard + 1) / cardsState.cards.length) * 100;
+            document.getElementById('card-progress').style.width = `${progress}%`;
+
+            // 更新掌握度
+            const knownCount = Array.from(cardsState.cardStatuses.values()).filter(status => status === 'known').length;
+            const mastery = cardsState.cardStatuses.size > 0 ? Math.round((knownCount / cardsState.cardStatuses.size) * 100) : 0;
+            document.getElementById('card-mastery').textContent = mastery;
+
+            // 更新按鈕狀態
+            document.getElementById('prev-card').disabled = cardsState.currentCard === 0;
+            document.getElementById('next-card').disabled = cardsState.currentCard === cardsState.cards.length - 1;
+        }
+
+        function flipCard() {
+            const card = document.querySelector('.flash-card');
+            card.classList.toggle('flipped');
+            cardsState.isFlipped = !cardsState.isFlipped;
+        }
+
+        function markCard(status) {
+            const currentWord = cardsState.cards[cardsState.currentCard];
+            cardsState.cardStatuses.set(currentWord.english, status);
+
+            // 更新全局學習進度
+            switch(status) {
+                case 'known':
+                    learningProgress.known.add(currentWord.english);
+                    learningProgress.learning.delete(currentWord.english);
+                    learningProgress.difficult.delete(currentWord.english);
+                    break;
+                case 'learning':
+                    learningProgress.learning.add(currentWord.english);
+                    learningProgress.known.delete(currentWord.english);
+                    learningProgress.difficult.delete(currentWord.english);
+                    break;
+                case 'difficult':
+                    learningProgress.difficult.add(currentWord.english);
+                    learningProgress.known.delete(currentWord.english);
+                    learningProgress.learning.delete(currentWord.english);
+                    break;
+            }
+
+            updateGameStats();
+
+            // 自動跳到下一張卡片
+            setTimeout(() => {
+                if (cardsState.currentCard < cardsState.cards.length - 1) {
+                    nextCard();
+                } else {
+                    showCardsComplete();
+                }
+            }, 500);
+        }
+
+        function nextCard() {
+            if (cardsState.currentCard < cardsState.cards.length - 1) {
+                cardsState.currentCard++;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (cardsState.currentCard > 0) {
+                cardsState.currentCard--;
+                updateCard();
+            }
+        }
+
+        function showCardsComplete() {
+            document.getElementById('cards-complete').classList.remove('hidden');
+
+            const knownCount = Array.from(cardsState.cardStatuses.values()).filter(status => status === 'known').length;
+            const learningCount = Array.from(cardsState.cardStatuses.values()).filter(status => status === 'learning').length;
+            const difficultCount = Array.from(cardsState.cardStatuses.values()).filter(status => status === 'difficult').length;
+
+            document.getElementById('cards-known-count').textContent = knownCount;
+            document.getElementById('cards-learning-count').textContent = learningCount;
+            document.getElementById('cards-difficult-count').textContent = difficultCount;
+        }
+
+        function reviewDifficultCards() {
+            // 只顯示標記為困難的卡片
+            const difficultWords = cardsState.cards.filter(card =>
+                cardsState.cardStatuses.get(card.english) === 'difficult'
+            );
+
+            if (difficultWords.length > 0) {
+                cardsState.cards = difficultWords;
+                cardsState.currentCard = 0;
+                cardsState.cardStatuses.clear();
+                document.getElementById('cards-complete').classList.add('hidden');
+                updateCard();
+            } else {
+                alert('沒有需要複習的困難單字！');
+            }
+        }
+
+        function restartCards() {
+            initCardsGame();
+        }
+
+        // 頁面初始化
+        window.addEventListener('load', () => {
+            showSection('setup');
+            updateWordList();
+            updateStartButton();
+
+            // 添加回車鍵支持
+            document.getElementById('english-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('chinese-input').focus();
+                }
+            });
+
+            document.getElementById('chinese-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addWord();
+                }
+            });
+        });
+
+        // 防止拖拽時的默認行為
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+        });
+
+        // 拖拽結束時清理樣式
+        document.addEventListener('dragend', (e) => {
+            if (e.target.classList.contains('match-item')) {
+                e.target.classList.remove('dragging');
+            }
+            document.querySelectorAll('.drag-over').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+        });
+    </script>
+</body>
+</html>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 單字設置區域 -->
+        <div id="setup-section" class="mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">
+                    📝 建立您的單字表
+                </h2>
+                
+                <div class="mb-6">
+                    <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                        <input type="text" id="english-input" placeholder="輸入英文單字" 
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <input type="text" id="chinese-input" placeholder="輸入中文翻譯" 
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <button onclick="addWord()" 
+                                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            添加單字
+                        </button>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button onclick="loadSampleWords('animals')" class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm hover:bg-green-200">
+                            動物單字
+                        </button>
+                        <button onclick="loadSampleWords('food')" class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm hover:bg-yellow-200">
+                            食物單字
+                        </button>
+                        <button onclick="loadSampleWords('colors')" class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm hover:bg-purple-200">
+                            顏色單字
+                        </button>
+                        <button onclick="loadSampleWords('family')" class="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-sm hover:bg-pink-200">
+                            家庭成員
+                        </button>
+                        <button onclick="clearWords()" class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm hover:bg-red-200">
+                            清空單字
+                        </button>
+                    </div>
+                </div>
+
+                <div id="word-list" class="mb-6">
+                    <h3 class="text-lg font-semibold mb-4">當前單字表 (<span id="word-count">0</span> 個單字)</h3>
+                    <div id="word-table" class="space-y-2 max-h-64 overflow-y-auto">
+                        <!-- 單字列表將在這裡顯示 -->
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button onclick="startGames()" id="start-games-btn" 
+                            class="bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+                            disabled>
+                        🎮 開始遊戲學習 (需要至少4個單字)
+                    </button>
+                </div>
+            </div>
+        </div>

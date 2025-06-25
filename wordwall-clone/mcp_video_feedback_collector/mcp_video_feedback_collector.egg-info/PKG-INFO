@@ -1,0 +1,63 @@
+Metadata-Version: 2.4
+Name: mcp-video-feedback-collector
+Version: 1.1.0
+Summary: Enhanced MCP Feedback Collector with Video Support - 增強版 MCP 反饋收集器，支持影片上傳
+Home-page: https://github.com/enhanced-mcp/mcp-video-feedback-collector
+Author: Enhanced MCP Team
+Author-email: enhanced@mcp.dev
+Project-URL: Bug Reports, https://github.com/enhanced-mcp/mcp-video-feedback-collector/issues
+Project-URL: Source, https://github.com/enhanced-mcp/mcp-video-feedback-collector
+Project-URL: Documentation, https://github.com/enhanced-mcp/mcp-video-feedback-collector#readme
+Keywords: mcp feedback video interactive ai
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Communications
+Classifier: Topic :: Multimedia :: Video
+Requires-Python: >=3.8
+Requires-Dist: mcp>=1.0.0
+Requires-Dist: pillow>=9.0.0
+Requires-Dist: fastmcp>=0.2.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: black>=23.0.0; extra == "dev"
+Requires-Dist: isort>=5.12.0; extra == "dev"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: project-url
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+
+Enhanced MCP Feedback Collector with Video Support
+
+基於原始 mcp-feedback-collector 添加影片上傳功能的增強版本。
+
+Features:
+- 文字反饋收集
+- 圖片上傳和預覽
+- 影片上傳和處理（新增功能）
+- 支持多種影片格式（MP4, AVI, MOV, WMV, WebM, MKV, FLV）
+- 智能文件大小檢查
+- 現代化用戶界面
+
+Usage:
+    from mcp_video_feedback_collector.server import collect_feedback
+    
+    feedback = collect_feedback(
+        work_summary="AI工作完成汇报",
+        timeout_seconds=300
+    )

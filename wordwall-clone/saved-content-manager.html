@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保存内容管理 - Wordwall Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .content-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .content-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .content-card.selected {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+        .slide-enter-active, .slide-leave-active {
+            transition: all 0.3s ease;
+        }
+        .slide-enter-from {
+            transform: translateX(-20px);
+            opacity: 0;
+        }
+        .slide-leave-to {
+            transform: translateX(20px);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app">
+        <!-- 顶部导航栏 -->
+        <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <button @click="goHome" class="text-blue-600 hover:text-blue-800 mr-4">
+                            ← 返回首页
+                        </button>
+                        <h1 class="text-2xl font-bold text-gray-900">📚 保存内容管理</h1>
+                        <div v-if="savedContents.length > 0" class="ml-4 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                            {{ savedContents.length }} 个内容集合
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="showCreateModal = true" 
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            ➕ 新建内容
+                        </button>
+                        <button @click="exportAllData" 
+                                :disabled="savedContents.length === 0"
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                            📤 导出全部
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- 空状态 -->
+            <div v-if="savedContents.length === 0" class="text-center py-16">
+                <div class="text-6xl mb-4">📝</div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">还没有保存任何内容</h2>
+                <p class="text-gray-600 mb-8">创建你的第一个内容集合，开始学习之旅！</p>
+                <button @click="showCreateModal = true" 
+                        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    ➕ 创建第一个内容
+                </button>
+            </div>
+
+            <!-- 内容网格 -->
+            <div v-else>
+                <!-- 筛选和搜索 -->
+                <div class="mb-8 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <input v-model="searchQuery" 
+                               type="text" 
+                               placeholder="搜索内容标题或描述..."
+                               class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64">
+                        <select v-model="sortBy" 
+                                class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="newest">最新创建</option>
+                            <option value="oldest">最早创建</option>
+                            <option value="name">按名称排序</option>
+                            <option value="size">按词汇数量</option>
+                        </select>
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        显示 {{ filteredContents.length }} / {{ savedContents.length }} 个内容
+                    </div>
+                </div>
+
+                <!-- 内容卡片网格 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <transition-group name="slide" tag="div" class="contents">
+                        <div v-for="content in filteredContents" 
+                             :key="content.id" 
+                             class="content-card bg-white rounded-xl shadow-lg p-6 border-2 border-transparent"
+                             :class="{ 'selected': selectedContent?.id === content.id }"
+                             @click="selectContent(content)">
+                            
+                            <!-- 内容头部 -->
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-lg text-gray-900 mb-1 truncate">{{ content.title }}</h3>
+                                    <p class="text-sm text-gray-600 line-clamp-2">{{ content.description || '无描述' }}</p>
+                                </div>
+                                <div class="ml-2 flex space-x-1">
+                                    <button @click.stop="editContent(content)" 
+                                            class="text-blue-600 hover:text-blue-800 p-1">
+                                        ✏️
+                                    </button>
+                                    <button @click.stop="deleteContent(content.id)" 
+                                            class="text-red-600 hover:text-red-800 p-1">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 统计信息 -->
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">词汇数量</span>
+                                    <span class="font-semibold text-blue-600">{{ content.vocabulary?.length || 0 }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">创建时间</span>
+                                    <span class="text-xs text-gray-500">{{ formatDate(content.createdAt) }}</span>
+                                </div>
+                                <div v-if="content.updatedAt && content.updatedAt !== content.createdAt" 
+                                     class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">更新时间</span>
+                                    <span class="text-xs text-gray-500">{{ formatDate(content.updatedAt) }}</span>
+                                </div>
+                            </div>
+
+                            <!-- 词汇预览 -->
+                            <div v-if="content.vocabulary && content.vocabulary.length > 0" class="mb-4">
+                                <div class="text-xs text-gray-600 mb-2">词汇预览:</div>
+                                <div class="flex flex-wrap gap-1">
+                                    <span v-for="(word, index) in content.vocabulary.slice(0, 3)" 
+                                          :key="word.id"
+                                          class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                                        {{ word.english }}
+                                    </span>
+                                    <span v-if="content.vocabulary.length > 3" 
+                                          class="text-xs text-gray-500">
+                                        +{{ content.vocabulary.length - 3 }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- 操作按钮 -->
+                            <div class="flex space-x-2">
+                                <button @click.stop="editContent(content)" 
+                                        class="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                    📝 编辑
+                                </button>
+                                <button @click.stop="startGame(content)" 
+                                        :disabled="!content.vocabulary || content.vocabulary.length < 2"
+                                        class="flex-1 bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors text-sm">
+                                    🎮 游戏
+                                </button>
+                            </div>
+                        </div>
+                    </transition-group>
+                </div>
+            </div>
+        </div>
+
+        <!-- 创建/编辑内容模态框 -->
+        <transition name="fade">
+            <div v-if="showCreateModal || showEditModal" 
+                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                 @click="closeModals">
+                <div class="bg-white rounded-xl max-w-md w-full p-6" @click.stop>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">
+                        {{ showCreateModal ? '创建新内容' : '编辑内容' }}
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">标题</label>
+                            <input v-model="formData.title" 
+                                   type="text" 
+                                   placeholder="输入内容标题"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">描述</label>
+                            <textarea v-model="formData.description" 
+                                      placeholder="输入内容描述（可选）"
+                                      rows="3"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button @click="closeModals" 
+                                class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                            取消
+                        </button>
+                        <button @click="saveContent" 
+                                :disabled="!formData.title.trim()"
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                            {{ showCreateModal ? '创建' : '保存' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 游戏选择模态框 -->
+        <transition name="fade">
+            <div v-if="showGameModal" 
+                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                 @click="showGameModal = false">
+                <div class="bg-white rounded-xl max-w-lg w-full p-6" @click.stop>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">选择游戏模式</h2>
+                    <p class="text-gray-600 mb-6">内容: {{ selectedContent?.title }} ({{ selectedContent?.vocabulary?.length }} 个词汇)</p>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <button v-for="game in availableGames" 
+                                :key="game.id"
+                                @click="launchGame(game)"
+                                :disabled="selectedContent?.vocabulary?.length < game.minWords"
+                                class="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            <div class="text-2xl mb-2">{{ game.icon }}</div>
+                            <div class="font-semibold">{{ game.name }}</div>
+                            <div class="text-xs text-gray-600">{{ game.description }}</div>
+                            <div v-if="selectedContent?.vocabulary?.length < game.minWords" 
+                                 class="text-xs text-red-600 mt-1">
+                                需要至少 {{ game.minWords }} 个词汇
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <div class="flex justify-end mt-6">
+                        <button @click="showGameModal = false" 
+                                class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
+                            取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 成功提示 -->
+        <transition name="fade">
+            <div v-if="successMessage" 
+                 class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+                {{ successMessage }}
+            </div>
+        </transition>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    savedContents: [],
+                    selectedContent: null,
+                    searchQuery: '',
+                    sortBy: 'newest',
+
+                    // 模态框状态
+                    showCreateModal: false,
+                    showEditModal: false,
+                    showGameModal: false,
+
+                    // 表单数据
+                    formData: {
+                        title: '',
+                        description: ''
+                    },
+
+                    // UI状态
+                    successMessage: '',
+
+                    // 游戏配置
+                    availableGames: [
+                        {
+                            id: 'quiz',
+                            name: '选择题',
+                            icon: '❓',
+                            description: '多选题测试',
+                            minWords: 2
+                        },
+                        {
+                            id: 'match',
+                            name: '配对游戏',
+                            icon: '🔗',
+                            description: '拖拽配对',
+                            minWords: 2
+                        },
+                        {
+                            id: 'cards',
+                            name: '闪卡记忆',
+                            icon: '🃏',
+                            description: '翻卡记忆',
+                            minWords: 1
+                        },
+                        {
+                            id: 'wheel',
+                            name: '转盘游戏',
+                            icon: '🎡',
+                            description: '随机选择',
+                            minWords: 3
+                        }
+                    ]
+                };
+            },
+
+            computed: {
+                filteredContents() {
+                    let filtered = this.savedContents;
+
+                    // 搜索过滤
+                    if (this.searchQuery) {
+                        const query = this.searchQuery.toLowerCase();
+                        filtered = filtered.filter(content =>
+                            content.title.toLowerCase().includes(query) ||
+                            (content.description && content.description.toLowerCase().includes(query))
+                        );
+                    }
+
+                    // 排序
+                    filtered = [...filtered].sort((a, b) => {
+                        switch (this.sortBy) {
+                            case 'newest':
+                                return new Date(b.createdAt) - new Date(a.createdAt);
+                            case 'oldest':
+                                return new Date(a.createdAt) - new Date(b.createdAt);
+                            case 'name':
+                                return a.title.localeCompare(b.title);
+                            case 'size':
+                                return (b.vocabulary?.length || 0) - (a.vocabulary?.length || 0);
+                            default:
+                                return 0;
+                        }
+                    });
+
+                    return filtered;
+                }
+            },
+
+            mounted() {
+                this.loadSavedContents();
+                this.loadDemoData(); // 加载演示数据
+            },
+
+            methods: {
+                // 数据加载
+                loadSavedContents() {
+                    const saved = localStorage.getItem('savedContent');
+                    if (saved) {
+                        try {
+                            this.savedContents = JSON.parse(saved);
+                        } catch (error) {
+                            console.error('加载保存内容失败:', error);
+                            this.savedContents = [];
+                        }
+                    }
+                },
+
+                // 加载演示数据
+                loadDemoData() {
+                    if (this.savedContents.length === 0) {
+                        const demoContents = [
+                            {
+                                id: Date.now() + 1,
+                                title: '基础英语单词',
+                                description: '日常生活中常用的英语单词',
+                                vocabulary: [
+                                    { id: 1, english: 'apple', chinese: '苹果', createdAt: new Date() },
+                                    { id: 2, english: 'book', chinese: '书', createdAt: new Date() },
+                                    { id: 3, english: 'cat', chinese: '猫', createdAt: new Date() },
+                                    { id: 4, english: 'dog', chinese: '狗', createdAt: new Date() }
+                                ],
+                                createdAt: new Date(Date.now() - 86400000), // 1天前
+                                updatedAt: new Date(Date.now() - 3600000)   // 1小时前
+                            },
+                            {
+                                id: Date.now() + 2,
+                                title: '动物词汇',
+                                description: '各种动物的英文名称',
+                                vocabulary: [
+                                    { id: 5, english: 'elephant', chinese: '大象', createdAt: new Date() },
+                                    { id: 6, english: 'tiger', chinese: '老虎', createdAt: new Date() },
+                                    { id: 7, english: 'bird', chinese: '鸟', createdAt: new Date() }
+                                ],
+                                createdAt: new Date(Date.now() - 172800000), // 2天前
+                                updatedAt: new Date(Date.now() - 172800000)
+                            },
+                            {
+                                id: Date.now() + 3,
+                                title: '颜色单词',
+                                description: '基本颜色的英文表达',
+                                vocabulary: [
+                                    { id: 8, english: 'red', chinese: '红色', createdAt: new Date() },
+                                    { id: 9, english: 'blue', chinese: '蓝色', createdAt: new Date() },
+                                    { id: 10, english: 'green', chinese: '绿色', createdAt: new Date() },
+                                    { id: 11, english: 'yellow', chinese: '黄色', createdAt: new Date() },
+                                    { id: 12, english: 'purple', chinese: '紫色', createdAt: new Date() }
+                                ],
+                                createdAt: new Date(Date.now() - 259200000), // 3天前
+                                updatedAt: new Date(Date.now() - 7200000)    // 2小时前
+                            }
+                        ];
+
+                        this.savedContents = demoContents;
+                        this.saveSavedContents();
+                    }
+                },
+
+                saveSavedContents() {
+                    localStorage.setItem('savedContent', JSON.stringify(this.savedContents));
+                },
+
+                // 内容操作
+                selectContent(content) {
+                    this.selectedContent = this.selectedContent?.id === content.id ? null : content;
+                },
+
+                editContent(content) {
+                    this.selectedContent = content;
+                    this.formData = {
+                        title: content.title,
+                        description: content.description || ''
+                    };
+                    this.showEditModal = true;
+                },
+
+                deleteContent(id) {
+                    if (confirm('确定要删除这个内容吗？此操作无法撤销。')) {
+                        this.savedContents = this.savedContents.filter(content => content.id !== id);
+                        if (this.selectedContent?.id === id) {
+                            this.selectedContent = null;
+                        }
+                        this.saveSavedContents();
+                        this.showSuccess('内容已删除！');
+                    }
+                },
+
+                // 模态框操作
+                closeModals() {
+                    this.showCreateModal = false;
+                    this.showEditModal = false;
+                    this.formData = { title: '', description: '' };
+                },
+
+                saveContent() {
+                    if (!this.formData.title.trim()) return;
+
+                    if (this.showCreateModal) {
+                        // 创建新内容
+                        const newContent = {
+                            id: Date.now(),
+                            title: this.formData.title.trim(),
+                            description: this.formData.description.trim(),
+                            vocabulary: [],
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                        };
+
+                        this.savedContents.unshift(newContent);
+                        this.showSuccess('新内容已创建！');
+
+                        // 创建后直接跳转到编辑页面
+                        setTimeout(() => {
+                            this.goToEdit(newContent);
+                        }, 1000);
+
+                    } else if (this.showEditModal) {
+                        // 更新现有内容
+                        const content = this.selectedContent;
+                        content.title = this.formData.title.trim();
+                        content.description = this.formData.description.trim();
+                        content.updatedAt = new Date();
+
+                        this.showSuccess('内容已更新！');
+                    }
+
+                    this.saveSavedContents();
+                    this.closeModals();
+                },
+
+                // 游戏相关
+                startGame(content) {
+                    if (!content.vocabulary || content.vocabulary.length < 2) {
+                        this.showSuccess('至少需要2个词汇才能开始游戏！');
+                        return;
+                    }
+
+                    this.selectedContent = content;
+                    this.showGameModal = true;
+                },
+
+                launchGame(game) {
+                    if (!this.selectedContent) return;
+
+                    // 准备游戏数据
+                    const gameData = {
+                        type: game.id,
+                        content: this.selectedContent,
+                        vocabulary: this.selectedContent.vocabulary,
+                        timestamp: new Date()
+                    };
+
+                    // 保存游戏数据
+                    localStorage.setItem('currentGameData', JSON.stringify(gameData));
+
+                    this.showGameModal = false;
+                    this.showSuccess(`正在启动 ${game.name}...`);
+
+                    // 模拟跳转到游戏页面
+                    setTimeout(() => {
+                        // 这里可以跳转到实际的游戏页面
+                        window.location.href = `interactive-demo.html#${game.id}`;
+                    }, 1000);
+                },
+
+                // 导航
+                goHome() {
+                    window.location.href = 'ai-analyzed-demo.html';
+                },
+
+                goToEdit(content) {
+                    // 保存当前编辑的内容到localStorage
+                    const editData = {
+                        id: content.id,
+                        title: content.title,
+                        description: content.description,
+                        vocabulary: content.vocabulary || [],
+                        createdAt: content.createdAt,
+                        updatedAt: content.updatedAt
+                    };
+
+                    localStorage.setItem('currentEditContent', JSON.stringify(editData));
+
+                    // 跳转到编辑页面
+                    window.location.href = 'ai-analyzed-demo.html';
+                },
+
+                // 数据导出
+                exportAllData() {
+                    if (this.savedContents.length === 0) {
+                        this.showSuccess('没有数据可以导出！');
+                        return;
+                    }
+
+                    const exportData = {
+                        contents: this.savedContents,
+                        exportedAt: new Date(),
+                        totalContents: this.savedContents.length,
+                        totalVocabulary: this.savedContents.reduce((sum, content) =>
+                            sum + (content.vocabulary?.length || 0), 0)
+                    };
+
+                    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+                        type: 'application/json'
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `wordwall-contents-${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                    this.showSuccess('数据已导出！');
+                },
+
+                // 工具方法
+                formatDate(date) {
+                    if (!date) return '';
+                    const d = new Date(date);
+                    const now = new Date();
+                    const diffTime = Math.abs(now - d);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 1) {
+                        return '今天 ' + d.toLocaleTimeString('zh-TW', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    } else if (diffDays === 2) {
+                        return '昨天 ' + d.toLocaleTimeString('zh-TW', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    } else if (diffDays <= 7) {
+                        return `${diffDays - 1}天前`;
+                    } else {
+                        return d.toLocaleDateString('zh-TW') + ' ' + d.toLocaleTimeString('zh-TW', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+                },
+
+                showSuccess(message) {
+                    this.successMessage = message;
+                    setTimeout(() => {
+                        this.successMessage = '';
+                    }, 3000);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

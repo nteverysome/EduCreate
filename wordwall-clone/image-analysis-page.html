@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片分析页面 - 内容管理设计</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .drop-zone {
+            border: 2px dashed #cbd5e0;
+            transition: all 0.3s ease;
+        }
+        .drop-zone.dragover {
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app">
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <!-- 标题 -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">🖼️ 图片分析页面</h1>
+                <p class="text-gray-600">上传你的内容管理界面设计图片，我会为你分析并实现</p>
+            </div>
+
+            <!-- 图片上传区域 -->
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <div class="drop-zone rounded-lg p-12 text-center" 
+                     @drop="handleDrop" 
+                     @dragover.prevent="handleDragOver" 
+                     @dragleave="handleDragLeave"
+                     @click="$refs.fileInput.click()">
+                    
+                    <div v-if="!uploadedImage" class="space-y-4">
+                        <div class="text-6xl">📁</div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-700 mb-2">上传你的设计图片</h3>
+                            <p class="text-gray-500 mb-4">拖拽图片到这里，或点击选择文件</p>
+                            <div class="text-sm text-gray-400">
+                                支持 JPG, PNG, GIF, WebP 格式，最大 10MB
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-if="uploadedImage" class="space-y-4">
+                        <img :src="uploadedImage" alt="上传的图片" class="image-preview mx-auto rounded-lg shadow-md">
+                        <div class="flex justify-center space-x-4">
+                            <button @click="clearImage" 
+                                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                🗑️ 清除图片
+                            </button>
+                            <button @click="analyzeImage" 
+                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                🔍 分析图片
+                            </button>
+                        </div>
+                    </div>
+
+                    <input type="file" 
+                           ref="fileInput" 
+                           @change="handleFileSelect" 
+                           accept="image/*" 
+                           class="hidden">
+                </div>
+            </div>
+
+            <!-- 分析结果区域 -->
+            <div v-if="analysisResult" class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">🔍 分析结果</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- 图片信息 -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">📊 图片信息</h3>
+                        <div class="space-y-2 text-sm">
+                            <div><span class="font-medium">文件大小:</span> {{ analysisResult.fileSize }}</div>
+                            <div><span class="font-medium">图片尺寸:</span> {{ analysisResult.dimensions }}</div>
+                            <div><span class="font-medium">文件格式:</span> {{ analysisResult.format }}</div>
+                            <div><span class="font-medium">上传时间:</span> {{ analysisResult.uploadTime }}</div>
+                        </div>
+                    </div>
+
+                    <!-- 设计分析 -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">🎨 设计分析</h3>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-blue-50 rounded-lg">
+                                <div class="font-medium text-blue-800">布局类型</div>
+                                <div class="text-blue-600 text-sm">{{ analysisResult.layoutType }}</div>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-lg">
+                                <div class="font-medium text-green-800">主要功能区域</div>
+                                <div class="text-green-600 text-sm">{{ analysisResult.mainAreas }}</div>
+                            </div>
+                            <div class="p-3 bg-purple-50 rounded-lg">
+                                <div class="font-medium text-purple-800">设计风格</div>
+                                <div class="text-purple-600 text-sm">{{ analysisResult.designStyle }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 实现建议 -->
+                <div class="mt-8">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">💡 实现建议</h3>
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <div class="prose max-w-none">
+                            <div v-html="analysisResult.suggestions"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 代码生成按钮 -->
+                <div class="mt-8 text-center">
+                    <button @click="generateCode" 
+                            class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl text-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all">
+                        🚀 生成代码实现
+                    </button>
+                </div>
+            </div>
+
+            <!-- 代码生成结果 -->
+            <div v-if="generatedCode" class="bg-white rounded-xl shadow-lg p-8 mt-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">💻 生成的代码</h2>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">HTML 结构</h3>
+                        <pre class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm"><code>{{ generatedCode.html }}</code></pre>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">CSS 样式</h3>
+                        <pre class="bg-gray-900 text-blue-400 p-4 rounded-lg overflow-x-auto text-sm"><code>{{ generatedCode.css }}</code></pre>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">JavaScript 功能</h3>
+                        <pre class="bg-gray-900 text-yellow-400 p-4 rounded-lg overflow-x-auto text-sm"><code>{{ generatedCode.js }}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    uploadedImage: null,
+                    analysisResult: null,
+                    generatedCode: null,
+                    isDragging: false
+                };
+            },
+            methods: {
+                handleDrop(event) {
+                    event.preventDefault();
+                    this.isDragging = false;
+                    
+                    const files = event.dataTransfer.files;
+                    if (files.length > 0) {
+                        this.processFile(files[0]);
+                    }
+                },
+                
+                handleDragOver(event) {
+                    event.preventDefault();
+                    this.isDragging = true;
+                },
+                
+                handleDragLeave() {
+                    this.isDragging = false;
+                },
+                
+                handleFileSelect(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.processFile(file);
+                    }
+                },
+                
+                processFile(file) {
+                    if (!file.type.startsWith('image/')) {
+                        alert('请选择图片文件！');
+                        return;
+                    }
+                    
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('图片文件不能超过10MB！');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.uploadedImage = e.target.result;
+                        this.analysisResult = null;
+                        this.generatedCode = null;
+                    };
+                    reader.readAsDataURL(file);
+                },
+                
+                clearImage() {
+                    this.uploadedImage = null;
+                    this.analysisResult = null;
+                    this.generatedCode = null;
+                    this.$refs.fileInput.value = '';
+                },
+                
+                analyzeImage() {
+                    // 模拟图片分析
+                    setTimeout(() => {
+                        this.analysisResult = {
+                            fileSize: '2.3 MB',
+                            dimensions: '1920 x 1080',
+                            format: 'PNG',
+                            uploadTime: new Date().toLocaleString('zh-TW'),
+                            layoutType: '三栏布局 - 左侧导航，中间内容，右侧工具栏',
+                            mainAreas: '词汇输入区、预览区、游戏选择区、设置面板',
+                            designStyle: '现代化扁平设计，卡片式布局，蓝色主题',
+                            suggestions: `
+                                <h4>基于你的设计图片，我建议以下实现方案：</h4>
+                                <ul>
+                                    <li><strong>布局框架：</strong>使用CSS Grid或Flexbox实现响应式三栏布局</li>
+                                    <li><strong>组件化：</strong>将每个功能区域封装为独立的Vue组件</li>
+                                    <li><strong>状态管理：</strong>使用Vuex或Pinia管理全局状态</li>
+                                    <li><strong>UI框架：</strong>建议使用Tailwind CSS + Headless UI</li>
+                                    <li><strong>交互体验：</strong>添加拖拽、动画等现代交互效果</li>
+                                </ul>
+                            `
+                        };
+                    }, 1500);
+                },
+                
+                generateCode() {
+                    // 模拟代码生成
+                    setTimeout(() => {
+                        this.generatedCode = {
+                            html: `<!-- 三栏布局结构 -->
+<div class="app-container">
+  <aside class="sidebar">
+    <!-- 左侧导航 -->
+  </aside>
+  <main class="content">
+    <!-- 主内容区域 -->
+  </main>
+  <aside class="toolbar">
+    <!-- 右侧工具栏 -->
+  </aside>
+</div>`,
+                            css: `.app-container {
+  display: grid;
+  grid-template-columns: 250px 1fr 300px;
+  height: 100vh;
+  gap: 1rem;
+}
+
+.sidebar {
+  background: #f8fafc;
+  padding: 1rem;
+  border-right: 1px solid #e2e8f0;
+}
+
+.content {
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.toolbar {
+  background: #f8fafc;
+  padding: 1rem;
+  border-left: 1px solid #e2e8f0;
+}`,
+                            js: `// Vue 3 组件实现
+const ContentManager = {
+  data() {
+    return {
+      vocabulary: [],
+      selectedGame: null,
+      settings: {}
+    };
+  },
+  methods: {
+    addWord(word) {
+      this.vocabulary.push(word);
+    },
+    selectGame(gameType) {
+      this.selectedGame = gameType;
+    }
+  }
+};`
+                        };
+                    }, 1000);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

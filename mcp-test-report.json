@@ -1,0 +1,81 @@
+{
+  "timestamp": "2025-06-25T01:33:27.710Z",
+  "total": 6,
+  "success": 0,
+  "failed": 5,
+  "timeout": 1,
+  "results": [
+    {
+      "name": "SQLite MCP",
+      "command": "node",
+      "args": [
+        "mcp-sqlite-jparkerweb/mcp-sqlite-server.js"
+      ],
+      "type": "node",
+      "port": null,
+      "status": "timeout"
+    },
+    {
+      "name": "Microsoft Playwright MCP",
+      "command": "node",
+      "args": [
+        "playwright-mcp-microsoft/index.js"
+      ],
+      "type": "node",
+      "port": null,
+      "status": "error",
+      "output": "",
+      "error": "node:internal/modules/esm/resolve:275\r\n    throw new ERR_MODULE_NOT_FOUND(\r\n          ^\r\n\r\nError [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\\Users\\Administrator\\Desktop\\EduCreate\\EduCreate\\playwright-mcp-microsoft\\lib\\index.js' imported from C:\\Users\\Administrator\\Desktop\\EduCreate\\EduCreate\\playwright-mcp-microsoft\\index.js\r\n    at finalizeResolution (node:internal/modules/esm/resolve:275:11)\r\n    at moduleResolve (node:internal/modules/esm/resolve:860:10)\r\n    at defaultResolve (node:internal/modules/esm/resolve:984:11)\r\n    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:780:12)\r\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:704:25)\r\n    at ModuleLoader.resolve (node:internal/modules/esm/loader:687:38)\r\n    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:305:38)\r\n    at ModuleJob._link (node:internal/modules/esm/module_job:137:49) {\r\n  code: 'ERR_MODULE_NOT_FOUND',\r\n  url: 'file:///C:/Users/Administrator/Desktop/EduCreate/EduCreate/playwright-mcp-microsoft/lib/index.js'\r\n}\r\n\r\nNode.js v22.16.0\r\n"
+    },
+    {
+      "name": "Sequential Thinking MCP",
+      "command": "node",
+      "args": [
+        "sequential-thinking-zalab/src/index.js"
+      ],
+      "type": "node",
+      "port": null,
+      "status": "error",
+      "output": "",
+      "error": "file:///C:/Users/Administrator/Desktop/EduCreate/EduCreate/sequential-thinking-zalab/src/index.js:39\r\nObject.defineProperty(exports, \"__esModule\", { value: true });\r\n                      ^\r\n\r\nReferenceError: exports is not defined in ES module scope\r\nThis file is being treated as an ES module because it has a '.js' file extension and 'C:\\Users\\Administrator\\Desktop\\EduCreate\\EduCreate\\sequential-thinking-zalab\\package.json' contains \"type\": \"module\". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.\r\n    at file:///C:/Users/Administrator/Desktop/EduCreate/EduCreate/sequential-thinking-zalab/src/index.js:39:23\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)\r\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)\r\n\r\nNode.js v22.16.0\r\n"
+    },
+    {
+      "name": "Unstructured MCP",
+      "command": "python",
+      "args": [
+        "-m",
+        "uns_mcp"
+      ],
+      "type": "python",
+      "cwd": "unstructured-mcp",
+      "port": null,
+      "status": "error",
+      "output": "",
+      "error": "Traceback (most recent call last):\r\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\r\n  File \"<frozen runpy>\", line 88, in _run_code\r\n  File \"C:\\Users\\Administrator\\Desktop\\EduCreate\\EduCreate\\unstructured-mcp\\uns_mcp\\__main__.py\", line 6, in <module>\r\n    main()\r\n    ~~~~^^\r\n  File \"C:\\Users\\Administrator\\Desktop\\EduCreate\\EduCreate\\unstructured-mcp\\uns_mcp\\server.py\", line 727, in main\r\n    load_environment_variables()\r\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^\r\n  File \"C:\\Users\\Administrator\\Desktop\\EduCreate\\EduCreate\\unstructured-mcp\\uns_mcp\\server.py\", line 65, in load_environment_variables\r\n    raise ValueError(f\"Missing required environment variable: {var}\")\r\nValueError: Missing required environment variable: UNSTRUCTURED_API_KEY\r\n"
+    },
+    {
+      "name": "Mem0 MCP",
+      "command": "python",
+      "args": [
+        "mem0-mcp/main.py"
+      ],
+      "type": "python",
+      "port": 8080,
+      "status": "error",
+      "output": "",
+      "error": "Traceback (most recent call last):\r\n  File \"C:\\Users\\Administrator\\Desktop\\EduCreate\\EduCreate\\mem0-mcp\\main.py\", line 8, in <module>\r\n    from mem0 import MemoryClient\r\nModuleNotFoundError: No module named 'mem0'\r\n"
+    },
+    {
+      "name": "MCP Memory (Alternative)",
+      "command": "node",
+      "args": [
+        "mcp-memory-sdimitrov/src/index.js"
+      ],
+      "type": "node",
+      "port": null,
+      "status": "error",
+      "output": "",
+      "error": "node:internal/modules/cjs/loader:1404\r\n  throw err;\r\n  ^\r\n\r\nError: Cannot find module 'C:\\Users\\Administrator\\Desktop\\EduCreate\\EduCreate\\mcp-memory-sdimitrov\\src\\index.js'\r\n    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)\r\n    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)\r\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)\r\n    at Function._load (node:internal/modules/cjs/loader:1211:37)\r\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\r\n    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)\r\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\r\n    at node:internal/main/run_main_module:36:49 {\r\n  code: 'MODULE_NOT_FOUND',\r\n  requireStack: []\r\n}\r\n\r\nNode.js v22.16.0\r\n"
+    }
+  ]
+}

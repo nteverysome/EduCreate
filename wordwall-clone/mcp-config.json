@@ -1,0 +1,137 @@
+{
+  "mcpServers": {
+    "sqlite": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@jparkerweb/mcp-sqlite",
+        "wordwall-clone/data/wordwall.db"
+      ],
+      "description": "SQLite database operations for Wordwall data",
+      "env": {
+        "SQLITE_DB_PATH": "./data/wordwall.db"
+      }
+    },
+    "sqlite-explorer": {
+      "command": "python",
+      "args": [
+        "-m",
+        "sqlite_explorer_fastmcp",
+        "--db-path",
+        "wordwall-clone/data/wordwall.db"
+      ],
+      "description": "Advanced SQLite explorer with FastMCP",
+      "env": {
+        "SQLITE_DB_PATH": "./data/wordwall.db"
+      }
+    },
+    "weaviate": {
+      "command": "python",
+      "args": [
+        "-m",
+        "weaviate_mcp_server",
+        "--host",
+        "localhost",
+        "--port",
+        "8080"
+      ],
+      "description": "Weaviate vector database for semantic search",
+      "env": {
+        "WEAVIATE_URL": "http://localhost:8080",
+        "WEAVIATE_API_KEY": ""
+      }
+    },
+    "opentelemetry": {
+      "command": "node",
+      "args": [
+        "mcp-servers/opentelemetry-server.js"
+      ],
+      "description": "OpenTelemetry monitoring and tracing",
+      "env": {
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+        "OTEL_SERVICE_NAME": "wordwall-clone",
+        "OTEL_RESOURCE_ATTRIBUTES": "service.name=wordwall-clone,service.version=1.0.0"
+      }
+    },
+    "traceloop": {
+      "command": "python",
+      "args": [
+        "-m",
+        "traceloop_mcp_server"
+      ],
+      "description": "Traceloop AI application monitoring",
+      "env": {
+        "TRACELOOP_API_KEY": "",
+        "TRACELOOP_BASE_URL": "https://api.traceloop.com"
+      }
+    },
+    "langfuse": {
+      "command": "node",
+      "args": [
+        "mcp-servers/langfuse-server.js"
+      ],
+      "description": "Langfuse LLM application monitoring",
+      "env": {
+        "LANGFUSE_SECRET_KEY": "",
+        "LANGFUSE_PUBLIC_KEY": "",
+        "LANGFUSE_HOST": "https://cloud.langfuse.com"
+      }
+    },
+    "enhanced-video-feedback-collector": {
+      "command": "python",
+      "args": [
+        "wordwall-clone/direct_video_collector.py"
+      ],
+      "description": "Enhanced MCP Video Feedback Collector with AI analysis",
+      "env": {
+        "MCP_VIDEO_COLLECTOR_ENABLED": "true",
+        "MCP_VIDEO_COLLECTOR_MAX_FILE_SIZE": "104857600",
+        "MCP_VIDEO_COLLECTOR_TIMEOUT": "300"
+      }
+    },
+    "airplane-game-tester": {
+      "command": "python",
+      "args": [
+        "wordwall-clone/test-airplane-game.py"
+      ],
+      "description": "飛機遊戲自動測試和分析工具",
+      "env": {
+        "GAME_DEV_TOOLS_ENABLED": "true"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "sqlite_query",
+      "description": "Execute SQL queries on the Wordwall database"
+    },
+    {
+      "name": "sqlite_schema",
+      "description": "Get database schema information"
+    },
+    {
+      "name": "weaviate_search",
+      "description": "Perform semantic search on educational content"
+    },
+    {
+      "name": "weaviate_insert",
+      "description": "Insert new content into vector database"
+    },
+    {
+      "name": "otel_trace",
+      "description": "Create OpenTelemetry traces for performance monitoring"
+    },
+    {
+      "name": "otel_metrics",
+      "description": "Record custom metrics"
+    },
+    {
+      "name": "traceloop_log",
+      "description": "Log AI application events to Traceloop"
+    },
+    {
+      "name": "langfuse_trace",
+      "description": "Create Langfuse traces for LLM monitoring"
+    }
+  ]
+}

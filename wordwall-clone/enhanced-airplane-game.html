@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✈️ 增強版飛機英文遊戲 - 基於AI分析優化</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 50%, #B0E0E6 100%);
+            overflow: hidden;
+            height: 100vh;
+            perspective: 1000px;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        /* 增強的3D飛機設計 */
+        #airplane {
+            position: absolute;
+            left: 80px;
+            top: 50%;
+            width: 80px;
+            height: 60px;
+            transform-style: preserve-3d;
+            transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 100;
+        }
+
+        .airplane-body {
+            position: absolute;
+            width: 80px;
+            height: 20px;
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            border-radius: 0 40px 40px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.3);
+            transform: translateZ(10px);
+        }
+
+        .airplane-wing-top {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            width: 40px;
+            height: 15px;
+            background: linear-gradient(45deg, #4ECDC4, #44A08D);
+            border-radius: 8px 8px 0 0;
+            transform: rotateX(15deg) translateZ(5px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .airplane-wing-bottom {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 15px;
+            background: linear-gradient(45deg, #4ECDC4, #44A08D);
+            border-radius: 0 0 8px 8px;
+            transform: rotateX(-15deg) translateZ(5px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .airplane-nose {
+            position: absolute;
+            right: -15px;
+            top: 5px;
+            width: 0;
+            height: 0;
+            border-left: 20px solid #FF6B6B;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            transform: translateZ(15px);
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .airplane-tail {
+            position: absolute;
+            left: -10px;
+            top: -10px;
+            width: 15px;
+            height: 40px;
+            background: linear-gradient(45deg, #96CEB4, #FFEAA7);
+            border-radius: 8px 0 0 8px;
+            transform: translateZ(8px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* 引擎火焰效果 */
+        .engine-flame {
+            position: absolute;
+            left: -25px;
+            top: 8px;
+            width: 20px;
+            height: 4px;
+            background: linear-gradient(90deg, #FF6B6B, #FFA500, transparent);
+            border-radius: 2px;
+            animation: flameFlicker 0.1s infinite alternate;
+            transform: translateZ(12px);
+        }
+
+        @keyframes flameFlicker {
+            0% { transform: scaleX(1) translateZ(12px); opacity: 0.8; }
+            100% { transform: scaleX(1.2) translateZ(12px); opacity: 1; }
+        }
+
+        /* 飛機軌跡效果 */
+        .airplane-trail {
+            position: absolute;
+            left: -30px;
+            top: 9px;
+            width: 25px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.6), transparent);
+            border-radius: 1px;
+            animation: trailFade 0.5s ease-out forwards;
+        }
+
+        @keyframes trailFade {
+            0% { opacity: 0.8; transform: scaleX(1); }
+            100% { opacity: 0; transform: scaleX(0.3); }
+        }
+
+        /* 增強的雲朵設計 */
+        .word-cloud {
+            position: absolute;
+            background: linear-gradient(135deg, #ffffff, #f0f8ff);
+            border: 3px solid #4ECDC4;
+            border-radius: 25px;
+            padding: 12px 18px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2C3E50;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: moveLeft 6s linear infinite;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.1);
+            transform-style: preserve-3d;
+        }
+
+        .word-cloud:hover {
+            transform: scale(1.15) rotateY(10deg);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .word-cloud.correct {
+            border-color: #2ECC71;
+            background: linear-gradient(135deg, #E8F8F5, #D5F4E6);
+            animation: correctPulse 0.3s ease-in-out;
+        }
+
+        .word-cloud.incorrect {
+            border-color: #E74C3C;
+            background: linear-gradient(135deg, #FADBD8, #F1C0C0);
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes moveLeft {
+            0% { transform: translateX(100vw) rotateY(0deg); }
+            100% { transform: translateX(-250px) rotateY(360deg); }
+        }
+
+        /* 增強的爆炸效果 */
+        .explosion {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            animation: explode 0.6s ease-out forwards;
+            z-index: 200;
+            transform-style: preserve-3d;
+        }
+
+        .explosion.correct {
+            background: radial-gradient(circle, #2ECC71 0%, #27AE60 30%, #F39C12 60%, transparent 100%);
+        }
+
+        .explosion.incorrect {
+            background: radial-gradient(circle, #E74C3C 0%, #C0392B 30%, #F39C12 60%, transparent 100%);
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(0) rotateZ(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2) rotateZ(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2.5) rotateZ(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 粒子效果 */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #FFD700;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 1s ease-out forwards;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: scale(1) translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) translate(var(--dx), var(--dy));
+                opacity: 0;
+            }
+        }
+
+        /* 遊戲界面增強 */
+        #gameUI {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            color: white;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        #currentWord {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(44,62,80,0.9));
+            color: white;
+            padding: 20px 40px;
+            border-radius: 30px;
+            font-size: 28px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            #airplane {
+                width: 60px;
+                height: 45px;
+                left: 40px;
+            }
+
+            .airplane-body {
+                width: 60px;
+                height: 15px;
+            }
+
+            .word-cloud {
+                font-size: 16px;
+                padding: 10px 15px;
+            }
+
+            #currentWord {
+                font-size: 22px;
+                padding: 15px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- 3D 飛機 -->
+        <div id="airplane">
+            <div class="airplane-body"></div>
+            <div class="airplane-wing-top"></div>
+            <div class="airplane-wing-bottom"></div>
+            <div class="airplane-nose"></div>
+            <div class="airplane-tail"></div>
+            <div class="engine-flame"></div>
+        </div>
+
+        <!-- 遊戲界面 -->
+        <div id="gameUI">
+            <div>分數: <span id="score">0</span></div>
+            <div>時間: <span id="timer">0</span>s</div>
+            <div>FPS: <span id="fps">60</span></div>
+            <div class="hearts" id="hearts">
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+                <span class="heart">❤️</span>
+            </div>
+        </div>
+
+        <!-- 當前單字顯示 -->
+        <div id="currentWord">準備開始...</div>
+    </div>
+
+    <!-- 設置面板 -->
+    <div id="setupPanel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2000; max-width: 500px; width: 90%;">
+        <h2 style="color: #2C3E50; margin-bottom: 20px; text-align: center;">✈️ 增強版飛機英文遊戲</h2>
+        <p style="margin-bottom: 20px; color: #7F8C8D;">基於AI分析優化：流暢物理引擎 + 3D視覺效果</p>
+
+        <div style="margin: 20px 0;">
+            <input type="text" id="englishInput" placeholder="輸入英文單字 (例: apple)" style="width: 48%; margin-right: 4%; padding: 10px; border: 2px solid #BDC3C7; border-radius: 8px;">
+            <input type="text" id="chineseInput" placeholder="輸入中文翻譯 (例: 蘋果)" style="width: 48%; padding: 10px; border: 2px solid #BDC3C7; border-radius: 8px;">
+        </div>
+
+        <button onclick="addWord()" style="background: #3498DB; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin: 5px;">➕ 添加單字</button>
+
+        <div id="wordList" style="max-height: 200px; overflow-y: auto; border: 1px solid #BDC3C7; border-radius: 8px; padding: 10px; margin: 10px 0;">
+            <div style="text-align: center; color: #7F8C8D; padding: 20px;">
+                還沒有單字，請先添加一些單字對！
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="startGame()" id="startBtn" disabled style="background: #2ECC71; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 5px;">🚀 開始遊戲</button>
+            <button onclick="addSampleWords()" style="background: #9B59B6; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 5px;">📚 添加示例單字</button>
+        </div>
+    </div>
+
+    <!-- 遊戲結束面板 -->
+    <div id="gameOver" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2000; text-align: center; display: none;">
+        <h2>🎮 遊戲結束</h2>
+        <div id="finalStats"></div>
+        <button onclick="restartGame()" style="background: #2ECC71; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; margin: 10px;">🔄 重新開始</button>
+        <button onclick="backToSetup()" style="background: #3498DB; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer; margin: 10px;">⚙️ 返回設置</button>
+    </div>
+
+    <script>
+        // 增強的物理引擎系統
+        class EnhancedPhysics {
+            constructor() {
+                this.position = { x: 80, y: window.innerHeight / 2 };
+                this.velocity = { x: 0, y: 0 };
+                this.acceleration = { x: 0, y: 0 };
+                this.maxSpeed = 12; // 提高最大速度
+                this.friction = 0.88; // 調整摩擦力
+                this.responsiveness = 0.8; // 高響應性
+                this.smoothing = 0.15; // 平滑係數
+            }
+
+            update(input) {
+                // 基於分析數據的高響應物理計算
+                const targetAcceleration = input.up ? -this.responsiveness :
+                                         input.down ? this.responsiveness : 0;
+
+                // 平滑加速度變化
+                this.acceleration.y += (targetAcceleration - this.acceleration.y) * this.smoothing;
+
+                // 更新速度
+                this.velocity.y += this.acceleration.y;
+                this.velocity.y = Math.max(-this.maxSpeed, Math.min(this.maxSpeed, this.velocity.y));
+
+                // 應用摩擦力
+                this.velocity.y *= this.friction;
+
+                // 更新位置
+                this.position.y += this.velocity.y;
+
+                // 邊界檢測
+                this.position.y = Math.max(50, Math.min(window.innerHeight - 100, this.position.y));
+
+                return this.position;
+            }
+
+            getTilt() {
+                // 根據速度計算飛機傾斜角度
+                return Math.max(-15, Math.min(15, this.velocity.y * 2));
+            }
+        }
+
+        // 粒子系統
+        class ParticleSystem {
+            constructor() {
+                this.particles = [];
+                this.pool = [];
+            }
+
+            createExplosion(x, y, color, count = 15) {
+                for (let i = 0; i < count; i++) {
+                    const particle = this.getParticle();
+                    if (particle) {
+                        particle.reset(x, y, color);
+                        this.particles.push(particle);
+                    }
+                }
+            }
+
+            update() {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const particle = this.particles[i];
+                    particle.update();
+
+                    if (particle.isDead()) {
+                        this.pool.push(this.particles.splice(i, 1)[0]);
+                    }
+                }
+            }
+
+            render() {
+                this.particles.forEach(particle => particle.render());
+            }
+
+            getParticle() {
+                return this.pool.pop() || new Particle();
+            }
+        }
+
+        class Particle {
+            constructor() {
+                this.element = null;
+                this.reset(0, 0, '#FFD700');
+            }
+
+            reset(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 15;
+                this.vy = (Math.random() - 0.5) * 15;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.02 + 0.02;
+                this.color = color;
+
+                if (!this.element) {
+                    this.element = document.createElement('div');
+                    this.element.className = 'particle';
+                    document.getElementById('gameContainer').appendChild(this.element);
+                }
+
+                this.element.style.left = this.x + 'px';
+                this.element.style.top = this.y + 'px';
+                this.element.style.background = this.color;
+                this.element.style.opacity = this.life;
+                this.element.style.setProperty('--dx', this.vx * 20 + 'px');
+                this.element.style.setProperty('--dy', this.vy * 20 + 'px');
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+
+                if (this.element) {
+                    this.element.style.left = this.x + 'px';
+                    this.element.style.top = this.y + 'px';
+                    this.element.style.opacity = this.life;
+                }
+            }
+
+            isDead() {
+                return this.life <= 0;
+            }
+
+            render() {
+                // 渲染邏輯已在 update 中處理
+            }
+        }
+
+        // 性能優化的遊戲循環
+        class GameLoop {
+            constructor() {
+                this.lastTime = 0;
+                this.accumulator = 0;
+                this.fixedTimeStep = 1000 / 60; // 60 FPS
+                this.fps = 60;
+                this.frameCount = 0;
+                this.fpsUpdateTime = 0;
+            }
+
+            run(currentTime) {
+                const deltaTime = currentTime - this.lastTime;
+                this.lastTime = currentTime;
+                this.accumulator += deltaTime;
+
+                // FPS 計算
+                this.frameCount++;
+                this.fpsUpdateTime += deltaTime;
+                if (this.fpsUpdateTime >= 1000) {
+                    this.fps = Math.round(this.frameCount * 1000 / this.fpsUpdateTime);
+                    document.getElementById('fps').textContent = this.fps;
+                    this.frameCount = 0;
+                    this.fpsUpdateTime = 0;
+                }
+
+                // 固定時間步長更新
+                while (this.accumulator >= this.fixedTimeStep) {
+                    if (gameState.isPlaying) {
+                        this.update(this.fixedTimeStep);
+                    }
+                    this.accumulator -= this.fixedTimeStep;
+                }
+
+                // 渲染
+                this.render(this.accumulator / this.fixedTimeStep);
+
+                requestAnimationFrame(this.run.bind(this));
+            }
+
+            update(deltaTime) {
+                // 更新物理
+                const input = {
+                    up: keys.up || keys.w,
+                    down: keys.down || keys.s
+                };
+
+                const newPosition = physics.update(input);
+
+                // 更新飛機位置和傾斜
+                const airplane = document.getElementById('airplane');
+                airplane.style.top = newPosition.y + 'px';
+
+                const tilt = physics.getTilt();
+                airplane.style.transform = `translateY(-50%) rotateZ(${tilt}deg)`;
+
+                // 更新粒子系統
+                particleSystem.update();
+
+                // 碰撞檢測
+                checkCollisions();
+
+                // 創建軌跡效果
+                if (Math.random() < 0.3) {
+                    createTrail();
+                }
+            }
+
+            render(interpolation) {
+                // 渲染粒子
+                particleSystem.render();
+            }
+        }
+
+        // 遊戲狀態
+        let gameState = {
+            isPlaying: false,
+            score: 0,
+            lives: 3,
+            timer: 0,
+            currentWordIndex: 0,
+            wordPairs: [],
+            currentEnglish: '',
+            currentChinese: ''
+        };
+
+        // 輸入系統
+        let keys = {
+            up: false,
+            down: false,
+            w: false,
+            s: false
+        };
+
+        // 初始化系統
+        let physics = new EnhancedPhysics();
+        let particleSystem = new ParticleSystem();
+        let gameLoop = new GameLoop();
+
+        // 鍵盤事件
+        document.addEventListener('keydown', function(e) {
+            switch(e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    keys.up = true;
+                    keys.w = true;
+                    e.preventDefault();
+                    break;
+                case 'arrowdown':
+                case 's':
+                    keys.down = true;
+                    keys.s = true;
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', function(e) {
+            switch(e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    keys.up = false;
+                    keys.w = false;
+                    break;
+                case 'arrowdown':
+                case 's':
+                    keys.down = false;
+                    keys.s = false;
+                    break;
+            }
+        });
+
+        // 觸控控制（增強版）
+        let touchStartY = 0;
+        let touchCurrentY = 0;
+        let isTouching = false;
+
+        document.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+            touchCurrentY = touchStartY;
+            isTouching = true;
+            e.preventDefault();
+        });
+
+        document.addEventListener('touchmove', function(e) {
+            if (!gameState.isPlaying || !isTouching) return;
+            e.preventDefault();
+
+            touchCurrentY = e.touches[0].clientY;
+            const deltaY = touchCurrentY - touchStartY;
+
+            // 根據滑動方向設置輸入
+            if (deltaY < -20) {
+                keys.up = true;
+                keys.down = false;
+            } else if (deltaY > 20) {
+                keys.down = true;
+                keys.up = false;
+            } else {
+                keys.up = false;
+                keys.down = false;
+            }
+        });
+
+        document.addEventListener('touchend', function(e) {
+            isTouching = false;
+            keys.up = false;
+            keys.down = false;
+            e.preventDefault();
+        });
+
+        // 軌跡效果
+        function createTrail() {
+            const trail = document.createElement('div');
+            trail.className = 'airplane-trail';
+            trail.style.left = (physics.position.x - 30) + 'px';
+            trail.style.top = (physics.position.y + 9) + 'px';
+
+            document.getElementById('gameContainer').appendChild(trail);
+
+            setTimeout(() => {
+                if (trail.parentNode) {
+                    trail.parentNode.removeChild(trail);
+                }
+            }, 500);
+        }
+
+        // 碰撞檢測（優化版）
+        function checkCollisions() {
+            const airplane = document.getElementById('airplane');
+            const airplaneRect = airplane.getBoundingClientRect();
+            const clouds = document.querySelectorAll('.word-cloud');
+
+            clouds.forEach(cloud => {
+                const cloudRect = cloud.getBoundingClientRect();
+
+                if (isColliding(airplaneRect, cloudRect)) {
+                    handleCollision(cloud);
+                }
+            });
+        }
+
+        function isColliding(rect1, rect2) {
+            return !(rect1.right < rect2.left + 10 ||
+                     rect1.left > rect2.right - 10 ||
+                     rect1.bottom < rect2.top + 10 ||
+                     rect1.top > rect2.bottom - 10);
+        }
+
+        // 處理碰撞（增強版）
+        function handleCollision(cloud) {
+            const isCorrect = cloud.dataset.correct === 'true';
+            const cloudRect = cloud.getBoundingClientRect();
+
+            if (isCorrect) {
+                gameState.score += 10;
+                createEnhancedExplosion(cloudRect.left, cloudRect.top, 'correct');
+                particleSystem.createExplosion(cloudRect.left + 50, cloudRect.top + 25, '#2ECC71', 20);
+                nextWord();
+            } else {
+                gameState.lives--;
+                createEnhancedExplosion(physics.position.x, physics.position.y, 'incorrect');
+                particleSystem.createExplosion(physics.position.x + 40, physics.position.y + 30, '#E74C3C', 25);
+
+                // 螢幕震動效果
+                document.body.style.animation = 'shake 0.3s ease-in-out';
+                setTimeout(() => {
+                    document.body.style.animation = '';
+                }, 300);
+
+                if (gameState.lives <= 0) {
+                    endGame();
+                }
+            }
+
+            cloud.remove();
+            updateUI();
+        }
+
+        // 增強的爆炸效果
+        function createEnhancedExplosion(x, y, type) {
+            const explosion = document.createElement('div');
+            explosion.className = `explosion ${type}`;
+            explosion.style.left = x + 'px';
+            explosion.style.top = y + 'px';
+
+            document.getElementById('gameContainer').appendChild(explosion);
+
+            setTimeout(() => {
+                if (explosion.parentNode) {
+                    explosion.parentNode.removeChild(explosion);
+                }
+            }, 600);
+        }
+
+        // 添加震動動畫
+        const shakeStyle = document.createElement('style');
+        shakeStyle.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
+            }
+        `;
+        document.head.appendChild(shakeStyle);
+
+        // 單字管理
+        function addWord() {
+            const english = document.getElementById('englishInput').value.trim();
+            const chinese = document.getElementById('chineseInput').value.trim();
+
+            if (english && chinese) {
+                gameState.wordPairs.push({ english, chinese });
+                updateWordList();
+                document.getElementById('englishInput').value = '';
+                document.getElementById('chineseInput').value = '';
+                updateStartButton();
+            } else {
+                alert('請輸入英文單字和中文翻譯！');
+            }
+        }
+
+        function updateWordList() {
+            const wordList = document.getElementById('wordList');
+
+            if (gameState.wordPairs.length === 0) {
+                wordList.innerHTML = '<div style="text-align: center; color: #7F8C8D; padding: 20px;">還沒有單字，請先添加一些單字對！</div>';
+                return;
+            }
+
+            wordList.innerHTML = gameState.wordPairs.map((pair, index) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #ECF0F1;">
+                    <span><strong>${pair.english}</strong> - ${pair.chinese}</span>
+                    <button onclick="removeWord(${index})" style="background: #E74C3C; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">刪除</button>
+                </div>
+            `).join('');
+        }
+
+        function removeWord(index) {
+            gameState.wordPairs.splice(index, 1);
+            updateWordList();
+            updateStartButton();
+        }
+
+        function updateStartButton() {
+            const startBtn = document.getElementById('startBtn');
+            const canStart = gameState.wordPairs.length >= 3;
+
+            startBtn.disabled = !canStart;
+            startBtn.textContent = canStart
+                ? `🚀 開始遊戲 (${gameState.wordPairs.length} 個單字)`
+                : '🚀 開始遊戲 (需要至少3個單字)';
+            startBtn.style.opacity = canStart ? '1' : '0.5';
+        }
+
+        function addSampleWords() {
+            const sampleWords = [
+                { english: 'airplane', chinese: '飛機' },
+                { english: 'cloud', chinese: '雲朵' },
+                { english: 'sky', chinese: '天空' },
+                { english: 'fast', chinese: '快速' },
+                { english: 'smooth', chinese: '流暢' },
+                { english: 'engine', chinese: '引擎' },
+                { english: 'wing', chinese: '翅膀' },
+                { english: 'flight', chinese: '飛行' }
+            ];
+
+            gameState.wordPairs = [...gameState.wordPairs, ...sampleWords];
+            updateWordList();
+            updateStartButton();
+        }
+
+        // 遊戲控制
+        function startGame() {
+            if (gameState.wordPairs.length < 3) {
+                alert('需要至少3個單字才能開始遊戲！');
+                return;
+            }
+
+            // 隱藏設置面板
+            document.getElementById('setupPanel').style.display = 'none';
+
+            // 重置遊戲狀態
+            gameState.isPlaying = true;
+            gameState.score = 0;
+            gameState.lives = 3;
+            gameState.timer = 0;
+            gameState.currentWordIndex = 0;
+
+            // 重置物理系統
+            physics = new EnhancedPhysics();
+
+            // 更新界面
+            updateUI();
+            nextWord();
+
+            // 開始計時器
+            const timerInterval = setInterval(() => {
+                if (gameState.isPlaying) {
+                    gameState.timer++;
+                    document.getElementById('timer').textContent = gameState.timer;
+                } else {
+                    clearInterval(timerInterval);
+                }
+            }, 1000);
+
+            // 開始雲朵生成
+            const cloudInterval = setInterval(() => {
+                if (gameState.isPlaying) {
+                    spawnWordCloud();
+                } else {
+                    clearInterval(cloudInterval);
+                }
+            }, 2000);
+        }
+
+        function nextWord() {
+            if (gameState.currentWordIndex >= gameState.wordPairs.length) {
+                gameState.currentWordIndex = 0;
+                gameState.wordPairs = shuffleArray(gameState.wordPairs);
+            }
+
+            const currentPair = gameState.wordPairs[gameState.currentWordIndex];
+            gameState.currentEnglish = currentPair.english;
+            gameState.currentChinese = currentPair.chinese;
+
+            document.getElementById('currentWord').textContent = `找到: ${gameState.currentEnglish}`;
+            gameState.currentWordIndex++;
+        }
+
+        function spawnWordCloud() {
+            if (!gameState.isPlaying) return;
+
+            const wordCloud = document.createElement('div');
+            wordCloud.className = 'word-cloud';
+
+            // 60% 機率生成正確答案
+            const isCorrect = Math.random() < 0.6;
+
+            if (isCorrect) {
+                wordCloud.textContent = gameState.currentChinese;
+                wordCloud.dataset.correct = 'true';
+                wordCloud.classList.add('correct');
+            } else {
+                const wrongAnswers = gameState.wordPairs
+                    .filter(pair => pair.chinese !== gameState.currentChinese)
+                    .map(pair => pair.chinese);
+
+                if (wrongAnswers.length > 0) {
+                    const randomWrong = wrongAnswers[Math.floor(Math.random() * wrongAnswers.length)];
+                    wordCloud.textContent = randomWrong;
+                    wordCloud.dataset.correct = 'false';
+                    wordCloud.classList.add('incorrect');
+                }
+            }
+
+            // 隨機垂直位置
+            wordCloud.style.top = Math.random() * (window.innerHeight - 150) + 75 + 'px';
+            wordCloud.style.right = '-200px';
+
+            // 點擊事件
+            wordCloud.addEventListener('click', function() {
+                handleCollision(this);
+            });
+
+            // 自動清理
+            wordCloud.addEventListener('animationend', function() {
+                if (this.parentNode) {
+                    this.parentNode.removeChild(this);
+                }
+            });
+
+            document.getElementById('gameContainer').appendChild(wordCloud);
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = gameState.score;
+
+            const hearts = document.querySelectorAll('.heart');
+            hearts.forEach((heart, index) => {
+                heart.style.opacity = index < gameState.lives ? '1' : '0.3';
+            });
+        }
+
+        function endGame() {
+            gameState.isPlaying = false;
+
+            // 清除所有雲朵
+            document.querySelectorAll('.word-cloud').forEach(cloud => cloud.remove());
+
+            // 顯示結果
+            const finalStats = document.getElementById('finalStats');
+            const totalScore = gameState.score + gameState.timer;
+            const ranking = getRanking(totalScore);
+
+            finalStats.innerHTML = `
+                <div style="margin: 20px 0;">
+                    <div style="font-size: 24px; color: #E74C3C; margin-bottom: 10px;">💥 飛機墜毀了！</div>
+                    <div style="font-size: 18px; margin: 10px 0;">最終分數: <strong>${gameState.score}</strong></div>
+                    <div style="font-size: 18px; margin: 10px 0;">存活時間: <strong>${gameState.timer}</strong> 秒</div>
+                    <div style="font-size: 18px; margin: 10px 0;">總分: <strong>${totalScore}</strong></div>
+                    <div style="font-size: 16px; color: #7F8C8D;">排名: ${ranking}</div>
+                    <div style="font-size: 14px; color: #95A5A6; margin-top: 10px;">
+                        基於AI分析優化的增強版遊戲體驗！
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        function getRanking(totalScore) {
+            if (totalScore >= 300) return '🏆 AI 優化大師';
+            if (totalScore >= 200) return '🥇 增強版飛行員';
+            if (totalScore >= 150) return '🥈 流暢操控者';
+            if (totalScore >= 100) return '🥉 物理引擎新手';
+            return '🔰 練習生';
+        }
+
+        function restartGame() {
+            document.getElementById('gameOver').style.display = 'none';
+            startGame();
+        }
+
+        function backToSetup() {
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('setupPanel').style.display = 'block';
+        }
+
+        // 工具函數
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // Enter 鍵添加單字
+        document.getElementById('chineseInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addWord();
+            }
+        });
+
+        // 初始化
+        updateWordList();
+        updateStartButton();
+
+        // 啟動遊戲循環
+        gameLoop.run(0);
+
+        console.log('🚀 增強版飛機遊戲已啟動！');
+        console.log('📊 基於AI分析數據優化：');
+        console.log('  - 流暢垂直移動物理引擎');
+        console.log('  - 快速高響應控制系統');
+        console.log('  - 3D視覺效果和增強動畫');
+        console.log('  - 粒子系統和性能優化');
+    </script>
+</body>
+</html>

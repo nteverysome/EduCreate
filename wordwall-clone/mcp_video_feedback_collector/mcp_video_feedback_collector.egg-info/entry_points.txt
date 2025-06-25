@@ -1,0 +1,2 @@
+[console_scripts]
+mcp-video-feedback-collector = mcp_video_feedback_collector.server:main

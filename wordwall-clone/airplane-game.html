@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛩️ 中英文配對飛行冒險</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Nunito:wght@400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
+            background: radial-gradient(ellipse at center, #87CEEB 0%, #4682B4 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 動態背景星星 */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: sparkle 3s infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        .game-container {
+            position: relative;
+            width: 950px;
+            height: 700px;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #87CEEB 0%, #6BB6FF 30%, #4FC3F7 60%, #29B6F6 100%);
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 
+                0 20px 50px rgba(0,0,0,0.3),
+                inset 0 0 50px rgba(255,255,255,0.1);
+            z-index: 5;
+        }
+
+        .game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: none;
+        }
+
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .score-display {
+            position: absolute;
+            top: 25px;
+            left: 30px;
+            color: white;
+            font-size: 26px;
+            font-weight: 800;
+            text-shadow: 
+                0 0 10px rgba(0,123,255,0.8),
+                2px 2px 8px rgba(0,0,0,0.6);
+            background: linear-gradient(135deg, rgba(0,123,255,0.8), rgba(40,167,69,0.8));
+            padding: 12px 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .lives-display {
+            position: absolute;
+            top: 25px;
+            right: 30px;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            text-shadow: 
+                0 0 8px rgba(220,53,69,0.8),
+                2px 2px 6px rgba(0,0,0,0.6);
+            background: linear-gradient(135deg, rgba(220,53,69,0.8), rgba(255,87,34,0.8));
+            padding: 12px 18px;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .target-word {
+            position: absolute;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #FF4500;
+            font-family: 'Fredoka One', cursive;
+            font-size: 52px;
+            font-weight: 400;
+            text-shadow: 
+                4px 4px 0px #FFF,
+                -2px -2px 0px #FFF,
+                2px -2px 0px #FFF,
+                -2px 2px 0px #FFF,
+                2px 2px 0px #FFF,
+                0 0 20px rgba(255,69,0,0.6);
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            padding: 18px 35px;
+            border-radius: 20px;
+            border: 4px solid #FF6347;
+            backdrop-filter: blur(15px);
+            animation: targetGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes targetGlow {
+            0% { 
+                transform: translateX(-50%) scale(1);
+                box-shadow: 0 0 20px rgba(255,99,71,0.6);
+            }
+            100% { 
+                transform: translateX(-50%) scale(1.02);
+                box-shadow: 0 0 30px rgba(255,99,71,0.8);
+            }
+        }
+
+        .streak-display {
+            position: absolute;
+            top: 90px;
+            right: 30px;
+            color: #FFD700;
+            font-size: 20px;
+            font-weight: 800;
+            text-shadow: 
+                0 0 10px rgba(255,215,0,0.8),
+                2px 2px 6px rgba(0,0,0,0.6);
+            background: linear-gradient(135deg, rgba(255,193,7,0.8), rgba(255,152,0,0.8));
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 25px;
+            left: 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.4));
+            padding: 18px 24px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(15px);
+            max-width: 380px;
+            line-height: 1.4;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, 
+                rgba(0,0,0,0.95), 
+                rgba(20,20,40,0.95));
+            color: white;
+            padding: 45px;
+            border-radius: 25px;
+            text-align: center;
+            display: none;
+            pointer-events: all;
+            border: 3px solid rgba(135,206,235,0.6);
+            box-shadow: 
+                0 0 50px rgba(135,206,235,0.8),
+                inset 0 0 30px rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+        }
+
+        .game-over h2 {
+            margin-bottom: 25px;
+            color: #87CEEB;
+            font-family: 'Fredoka One', cursive;
+            font-size: 36px;
+            text-shadow: 0 0 15px #87CEEB;
+        }
+
+        .game-over p {
+            margin: 12px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #28a745, #34ce57);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 6px 20px rgba(40,167,69,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .restart-btn:hover {
+            background: linear-gradient(45deg, #34ce57, #28a745);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 10px 25px rgba(40,167,69,0.6),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .correct-effect {
+            position: absolute;
+            color: #00FF7F;
+            font-family: 'Fredoka One', cursive;
+            font-size: 40px;
+            font-weight: 400;
+            text-shadow: 
+                2px 2px 0 #FFF,
+                0 0 15px #00FF7F;
+            pointer-events: none;
+            z-index: 20;
+            animation: correctBounce 1.2s ease-out forwards;
+        }
+
+        @keyframes correctBounce {
+            0% { 
+                opacity: 1; 
+                transform: scale(0.8) translateY(0) rotate(-5deg); 
+            }
+            50% { 
+                transform: scale(1.3) translateY(-30px) rotate(5deg); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: scale(1) translateY(-60px) rotate(0deg); 
+            }
+        }
+
+        .wrong-effect {
+            position: absolute;
+            color: #FF4500;
+            font-family: 'Fredoka One', cursive;
+            font-size: 40px;
+            font-weight: 400;
+            text-shadow: 
+                2px 2px 0 #FFF,
+                0 0 15px #FF4500;
+            pointer-events: none;
+            z-index: 20;
+            animation: wrongShake 1.2s ease-out forwards;
+        }
+
+        @keyframes wrongShake {
+            0% { 
+                opacity: 1; 
+                transform: scale(0.8) translateX(0); 
+            }
+            25% { 
+                transform: scale(1.2) translateX(-15px); 
+            }
+            50% { 
+                transform: scale(1.2) translateX(15px); 
+            }
+            75% { 
+                transform: scale(1.2) translateX(-10px); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: scale(1) translateX(0); 
+            }
+        }
+
+        .combo-flash {
+            animation: comboFlash 0.5s ease-in-out;
+        }
+
+        @keyframes comboFlash {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        @media (max-width: 1000px) {
+            .game-container {
+                width: 95vw;
+                height: 85vh;
+            }
+            
+            .target-word {
+                font-size: 40px;
+                padding: 15px 25px;
+            }
+            
+            .instructions {
+                font-size: 14px;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 動態星空背景 -->
+    <div class="stars" id="stars"></div>
+
+    <div class="game-container">
+        <canvas class="game-canvas" id="gameCanvas" width="950" height="700"></canvas>
+        
+        <div class="ui-overlay">
+            <div class="score-display">
+                🏆 <span id="score">0</span>
+            </div>
+            <div class="lives-display">
+                💖 <span id="lives">❤️❤️❤️</span>
+            </div>
+            <div class="target-word" id="targetWord">車子</div>
+            <div class="streak-display">
+                ⚡ <span id="streak">0</span> 連擊
+            </div>
+            <div class="instructions">
+                🎯 <strong>任務目標：</strong>找到對應的英文單字！<br>
+                🎮 <strong>控制方式：</strong>滑鼠移動或方向鍵<br>
+                ✨ <strong>得分技巧：</strong>連續答對獲得額外分數
+            </div>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <h2>🌟 任務完成</h2>
+            <p>🏆 最終得分: <span id="finalScore">0</span></p>
+            <p>📚 答對題數: <span id="correctAnswers">0</span></p>
+            <p>⚡ 最高連擊: <span id="maxStreak">0</span></p>
+            <p>🎯 正確率: <span id="accuracy">0</span>%</p>
+            <button class="restart-btn" onclick="restartGame()">🚀 再次挑戰</button>
+        </div>
+    </div>
+
+    <script>
+        // 中英文單字配對數據
+        const wordPairs = [
+            { chinese: '車子', english: 'car' },
+            { chinese: '房子', english: 'house' },
+            { chinese: '學校', english: 'school' },
+            { chinese: '醫院', english: 'hospital' },
+            { chinese: '公園', english: 'park' },
+            { chinese: '書本', english: 'book' },
+            { chinese: '電腦', english: 'computer' },
+            { chinese: '手機', english: 'phone' },
+            { chinese: '飛機', english: 'airplane' },
+            { chinese: '火車', english: 'train' },
+            { chinese: '水果', english: 'fruit' },
+            { chinese: '動物', english: 'animal' }
+        ];
+
+        // 遊戲狀態
+        let gameState = {
+            isPlaying: false,
+            score: 0,
+            lives: 3,
+            streak: 0,
+            maxStreak: 0,
+            correctAnswers: 0,
+            totalAnswers: 0,
+            currentWord: null,
+            startTime: 0,
+            airplane: { x: 120, y: 350, width: 80, height: 40, angle: 0 },
+            clouds: [],
+            particles: [],
+            backgroundParticles: [],
+            keys: {},
+            mouseY: 350,
+            cloudSpawnRate: 3500,
+            lastCloudSpawn: 0
+        };
+
+        // Canvas 設置
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 創建動態星空
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = (Math.random() * 4 + 1) + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // 初始化遊戲
+        function initGame() {
+            gameState.isPlaying = true;
+            gameState.score = 0;
+            gameState.lives = 3;
+            gameState.streak = 0;
+            gameState.maxStreak = 0;
+            gameState.correctAnswers = 0;
+            gameState.totalAnswers = 0;
+            gameState.startTime = Date.now();
+            gameState.airplane = { x: 120, y: 350, width: 80, height: 40, angle: 0 };
+            gameState.clouds = [];
+            gameState.particles = [];
+            gameState.backgroundParticles = [];
+            gameState.cloudSpawnRate = 4000;
+            gameState.lastCloudSpawn = 0;
+            
+            // 初始化背景粒子
+            initBackgroundParticles();
+            
+            // 設置第一個單字
+            setNewTargetWord();
+            
+            document.getElementById('gameOver').style.display = 'none';
+            updateUI();
+            
+            // 開始遊戲循環
+            gameLoop();
+            
+            console.log('🛩️ 中英文配對飛行冒險啟動！');
+        }
+
+        // 初始化背景粒子
+        function initBackgroundParticles() {
+            for (let i = 0; i < 20; i++) {
+                gameState.backgroundParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 3 + 1,
+                    speed: Math.random() * 0.5 + 0.2,
+                    opacity: Math.random() * 0.3 + 0.1
+                });
+            }
+        }
+
+        // 設置新的目標單字
+        function setNewTargetWord() {
+            const randomPair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
+            gameState.currentWord = randomPair;
+            document.getElementById('targetWord').textContent = randomPair.chinese;
+            
+            // 不清除現有雲朵，讓它們繼續前進
+            gameState.lastCloudSpawn = Date.now();
+            
+            console.log('新目標:', randomPair.chinese, '->', randomPair.english);
+        }
+
+        // 生成雲朵障礙物
+        function generateCloud() {
+            if (!gameState.isPlaying) return;
+            
+            const now = Date.now();
+            if (now - gameState.lastCloudSpawn < gameState.cloudSpawnRate) return;
+            
+            gameState.lastCloudSpawn = now;
+            
+            // 決定這個雲朵是正確答案還是錯誤答案
+            const isCorrect = Math.random() < 0.35; // 35%機率是正確答案
+            let englishWord;
+            
+            if (isCorrect) {
+                englishWord = gameState.currentWord.english;
+            } else {
+                // 從其他單字中隨機選擇
+                const otherWords = wordPairs.filter(pair => pair.english !== gameState.currentWord.english);
+                englishWord = otherWords[Math.floor(Math.random() * otherWords.length)].english;
+            }
+            
+            const cloud = {
+                x: canvas.width,
+                y: Math.random() * (canvas.height - 250) + 125,
+                width: 140 + Math.random() * 40,
+                height: 90 + Math.random() * 30,
+                speed: 1.8 + Math.random() * 1.5,
+                word: englishWord,
+                isCorrect: isCorrect,
+                opacity: 0.95,
+                textSize: 20 + Math.random() * 6,
+                bobOffset: Math.random() * Math.PI * 2,
+                bobSpeed: 0.02 + Math.random() * 0.01
+            };
+            
+            gameState.clouds.push(cloud);
+        }
+
+        // 繪製美化背景
+        function drawBackground() {
+            // 主背景漸變
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(0.3, '#6BB6FF');
+            gradient.addColorStop(0.7, '#4FC3F7');
+            gradient.addColorStop(1, '#29B6F6');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 背景光暈
+            const time = Date.now() * 0.001;
+            for (let i = 0; i < 3; i++) {
+                ctx.save();
+                ctx.globalAlpha = 0.1;
+                const x = canvas.width * 0.3 + Math.sin(time + i * 2) * 100;
+                const y = canvas.height * 0.4 + Math.cos(time + i * 2) * 80;
+                
+                const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, 150);
+                glowGradient.addColorStop(0, 'rgba(255,255,255,0.8)');
+                glowGradient.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = glowGradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            }
+            
+            // 移動的背景雲朵
+            ctx.save();
+            ctx.globalAlpha = 0.15;
+            for (let i = 0; i < 4; i++) {
+                const x = (time * 30 + i * 250) % (canvas.width + 200) - 200;
+                const y = 60 + Math.sin(time * 0.5 + i) * 40;
+                
+                ctx.fillStyle = '#ffffff';
+                drawFluffyCloud(x, y, 60 + i * 10);
+            }
+            ctx.restore();
+            
+            // 背景粒子
+            gameState.backgroundParticles.forEach(particle => {
+                ctx.save();
+                ctx.globalAlpha = particle.opacity;
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                
+                particle.x -= particle.speed;
+                if (particle.x < -10) {
+                    particle.x = canvas.width + 10;
+                    particle.y = Math.random() * canvas.height;
+                }
+            });
+        }
+
+        // 繪製蓬鬆雲朵
+        function drawFluffyCloud(x, y, size) {
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.4, y - size * 0.2, size * 0.5, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.8, y, size * 0.6, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.4, y + size * 0.2, size * 0.4, 0, Math.PI * 2);
+            ctx.arc(x - size * 0.2, y, size * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 繪製精美飛機
+        function drawAirplane() {
+            const { x, y, width, height, angle } = gameState.airplane;
+            
+            ctx.save();
+            ctx.translate(x + width/2, y + height/2);
+            ctx.rotate(angle);
+            
+            // 飛機陰影
+            ctx.save();
+            ctx.translate(4, 4);
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#333333';
+            ctx.fillRect(-width/2, -height/2, width, height);
+            ctx.restore();
+            
+            // 飛機主體漸變
+            const bodyGradient = ctx.createLinearGradient(-width/2, 0, width/2, 0);
+            bodyGradient.addColorStop(0, '#FF6B6B');
+            bodyGradient.addColorStop(0.3, '#FF8E53');
+            bodyGradient.addColorStop(0.7, '#FF6B6B');
+            bodyGradient.addColorStop(1, '#E55353');
+            ctx.fillStyle = bodyGradient;
+            ctx.fillRect(-width/2, -height/2, width, height);
+            
+            // 飛機輪廓
+            ctx.strokeStyle = '#D63447';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(-width/2, -height/2, width, height);
+            
+            // 飛機機翼
+            const wingGradient = ctx.createLinearGradient(0, -height/2 - 15, 0, height/2 + 15);
+            wingGradient.addColorStop(0, '#4ECDC4');
+            wingGradient.addColorStop(1, '#36A39E');
+            ctx.fillStyle = wingGradient;
+            ctx.fillRect(-width/3, -height/2 - 15, width/2, 15);
+            ctx.fillRect(-width/3, height/2, width/2, 15);
+            
+            // 機翼輪廓
+            ctx.strokeStyle = '#2E8B87';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(-width/3, -height/2 - 15, width/2, 15);
+            ctx.strokeRect(-width/3, height/2, width/2, 15);
+            
+            // 駕駛艙
+            const cockpitGradient = ctx.createLinearGradient(width/4, -height/4, width/2, height/4);
+            cockpitGradient.addColorStop(0, '#45B7D1');
+            cockpitGradient.addColorStop(1, '#2E86AB');
+            ctx.fillStyle = cockpitGradient;
+            ctx.fillRect(width/4, -height/4, width/4, height/2);
+            
+            // 引擎火焰效果
+            const flameGradient = ctx.createLinearGradient(-width/2, 0, -width/2 - 25, 0);
+            flameGradient.addColorStop(0, '#FFE66D');
+            flameGradient.addColorStop(0.5, '#FF8C42');
+            flameGradient.addColorStop(1, 'rgba(255, 140, 66, 0)');
+            ctx.fillStyle = flameGradient;
+            ctx.fillRect(-width/2 - 25, -12, 25, 24);
+            
+            ctx.restore();
+            
+            // 生成美化的引擎粒子
+            for (let i = 0; i < 2; i++) {
+                if (Math.random() < 0.9) {
+                    gameState.particles.push({
+                        x: x - 15 - Math.random() * 20,
+                        y: y + height/2 + (Math.random() - 0.5) * 15,
+                        vx: -3 - Math.random() * 3,
+                        vy: (Math.random() - 0.5) * 2,
+                        life: 25 + Math.random() * 15,
+                        maxLife: 40,
+                        size: 3 + Math.random() * 3,
+                        color: Math.random() < 0.5 ? '#FFE66D' : '#FF8C42',
+                        type: 'engine'
+                    });
+                }
+            }
+        }
+
+        // 繪製美化雲朵和英文單字
+        function drawClouds() {
+            const time = Date.now() * 0.001;
+            
+            gameState.clouds.forEach(cloud => {
+                ctx.save();
+                
+                // 雲朵上下浮動
+                const bobY = cloud.y + Math.sin(time * cloud.bobSpeed + cloud.bobOffset) * 8;
+                
+                // 已答對的雲朵透明度降低
+                if (cloud.answered) {
+                    ctx.globalAlpha = 0.4;
+                } else {
+                    ctx.globalAlpha = cloud.opacity;
+                }
+                
+                // 雲朵陰影
+                ctx.save();
+                ctx.translate(6, 6);
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = '#333333';
+                drawFluffyCloud(cloud.x, bobY, cloud.width * 0.4);
+                ctx.restore();
+                
+                // 純白色雲朵
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                drawFluffyCloud(cloud.x, bobY, cloud.width * 0.4);
+                
+                // 繪製英文單字
+                if (cloud.answered) {
+                    ctx.fillStyle = '#888888'; // 已答對的單字變灰
+                } else {
+                    ctx.fillStyle = '#2C3E50';
+                }
+                ctx.font = `bold ${cloud.textSize}px "Nunito", Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // 文字陰影
+                ctx.save();
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fillText(cloud.word, cloud.x + cloud.width * 0.3 + 2, bobY + 2);
+                ctx.restore();
+                
+                // 主文字
+                ctx.fillText(cloud.word, cloud.x + cloud.width * 0.3, bobY);
+                
+                ctx.restore();
+            });
+        }
+
+        // 繪製美化粒子效果
+        function drawParticles() {
+            gameState.particles.forEach(particle => {
+                const alpha = particle.life / particle.maxLife;
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                
+                if (particle.type === 'engine') {
+                    const gradient = ctx.createRadialGradient(
+                        particle.x, particle.y, 0,
+                        particle.x, particle.y, particle.size * 2
+                    );
+                    gradient.addColorStop(0, particle.color);
+                    gradient.addColorStop(1, particle.color + '00');
+                    ctx.fillStyle = gradient;
+                } else {
+                    ctx.fillStyle = particle.color || '#FFE66D';
+                }
+                
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            });
+        }
+
+        // 更新遊戲邏輯
+        function updateGame() {
+            if (!gameState.isPlaying) return;
+            
+            // 更新飛機位置
+            const targetY = gameState.mouseY - gameState.airplane.height/2;
+            const deltaY = targetY - gameState.airplane.y;
+            gameState.airplane.y += deltaY * 0.15;
+            gameState.airplane.angle = deltaY * 0.004;
+            
+            // 鍵盤控制
+            if (gameState.keys['ArrowUp'] || gameState.keys['w']) {
+                gameState.airplane.y = Math.max(0, gameState.airplane.y - 8);
+                gameState.airplane.angle = -0.15;
+            }
+            if (gameState.keys['ArrowDown'] || gameState.keys['s']) {
+                gameState.airplane.y = Math.min(canvas.height - gameState.airplane.height, gameState.airplane.y + 8);
+                gameState.airplane.angle = 0.15;
+            }
+            
+            // 限制飛機位置
+            gameState.airplane.y = Math.max(0, Math.min(canvas.height - gameState.airplane.height, gameState.airplane.y));
+            
+            // 生成雲朵
+            generateCloud();
+            
+            // 更新雲朵位置
+            gameState.clouds = gameState.clouds.filter(cloud => {
+                cloud.x -= cloud.speed;
+                return cloud.x + cloud.width > 0;
+            });
+            
+            // 更新粒子
+            gameState.particles = gameState.particles.filter(particle => {
+                particle.x += particle.vx || -3;
+                particle.y += particle.vy || 0;
+                particle.life--;
+                if (particle.vy) particle.vy *= 0.98;
+                return particle.life > 0 && particle.x > -50;
+            });
+            
+            // 碰撞檢測
+            checkCollisions();
+            
+            updateUI();
+        }
+
+        // 碰撞檢測
+        function checkCollisions() {
+            const airplane = gameState.airplane;
+            
+            gameState.clouds.forEach((cloud, index) => {
+                // 跳過已經答對的雲朵
+                if (cloud.answered) return;
+                
+                if (airplane.x + airplane.width > cloud.x &&
+                    airplane.x < cloud.x + cloud.width &&
+                    airplane.y + airplane.height > cloud.y - cloud.height/2 &&
+                    airplane.y < cloud.y + cloud.height/2) {
+                    
+                    // 碰撞發生
+                    gameState.totalAnswers++;
+                    
+                    if (cloud.isCorrect) {
+                        // 正確答案
+                        gameState.score += 100 + (gameState.streak * 25);
+                        gameState.streak++;
+                        gameState.correctAnswers++;
+                        gameState.maxStreak = Math.max(gameState.maxStreak, gameState.streak);
+                        
+                        showEffect('太棒了！+' + (100 + ((gameState.streak-1) * 25)), airplane.x, airplane.y, 'correct');
+                        createCelebrationParticles(airplane.x + airplane.width/2, airplane.y + airplane.height/2);
+                        
+                        // 連擊效果
+                        if (gameState.streak > 1) {
+                            document.querySelector('.streak-display').classList.add('combo-flash');
+                            setTimeout(() => {
+                                document.querySelector('.streak-display').classList.remove('combo-flash');
+                            }, 500);
+                        }
+                        
+                        // 立即設置新的目標單字，雲朵繼續前進
+                        setNewTargetWord();
+                        
+                        // 標記這個雲朵已經被答對，讓它繼續前進
+                        cloud.answered = true;
+                        
+                    } else {
+                        // 錯誤答案
+                        gameState.lives--;
+                        gameState.streak = 0;
+                        
+                        showEffect('哎呀！', airplane.x, airplane.y, 'wrong');
+                        createExplosionParticles(airplane.x + airplane.width/2, airplane.y + airplane.height/2);
+                        
+                        // 移除錯誤的雲朵
+                        gameState.clouds.splice(index, 1);
+                        
+                        if (gameState.lives <= 0) {
+                            endGame();
+                        }
+                    }
+                }
+            });
+        }
+
+        // 顯示正確/錯誤效果
+        function showEffect(text, x, y, type) {
+            const effect = document.createElement('div');
+            effect.className = type + '-effect';
+            effect.textContent = text;
+            effect.style.left = x + 'px';
+            effect.style.top = y + 'px';
+            
+            document.querySelector('.ui-overlay').appendChild(effect);
+            
+            setTimeout(() => {
+                if (effect.parentNode) {
+                    effect.parentNode.removeChild(effect);
+                }
+            }, 1200);
+        }
+
+        // 創建慶祝粒子
+        function createCelebrationParticles(x, y) {
+            const colors = ['#00FF7F', '#FFD700', '#FF69B4', '#00BFFF', '#32CD32'];
+            for (let i = 0; i < 20; i++) {
+                gameState.particles.push({
+                    x: x + (Math.random() - 0.5) * 40,
+                    y: y + (Math.random() - 0.5) * 40,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    life: 35 + Math.random() * 25,
+                    maxLife: 60,
+                    size: 3 + Math.random() * 4,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+        }
+
+        // 創建爆炸粒子
+        function createExplosionParticles(x, y) {
+            const colors = ['#FF4500', '#FF6347', '#FF8C00', '#DC143C'];
+            for (let i = 0; i < 25; i++) {
+                gameState.particles.push({
+                    x: x + (Math.random() - 0.5) * 50,
+                    y: y + (Math.random() - 0.5) * 50,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    life: 30 + Math.random() * 20,
+                    maxLife: 50,
+                    size: 2 + Math.random() * 5,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+        }
+
+        // 更新UI
+        function updateUI() {
+            document.getElementById('score').textContent = gameState.score.toLocaleString();
+            document.getElementById('lives').textContent = '❤️'.repeat(Math.max(0, gameState.lives));
+            document.getElementById('streak').textContent = gameState.streak;
+        }
+
+        // 結束遊戲
+        function endGame() {
+            gameState.isPlaying = false;
+            const accuracy = gameState.totalAnswers > 0 ? 
+                Math.round((gameState.correctAnswers / gameState.totalAnswers) * 100) : 0;
+            
+            document.getElementById('finalScore').textContent = gameState.score.toLocaleString();
+            document.getElementById('correctAnswers').textContent = gameState.correctAnswers;
+            document.getElementById('maxStreak').textContent = gameState.maxStreak;
+            document.getElementById('accuracy').textContent = accuracy;
+            document.getElementById('gameOver').style.display = 'block';
+        }
+
+        // 重新開始遊戲
+        function restartGame() {
+            initGame();
+        }
+
+        // 遊戲主循環
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            updateGame();
+            drawClouds();
+            drawParticles();
+            drawAirplane();
+            
+            if (gameState.isPlaying) {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // 事件監聽
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key] = false;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            gameState.mouseY = e.clientY - rect.top;
+        });
+
+        // 觸控支持
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            gameState.mouseY = touch.clientY - rect.top;
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+        });
+
+        // 啟動遊戲
+        createStars();
+        initGame();
+
+        console.log('🛩️ 中英文配對飛行冒險已啟動！');
+        console.log('✨ 全新美化版本');
+        console.log('🎨 精美視覺效果');
+        console.log('🌟 沉浸式遊戲體驗');
+    </script>
+</body>
+</html>

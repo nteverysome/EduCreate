@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通用游戏内容管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .universal-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .universal-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .game-badge {
+            transition: all 0.2s ease;
+        }
+        .game-badge:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app">
+        <!-- 通用顶部导航 -->
+        <nav class="bg-white shadow-sm border-b sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <div class="text-2xl font-bold text-gray-900">🎮 通用游戏内容管理系统</div>
+                        <div class="ml-4 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                            {{ contentLibrary.length }} 个内容库
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <select v-model="selectedGamePlatform" 
+                                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="all">所有游戏平台</option>
+                            <option value="wordwall">Wordwall类游戏</option>
+                            <option value="kahoot">Kahoot类游戏</option>
+                            <option value="quizlet">Quizlet类游戏</option>
+                            <option value="custom">自定义游戏</option>
+                        </select>
+                        <button @click="createContent" 
+                                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            ➕ 新建内容
+                        </button>
+                        <button @click="exportForGames" 
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            📤 导出游戏数据
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- 通用统计面板 -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-blue-600">{{ totalContents }}</div>
+                    <div class="text-blue-800 font-medium">总内容数</div>
+                </div>
+                <div class="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-green-600">{{ totalVocabulary }}</div>
+                    <div class="text-green-800 font-medium">总词汇数</div>
+                </div>
+                <div class="bg-purple-50 border border-purple-200 rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-purple-600">{{ supportedGames.length }}</div>
+                    <div class="text-purple-800 font-medium">支持游戏</div>
+                </div>
+                <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-orange-600">{{ activePlatforms }}</div>
+                    <div class="text-orange-800 font-medium">活跃平台</div>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                    <div class="text-3xl font-bold text-red-600">{{ recentlyUsed }}</div>
+                    <div class="text-red-800 font-medium">最近使用</div>
+                </div>
+            </div>
+
+            <!-- 通用筛选控制 -->
+            <div class="mb-8 bg-white rounded-xl shadow-lg p-6">
+                <div class="flex flex-wrap gap-4 items-center justify-between">
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <input v-model="searchQuery" 
+                               type="text" 
+                               placeholder="搜索内容、标签或描述..."
+                               class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-64">
+                        
+                        <select v-model="contentTypeFilter" 
+                                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="all">所有类型</option>
+                            <option value="vocabulary">词汇类</option>
+                            <option value="quiz">问答类</option>
+                            <option value="image">图片类</option>
+                            <option value="audio">音频类</option>
+                            <option value="mixed">混合类</option>
+                        </select>
+                        
+                        <select v-model="difficultyFilter" 
+                                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="all">所有难度</option>
+                            <option value="beginner">初级</option>
+                            <option value="intermediate">中级</option>
+                            <option value="advanced">高级</option>
+                        </select>
+                        
+                        <select v-model="sortBy" 
+                                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="newest">最新创建</option>
+                            <option value="popular">最受欢迎</option>
+                            <option value="name">按名称</option>
+                            <option value="size">按大小</option>
+                            <option value="games">支持游戏数</option>
+                        </select>
+                    </div>
+                    
+                    <div class="text-sm text-gray-600">
+                        显示 {{ filteredContents.length }} / {{ contentLibrary.length }} 个内容
+                    </div>
+                </div>
+            </div>
+
+            <!-- 通用内容网格 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="content in filteredContents" 
+                     :key="content.id" 
+                     class="universal-card bg-white rounded-xl shadow-lg p-6 border-2 border-transparent hover:border-blue-300">
+                    
+                    <!-- 内容头部 -->
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <h3 class="font-bold text-lg text-gray-900 truncate">{{ content.title }}</h3>
+                                <span class="text-xs px-2 py-1 rounded-full"
+                                      :class="getDifficultyClass(content.difficulty)">
+                                    {{ content.difficulty }}
+                                </span>
+                            </div>
+                            <p class="text-sm text-gray-600 line-clamp-2">{{ content.description }}</p>
+                        </div>
+                        <div class="ml-2 flex space-x-1">
+                            <button @click.stop="editContent(content)" 
+                                    class="text-blue-600 hover:text-blue-800 p-1">
+                                ✏️
+                            </button>
+                            <button @click.stop="duplicateContent(content)" 
+                                    class="text-green-600 hover:text-green-800 p-1">
+                                📋
+                            </button>
+                            <button @click.stop="deleteContent(content.id)" 
+                                    class="text-red-600 hover:text-red-800 p-1">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 内容统计 -->
+                    <div class="grid grid-cols-3 gap-4 mb-4 text-center">
+                        <div>
+                            <div class="text-lg font-bold text-blue-600">{{ content.items?.length || 0 }}</div>
+                            <div class="text-xs text-gray-600">内容项</div>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-green-600">{{ content.compatibleGames?.length || 0 }}</div>
+                            <div class="text-xs text-gray-600">支持游戏</div>
+                        </div>
+                        <div>
+                            <div class="text-lg font-bold text-purple-600">{{ content.usageCount || 0 }}</div>
+                            <div class="text-xs text-gray-600">使用次数</div>
+                        </div>
+                    </div>
+
+                    <!-- 支持的游戏标签 -->
+                    <div class="mb-4">
+                        <div class="text-xs text-gray-600 mb-2">支持的游戏:</div>
+                        <div class="flex flex-wrap gap-1">
+                            <span v-for="game in content.compatibleGames?.slice(0, 4)" 
+                                  :key="game.id"
+                                  class="game-badge text-xs px-2 py-1 rounded cursor-pointer"
+                                  :class="getGameBadgeClass(game.platform)"
+                                  @click.stop="launchGame(content, game)">
+                                {{ game.icon }} {{ game.name }}
+                            </span>
+                            <span v-if="content.compatibleGames?.length > 4" 
+                                  class="text-xs text-gray-500 px-2 py-1">
+                                +{{ content.compatibleGames.length - 4 }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 内容预览 -->
+                    <div v-if="content.items && content.items.length > 0" class="mb-4">
+                        <div class="text-xs text-gray-600 mb-2">内容预览:</div>
+                        <div class="bg-gray-50 rounded-lg p-3 text-sm">
+                            <div v-for="(item, index) in content.items.slice(0, 2)" 
+                                 :key="index"
+                                 class="flex justify-between items-center py-1">
+                                <span class="truncate">{{ item.question || item.english || item.text }}</span>
+                                <span class="text-gray-500 text-xs ml-2">{{ item.answer || item.chinese || item.value }}</span>
+                            </div>
+                            <div v-if="content.items.length > 2" class="text-center text-gray-500 text-xs mt-2">
+                                ... 还有 {{ content.items.length - 2 }} 项
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 通用操作按钮 -->
+                    <div class="flex space-x-2">
+                        <button @click.stop="editContent(content)" 
+                                class="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                            📝 编辑
+                        </button>
+                        <button @click.stop="useInGame(content)" 
+                                :disabled="!content.items || content.items.length === 0"
+                                class="flex-1 bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors text-sm">
+                            🎮 使用
+                        </button>
+                        <button @click.stop="shareContent(content)" 
+                                class="bg-purple-600 text-white py-2 px-3 rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                            📤
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 空状态 -->
+            <div v-if="filteredContents.length === 0" class="text-center py-16">
+                <div class="text-6xl mb-4">🎮</div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">没有找到匹配的内容</h2>
+                <p class="text-gray-600 mb-8">创建新内容或调整筛选条件</p>
+                <button @click="createContent" 
+                        class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors">
+                    ➕ 创建新内容
+                </button>
+            </div>
+
+            <!-- 通用游戏平台说明 -->
+            <div class="mt-12 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">🌐 通用游戏平台支持</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                    <div>
+                        <h3 class="font-semibold text-blue-800 mb-2">📚 Wordwall类</h3>
+                        <ul class="space-y-1 text-blue-700">
+                            <li>• 选择题游戏</li>
+                            <li>• 配对游戏</li>
+                            <li>• 转盘游戏</li>
+                            <li>• 闪卡记忆</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-green-800 mb-2">🎯 Kahoot类</h3>
+                        <ul class="space-y-1 text-green-700">
+                            <li>• 实时问答</li>
+                            <li>• 团队竞赛</li>
+                            <li>• 调查投票</li>
+                            <li>• 讨论题</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-purple-800 mb-2">📖 Quizlet类</h3>
+                        <ul class="space-y-1 text-purple-700">
+                            <li>• 学习模式</li>
+                            <li>• 测试模式</li>
+                            <li>• 匹配游戏</li>
+                            <li>• 重力游戏</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-orange-800 mb-2">🔧 自定义游戏</h3>
+                        <ul class="space-y-1 text-orange-700">
+                            <li>• API接口</li>
+                            <li>• 数据导出</li>
+                            <li>• 插件支持</li>
+                            <li>• 第三方集成</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 成功提示 -->
+        <div v-if="successMessage" 
+             class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+            {{ successMessage }}
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    // 筛选和搜索
+                    searchQuery: '',
+                    selectedGamePlatform: 'all',
+                    contentTypeFilter: 'all',
+                    difficultyFilter: 'all',
+                    sortBy: 'newest',
+                    successMessage: '',
+
+                    // 支持的游戏平台和类型
+                    supportedGames: [
+                        // Wordwall类游戏
+                        { id: 'quiz', name: '选择题', icon: '❓', platform: 'wordwall', minItems: 2 },
+                        { id: 'match', name: '配对', icon: '🔗', platform: 'wordwall', minItems: 2 },
+                        { id: 'wheel', name: '转盘', icon: '🎡', platform: 'wordwall', minItems: 3 },
+                        { id: 'cards', name: '闪卡', icon: '🃏', platform: 'wordwall', minItems: 1 },
+
+                        // Kahoot类游戏
+                        { id: 'kahoot-quiz', name: '实时问答', icon: '⚡', platform: 'kahoot', minItems: 1 },
+                        { id: 'kahoot-survey', name: '调查', icon: '📊', platform: 'kahoot', minItems: 1 },
+                        { id: 'kahoot-discussion', name: '讨论', icon: '💬', platform: 'kahoot', minItems: 1 },
+
+                        // Quizlet类游戏
+                        { id: 'quizlet-learn', name: '学习', icon: '📚', platform: 'quizlet', minItems: 1 },
+                        { id: 'quizlet-test', name: '测试', icon: '📝', platform: 'quizlet', minItems: 2 },
+                        { id: 'quizlet-match', name: '匹配', icon: '🎯', platform: 'quizlet', minItems: 2 },
+                        { id: 'quizlet-gravity', name: '重力', icon: '🌍', platform: 'quizlet', minItems: 3 },
+
+                        // 自定义游戏
+                        { id: 'custom-api', name: 'API', icon: '🔌', platform: 'custom', minItems: 1 },
+                        { id: 'custom-export', name: '导出', icon: '📤', platform: 'custom', minItems: 1 }
+                    ],
+
+                    // 通用内容库
+                    contentLibrary: [
+                        {
+                            id: 1,
+                            title: '基础英语词汇',
+                            description: '适合所有平台的基础英语学习内容',
+                            type: 'vocabulary',
+                            difficulty: 'beginner',
+                            items: [
+                                { english: 'apple', chinese: '苹果', type: 'word' },
+                                { english: 'book', chinese: '书', type: 'word' },
+                                { english: 'cat', chinese: '猫', type: 'word' },
+                                { english: 'dog', chinese: '狗', type: 'word' },
+                                { english: 'elephant', chinese: '大象', type: 'word' }
+                            ],
+                            compatibleGames: [
+                                { id: 'quiz', name: '选择题', icon: '❓', platform: 'wordwall' },
+                                { id: 'match', name: '配对', icon: '🔗', platform: 'wordwall' },
+                                { id: 'kahoot-quiz', name: '实时问答', icon: '⚡', platform: 'kahoot' },
+                                { id: 'quizlet-learn', name: '学习', icon: '📚', platform: 'quizlet' },
+                                { id: 'quizlet-test', name: '测试', icon: '📝', platform: 'quizlet' }
+                            ],
+                            usageCount: 15,
+                            createdAt: new Date(Date.now() - 86400000),
+                            tags: ['英语', '基础', '词汇']
+                        },
+                        {
+                            id: 2,
+                            title: '数学基础概念',
+                            description: '数学基础概念问答，适合Kahoot和自定义游戏',
+                            type: 'quiz',
+                            difficulty: 'intermediate',
+                            items: [
+                                { question: '1+1等于多少？', answer: '2', type: 'qa' },
+                                { question: '圆的面积公式是？', answer: 'πr²', type: 'qa' },
+                                { question: '直角三角形的特点？', answer: '有一个90度角', type: 'qa' }
+                            ],
+                            compatibleGames: [
+                                { id: 'kahoot-quiz', name: '实时问答', icon: '⚡', platform: 'kahoot' },
+                                { id: 'kahoot-discussion', name: '讨论', icon: '💬', platform: 'kahoot' },
+                                { id: 'custom-api', name: 'API', icon: '🔌', platform: 'custom' }
+                            ],
+                            usageCount: 8,
+                            createdAt: new Date(Date.now() - 172800000),
+                            tags: ['数学', '概念', '问答']
+                        },
+                        {
+                            id: 3,
+                            title: '科学实验词汇',
+                            description: '科学实验相关词汇，支持多种学习模式',
+                            type: 'mixed',
+                            difficulty: 'advanced',
+                            items: [
+                                { english: 'experiment', chinese: '实验', type: 'word' },
+                                { english: 'hypothesis', chinese: '假设', type: 'word' },
+                                { question: '什么是对照组？', answer: '用于比较的标准组', type: 'qa' }
+                            ],
+                            compatibleGames: [
+                                { id: 'quizlet-learn', name: '学习', icon: '📚', platform: 'quizlet' },
+                                { id: 'quizlet-match', name: '匹配', icon: '🎯', platform: 'quizlet' },
+                                { id: 'wheel', name: '转盘', icon: '🎡', platform: 'wordwall' },
+                                { id: 'custom-export', name: '导出', icon: '📤', platform: 'custom' }
+                            ],
+                            usageCount: 3,
+                            createdAt: new Date(Date.now() - 259200000),
+                            tags: ['科学', '实验', '高级']
+                        },
+                        {
+                            id: 4,
+                            title: '历史时间线',
+                            description: '重要历史事件时间线，适合讨论和学习',
+                            type: 'image',
+                            difficulty: 'intermediate',
+                            items: [
+                                { event: '中华人民共和国成立', year: '1949', type: 'timeline' },
+                                { event: '改革开放开始', year: '1978', type: 'timeline' }
+                            ],
+                            compatibleGames: [
+                                { id: 'kahoot-discussion', name: '讨论', icon: '💬', platform: 'kahoot' },
+                                { id: 'kahoot-survey', name: '调查', icon: '📊', platform: 'kahoot' },
+                                { id: 'custom-api', name: 'API', icon: '🔌', platform: 'custom' }
+                            ],
+                            usageCount: 12,
+                            createdAt: new Date(Date.now() - 345600000),
+                            tags: ['历史', '时间线', '事件']
+                        }
+                    ]
+                };
+            },
+
+            computed: {
+                // 通用统计
+                totalContents() {
+                    return this.contentLibrary.length;
+                },
+
+                totalVocabulary() {
+                    return this.contentLibrary.reduce((sum, content) =>
+                        sum + (content.items?.length || 0), 0);
+                },
+
+                activePlatforms() {
+                    const platforms = new Set();
+                    this.contentLibrary.forEach(content => {
+                        content.compatibleGames?.forEach(game => {
+                            platforms.add(game.platform);
+                        });
+                    });
+                    return platforms.size;
+                },
+
+                recentlyUsed() {
+                    return this.contentLibrary.filter(content =>
+                        content.usageCount > 0
+                    ).length;
+                },
+
+                // 过滤内容
+                filteredContents() {
+                    let filtered = this.contentLibrary;
+
+                    // 按游戏平台过滤
+                    if (this.selectedGamePlatform !== 'all') {
+                        filtered = filtered.filter(content =>
+                            content.compatibleGames?.some(game =>
+                                game.platform === this.selectedGamePlatform
+                            )
+                        );
+                    }
+
+                    // 按内容类型过滤
+                    if (this.contentTypeFilter !== 'all') {
+                        filtered = filtered.filter(content =>
+                            content.type === this.contentTypeFilter
+                        );
+                    }
+
+                    // 按难度过滤
+                    if (this.difficultyFilter !== 'all') {
+                        filtered = filtered.filter(content =>
+                            content.difficulty === this.difficultyFilter
+                        );
+                    }
+
+                    // 搜索过滤
+                    if (this.searchQuery) {
+                        const query = this.searchQuery.toLowerCase();
+                        filtered = filtered.filter(content =>
+                            content.title.toLowerCase().includes(query) ||
+                            content.description.toLowerCase().includes(query) ||
+                            content.tags?.some(tag => tag.toLowerCase().includes(query))
+                        );
+                    }
+
+                    // 排序
+                    filtered = [...filtered].sort((a, b) => {
+                        switch (this.sortBy) {
+                            case 'newest':
+                                return new Date(b.createdAt) - new Date(a.createdAt);
+                            case 'popular':
+                                return (b.usageCount || 0) - (a.usageCount || 0);
+                            case 'name':
+                                return a.title.localeCompare(b.title);
+                            case 'size':
+                                return (b.items?.length || 0) - (a.items?.length || 0);
+                            case 'games':
+                                return (b.compatibleGames?.length || 0) - (a.compatibleGames?.length || 0);
+                            default:
+                                return 0;
+                        }
+                    });
+
+                    return filtered;
+                }
+            },
+
+            methods: {
+                // 样式相关方法
+                getDifficultyClass(difficulty) {
+                    const classes = {
+                        'beginner': 'bg-green-100 text-green-800',
+                        'intermediate': 'bg-yellow-100 text-yellow-800',
+                        'advanced': 'bg-red-100 text-red-800'
+                    };
+                    return classes[difficulty] || 'bg-gray-100 text-gray-800';
+                },
+
+                getGameBadgeClass(platform) {
+                    const classes = {
+                        'wordwall': 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+                        'kahoot': 'bg-green-100 text-green-800 hover:bg-green-200',
+                        'quizlet': 'bg-purple-100 text-purple-800 hover:bg-purple-200',
+                        'custom': 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                    };
+                    return classes[platform] || 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+                },
+
+                // 核心功能方法
+                createContent() {
+                    this.showSuccess('创建新内容 - 支持所有游戏平台的通用格式');
+                },
+
+                editContent(content) {
+                    this.showSuccess(`编辑内容: ${content.title} - 通用编辑器支持所有内容类型`);
+                },
+
+                duplicateContent(content) {
+                    this.showSuccess(`复制内容: ${content.title} - 创建副本以便修改`);
+                },
+
+                deleteContent(id) {
+                    const content = this.contentLibrary.find(c => c.id === id);
+                    this.showSuccess(`删除内容: ${content.title}`);
+                },
+
+                // 游戏启动方法 - 通用游戏接口
+                useInGame(content) {
+                    if (!content.items || content.items.length === 0) {
+                        this.showSuccess('内容为空，无法在游戏中使用！');
+                        return;
+                    }
+
+                    // 显示可用游戏选择
+                    const gameList = content.compatibleGames.map(g => `${g.icon} ${g.name}`).join('、');
+                    this.showSuccess(`${content.title} 可用于: ${gameList}`);
+                },
+
+                launchGame(content, game) {
+                    // 通用游戏启动接口
+                    const gameData = {
+                        contentId: content.id,
+                        gameType: game.id,
+                        platform: game.platform,
+                        title: content.title,
+                        items: content.items,
+                        difficulty: content.difficulty,
+                        timestamp: new Date()
+                    };
+
+                    // 根据平台选择不同的启动方式
+                    switch (game.platform) {
+                        case 'wordwall':
+                            this.launchWordwallGame(gameData);
+                            break;
+                        case 'kahoot':
+                            this.launchKahootGame(gameData);
+                            break;
+                        case 'quizlet':
+                            this.launchQuizletGame(gameData);
+                            break;
+                        case 'custom':
+                            this.launchCustomGame(gameData);
+                            break;
+                        default:
+                            this.showSuccess(`启动 ${game.name} - 平台: ${game.platform}`);
+                    }
+
+                    // 增加使用次数
+                    content.usageCount = (content.usageCount || 0) + 1;
+                },
+
+                // 平台特定的启动方法
+                launchWordwallGame(gameData) {
+                    localStorage.setItem('currentGameData', JSON.stringify(gameData));
+                    this.showSuccess(`启动Wordwall ${gameData.gameType} - ${gameData.title}`);
+                    // 可以跳转到对应的Wordwall游戏页面
+                    // window.location.href = `wordwall-games.html#${gameData.gameType}`;
+                },
+
+                launchKahootGame(gameData) {
+                    // Kahoot API集成
+                    this.showSuccess(`启动Kahoot ${gameData.gameType} - ${gameData.title}`);
+                    // 可以调用Kahoot API或跳转到Kahoot平台
+                },
+
+                launchQuizletGame(gameData) {
+                    // Quizlet API集成
+                    this.showSuccess(`启动Quizlet ${gameData.gameType} - ${gameData.title}`);
+                    // 可以调用Quizlet API或跳转到Quizlet平台
+                },
+
+                launchCustomGame(gameData) {
+                    // 自定义游戏API
+                    this.showSuccess(`启动自定义游戏 - ${gameData.title}`);
+                    // 可以调用自定义API或导出数据
+                },
+
+                // 分享和导出功能
+                shareContent(content) {
+                    const shareData = {
+                        id: content.id,
+                        title: content.title,
+                        description: content.description,
+                        type: content.type,
+                        difficulty: content.difficulty,
+                        items: content.items,
+                        compatibleGames: content.compatibleGames,
+                        tags: content.tags
+                    };
+
+                    // 生成分享链接或导出数据
+                    this.showSuccess(`分享内容: ${content.title} - 生成通用分享格式`);
+                },
+
+                exportForGames() {
+                    const exportData = {
+                        version: '1.0',
+                        platform: 'universal',
+                        contents: this.contentLibrary.map(content => ({
+                            id: content.id,
+                            title: content.title,
+                            description: content.description,
+                            type: content.type,
+                            difficulty: content.difficulty,
+                            items: content.items,
+                            compatibleGames: content.compatibleGames,
+                            tags: content.tags,
+                            usageCount: content.usageCount
+                        })),
+                        exportedAt: new Date(),
+                        totalContents: this.contentLibrary.length,
+                        totalItems: this.totalVocabulary,
+                        supportedPlatforms: ['wordwall', 'kahoot', 'quizlet', 'custom']
+                    };
+
+                    // 创建下载
+                    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+                        type: 'application/json'
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `universal-game-contents-${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+
+                    this.showSuccess('通用游戏数据已导出！支持所有平台导入');
+                },
+
+                // 工具方法
+                showSuccess(message) {
+                    this.successMessage = message;
+                    setTimeout(() => {
+                        this.successMessage = '';
+                    }, 3000);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
