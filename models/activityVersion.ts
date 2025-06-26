@@ -44,7 +44,7 @@ export async function getActivityVersions(activityId: string) {
   });
 }
 
-// 獲取猹定一本
+// 獲取獹定一本
 export async function getActivityVersion(versionId: string) {
   return prisma.activityVersion.findUnique({
     where: { id: versionId },
@@ -67,6 +67,6 @@ export async function restoreActivityVersion(activityId: string, versionId: stri
     activityId,
     versionToRestore.content,
     userId,
-    `徙版本 ${versionToRestore.versionName} 恢復‌
+    '恢復版本 ' + versionToRestore.versionName + ' 恢復'
   );
 }
