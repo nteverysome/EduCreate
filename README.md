@@ -4,6 +4,8 @@
 
 EduCreate是一個互動式教育資源創建平台，旨在提供教師創建、分享和使用互動教學活動的工具。平台支持多種活動模板，包括配對遊戲、單字卡片和測驗問答等。
 
+🎉 **最新更新**: AI-First Quiz 系統已完成，包含 OpenAI 集成、繁體中文本地化和透明化 AI 思維功能！
+
 ## 技術架構
 
 - **前端**：Next.js, React, TailwindCSS, DnD Kit, Zustand
