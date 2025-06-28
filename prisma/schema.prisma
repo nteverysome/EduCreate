@@ -88,17 +88,29 @@ model Activity {
   lastPlayed   DateTime?            // 新增：最後遊玩時間
   playCount    Int                  @default(0) // 新增：遊玩次數
   shareCount   Int                  @default(0) // 新增：分享次數
+
+  // WordWall 風格擴展
+  gameTemplateId String?            // 新增：遊戲模板 ID
+  aiGenerated    Boolean            @default(false) // 新增：AI 生成標記
+  difficulty     DifficultyLevel?   // 新增：難度等級
+  estimatedTime  String?            // 新增：預估完成時間
+  tags           String[]           // 新增：標籤
+
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
   templateId   String?
   userId       String
   h5pContentId String?
+
+  // 關聯
   folder       Folder?              @relation(fields: [folderId], references: [id])
   h5pContent   H5PContent?          @relation(fields: [h5pContentId], references: [id])
   template     Template?            @relation(fields: [templateId], references: [id])
+  gameTemplate GameTemplate?        @relation(fields: [gameTemplateId], references: [id])
   user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   versions     ActivityVersion[]
   versionLogs  ActivityVersionLog[]
+  gameSettings GameSettings?        // 新增：遊戲設置關聯
 }
 
 model Template {
@@ -247,21 +259,47 @@ enum Role {
 }
 
 enum TemplateType {
+  // 現有模板
   MATCHING
   FLASHCARDS
   QUIZ
-  UNIVERSAL        // 新增：統一內容類型
-  SPIN_WHEEL       // 新增：隨機轉盤
-  WHACK_A_MOLE     // 新增：打地鼠
-  MEMORY_CARDS     // 新增：記憶卡片
-  WORD_SEARCH      // 新增：單字搜尋
-  CROSSWORD        // 新增：填字遊戲
-  FILL_BLANKS      // 新增：填空題
-  TRUE_FALSE       // 新增：是非題
-  DRAG_SORT        // 新增：拖拽排序
-  BALLOON_POP      // 新增：氣球爆破
-  AIRPLANE         // 新增：飛機遊戲
-  MAZE_CHASE       // 新增：迷宮追逐
+  UNIVERSAL        // 統一內容類型
+  SPIN_WHEEL       // 隨機轉盤
+  WHACK_A_MOLE     // 打地鼠
+  MEMORY_CARDS     // 記憶卡片
+  WORD_SEARCH      // 單字搜尋
+  CROSSWORD        // 填字遊戲
+  FILL_BLANKS      // 填空題
+  TRUE_FALSE       // 是非題
+  DRAG_SORT        // 拖拽排序
+  BALLOON_POP      // 氣球爆破
+  AIRPLANE         // 飛機遊戲
+  MAZE_CHASE       // 迷宮追逐
+
+  // WordWall 風格新增模板
+  HANGMAN          // 猜字遊戲
+  IMAGE_QUIZ       // 圖片問答
+  GAMESHOW_QUIZ    // 遊戲節目問答
+  OPEN_THE_BOX     // 開箱遊戲
+  MATCHING_PAIRS   // 配對記憶
+  FIND_THE_MATCH   // 找配對
+  ANAGRAM          // 字母重組
+  SPEAKING_CARDS   // 口語卡片
+  UNJUMBLE         // 重組句子
+  COMPLETE_SENTENCE // 完成句子
+  SPELL_WORD       // 拼字遊戲
+  FLIP_TILES       // 翻轉磁磚
+  TYPE_ANSWER      // 輸入答案
+  SPEED_SORTING    // 快速分類
+  WATCH_MEMORIZE   // 觀察記憶
+  PAIR_NO_PAIR     // 配對或不配對
+  RANK_ORDER       // 排序
+  WIN_LOSE_QUIZ    // 輸贏問答
+  MATH_GENERATOR   // 數學生成器
+  WORD_MAGNETS     // 單字磁鐵
+  FLYING_FRUIT     // 飛行水果
+  GROUP_SORT       // 分組排序
+  LABELLED_DIAGRAM // 標記圖表
 }
 
 enum SubStatus {
@@ -281,4 +319,156 @@ enum BillingInterval {
 enum H5PContentStatus {
   DRAFT
   PUBLISHED
+}
+
+// ===== WordWall 風格擴展表結構 =====
+
+model GameTemplate {
+  id               String            @id @default(cuid())
+  name             String            @unique
+  displayName      String            // 顯示名稱
+  description      String?
+  icon             String?           // 圖標 URL 或 emoji
+  category         GameCategory      @default(QUIZ)
+  difficulty       DifficultyLevel   @default(EASY)
+  estimatedTime    String?           // 預估時間 "5-15分鐘"
+  features         String[]          // 功能特色列表
+  minItems         Int               @default(1)
+  maxItems         Int               @default(50)
+  requiresEvenItems Boolean          @default(false)
+  isActive         Boolean           @default(true)
+  isPremium        Boolean           @default(false)
+  sortOrder        Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  // 關聯
+  activities       Activity[]
+  gameSettings     GameSettings[]
+}
+
+model VisualTheme {
+  id           String         @id @default(cuid())
+  name         String         @unique
+  displayName  String         // 顯示名稱
+  description  String?
+  thumbnail    String?        // 預覽圖片 URL
+  category     ThemeCategory  @default(CLASSIC)
+  isPremium    Boolean        @default(false)
+  isActive     Boolean        @default(true)
+  sortOrder    Int            @default(0)
+
+  // CSS 變量配置
+  primaryColor     String     @default("#007bff")
+  secondaryColor   String     @default("#6c757d")
+  backgroundColor  String     @default("#ffffff")
+  textColor        String     @default("#212529")
+  accentColor      String?
+  borderColor      String?
+
+  // 高級樣式配置
+  fontFamily       String?
+  borderRadius     String?
+  boxShadow        String?
+  backgroundImage  String?
+  customCSS        String?    @db.Text
+
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  // 關聯
+  gameSettings     GameSettings[]
+}
+
+model GameSettings {
+  id                String        @id @default(cuid())
+  activityId        String        @unique
+  templateId        String?
+  themeId           String?
+
+  // 計時器設置
+  timerType         TimerType     @default(NONE)
+  timerDuration     Int?          // 秒數
+
+  // 遊戲選項
+  livesCount        Int           @default(0) // 0 = 無限
+  shuffleQuestions  Boolean       @default(false)
+  shuffleAnswers    Boolean       @default(false)
+  autoProceed       Boolean       @default(true)
+  showAnswers       Boolean       @default(true)
+  answerLabels      AnswerLabels  @default(ABC)
+
+  // 音效和動畫
+  enableSounds      Boolean       @default(true)
+  enableAnimations  Boolean       @default(true)
+
+  // 高級設置
+  allowRetry        Boolean       @default(true)
+  showProgress      Boolean       @default(true)
+  showScore         Boolean       @default(true)
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // 關聯
+  activity          Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  template          GameTemplate? @relation(fields: [templateId], references: [id])
+  theme             VisualTheme?  @relation(fields: [themeId], references: [id])
+}
+
+model AIPrompt {
+  id              String       @id @default(cuid())
+  name            String       @unique
+  templateType    TemplateType
+  promptTemplate  String       @db.Text
+  exampleInput    String?      @db.Text
+  exampleOutput   String?      @db.Text
+  isActive        Boolean      @default(true)
+  version         String       @default("1.0")
+
+  // AI 配置
+  model           String       @default("gpt-4")
+  temperature     Float        @default(0.7)
+  maxTokens       Int          @default(2000)
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+// 新增枚舉類型
+
+enum GameCategory {
+  QUIZ
+  MATCHING
+  MEMORY
+  ACTION
+  CREATIVE
+  WORD_GAMES
+  MATH_GAMES
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum ThemeCategory {
+  CLASSIC
+  THEMED
+  SEASONAL
+  EDUCATIONAL
+  MODERN
+}
+
+enum TimerType {
+  NONE
+  COUNT_UP
+  COUNT_DOWN
+}
+
+enum AnswerLabels {
+  ABC
+  NUMBERS
+  NONE
 }
