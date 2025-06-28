@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
 import { ActivityVersion } from '@/models/activityVersion';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../lib/prisma'; // 使用統一的 Prisma 實例
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-
-const prisma = new PrismaClient();
+import { useErrorHandler } from '../../hooks/useErrorHandler';
+import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
 
 // 定义组件props类型
 interface CompareVersionsProps {

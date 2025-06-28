@@ -1,73 +1,85 @@
 import { useSession } from 'next-auth/react';
+import { useMemo } from 'react';
 import { PERMISSIONS, hasPermission, hasAnyPermission, hasAllPermissions } from '../lib/permissions';
+import { permissionCache } from '../lib/cache/CacheManager';
 
 /**
- * 自定義Hook用於前端權限檢查
- * 可以檢查當前登入用戶是否擁有特定權限
+ * 優化的權限檢查 Hook
+ * 使用緩存和 memoization 提高性能
  */
 export function usePermission() {
   const { data: session } = useSession();
   const userRole = session?.user?.role || 'USER';
+  const userId = session?.user?.id;
 
-  /**
-   * 檢查用戶是否擁有特定權限
-   * @param permission 權限名稱
-   * @returns boolean
-   */
-  const checkPermission = (permission: string): boolean => {
-    return hasPermission(userRole, permission);
-  };
+  // 使用 memoization 緩存權限檢查結果
+  const permissionCheckers = useMemo(() => {
+    const cacheKey = `permissions:${userId}:${userRole}`;
 
-  /**
-   * 檢查用戶是否擁有多個權限中的任意一個
-   * @param permissions 權限名稱數組
-   * @returns boolean
-   */
-  const checkAnyPermission = (permissions: string[]): boolean => {
-    return hasAnyPermission(userRole, permissions);
-  };
+    return {
+      /**
+       * 檢查用戶是否擁有特定權限（帶緩存）
+       */
+      checkPermission: (permission: string): boolean => {
+        const permissionCacheKey = `${cacheKey}:${permission}`;
 
-  /**
-   * 檢查用戶是否擁有所有指定的權限
-   * @param permissions 權限名稱數組
-   * @returns boolean
-   */
-  const checkAllPermissions = (permissions: string[]): boolean => {
-    return hasAllPermissions(userRole, permissions);
-  };
+        return permissionCache.getOrSet(
+          permissionCacheKey,
+          async () => hasPermission(userRole, permission),
+          2 * 60 * 1000 // 2 分鐘緩存
+        ) as boolean;
+      },
 
-  /**
-   * 檢查用戶是否為管理員
-   * @returns boolean
-   */
-  const isAdmin = (): boolean => {
-    return userRole === 'ADMIN';
-  };
+      /**
+       * 檢查用戶是否擁有多個權限中的任意一個
+       */
+      checkAnyPermission: (permissions: string[]): boolean => {
+        const permissionCacheKey = `${cacheKey}:any:${permissions.join(',')}`;
 
-  /**
-   * 檢查用戶是否為高級用戶
-   * @returns boolean
-   */
-  const isPremiumUser = (): boolean => {
-    return userRole === 'PREMIUM_USER' || userRole === 'ADMIN';
-  };
+        return permissionCache.getOrSet(
+          permissionCacheKey,
+          async () => hasAnyPermission(userRole, permissions),
+          2 * 60 * 1000
+        ) as boolean;
+      },
 
-  /**
-   * 檢查用戶是否為教師
-   * @returns boolean
-   */
-  const isTeacher = (): boolean => {
-    return userRole === 'TEACHER' || userRole === 'ADMIN';
-  };
+      /**
+       * 檢查用戶是否擁有所有指定的權限
+       */
+      checkAllPermissions: (permissions: string[]): boolean => {
+        const permissionCacheKey = `${cacheKey}:all:${permissions.join(',')}`;
+
+        return permissionCache.getOrSet(
+          permissionCacheKey,
+          async () => hasAllPermissions(userRole, permissions),
+          2 * 60 * 1000
+        ) as boolean;
+      },
+    };
+  }, [userRole, userId]);
+
+  // 預計算常用權限檢查
+  const commonPermissions = useMemo(() => ({
+    canCreateActivity: hasPermission(userRole, PERMISSIONS.CREATE_ACTIVITY),
+    canEditActivity: hasPermission(userRole, PERMISSIONS.EDIT_ACTIVITY),
+    canDeleteActivity: hasPermission(userRole, PERMISSIONS.DELETE_ACTIVITY),
+    canCreateH5P: hasPermission(userRole, PERMISSIONS.CREATE_H5P),
+    canManageUsers: hasPermission(userRole, PERMISSIONS.READ_USERS),
+    isAdmin: userRole === 'ADMIN',
+    isPremiumUser: userRole === 'PREMIUM_USER' || userRole === 'ADMIN',
+    isTeacher: userRole === 'TEACHER' || userRole === 'ADMIN',
+  }), [userRole]);
 
   return {
-    checkPermission,
-    checkAnyPermission,
-    checkAllPermissions,
-    isAdmin,
-    isPremiumUser,
-    isTeacher,
+    ...permissionCheckers,
+    ...commonPermissions,
     PERMISSIONS,
     userRole,
+    userId,
+
+    // 清除權限緩存的方法
+    clearPermissionCache: () => {
+      permissionCache.clear();
+    },
   };
 }

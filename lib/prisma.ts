@@ -7,8 +7,6 @@ declare global {
 
 const prisma = globalThis.__globalPrisma ?? new PrismaClient({
   log: ['query', 'error', 'warn'],
-  // Add missing configuration options for Prisma v6 compatibility
-  engineType: 'library',
   errorFormat: 'pretty',
 });
 
@@ -17,4 +15,5 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export default prisma;
+export { prisma };
 export type { PrismaClient } from '@prisma/client';

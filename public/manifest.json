@@ -1,12 +1,16 @@
 {
-  "name": "EduCreate",
+  "name": "EduCreate - AI 驅動的教育遊戲平台",
   "short_name": "EduCreate",
-  "description": "互動式教育資源創建平台",
+  "description": "創新的 AI 驅動教育遊戲平台，提供個性化學習體驗",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
+  "theme_color": "#3B82F6",
   "orientation": "portrait-primary",
+  "lang": "zh-TW",
+  "dir": "ltr",
+  "categories": ["education", "games", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -56,5 +60,62 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "創建新活動",
+      "short_name": "新活動",
+      "description": "快速創建新的學習活動",
+      "url": "/create",
+      "icons": [
+        {
+          "src": "/icons/shortcut-create.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "我的進度",
+      "short_name": "進度",
+      "description": "查看學習進度和統計",
+      "url": "/progress",
+      "icons": [
+        {
+          "src": "/icons/shortcut-progress.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "AI 助手",
+      "short_name": "AI 助手",
+      "description": "使用 AI 生成學習內容",
+      "url": "/ai-assistant",
+      "icons": [
+        {
+          "src": "/icons/shortcut-ai.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": ["image/*", "video/*", "audio/*", ".pdf", ".doc", ".docx"]
+        }
+      ]
+    }
+  }
 }

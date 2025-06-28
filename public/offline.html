@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>離線模式 - EduCreate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .features {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .features h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .feature-list {
+            list-style: none;
+            text-align: left;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            color: #4ade80;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .retry-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .retry-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .status {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .online {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .offline {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+            
+            .icon {
+                font-size: 3rem;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon pulse">📱</div>
+        
+        <h1>離線模式</h1>
+        
+        <p>
+            您目前處於離線狀態，但 EduCreate 仍然可以為您提供基本功能。
+        </p>
+
+        <div class="features">
+            <h2>離線可用功能</h2>
+            <ul class="feature-list">
+                <li>瀏覽已下載的學習內容</li>
+                <li>繼續進行離線遊戲</li>
+                <li>查看學習進度記錄</li>
+                <li>創建和編輯草稿</li>
+                <li>使用基本工具功能</li>
+            </ul>
+        </div>
+
+        <button class="retry-btn" onclick="checkConnection()">
+            重新連接
+        </button>
+
+        <div class="status offline" id="status">
+            <strong>🔴 離線狀態</strong><br>
+            <small>數據將在重新連接後同步</small>
+        </div>
+    </div>
+
+    <script>
+        // 檢查網絡連接狀態
+        function updateConnectionStatus() {
+            const status = document.getElementById('status');
+            
+            if (navigator.onLine) {
+                status.className = 'status online';
+                status.innerHTML = '<strong>🟢 已連接</strong><br><small>正在同步數據...</small>';
+                
+                // 延遲後重定向到主頁
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                status.className = 'status offline';
+                status.innerHTML = '<strong>🔴 離線狀態</strong><br><small>數據將在重新連接後同步</small>';
+            }
+        }
+
+        // 手動檢查連接
+        function checkConnection() {
+            const btn = document.querySelector('.retry-btn');
+            btn.textContent = '檢查中...';
+            btn.disabled = true;
+            
+            // 嘗試發送請求到服務器
+            fetch('/', { method: 'HEAD', cache: 'no-cache' })
+                .then(() => {
+                    updateConnectionStatus();
+                })
+                .catch(() => {
+                    setTimeout(() => {
+                        btn.textContent = '重新連接';
+                        btn.disabled = false;
+                    }, 1000);
+                });
+        }
+
+        // 監聽網絡狀態變化
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // 初始化狀態
+        updateConnectionStatus();
+
+        // 定期檢查連接狀態
+        setInterval(() => {
+            if (!navigator.onLine) {
+                // 嘗試 ping 服務器
+                fetch('/', { method: 'HEAD', cache: 'no-cache' })
+                    .then(() => {
+                        // 如果成功，更新狀態
+                        updateConnectionStatus();
+                    })
+                    .catch(() => {
+                        // 保持離線狀態
+                    });
+            }
+        }, 30000); // 每30秒檢查一次
+
+        // PWA 安裝提示
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // 顯示安裝提示
+            const installHint = document.createElement('div');
+            installHint.innerHTML = `
+                <div style="
+                    position: fixed;
+                    bottom: 20px;
+                    left: 20px;
+                    right: 20px;
+                    background: rgba(255, 255, 255, 0.95);
+                    color: #333;
+                    padding: 1rem;
+                    border-radius: 10px;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                    z-index: 1000;
+                    text-align: center;
+                ">
+                    <strong>💡 提示</strong><br>
+                    <small>安裝 EduCreate 應用以獲得更好的離線體驗</small><br>
+                    <button onclick="installApp()" style="
+                        background: #667eea;
+                        color: white;
+                        border: none;
+                        padding: 0.5rem 1rem;
+                        border-radius: 5px;
+                        margin: 0.5rem 0.25rem 0 0.25rem;
+                        cursor: pointer;
+                    ">安裝</button>
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: #6b7280;
+                        color: white;
+                        border: none;
+                        padding: 0.5rem 1rem;
+                        border-radius: 5px;
+                        margin: 0.5rem 0.25rem 0 0.25rem;
+                        cursor: pointer;
+                    ">稍後</button>
+                </div>
+            `;
+            document.body.appendChild(installHint);
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('用戶接受了安裝提示');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // 顯示離線數據統計
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then((registration) => {
+                // 獲取緩存統計
+                caches.keys().then((cacheNames) => {
+                    if (cacheNames.length > 0) {
+                        const cacheInfo = document.createElement('div');
+                        cacheInfo.innerHTML = `
+                            <div style="
+                                margin-top: 1rem;
+                                padding: 1rem;
+                                background: rgba(255, 255, 255, 0.1);
+                                border-radius: 10px;
+                                font-size: 0.9rem;
+                            ">
+                                <strong>📦 離線數據</strong><br>
+                                <small>已緩存 ${cacheNames.length} 個數據包</small>
+                            </div>
+                        `;
+                        document.querySelector('.container').appendChild(cacheInfo);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

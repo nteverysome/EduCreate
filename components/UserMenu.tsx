@@ -80,7 +80,7 @@ export default function UserMenu() {
             </Menu.Item>
           </div>
 
-          {isAdmin() && (
+          {isAdmin && (
             <div className="px-1 py-1">
               <Menu.Item>
                 {({ active }) => (
