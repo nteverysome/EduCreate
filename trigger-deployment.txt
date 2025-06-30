@@ -1,0 +1,5 @@
+Trigger Vercel deployment - 2025-06-27 09:20
+
+AI-First Quiz 系統完成！
+
+OpenAI API 集成成功
