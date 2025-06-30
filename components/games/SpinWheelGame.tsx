@@ -1,24 +1,41 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-interface SpinWheelProps {
-  items: string[];
-  title?: string;
-  colors?: string[];
+export interface WheelSegment {
+  id: string;
+  text: string;
+  color: string;
+  points?: number;
+  action?: 'question' | 'bonus' | 'penalty' | 'normal';
 }
 
-export default function SpinWheelGame({ 
-  items, 
-  title = "隨機轉盤",
-  colors = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', 
-    '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
-    '#BB8FCE', '#85C1E9', '#F8C471', '#82E0AA'
-  ]
-}: SpinWheelProps) {
+interface SpinWheelGameProps {
+  segments: WheelSegment[];
+  onComplete?: (results: any) => void;
+  maxSpins?: number;
+  title?: string;
+}
+
+export default function SpinWheelGame({
+  segments,
+  onComplete,
+  maxSpins = 10,
+  title = "轉盤選擇"
+}: SpinWheelGameProps) {
   const [isSpinning, setIsSpinning] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
   const [rotation, setRotation] = useState(0);
+  const [selectedSegment, setSelectedSegment] = useState<WheelSegment | null>(null);
+  const [score, setScore] = useState(0);
+  const [spinsLeft, setSpinsLeft] = useState(maxSpins);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [gameCompleted, setGameCompleted] = useState(false);
+  const [spinHistory, setSpinHistory] = useState<WheelSegment[]>([]);
+  const [showResult, setShowResult] = useState(false);
+
+  // Refs
   const wheelRef = useRef<HTMLDivElement>(null);
+
+  // 計算每個扇形的角度
+  const segmentAngle = segments.length > 0 ? 360 / segments.length : 60;
 
   const spin = () => {
     if (isSpinning) return;
@@ -30,8 +47,7 @@ export default function SpinWheelGame({
     const randomIndex = Math.floor(Math.random() * items.length);
     const selectedItem = items[randomIndex];
 
-    // 計算旋轉角度
-    const segmentAngle = 360 / items.length;
+    // 計算旋轉角度 - 使用已定義的 segmentAngle
     const targetAngle = 360 - (randomIndex * segmentAngle + segmentAngle / 2);
     const spins = 5; // 轉5圈
     const finalRotation = rotation + spins * 360 + targetAngle;
@@ -49,8 +65,6 @@ export default function SpinWheelGame({
     setResult(null);
     setRotation(0);
   };
-
-  const segmentAngle = 360 / items.length;
 
   return (
     <div className="text-center">

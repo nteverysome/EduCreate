@@ -1,0 +1,90 @@
+{
+  "summary": {
+    "total": 13,
+    "passed": 4,
+    "failed": 5,
+    "warnings": 4,
+    "successRate": 31
+  },
+  "details": [
+    {
+      "test": "主網站訪問",
+      "status": "WARN",
+      "details": "頁面加載但缺少部分功能展示",
+      "timestamp": "2025-06-30T12:23:26.446Z"
+    },
+    {
+      "test": "AI 功能頁面",
+      "status": "FAIL",
+      "details": "頁面不存在 (404)",
+      "timestamp": "2025-06-30T12:23:26.477Z"
+    },
+    {
+      "test": "記憶增強頁面",
+      "status": "FAIL",
+      "details": "頁面不存在 (404)",
+      "timestamp": "2025-06-30T12:23:26.510Z"
+    },
+    {
+      "test": "統一內容管理器 (新路由)",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-06-30T12:23:26.542Z"
+    },
+    {
+      "test": "統一內容管理器 (HTML)",
+      "status": "FAIL",
+      "details": "HTTP 404",
+      "timestamp": "2025-06-30T12:23:26.575Z"
+    },
+    {
+      "test": "API 健康檢查",
+      "status": "PASS",
+      "details": "環境: production",
+      "timestamp": "2025-06-30T12:23:26.624Z"
+    },
+    {
+      "test": "AI 生成 API",
+      "status": "WARN",
+      "details": "意外狀態碼: 405",
+      "timestamp": "2025-06-30T12:23:26.657Z"
+    },
+    {
+      "test": "記憶分析 API",
+      "status": "WARN",
+      "details": "意外狀態碼: 404",
+      "timestamp": "2025-06-30T12:23:26.684Z"
+    },
+    {
+      "test": "遊戲模板系統",
+      "status": "WARN",
+      "details": "只發現 0 個模板",
+      "timestamp": "2025-06-30T12:23:26.718Z"
+    },
+    {
+      "test": "路由: 用戶儀表板",
+      "status": "FAIL",
+      "details": "HTTP 308",
+      "timestamp": "2025-06-30T12:23:26.747Z"
+    },
+    {
+      "test": "路由: 創建活動",
+      "status": "PASS",
+      "details": "頁面正常訪問",
+      "timestamp": "2025-06-30T12:23:26.774Z"
+    },
+    {
+      "test": "路由: 登入頁面",
+      "status": "PASS",
+      "details": "頁面正常訪問",
+      "timestamp": "2025-06-30T12:23:26.804Z"
+    },
+    {
+      "test": "路由: 註冊頁面",
+      "status": "PASS",
+      "details": "頁面正常訪問",
+      "timestamp": "2025-06-30T12:23:27.076Z"
+    }
+  ],
+  "timestamp": "2025-06-30T12:23:27.078Z"
+}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VS Code 修復測試</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        .success {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 10px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .test-button:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        .status {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        .instructions {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 VS Code 外部鏈接修復完成！</h1>
+        
+        <div class="success">
+            <h2>✅ 修復狀態</h2>
+            <p><strong>VS Code 設置已自動創建並配置</strong></p>
+            <p>📁 用戶設置: <code>%APPDATA%\Code\User\settings.json</code></p>
+            <p>📁 工作區設置: <code>.vscode\settings.json</code></p>
+        </div>
+
+        <div class="status">
+            🧪 測試 VS Code 外部鏈接功能
+        </div>
+
+        <p>點擊下面的按鈕測試 VS Code 是否會自動打開外部鏈接：</p>
+
+        <a href="https://edu-create.vercel.app" class="test-button" target="_blank">
+            🔗 測試 EduCreate 主網站
+        </a>
+
+        <a href="https://edu-create.vercel.app/unified-content-manager.html" class="test-button" target="_blank">
+            🎮 測試內容管理器
+        </a>
+
+        <a href="https://edu-create.vercel.app/api/health" class="test-button" target="_blank">
+            🏥 測試 API 健康檢查
+        </a>
+
+        <div class="instructions">
+            <h3>📋 測試說明</h3>
+            <ol>
+                <li><strong>重啟 VS Code</strong> (如果還沒有重啟)</li>
+                <li>在 VS Code 中點擊上面的任何一個鏈接</li>
+                <li>如果修復成功，鏈接應該直接在瀏覽器中打開</li>
+                <li>如果仍然出現對話框，請檢查設置是否正確保存</li>
+            </ol>
+        </div>
+
+        <div class="instructions">
+            <h3>🔧 已配置的設置</h3>
+            <pre style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; text-align: left;">
+{
+  "workbench.trustedDomains": [
+    "https://edu-create.vercel.app",
+    "https://*.vercel.app",
+    "http://localhost:3000"
+  ],
+  "security.workspace.trust.untrustedFiles": "open"
+}
+            </pre>
+        </div>
+
+        <div class="instructions">
+            <h3>🚨 如果仍有問題</h3>
+            <p>請手動執行以下步驟：</p>
+            <ol>
+                <li>按 <kbd>Ctrl + Shift + P</kbd></li>
+                <li>輸入：<code>Preferences: Open User Settings (JSON)</code></li>
+                <li>確認上面的設置已正確保存</li>
+                <li>重啟 VS Code</li>
+            </ol>
+        </div>
+
+        <div class="success">
+            <h3>🎯 下一步</h3>
+            <p>VS Code 問題解決後，我們可以繼續進行 EduCreate 的全面功能測試！</p>
+        </div>
+    </div>
+
+    <script>
+        // 自動檢測測試結果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢查是否在 VS Code 中
+            if (navigator.userAgent.includes('VSCode')) {
+                document.body.style.background = 'var(--vscode-editor-background)';
+                document.body.style.color = 'var(--vscode-editor-foreground)';
+                
+                // 添加 VS Code 檢測提示
+                const vscodeNotice = document.createElement('div');
+                vscodeNotice.className = 'success';
+                vscodeNotice.innerHTML = '<h3>🔍 檢測到 VS Code 環境</h3><p>請點擊上面的鏈接測試外部鏈接功能</p>';
+                document.querySelector('.container').insertBefore(vscodeNotice, document.querySelector('.status'));
+            }
+        });
+
+        // 測試鏈接點擊事件
+        document.querySelectorAll('.test-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                console.log('測試鏈接被點擊:', this.href);
+                
+                // 記錄測試時間
+                const testTime = new Date().toLocaleString();
+                console.log('測試時間:', testTime);
+                
+                // 如果在 VS Code 中，這個鏈接應該直接打開而不顯示對話框
+                setTimeout(() => {
+                    console.log('如果您看到這個消息且沒有對話框，說明修復成功！');
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>

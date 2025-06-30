@@ -1,0 +1,12 @@
+{
+  "workbench.trustedDomains": [
+    "https://edu-create.vercel.app",
+    "https://*.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:3001"
+  ],
+  "security.workspace.trust.untrustedFiles": "open",
+  "workbench.externalUriOpeners": {
+    "https://edu-create.vercel.app": "default"
+  }
+}

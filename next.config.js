@@ -56,6 +56,16 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+
+  // 靜態文件重寫規則
+  async rewrites() {
+    return [
+      {
+        source: '/unified-content-manager',
+        destination: '/unified-content-manager.html'
+      }
+    ];
+  },
 }
 
 module.exports = withPWA(nextConfig)

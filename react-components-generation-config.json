@@ -1,0 +1,231 @@
+{
+  "project": "WordWall Complete Recreation",
+  "agent": "Agent-3 UI Developer",
+  "tools": ["react-builder-mcp", "manim-mcp-server"],
+  "target": "Generate remaining 9 game templates based on memory analysis",
+  
+  "existing_components": [
+    "QuizGame.tsx",
+    "MatchingGame.tsx", 
+    "FlashcardGame.tsx",
+    "HangmanGame.tsx",
+    "WhackAMoleGame.tsx",
+    "SpinWheelGame.tsx",
+    "MemoryCardGame.tsx",
+    "WordsearchGame.tsx"
+  ],
+  
+  "components_to_generate": [
+    {
+      "name": "CompleteTheSentenceGame",
+      "memory_type": "語境記憶",
+      "description": "拖拽單詞填入句子空白處的完形填空遊戲",
+      "features": [
+        "拖拽交互",
+        "句子結構分析", 
+        "語法檢查",
+        "漸進提示",
+        "錯誤反饋"
+      ],
+      "props": {
+        "sentences": "Array<{text: string, blanks: Array<{position: number, options: string[], correct: string}>}>",
+        "difficulty": "easy | medium | hard",
+        "timeLimit": "number",
+        "hints": "boolean"
+      }
+    },
+    {
+      "name": "SpellTheWordGame", 
+      "memory_type": "拼寫記憶",
+      "description": "通過拖拽或輸入字母來拼寫單詞的遊戲",
+      "features": [
+        "字母拖拽",
+        "鍵盤輸入",
+        "拼寫檢查",
+        "音效反饋",
+        "視覺提示"
+      ],
+      "props": {
+        "words": "Array<{word: string, hint?: string, image?: string}>",
+        "inputMode": "drag | type | both",
+        "showHints": "boolean",
+        "audioEnabled": "boolean"
+      }
+    },
+    {
+      "name": "RankOrderGame",
+      "memory_type": "排序邏輯記憶", 
+      "description": "將項目按照正確順序排列的邏輯遊戲",
+      "features": [
+        "拖拽排序",
+        "邏輯驗證",
+        "順序提示",
+        "動畫效果",
+        "成績計算"
+      ],
+      "props": {
+        "items": "Array<{id: string, content: string, correctPosition: number}>",
+        "criteria": "string",
+        "allowPartialCredit": "boolean",
+        "showPositionNumbers": "boolean"
+      }
+    },
+    {
+      "name": "LabelledDiagramGame",
+      "memory_type": "標籤空間記憶",
+      "description": "在圖表上拖拽標籤到正確位置的空間記憶遊戲", 
+      "features": [
+        "圖像標註",
+        "精確定位",
+        "空間記憶",
+        "視覺反饋",
+        "縮放功能"
+      ],
+      "props": {
+        "image": "string",
+        "labels": "Array<{id: string, text: string, x: number, y: number, tolerance: number}>",
+        "zoomEnabled": "boolean",
+        "showGrid": "boolean"
+      }
+    },
+    {
+      "name": "SpeedSortingGame",
+      "memory_type": "快速分類記憶",
+      "description": "在時間壓力下快速分類項目的反應遊戲",
+      "features": [
+        "時間壓力",
+        "快速分類",
+        "反應訓練",
+        "分數系統",
+        "難度漸進"
+      ],
+      "props": {
+        "items": "Array<{id: string, content: string, category: string}>",
+        "categories": "Array<{id: string, name: string, color: string}>",
+        "timePerItem": "number",
+        "speedBonus": "boolean"
+      }
+    },
+    {
+      "name": "WatchAndMemorizeGame",
+      "memory_type": "觀察記憶",
+      "description": "觀看序列後回憶順序或內容的記憶遊戲",
+      "features": [
+        "序列展示",
+        "記憶測試",
+        "注意力訓練",
+        "漸進難度",
+        "視覺追蹤"
+      ],
+      "props": {
+        "sequence": "Array<{id: string, content: string, duration: number}>",
+        "testType": "order | content | both",
+        "showDuration": "number",
+        "maxAttempts": "number"
+      }
+    },
+    {
+      "name": "MathsGeneratorGame",
+      "memory_type": "數學記憶",
+      "description": "自動生成數學題目的計算遊戲",
+      "features": [
+        "題目生成",
+        "計算驗證",
+        "難度調節",
+        "步驟提示",
+        "公式記憶"
+      ],
+      "props": {
+        "operations": "Array<'add' | 'subtract' | 'multiply' | 'divide'>",
+        "range": "{min: number, max: number}",
+        "questionCount": "number",
+        "showSteps": "boolean"
+      }
+    },
+    {
+      "name": "WordMagnetsGame",
+      "memory_type": "詞彙組合記憶",
+      "description": "使用磁性單詞組合句子的創意遊戲",
+      "features": [
+        "單詞磁鐵",
+        "句子構建",
+        "語法檢查",
+        "創意表達",
+        "磁性效果"
+      ],
+      "props": {
+        "words": "Array<{word: string, type: 'noun' | 'verb' | 'adjective' | 'other'}>",
+        "targetSentences": "Array<string>",
+        "freeMode": "boolean",
+        "grammarCheck": "boolean"
+      }
+    },
+    {
+      "name": "CrosswordGame",
+      "memory_type": "交叉詞彙記憶",
+      "description": "填字遊戲，測試詞彙和拼寫能力",
+      "features": [
+        "網格填字",
+        "線索提示",
+        "交叉驗證",
+        "自動檢查",
+        "進度保存"
+      ],
+      "props": {
+        "grid": "Array<Array<{letter?: string, number?: number, clue?: string}>>",
+        "clues": "{across: Array<{number: number, clue: string, answer: string}>, down: Array<{number: number, clue: string, answer: string}>}",
+        "showErrors": "boolean",
+        "autoSave": "boolean"
+      }
+    }
+  ],
+  
+  "shared_features": {
+    "memory_enhancement": {
+      "spaced_repetition": true,
+      "difficulty_adaptation": true,
+      "performance_tracking": true,
+      "personalized_feedback": true
+    },
+    "ui_standards": {
+      "responsive_design": true,
+      "accessibility": true,
+      "dark_mode": true,
+      "animations": true
+    },
+    "game_mechanics": {
+      "scoring_system": true,
+      "time_tracking": true,
+      "hint_system": true,
+      "progress_saving": true
+    }
+  },
+  
+  "animation_requirements": {
+    "tool": "manim-mcp-server",
+    "animations": [
+      "drag_and_drop_feedback",
+      "correct_answer_celebration", 
+      "wrong_answer_shake",
+      "progress_bar_animation",
+      "score_increment_effect",
+      "level_completion_burst",
+      "hint_reveal_animation",
+      "time_warning_pulse"
+    ]
+  },
+  
+  "integration_points": {
+    "memory_engine": "lib/memory-enhancement/MemoryEnhancementEngine.ts",
+    "game_state": "lib/store/gameStore.ts", 
+    "analytics": "lib/analytics/gameAnalytics.ts",
+    "audio": "lib/audio/gameAudio.ts"
+  },
+  
+  "output_structure": {
+    "components_path": "components/games/",
+    "types_path": "types/games.ts",
+    "hooks_path": "hooks/useGame.ts",
+    "styles_path": "styles/games.css"
+  }
+}

@@ -1,0 +1,351 @@
+{
+  "agent": "Agent-7 DevOps",
+  "tools": ["vercel-mcp-server", "lighthouse-mcp-server"],
+  "project": "WordWall Complete Recreation - EduCreate",
+  "deployment_strategy": "Multi-stage Progressive Deployment",
+  
+  "vercel_configuration": {
+    "project_name": "educreate-wordwall-complete",
+    "domain": "edu-create.vercel.app",
+    "framework": "nextjs",
+    "build_command": "npm run build",
+    "output_directory": ".next",
+    "install_command": "npm install",
+    "dev_command": "npm run dev",
+    
+    "environment_variables": {
+      "production": {
+        "NEXTAUTH_URL": "https://edu-create.vercel.app",
+        "NEXTAUTH_SECRET": "${NEXTAUTH_SECRET}",
+        "DATABASE_URL": "${NEON_DATABASE_URL}",
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}",
+        "SUPABASE_URL": "${SUPABASE_URL}",
+        "SUPABASE_ANON_KEY": "${SUPABASE_ANON_KEY}",
+        "GOOGLE_CLIENT_ID": "${GOOGLE_CLIENT_ID}",
+        "GOOGLE_CLIENT_SECRET": "${GOOGLE_CLIENT_SECRET}",
+        "GITHUB_CLIENT_ID": "${GITHUB_CLIENT_ID}",
+        "GITHUB_CLIENT_SECRET": "${GITHUB_CLIENT_SECRET}",
+        "WEAVIATE_URL": "${WEAVIATE_URL}",
+        "WEAVIATE_API_KEY": "${WEAVIATE_API_KEY}"
+      },
+      "preview": {
+        "NEXTAUTH_URL": "https://educreate-wordwall-complete-preview.vercel.app",
+        "DATABASE_URL": "${NEON_DATABASE_URL_STAGING}"
+      },
+      "development": {
+        "NEXTAUTH_URL": "http://localhost:3000",
+        "DATABASE_URL": "${LOCAL_DATABASE_URL}"
+      }
+    },
+    
+    "regions": ["hkg1", "sfo1", "fra1"],
+    "functions": {
+      "memory-enhancement/recommendations": {
+        "memory": 1024,
+        "maxDuration": 30
+      },
+      "ai-content-generation": {
+        "memory": 2048,
+        "maxDuration": 60
+      },
+      "game-sessions": {
+        "memory": 512,
+        "maxDuration": 15
+      }
+    },
+    
+    "headers": [
+      {
+        "source": "/api/(.*)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "s-maxage=60, stale-while-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/static/(.*)",
+        "headers": [
+          {
+            "key": "Cache-Control", 
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      }
+    ],
+    
+    "redirects": [
+      {
+        "source": "/wordwall",
+        "destination": "/memory-enhancement",
+        "permanent": true
+      }
+    ]
+  },
+  
+  "performance_optimization": {
+    "lighthouse_targets": {
+      "performance": 95,
+      "accessibility": 100,
+      "best_practices": 95,
+      "seo": 100,
+      "pwa": 90
+    },
+    
+    "core_web_vitals": {
+      "largest_contentful_paint": "< 2.5s",
+      "first_input_delay": "< 100ms", 
+      "cumulative_layout_shift": "< 0.1"
+    },
+    
+    "optimization_strategies": [
+      {
+        "category": "Images",
+        "actions": [
+          "使用 Next.js Image 組件",
+          "實現 WebP 格式轉換",
+          "添加圖片懶加載",
+          "優化圖片尺寸和壓縮"
+        ]
+      },
+      {
+        "category": "JavaScript",
+        "actions": [
+          "代碼分割和懶加載",
+          "移除未使用的依賴",
+          "使用 Tree Shaking",
+          "壓縮和混淆代碼"
+        ]
+      },
+      {
+        "category": "CSS",
+        "actions": [
+          "CSS 壓縮和優化",
+          "移除未使用的 CSS",
+          "使用 Critical CSS",
+          "優化 Tailwind CSS 配置"
+        ]
+      },
+      {
+        "category": "Fonts",
+        "actions": [
+          "使用 font-display: swap",
+          "預加載關鍵字體",
+          "優化字體文件大小",
+          "使用系統字體作為後備"
+        ]
+      }
+    ]
+  },
+  
+  "monitoring_and_analytics": {
+    "performance_monitoring": {
+      "tool": "Vercel Analytics",
+      "metrics": [
+        "頁面加載時間",
+        "API 響應時間", 
+        "錯誤率",
+        "用戶會話時長",
+        "跳出率"
+      ]
+    },
+    
+    "error_tracking": {
+      "tool": "Vercel Error Tracking",
+      "configuration": {
+        "capture_console_errors": true,
+        "capture_unhandled_rejections": true,
+        "capture_http_errors": true,
+        "sample_rate": 1.0
+      }
+    },
+    
+    "user_analytics": {
+      "tool": "Vercel Web Analytics",
+      "privacy_compliant": true,
+      "track_events": [
+        "game_start",
+        "game_complete", 
+        "template_select",
+        "ai_content_generate",
+        "memory_enhancement_use"
+      ]
+    }
+  },
+  
+  "security_configuration": {
+    "content_security_policy": {
+      "default-src": "'self'",
+      "script-src": "'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live",
+      "style-src": "'self' 'unsafe-inline'",
+      "img-src": "'self' data: https:",
+      "font-src": "'self' data:",
+      "connect-src": "'self' https://api.openai.com https://*.supabase.co"
+    },
+    
+    "security_headers": [
+      {
+        "key": "X-Frame-Options",
+        "value": "DENY"
+      },
+      {
+        "key": "X-Content-Type-Options", 
+        "value": "nosniff"
+      },
+      {
+        "key": "Referrer-Policy",
+        "value": "origin-when-cross-origin"
+      },
+      {
+        "key": "Permissions-Policy",
+        "value": "camera=(), microphone=(), geolocation=()"
+      }
+    ]
+  },
+  
+  "ci_cd_pipeline": {
+    "stages": [
+      {
+        "name": "Code Quality Check",
+        "tools": ["ESLint", "Prettier", "TypeScript"],
+        "actions": [
+          "代碼格式檢查",
+          "類型檢查",
+          "語法檢查",
+          "代碼風格統一"
+        ]
+      },
+      {
+        "name": "Testing",
+        "tools": ["Jest", "Playwright", "Lighthouse"],
+        "actions": [
+          "單元測試",
+          "集成測試", 
+          "端到端測試",
+          "性能測試"
+        ]
+      },
+      {
+        "name": "Build and Deploy",
+        "tools": ["Vercel CLI", "GitHub Actions"],
+        "actions": [
+          "構建應用",
+          "部署到預覽環境",
+          "運行煙霧測試",
+          "部署到生產環境"
+        ]
+      },
+      {
+        "name": "Post-Deploy Validation",
+        "tools": ["Lighthouse", "Vercel Analytics"],
+        "actions": [
+          "性能驗證",
+          "功能驗證",
+          "監控設置",
+          "告警配置"
+        ]
+      }
+    ]
+  },
+  
+  "database_optimization": {
+    "neon_configuration": {
+      "connection_pooling": true,
+      "max_connections": 100,
+      "idle_timeout": "10m",
+      "query_timeout": "30s"
+    },
+    
+    "query_optimization": [
+      "添加適當的數據庫索引",
+      "優化 N+1 查詢問題",
+      "使用查詢緩存",
+      "實現分頁查詢"
+    ],
+    
+    "caching_strategy": {
+      "redis_cache": {
+        "ttl": 3600,
+        "keys": [
+          "user_recommendations",
+          "template_configurations", 
+          "ai_generated_content",
+          "game_leaderboards"
+        ]
+      }
+    }
+  },
+  
+  "cdn_optimization": {
+    "static_assets": {
+      "images": "Vercel Image Optimization",
+      "fonts": "Vercel Edge Network",
+      "scripts": "Vercel Edge Network",
+      "styles": "Vercel Edge Network"
+    },
+    
+    "edge_functions": [
+      {
+        "path": "/api/memory-enhancement/quick-recommendations",
+        "description": "快速記憶推薦 API"
+      },
+      {
+        "path": "/api/game-sessions/start",
+        "description": "遊戲會話啟動 API"
+      }
+    ]
+  },
+  
+  "backup_and_disaster_recovery": {
+    "database_backup": {
+      "frequency": "daily",
+      "retention": "30 days",
+      "automated": true
+    },
+    
+    "code_backup": {
+      "repository": "GitHub",
+      "branches": ["main", "develop", "staging"],
+      "automated": true
+    },
+    
+    "disaster_recovery": {
+      "rto": "< 1 hour",
+      "rpo": "< 15 minutes",
+      "failover_strategy": "Multi-region deployment"
+    }
+  },
+  
+  "deployment_checklist": [
+    "✅ 代碼質量檢查通過",
+    "✅ 所有測試通過",
+    "✅ 性能指標達標",
+    "✅ 安全配置正確",
+    "✅ 環境變量配置",
+    "✅ 數據庫遷移完成",
+    "✅ CDN 配置正確",
+    "✅ 監控和告警設置",
+    "✅ 備份策略實施",
+    "✅ 文檔更新完成"
+  ],
+  
+  "rollback_strategy": {
+    "automatic_rollback": {
+      "triggers": [
+        "錯誤率 > 5%",
+        "響應時間 > 5s",
+        "可用性 < 99%"
+      ]
+    },
+    
+    "manual_rollback": {
+      "process": [
+        "停止新部署",
+        "回滾到上一個穩定版本",
+        "驗證回滾成功",
+        "通知相關團隊"
+      ]
+    }
+  }
+}

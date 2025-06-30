@@ -1,0 +1,218 @@
+{
+  "project_name": "WordWall Complete Recreation",
+  "project_description": "8智能體協作系統完整重現WordWall.net的所有功能和架構",
+  "coordinator": {
+    "name": "Agent-8 Coordinator",
+    "role": "項目協調管理中心",
+    "tools": ["Sequential_thinking", "mcp-memory"],
+    "responsibilities": [
+      "協調管理所有智能體工作",
+      "監控項目進度和質量",
+      "處理衝突和問題解決",
+      "維護項目知識庫",
+      "制定決策和優先級"
+    ],
+    "startup_priority": 1
+  },
+  "agents": [
+    {
+      "id": "agent-1",
+      "name": "Agent-1 Explorer",
+      "role": "功能探索專家",
+      "tools": ["Playwright", "screenshot-mcp"],
+      "responsibilities": [
+        "深度探索wordwall.net所有功能",
+        "記錄用戶流程和交互細節",
+        "生成功能清單和用戶體驗報告",
+        "發現隱藏功能和特性",
+        "分析用戶行為模式"
+      ],
+      "startup_priority": 1,
+      "dependencies": [],
+      "outputs": [
+        "功能清單文檔",
+        "用戶流程圖",
+        "界面截圖集",
+        "交互細節報告"
+      ]
+    },
+    {
+      "id": "agent-2", 
+      "name": "Agent-2 Architect",
+      "role": "技術架構分析師",
+      "tools": ["web-scraper-mcp", "html-analyzer-mcp"],
+      "responsibilities": [
+        "分析WordWall完整技術架構",
+        "研究前端框架和組件結構",
+        "分析後端API和數據流",
+        "識別技術棧和依賴關係",
+        "設計對應的架構方案"
+      ],
+      "startup_priority": 1,
+      "dependencies": [],
+      "outputs": [
+        "技術架構文檔",
+        "API接口規範",
+        "數據庫設計",
+        "技術棧選型報告"
+      ]
+    },
+    {
+      "id": "agent-3",
+      "name": "Agent-3 UI Developer", 
+      "role": "用戶界面開發專家",
+      "tools": ["react-builder-mcp", "manim-mcp-server"],
+      "responsibilities": [
+        "重現所有WordWall界面",
+        "實現動畫和交互效果",
+        "確保響應式設計",
+        "優化用戶體驗",
+        "實現無障礙功能"
+      ],
+      "startup_priority": 2,
+      "dependencies": ["agent-1", "agent-2"],
+      "outputs": [
+        "React組件庫",
+        "CSS樣式系統",
+        "動畫效果庫",
+        "響應式布局"
+      ]
+    },
+    {
+      "id": "agent-4",
+      "name": "Agent-4 Game Developer",
+      "role": "遊戲開發專家", 
+      "tools": ["Unity-MCP", "gdai-mcp-plugin-godot"],
+      "responsibilities": [
+        "開發所有34+個遊戲模板",
+        "實現遊戲邏輯和計分系統",
+        "創建遊戲動畫和特效",
+        "優化遊戲性能",
+        "實現多平台兼容"
+      ],
+      "startup_priority": 2,
+      "dependencies": ["agent-1"],
+      "outputs": [
+        "遊戲引擎框架",
+        "34+個遊戲模板",
+        "遊戲資源庫",
+        "性能優化方案"
+      ]
+    },
+    {
+      "id": "agent-5",
+      "name": "Agent-5 Backend Engineer",
+      "role": "後端系統工程師",
+      "tools": ["sqlite-mcp", "mcp-server-weaviate"],
+      "responsibilities": [
+        "建立完整後端系統",
+        "設計數據庫架構",
+        "開發API端點",
+        "實現用戶管理和權限控制",
+        "確保數據安全和性能"
+      ],
+      "startup_priority": 2,
+      "dependencies": ["agent-2"],
+      "outputs": [
+        "後端API系統",
+        "數據庫架構",
+        "用戶管理系統",
+        "安全認證機制"
+      ]
+    },
+    {
+      "id": "agent-6",
+      "name": "Agent-6 AI Enhancer",
+      "role": "AI功能增強專家",
+      "tools": ["openai-gpt-image-mcp", "imagen3-mcp"],
+      "responsibilities": [
+        "添加AI內容生成功能",
+        "實現智能題目創建",
+        "開發個性化推薦系統",
+        "集成記憶增強功能",
+        "超越WordWall的AI能力"
+      ],
+      "startup_priority": 3,
+      "dependencies": ["agent-3", "agent-4", "agent-5"],
+      "outputs": [
+        "AI內容生成系統",
+        "智能推薦引擎",
+        "記憶增強模塊",
+        "AI功能API"
+      ]
+    },
+    {
+      "id": "agent-7",
+      "name": "Agent-7 DevOps",
+      "role": "部署運維專家",
+      "tools": ["vercel-mcp-server", "lighthouse-mcp-server"],
+      "responsibilities": [
+        "配置部署環境",
+        "進行性能測試和優化",
+        "設置CI/CD流程",
+        "監控系統穩定性",
+        "實現自動化運維"
+      ],
+      "startup_priority": 3,
+      "dependencies": ["agent-3", "agent-4", "agent-5"],
+      "outputs": [
+        "部署配置",
+        "性能優化報告",
+        "CI/CD流程",
+        "監控系統"
+      ]
+    }
+  ],
+  "workflow": {
+    "phase_1": {
+      "name": "探索分析階段",
+      "duration": "3天",
+      "agents": ["agent-1", "agent-2"],
+      "coordinator_tasks": [
+        "建立項目知識庫",
+        "制定工作標準",
+        "監控分析進度"
+      ]
+    },
+    "phase_2": {
+      "name": "開發實現階段", 
+      "duration": "7天",
+      "agents": ["agent-3", "agent-4", "agent-5"],
+      "coordinator_tasks": [
+        "協調開發進度",
+        "解決技術衝突",
+        "確保代碼質量"
+      ]
+    },
+    "phase_3": {
+      "name": "增強部署階段",
+      "duration": "4天", 
+      "agents": ["agent-6", "agent-7"],
+      "coordinator_tasks": [
+        "集成測試管理",
+        "部署質量控制",
+        "項目交付準備"
+      ]
+    }
+  },
+  "success_metrics": {
+    "functionality": "100%功能覆蓋率",
+    "performance": "頁面加載<2秒，遊戲響應<100ms",
+    "quality": "測試覆蓋率>90%，零嚴重bug",
+    "ai_enhancement": "超越WordWall的AI功能",
+    "user_experience": "UI/UX一致性或更優"
+  },
+  "communication_protocol": {
+    "data_format": "JSON",
+    "api_standard": "RESTful",
+    "version_control": "Git",
+    "knowledge_sharing": "mcp-memory",
+    "progress_tracking": "實時更新"
+  },
+  "risk_management": {
+    "technical_risks": "多備選方案",
+    "timeline_risks": "關鍵路徑管理", 
+    "quality_risks": "多層次測試",
+    "integration_risks": "增量集成策略"
+  }
+}

@@ -4,8 +4,6 @@ import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import Link from 'next/link';
 
-import { toast } from 'react-hot-toast';
-
 export default function CreateActivityPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -42,7 +40,7 @@ export default function CreateActivityPage() {
         setActivityDescription(templateInfo.description);
         setStep(2);
       } else {
-        toast.error('未找到指定的模板');
+        alert('未找到指定的模板');
         router.push('/');
       }
     }
@@ -148,14 +146,14 @@ export default function CreateActivityPage() {
       }
 
       const data = await response.json();
-      
-      toast.success('活動創建成功！');
-      
+
+      alert('活動創建成功！');
+
       // 重定向到編輯器頁面
       router.push(`/editor?id=${data.id}&template=${selectedTemplate.id}&type=${selectedTemplate.type}`);
     } catch (error) {
       console.error('創建活動失敗:', error);
-      toast.error(error instanceof Error ? error.message : '創建活動失敗');
+      alert(error instanceof Error ? error.message : '創建活動失敗');
     } finally {
       setIsLoading(false);
     }

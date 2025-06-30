@@ -1,35 +1,79 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-interface QuizQuestion {
+export interface QuizQuestion {
   id: string;
   question: string;
   options: string[];
   correctAnswer: number;
   explanation?: string;
+  imageUrl?: string;
+  audioUrl?: string;
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+  category?: string;
+  points?: number;
 }
 
-interface QuizGameProps {
+export interface QuizGameProps {
   questions: QuizQuestion[];
+  timeLimit?: number; // 秒
+  showTimer?: boolean;
+  showScore?: boolean;
   shuffleQuestions?: boolean;
-  shuffleOptions?: boolean;
-  showExplanation?: boolean;
-  onComplete?: (score: number, total: number) => void;
+  shuffleAnswers?: boolean;
+  gameMode?: 'CLASSIC' | 'TIMED' | 'SURVIVAL';
+  onComplete?: (results: QuizResults) => void;
+  onQuestionAnswer?: (questionId: string, selectedAnswer: number, isCorrect: boolean) => void;
+  onGameStart?: () => void;
+}
+
+export interface QuizResults {
+  totalQuestions: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  score: number;
+  timeSpent: number;
+  accuracy: number;
+  answers: Array<{
+    questionId: string;
+    selectedAnswer: number;
+    correctAnswer: number;
+    isCorrect: boolean;
+    timeSpent: number;
+    points: number;
+  }>;
 }
 
 export default function QuizGame({
   questions = [],
-  shuffleQuestions = true,
-  shuffleOptions = true,
-  showExplanation = true,
-  onComplete
+  timeLimit = 300,
+  showTimer = true,
+  showScore = true,
+  shuffleQuestions = false,
+  shuffleAnswers = false,
+  gameMode = 'CLASSIC',
+  onComplete,
+  onQuestionAnswer,
+  onGameStart
 }: QuizGameProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
-  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(timeLimit);
+  const [gameStartTime] = useState(Date.now());
+  const [questionStartTime, setQuestionStartTime] = useState(Date.now());
+  const [answers, setAnswers] = useState<QuizResults['answers']>([]);
+  const [isGameComplete, setIsGameComplete] = useState(false);
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [processedQuestions, setProcessedQuestions] = useState<QuizQuestion[]>([]);
   const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>([]);
   const [shuffledOptions, setShuffledOptions] = useState<{[key: string]: number[]}>({});
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [showExplanation, setShowExplanation] = useState(true);
+  const [streak, setStreak] = useState(0);
+  const [maxStreak, setMaxStreak] = useState(0);
 
   // 初始化測驗
   useEffect(() => {
@@ -47,7 +91,7 @@ export default function QuizGame({
       setQuizCompleted(false);
       
       // 為每個問題洗牌選項
-      if (shuffleOptions) {
+      if (shuffleAnswers) {
         const optionsMap: {[key: string]: number[]} = {};
         
         shuffled.forEach(question => {
@@ -61,14 +105,14 @@ export default function QuizGame({
         setShuffledOptions(optionsMap);
       }
     }
-  }, [questions, shuffleQuestions, shuffleOptions]);
+  }, [questions, shuffleQuestions, shuffleAnswers]);
 
   // 當前問題
   const currentQuestion = shuffledQuestions[currentQuestionIndex];
 
   // 獲取選項順序
   const getOptionsOrder = (questionId: string) => {
-    if (shuffleOptions && shuffledOptions[questionId]) {
+    if (shuffleAnswers && shuffledOptions[questionId]) {
       return shuffledOptions[questionId];
     }
     // 如果不洗牌或尚未設置，返回原始順序
@@ -118,7 +162,7 @@ export default function QuizGame({
     setQuizCompleted(false);
     
     // 重新洗牌選項
-    if (shuffleOptions) {
+    if (shuffleAnswers) {
       const optionsMap: {[key: string]: number[]} = {};
       
       shuffled.forEach(question => {

@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordwall Clone - 互動演示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/framer-motion/10.16.4/framer-motion.min.js"></script>
+    <style>
+        .game-card {
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .spin-wheel {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+            border: 8px solid #374151;
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ef4444;
+            z-index: 10;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spinning {
+            animation: spin 3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        .quiz-option {
+            transition: all 0.2s ease;
+        }
+
+        .quiz-option:hover {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+        .quiz-option.selected {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #1d4ed8;
+        }
+
+        .quiz-option.correct {
+            background-color: #10b981;
+            color: white;
+            border-color: #059669;
+        }
+
+        .quiz-option.incorrect {
+            background-color: #ef4444;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .match-item {
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .match-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .match-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .drop-zone {
+            min-height: 60px;
+            border: 2px dashed #d1d5db;
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+        }
+
+        .drop-zone.matched {
+            border-color: #10b981;
+            background-color: #d1fae5;
+        }
+
+        .flash-card {
+            perspective: 1000px;
+            width: 300px;
+            height: 200px;
+            margin: 0 auto;
+        }
+
+        .flash-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flash-card.flipped .flash-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flash-card-front, .flash-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .flash-card-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .flash-card-back {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 導航欄 -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="text-2xl font-bold text-blue-600">🎮 Wordwall Clone</div>
+                    <div class="ml-4 text-sm text-gray-600">互動演示</div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="demo.html" class="text-blue-600 hover:text-blue-800">返回主頁</a>
+                    <a href="game-templates-showcase.html" class="text-blue-600 hover:text-blue-800">模板展示</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- 頁面標題 -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                🎯 互動遊戲演示
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                體驗 5 種不同的互動遊戲模板，感受豐富的教育遊戲功能
+            </p>
+        </div>
+
+        <!-- 遊戲選擇器 -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">選擇遊戲類型</h2>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <button onclick="showGame('quiz')"
+                        class="game-selector p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors text-center"
+                        id="selector-quiz">
+                    <div class="text-3xl mb-2">❓</div>
+                    <div class="font-semibold">測驗</div>
+                </button>
+
+                <button onclick="showGame('match')"
+                        class="game-selector p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors text-center"
+                        id="selector-match">
+                    <div class="text-3xl mb-2">🔗</div>
+                    <div class="font-semibold">配對</div>
+                </button>
+
+                <button onclick="showGame('wheel')"
+                        class="game-selector p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors text-center"
+                        id="selector-wheel">
+                    <div class="text-3xl mb-2">🎡</div>
+                    <div class="font-semibold">轉盤</div>
+                </button>
+
+                <button onclick="showGame('sort')"
+                        class="game-selector p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors text-center"
+                        id="selector-sort">
+                    <div class="text-3xl mb-2">📂</div>
+                    <div class="font-semibold">分組</div>
+                </button>
+
+                <button onclick="showGame('cards')"
+                        class="game-selector p-4 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-colors text-center"
+                        id="selector-cards">
+                    <div class="text-3xl mb-2">🃏</div>
+                    <div class="font-semibold">閃卡</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- 遊戲內容區域 -->
+        <div id="game-content" class="bg-white rounded-xl shadow-lg p-8 min-h-96">
+            <!-- 歡迎頁面 -->
+            <div id="welcome-screen" class="text-center">
+                <div class="text-6xl mb-6">🎮</div>
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">歡迎來到互動演示</h2>
+                <p class="text-lg text-gray-600 mb-8">請選擇上方的遊戲類型開始體驗</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <div class="text-2xl mb-3">🎯</div>
+                        <h3 class="font-semibold mb-2">即時互動</h3>
+                        <p class="text-sm text-gray-600">所有遊戲都支持即時反饋和互動操作</p>
+                    </div>
+
+                    <div class="bg-green-50 rounded-lg p-6">
+                        <div class="text-2xl mb-3">📊</div>
+                        <h3 class="font-semibold mb-2">數據追蹤</h3>
+                        <p class="text-sm text-gray-600">詳細記錄學習進度和成績統計</p>
+                    </div>
+
+                    <div class="bg-purple-50 rounded-lg p-6">
+                        <div class="text-2xl mb-3">🎨</div>
+                        <h3 class="font-semibold mb-2">精美設計</h3>
+                        <p class="text-sm text-gray-600">現代化界面設計，流暢的動畫效果</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 測驗遊戲 -->
+            <div id="quiz-game" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">❓ 數學基礎測驗</h2>
+                    <p class="text-gray-600">測試你的數學運算能力</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto">
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-sm font-medium text-gray-600">問題 <span id="quiz-current">1</span> / 3</span>
+                            <span class="text-sm font-medium text-gray-600">時間: <span id="quiz-timer">60</span>s</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="quiz-progress" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 33%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                        <h3 id="quiz-question" class="text-xl font-semibold text-center mb-6">2 + 2 = ?</h3>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <button class="quiz-option p-4 rounded-lg border-2 border-gray-300 text-center font-medium"
+                                    onclick="selectQuizOption(this, false)" data-value="3">
+                                A) 3
+                            </button>
+                            <button class="quiz-option p-4 rounded-lg border-2 border-gray-300 text-center font-medium"
+                                    onclick="selectQuizOption(this, true)" data-value="4">
+                                B) 4
+                            </button>
+                            <button class="quiz-option p-4 rounded-lg border-2 border-gray-300 text-center font-medium"
+                                    onclick="selectQuizOption(this, false)" data-value="5">
+                                C) 5
+                            </button>
+                            <button class="quiz-option p-4 rounded-lg border-2 border-gray-300 text-center font-medium"
+                                    onclick="selectQuizOption(this, false)" data-value="6">
+                                D) 6
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button id="quiz-next" onclick="nextQuizQuestion()"
+                                class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                disabled>
+                            下一題
+                        </button>
+                    </div>
+
+                    <div id="quiz-result" class="hidden mt-6 p-4 rounded-lg text-center">
+                        <h3 class="text-xl font-bold mb-2">測驗完成！</h3>
+                        <p class="text-gray-600 mb-4">你的得分: <span id="quiz-score" class="font-bold text-blue-600">0</span>/3</p>
+                        <button onclick="restartQuiz()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            重新開始
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 配對遊戲 -->
+            <div id="match-game" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">🔗 英語詞彙配對</h2>
+                    <p class="text-gray-600">將英語單詞與中文意思配對</p>
+                </div>
+
+                <div class="max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- 左側：英語單詞 -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4 text-center">英語單詞</h3>
+                            <div class="space-y-3">
+                                <div class="match-item bg-blue-100 p-4 rounded-lg text-center font-medium cursor-pointer"
+                                     draggable="true" ondragstart="dragStart(event)" data-value="apple">
+                                    Apple
+                                </div>
+                                <div class="match-item bg-green-100 p-4 rounded-lg text-center font-medium cursor-pointer"
+                                     draggable="true" ondragstart="dragStart(event)" data-value="book">
+                                    Book
+                                </div>
+                                <div class="match-item bg-yellow-100 p-4 rounded-lg text-center font-medium cursor-pointer"
+                                     draggable="true" ondragstart="dragStart(event)" data-value="cat">
+                                    Cat
+                                </div>
+                                <div class="match-item bg-purple-100 p-4 rounded-lg text-center font-medium cursor-pointer"
+                                     draggable="true" ondragstart="dragStart(event)" data-value="dog">
+                                    Dog
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 右側：中文意思 -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4 text-center">中文意思</h3>
+                            <div class="space-y-3">
+                                <div class="drop-zone p-4 rounded-lg text-center font-medium"
+                                     ondrop="drop(event)" ondragover="allowDrop(event)" data-target="cat">
+                                    貓
+                                </div>
+                                <div class="drop-zone p-4 rounded-lg text-center font-medium"
+                                     ondrop="drop(event)" ondragover="allowDrop(event)" data-target="apple">
+                                    蘋果
+                                </div>
+                                <div class="drop-zone p-4 rounded-lg text-center font-medium"
+                                     ondrop="drop(event)" ondragover="allowDrop(event)" data-target="dog">
+                                    狗
+                                </div>
+                                <div class="drop-zone p-4 rounded-lg text-center font-medium"
+                                     ondrop="drop(event)" ondragover="allowDrop(event)" data-target="book">
+                                    書
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-8">
+                        <div class="mb-4">
+                            <span class="text-lg font-semibold">配對進度: </span>
+                            <span id="match-score" class="text-blue-600 font-bold">0</span>/4
+                        </div>
+                        <button onclick="resetMatch()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                            重置遊戲
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 轉盤遊戲 -->
+            <div id="wheel-game" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">🎡 幸運轉盤</h2>
+                    <p class="text-gray-600">轉動轉盤，看看你的運氣如何</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto text-center">
+                    <div class="relative mb-8">
+                        <div class="wheel-pointer"></div>
+                        <div id="spin-wheel" class="spin-wheel mx-auto">
+                            <div class="wheel-segment" style="background: #ff6b6b; transform: rotate(0deg);">
+                                <div style="position: absolute; top: 20%; left: 75%; transform: rotate(-30deg); font-weight: bold; color: white;">大獎</div>
+                            </div>
+                            <div class="wheel-segment" style="background: #4ecdc4; transform: rotate(60deg);">
+                                <div style="position: absolute; top: 20%; left: 75%; transform: rotate(-30deg); font-weight: bold; color: white;">小獎</div>
+                            </div>
+                            <div class="wheel-segment" style="background: #45b7d1; transform: rotate(120deg);">
+                                <div style="position: absolute; top: 20%; left: 75%; transform: rotate(-30deg); font-weight: bold; color: white;">安慰獎</div>
+                            </div>
+                            <div class="wheel-segment" style="background: #96ceb4; transform: rotate(180deg);">
+                                <div style="position: absolute; top: 20%; left: 75%; transform: rotate(-30deg); font-weight: bold; color: white;">再試一次</div>
+                            </div>
+                            <div class="wheel-segment" style="background: #ffeaa7; transform: rotate(240deg);">
+                                <div style="position: absolute; top: 20%; left: 75%; transform: rotate(-30deg); font-weight: bold; color: black;">謝謝參與</div>
+                            </div>
+                            <div class="wheel-segment" style="background: #dda0dd; transform: rotate(300deg);">
+                                <div style="position: absolute; top: 20%; left: 75%; transform: rotate(-30deg); font-weight: bold; color: white;">幸運星</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <button id="spin-button" onclick="spinWheel()"
+                                class="bg-red-600 text-white px-8 py-4 rounded-lg text-xl font-bold hover:bg-red-700 transition-colors">
+                            🎡 轉動轉盤
+                        </button>
+                    </div>
+
+                    <div id="wheel-result" class="hidden p-4 rounded-lg">
+                        <h3 class="text-xl font-bold mb-2">恭喜！</h3>
+                        <p class="text-lg">你獲得了: <span id="wheel-prize" class="font-bold text-red-600"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分組排序遊戲 -->
+            <div id="sort-game" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">📂 動物分類</h2>
+                    <p class="text-gray-600">將動物拖拽到正確的分類中</p>
+                </div>
+
+                <div class="max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <!-- 哺乳動物 -->
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <h3 class="text-lg font-semibold text-center mb-4 text-blue-800">🐾 哺乳動物</h3>
+                            <div class="drop-zone min-h-32 p-2 rounded-lg"
+                                 ondrop="dropSort(event)" ondragover="allowDrop(event)" data-category="mammal">
+                                <!-- 動物會被拖拽到這裡 -->
+                            </div>
+                        </div>
+
+                        <!-- 鳥類 -->
+                        <div class="bg-green-50 rounded-lg p-4">
+                            <h3 class="text-lg font-semibold text-center mb-4 text-green-800">🦅 鳥類</h3>
+                            <div class="drop-zone min-h-32 p-2 rounded-lg"
+                                 ondrop="dropSort(event)" ondragover="allowDrop(event)" data-category="bird">
+                                <!-- 動物會被拖拽到這裡 -->
+                            </div>
+                        </div>
+
+                        <!-- 魚類 -->
+                        <div class="bg-cyan-50 rounded-lg p-4">
+                            <h3 class="text-lg font-semibold text-center mb-4 text-cyan-800">🐟 魚類</h3>
+                            <div class="drop-zone min-h-32 p-2 rounded-lg"
+                                 ondrop="dropSort(event)" ondragover="allowDrop(event)" data-category="fish">
+                                <!-- 動物會被拖拽到這裡 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 待分類的動物 -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-center mb-4">待分類的動物</h3>
+                        <div id="animals-container" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="match-item bg-white p-3 rounded-lg text-center font-medium border-2 border-gray-200"
+                                 draggable="true" ondragstart="dragStart(event)" data-category="mammal">
+                                🐱 貓
+                            </div>
+                            <div class="match-item bg-white p-3 rounded-lg text-center font-medium border-2 border-gray-200"
+                                 draggable="true" ondragstart="dragStart(event)" data-category="bird">
+                                🦅 老鷹
+                            </div>
+                            <div class="match-item bg-white p-3 rounded-lg text-center font-medium border-2 border-gray-200"
+                                 draggable="true" ondragstart="dragStart(event)" data-category="fish">
+                                🐟 金魚
+                            </div>
+                            <div class="match-item bg-white p-3 rounded-lg text-center font-medium border-2 border-gray-200"
+                                 draggable="true" ondragstart="dragStart(event)" data-category="mammal">
+                                🐶 狗
+                            </div>
+                            <div class="match-item bg-white p-3 rounded-lg text-center font-medium border-2 border-gray-200"
+                                 draggable="true" ondragstart="dragStart(event)" data-category="bird">
+                                🐧 企鵝
+                            </div>
+                            <div class="match-item bg-white p-3 rounded-lg text-center font-medium border-2 border-gray-200"
+                                 draggable="true" ondragstart="dragStart(event)" data-category="fish">
+                                🦈 鯊魚
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-6">
+                        <div class="mb-4">
+                            <span class="text-lg font-semibold">分類進度: </span>
+                            <span id="sort-score" class="text-blue-600 font-bold">0</span>/6
+                        </div>
+                        <button onclick="resetSort()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                            重置遊戲
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 閃卡遊戲 -->
+            <div id="cards-game" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">🃏 英語單詞閃卡</h2>
+                    <p class="text-gray-600">點擊卡片查看中文意思</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto text-center">
+                    <div class="mb-6">
+                        <span class="text-lg font-semibold">卡片 </span>
+                        <span id="card-current" class="text-blue-600 font-bold">1</span> /
+                        <span id="card-total" class="text-blue-600 font-bold">5</span>
+                    </div>
+
+                    <div class="flash-card mb-8" onclick="flipCard()">
+                        <div class="flash-card-inner">
+                            <div class="flash-card-front">
+                                <div id="card-front-text">Hello</div>
+                            </div>
+                            <div class="flash-card-back">
+                                <div id="card-back-text">你好</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center space-x-4 mb-6">
+                        <button onclick="prevCard()" id="prev-card"
+                                class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50">
+                            ← 上一張
+                        </button>
+                        <button onclick="nextCard()" id="next-card"
+                                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            下一張 →
+                        </button>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-semibold mb-2">學習提示</h3>
+                        <p class="text-sm text-gray-600">點擊卡片可以翻轉查看答案，使用按鈕切換不同的單詞</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局變量
+        let currentGame = 'welcome';
+        let quizData = [
+            { question: '2 + 2 = ?', options: ['3', '4', '5', '6'], correct: 1 },
+            { question: '5 × 3 = ?', options: ['12', '15', '18', '20'], correct: 1 },
+            { question: '10 ÷ 2 = ?', options: ['4', '5', '6', '8'], correct: 1 }
+        ];
+        let currentQuizQuestion = 0;
+        let quizScore = 0;
+        let quizTimer = 60;
+        let quizInterval;
+
+        let matchScore = 0;
+        let sortScore = 0;
+
+        let flashCards = [
+            { front: 'Hello', back: '你好' },
+            { front: 'World', back: '世界' },
+            { front: 'Love', back: '愛' },
+            { front: 'Peace', back: '和平' },
+            { front: 'Friend', back: '朋友' }
+        ];
+        let currentCard = 0;
+
+        // 顯示指定遊戲
+        function showGame(gameType) {
+            // 隱藏所有遊戲
+            document.querySelectorAll('#game-content > div').forEach(div => {
+                div.classList.add('hidden');
+            });
+
+            // 重置所有選擇器樣式
+            document.querySelectorAll('.game-selector').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50');
+                btn.classList.add('border-gray-200');
+            });
+
+            // 高亮當前選擇器
+            const selector = document.getElementById(`selector-${gameType}`);
+            selector.classList.remove('border-gray-200');
+            selector.classList.add('border-blue-500', 'bg-blue-50');
+
+            // 顯示對應遊戲
+            currentGame = gameType;
+            switch(gameType) {
+                case 'quiz':
+                    document.getElementById('quiz-game').classList.remove('hidden');
+                    resetQuiz();
+                    break;
+                case 'match':
+                    document.getElementById('match-game').classList.remove('hidden');
+                    resetMatch();
+                    break;
+                case 'wheel':
+                    document.getElementById('wheel-game').classList.remove('hidden');
+                    break;
+                case 'sort':
+                    document.getElementById('sort-game').classList.remove('hidden');
+                    resetSort();
+                    break;
+                case 'cards':
+                    document.getElementById('cards-game').classList.remove('hidden');
+                    resetCards();
+                    break;
+                default:
+                    document.getElementById('welcome-screen').classList.remove('hidden');
+            }
+        }
+
+        // 測驗遊戲功能
+        function selectQuizOption(button, isCorrect) {
+            // 移除所有選項的選中狀態
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            // 標記選中的選項
+            button.classList.add('selected');
+
+            // 顯示正確答案
+            setTimeout(() => {
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    const optIsCorrect = opt.onclick.toString().includes('true');
+                    if (optIsCorrect) {
+                        opt.classList.add('correct');
+                    } else if (opt.classList.contains('selected') && !isCorrect) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+
+                if (isCorrect) {
+                    quizScore++;
+                }
+
+                document.getElementById('quiz-next').disabled = false;
+            }, 500);
+        }
+
+        function nextQuizQuestion() {
+            currentQuizQuestion++;
+
+            if (currentQuizQuestion >= quizData.length) {
+                // 測驗結束
+                clearInterval(quizInterval);
+                document.getElementById('quiz-result').classList.remove('hidden');
+                document.getElementById('quiz-score').textContent = quizScore;
+                return;
+            }
+
+            // 載入下一題
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            const question = quizData[currentQuizQuestion];
+            document.getElementById('quiz-question').textContent = question.question;
+            document.getElementById('quiz-current').textContent = currentQuizQuestion + 1;
+            document.getElementById('quiz-progress').style.width = `${((currentQuizQuestion + 1) / quizData.length) * 100}%`;
+
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach((opt, index) => {
+                opt.textContent = `${String.fromCharCode(65 + index)}) ${question.options[index]}`;
+                opt.onclick = () => selectQuizOption(opt, index === question.correct);
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            document.getElementById('quiz-next').disabled = true;
+        }
+
+        function resetQuiz() {
+            currentQuizQuestion = 0;
+            quizScore = 0;
+            quizTimer = 60;
+
+            document.getElementById('quiz-result').classList.add('hidden');
+            loadQuizQuestion();
+
+            // 啟動計時器
+            clearInterval(quizInterval);
+            quizInterval = setInterval(() => {
+                quizTimer--;
+                document.getElementById('quiz-timer').textContent = quizTimer;
+                if (quizTimer <= 0) {
+                    clearInterval(quizInterval);
+                    // 時間到，自動結束
+                    currentQuizQuestion = quizData.length;
+                    nextQuizQuestion();
+                }
+            }, 1000);
+        }
+
+        function restartQuiz() {
+            resetQuiz();
+        }
+
+        // 拖拽功能
+        let draggedElement = null;
+
+        function dragStart(event) {
+            draggedElement = event.target;
+            event.target.classList.add('dragging');
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+            event.target.classList.add('drag-over');
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            event.target.classList.remove('drag-over');
+
+            if (draggedElement) {
+                const dragValue = draggedElement.getAttribute('data-value');
+                const targetValue = event.target.getAttribute('data-target');
+
+                if (dragValue === targetValue) {
+                    // 配對正確
+                    event.target.appendChild(draggedElement);
+                    event.target.classList.add('matched');
+                    draggedElement.classList.remove('dragging');
+                    draggedElement.style.cursor = 'default';
+                    draggedElement.draggable = false;
+
+                    matchScore++;
+                    document.getElementById('match-score').textContent = matchScore;
+
+                    if (matchScore === 4) {
+                        setTimeout(() => {
+                            alert('🎉 恭喜！所有配對都正確！');
+                        }, 500);
+                    }
+                } else {
+                    // 配對錯誤
+                    draggedElement.classList.remove('dragging');
+                    setTimeout(() => {
+                        draggedElement.style.transform = 'translateX(10px)';
+                        setTimeout(() => {
+                            draggedElement.style.transform = '';
+                        }, 200);
+                    }, 100);
+                }
+
+                draggedElement = null;
+            }
+        }
+
+        function dropSort(event) {
+            event.preventDefault();
+            event.target.classList.remove('drag-over');
+
+            if (draggedElement) {
+                const dragCategory = draggedElement.getAttribute('data-category');
+                const targetCategory = event.target.getAttribute('data-category');
+
+                if (dragCategory === targetCategory) {
+                    // 分類正確
+                    event.target.appendChild(draggedElement);
+                    event.target.classList.add('matched');
+                    draggedElement.classList.remove('dragging');
+                    draggedElement.style.cursor = 'default';
+                    draggedElement.draggable = false;
+
+                    sortScore++;
+                    document.getElementById('sort-score').textContent = sortScore;
+
+                    if (sortScore === 6) {
+                        setTimeout(() => {
+                            alert('🎉 恭喜！所有動物都分類正確！');
+                        }, 500);
+                    }
+                } else {
+                    // 分類錯誤
+                    draggedElement.classList.remove('dragging');
+                    setTimeout(() => {
+                        draggedElement.style.transform = 'translateX(10px)';
+                        setTimeout(() => {
+                            draggedElement.style.transform = '';
+                        }, 200);
+                    }, 100);
+                }
+
+                draggedElement = null;
+            }
+        }
+
+        function resetMatch() {
+            matchScore = 0;
+            document.getElementById('match-score').textContent = matchScore;
+
+            // 重置所有拖拽項目
+            document.querySelectorAll('.match-item').forEach(item => {
+                item.style.cursor = 'grab';
+                item.draggable = true;
+                item.classList.remove('dragging');
+            });
+
+            // 重置所有放置區域
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.classList.remove('matched', 'drag-over');
+                // 將拖拽項目移回原位置
+                const items = zone.querySelectorAll('.match-item');
+                items.forEach(item => {
+                    document.querySelector('#match-game .space-y-3').appendChild(item);
+                });
+            });
+        }
+
+        function resetSort() {
+            sortScore = 0;
+            document.getElementById('sort-score').textContent = sortScore;
+
+            // 重置所有拖拽項目
+            document.querySelectorAll('#sort-game .match-item').forEach(item => {
+                item.style.cursor = 'grab';
+                item.draggable = true;
+                item.classList.remove('dragging');
+            });
+
+            // 重置所有放置區域
+            document.querySelectorAll('#sort-game .drop-zone').forEach(zone => {
+                zone.classList.remove('matched', 'drag-over');
+                // 將拖拽項目移回原位置
+                const items = zone.querySelectorAll('.match-item');
+                items.forEach(item => {
+                    document.getElementById('animals-container').appendChild(item);
+                });
+            });
+        }
+
+        // 轉盤遊戲
+        function spinWheel() {
+            const wheel = document.getElementById('spin-wheel');
+            const button = document.getElementById('spin-button');
+            const result = document.getElementById('wheel-result');
+
+            button.disabled = true;
+            button.textContent = '轉動中...';
+            result.classList.add('hidden');
+
+            // 隨機角度 (3-5圈 + 隨機角度)
+            const spins = 3 + Math.random() * 2;
+            const finalAngle = Math.random() * 360;
+            const totalRotation = spins * 360 + finalAngle;
+
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+            wheel.style.transition = 'transform 3s cubic-bezier(0.23, 1, 0.32, 1)';
+
+            setTimeout(() => {
+                // 計算結果
+                const normalizedAngle = (360 - (finalAngle % 360)) % 360;
+                const segmentAngle = 60;
+                const segmentIndex = Math.floor(normalizedAngle / segmentAngle);
+
+                const prizes = ['大獎', '小獎', '安慰獎', '再試一次', '謝謝參與', '幸運星'];
+                const prize = prizes[segmentIndex];
+
+                document.getElementById('wheel-prize').textContent = prize;
+                result.classList.remove('hidden');
+                result.className = 'p-4 rounded-lg bg-yellow-50 border border-yellow-200';
+
+                button.disabled = false;
+                button.textContent = '🎡 再轉一次';
+            }, 3000);
+        }
+
+        // 閃卡遊戲
+        function flipCard() {
+            const card = document.querySelector('.flash-card');
+            card.classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (currentCard < flashCards.length - 1) {
+                currentCard++;
+                updateCard();
+            }
+        }
+
+        function prevCard() {
+            if (currentCard > 0) {
+                currentCard--;
+                updateCard();
+            }
+        }
+
+        function updateCard() {
+            const card = flashCards[currentCard];
+            document.getElementById('card-front-text').textContent = card.front;
+            document.getElementById('card-back-text').textContent = card.back;
+            document.getElementById('card-current').textContent = currentCard + 1;
+
+            // 重置卡片狀態
+            document.querySelector('.flash-card').classList.remove('flipped');
+
+            // 更新按鈕狀態
+            document.getElementById('prev-card').disabled = currentCard === 0;
+            document.getElementById('next-card').disabled = currentCard === flashCards.length - 1;
+        }
+
+        function resetCards() {
+            currentCard = 0;
+            updateCard();
+            document.getElementById('card-total').textContent = flashCards.length;
+        }
+
+        // 頁面載入時初始化
+        window.addEventListener('load', () => {
+            showGame('welcome');
+        });
+
+        // 防止拖拽時的默認行為
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>

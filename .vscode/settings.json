@@ -1,0 +1,6 @@
+{ 
+  "workbench.trustedDomains": [ 
+    "https://edu-create.vercel.app" 
+  ], 
+  "security.workspace.trust.untrustedFiles": "open" 
+} 
