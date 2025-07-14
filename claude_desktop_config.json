@@ -35,6 +35,36 @@
       "env": {
         "NODE_ENV": "production"
       }
+    },
+    "mcp-feedback-collector": {
+      "command": "python",
+      "args": [
+        "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src\\mcp_feedback_collector\\server.py"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "MCP_DIALOG_TIMEOUT": "300",
+        "PYTHONPATH": "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src"
+      }
+    },
+    "autogen-mcp": {
+      "command": "python",
+      "args": [
+        "C:\\Users\\Administrator\\Desktop\\EduCreate\\autogen-mcp-server.py"
+      ],
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONPATH": "C:\\Users\\Administrator\\Desktop\\EduCreate\\autogen-microsoft\\python\\packages\\autogen-ext\\src"
+      }
+    },
+    "langfuse-mcp": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-server-langfuse\\index.js"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
     }
   },
   "globalShortcuts": {

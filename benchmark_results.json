@@ -1,0 +1,12 @@
+{
+  "cpu_benchmark": {
+    "duration": 0.5767214298248291,
+    "workers": 30,
+    "total_operations": 9999985000005000000
+  },
+  "memory_benchmark": {
+    "duration": 0.39526915550231934,
+    "operations": 800000
+  },
+  "timestamp": "2025-07-14 20:34:58"
+}

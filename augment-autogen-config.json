@@ -1,0 +1,198 @@
+{
+  "name": "Augment AutoGen Integration",
+  "version": "1.0.0",
+  "description": "AutoGen MCP 配置，提升 Augment 的多代理協作能力",
+  "mcpServers": {
+    "autogen": {
+      "enabled": true,
+      "autoStart": true,
+      "command": "python",
+      "args": [
+        "C:\\Users\\Administrator\\Desktop\\EduCreate\\autogen-mcp-server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "C:\\Users\\Administrator\\Desktop\\EduCreate\\autogen-microsoft\\python\\packages",
+        "NODE_ENV": "production",
+        "MCP_SERVER_NAME": "autogen",
+        "LOG_LEVEL": "info"
+      },
+      "capabilities": [
+        "multi_agent_collaboration",
+        "task_decomposition",
+        "specialized_expertise",
+        "parallel_processing",
+        "intelligent_coordination"
+      ],
+      "agents": {
+        "frontend_expert": {
+          "role": "前端開發專家",
+          "specialties": ["React", "Next.js", "TypeScript", "CSS", "UX", "Accessibility"],
+          "priority": 8
+        },
+        "backend_expert": {
+          "role": "後端開發專家", 
+          "specialties": ["Node.js", "API", "Database", "Auth", "Security", "Performance"],
+          "priority": 8
+        },
+        "test_expert": {
+          "role": "測試專家",
+          "specialties": ["Playwright", "Jest", "E2E", "Unit Test", "Performance Test"],
+          "priority": 7
+        },
+        "architect": {
+          "role": "系統架構師",
+          "specialties": ["Architecture", "Design Patterns", "Scalability", "Best Practices"],
+          "priority": 9
+        },
+        "doc_expert": {
+          "role": "文檔專家",
+          "specialties": ["Documentation", "API Docs", "User Guides", "Knowledge Base"],
+          "priority": 6
+        }
+      }
+    }
+  },
+  "augmentEnhancements": {
+    "multiAgentMode": {
+      "enabled": true,
+      "description": "啟用多代理協作模式，讓 Augment 能夠創建專業代理團隊",
+      "triggers": [
+        "複雜開發任務",
+        "全棧開發",
+        "系統架構設計",
+        "大型功能實現",
+        "代碼重構",
+        "性能優化"
+      ],
+      "autoActivation": {
+        "enabled": true,
+        "conditions": [
+          "任務複雜度 > 高",
+          "涉及多個技術領域",
+          "需要專業化分工",
+          "預估工作量 > 2小時"
+        ]
+      }
+    },
+    "taskDecomposition": {
+      "enabled": true,
+      "description": "智能任務分解，將複雜任務分配給最適合的代理",
+      "strategies": [
+        "按技術領域分工",
+        "按開發階段分工", 
+        "按優先級排序",
+        "並行處理優化"
+      ]
+    },
+    "qualityAssurance": {
+      "enabled": true,
+      "description": "多代理品質保證，確保代碼品質和最佳實踐",
+      "processes": [
+        "架構師審查設計",
+        "專家代理實現功能",
+        "測試專家驗證品質",
+        "文檔專家完善說明"
+      ]
+    }
+  },
+  "usageScenarios": [
+    {
+      "scenario": "全棧功能開發",
+      "description": "開發完整的前後端功能",
+      "team": ["architect", "frontend_expert", "backend_expert", "test_expert", "doc_expert"],
+      "workflow": [
+        "架構師設計整體架構",
+        "前端專家實現用戶界面",
+        "後端專家實現 API 和邏輯",
+        "測試專家編寫和執行測試",
+        "文檔專家撰寫文檔"
+      ]
+    },
+    {
+      "scenario": "性能優化",
+      "description": "系統性能分析和優化",
+      "team": ["architect", "backend_expert", "frontend_expert", "test_expert"],
+      "workflow": [
+        "架構師分析性能瓶頸",
+        "後端專家優化服務器性能",
+        "前端專家優化客戶端性能",
+        "測試專家驗證優化效果"
+      ]
+    },
+    {
+      "scenario": "新功能設計",
+      "description": "設計和實現新功能",
+      "team": ["architect", "frontend_expert", "backend_expert"],
+      "workflow": [
+        "架構師設計功能架構",
+        "前端專家設計用戶體驗",
+        "後端專家設計數據模型和 API"
+      ]
+    },
+    {
+      "scenario": "代碼重構",
+      "description": "重構現有代碼提升品質",
+      "team": ["architect", "frontend_expert", "backend_expert", "test_expert"],
+      "workflow": [
+        "架構師分析重構策略",
+        "專家代理執行重構",
+        "測試專家確保功能完整性"
+      ]
+    }
+  ],
+  "integrationSettings": {
+    "augment": {
+      "enableAutoTeamCreation": true,
+      "teamCreationTriggers": [
+        "我需要開發一個完整功能",
+        "幫我設計系統架構",
+        "優化這個系統的性能",
+        "重構這段代碼",
+        "實現這個複雜需求"
+      ],
+      "responseEnhancement": {
+        "showAgentContributions": true,
+        "includeExpertiseAreas": true,
+        "provideCollaborativeInsights": true,
+        "summarizeTeamwork": true
+      }
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "logLevel": "info",
+    "metrics": [
+      "agent_collaboration_sessions",
+      "task_completion_rate",
+      "agent_utilization",
+      "user_satisfaction",
+      "development_efficiency"
+    ]
+  },
+  "examples": {
+    "createTeam": {
+      "method": "create_agent_team",
+      "params": {
+        "task_type": "full_stack_development",
+        "requirements": {
+          "frontend": "React + TypeScript",
+          "backend": "Node.js + Express",
+          "database": "PostgreSQL",
+          "testing": "Playwright + Jest"
+        }
+      }
+    },
+    "executeTask": {
+      "method": "execute_collaborative_task",
+      "params": {
+        "session_id": "educreat_feature_dev",
+        "task": "實現實時同步和衝突解決功能",
+        "team": ["architect", "frontend_expert", "backend_expert", "test_expert"]
+      }
+    },
+    "getAgents": {
+      "method": "get_available_agents",
+      "params": {}
+    }
+  }
+}

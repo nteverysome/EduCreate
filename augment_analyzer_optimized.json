@@ -1,0 +1,15 @@
+{
+  "max_workers": 30,
+  "cache_size_gb": 19,
+  "worker_allocation": {
+    "code_analysis": 12,
+    "vector_search": 8,
+    "memory_operations": 3,
+    "file_processing": 3,
+    "ai_inference": 2
+  },
+  "performance_mode": "maximum",
+  "parallel_optimization": true,
+  "numa_optimization": true,
+  "cpu_affinity": true
+}

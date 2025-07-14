@@ -1,0 +1,291 @@
+{
+  "name": "Augment 本地記憶系統配置",
+  "version": "1.0.0",
+  "description": "本地記憶系統，無需 API 密鑰，完全私密",
+  "localMemorySystem": {
+    "enabled": true,
+    "type": "file_based",
+    "dataDirectory": "augment_memory_data",
+    "autoBackup": true,
+    "backupInterval": "daily",
+    "maxMemories": 10000,
+    "maxKnowledge": 5000,
+    "cleanupOldMemories": true,
+    "cleanupDays": 90
+  },
+  "memoryTypes": {
+    "conversation": {
+      "description": "對話記憶",
+      "importance": 5,
+      "retention": "30天",
+      "autoLearn": true
+    },
+    "preference": {
+      "description": "用戶偏好",
+      "importance": 8,
+      "retention": "永久",
+      "autoLearn": true
+    },
+    "knowledge": {
+      "description": "項目知識",
+      "importance": 9,
+      "retention": "永久",
+      "autoLearn": false
+    },
+    "code_pattern": {
+      "description": "代碼模式",
+      "importance": 7,
+      "retention": "60天",
+      "autoLearn": true
+    }
+  },
+  "categories": {
+    "educreat": {
+      "description": "EduCreate 項目相關",
+      "priority": 10,
+      "tags": ["educreat", "memory_science", "education", "games"]
+    },
+    "programming": {
+      "description": "編程相關",
+      "priority": 8,
+      "tags": ["code", "development", "patterns", "best_practices"]
+    },
+    "user_preference": {
+      "description": "用戶偏好",
+      "priority": 9,
+      "tags": ["preference", "habit", "style", "workflow"]
+    },
+    "project": {
+      "description": "項目信息",
+      "priority": 10,
+      "tags": ["project", "architecture", "tech_stack", "requirements"]
+    },
+    "memory_science": {
+      "description": "記憶科學",
+      "priority": 10,
+      "tags": ["memory", "learning", "cognitive", "psychology"]
+    }
+  },
+  "autoLearning": {
+    "enabled": true,
+    "triggers": {
+      "userPreferences": [
+        "我喜歡", "我偏好", "我習慣", "我通常",
+        "I prefer", "I like", "I usually"
+      ],
+      "codePatterns": [
+        "function", "component", "class", "interface",
+        "函數", "組件", "類別", "介面"
+      ],
+      "educreatFeatures": [
+        "educreat", "記憶", "遊戲", "gept", "memory",
+        "learning", "education", "game"
+      ],
+      "problemSolving": [
+        "如何", "怎麼", "問題", "錯誤", "bug",
+        "how to", "problem", "error", "issue"
+      ]
+    },
+    "importanceRules": {
+      "userPreference": 8,
+      "projectKnowledge": 9,
+      "codePattern": 7,
+      "problemSolution": 6,
+      "generalConversation": 5
+    }
+  },
+  "searchCapabilities": {
+    "enabled": true,
+    "searchTypes": [
+      "content_search",
+      "tag_search", 
+      "category_search",
+      "semantic_search"
+    ],
+    "rankingFactors": {
+      "importance": 0.4,
+      "recency": 0.3,
+      "access_frequency": 0.2,
+      "relevance": 0.1
+    }
+  },
+  "userPreferences": {
+    "defaultPreferences": {
+      "coding_style": "typescript_strict",
+      "test_framework": "playwright_jest",
+      "ui_framework": "tailwind_css",
+      "project_type": "educreat_platform",
+      "development_approach": "incremental",
+      "documentation_style": "comprehensive",
+      "error_handling": "defensive",
+      "performance_priority": "high"
+    },
+    "learningPreferences": {
+      "memory_techniques": ["spaced_repetition", "active_recall"],
+      "learning_style": "visual_kinesthetic",
+      "difficulty_progression": "gradual",
+      "feedback_frequency": "immediate"
+    }
+  },
+  "projectKnowledge": {
+    "educreat": {
+      "coreFeatures": [
+        "25種記憶遊戲",
+        "AI智能對話",
+        "GEPT分級系統",
+        "無障礙設計",
+        "用戶內容輸入",
+        "無縫遊戲切換",
+        "防止功能孤立"
+      ],
+      "memoryScience": [
+        "間隔重複算法",
+        "主動回憶技術",
+        "認知負荷理論",
+        "多感官學習",
+        "遺忘曲線優化"
+      ],
+      "techStack": {
+        "frontend": "Next.js + React + TypeScript + Tailwind",
+        "backend": "Node.js + Express + PostgreSQL + Prisma",
+        "ai": "OpenAI GPT-4 + 語音識別/合成",
+        "testing": "Jest + Playwright",
+        "deployment": "Vercel + AWS"
+      },
+      "architecture": [
+        "微服務架構",
+        "API閘道層",
+        "統一UI組件庫",
+        "多層數據存儲",
+        "CDN優化策略"
+      ]
+    }
+  },
+  "integrationSettings": {
+    "augmentIntegration": {
+      "enabled": true,
+      "contextInjection": true,
+      "preferenceInfluence": true,
+      "knowledgeRetrieval": true,
+      "conversationLearning": true
+    },
+    "mcpIntegration": {
+      "enabled": true,
+      "serverPort": 8081,
+      "autoStart": true,
+      "methods": [
+        "add_memory",
+        "search_memories",
+        "get_user_context",
+        "learn_from_conversation",
+        "set_preference",
+        "get_preference",
+        "add_knowledge",
+        "get_statistics"
+      ]
+    }
+  },
+  "performance": {
+    "caching": {
+      "enabled": true,
+      "cacheSize": "100MB",
+      "ttl": "1小時"
+    },
+    "indexing": {
+      "enabled": true,
+      "indexTypes": ["content", "tags", "categories"],
+      "rebuildInterval": "daily"
+    },
+    "compression": {
+      "enabled": true,
+      "algorithm": "gzip",
+      "threshold": "1KB"
+    }
+  },
+  "privacy": {
+    "dataLocation": "本地",
+    "encryption": false,
+    "anonymization": false,
+    "dataRetention": {
+      "conversations": "30天",
+      "preferences": "永久",
+      "knowledge": "永久",
+      "statistics": "90天"
+    },
+    "dataExport": {
+      "enabled": true,
+      "formats": ["json", "csv"],
+      "includeMetadata": true
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics": [
+      "memory_count",
+      "search_frequency",
+      "learning_rate",
+      "preference_updates",
+      "knowledge_growth"
+    ],
+    "alerts": {
+      "memoryLimit": 9000,
+      "diskSpace": "90%",
+      "errorRate": "5%"
+    }
+  },
+  "examples": {
+    "addMemory": {
+      "content": "用戶喜歡使用 React Hooks 進行狀態管理",
+      "memory_type": "preference",
+      "category": "programming",
+      "importance": 8,
+      "tags": ["react", "hooks", "state_management"]
+    },
+    "searchMemories": {
+      "query": "TypeScript",
+      "limit": 10
+    },
+    "setPreference": {
+      "key": "preferred_testing_framework",
+      "value": "playwright"
+    },
+    "addKnowledge": {
+      "file_path": "components/games/MemoryGame.tsx",
+      "knowledge_type": "component",
+      "content": "記憶遊戲組件，實現間隔重複算法",
+      "confidence": 0.9
+    }
+  },
+  "advantages": [
+    "✅ 無需 API 密鑰",
+    "✅ 完全本地存儲",
+    "✅ 數據完全私密",
+    "✅ 快速響應",
+    "✅ 離線可用",
+    "✅ 無使用限制",
+    "✅ 自動學習",
+    "✅ 語義搜索",
+    "✅ 個人化體驗",
+    "✅ 項目知識累積"
+  ],
+  "usageInstructions": {
+    "setup": [
+      "1. 運行 python simple-local-memory.py 初始化系統",
+      "2. 系統會自動創建 augment_memory_data 目錄",
+      "3. EduCreate 項目知識會自動載入",
+      "4. 用戶偏好會自動設置"
+    ],
+    "dailyUsage": [
+      "1. Augment 會自動從對話中學習",
+      "2. 用戶偏好會影響 Augment 的建議",
+      "3. 項目知識會提升理解能力",
+      "4. 搜索功能幫助找到相關記憶"
+    ],
+    "maintenance": [
+      "1. 系統會自動清理舊記憶",
+      "2. 定期備份重要數據",
+      "3. 監控存儲空間使用",
+      "4. 更新項目知識"
+    ]
+  }
+}

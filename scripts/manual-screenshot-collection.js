@@ -43,7 +43,7 @@ async function collectScreenshots() {
       const collaborationFeature = await page.$('[data-testid="feature-folder-collaboration"]');
       if (collaborationFeature) {
         await collaborationFeature.scrollIntoView();
-        await page.waitForTimeout(1000);
+        await new Promise(resolve => setTimeout(resolve, 1000));
         await collaborationFeature.screenshot({ 
           path: path.join(screenshotDir, '02-homepage-collaboration-card.png')
         });

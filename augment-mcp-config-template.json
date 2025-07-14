@@ -1,0 +1,18 @@
+{
+    "augment.advanced": {
+        "mcpServers": [
+            {
+                "name": "mcp-feedback-collector",
+                "command": "python",
+                "args": [
+                    "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src\\mcp_feedback_collector\\server.py"
+                ],
+                "env": {
+                    "PYTHONIOENCODING": "utf-8",
+                    "MCP_DIALOG_TIMEOUT": "300",
+                    "PYTHONPATH": "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src"
+                }
+            }
+        ]
+    }
+}

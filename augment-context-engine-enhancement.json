@@ -1,0 +1,316 @@
+{
+  "name": "Augment Context Engine 記憶增強配置",
+  "version": "2.0.0",
+  "description": "提升 Augment Context Engine 的記憶和理解能力",
+  "contextEngineEnhancements": {
+    "memorySystem": {
+      "enabled": true,
+      "longTermMemory": {
+        "projectKnowledge": {
+          "enabled": true,
+          "retentionPeriod": "永久",
+          "keyFiles": [
+            "docs/context-rules.md",
+            "docs/architecture/**/*.md",
+            "docs/COMPREHENSIVE_ANALYSIS_AND_ROADMAP.md"
+          ],
+          "learningPatterns": [
+            "用戶編程習慣",
+            "常用代碼模式",
+            "項目架構偏好",
+            "測試策略偏好"
+          ]
+        },
+        "conversationHistory": {
+          "enabled": true,
+          "maxSessions": 1000,
+          "contextWindow": "32K tokens",
+          "semanticSearch": true,
+          "keywordExtraction": true
+        },
+        "codebaseUnderstanding": {
+          "enabled": true,
+          "deepAnalysis": {
+            "functionDependencies": true,
+            "componentRelationships": true,
+            "dataFlow": true,
+            "architecturePatterns": true
+          },
+          "semanticIndexing": {
+            "enabled": true,
+            "embeddingModel": "text-embedding-3-large",
+            "chunkSize": 1000,
+            "overlapSize": 200
+          }
+        }
+      },
+      "workingMemory": {
+        "contextWindow": "128K tokens",
+        "priorityFiles": [
+          "當前編輯的文件",
+          "相關依賴文件",
+          "測試文件",
+          "配置文件"
+        ],
+        "smartCaching": {
+          "enabled": true,
+          "cacheStrategy": "LRU + 語義相似性",
+          "maxCacheSize": "2GB",
+          "preloadPatterns": [
+            "*.tsx 文件的相關 *.ts 文件",
+            "組件文件的測試文件",
+            "API 路由的相關類型定義"
+          ]
+        }
+      }
+    },
+    "understandingCapabilities": {
+      "codebaseMapping": {
+        "enabled": true,
+        "autoMapping": {
+          "componentHierarchy": true,
+          "apiEndpoints": true,
+          "databaseSchema": true,
+          "routingStructure": true,
+          "stateManagement": true
+        },
+        "relationshipAnalysis": {
+          "importDependencies": true,
+          "functionCalls": true,
+          "dataFlow": true,
+          "eventHandling": true
+        }
+      },
+      "patternRecognition": {
+        "enabled": true,
+        "patterns": [
+          "React 組件模式",
+          "API 設計模式",
+          "測試模式",
+          "錯誤處理模式",
+          "性能優化模式"
+        ],
+        "customPatterns": {
+          "eduCreatePatterns": [
+            "記憶遊戲模式",
+            "AI 對話模式",
+            "GEPT 分級模式",
+            "無障礙設計模式"
+          ]
+        }
+      },
+      "intentUnderstanding": {
+        "enabled": true,
+        "contextualAnalysis": {
+          "taskComplexity": true,
+          "requiredExpertise": true,
+          "timeEstimation": true,
+          "riskAssessment": true
+        },
+        "smartSuggestions": {
+          "codeCompletion": true,
+          "refactoringOpportunities": true,
+          "testingRecommendations": true,
+          "performanceOptimizations": true
+        }
+      }
+    },
+    "fileUnderstanding": {
+      "deepAnalysis": {
+        "enabled": true,
+        "analysisLevels": {
+          "syntactic": {
+            "enabled": true,
+            "features": ["AST 解析", "語法檢查", "結構分析"]
+          },
+          "semantic": {
+            "enabled": true,
+            "features": ["意圖理解", "邏輯流程", "業務邏輯"]
+          },
+          "pragmatic": {
+            "enabled": true,
+            "features": ["使用模式", "性能影響", "維護性"]
+          }
+        }
+      },
+      "crossFileAnalysis": {
+        "enabled": true,
+        "analysisTypes": [
+          "依賴關係分析",
+          "影響範圍分析",
+          "重構安全性分析",
+          "測試覆蓋率分析"
+        ]
+      },
+      "intelligentIndexing": {
+        "enabled": true,
+        "indexingStrategy": {
+          "priorityBased": true,
+          "frequencyBased": true,
+          "dependencyBased": true,
+          "recentlyModified": true
+        },
+        "indexingDepth": {
+          "coreFiles": "完整分析",
+          "supportFiles": "結構分析",
+          "testFiles": "關聯分析",
+          "configFiles": "配置分析"
+        }
+      }
+    }
+  },
+  "performanceOptimizations": {
+    "parallelProcessing": {
+      "enabled": true,
+      "maxWorkers": 6,
+      "taskDistribution": {
+        "fileAnalysis": 2,
+        "mcpCalls": 2,
+        "cacheOperations": 1,
+        "backgroundTasks": 1
+      }
+    },
+    "intelligentCaching": {
+      "enabled": true,
+      "cacheTypes": {
+        "fileAnalysis": {
+          "ttl": "1小時",
+          "invalidateOnChange": true
+        },
+        "dependencyGraph": {
+          "ttl": "24小時",
+          "invalidateOnStructureChange": true
+        },
+        "semanticEmbeddings": {
+          "ttl": "7天",
+          "invalidateOnContentChange": true
+        }
+      }
+    },
+    "resourceManagement": {
+      "memoryLimit": "8GB",
+      "gcStrategy": "智能垃圾回收",
+      "resourceMonitoring": true,
+      "adaptivePerformance": true
+    }
+  },
+  "integrationSettings": {
+    "mcpIntegration": {
+      "priorityMCPs": [
+        "sequential-thinking",
+        "autogen",
+        "mem0",
+        "langfuse",
+        "guardrails-ai"
+      ],
+      "contextSharing": {
+        "enabled": true,
+        "shareProjectContext": true,
+        "shareConversationHistory": true,
+        "shareCodebaseKnowledge": true
+      }
+    },
+    "aiEnhancements": {
+      "multiModalUnderstanding": {
+        "enabled": true,
+        "supportedTypes": ["代碼", "文檔", "圖片", "架構圖"]
+      },
+      "contextualReasoning": {
+        "enabled": true,
+        "reasoningTypes": [
+          "因果推理",
+          "類比推理", 
+          "歸納推理",
+          "演繹推理"
+        ]
+      }
+    }
+  },
+  "monitoringAndAnalytics": {
+    "performanceMetrics": {
+      "enabled": true,
+      "metrics": [
+        "響應時間",
+        "記憶體使用",
+        "緩存命中率",
+        "文件分析速度",
+        "上下文準確性"
+      ]
+    },
+    "usageAnalytics": {
+      "enabled": true,
+      "trackingItems": [
+        "最常用功能",
+        "代碼模式偏好",
+        "問題類型分布",
+        "效率提升指標"
+      ]
+    },
+    "adaptiveLearning": {
+      "enabled": true,
+      "learningAreas": [
+        "用戶編程風格",
+        "項目架構偏好",
+        "常見問題模式",
+        "優化機會識別"
+      ]
+    }
+  },
+  "eduCreateSpecific": {
+    "domainKnowledge": {
+      "memoryScience": {
+        "enabled": true,
+        "concepts": [
+          "間隔重複算法",
+          "主動回憶技術",
+          "認知負荷理論",
+          "多感官學習"
+        ]
+      },
+      "gameDesign": {
+        "enabled": true,
+        "patterns": [
+          "25種記憶遊戲模式",
+          "無縫遊戲切換",
+          "用戶內容輸入",
+          "AI 對話整合"
+        ]
+      },
+      "accessibility": {
+        "enabled": true,
+        "standards": [
+          "WCAG 2.1 AA",
+          "鍵盤導航",
+          "螢幕閱讀器支援",
+          "色彩對比度"
+        ]
+      },
+      "geptSystem": {
+        "enabled": true,
+        "levels": [
+          "初級 (Elementary)",
+          "中級 (Intermediate)", 
+          "中高級 (High-Intermediate)"
+        ]
+      }
+    },
+    "workflowOptimization": {
+      "antiIsolationWorkflow": {
+        "enabled": true,
+        "checkpoints": [
+          "主頁入口檢查",
+          "儀表板整合檢查",
+          "導航連結檢查",
+          "功能互動檢查",
+          "端到端測試檢查"
+        ]
+      },
+      "playwrightIntegration": {
+        "enabled": true,
+        "autoTestGeneration": true,
+        "crossBrowserTesting": true,
+        "visualRegression": true
+      }
+    }
+  }
+}

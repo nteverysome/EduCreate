@@ -1,0 +1,35 @@
+{
+  "augment.mcp.servers": {
+    "autogen-mcp": {
+      "command": "python",
+      "args": [
+        "autogen-mcp-server.py"
+      ],
+      "cwd": "C:\\Users\\Administrator\\Desktop\\EduCreate",
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONPATH": "C:\\Users\\Administrator\\Desktop\\EduCreate\\autogen-microsoft\\python\\packages\\autogen-ext\\src"
+      },
+      "capabilities": [
+        "多代理協作",
+        "任務分解",
+        "專業化分工"
+      ]
+    },
+    "langfuse-mcp": {
+      "command": "node",
+      "args": [
+        "index.js"
+      ],
+      "cwd": "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-server-langfuse",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "capabilities": [
+        "LLM追蹤",
+        "性能監控",
+        "對話分析"
+      ]
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "coding_style": {
+    "value": "typescript_strict",
+    "updated_at": "2025-07-14T19:57:58.232060"
+  },
+  "test_framework": {
+    "value": "playwright_jest",
+    "updated_at": "2025-07-14T19:57:58.232060"
+  },
+  "ui_framework": {
+    "value": "tailwind_css",
+    "updated_at": "2025-07-14T19:57:58.232060"
+  },
+  "project_type": {
+    "value": "educreat_platform",
+    "updated_at": "2025-07-14T19:57:58.232060"
+  }
+}

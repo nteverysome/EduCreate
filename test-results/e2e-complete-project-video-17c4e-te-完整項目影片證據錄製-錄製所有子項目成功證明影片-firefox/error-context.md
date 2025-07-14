@@ -1,0 +1,64 @@
+# Page snapshot
+
+```yaml
+- alert
+- navigation:
+  - link "EduCreate (9/11)":
+    - /url: /
+  - link "🏠 首頁":
+    - /url: /
+  - link "📊 功能儀表板":
+    - /url: /dashboard
+  - link "🔄 智能排序":
+    - /url: /demo/smart-sorting
+  - link "📈 檔案夾統計":
+    - /url: /demo/folder-analytics
+  - link "📁 檔案管理":
+    - /url: /tools/files
+  - link "🤝 檔案夾協作":
+    - /url: /collaboration/folders
+  - link "📁 檔案夾模板":
+    - /url: /tools/folder-templates
+  - link "🔄 檔案夾導入導出":
+    - /url: /tools/folder-import-export
+  - link "⚡ 實時同步":
+    - /url: /tools/real-time-sync
+- heading "檔案管理器" [level=1]
+- paragraph: 管理您的學習資料和遊戲模板
+- button "根目錄"
+- combobox:
+  - option "按名稱排序" [selected]
+  - option "按日期排序"
+  - option "按大小排序"
+- button "列表"
+- button "網格"
+- button "新建檔案夾"
+- checkbox
+- text: 名稱 大小 修改時間 分享 操作
+- checkbox
+- text: 📁 英語學習資料 檔案夾 - 2025/7/12 下午10:23 已分享
+- button:
+  - img
+- checkbox
+- text: 📂 遊戲模板 檔案夾 - 2025/7/13 下午10:23 私人
+- button:
+  - img
+- checkbox
+- text: 📄 基礎單字配對.json 2 KB 2025/7/14 下午04:23 已分享
+- button:
+  - img
+- checkbox
+- text: 📕 學習進度報告.pdf 5 KB 2025/7/14 下午08:23 已分享
+- button:
+  - img
+- checkbox
+- text: 📄 數學練習活動.json 1.5 KB 2025/7/14 下午06:23 私人
+- button:
+  - img
+- heading "檔案統計" [level=2]
+- text: 2 檔案夾 3 檔案 3 已分享 8.5 KB 總大小
+- link "返回功能儀表板":
+  - /url: /dashboard
+  - img
+  - text: 返回功能儀表板
+```

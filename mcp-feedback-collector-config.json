@@ -1,0 +1,214 @@
+{
+  "name": "MCP 反饋收集器配置",
+  "version": "1.0.0",
+  "description": "整合 mcp-feedback-collector 到 Augment 工作流程",
+  "mcpServers": {
+    "feedback-collector": {
+      "enabled": true,
+      "autoStart": true,
+      "command": "python",
+      "args": [
+        "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src\\mcp_feedback_collector\\server.py"
+      ],
+      "env": {
+        "MCP_DIALOG_TIMEOUT": "300",
+        "PYTHONPATH": "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src",
+        "MCP_SERVER_NAME": "feedback-collector"
+      },
+      "capabilities": [
+        "collect_feedback",
+        "interactive_dialog",
+        "image_feedback",
+        "text_feedback",
+        "work_summary_reporting"
+      ]
+    }
+  },
+  "feedbackWorkflow": {
+    "enabled": true,
+    "description": "每次完成用戶請求前自動收集反饋",
+    "triggers": [
+      "task_completion",
+      "question_asking",
+      "work_summary",
+      "user_request_end"
+    ],
+    "autoActivation": {
+      "enabled": true,
+      "conditions": [
+        "任務即將完成",
+        "需要用戶確認",
+        "工作總結階段",
+        "請求結束前"
+      ]
+    },
+    "feedbackLoop": {
+      "enabled": true,
+      "description": "持續收集反饋直到用戶滿意",
+      "maxIterations": 10,
+      "stopCondition": "用戶反饋為空或表示滿意"
+    }
+  },
+  "integrationRules": {
+    "whenToCallMCP": [
+      "每當想要問問題時",
+      "每當即將完成用戶請求時",
+      "每當需要用戶確認時",
+      "每當工作階段結束時"
+    ],
+    "callPattern": {
+      "method": "mcp-feedback-collector.collect_feedback",
+      "parameters": {
+        "work_summary": "工作內容總結",
+        "completion_status": "完成狀態",
+        "next_steps": "下一步建議",
+        "questions": "需要確認的問題"
+      },
+      "responseHandling": {
+        "continueIfEmpty": false,
+        "continueIfSatisfied": false,
+        "continueUntilEmpty": true
+      }
+    }
+  },
+  "workflowSteps": {
+    "step1": {
+      "name": "工作執行",
+      "description": "執行用戶請求的具體工作"
+    },
+    "step2": {
+      "name": "工作總結",
+      "description": "總結完成的工作內容和結果"
+    },
+    "step3": {
+      "name": "反饋收集",
+      "description": "調用 MCP 收集用戶反饋",
+      "action": "call mcp-feedback-collector.collect_feedback"
+    },
+    "step4": {
+      "name": "反饋處理",
+      "description": "根據用戶反饋調整或改進工作"
+    },
+    "step5": {
+      "name": "循環檢查",
+      "description": "如果用戶有反饋，回到 step4；如果沒有反饋，結束請求"
+    }
+  },
+  "feedbackTypes": {
+    "text_feedback": {
+      "description": "文字反饋",
+      "examples": [
+        "需要修改的地方",
+        "額外的要求",
+        "改進建議",
+        "問題和疑慮"
+      ]
+    },
+    "image_feedback": {
+      "description": "圖片反饋",
+      "examples": [
+        "截圖說明問題",
+        "設計參考圖片",
+        "錯誤畫面",
+        "期望效果圖"
+      ]
+    },
+    "satisfaction_feedback": {
+      "description": "滿意度反饋",
+      "options": [
+        "非常滿意",
+        "滿意",
+        "需要改進",
+        "不滿意"
+      ]
+    }
+  },
+  "responseTemplates": {
+    "workSummary": {
+      "template": "📋 工作完成總結:\n{work_content}\n\n✅ 完成狀態: {completion_status}\n\n💡 下一步建議: {next_steps}\n\n❓ 需要確認: {questions}",
+      "variables": [
+        "work_content",
+        "completion_status", 
+        "next_steps",
+        "questions"
+      ]
+    },
+    "feedbackRequest": {
+      "template": "🎯 請提供您的反饋:\n\n📝 文字反饋: 任何需要修改或改進的地方\n🖼️ 圖片反饋: 可以上傳截圖或參考圖片\n\n如果您滿意當前結果，可以直接關閉對話框。",
+      "showAlways": true
+    },
+    "feedbackProcessing": {
+      "template": "📥 收到您的反饋:\n{feedback_content}\n\n🔄 正在根據反饋進行調整...",
+      "variables": [
+        "feedback_content"
+      ]
+    }
+  },
+  "examples": {
+    "basicUsage": {
+      "scenario": "完成代碼分析任務",
+      "workSummary": "已完成 EduCreate 項目的代碼分析，發現 15 個優化建議",
+      "mcpCall": {
+        "method": "collect_feedback",
+        "params": {
+          "work_summary": "代碼分析完成，生成了詳細的分析報告和優化建議",
+          "completion_status": "已完成",
+          "next_steps": "可以開始實施優化建議",
+          "questions": "是否需要優先處理某些特定的優化項目？"
+        }
+      }
+    },
+    "iterativeFeedback": {
+      "scenario": "根據反饋改進工作",
+      "iteration1": {
+        "feedback": "分析報告太技術性，需要更通俗的說明",
+        "action": "重新生成更易懂的分析報告"
+      },
+      "iteration2": {
+        "feedback": "可以添加具體的實施步驟嗎？",
+        "action": "為每個優化建議添加詳細的實施指南"
+      },
+      "iteration3": {
+        "feedback": "很好，沒有其他問題了",
+        "action": "結束反饋循環，完成請求"
+      }
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics": [
+      "feedback_collection_rate",
+      "user_satisfaction_score",
+      "iteration_count",
+      "response_time",
+      "feedback_quality"
+    ],
+    "logging": {
+      "logFeedback": true,
+      "logWorkSummaries": true,
+      "logIterations": true,
+      "logFile": "mcp_feedback_log.json"
+    }
+  },
+  "troubleshooting": {
+    "commonIssues": [
+      {
+        "issue": "MCP 服務器無法啟動",
+        "solution": "檢查 Python 環境和依賴包安裝"
+      },
+      {
+        "issue": "對話框不顯示",
+        "solution": "確認 tkinter 和 PIL 已正確安裝"
+      },
+      {
+        "issue": "反饋收集超時",
+        "solution": "調整 MCP_DIALOG_TIMEOUT 環境變量"
+      }
+    ],
+    "diagnostics": {
+      "checkMCPServer": "python src/mcp_feedback_collector/server.py",
+      "checkDependencies": "pip list | grep -E '(pillow|tkinter|mcp)'",
+      "testFeedback": "調用 collect_feedback 方法測試"
+    }
+  }
+}

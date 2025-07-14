@@ -1,0 +1,74 @@
+{
+  "test_timestamp": "2025-07-14 21:58:57",
+  "database_status": {
+    "code_analysis": {
+      "status": "✅ 可用",
+      "analyzed_files": 12,
+      "patterns_found": 0,
+      "dependencies": 0
+    },
+    "vector_search": {
+      "status": "✅ 可用",
+      "indexed_files": 10
+    },
+    "memory_system": {
+      "status": "✅ 可用",
+      "memories_count": 10,
+      "has_preferences": true,
+      "has_knowledge": false
+    }
+  },
+  "system_performance": {
+    "cpu": {
+      "cores": 32,
+      "usage_percent": 6.6
+    },
+    "memory": {
+      "total_gb": 63.8,
+      "used_percent": 28.6,
+      "available_gb": 45.6
+    },
+    "disk": {
+      "free_gb": 372.0
+    }
+  },
+  "code_analysis_speed": {
+    "files_analyzed": 5,
+    "total_lines": 2250,
+    "analysis_time": 0.014,
+    "files_per_second": 364.17,
+    "lines_per_second": 163876.99
+  },
+  "search_capabilities": {
+    "function": {
+      "matches": 133,
+      "files_searched": 60,
+      "search_time": 0.017
+    },
+    "class": {
+      "matches": 230,
+      "files_searched": 60,
+      "search_time": 0.013
+    },
+    "import": {
+      "matches": 278,
+      "files_searched": 60,
+      "search_time": 0.011
+    },
+    "export": {
+      "matches": 45,
+      "files_searched": 60,
+      "search_time": 0.016
+    },
+    "const": {
+      "matches": 464,
+      "files_searched": 60,
+      "search_time": 0.019
+    }
+  },
+  "summary": {
+    "databases_working": 3,
+    "total_databases": 3,
+    "system_health": "good"
+  }
+}

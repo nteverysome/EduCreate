@@ -1,0 +1,7 @@
+{
+  "ram_allocation_gb": 15,
+  "parallel_workers": 8,
+  "cache_strategy": "intelligent_lru",
+  "index_optimization": "high_performance",
+  "gpu_acceleration": true
+}

@@ -1,0 +1,19 @@
+{
+  "test_summary": {
+    "total_tests": 5,
+    "passed_tests": 5,
+    "failed_tests": 0,
+    "success_rate": "100.0%"
+  },
+  "test_results": {
+    "module_import": true,
+    "dependencies": true,
+    "dialog_creation": true,
+    "server_start": true,
+    "workflow_simulation": true
+  },
+  "timestamp": "2025-07-14 20:55:44",
+  "recommendations": [
+    "所有測試通過，可以開始使用反饋收集器"
+  ]
+}

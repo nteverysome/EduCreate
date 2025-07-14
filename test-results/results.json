@@ -1,0 +1,1426 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\Administrator\\Desktop\\EduCreate\\playwright.config.ts",
+    "rootDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\global-setup.ts",
+    "globalTeardown": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\global-teardown.ts",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 6
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "playwright-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/junit.xml"
+        }
+      ],
+      [
+        "list",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 6
+        },
+        "id": "Tablet",
+        "name": "Tablet",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.53.1",
+    "workers": 16,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:3000",
+      "reuseExistingServer": true,
+      "timeout": 30000
+    }
+  },
+  "suites": [
+    {
+      "title": "e2e\\complete-project-video-evidence.spec.ts",
+      "file": "e2e/complete-project-video-evidence.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "EduCreate 完整項目影片證據錄製",
+          "file": "e2e/complete-project-video-evidence.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "錄製所有子項目成功證明影片",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 600000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 130066,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🎬 開始錄製 EduCreate 所有子項目成功證明影片...\n"
+                        },
+                        {
+                          "text": "🎬 第一部分: 主頁和統一導航系統\n"
+                        },
+                        {
+                          "text": "✅ 主頁成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統一導航系統正常\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-memory-games 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第二部分: 儀表板系統\n"
+                        },
+                        {
+                          "text": "✅ 儀表板成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-total 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-available 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-development 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-coming-soon 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-content-editor 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-auto-save 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-file-manager 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第三部分: 智能排序系統\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第四部分: 檔案夾統計分析\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第五部分: 自動保存系統\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第六部分: 內容編輯器\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯功能展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第七部分: 檔案管理器\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第八部分: 檔案夾協作系統\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾協作系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ overview 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ collaborators 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ sharing 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ invitations 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ activity 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾協作系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第九部分: 響應式設計展示\n"
+                        },
+                        {
+                          "text": "✅ 桌面 視圖展示完成\n"
+                        },
+                        {
+                          "text": "✅ 平板 視圖展示完成\n"
+                        },
+                        {
+                          "text": "✅ 手機 視圖展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第十部分: 最終總結\n"
+                        },
+                        {
+                          "text": "🎉 EduCreate 完整項目影片證據錄製完成！\n"
+                        },
+                        {
+                          "text": "📊 完整項目錄製報告: {\n  \"title\": \"EduCreate 完整項目成功證明影片\",\n  \"duration\": \"約 8-10 分鐘\",\n  \"sections\": [\n    \"主頁和統一導航系統\",\n    \"儀表板系統\",\n    \"智能排序系統\",\n    \"檔案夾統計分析\",\n    \"自動保存系統\",\n    \"內容編輯器\",\n    \"檔案管理器\",\n    \"檔案夾協作系統\",\n    \"響應式設計展示\",\n    \"最終總結\"\n  ],\n  \"verifiedFeatures\": [\n    \"統一導航系統整合\",\n    \"主儀表板功能展示\",\n    \"智能排序功能\",\n    \"檔案夾統計分析\",\n    \"自動保存系統\",\n    \"內容編輯器\",\n    \"檔案管理器\",\n    \"檔案夾協作系統\",\n    \"響應式設計\",\n    \"跨功能導航\"\n  ],\n  \"timestamp\": \"2025-07-14T14:24:35.095Z\",\n  \"status\": \"completed\"\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-14T14:22:24.755Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-chromium\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-chromium\\video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8b31fa0606da4652dff0-e0c245dd18bf4b6ff1e7",
+              "file": "e2e/complete-project-video-evidence.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "錄製所有子項目成功證明影片",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 600000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 99843,
+                      "error": {
+                        "message": "TimeoutError: locator.hover: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid^=\"file-item-\"]').nth(2)\u001b[22m\n\u001b[2m    - locator resolved to <div data-testid=\"file-item-file_1\" class=\"px-6 py-4 hover:bg-gray-50 transition-colors \">…</div>\u001b[22m\n\u001b[2m  - attempting hover action\u001b[22m\n\u001b[2m    - waiting for element to be visible and stable\u001b[22m\n",
+                        "stack": "TimeoutError: locator.hover: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid^=\"file-item-\"]').nth(2)\u001b[22m\n\u001b[2m    - locator resolved to <div data-testid=\"file-item-file_1\" class=\"px-6 py-4 hover:bg-gray-50 transition-colors \">…</div>\u001b[22m\n\u001b[2m  - attempting hover action\u001b[22m\n\u001b[2m    - waiting for element to be visible and stable\u001b[22m\n\n    at C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\e2e\\complete-project-video-evidence.spec.ts:270:34",
+                        "location": {
+                          "file": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\e2e\\complete-project-video-evidence.spec.ts",
+                          "column": 34,
+                          "line": 270
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 268 |\u001b[39m         \u001b[36mconst\u001b[39m fileCount \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m fileItems\u001b[33m.\u001b[39mcount()\u001b[33m;\u001b[39m\n \u001b[90m 269 |\u001b[39m         \u001b[36mfor\u001b[39m (\u001b[36mlet\u001b[39m i \u001b[33m=\u001b[39m \u001b[35m0\u001b[39m\u001b[33m;\u001b[39m i \u001b[33m<\u001b[39m \u001b[33mMath\u001b[39m\u001b[33m.\u001b[39mmin(fileCount\u001b[33m,\u001b[39m \u001b[35m3\u001b[39m)\u001b[33m;\u001b[39m i\u001b[33m++\u001b[39m) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 270 |\u001b[39m           \u001b[36mawait\u001b[39m fileItems\u001b[33m.\u001b[39mnth(i)\u001b[33m.\u001b[39mhover()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 271 |\u001b[39m           \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m800\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 272 |\u001b[39m         }\n \u001b[90m 273 |\u001b[39m         \u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\e2e\\complete-project-video-evidence.spec.ts",
+                            "column": 34,
+                            "line": 270
+                          },
+                          "message": "TimeoutError: locator.hover: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid^=\"file-item-\"]').nth(2)\u001b[22m\n\u001b[2m    - locator resolved to <div data-testid=\"file-item-file_1\" class=\"px-6 py-4 hover:bg-gray-50 transition-colors \">…</div>\u001b[22m\n\u001b[2m  - attempting hover action\u001b[22m\n\u001b[2m    - waiting for element to be visible and stable\u001b[22m\n\n\n\u001b[0m \u001b[90m 268 |\u001b[39m         \u001b[36mconst\u001b[39m fileCount \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m fileItems\u001b[33m.\u001b[39mcount()\u001b[33m;\u001b[39m\n \u001b[90m 269 |\u001b[39m         \u001b[36mfor\u001b[39m (\u001b[36mlet\u001b[39m i \u001b[33m=\u001b[39m \u001b[35m0\u001b[39m\u001b[33m;\u001b[39m i \u001b[33m<\u001b[39m \u001b[33mMath\u001b[39m\u001b[33m.\u001b[39mmin(fileCount\u001b[33m,\u001b[39m \u001b[35m3\u001b[39m)\u001b[33m;\u001b[39m i\u001b[33m++\u001b[39m) {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 270 |\u001b[39m           \u001b[36mawait\u001b[39m fileItems\u001b[33m.\u001b[39mnth(i)\u001b[33m.\u001b[39mhover()\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 271 |\u001b[39m           \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m800\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 272 |\u001b[39m         }\n \u001b[90m 273 |\u001b[39m         \u001b[0m\n\u001b[2m    at C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\e2e\\complete-project-video-evidence.spec.ts:270:34\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🎬 開始錄製 EduCreate 所有子項目成功證明影片...\n"
+                        },
+                        {
+                          "text": "🎬 第一部分: 主頁和統一導航系統\n"
+                        },
+                        {
+                          "text": "✅ 主頁成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統一導航系統正常\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-memory-games 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第二部分: 儀表板系統\n"
+                        },
+                        {
+                          "text": "✅ 儀表板成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-total 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-available 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-development 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-coming-soon 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-content-editor 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-auto-save 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-file-manager 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第三部分: 智能排序系統\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第四部分: 檔案夾統計分析\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第五部分: 自動保存系統\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第六部分: 內容編輯器\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯功能展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第七部分: 檔案管理器\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器頁面載入成功\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "❌ 完整項目影片錄製失敗: locator.hover: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid^=\"file-item-\"]').nth(2)\u001b[22m\n\u001b[2m    - locator resolved to <div data-testid=\"file-item-file_1\" class=\"px-6 py-4 hover:bg-gray-50 transition-colors \">…</div>\u001b[22m\n\u001b[2m  - attempting hover action\u001b[22m\n\u001b[2m    - waiting for element to be visible and stable\u001b[22m\n\n    at \u001b[90mC:\\Users\\Administrator\\Desktop\\EduCreate\\\u001b[39mtests\\e2e\\complete-project-video-evidence.spec.ts:270:34 {\n  name: \u001b[32m'TimeoutError'\u001b[39m,\n  \u001b[32mSymbol(step)\u001b[39m: {\n    stepId: \u001b[32m'pw:api@160'\u001b[39m,\n    location: {\n      file: \u001b[32m'C:\\\\Users\\\\Administrator\\\\Desktop\\\\EduCreate\\\\tests\\\\e2e\\\\complete-project-video-evidence.spec.ts'\u001b[39m,\n      line: \u001b[33m270\u001b[39m,\n      column: \u001b[33m34\u001b[39m\n    },\n    category: \u001b[32m'pw:api'\u001b[39m,\n    title: \u001b[32m`Hover locator('[data-testid^=\"file-item-\"]').nth(2)`\u001b[39m,\n    apiName: \u001b[32m'locator.hover'\u001b[39m,\n    params: {\n      selector: \u001b[32m'[data-testid^=\"file-item-\"] >> nth=2'\u001b[39m,\n      strict: \u001b[33mtrue\u001b[39m,\n      timeout: \u001b[33m10000\u001b[39m\n    },\n    boxedStack: \u001b[90mundefined\u001b[39m,\n    steps: [],\n    attachmentIndices: [],\n    info: TestStepInfoImpl {\n      annotations: [],\n      _testInfo: \u001b[36m[TestInfoImpl]\u001b[39m,\n      _stepId: \u001b[32m'pw:api@160'\u001b[39m\n    },\n    complete: \u001b[36m[Function: complete]\u001b[39m,\n    endWallTime: \u001b[33m1752503045679\u001b[39m,\n    error: {\n      message: \u001b[32m'TimeoutError: locator.hover: Timeout 10000ms exceeded.\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m`\\x1B[2m  - waiting for locator('[data-testid^=\"file-item-\"]').nth(2)\\x1B[22m\\n`\u001b[39m +\n        \u001b[32m'\\x1B[2m    - locator resolved to <div data-testid=\"file-item-file_1\" class=\"px-6 py-4 hover:bg-gray-50 transition-colors \">…</div>\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - attempting hover action\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m    - waiting for element to be visible and stable\\x1B[22m\\n'\u001b[39m,\n      stack: \u001b[32m'TimeoutError: locator.hover: Timeout 10000ms exceeded.\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m`\\x1B[2m  - waiting for locator('[data-testid^=\"file-item-\"]').nth(2)\\x1B[22m\\n`\u001b[39m +\n        \u001b[32m'\\x1B[2m    - locator resolved to <div data-testid=\"file-item-file_1\" class=\"px-6 py-4 hover:bg-gray-50 transition-colors \">…</div>\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - attempting hover action\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m    - waiting for element to be visible and stable\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'    at C:\\\\Users\\\\Administrator\\\\Desktop\\\\EduCreate\\\\tests\\\\e2e\\\\complete-project-video-evidence.spec.ts:270:34'\u001b[39m,\n      cause: \u001b[90mundefined\u001b[39m\n    }\n  }\n}\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2025-07-14T14:22:24.799Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\e2e\\complete-project-video-evidence.spec.ts",
+                        "column": 34,
+                        "line": 270
+                      }
+                    },
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 26604,
+                      "error": {
+                        "message": "TimeoutError: locator.hover: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"feature-memory-games\"]')\u001b[22m\n\u001b[2m    - locator resolved to <div data-testid=\"feature-memory-games\" class=\"bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow\">…</div>\u001b[22m\n\u001b[2m  - attempting hover action\u001b[22m\n\u001b[2m    - waiting for element to be visible and stable\u001b[22m\n",
+                        "stack": "TimeoutError: locator.hover: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"feature-memory-games\"]')\u001b[22m\n\u001b[2m    - locator resolved to <div data-testid=\"feature-memory-games\" class=\"bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow\">…</div>\u001b[22m\n\u001b[2m  - attempting hover action\u001b[22m\n\u001b[2m    - waiting for element to be visible and stable\u001b[22m\n\n    at C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\e2e\\complete-project-video-evidence.spec.ts:44:22",
+                        "location": {
+                          "file": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\e2e\\complete-project-video-evidence.spec.ts",
+                          "column": 22,
+                          "line": 44
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 42 |\u001b[39m           \u001b[36mawait\u001b[39m card\u001b[33m.\u001b[39mscrollIntoViewIfNeeded()\u001b[33m;\u001b[39m\n \u001b[90m 43 |\u001b[39m           \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1500\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 44 |\u001b[39m           \u001b[36mawait\u001b[39m card\u001b[33m.\u001b[39mhover()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 45 |\u001b[39m           \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 46 |\u001b[39m           console\u001b[33m.\u001b[39mlog(\u001b[32m`✅ 功能卡片 ${cardId} 展示完成`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 47 |\u001b[39m         }\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\e2e\\complete-project-video-evidence.spec.ts",
+                            "column": 22,
+                            "line": 44
+                          },
+                          "message": "TimeoutError: locator.hover: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"feature-memory-games\"]')\u001b[22m\n\u001b[2m    - locator resolved to <div data-testid=\"feature-memory-games\" class=\"bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow\">…</div>\u001b[22m\n\u001b[2m  - attempting hover action\u001b[22m\n\u001b[2m    - waiting for element to be visible and stable\u001b[22m\n\n\n\u001b[0m \u001b[90m 42 |\u001b[39m           \u001b[36mawait\u001b[39m card\u001b[33m.\u001b[39mscrollIntoViewIfNeeded()\u001b[33m;\u001b[39m\n \u001b[90m 43 |\u001b[39m           \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1500\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 44 |\u001b[39m           \u001b[36mawait\u001b[39m card\u001b[33m.\u001b[39mhover()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 45 |\u001b[39m           \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 46 |\u001b[39m           console\u001b[33m.\u001b[39mlog(\u001b[32m`✅ 功能卡片 ${cardId} 展示完成`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 47 |\u001b[39m         }\u001b[0m\n\u001b[2m    at C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\e2e\\complete-project-video-evidence.spec.ts:44:22\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🎬 開始錄製 EduCreate 所有子項目成功證明影片...\n"
+                        },
+                        {
+                          "text": "🎬 第一部分: 主頁和統一導航系統\n"
+                        },
+                        {
+                          "text": "✅ 主頁成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統一導航系統正常\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-analytics 展示完成\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "❌ 完整項目影片錄製失敗: locator.hover: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"feature-memory-games\"]')\u001b[22m\n\u001b[2m    - locator resolved to <div data-testid=\"feature-memory-games\" class=\"bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow\">…</div>\u001b[22m\n\u001b[2m  - attempting hover action\u001b[22m\n\u001b[2m    - waiting for element to be visible and stable\u001b[22m\n\n    at \u001b[90mC:\\Users\\Administrator\\Desktop\\EduCreate\\\u001b[39mtests\\e2e\\complete-project-video-evidence.spec.ts:44:22 {\n  name: \u001b[32m'TimeoutError'\u001b[39m,\n  \u001b[32mSymbol(step)\u001b[39m: {\n    stepId: \u001b[32m'pw:api@25'\u001b[39m,\n    location: {\n      file: \u001b[32m'C:\\\\Users\\\\Administrator\\\\Desktop\\\\EduCreate\\\\tests\\\\e2e\\\\complete-project-video-evidence.spec.ts'\u001b[39m,\n      line: \u001b[33m44\u001b[39m,\n      column: \u001b[33m22\u001b[39m\n    },\n    category: \u001b[32m'pw:api'\u001b[39m,\n    title: \u001b[32m`Hover locator('[data-testid=\"feature-memory-games\"]')`\u001b[39m,\n    apiName: \u001b[32m'locator.hover'\u001b[39m,\n    params: {\n      selector: \u001b[32m'[data-testid=\"feature-memory-games\"]'\u001b[39m,\n      strict: \u001b[33mtrue\u001b[39m,\n      timeout: \u001b[33m10000\u001b[39m\n    },\n    boxedStack: \u001b[90mundefined\u001b[39m,\n    steps: [],\n    attachmentIndices: [],\n    info: TestStepInfoImpl {\n      annotations: [],\n      _testInfo: \u001b[36m[TestInfoImpl]\u001b[39m,\n      _stepId: \u001b[32m'pw:api@25'\u001b[39m\n    },\n    complete: \u001b[36m[Function: complete]\u001b[39m,\n    endWallTime: \u001b[33m1752503074199\u001b[39m,\n    error: {\n      message: \u001b[32m'TimeoutError: locator.hover: Timeout 10000ms exceeded.\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m`\\x1B[2m  - waiting for locator('[data-testid=\"feature-memory-games\"]')\\x1B[22m\\n`\u001b[39m +\n        \u001b[32m'\\x1B[2m    - locator resolved to <div data-testid=\"feature-memory-games\" class=\"bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow\">…</div>\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - attempting hover action\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m    - waiting for element to be visible and stable\\x1B[22m\\n'\u001b[39m,\n      stack: \u001b[32m'TimeoutError: locator.hover: Timeout 10000ms exceeded.\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m`\\x1B[2m  - waiting for locator('[data-testid=\"feature-memory-games\"]')\\x1B[22m\\n`\u001b[39m +\n        \u001b[32m'\\x1B[2m    - locator resolved to <div data-testid=\"feature-memory-games\" class=\"bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow\">…</div>\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - attempting hover action\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m    - waiting for element to be visible and stable\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'    at C:\\\\Users\\\\Administrator\\\\Desktop\\\\EduCreate\\\\tests\\\\e2e\\\\complete-project-video-evidence.spec.ts:44:22'\u001b[39m,\n      cause: \u001b[90mundefined\u001b[39m\n    }\n  }\n}\n"
+                        }
+                      ],
+                      "retry": 1,
+                      "startTime": "2025-07-14T14:24:07.846Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox-retry1\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox-retry1\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox-retry1\\error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox-retry1\\trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\e2e\\complete-project-video-evidence.spec.ts",
+                        "column": 22,
+                        "line": 44
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "8b31fa0606da4652dff0-7b304338fe38ae10eab3",
+              "file": "e2e/complete-project-video-evidence.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "錄製所有子項目成功證明影片",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 600000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 141229,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🎬 開始錄製 EduCreate 所有子項目成功證明影片...\n"
+                        },
+                        {
+                          "text": "🎬 第一部分: 主頁和統一導航系統\n"
+                        },
+                        {
+                          "text": "✅ 主頁成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統一導航系統正常\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-memory-games 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第二部分: 儀表板系統\n"
+                        },
+                        {
+                          "text": "✅ 儀表板成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-total 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-available 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-development 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-coming-soon 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-content-editor 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-auto-save 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-file-manager 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第三部分: 智能排序系統\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第四部分: 檔案夾統計分析\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第五部分: 自動保存系統\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第六部分: 內容編輯器\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯功能展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第七部分: 檔案管理器\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第八部分: 檔案夾協作系統\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾協作系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ overview 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ collaborators 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ sharing 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ invitations 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ activity 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾協作系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第九部分: 響應式設計展示\n"
+                        },
+                        {
+                          "text": "✅ 桌面 視圖展示完成\n"
+                        },
+                        {
+                          "text": "✅ 平板 視圖展示完成\n"
+                        },
+                        {
+                          "text": "✅ 手機 視圖展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第十部分: 最終總結\n"
+                        },
+                        {
+                          "text": "🎉 EduCreate 完整項目影片證據錄製完成！\n"
+                        },
+                        {
+                          "text": "📊 完整項目錄製報告: {\n  \"title\": \"EduCreate 完整項目成功證明影片\",\n  \"duration\": \"約 8-10 分鐘\",\n  \"sections\": [\n    \"主頁和統一導航系統\",\n    \"儀表板系統\",\n    \"智能排序系統\",\n    \"檔案夾統計分析\",\n    \"自動保存系統\",\n    \"內容編輯器\",\n    \"檔案管理器\",\n    \"檔案夾協作系統\",\n    \"響應式設計展示\",\n    \"最終總結\"\n  ],\n  \"verifiedFeatures\": [\n    \"統一導航系統整合\",\n    \"主儀表板功能展示\",\n    \"智能排序功能\",\n    \"檔案夾統計分析\",\n    \"自動保存系統\",\n    \"內容編輯器\",\n    \"檔案管理器\",\n    \"檔案夾協作系統\",\n    \"響應式設計\",\n    \"跨功能導航\"\n  ],\n  \"timestamp\": \"2025-07-14T14:24:45.788Z\",\n  \"status\": \"completed\"\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-14T14:22:24.833Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-webkit\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-webkit\\video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8b31fa0606da4652dff0-7258a1292a1e7362e106",
+              "file": "e2e/complete-project-video-evidence.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "錄製所有子項目成功證明影片",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 600000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 130532,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🎬 開始錄製 EduCreate 所有子項目成功證明影片...\n"
+                        },
+                        {
+                          "text": "🎬 第一部分: 主頁和統一導航系統\n"
+                        },
+                        {
+                          "text": "✅ 主頁成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統一導航系統正常\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-memory-games 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第二部分: 儀表板系統\n"
+                        },
+                        {
+                          "text": "✅ 儀表板成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-total 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-available 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-development 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-coming-soon 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-content-editor 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-auto-save 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-file-manager 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第三部分: 智能排序系統\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第四部分: 檔案夾統計分析\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第五部分: 自動保存系統\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第六部分: 內容編輯器\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯功能展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第七部分: 檔案管理器\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第八部分: 檔案夾協作系統\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾協作系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ overview 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ collaborators 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ sharing 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ invitations 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ activity 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾協作系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第九部分: 響應式設計展示\n"
+                        },
+                        {
+                          "text": "✅ 桌面 視圖展示完成\n"
+                        },
+                        {
+                          "text": "✅ 平板 視圖展示完成\n"
+                        },
+                        {
+                          "text": "✅ 手機 視圖展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第十部分: 最終總結\n"
+                        },
+                        {
+                          "text": "🎉 EduCreate 完整項目影片證據錄製完成！\n"
+                        },
+                        {
+                          "text": "📊 完整項目錄製報告: {\n  \"title\": \"EduCreate 完整項目成功證明影片\",\n  \"duration\": \"約 8-10 分鐘\",\n  \"sections\": [\n    \"主頁和統一導航系統\",\n    \"儀表板系統\",\n    \"智能排序系統\",\n    \"檔案夾統計分析\",\n    \"自動保存系統\",\n    \"內容編輯器\",\n    \"檔案管理器\",\n    \"檔案夾協作系統\",\n    \"響應式設計展示\",\n    \"最終總結\"\n  ],\n  \"verifiedFeatures\": [\n    \"統一導航系統整合\",\n    \"主儀表板功能展示\",\n    \"智能排序功能\",\n    \"檔案夾統計分析\",\n    \"自動保存系統\",\n    \"內容編輯器\",\n    \"檔案管理器\",\n    \"檔案夾協作系統\",\n    \"響應式設計\",\n    \"跨功能導航\"\n  ],\n  \"timestamp\": \"2025-07-14T14:24:35.095Z\",\n  \"status\": \"completed\"\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-14T14:22:24.881Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Mobile-Chrome\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Mobile-Chrome\\video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8b31fa0606da4652dff0-6dbeb65ee93ebb7fe0bd",
+              "file": "e2e/complete-project-video-evidence.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "錄製所有子項目成功證明影片",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 600000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
+                      "status": "passed",
+                      "duration": 141000,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🎬 開始錄製 EduCreate 所有子項目成功證明影片...\n"
+                        },
+                        {
+                          "text": "🎬 第一部分: 主頁和統一導航系統\n"
+                        },
+                        {
+                          "text": "✅ 主頁成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統一導航系統正常\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-memory-games 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第二部分: 儀表板系統\n"
+                        },
+                        {
+                          "text": "✅ 儀表板成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-total 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-available 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-development 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-coming-soon 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-content-editor 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-auto-save 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-file-manager 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第三部分: 智能排序系統\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第四部分: 檔案夾統計分析\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第五部分: 自動保存系統\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第六部分: 內容編輯器\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯功能展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第七部分: 檔案管理器\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第八部分: 檔案夾協作系統\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾協作系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ overview 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ collaborators 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ sharing 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ invitations 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ activity 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾協作系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第九部分: 響應式設計展示\n"
+                        },
+                        {
+                          "text": "✅ 桌面 視圖展示完成\n"
+                        },
+                        {
+                          "text": "✅ 平板 視圖展示完成\n"
+                        },
+                        {
+                          "text": "✅ 手機 視圖展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第十部分: 最終總結\n"
+                        },
+                        {
+                          "text": "🎉 EduCreate 完整項目影片證據錄製完成！\n"
+                        },
+                        {
+                          "text": "📊 完整項目錄製報告: {\n  \"title\": \"EduCreate 完整項目成功證明影片\",\n  \"duration\": \"約 8-10 分鐘\",\n  \"sections\": [\n    \"主頁和統一導航系統\",\n    \"儀表板系統\",\n    \"智能排序系統\",\n    \"檔案夾統計分析\",\n    \"自動保存系統\",\n    \"內容編輯器\",\n    \"檔案管理器\",\n    \"檔案夾協作系統\",\n    \"響應式設計展示\",\n    \"最終總結\"\n  ],\n  \"verifiedFeatures\": [\n    \"統一導航系統整合\",\n    \"主儀表板功能展示\",\n    \"智能排序功能\",\n    \"檔案夾統計分析\",\n    \"自動保存系統\",\n    \"內容編輯器\",\n    \"檔案管理器\",\n    \"檔案夾協作系統\",\n    \"響應式設計\",\n    \"跨功能導航\"\n  ],\n  \"timestamp\": \"2025-07-14T14:24:45.194Z\",\n  \"status\": \"completed\"\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-14T14:22:24.921Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Mobile-Safari\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Mobile-Safari\\video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8b31fa0606da4652dff0-2068aceb2b78cc9d1d04",
+              "file": "e2e/complete-project-video-evidence.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "錄製所有子項目成功證明影片",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 600000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Tablet",
+                  "projectName": "Tablet",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
+                      "status": "passed",
+                      "duration": 129991,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "🎬 開始錄製 EduCreate 所有子項目成功證明影片...\n"
+                        },
+                        {
+                          "text": "🎬 第一部分: 主頁和統一導航系統\n"
+                        },
+                        {
+                          "text": "✅ 主頁成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統一導航系統正常\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-memory-games 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 功能卡片 feature-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第二部分: 儀表板系統\n"
+                        },
+                        {
+                          "text": "✅ 儀表板成功載入\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-total 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-available 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-development 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 統計卡片 stats-coming-soon 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-smart-sorting 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-analytics 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-content-editor 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-auto-save 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-file-manager 展示完成\n"
+                        },
+                        {
+                          "text": "✅ 儀表板功能卡片 feature-card-folder-collaboration 展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第三部分: 智能排序系統\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 智能排序系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第四部分: 檔案夾統計分析\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾統計分析展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第五部分: 自動保存系統\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 自動保存系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第六部分: 內容編輯器\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 內容編輯功能展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第七部分: 檔案管理器\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ 檔案管理器展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第八部分: 檔案夾協作系統\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾協作系統頁面載入成功\n"
+                        },
+                        {
+                          "text": "✅ overview 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ collaborators 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ sharing 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ invitations 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ activity 標籤展示完成\n"
+                        },
+                        {
+                          "text": "✅ 檔案夾協作系統展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第九部分: 響應式設計展示\n"
+                        },
+                        {
+                          "text": "✅ 桌面 視圖展示完成\n"
+                        },
+                        {
+                          "text": "✅ 平板 視圖展示完成\n"
+                        },
+                        {
+                          "text": "✅ 手機 視圖展示完成\n"
+                        },
+                        {
+                          "text": "🎬 第十部分: 最終總結\n"
+                        },
+                        {
+                          "text": "🎉 EduCreate 完整項目影片證據錄製完成！\n"
+                        },
+                        {
+                          "text": "📊 完整項目錄製報告: {\n  \"title\": \"EduCreate 完整項目成功證明影片\",\n  \"duration\": \"約 8-10 分鐘\",\n  \"sections\": [\n    \"主頁和統一導航系統\",\n    \"儀表板系統\",\n    \"智能排序系統\",\n    \"檔案夾統計分析\",\n    \"自動保存系統\",\n    \"內容編輯器\",\n    \"檔案管理器\",\n    \"檔案夾協作系統\",\n    \"響應式設計展示\",\n    \"最終總結\"\n  ],\n  \"verifiedFeatures\": [\n    \"統一導航系統整合\",\n    \"主儀表板功能展示\",\n    \"智能排序功能\",\n    \"檔案夾統計分析\",\n    \"自動保存系統\",\n    \"內容編輯器\",\n    \"檔案管理器\",\n    \"檔案夾協作系統\",\n    \"響應式設計\",\n    \"跨功能導航\"\n  ],\n  \"timestamp\": \"2025-07-14T14:24:35.095Z\",\n  \"status\": \"completed\"\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-07-14T14:22:24.975Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Tablet\\test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Tablet\\video.webm"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "8b31fa0606da4652dff0-3176deb75719fdc6b87e",
+              "file": "e2e/complete-project-video-evidence.spec.ts",
+              "line": 9,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-07-14T14:22:15.759Z",
+    "duration": 150500.425,
+    "expected": 5,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

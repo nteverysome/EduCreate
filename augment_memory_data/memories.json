@@ -1,0 +1,146 @@
+[
+  {
+    "id": "f57ad39934fe3a4c480af3647dbf456f",
+    "content": "EduCreate 是一個記憶科學驅動的智能教育遊戲 SaaS 平台",
+    "memory_type": "knowledge",
+    "category": "project",
+    "importance": 10,
+    "tags": [
+      "educreat",
+      "project",
+      "memory_science"
+    ],
+    "created_at": "2025-07-14T19:57:58.216093",
+    "last_accessed": "2025-07-14T19:57:58.216093",
+    "access_count": 0
+  },
+  {
+    "id": "31722510387b2a5ab369ff772bdefd65",
+    "content": "技術棧: Next.js + React + TypeScript + Tailwind CSS + PostgreSQL + Prisma",
+    "memory_type": "knowledge",
+    "category": "tech_stack",
+    "importance": 9,
+    "tags": [
+      "tech_stack",
+      "nextjs",
+      "react",
+      "typescript"
+    ],
+    "created_at": "2025-07-14T19:57:58.216093",
+    "last_accessed": "2025-07-14T19:57:58.232060",
+    "access_count": 1
+  },
+  {
+    "id": "ccf8a503f835caf1849e72df08aad5c6",
+    "content": "間隔重複算法 - 基於遺忘曲線優化學習",
+    "memory_type": "knowledge",
+    "category": "memory_science",
+    "importance": 8,
+    "tags": [
+      "memory_science",
+      "core_concept"
+    ],
+    "created_at": "2025-07-14T19:57:58.216093",
+    "last_accessed": "2025-07-14T19:57:58.216093",
+    "access_count": 0
+  },
+  {
+    "id": "e15ca278e40641b8903b9f0983b82774",
+    "content": "主動回憶技術 - 提升記憶鞏固效果",
+    "memory_type": "knowledge",
+    "category": "memory_science",
+    "importance": 8,
+    "tags": [
+      "memory_science",
+      "core_concept"
+    ],
+    "created_at": "2025-07-14T19:57:58.216093",
+    "last_accessed": "2025-07-14T19:57:58.216093",
+    "access_count": 0
+  },
+  {
+    "id": "a12296a0a1b627f809cdf9adf9e3f917",
+    "content": "認知負荷理論 - 優化學習體驗設計",
+    "memory_type": "knowledge",
+    "category": "memory_science",
+    "importance": 8,
+    "tags": [
+      "memory_science",
+      "core_concept"
+    ],
+    "created_at": "2025-07-14T19:57:58.216093",
+    "last_accessed": "2025-07-14T19:57:58.216093",
+    "access_count": 0
+  },
+  {
+    "id": "36d13ba0d906878b415ae646b25872dc",
+    "content": "GEPT 三級分級 - 英語能力分級系統",
+    "memory_type": "knowledge",
+    "category": "memory_science",
+    "importance": 8,
+    "tags": [
+      "memory_science",
+      "core_concept"
+    ],
+    "created_at": "2025-07-14T19:57:58.216093",
+    "last_accessed": "2025-07-14T19:57:58.216093",
+    "access_count": 0
+  },
+  {
+    "id": "4178fdfa2f86f21dd794032775f3eb71",
+    "content": "25 種記憶遊戲 - 多樣化學習體驗",
+    "memory_type": "knowledge",
+    "category": "memory_science",
+    "importance": 8,
+    "tags": [
+      "memory_science",
+      "core_concept"
+    ],
+    "created_at": "2025-07-14T19:57:58.232060",
+    "last_accessed": "2025-07-14T19:57:58.232060",
+    "access_count": 0
+  },
+  {
+    "id": "4e1ce079c7e6354e969e4892915a3f64",
+    "content": "防止功能孤立 - 確保功能完整整合",
+    "memory_type": "knowledge",
+    "category": "memory_science",
+    "importance": 8,
+    "tags": [
+      "memory_science",
+      "core_concept"
+    ],
+    "created_at": "2025-07-14T19:57:58.232060",
+    "last_accessed": "2025-07-14T19:57:58.232060",
+    "access_count": 0
+  },
+  {
+    "id": "ea29af0b96161856df1bb342ff9ef39d",
+    "content": "用戶喜歡使用 React Hooks 進行狀態管理",
+    "memory_type": "preference",
+    "category": "programming",
+    "importance": 8,
+    "tags": [
+      "react",
+      "hooks",
+      "state"
+    ],
+    "created_at": "2025-07-14T19:57:58.232060",
+    "last_accessed": "2025-07-14T19:57:58.232060",
+    "access_count": 1
+  },
+  {
+    "id": "7401f35710a62ce6fb91796004ea6863",
+    "content": "用戶偏好: 我通常使用 TypeScript 進行開發",
+    "memory_type": "preference",
+    "category": "user_preference",
+    "importance": 7,
+    "tags": [
+      "user_preference",
+      "conversation"
+    ],
+    "created_at": "2025-07-14T19:57:58.232060",
+    "last_accessed": "2025-07-14T19:57:58.232060",
+    "access_count": 0
+  }
+]

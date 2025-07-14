@@ -1,0 +1,14 @@
+{
+  "total_allocation_gb": 57,
+  "allocation_breakdown": {
+    "code_analysis_cache": 19,
+    "vector_database": 15,
+    "memory_system": 7,
+    "file_cache": 10,
+    "working_memory": 4,
+    "system_buffer": 2
+  },
+  "cache_hit_target": 0.98,
+  "search_optimization": "microsecond_level",
+  "learning_rate": "real_time"
+}

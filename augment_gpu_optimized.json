@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "vram_allocation_gb": 4,
+  "cuda_optimization": true,
+  "mixed_precision": true,
+  "fallback_to_cpu": true,
+  "acceleration_targets": [
+    "vector_calculations",
+    "parallel_data_processing",
+    "mathematical_operations",
+    "search_algorithms"
+  ]
+}

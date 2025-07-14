@@ -1,0 +1,165 @@
+{
+  "name": "VSCode Augment MCP 完整配置",
+  "version": "1.0.0",
+  "description": "為 VSCode 擴展 Augment 配置所有 MCP 工具",
+  "augment.advanced": {
+    "mcpServers": [
+      {
+        "name": "sequential-thinking",
+        "enabled": true,
+        "command": "node",
+        "args": [
+          "C:\\Users\\Administrator\\Desktop\\EduCreate\\sequential-thinking-zalab\\dist\\index.js"
+        ],
+        "env": {
+          "NODE_ENV": "production"
+        },
+        "capabilities": ["深度思維分析", "邏輯推理", "問題分解"]
+      },
+      {
+        "name": "playwright-mcp",
+        "enabled": true,
+        "command": "node",
+        "args": [
+          "C:\\Users\\Administrator\\Desktop\\EduCreate\\playwright-mcp-microsoft\\index.js"
+        ],
+        "env": {
+          "NODE_ENV": "production"
+        },
+        "capabilities": ["瀏覽器自動化", "端到端測試", "網頁截圖"]
+      },
+      {
+        "name": "sqlite-mcp",
+        "enabled": true,
+        "command": "node",
+        "args": [
+          "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-sqlite\\mcp-sqlite-server.js"
+        ],
+        "env": {
+          "NODE_ENV": "production"
+        },
+        "capabilities": ["數據庫查詢", "數據分析", "SQL 操作"]
+      },
+      {
+        "name": "mcp-feedback-collector",
+        "enabled": true,
+        "command": "python",
+        "args": [
+          "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src\\mcp_feedback_collector\\server.py"
+        ],
+        "env": {
+          "PYTHONIOENCODING": "utf-8",
+          "MCP_DIALOG_TIMEOUT": "300",
+          "PYTHONPATH": "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src"
+        },
+        "capabilities": ["用戶反饋收集", "交互式對話", "圖片處理"]
+      },
+      {
+        "name": "autogen-mcp",
+        "enabled": true,
+        "command": "python",
+        "args": [
+          "C:\\Users\\Administrator\\Desktop\\EduCreate\\autogen-mcp-server.py"
+        ],
+        "env": {
+          "PYTHONIOENCODING": "utf-8",
+          "PYTHONPATH": "C:\\Users\\Administrator\\Desktop\\EduCreate\\autogen-microsoft\\python\\packages\\autogen-ext\\src"
+        },
+        "capabilities": ["多代理協作", "任務分解", "專業化分工", "並行處理"]
+      },
+      {
+        "name": "langfuse-mcp",
+        "enabled": true,
+        "command": "node",
+        "args": [
+          "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-server-langfuse\\index.js"
+        ],
+        "env": {
+          "NODE_ENV": "production"
+        },
+        "capabilities": ["LLM 追蹤", "性能監控", "對話分析"]
+      },
+      {
+        "name": "local-memory-mcp",
+        "enabled": true,
+        "command": "python",
+        "args": [
+          "C:\\Users\\Administrator\\Desktop\\EduCreate\\local-memory-mcp-server.py"
+        ],
+        "env": {
+          "PYTHONIOENCODING": "utf-8"
+        },
+        "capabilities": ["本地記憶管理", "知識存儲", "上下文保持"]
+      }
+    ]
+  },
+  "augmentEnhancements": {
+    "mcpIntegration": {
+      "enabled": true,
+      "autoStart": true,
+      "description": "自動啟動所有 MCP 服務器並整合到 Augment 工作流程中"
+    },
+    "multiAgentCollaboration": {
+      "enabled": true,
+      "description": "啟用多代理協作模式，利用 AutoGen MCP 創建專業代理團隊"
+    },
+    "enhancedMemory": {
+      "enabled": true,
+      "description": "使用本地記憶系統和向量搜索增強 Augment 的記憶能力"
+    },
+    "intelligentTesting": {
+      "enabled": true,
+      "description": "使用 Playwright MCP 進行智能測試和驗證"
+    },
+    "feedbackLoop": {
+      "enabled": true,
+      "description": "使用反饋收集器持續改進開發流程"
+    }
+  },
+  "usageVerification": {
+    "testCommands": [
+      "使用 sequential-thinking 分析複雜問題",
+      "使用 playwright-mcp 進行端到端測試",
+      "使用 sqlite-mcp 查詢數據庫",
+      "使用 mcp-feedback-collector 收集反饋",
+      "使用 autogen-mcp 創建代理團隊",
+      "使用 langfuse-mcp 監控性能",
+      "使用 local-memory-mcp 管理記憶"
+    ],
+    "verificationSteps": [
+      "檢查所有 MCP 服務器是否正常啟動",
+      "測試每個 MCP 工具的核心功能",
+      "驗證 Augment 與 MCP 工具的整合",
+      "確認多代理協作功能正常",
+      "測試記憶系統和向量搜索",
+      "驗證反饋收集和性能監控"
+    ]
+  },
+  "troubleshooting": {
+    "commonIssues": [
+      {
+        "issue": "MCP 服務器啟動失敗",
+        "solution": "檢查路徑和環境變量配置"
+      },
+      {
+        "issue": "Python 編碼錯誤",
+        "solution": "確保 PYTHONIOENCODING=utf-8"
+      },
+      {
+        "issue": "Node.js 模組找不到",
+        "solution": "檢查 node_modules 是否完整安裝"
+      }
+    ]
+  },
+  "monitoring": {
+    "enabled": true,
+    "logLevel": "info",
+    "metrics": [
+      "mcp_server_status",
+      "tool_usage_frequency",
+      "collaboration_sessions",
+      "memory_system_performance",
+      "feedback_collection_rate"
+    ]
+  }
+}
