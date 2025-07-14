@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-07-13T12:19:15.740Z",
+  "projectName": "EduCreate",
+  "status": {
+    "overall": "excellent",
+    "memory": {
+      "status": "optimized",
+      "limitMB": 8384
+    },
+    "vscode": {
+      "status": "optimized",
+      "optimized": true
+    },
+    "fileIndexing": {
+      "status": "optimized",
+      "optimized": true
+    },
+    "performance": {
+      "status": "unknown",
+      "score": 100
+    }
+  },
+  "recommendations": [],
+  "quickActions": []
+}

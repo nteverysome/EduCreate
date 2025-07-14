@@ -1,0 +1,115 @@
+{
+  "name": "Augment Sequential Thinking Integration",
+  "version": "1.0.0",
+  "description": "讓 Augment 在平常寫代碼時就能使用 sequential-thinking MCP",
+  "mcpServers": {
+    "sequential-thinking": {
+      "enabled": true,
+      "autoStart": true,
+      "command": "node",
+      "args": [
+        "C:\\Users\\Administrator\\Desktop\\EduCreate\\sequential-thinking-zalab\\dist\\index.js"
+      ],
+      "env": {
+        "NODE_ENV": "production",
+        "MCP_SERVER_NAME": "sequential-thinking",
+        "LOG_LEVEL": "info"
+      },
+      "capabilities": [
+        "sequential_thinking",
+        "problem_decomposition", 
+        "reflective_analysis",
+        "hypothesis_generation",
+        "step_by_step_reasoning"
+      ],
+      "triggers": [
+        "複雜問題",
+        "架構設計",
+        "算法實現",
+        "系統分析",
+        "調試問題",
+        "代碼重構",
+        "性能優化",
+        "技術選型"
+      ],
+      "autoActivation": {
+        "enabled": true,
+        "conditions": [
+          "問題複雜度 > 中等",
+          "需要多步驟分析",
+          "涉及架構決策",
+          "需要權衡利弊",
+          "問題範圍不明確"
+        ]
+      }
+    }
+  },
+  "integrationSettings": {
+    "augment": {
+      "enableAutoThinking": true,
+      "thinkingTriggers": [
+        "如何實現",
+        "設計方案",
+        "解決問題",
+        "分析原因",
+        "優化策略",
+        "架構選擇",
+        "技術對比"
+      ],
+      "responseEnhancement": {
+        "addThinkingSteps": true,
+        "showReasoningProcess": true,
+        "includeAlternatives": true,
+        "provideSummary": true
+      }
+    }
+  },
+  "usageExamples": [
+    {
+      "scenario": "代碼架構設計",
+      "trigger": "我需要設計一個複雜的系統架構",
+      "expectedBehavior": "自動啟用 sequential thinking，分解架構需求，分析各種方案，提供步驟化的設計建議"
+    },
+    {
+      "scenario": "算法優化",
+      "trigger": "這個算法性能不好，如何優化？",
+      "expectedBehavior": "使用 sequential thinking 分析性能瓶頸，探索優化方案，評估不同方法的利弊"
+    },
+    {
+      "scenario": "調試複雜問題",
+      "trigger": "這個 bug 很難定位，可能的原因是什麼？",
+      "expectedBehavior": "啟用 sequential thinking 進行系統性的問題分析，逐步縮小問題範圍"
+    },
+    {
+      "scenario": "技術選型",
+      "trigger": "在 React 和 Vue 之間如何選擇？",
+      "expectedBehavior": "使用 sequential thinking 分析項目需求，對比技術特點，提供決策建議"
+    }
+  ],
+  "monitoring": {
+    "enabled": true,
+    "logLevel": "info",
+    "metrics": [
+      "thinking_sessions_count",
+      "average_thinking_steps",
+      "problem_resolution_rate",
+      "user_satisfaction"
+    ]
+  },
+  "troubleshooting": {
+    "commonIssues": [
+      {
+        "issue": "MCP 服務器無法啟動",
+        "solution": "檢查 Node.js 版本，確保依賴已安裝，運行 npm install"
+      },
+      {
+        "issue": "sequential thinking 沒有自動觸發",
+        "solution": "檢查觸發條件設置，確認問題複雜度達到閾值"
+      },
+      {
+        "issue": "思考步驟不夠詳細",
+        "solution": "調整 thinking depth 參數，增加分析層次"
+      }
+    ]
+  }
+}

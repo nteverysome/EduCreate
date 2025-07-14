@@ -1,0 +1,23 @@
+{
+  "startTime": "2025-07-14T10:53:39.741Z",
+  "endTime": "2025-07-14T10:59:52.668Z",
+  "duration": "373秒",
+  "testResultsDir": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results",
+  "screenshots": [
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-chromium\\test-finished-1.png",
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-firefox\\test-finished-1.png",
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-Mobile-Chrome\\test-finished-1.png",
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-Mobile-Safari\\test-finished-1.png",
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-Tablet\\test-finished-1.png",
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-webkit\\test-finished-1.png"
+  ],
+  "videos": [
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-chromium\\video.webm",
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-firefox\\video.webm",
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-Mobile-Chrome\\video.webm",
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-Mobile-Safari\\video.webm",
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-Tablet\\video.webm",
+    "test-results\\e2e-real-time-sync-complet-3972f-決系統完整用戶旅程-實時同步和衝突解決系統完整功能驗證-webkit\\video.webm"
+  ],
+  "reports": []
+}

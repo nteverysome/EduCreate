@@ -8,16 +8,24 @@ import { UniversalContent } from './UniversalContentManager';
 
 export interface AutoSaveState {
   activityId: string;
+  guid: string; // 新增：基於 Wordwall 的 GUID 系統
   title: string;
   lastSaved: Date;
   isAutoSave: boolean;
   hasUnsavedChanges: boolean;
+  saveFrequency: number; // 新增：實際保存頻率 (基於測試發現的 2 秒)
+  contentChangeCount: number; // 新增：內容變更計數
+  sessionId: string; // 新增：Session 追蹤
 }
 
 export interface AutoSaveOptions {
-  saveDelay?: number; // 自動保存延遲時間（毫秒）
+  saveDelay?: number; // 自動保存延遲時間（毫秒）- 基於測試：2000ms
   maxRetries?: number; // 最大重試次數
   enableOfflineMode?: boolean; // 是否啟用離線模式
+  enableCompression?: boolean; // 新增：啟用數據壓縮 (基於 Wordwall ZIP 壓縮)
+  enableGUIDTracking?: boolean; // 新增：啟用 GUID 追蹤系統
+  contentChangeThreshold?: number; // 新增：內容變更觸發閾值 (基於測試：1 字符)
+  enableSessionTracking?: boolean; // 新增：啟用 Session 追蹤
 }
 
 export class AutoSaveManager {
@@ -25,9 +33,17 @@ export class AutoSaveManager {
   private readonly saveDelay: number;
   private readonly maxRetries: number;
   private readonly enableOfflineMode: boolean;
+  private readonly enableCompression: boolean; // 新增：數據壓縮
+  private readonly enableGUIDTracking: boolean; // 新增：GUID 追蹤
+  private readonly contentChangeThreshold: number; // 新增：變更閾值
+  private readonly enableSessionTracking: boolean; // 新增：Session 追蹤
   private retryCount = 0;
   private isOnline = true;
   private listeners: Set<(state: AutoSaveState) => void> = new Set();
+  private guid: string; // 新增：活動 GUID
+  private sessionId: string; // 新增：Session ID
+  private contentChangeCount = 0; // 新增：變更計數
+  private lastContentHash = ''; // 新增：內容哈希比較
 
   constructor(
     private activityId: string,

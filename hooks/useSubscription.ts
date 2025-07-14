@@ -1,6 +1,23 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { sessionCache } from '../lib/cache/CacheManager';
+// 簡單的內存緩存實現
+const simpleCache = new Map<string, { data: any; expiry: number }>();
+const sessionCache = {
+  get: <T>(key: string): T | null => {
+    const item = simpleCache.get(key);
+    if (item && item.expiry > Date.now()) {
+      return item.data;
+    }
+    simpleCache.delete(key);
+    return null;
+  },
+  set: (key: string, data: any, ttl: number) => {
+    simpleCache.set(key, { data, expiry: Date.now() + ttl });
+  },
+  delete: (key: string) => {
+    simpleCache.delete(key);
+  }
+};
 import { useErrorHandler } from './useErrorHandler';
 
 interface SubscriptionStatus {

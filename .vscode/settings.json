@@ -1,6 +1,77 @@
-{ 
-  "workbench.trustedDomains": [ 
-    "https://edu-create.vercel.app" 
-  ], 
-  "security.workspace.trust.untrustedFiles": "open" 
-} 
+{
+  "workbench.trustedDomains": [
+    "https://edu-create.vercel.app"
+  ],
+  "security.workspace.trust.untrustedFiles": "open",
+  "augment.memoryLimit": "8192",
+  "augment.maxConcurrentRequests": 6,
+  "augment.cacheEnabled": true,
+  "augment.indexingEnabled": true,
+  "augment.backgroundIndexing": false,
+  "augment.telemetryEnabled": false,
+  "augment.maxContextLength": 16384,
+  "augment.enableCodeCompletion": true,
+  "augment.enableInlineChat": true,
+  "augment.enableCodeExplanation": true,
+  "augment.enableRefactoring": true,
+  "augment.enableDocumentation": true,
+  "augment.enableTesting": true,
+  "augment.enableDebugging": true,
+  "augment.enableOptimization": true,
+  "augment.enableSecurityAnalysis": true,
+  "augment.enablePerformanceAnalysis": true,
+  "augment.logLevel": "error",
+  "augment.fileIndexing": {
+    "priority": {
+      "high": [
+        "docs/context-rules.md",
+        "components/**/*.tsx",
+        "pages/**/*.tsx",
+        "lib/**/*.ts",
+        "types/**/*.ts",
+        "prisma/schema.prisma"
+      ],
+      "medium": [
+        "__tests__/**/*.test.ts",
+        "__tests__/**/*.test.tsx",
+        "hooks/**/*.ts",
+        "middleware/**/*.ts"
+      ]
+    },
+    "maxFileSize": "1MB",
+    "excludePatterns": [
+      "node_modules/**",
+      ".next/**",
+      "test-results/**",
+      "logs/**",
+      "*.log",
+      "*.tmp"
+    ]
+  },
+  "augment.performance": {
+    "maxConcurrentMCPCalls": 6,
+    "fileIndexingBatchSize": 100,
+    "codeAnalysisTimeout": "30s",
+    "memoryLimit": "8GB",
+    "enableLazyLoading": true,
+    "preloadCriticalFiles": [
+      "docs/context-rules.md",
+      "package.json",
+      "tsconfig.json"
+    ]
+  },
+  "augment.cache": {
+    "enabled": true,
+    "strategy": "intelligent",
+    "cacheSize": "2GB",
+    "ttl": {
+      "codeAnalysis": "1h",
+      "projectContext": "24h",
+      "fileIndex": "30m",
+      "mcpResponses": "15m"
+    },
+    "priorityFiles": [
+      "docs/context-rules.md"
+    ]
+  }
+}

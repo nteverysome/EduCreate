@@ -1,49 +1,63 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
-import { PrismaClient } from '@prisma/client';
 import { withTestAuth } from '../../../middleware/withTestAuth';
-
-const prisma = new PrismaClient();
+import { AdvancedSearchManager, SearchType, SortOption, SearchOptions } from '../../../lib/search/AdvancedSearchManager';
 
 /**
  * 高級搜索API
- * 支持多種搜索條件、過濾和排序選項
+ * 支持15個組織工具的高級搜索：全文搜索、模糊匹配、語義搜索、多條件過濾器
  */
 async function advancedSearchHandler(req: NextApiRequest, res: NextApiResponse) {
   // 獲取用戶信息（可能來自會話或測試令牌）
   const session = await getSession({ req });
   const user = session?.user || (req as any).testUser;
-  
+
   // 檢查用戶認證狀態
   if (!session && !(req as any).testUser) {
-    return res.status(401).json({ 
+    return res.status(401).json({
       error: '未授權訪問',
       message: '請先登入以使用高級搜索功能',
       code: 'UNAUTHORIZED'
     });
   }
-  
+
   // 只允許GET請求
   if (req.method !== 'GET') {
     return res.status(405).json({ error: '方法不允許' });
   }
-  
+
   try {
-    const { 
-      query,           // 搜索關鍵詞
-      type,            // 活動類型
-      tags,            // 標籤（逗號分隔）
-      published,       // 發布狀態
-      createdBy,       // 創建者ID
-      favorite,        // 是否為收藏
-      difficulty,      // 難度級別
-      dateFrom,        // 創建日期範圍（開始）
-      dateTo,          // 創建日期範圍（結束）
-      sort = 'updatedAt', // 排序字段
-      order = 'desc',  // 排序方向
-      page = 1,        // 頁碼
-      limit = 10,      // 每頁數量
-      includeStats = 'true' // 是否包含統計數據
+    const {
+      query,                    // 搜索關鍵詞
+      searchType = 'full_text', // 搜索類型
+      activityType,            // 活動類型（逗號分隔）
+      geptLevel,               // GEPT等級（逗號分隔）
+      difficulty,              // 難度級別（逗號分隔）
+      tags,                    // 標籤（逗號分隔）
+      categories,              // 分類（逗號分隔）
+      published,               // 發布狀態
+      featured,                // 精選狀態
+      shared,                  // 分享狀態
+      createdBy,               // 創建者ID（逗號分隔）
+      dateCreatedFrom,         // 創建日期範圍（開始）
+      dateCreatedTo,           // 創建日期範圍（結束）
+      dateUpdatedFrom,         // 更新日期範圍（開始）
+      dateUpdatedTo,           // 更新日期範圍（結束）
+      hasImages,               // 包含圖片
+      hasAudio,                // 包含音頻
+      hasVideo,                // 包含視頻
+      hasInteractivity,        // 包含互動元素
+      minCompletionRate,       // 最小完成率
+      maxCompletionRate,       // 最大完成率
+      minAverageScore,         // 最小平均分
+      maxAverageScore,         // 最大平均分
+      sortBy = 'relevance',    // 排序字段
+      sortOrder = 'desc',      // 排序方向
+      page = 1,                // 頁碼
+      limit = 20,              // 每頁數量
+      includeHighlights = 'true',  // 包含高亮
+      includeFacets = 'true',      // 包含分面
+      includeStats = 'true'        // 是否包含統計數據
     } = req.query;
     
     const pageNum = Number(page);

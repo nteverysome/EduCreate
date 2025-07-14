@@ -1,0 +1,135 @@
+{
+  "analysis": {
+    "name": "Wordwall Competitive Analysis",
+    "version": "1.0.0",
+    "description": "EduCreate 項目的 Wordwall 競品分析工具配置"
+  },
+  "targets": {
+    "wordwall": {
+      "baseUrl": "https://wordwall.net",
+      "pages": {
+        "home": "/",
+        "create": "/create",
+        "myActivities": "/myactivities",
+        "community": "/community",
+        "templates": "/templates"
+      }
+    }
+  },
+  "analysisAreas": {
+    "contentInputSystem": {
+      "priority": "high",
+      "description": "用戶內容輸入系統分析",
+      "selectors": {
+        "textInputs": "textarea, input[type='text']",
+        "imageInputs": "input[type='file']",
+        "contentAreas": "[class*='content'], [class*='input']"
+      }
+    },
+    "gameTemplates": {
+      "priority": "high",
+      "description": "遊戲模板系統分析",
+      "selectors": {
+        "templates": "[class*='template'], [class*='game']",
+        "templateCards": "[data-testid*='template']",
+        "gameTypes": "[class*='type'], [class*='category']"
+      }
+    },
+    "crossGameSwitching": {
+      "priority": "medium",
+      "description": "跨遊戲切換機制分析",
+      "selectors": {
+        "switchButtons": "[class*='switch'], [class*='change']",
+        "dropdowns": "select, [class*='dropdown']",
+        "navigation": "[class*='nav'], [class*='menu']"
+      }
+    },
+    "sharingEcosystem": {
+      "priority": "medium",
+      "description": "社區分享生態系統分析",
+      "selectors": {
+        "shareButtons": "[class*='share'], button:has-text('Share')",
+        "communityLinks": "a[href*='community']",
+        "socialFeatures": "[class*='social'], [class*='public']"
+      }
+    },
+    "userFileSpace": {
+      "priority": "high",
+      "description": "用戶檔案空間管理分析",
+      "selectors": {
+        "folders": "[class*='folder']",
+        "activities": "[class*='activity'], [class*='item']",
+        "organizationTools": "[class*='sort'], [class*='filter'], [class*='search']"
+      }
+    }
+  },
+  "outputFormats": {
+    "json": {
+      "enabled": true,
+      "path": "test-results/wordwall-analysis/",
+      "filename": "competitive-analysis-report.json"
+    },
+    "markdown": {
+      "enabled": true,
+      "path": "test-results/wordwall-analysis/",
+      "filename": "COMPETITIVE_ANALYSIS_REPORT.md"
+    },
+    "screenshots": {
+      "enabled": true,
+      "path": "test-results/wordwall-analysis/",
+      "format": "png",
+      "fullPage": true
+    }
+  },
+  "browserConfig": {
+    "headless": false,
+    "slowMo": 1000,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "timeout": 30000
+  },
+  "educreateMapping": {
+    "contentInputSystem": {
+      "targetComponent": "components/content/UniversalContentEditor.tsx",
+      "features": [
+        "多媒體內容輸入",
+        "智能內容解析",
+        "批量內容處理"
+      ]
+    },
+    "gameTemplates": {
+      "targetDirectory": "components/games/",
+      "features": [
+        "25種記憶科學遊戲",
+        "統一遊戲接口",
+        "GEPT分級支持"
+      ]
+    },
+    "crossGameSwitching": {
+      "targetComponent": "components/content/GameSwitcher.tsx",
+      "features": [
+        "無縫遊戲切換",
+        "內容自動適配",
+        "狀態保持"
+      ]
+    },
+    "sharingEcosystem": {
+      "targetDirectory": "components/sharing/",
+      "features": [
+        "三層分享模式",
+        "權限管理",
+        "社區互動"
+      ]
+    },
+    "userFileSpace": {
+      "targetComponent": "components/user/MyActivities.tsx",
+      "features": [
+        "智能檔案組織",
+        "GEPT分級管理",
+        "學習進度追蹤"
+      ]
+    }
+  }
+}

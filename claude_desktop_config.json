@@ -1,0 +1,43 @@
+{
+  "mcpServers": {
+    "sequential-thinking": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Administrator\\Desktop\\EduCreate\\sequential-thinking-zalab\\dist\\index.js"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "playwright-mcp": {
+      "command": "node", 
+      "args": [
+        "C:\\Users\\Administrator\\Desktop\\EduCreate\\playwright-mcp-microsoft\\index.js"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "sqlite-mcp": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-sqlite-jparkerweb\\mcp-sqlite-server.js"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "filesystem-mcp": {
+      "command": "npx",
+      "args": [
+        "@shtse8/filesystem-mcp"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  },
+  "globalShortcuts": {
+    "sequential-thinking": "Ctrl+Shift+T"
+  }
+}

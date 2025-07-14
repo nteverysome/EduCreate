@@ -425,56 +425,309 @@ export class FolderManager {
     };
   }
 
-  // 數據庫操作方法（需要實現）
+  // 數據庫操作方法（完整實現）
   private static async saveFolderToDatabase(folder: FolderItem): Promise<void> {
-    // 實現數據庫保存邏輯
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      await prisma.folder.create({
+        data: {
+          id: folder.id,
+          name: folder.name,
+          description: folder.description,
+          color: folder.color,
+          icon: folder.icon,
+          parentId: folder.parentId,
+          userId: folder.userId,
+          activityCount: folder.activityCount,
+          subfolderCount: folder.subfolderCount,
+          totalActivityCount: folder.totalActivityCount,
+          path: folder.path,
+          depth: folder.depth,
+          isShared: folder.isShared || false,
+          shareSettings: folder.shareSettings ? JSON.stringify(folder.shareSettings) : null,
+          permissions: folder.permissions ? JSON.stringify(folder.permissions) : null,
+          createdAt: folder.createdAt,
+          updatedAt: folder.updatedAt,
+          lastAccessedAt: folder.lastAccessedAt
+        }
+      });
+    } finally {
+      await prisma.$disconnect();
+    }
   }
 
   private static async updateFolderInDatabase(folder: FolderItem): Promise<void> {
-    // 實現數據庫更新邏輯
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      await prisma.folder.update({
+        where: { id: folder.id },
+        data: {
+          name: folder.name,
+          description: folder.description,
+          color: folder.color,
+          icon: folder.icon,
+          parentId: folder.parentId,
+          activityCount: folder.activityCount,
+          subfolderCount: folder.subfolderCount,
+          totalActivityCount: folder.totalActivityCount,
+          path: folder.path,
+          depth: folder.depth,
+          isShared: folder.isShared,
+          shareSettings: folder.shareSettings ? JSON.stringify(folder.shareSettings) : null,
+          permissions: folder.permissions ? JSON.stringify(folder.permissions) : null,
+          updatedAt: folder.updatedAt,
+          lastAccessedAt: folder.lastAccessedAt
+        }
+      });
+    } finally {
+      await prisma.$disconnect();
+    }
   }
 
   private static async getFolderById(id: string): Promise<FolderItem | null> {
-    // 實現數據庫查詢邏輯
-    return null;
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      const folder = await prisma.folder.findUnique({
+        where: { id }
+      });
+
+      if (!folder) return null;
+
+      return this.mapDatabaseToFolderItem(folder);
+    } finally {
+      await prisma.$disconnect();
+    }
   }
 
   private static async getUserFolders(userId: string): Promise<FolderItem[]> {
-    // 實現用戶文件夾查詢邏輯
-    return [];
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      const folders = await prisma.folder.findMany({
+        where: { userId },
+        orderBy: [
+          { depth: 'asc' },
+          { name: 'asc' }
+        ]
+      });
+
+      return folders.map(folder => this.mapDatabaseToFolderItem(folder));
+    } finally {
+      await prisma.$disconnect();
+    }
   }
 
   private static async getFoldersByParent(parentId: string | undefined, userId: string): Promise<FolderItem[]> {
-    // 實現父文件夾查詢邏輯
-    return [];
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      const folders = await prisma.folder.findMany({
+        where: {
+          userId,
+          parentId: parentId || null
+        },
+        orderBy: { name: 'asc' }
+      });
+
+      return folders.map(folder => this.mapDatabaseToFolderItem(folder));
+    } finally {
+      await prisma.$disconnect();
+    }
   }
 
   private static async getFolderDescendants(folderId: string): Promise<FolderItem[]> {
-    // 實現子文件夾查詢邏輯
-    return [];
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      // 使用路徑查詢所有子文件夾
+      const folders = await prisma.folder.findMany({
+        where: {
+          path: {
+            array_contains: [folderId]
+          }
+        },
+        orderBy: [
+          { depth: 'asc' },
+          { name: 'asc' }
+        ]
+      });
+
+      return folders.map(folder => this.mapDatabaseToFolderItem(folder));
+    } finally {
+      await prisma.$disconnect();
+    }
   }
 
   private static async updateFolderStats(folderId: string): Promise<void> {
-    // 實現文件夾統計更新邏輯
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      // 計算子文件夾數量
+      const subfolderCount = await prisma.folder.count({
+        where: { parentId: folderId }
+      });
+
+      // 計算直接活動數量
+      const activityCount = await prisma.activity.count({
+        where: { folderId }
+      });
+
+      // 計算總活動數量（包含子文件夾）
+      const descendants = await this.getFolderDescendants(folderId);
+      const descendantIds = descendants.map(f => f.id);
+      const totalActivityCount = await prisma.activity.count({
+        where: {
+          folderId: {
+            in: [folderId, ...descendantIds]
+          }
+        }
+      });
+
+      // 更新統計信息
+      await prisma.folder.update({
+        where: { id: folderId },
+        data: {
+          subfolderCount,
+          activityCount,
+          totalActivityCount,
+          updatedAt: new Date()
+        }
+      });
+    } finally {
+      await prisma.$disconnect();
+    }
   }
 
   private static async updateDescendantPaths(folderId: string): Promise<void> {
-    // 實現子文件夾路徑更新邏輯
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      const folder = await this.getFolderById(folderId);
+      if (!folder) return;
+
+      const descendants = await this.getFolderDescendants(folderId);
+
+      // 批量更新所有子文件夾的路徑和深度
+      for (const descendant of descendants) {
+        const newPath = [...folder.path, folder.id, ...descendant.path.slice(folder.path.length + 1)];
+        const newDepth = newPath.length;
+
+        await prisma.folder.update({
+          where: { id: descendant.id },
+          data: {
+            path: newPath,
+            depth: newDepth,
+            updatedAt: new Date()
+          }
+        });
+      }
+    } finally {
+      await prisma.$disconnect();
+    }
   }
 
   private static async bulkMove(itemIds: string[], targetFolderId: string): Promise<void> {
-    // 實現批量移動邏輯
+    for (const itemId of itemIds) {
+      await this.moveFolder(itemId, targetFolderId);
+    }
   }
 
   private static async bulkCopy(itemIds: string[], targetFolderId: string): Promise<void> {
-    // 實現批量複製邏輯
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      for (const itemId of itemIds) {
+        const folder = await this.getFolderById(itemId);
+        if (!folder) continue;
+
+        // 創建副本
+        const copyName = `${folder.name} - 副本`;
+        await this.createFolder(copyName, targetFolderId, {
+          description: folder.description,
+          color: folder.color,
+          icon: folder.icon,
+          userId: folder.userId
+        });
+      }
+    } finally {
+      await prisma.$disconnect();
+    }
   }
 
   private static async bulkDelete(itemIds: string[]): Promise<void> {
-    // 實現批量刪除邏輯
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      // 遞歸刪除所有子文件夾和活動
+      for (const itemId of itemIds) {
+        const descendants = await this.getFolderDescendants(itemId);
+        const allIds = [itemId, ...descendants.map(d => d.id)];
+
+        // 刪除所有相關活動
+        await prisma.activity.deleteMany({
+          where: {
+            folderId: { in: allIds }
+          }
+        });
+
+        // 刪除文件夾（從最深層開始）
+        const sortedIds = allIds.sort((a, b) => {
+          const folderA = descendants.find(d => d.id === a);
+          const folderB = descendants.find(d => d.id === b);
+          return (folderB?.depth || 0) - (folderA?.depth || 0);
+        });
+
+        for (const id of sortedIds) {
+          await prisma.folder.delete({
+            where: { id }
+          });
+        }
+      }
+    } finally {
+      await prisma.$disconnect();
+    }
   }
 
   private static async bulkShare(itemIds: string[], options: Record<string, any>): Promise<void> {
-    // 實現批量分享邏輯
+    for (const itemId of itemIds) {
+      await this.shareFolder(itemId, options);
+    }
+  }
+
+  // 輔助方法：將數據庫記錄映射為 FolderItem
+  private static mapDatabaseToFolderItem(dbFolder: any): FolderItem {
+    return {
+      id: dbFolder.id,
+      name: dbFolder.name,
+      description: dbFolder.description,
+      color: dbFolder.color,
+      icon: dbFolder.icon,
+      parentId: dbFolder.parentId,
+      userId: dbFolder.userId,
+      activityCount: dbFolder.activityCount || 0,
+      subfolderCount: dbFolder.subfolderCount || 0,
+      totalActivityCount: dbFolder.totalActivityCount || 0,
+      path: dbFolder.path || [],
+      depth: dbFolder.depth || 0,
+      isShared: dbFolder.isShared || false,
+      shareSettings: dbFolder.shareSettings ? JSON.parse(dbFolder.shareSettings) : undefined,
+      permissions: dbFolder.permissions ? JSON.parse(dbFolder.permissions) : this.getDefaultPermissions(),
+      createdAt: dbFolder.createdAt,
+      updatedAt: dbFolder.updatedAt,
+      lastAccessedAt: dbFolder.lastAccessedAt
+    };
   }
 }

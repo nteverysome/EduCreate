@@ -18,7 +18,7 @@ export default defineConfig({
   
   /* 測試報告配置 */
   reporter: [
-    ['html', { outputFolder: 'test-results/html-report' }],
+    ['html', { outputFolder: 'playwright-report' }],
     ['json', { outputFile: 'test-results/results.json' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
     ['list']
@@ -33,10 +33,10 @@ export default defineConfig({
     trace: 'on-first-retry',
     
     /* 截圖配置 */
-    screenshot: 'only-on-failure',
-    
+    screenshot: 'on',
+
     /* 視頻錄製 */
-    video: 'retain-on-failure',
+    video: 'on',
     
     /* 瀏覽器上下文配置 */
     viewport: { width: 1280, height: 720 },
@@ -96,8 +96,8 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    reuseExistingServer: true,
+    timeout: 30000,
   },
 
   /* 輸出目錄 */
