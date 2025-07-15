@@ -214,6 +214,25 @@ export default function HomePage() {
               </Link>
             </div>
 
+            {/* 統一內容編輯器 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-universal-content-editor">
+              <div className="text-4xl mb-4">📝</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">統一內容編輯器</h3>
+              <p className="text-gray-600 mb-6">
+                一站式內容管理平台，支持文字、圖片輸入，一鍵適配25種教育遊戲，模仿 Wordwall 模式
+              </p>
+              <Link
+                href="/universal-game"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="universal-content-editor-link"
+              >
+                立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
             {/* AI內容生成系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-ai-content-generation">
               <div className="text-4xl mb-4">🤖</div>
@@ -395,6 +414,13 @@ export default function HomePage() {
               data-testid="quick-dashboard"
             >
               📊 功能儀表板
+            </Link>
+            <Link
+              href="/universal-game"
+              className="inline-flex items-center px-6 py-3 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
+              data-testid="quick-universal-content-editor"
+            >
+              📝 統一內容編輯器
             </Link>
             <Link
               href="/demo/smart-sorting"
