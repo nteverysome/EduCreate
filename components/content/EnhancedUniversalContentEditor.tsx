@@ -9,6 +9,7 @@ import { GameAdapters } from '../../lib/content/GameAdapters';
 import { TemplateManager } from '../../lib/content/TemplateManager';
 import { useAutoSave, generateActivityId } from '../../lib/content/AutoSaveManager';
 import { ContentValidator, ValidationResult } from '../../lib/content/ContentValidator';
+import RichTextEditor from './RichTextEditor';
 
 interface EnhancedUniversalContentEditorProps {
   initialContent?: UniversalContent;
@@ -326,23 +327,38 @@ export default function EnhancedUniversalContentEditor({
               </div>
             )}
 
-            {/* 添加新項目 */}
+            {/* 添加新項目 - 增強版富文本編輯 */}
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                <input
-                  type="text"
-                  value={newItem.term}
-                  onChange={(e) => setNewItem({ ...newItem, term: e.target.value })}
-                  placeholder="詞彙/問題"
-                  className="p-2 border border-gray-300 rounded"
-                />
-                <input
-                  type="text"
-                  value={newItem.definition}
-                  onChange={(e) => setNewItem({ ...newItem, definition: e.target.value })}
-                  placeholder="定義/答案"
-                  className="p-2 border border-gray-300 rounded"
-                />
+              <h4 className="font-medium mb-4 text-gray-900">
+                {editingIndex !== null ? '編輯項目' : '添加新項目'}
+              </h4>
+
+              <div className="space-y-4">
+                {/* 詞彙/問題 - 富文本編輯器 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    詞彙/問題
+                  </label>
+                  <RichTextEditor
+                    value={newItem.term}
+                    onChange={(value) => setNewItem({ ...newItem, term: value })}
+                    placeholder="輸入詞彙或問題，支持格式化文本..."
+                    data-testid="term-rich-editor"
+                  />
+                </div>
+
+                {/* 定義/答案 - 富文本編輯器 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    定義/答案
+                  </label>
+                  <RichTextEditor
+                    value={newItem.definition}
+                    onChange={(value) => setNewItem({ ...newItem, definition: value })}
+                    placeholder="輸入定義或答案，支持格式化文本、表格、列表..."
+                    data-testid="definition-rich-editor"
+                  />
+                </div>
               </div>
               <div className="flex items-center space-x-2">
                 {editingIndex !== null ? (
@@ -371,27 +387,53 @@ export default function EnhancedUniversalContentEditor({
               </div>
             </div>
 
-            {/* 內容項目列表 */}
-            <div className="space-y-2">
+            {/* 內容項目列表 - 增強版富文本顯示 */}
+            <div className="space-y-4">
               {content.items.map((item, index) => (
-                <div key={item.id} className="flex items-center p-3 bg-gray-50 rounded-lg">
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{item.term}</div>
-                    <div className="text-sm text-gray-600">{item.definition}</div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleEditItem(index)}
-                      className="text-blue-600 hover:text-blue-800 text-sm"
-                    >
-                      編輯
-                    </button>
-                    <button
-                      onClick={() => handleDeleteItem(index)}
-                      className="text-red-600 hover:text-red-800 text-sm"
-                    >
-                      刪除
-                    </button>
+                <div key={item.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 space-y-3">
+                      {/* 詞彙/問題顯示 */}
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                          詞彙/問題
+                        </div>
+                        <div
+                          className="rich-content font-medium text-gray-900 prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: item.term }}
+                          data-testid={`item-term-${index}`}
+                        />
+                      </div>
+
+                      {/* 定義/答案顯示 */}
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                          定義/答案
+                        </div>
+                        <div
+                          className="rich-content text-gray-700 prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: item.definition }}
+                          data-testid={`item-definition-${index}`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2 ml-4">
+                      <button
+                        onClick={() => handleEditItem(index)}
+                        className="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 rounded hover:bg-blue-50"
+                        data-testid={`edit-item-${index}`}
+                      >
+                        編輯
+                      </button>
+                      <button
+                        onClick={() => handleDeleteItem(index)}
+                        className="text-red-600 hover:text-red-800 text-sm px-2 py-1 rounded hover:bg-red-50"
+                        data-testid={`delete-item-${index}`}
+                      >
+                        刪除
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

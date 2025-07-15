@@ -1,122 +1,115 @@
 /**
- * 協作編輯器組件
- * 提供實時多用戶協作編輯功能
+ * CollaborativeEditor - 實時協作編輯器組件
+ * 支持多用戶同時編輯、版本歷史、變更追蹤和衝突解決
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { 
-  RealtimeCollaboration,
-  CollaborationSession,
-  Participant,
-  Comment,
-  EditOperation,
-  CursorPosition
-} from '../../lib/collaboration/RealtimeCollaboration';
+import {
+  CollaborationManager,
+  CollaborationUser,
+  ContentChange,
+  ContentVersion,
+  ConflictResolution
+} from '../../lib/collaboration/CollaborationManager';
 
-interface CollaborativeEditorProps {
-  activityId: string;
-  userId: string;
-  username: string;
-  initialContent?: any;
-  onContentChange?: (content: any) => void;
-  onSessionChange?: (session: CollaborationSession | null) => void;
+export interface CollaborativeEditorProps {
+  documentId: string;
+  initialContent?: string;
+  currentUser: CollaborationUser;
+  onContentChange?: (content: string) => void;
+  onVersionCreate?: (version: ContentVersion) => void;
+  className?: string;
+  'data-testid'?: string;
 }
 
 export default function CollaborativeEditor({
-  activityId,
-  userId,
-  username,
-  initialContent,
+  documentId,
+  initialContent = '',
+  currentUser,
   onContentChange,
-  onSessionChange
+  onVersionCreate,
+  className = '',
+  'data-testid': testId = 'collaborative-editor'
 }: CollaborativeEditorProps) {
-  const [session, setSession] = useState<CollaborationSession | null>(null);
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
-  const [showParticipants, setShowParticipants] = useState(true);
-  const [showComments, setShowComments] = useState(false);
-  const [selectedElement, setSelectedElement] = useState<string | null>(null);
-  const [newComment, setNewComment] = useState('');
-  
-  const editorRef = useRef<HTMLDivElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
+  const [collaborationManager] = useState(() => new CollaborationManager());
+  const [content, setContent] = useState(initialContent);
+  const [users, setUsers] = useState<CollaborationUser[]>([]);
+  const [versions, setVersions] = useState<ContentVersion[]>([]);
+  const [changes, setChanges] = useState<ContentChange[]>([]);
+  const [conflicts, setConflicts] = useState<ConflictResolution[]>([]);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('disconnected');
+  const [isJoined, setIsJoined] = useState(false);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [showUserList, setShowUserList] = useState(true);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastChangeRef = useRef<number>(0);
 
   // 初始化協作會話
   useEffect(() => {
-    initializeCollaboration();
-    return () => {
-      cleanup();
-    };
-  }, [activityId, userId]);
-
-  const initializeCollaboration = async () => {
-    try {
-      // 嘗試加入現有會話或創建新會話
-      let collaborationSession: CollaborationSession;
-      
-      // 這裡應該先檢查是否有現有的會話
-      const existingSessionId = localStorage.getItem(`session_${activityId}`);
-      
-      if (existingSessionId) {
-        const joinResult = await RealtimeCollaboration.joinSession(existingSessionId, userId, username);
-        if (joinResult.success && joinResult.session) {
-          collaborationSession = joinResult.session;
-        } else {
-          // 加入失敗，創建新會話
-          collaborationSession = await RealtimeCollaboration.createSession(activityId, userId);
-          localStorage.setItem(`session_${activityId}`, collaborationSession.id);
-        }
-      } else {
-        // 創建新會話
-        collaborationSession = await RealtimeCollaboration.createSession(activityId, userId);
-        localStorage.setItem(`session_${activityId}`, collaborationSession.id);
+    const initializeCollaboration = async () => {
+      try {
+        await collaborationManager.joinSession(documentId, currentUser);
+        setIsJoined(true);
+      } catch (error) {
+        console.error('加入協作會話失敗:', error);
       }
-
-      setSession(collaborationSession);
-      setParticipants(collaborationSession.participants);
-      onSessionChange?.(collaborationSession);
-
-      // 載入評論
-      const sessionComments = RealtimeCollaboration.getComments(collaborationSession.id);
-      setComments(sessionComments);
-
-      // 建立 WebSocket 連接
-      setupWebSocketConnection(collaborationSession.id);
-      
-      setIsConnected(true);
-    } catch (error) {
-      console.error('初始化協作失敗:', error);
-    }
-  };
-
-  const setupWebSocketConnection = (sessionId: string) => {
-    // 實際實現中需要連接到 WebSocket 服務器
-    // 這裡使用模擬的 WebSocket 連接
-    const ws = new WebSocket(`ws://localhost:8080/collaboration/${sessionId}`);
-    
-    ws.onopen = () => {
-      console.log('WebSocket 連接已建立');
-      setIsConnected(true);
     };
 
-    ws.onmessage = (event) => {
-      const collaborationEvent = JSON.parse(event.data);
-      handleCollaborationEvent(collaborationEvent);
+    initializeCollaboration();
+
+    return () => {
+      collaborationManager.leaveSession();
+      collaborationManager.destroy();
+    };
+  }, [documentId, currentUser, collaborationManager]);
+
+  // 設置事件監聽器
+  useEffect(() => {
+    const handleUsersUpdate = (updatedUsers: CollaborationUser[]) => {
+      setUsers(updatedUsers);
     };
 
-    ws.onclose = () => {
-      console.log('WebSocket 連接已關閉');
-      setIsConnected(false);
+    const handleContentChange = (change: ContentChange) => {
+      setChanges(prev => [...prev, change]);
+
+      // 如果不是當前用戶的變更，更新內容
+      if (change.userId !== currentUser.id) {
+        const session = collaborationManager.getCurrentSession();
+        if (session) {
+          setContent(session.currentVersion.content);
+          onContentChange?.(session.currentVersion.content);
+        }
+      }
     };
 
-    ws.onerror = (error) => {
-      console.error('WebSocket 錯誤:', error);
-      setIsConnected(false);
+    const handleVersionCreate = (version: ContentVersion) => {
+      setVersions(prev => [...prev, version]);
+      onVersionCreate?.(version);
     };
 
-    wsRef.current = ws;
-  };
+    const handleConflictResolution = (conflict: ConflictResolution) => {
+      setConflicts(prev => [...prev, conflict]);
+    };
+
+    const handleConnectionStatus = (status: 'connected' | 'disconnected' | 'reconnecting') => {
+      setConnectionStatus(status);
+    };
+
+    collaborationManager.addUserListener(handleUsersUpdate);
+    collaborationManager.addChangeListener(handleContentChange);
+    collaborationManager.addVersionListener(handleVersionCreate);
+    collaborationManager.addConflictListener(handleConflictResolution);
+    collaborationManager.addConnectionListener(handleConnectionStatus);
+
+    return () => {
+      collaborationManager.removeUserListener(handleUsersUpdate);
+      collaborationManager.removeChangeListener(handleContentChange);
+      collaborationManager.removeVersionListener(handleVersionCreate);
+      collaborationManager.removeConflictListener(handleConflictResolution);
+      collaborationManager.removeConnectionListener(handleConnectionStatus);
+    };
+  }, [collaborationManager, currentUser.id, onContentChange, onVersionCreate]);
 
   const handleCollaborationEvent = (event: any) => {
     switch (event.type) {

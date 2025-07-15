@@ -119,6 +119,158 @@ export default function HomePage() {
               </Link>
             </div>
 
+            {/* 富文本編輯器 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-rich-text-editor">
+              <div className="text-4xl mb-4">✏️</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">富文本編輯器</h3>
+              <p className="text-gray-600 mb-6">
+                完整的富文本編輯功能，支持格式化、表格、列表和無障礙設計
+              </p>
+              <Link
+                href="/content/rich-text-editor"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="rich-text-editor-link"
+              >
+                立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* 多媒體支持系統 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-multimedia">
+              <div className="text-4xl mb-4">🎬</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">多媒體支持系統</h3>
+              <p className="text-gray-600 mb-6">
+                完整的多媒體上傳、管理和預覽功能，支持圖片、音頻、視頻和動畫
+              </p>
+              <Link
+                href="/content/multimedia"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="multimedia-link"
+              >
+                立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* 語音錄製系統 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-voice-recording">
+              <div className="text-4xl mb-4">🎤</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">語音錄製系統</h3>
+              <p className="text-gray-600 mb-6">
+                完整的語音錄製、播放、語音識別和語音合成功能，支持多種音頻格式
+              </p>
+              <Link
+                href="/content/voice-recording"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="voice-recording-link"
+              >
+                立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* GEPT分級系統 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-gept-templates">
+              <div className="text-4xl mb-4">📚</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">GEPT分級系統</h3>
+              <p className="text-gray-600 mb-6">
+                完整的GEPT分級模板管理、內容驗證和詞彙瀏覽功能，支持三個級別
+              </p>
+              <Link
+                href="/content/gept-templates"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="gept-templates-link"
+              >
+                立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* 實時協作系統 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-realtime-collaboration">
+              <div className="text-4xl mb-4">👥</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">實時協作系統</h3>
+              <p className="text-gray-600 mb-6">
+                多用戶同時編輯、版本歷史、變更追蹤和衝突解決，實時協作延遲 &lt;100ms
+              </p>
+              <Link
+                href="/content/realtime-collaboration"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="realtime-collaboration-link"
+              >
+                立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* AI內容生成系統 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-ai-content-generation">
+              <div className="text-4xl mb-4">🤖</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">AI內容生成系統</h3>
+              <p className="text-gray-600 mb-6">
+                基於記憶科學原理的AI內容生成，支持多語言翻譯和個性化學習建議
+              </p>
+              <Link
+                href="/content/ai-content-generation"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="ai-content-generation-link"
+              >
+                立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* Match配對遊戲 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-match-game">
+              <div className="text-4xl mb-4">🎯</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Match配對遊戲</h3>
+              <p className="text-gray-600 mb-6">
+                基於記憶科學原理的配對遊戲，支持多種模式和智能適配，挑戰記憶力
+              </p>
+              <Link
+                href="/games/match"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="match-game-link"
+              >
+                立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* 自動保存系統 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-auto-save">
+              <div className="text-4xl mb-4">💾</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">自動保存系統</h3>
+              <p className="text-gray-600 mb-6">
+                智能自動保存、離線支持、版本控制和批量優化，零數據丟失保證
+              </p>
+              <Link
+                href="/content/autosave"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="auto-save-link"
+              >
+                立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
             {/* 檔案夾協作系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-folder-collaboration">
               <div className="text-4xl mb-4">🤝</div>

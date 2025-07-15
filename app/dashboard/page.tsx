@@ -71,13 +71,67 @@ const features: FeatureCard[] = [
   
   // 內容管理功能
   {
-    id: 'content-editor',
-    title: '內容編輯器',
-    description: '富文本編輯器，支援多媒體和實時協作',
-    href: '/content/editor',
+    id: 'rich-text-editor',
+    title: '富文本編輯器',
+    description: '完整的富文本編輯功能，支持格式化、表格、列表和無障礙設計',
+    href: '/content/rich-text-editor',
     icon: '✏️',
     status: 'available',
     category: 'content'
+  },
+  {
+    id: 'multimedia-system',
+    title: '多媒體支持系統',
+    description: '完整的多媒體上傳、管理和預覽功能，支持圖片、音頻、視頻和動畫',
+    href: '/content/multimedia',
+    icon: '🎬',
+    status: 'available',
+    category: 'content'
+  },
+  {
+    id: 'voice-recording-system',
+    title: '語音錄製系統',
+    description: '完整的語音錄製、播放、語音識別和語音合成功能，支持多種音頻格式',
+    href: '/content/voice-recording',
+    icon: '🎤',
+    status: 'available',
+    category: 'content'
+  },
+  {
+    id: 'gept-templates-system',
+    title: 'GEPT分級系統',
+    description: '完整的GEPT分級模板管理、內容驗證和詞彙瀏覽功能，支持三個級別',
+    href: '/content/gept-templates',
+    icon: '📚',
+    status: 'available',
+    category: 'content'
+  },
+  {
+    id: 'realtime-collaboration-system',
+    title: '實時協作系統',
+    description: '多用戶同時編輯、版本歷史、變更追蹤和衝突解決，實時協作延遲 <100ms',
+    href: '/content/realtime-collaboration',
+    icon: '👥',
+    status: 'available',
+    category: 'content'
+  },
+  {
+    id: 'ai-content-generation-system',
+    title: 'AI內容生成系統',
+    description: '基於記憶科學原理的AI內容生成，支持多語言翻譯和個性化學習建議',
+    href: '/content/ai-content-generation',
+    icon: '🤖',
+    status: 'available',
+    category: 'content'
+  },
+  {
+    id: 'match-game',
+    title: 'Match配對遊戲',
+    description: '基於記憶科學原理的配對遊戲，支持多種模式和智能適配，挑戰記憶力',
+    href: '/games/match',
+    icon: '🎯',
+    status: 'available',
+    category: 'games'
   },
   {
     id: 'auto-save',

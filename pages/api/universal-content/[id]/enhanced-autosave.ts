@@ -13,6 +13,7 @@ import crypto from 'crypto';
 interface EnhancedAutoSavePayload {
   guid: string; // 活動 GUID (基於 Wordwall 模式)
   sessionId: string; // Session 追蹤
+  version: number; // 版本號追蹤
   content: any; // 活動內容
   contentHash: string; // 內容哈希
   changeType: 'typing' | 'paste' | 'delete' | 'template-switch'; // 變更類型
@@ -20,10 +21,14 @@ interface EnhancedAutoSavePayload {
   isCompressed: boolean; // 是否壓縮
   templateId?: number; // 模板 ID
   folderId?: number; // 檔案夾 ID
+  lastModified: string; // 最後修改時間
+  isAutoSave: boolean; // 是否為自動保存
   metadata: {
     userAgent: string;
     timestamp: string;
     saveReason: 'interval' | 'change' | 'manual' | 'page-switch'; // 保存原因
+    compressionRatio?: number; // 壓縮比例
+    responseTime?: number; // 響應時間
   };
 }
 
@@ -31,10 +36,20 @@ interface AutoSaveResponse {
   success: boolean;
   guid: string;
   sessionId: string;
+  version: number; // 版本號
   lastSaved: string;
   saveCount: number;
   nextSaveIn: number; // 下次保存倒計時 (毫秒)
   compressionRatio?: number; // 壓縮比例
+  responseTime: number; // 響應時間
+  conflictDetected?: boolean; // 是否檢測到衝突
+  conflictResolved?: boolean; // 衝突是否已解決
+  performanceMetrics?: {
+    targetResponseTime: number;
+    targetSuccessRate: number;
+    currentResponseTime: number;
+    performanceOk: boolean;
+  };
   error?: string;
 }
 

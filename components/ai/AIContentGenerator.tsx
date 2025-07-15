@@ -1,45 +1,68 @@
 /**
  * AI 內容生成器組件
- * 提供 AI 自動生成教育內容的用戶界面
+ * 基於記憶科學原理的AI輔助內容生成，支持多語言和個性化學習
  */
 
-import React, { useState, useEffect } from 'react';
-import { 
-  ContentGenerator, 
-  AIGenerationRequest, 
-  AIGenerationResult,
-  AIModel 
-} from '../../lib/ai/ContentGenerator';
-import { GameType } from '../../lib/content/UniversalContentManager';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  aiContentGenerator,
+  AIGenerationRequest,
+  GeneratedContent,
+  Language,
+  ContentType,
+  DifficultyLevel,
+  MemoryTechnique,
+  LearnerProfile,
+  TranslationRequest,
+  PersonalizationSuggestion
+} from '../../lib/ai/AIContentGenerator';
 
-interface AIContentGeneratorProps {
-  gameType: GameType;
-  onContentGenerated: (content: any[]) => void;
-  onClose?: () => void;
+export interface AIContentGeneratorProps {
+  onContentGenerated?: (content: GeneratedContent) => void;
+  onTranslationComplete?: (translation: string) => void;
+  initialTopic?: string;
+  initialLanguage?: Language;
+  learnerProfile?: LearnerProfile;
+  className?: string;
+  'data-testid'?: string;
 }
 
 export default function AIContentGenerator({
-  gameType,
   onContentGenerated,
-  onClose
+  onTranslationComplete,
+  initialTopic = '',
+  initialLanguage = 'zh-TW',
+  learnerProfile,
+  className = '',
+  'data-testid': testId = 'ai-content-generator'
 }: AIContentGeneratorProps) {
-  const [request, setRequest] = useState<Partial<AIGenerationRequest>>({
-    type: 'questions',
-    gameType,
-    topic: '',
-    difficulty: 'intermediate',
-    count: 5,
-    language: 'zh-TW',
-    targetAge: '',
-    learningObjectives: [],
-    customPrompt: ''
-  });
-  
+  const [activeTab, setActiveTab] = useState<'generate' | 'translate' | 'personalize'>('generate');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [result, setResult] = useState<AIGenerationResult | null>(null);
-  const [availableModels, setAvailableModels] = useState<AIModel[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>('');
-  const [previewContent, setPreviewContent] = useState<any[]>([]);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
+  const [translationResult, setTranslationResult] = useState<string>('');
+  const [suggestions, setSuggestions] = useState<PersonalizationSuggestion[]>([]);
+
+  // 生成請求狀態
+  const [request, setRequest] = useState<AIGenerationRequest>({
+    type: 'vocabulary',
+    topic: initialTopic,
+    language: initialLanguage,
+    difficulty: 'intermediate',
+    memoryTechniques: ['spaced-repetition', 'active-recall'],
+    wordCount: 300,
+    keywords: [],
+    learnerProfile
+  });
+
+  // 翻譯請求狀態
+  const [translationRequest, setTranslationRequest] = useState<TranslationRequest>({
+    text: '',
+    sourceLanguage: 'zh-TW',
+    targetLanguage: 'en-US',
+    preserveFormatting: true,
+    culturalAdaptation: false
+  });
 
   // 初始化
   useEffect(() => {
