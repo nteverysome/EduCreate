@@ -40,4 +40,53 @@ cache/
 prisma/migrations/
 !prisma/schema.prisma
 
-# ���h���� schema.prisma������F�/녶˲���
+# =============================================================================
+# EduCreate 測試影片管理系統 - Git 排除規則
+# =============================================================================
+
+# 🚫 測試影片檔案 (太大且不適合 Git 管理)
+# 影片檔案會讓 repository 變得笨重，且 GitHub 有 100MB 檔案大小限制
+EduCreate-Test-Videos/current/**/*.webm
+EduCreate-Test-Videos/compressed/**/*.webm
+EduCreate-Test-Videos/archive/**/*.webm
+test-results/**/*.webm
+
+# 🚫 敏感測試資料和 MCP 整合資料
+# 包含可能的敏感資訊，如內部 API 金鑰、用戶資料等
+EduCreate-Test-Videos/mcp-integration/langfuse-traces/
+EduCreate-Test-Videos/mcp-integration/sequential-thinking/
+EduCreate-Test-Videos/mcp-integration/feedback-collection/
+EduCreate-Test-Videos/local-memory/
+
+# 🚫 動態生成的報告和元數據
+# 這些會頻繁變動，且可以重新生成
+EduCreate-Test-Videos/reports/daily/
+EduCreate-Test-Videos/reports/weekly/
+EduCreate-Test-Videos/reports/monthly/
+EduCreate-Test-Videos/reports/dashboard/
+EduCreate-Test-Videos/metadata/
+
+# 🚫 臨時文件和緩存
+EduCreate-Test-Videos/temp/
+EduCreate-Test-Videos/cache/
+EduCreate-Test-Videos/.temp/
+
+# ✅ 保留的重要文件 (使用 ! 強制包含)
+# 核心腳本和配置文件需要版本控制
+!EduCreate-Test-Videos/scripts/
+!EduCreate-Test-Videos/config/
+!EduCreate-Test-Videos/README.md
+!EduCreate-Test-Videos/docs/
+
+# 🚫 測試結果和截圖
+test-results/**/*.png
+test-results/**/*.jpg
+test-results/**/*.jpeg
+test-results/**/*.zip
+test-results/**/*.xml
+test-results/**/*.json
+test-results/screenshots/
+
+# 🚫 系統生成的日誌文件
+*.log
+EduCreate-Test-Videos/**/*.log
