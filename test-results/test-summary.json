@@ -1,25 +1,16 @@
 {
-  "startTime": "2025-07-14T14:22:23.557Z",
-  "endTime": "2025-07-14T14:24:46.245Z",
-  "duration": "143秒",
+  "startTime": "2025-07-15T13:47:12.986Z",
+  "endTime": "2025-07-15T13:47:33.753Z",
+  "duration": "21秒",
   "testResultsDir": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results",
   "screenshots": [
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-chromium\\test-finished-1.png",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox\\test-failed-1.png",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox-retry1\\test-failed-1.png",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Mobile-Chrome\\test-finished-1.png",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Mobile-Safari\\test-finished-1.png",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Tablet\\test-finished-1.png",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-webkit\\test-finished-1.png"
+    "test-results\\universal-content-editor-homepage-integration-final.png",
+    "test-results\\universal-content-editor-h-0cdb5-ntentEditor主頁整合功能演示---從主頁開始-chromium\\test-finished-1.png",
+    "test-results\\universal-content-editor-h-14ead-ersalContentEditor主頁整合無障礙測試-chromium\\test-finished-1.png"
   ],
   "videos": [
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-chromium\\video.webm",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox\\video.webm",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-firefox-retry1\\video.webm",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Mobile-Chrome\\video.webm",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Mobile-Safari\\video.webm",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-Tablet\\video.webm",
-    "test-results\\e2e-complete-project-video-17c4e-te-完整項目影片證據錄製-錄製所有子項目成功證明影片-webkit\\video.webm"
+    "test-results\\universal-content-editor-h-0cdb5-ntentEditor主頁整合功能演示---從主頁開始-chromium\\video.webm",
+    "test-results\\universal-content-editor-h-14ead-ersalContentEditor主頁整合無障礙測試-chromium\\video.webm"
   ],
   "reports": []
 }
