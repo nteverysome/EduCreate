@@ -284,29 +284,212 @@ class TestVideoProcessor {
     };
   }
 
-  // 生成默認測試階段
+  // 生成默認測試階段（增強版錯誤信息）
   generateDefaultTestStages(module, feature, result) {
+    const timestamp = new Date().toISOString();
+
+    // 生成詳細的錯誤信息
+    const generateStageDetails = (stageName, stageResult) => {
+      const baseStage = {
+        stage: 0, // 將在下面設置
+        name: stageName,
+        result: stageResult,
+        timestamp,
+        memory: stageResult === 'pass'
+          ? `${stageName}階段成功完成，功能正常工作`
+          : `${stageName}階段失敗，需要進一步調查和修復`
+      };
+
+      // 如果失敗，添加詳細的錯誤分析
+      if (stageResult === 'fail') {
+        baseStage.errorDetails = {
+          errorType: 'functional_failure',
+          possibleCauses: this.generatePossibleCauses(stageName, module, feature),
+          suggestedFixes: this.generateSuggestedFixes(stageName, module, feature),
+          debugSteps: this.generateDebugSteps(stageName, module, feature),
+          relatedComponents: this.getRelatedComponents(stageName, module, feature),
+          memoryScience: this.getMemoryScienceImpact(stageName, module),
+          geptImpact: this.getGEPTImpact(stageName, module),
+          priority: this.getFailurePriority(stageName, module)
+        };
+      }
+
+      return baseStage;
+    };
+
     const baseStages = [
-      { stage: 1, name: '主頁導航', result: 'pass', timestamp: new Date().toISOString() },
-      { stage: 2, name: '功能入口', result: 'pass', timestamp: new Date().toISOString() },
-      { stage: 3, name: '基本功能測試', result: result === 'success' ? 'pass' : 'fail', timestamp: new Date().toISOString() }
+      generateStageDetails('主頁導航', 'pass'),
+      generateStageDetails('功能入口', 'pass'),
+      generateStageDetails('基本功能測試', result === 'success' ? 'pass' : 'fail')
     ];
-    
+
+    // 設置階段編號
+    baseStages.forEach((stage, index) => {
+      stage.stage = index + 1;
+    });
+
     // 根據模組添加特定階段
     if (module === 'games') {
-      baseStages.push(
-        { stage: 4, name: '遊戲配置', result: 'pass', timestamp: new Date().toISOString() },
-        { stage: 5, name: '遊戲玩法', result: result === 'success' ? 'pass' : 'fail', timestamp: new Date().toISOString() },
-        { stage: 6, name: '記憶科學驗證', result: result === 'success' ? 'pass' : 'fail', timestamp: new Date().toISOString() }
-      );
+      const gameStages = [
+        generateStageDetails('遊戲配置', 'pass'),
+        generateStageDetails('遊戲玩法', result === 'success' ? 'pass' : 'fail'),
+        generateStageDetails('記憶科學驗證', result === 'success' ? 'pass' : 'fail')
+      ];
+
+      gameStages.forEach((stage, index) => {
+        stage.stage = baseStages.length + index + 1;
+      });
+
+      baseStages.push(...gameStages);
     } else if (module === 'content') {
-      baseStages.push(
-        { stage: 4, name: 'GEPT分級測試', result: 'pass', timestamp: new Date().toISOString() },
-        { stage: 5, name: 'AI內容生成', result: result === 'success' ? 'pass' : 'fail', timestamp: new Date().toISOString() }
-      );
+      const contentStages = [
+        generateStageDetails('GEPT分級測試', 'pass'),
+        generateStageDetails('AI內容生成', result === 'success' ? 'pass' : 'fail')
+      ];
+
+      contentStages.forEach((stage, index) => {
+        stage.stage = baseStages.length + index + 1;
+      });
+
+      baseStages.push(...contentStages);
+    } else if (module === 'system') {
+      const systemStages = [
+        generateStageDetails('系統整合測試', result === 'success' ? 'pass' : 'fail'),
+        generateStageDetails('性能驗證', result === 'success' ? 'pass' : 'fail')
+      ];
+
+      systemStages.forEach((stage, index) => {
+        stage.stage = baseStages.length + index + 1;
+      });
+
+      baseStages.push(...systemStages);
     }
-    
+
     return baseStages;
+  }
+
+  // 生成可能的錯誤原因
+  generatePossibleCauses(stageName, module, feature) {
+    const commonCauses = {
+      '主頁導航': ['頁面載入超時', '導航元素未找到', '路由配置錯誤'],
+      '功能入口': ['按鈕或連結失效', '權限驗證失敗', '功能未正確註冊'],
+      '基本功能測試': ['核心邏輯錯誤', 'API 端點失效', '數據驗證失敗'],
+      '遊戲配置': ['遊戲參數錯誤', '模板載入失敗', '配置文件損壞'],
+      '遊戲玩法': ['互動邏輯錯誤', '事件處理失敗', '狀態管理問題'],
+      '記憶科學驗證': ['間隔重複算法錯誤', '主動回憶機制失效', '認知負荷計算錯誤'],
+      'GEPT分級測試': ['詞彙分級錯誤', '難度評估失敗', '分級數據缺失'],
+      'AI內容生成': ['AI API 失效', '內容生成邏輯錯誤', '模板處理失敗'],
+      '系統整合測試': ['組件間通信失敗', '數據同步錯誤', '依賴項缺失'],
+      '性能驗證': ['響應時間超標', '記憶體洩漏', '資源使用過高']
+    };
+
+    return commonCauses[stageName] || ['未知錯誤原因', '需要進一步分析'];
+  }
+
+  // 生成修復建議
+  generateSuggestedFixes(stageName, module, feature) {
+    const commonFixes = {
+      '主頁導航': [
+        '檢查路由配置文件',
+        '驗證頁面組件是否正確載入',
+        '檢查導航元素的 data-testid 屬性'
+      ],
+      '功能入口': [
+        '驗證功能按鈕的事件處理',
+        '檢查權限和身份驗證',
+        '確認功能在主頁正確註冊'
+      ],
+      '基本功能測試': [
+        '檢查 API 端點的可用性',
+        '驗證數據格式和驗證邏輯',
+        '測試核心業務邏輯'
+      ],
+      '遊戲玩法': [
+        '檢查遊戲狀態管理',
+        '驗證用戶互動事件',
+        '測試遊戲邏輯流程'
+      ],
+      '記憶科學驗證': [
+        '檢查間隔重複算法實現',
+        '驗證主動回憶機制',
+        '測試認知負荷計算'
+      ]
+    };
+
+    return commonFixes[stageName] || ['進行詳細的錯誤分析和調試'];
+  }
+
+  // 生成調試步驟
+  generateDebugSteps(stageName, module, feature) {
+    return [
+      `1. 檢查 ${stageName} 相關的組件和邏輯`,
+      `2. 查看瀏覽器控制台的錯誤信息`,
+      `3. 驗證 ${module} 模組的依賴項`,
+      `4. 測試 ${feature} 功能的單元測試`,
+      `5. 檢查相關的 API 端點和數據流`,
+      `6. 驗證無障礙設計和 WCAG 合規性`,
+      `7. 測試記憶科學原理的實現`
+    ];
+  }
+
+  // 獲取相關組件
+  getRelatedComponents(stageName, module, feature) {
+    const componentMap = {
+      'games': ['GameEngine', 'MemoryScience', 'GEPTGrading', 'UserInterface'],
+      'content': ['ContentManager', 'AIGenerator', 'GEPTClassifier', 'TemplateEngine'],
+      'system': ['NavigationSystem', 'AuthManager', 'DataSync', 'PerformanceMonitor'],
+      'file-space': ['FileManager', 'FolderSystem', 'SearchEngine', 'BatchOperations']
+    };
+
+    return componentMap[module] || ['UnknownComponent'];
+  }
+
+  // 獲取記憶科學影響
+  getMemoryScienceImpact(stageName, module) {
+    if (stageName.includes('記憶科學') || module === 'games') {
+      return {
+        impact: 'high',
+        affectedPrinciples: ['間隔重複', '主動回憶', '認知負荷管理'],
+        learningEffectiveness: 'significantly_reduced'
+      };
+    }
+    return {
+      impact: 'low',
+      affectedPrinciples: [],
+      learningEffectiveness: 'minimal_impact'
+    };
+  }
+
+  // 獲取 GEPT 影響
+  getGEPTImpact(stageName, module) {
+    if (stageName.includes('GEPT') || module === 'content') {
+      return {
+        impact: 'high',
+        affectedLevels: ['elementary', 'intermediate', 'high-intermediate'],
+        gradingAccuracy: 'compromised'
+      };
+    }
+    return {
+      impact: 'low',
+      affectedLevels: [],
+      gradingAccuracy: 'unaffected'
+    };
+  }
+
+  // 獲取失敗優先級
+  getFailurePriority(stageName, module) {
+    const highPriorityStages = ['記憶科學驗證', 'GEPT分級測試', '基本功能測試'];
+    const highPriorityModules = ['games', 'content'];
+
+    if (highPriorityStages.includes(stageName) || highPriorityModules.includes(module)) {
+      return 'critical';
+    }
+
+    if (stageName.includes('功能') || stageName.includes('玩法')) {
+      return 'high';
+    }
+
+    return 'medium';
   }
 
   // 組織影片到適當目錄

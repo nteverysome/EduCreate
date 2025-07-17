@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-
 interface WhackAMoleProps {
   questions: Array<{
     question: string;
@@ -9,7 +8,6 @@ interface WhackAMoleProps {
   gameTime?: number; // 遊戲時間（秒）
   moleSpeed?: number; // 地鼠出現速度（毫秒）
 }
-
 interface Mole {
   id: number;
   position: number;
@@ -17,7 +15,6 @@ interface Mole {
   isCorrect: boolean;
   isVisible: boolean;
 }
-
 export default function WhackAMoleGame({ 
   questions, 
   gameTime = 60, 
@@ -30,17 +27,14 @@ export default function WhackAMoleGame({
   const [gameEnded, setGameEnded] = useState(false);
   const [moles, setMoles] = useState<Mole[]>([]);
   const [nextMoleId, setNextMoleId] = useState(0);
-
   // 創建地鼠
   const createMole = useCallback(() => {
     if (gameEnded || !gameStarted) return;
-
     const question = questions[currentQuestion];
     const allAnswers = [question.correct, ...question.incorrect];
     const randomAnswer = allAnswers[Math.floor(Math.random() * allAnswers.length)];
     const isCorrect = randomAnswer === question.correct;
     const position = Math.floor(Math.random() * 9); // 9個洞
-
     const newMole: Mole = {
       id: nextMoleId,
       position,
@@ -48,16 +42,13 @@ export default function WhackAMoleGame({
       isCorrect,
       isVisible: true
     };
-
     setMoles(prev => [...prev, newMole]);
     setNextMoleId(prev => prev + 1);
-
     // 地鼠自動消失
     setTimeout(() => {
       setMoles(prev => prev.filter(mole => mole.id !== newMole.id));
     }, moleSpeed * 0.8);
   }, [currentQuestion, questions, gameEnded, gameStarted, nextMoleId, moleSpeed]);
-
   // 打地鼠
   const whackMole = (mole: Mole) => {
     if (mole.isCorrect) {
@@ -69,11 +60,9 @@ export default function WhackAMoleGame({
     } else {
       setScore(prev => Math.max(0, prev - 5)); // 錯誤扣分
     }
-    
     // 移除被打的地鼠
     setMoles(prev => prev.filter(m => m.id !== mole.id));
   };
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -84,7 +73,6 @@ export default function WhackAMoleGame({
     setMoles([]);
     setNextMoleId(0);
   };
-
   // 重新開始
   const resetGame = () => {
     setGameStarted(false);
@@ -95,11 +83,9 @@ export default function WhackAMoleGame({
     setMoles([]);
     setNextMoleId(0);
   };
-
   // 遊戲計時器
   useEffect(() => {
     if (!gameStarted || gameEnded) return;
-
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -110,18 +96,14 @@ export default function WhackAMoleGame({
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [gameStarted, gameEnded]);
-
   // 地鼠生成器
   useEffect(() => {
     if (!gameStarted || gameEnded) return;
-
     const moleGenerator = setInterval(createMole, moleSpeed);
     return () => clearInterval(moleGenerator);
   }, [gameStarted, gameEnded, createMole, moleSpeed]);
-
   // 遊戲結束條件
   useEffect(() => {
     if (currentQuestion >= questions.length && gameStarted) {
@@ -129,7 +111,6 @@ export default function WhackAMoleGame({
       setGameStarted(false);
     }
   }, [currentQuestion, questions.length, gameStarted]);
-
   if (!gameStarted && !gameEnded) {
     return (
       <div className="text-center">
@@ -154,7 +135,6 @@ export default function WhackAMoleGame({
       </div>
     );
   }
-
   if (gameEnded) {
     return (
       <div className="text-center">
@@ -174,9 +154,7 @@ export default function WhackAMoleGame({
       </div>
     );
   }
-
   const currentQ = questions[currentQuestion];
-
   return (
     <div>
       {/* 遊戲狀態 */}
@@ -191,20 +169,17 @@ export default function WhackAMoleGame({
           題目: {currentQuestion + 1}/{questions.length}
         </div>
       </div>
-
       {/* 當前問題 */}
       <div className="text-center mb-6">
         <h3 className="text-xl font-bold bg-blue-100 p-4 rounded-lg">
           {currentQ?.question}
         </h3>
       </div>
-
       {/* 遊戲區域 */}
       <div className="relative bg-green-200 rounded-lg p-4" style={{ minHeight: '400px' }}>
         <div className="grid grid-cols-3 gap-4 h-full">
           {Array.from({ length: 9 }, (_, index) => {
             const moleInHole = moles.find(mole => mole.position === index && mole.isVisible);
-            
             return (
               <div
                 key={index}
@@ -217,7 +192,6 @@ export default function WhackAMoleGame({
               >
                 {/* 洞 */}
                 <div className="absolute inset-2 bg-black rounded-full opacity-50"></div>
-                
                 {/* 地鼠 */}
                 {moleInHole && (
                   <button
@@ -242,7 +216,6 @@ export default function WhackAMoleGame({
           })}
         </div>
       </div>
-
       <style jsx>{`
         @keyframes molePopUp {
           0% {

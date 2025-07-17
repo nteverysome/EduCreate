@@ -8,7 +8,7 @@ interface ShareActivityProps {
   onClose: () => void;
 }
 
-export default function ShareActivity({ activityId, activityTitle, onClose }: ShareActivityProps) {
+const ShareActivity = ({ activityId, activityTitle, onClose }: ShareActivityProps) {
   const [copied, setCopied] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
   const linkInputRef = useRef<HTMLInputElement>(null);
@@ -158,3 +158,5 @@ export default function ShareActivity({ activityId, activityTitle, onClose }: Sh
     </div>
   );
 }
+
+export default ShareActivity;

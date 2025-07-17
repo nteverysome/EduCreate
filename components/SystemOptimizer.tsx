@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 // System Optimization Types
 interface OptimizationTask {
   id: string;
@@ -20,7 +19,6 @@ interface OptimizationTask {
     after?: Record<string, number>;
   };
 }
-
 interface SystemMetrics {
   performance: {
     pageLoadTime: number;
@@ -47,14 +45,12 @@ interface SystemMetrics {
     colorContrastRatio: number;
   };
 }
-
 export default function SystemOptimizer() {
   const [optimizationTasks, setOptimizationTasks] = useState<OptimizationTask[]>([]);
   const [systemMetrics, setSystemMetrics] = useState<SystemMetrics | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [showCreateTask, setShowCreateTask] = useState(false);
-
   // Initialize optimization tasks based on user feedback
   useEffect(() => {
     const tasks: OptimizationTask[] = [
@@ -149,9 +145,7 @@ export default function SystemOptimizer() {
         }
       }
     ];
-
     setOptimizationTasks(tasks);
-
     // Mock system metrics
     const metrics: SystemMetrics = {
       performance: {
@@ -179,16 +173,13 @@ export default function SystemOptimizer() {
         colorContrastRatio: 4.8
       }
     };
-
     setSystemMetrics(metrics);
   }, []);
-
   const filteredTasks = optimizationTasks.filter(task => {
     const categoryMatch = selectedCategory === 'all' || task.category === selectedCategory;
     const statusMatch = selectedStatus === 'all' || task.status === selectedStatus;
     return categoryMatch && statusMatch;
   });
-
   const updateTaskStatus = (taskId: string, newStatus: OptimizationTask['status']) => {
     setOptimizationTasks(prev => prev.map(task => 
       task.id === taskId 
@@ -200,7 +191,6 @@ export default function SystemOptimizer() {
         : task
     ));
   };
-
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'text-red-600 bg-red-100 border-red-200';
@@ -210,7 +200,6 @@ export default function SystemOptimizer() {
       default: return 'text-gray-600 bg-gray-100 border-gray-200';
     }
   };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'text-gray-600 bg-gray-100';
@@ -221,7 +210,6 @@ export default function SystemOptimizer() {
       default: return 'text-gray-600 bg-gray-100';
     }
   };
-
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'performance': return '⚡';
@@ -232,7 +220,6 @@ export default function SystemOptimizer() {
       default: return '📋';
     }
   };
-
   const getMetricScore = (value: number, category: string) => {
     // Different scoring logic for different metrics
     if (category === 'errorRate') {
@@ -241,7 +228,6 @@ export default function SystemOptimizer() {
       return value >= 90 ? 'excellent' : value >= 75 ? 'good' : value >= 60 ? 'fair' : 'poor';
     }
   };
-
   const getScoreColor = (score: string) => {
     switch (score) {
       case 'excellent': return 'text-green-600 bg-green-100';
@@ -251,15 +237,12 @@ export default function SystemOptimizer() {
       default: return 'text-gray-600 bg-gray-100';
     }
   };
-
   if (!systemMetrics) return <div>Loading...</div>;
-
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">🔧 系統優化管理</h1>
-        
         {/* System Health Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
@@ -272,7 +255,6 @@ export default function SystemOptimizer() {
               <div className="text-3xl opacity-80">⚡</div>
             </div>
           </div>
-
           <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -283,7 +265,6 @@ export default function SystemOptimizer() {
               <div className="text-3xl opacity-80">👤</div>
             </div>
           </div>
-
           <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -294,7 +275,6 @@ export default function SystemOptimizer() {
               <div className="text-3xl opacity-80">🔧</div>
             </div>
           </div>
-
           <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -307,7 +287,6 @@ export default function SystemOptimizer() {
           </div>
         </div>
       </div>
-
       {/* Filters and Controls */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
         <div className="flex flex-wrap gap-4 items-center justify-between">
@@ -327,7 +306,6 @@ export default function SystemOptimizer() {
                 <option value="security">安全性</option>
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">狀態</label>
               <select
@@ -344,7 +322,6 @@ export default function SystemOptimizer() {
               </select>
             </div>
           </div>
-
           <button
             onClick={() => setShowCreateTask(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -353,14 +330,12 @@ export default function SystemOptimizer() {
           </button>
         </div>
       </div>
-
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Optimization Tasks */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">優化任務列表</h2>
-            
             <div className="space-y-4">
               {filteredTasks.map((task) => (
                 <div key={task.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -381,7 +356,6 @@ export default function SystemOptimizer() {
                       </span>
                     </div>
                   </div>
-
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-3">
                     <div>
                       <span className="font-medium">影響:</span> {task.impact}
@@ -396,7 +370,6 @@ export default function SystemOptimizer() {
                       <span className="font-medium">負責人:</span> {task.assignee}
                     </div>
                   </div>
-
                   {/* Metrics Comparison */}
                   {task.metrics.after && (
                     <div className="bg-gray-50 rounded p-3 mb-3">
@@ -422,7 +395,6 @@ export default function SystemOptimizer() {
                       </div>
                     </div>
                   )}
-
                   <div className="flex justify-between items-center">
                     <div className="text-xs text-gray-500">
                       創建於: {new Date(task.createdAt).toLocaleDateString()}
@@ -432,7 +404,6 @@ export default function SystemOptimizer() {
                         </span>
                       )}
                     </div>
-                    
                     {task.status !== 'completed' && task.status !== 'failed' && (
                       <select
                         value={task.status}
@@ -452,7 +423,6 @@ export default function SystemOptimizer() {
             </div>
           </div>
         </div>
-
         {/* Metrics Dashboard */}
         <div className="space-y-6">
           {/* Performance Metrics */}
@@ -475,7 +445,6 @@ export default function SystemOptimizer() {
               })}
             </div>
           </div>
-
           {/* Usability Metrics */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">👤 可用性指標</h3>
@@ -496,7 +465,6 @@ export default function SystemOptimizer() {
               })}
             </div>
           </div>
-
           {/* Quick Actions */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">🚀 快速操作</h3>
@@ -505,12 +473,10 @@ export default function SystemOptimizer() {
                 <div className="font-medium text-blue-900">運行性能測試</div>
                 <div className="text-sm text-blue-600">檢查系統當前性能指標</div>
               </button>
-              
               <button className="w-full text-left p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
                 <div className="font-medium text-green-900">生成優化報告</div>
                 <div className="text-sm text-green-600">導出詳細的系統優化報告</div>
               </button>
-              
               <button className="w-full text-left p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
                 <div className="font-medium text-purple-900">無障礙檢查</div>
                 <div className="text-sm text-purple-600">運行完整的無障礙合規性檢查</div>

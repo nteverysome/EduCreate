@@ -13,12 +13,12 @@ interface AdvancedSearchInterfaceProps {
   initialOptions?: SearchOptions;
 }
 
-export default function AdvancedSearchInterface({
+export const AdvancedSearchInterface = ({
   onSearch,
   onReset,
   isLoading = false,
   initialOptions
-}: AdvancedSearchInterfaceProps) {
+}: AdvancedSearchInterfaceProps) => {
   const [searchOptions, setSearchOptions] = useState<SearchOptions>({
     query: '',
     searchType: SearchType.FULL_TEXT,
@@ -421,4 +421,6 @@ export default function AdvancedSearchInterface({
       )}
     </div>
   );
-}
+};
+
+export default AdvancedSearchInterface;

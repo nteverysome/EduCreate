@@ -3,9 +3,7 @@
  * 基於空間導航記憶機制的迷宮追逐遊戲
  * 根據WordWall Maze Chase模板分析設計
  */
-
 import React, { useState, useEffect, useCallback } from 'react';
-
 interface MazeCell {
   x: number;
   y: number;
@@ -20,12 +18,10 @@ interface MazeCell {
   };
   isVisited: boolean;
 }
-
 interface Position {
   x: number;
   y: number;
 }
-
 interface MazeChaseGameProps {
   mazeSize: { width: number; height: number };
   questions: Array<{
@@ -38,7 +34,6 @@ interface MazeChaseGameProps {
   onComplete?: (score: number, timeUsed: number) => void;
   onScoreUpdate?: (score: number) => void;
 }
-
 export default function MazeChaseGame({
   mazeSize,
   questions,
@@ -60,12 +55,10 @@ export default function MazeChaseGame({
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [pathToTarget, setPathToTarget] = useState<Position[]>([]);
-
   // 生成迷宮
   const generateMaze = useCallback(() => {
     const { width, height } = mazeSize;
     const newMaze: MazeCell[][] = [];
-    
     // 初始化迷宮（全部為牆）
     for (let y = 0; y < height; y++) {
       newMaze[y] = [];
@@ -80,60 +73,49 @@ export default function MazeChaseGame({
         };
       }
     }
-    
     // 使用遞歸回溯算法生成迷宮
     const stack: Position[] = [];
     const start = { x: 1, y: 1 };
     newMaze[start.y][start.x].isWall = false;
     newMaze[start.y][start.x].isPath = true;
     stack.push(start);
-    
     const directions = [
       { x: 0, y: -2 }, // 上
       { x: 2, y: 0 },  // 右
       { x: 0, y: 2 },  // 下
       { x: -2, y: 0 }  // 左
     ];
-    
     while (stack.length > 0) {
       const current = stack[stack.length - 1];
       const neighbors: Position[] = [];
-      
       // 找到未訪問的鄰居
       directions.forEach(dir => {
         const nx = current.x + dir.x;
         const ny = current.y + dir.y;
-        
         if (nx > 0 && nx < width - 1 && ny > 0 && ny < height - 1 && newMaze[ny][nx].isWall) {
           neighbors.push({ x: nx, y: ny });
         }
       });
-      
       if (neighbors.length > 0) {
         // 隨機選擇一個鄰居
         const next = neighbors[Math.floor(Math.random() * neighbors.length)];
-        
         // 打通當前位置和選中鄰居之間的牆
         const wallX = current.x + (next.x - current.x) / 2;
         const wallY = current.y + (next.y - current.y) / 2;
-        
         newMaze[wallY][wallX].isWall = false;
         newMaze[wallY][wallX].isPath = true;
         newMaze[next.y][next.x].isWall = false;
         newMaze[next.y][next.x].isPath = true;
-        
         stack.push(next);
       } else {
         stack.pop();
       }
     }
-    
     // 設置出口
     const exit = { x: width - 2, y: height - 2 };
     newMaze[exit.y][exit.x].isWall = false;
     newMaze[exit.y][exit.x].isPath = true;
     setTargetPosition(exit);
-    
     // 在路徑上隨機放置問題
     const pathCells: Position[] = [];
     for (let y = 0; y < height; y++) {
@@ -143,25 +125,20 @@ export default function MazeChaseGame({
         }
       }
     }
-    
     // 隨機選擇位置放置問題
     const questionPositions = pathCells
       .sort(() => Math.random() - 0.5)
       .slice(0, Math.min(questions.length, pathCells.length));
-    
     questionPositions.forEach((pos, index) => {
       newMaze[pos.y][pos.x].hasQuestion = true;
       newMaze[pos.y][pos.x].question = questions[index];
     });
-    
     setMaze(newMaze);
   }, [mazeSize, questions]);
-
   // 初始化遊戲
   useEffect(() => {
     generateMaze();
   }, [generateMaze]);
-
   // 計時器
   useEffect(() => {
     if (gameStarted && timeLimit > 0 && timeLeft > 0 && !gameCompleted && !showQuestion) {
@@ -173,15 +150,12 @@ export default function MazeChaseGame({
       handleGameComplete();
     }
   }, [gameStarted, timeLeft, gameCompleted, showQuestion]);
-
   // 鍵盤控制
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (!gameStarted || gameCompleted || showQuestion) return;
-      
       let newX = playerPosition.x;
       let newY = playerPosition.y;
-      
       switch (e.key) {
         case 'ArrowUp':
         case 'w':
@@ -206,50 +180,40 @@ export default function MazeChaseGame({
         default:
           return;
       }
-      
       // 檢查是否可以移動
       if (newX >= 0 && newX < mazeSize.width && 
           newY >= 0 && newY < mazeSize.height && 
           !maze[newY]?.[newX]?.isWall) {
-        
         setPlayerPosition({ x: newX, y: newY });
-        
         // 標記為已訪問
         setMaze(prev => {
           const newMaze = [...prev];
           newMaze[newY][newX].isVisited = true;
           return newMaze;
         });
-        
         // 檢查是否有問題
         const cell = maze[newY]?.[newX];
         if (cell?.hasQuestion && cell.question) {
           setCurrentQuestion(cell.question);
           setShowQuestion(true);
         }
-        
         // 檢查是否到達目標
         if (newX === targetPosition.x && newY === targetPosition.y) {
           handleGameComplete();
         }
       }
     };
-    
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [gameStarted, gameCompleted, showQuestion, playerPosition, maze, targetPosition, mazeSize]);
-
   const startGame = () => {
     setGameStarted(true);
     setStartTime(Date.now());
     setTimeLeft(timeLimit);
   };
-
   const handleAnswerSelect = (answerIndex: number) => {
     if (!currentQuestion) return;
-    
     const isCorrect = answerIndex === currentQuestion.correctAnswer;
-    
     if (isCorrect) {
       const points = 20;
       setScore(prev => {
@@ -257,20 +221,16 @@ export default function MazeChaseGame({
         onScoreUpdate?.(newScore);
         return newScore;
       });
-      
       setQuestionsAnswered(prev => prev + 1);
       setFeedbackMessage(`正確！+${points} 分`);
     } else {
       setFeedbackMessage('錯誤答案！');
     }
-    
     setShowFeedback(true);
-    
     setTimeout(() => {
       setShowQuestion(false);
       setShowFeedback(false);
       setCurrentQuestion(null);
-      
       // 移除該位置的問題
       setMaze(prev => {
         const newMaze = [...prev];
@@ -280,21 +240,17 @@ export default function MazeChaseGame({
       });
     }, 2000);
   };
-
   const handleGameComplete = () => {
     setGameCompleted(true);
     const timeUsed = startTime ? (Date.now() - startTime) / 1000 : 0;
-    
     // 完成獎勵
     const completionBonus = 50;
     const timeBonus = timeLimit > 0 ? Math.max(0, Math.floor(timeLeft / 5)) : 0;
     const finalScore = score + completionBonus + timeBonus;
-    
     setScore(finalScore);
     onScoreUpdate?.(finalScore);
     onComplete?.(finalScore, timeUsed);
   };
-
   if (!gameStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -302,7 +258,6 @@ export default function MazeChaseGame({
         <p className="text-gray-600 mb-6 text-center max-w-md">
           在迷宮中找到出口，途中回答問題獲得分數。基於空間導航記憶機制，提高您的空間認知能力。
         </p>
-        
         <div className="mb-6 p-4 bg-blue-50 rounded-lg">
           <h3 className="font-semibold text-blue-900 mb-2">遊戲設置：</h3>
           <div className="text-blue-800 text-sm space-y-1">
@@ -311,7 +266,6 @@ export default function MazeChaseGame({
             {timeLimit > 0 && <p>時間限制: {timeLimit} 秒</p>}
           </div>
         </div>
-        
         <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
           <h3 className="font-semibold text-yellow-900 mb-2">控制說明：</h3>
           <div className="text-yellow-800 text-sm space-y-1">
@@ -321,7 +275,6 @@ export default function MazeChaseGame({
             <p>❓ 問號表示有問題的位置</p>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-lg font-semibold"
@@ -331,7 +284,6 @@ export default function MazeChaseGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -350,7 +302,6 @@ export default function MazeChaseGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* 遊戲狀態欄 */}
@@ -370,13 +321,11 @@ export default function MazeChaseGame({
           </div>
         )}
       </div>
-
       {/* 問題對話框 */}
       {showQuestion && currentQuestion && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-xl font-bold text-gray-800 mb-4">{currentQuestion.text}</h3>
-            
             <div className="space-y-3">
               {currentQuestion.options.map((option, index) => (
                 <button
@@ -394,7 +343,6 @@ export default function MazeChaseGame({
                 </button>
               ))}
             </div>
-            
             {showFeedback && (
               <div className={`mt-4 p-3 rounded-lg text-center font-semibold ${
                 feedbackMessage.includes('正確') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -405,7 +353,6 @@ export default function MazeChaseGame({
           </div>
         </div>
       )}
-
       {/* 迷宮 */}
       <div className="mb-6 flex justify-center">
         <div 
@@ -449,7 +396,6 @@ export default function MazeChaseGame({
           )}
         </div>
       </div>
-
       {/* 控制說明 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 bg-blue-50 rounded-lg">
@@ -461,7 +407,6 @@ export default function MazeChaseGame({
             <p>➡️ 向右移動: → 或 D</p>
           </div>
         </div>
-        
         <div className="p-4 bg-green-50 rounded-lg">
           <h4 className="font-semibold text-green-900 mb-2">圖例說明：</h4>
           <div className="text-green-800 text-sm space-y-1">

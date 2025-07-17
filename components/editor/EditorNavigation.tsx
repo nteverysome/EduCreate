@@ -1,13 +1,11 @@
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-
 interface EditorNavigationProps {
   activityId?: string;
   templateId?: string;
   templateType?: string;
   currentEditor: 'standard' | 'improved';
 }
-
 export default function EditorNavigation({ 
   activityId, 
   templateId, 
@@ -15,21 +13,17 @@ export default function EditorNavigation({
   currentEditor 
 }: EditorNavigationProps) {
   const router = useRouter();
-
   // 構建編輯器URL
   const getEditorUrl = (editorType: 'standard' | 'improved') => {
     const basePath = editorType === 'standard' ? '/editor' : '/editor/improved';
-    
     const queryParams = [];
     if (activityId) queryParams.push(`id=${activityId}`);
     if (templateId) queryParams.push(`template=${templateId}`);
     if (templateType) queryParams.push(`type=${templateType}`);
-    
     return queryParams.length > 0 
       ? `${basePath}?${queryParams.join('&')}` 
       : basePath;
   };
-
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
       <div className="flex items-center space-x-2">
@@ -43,7 +37,6 @@ export default function EditorNavigation({
         </button>
         <h1 className="text-lg font-medium">活動編輯器</h1>
       </div>
-      
       <div className="flex items-center space-x-2 bg-gray-100 rounded-md p-1">
         <Link 
           href={getEditorUrl('standard')} 

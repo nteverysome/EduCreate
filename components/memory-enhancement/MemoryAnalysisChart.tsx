@@ -11,7 +11,7 @@ interface MemoryAnalysisChartProps {
   chartType?: 'memory-distribution' | 'cognitive-load' | 'difficulty-analysis' | 'enhancement-features';
 }
 
-export default function MemoryAnalysisChart({ chartType = 'memory-distribution' }: MemoryAnalysisChartProps) {
+const MemoryAnalysisChart = ({ chartType = 'memory-distribution' }: MemoryAnalysisChartProps) {
   const [manager] = useState(() => new MemoryConfigurationManager());
   const [engine] = useState(() => new MemoryEnhancementEngine());
   const [chartData, setChartData] = useState<any>(null);
@@ -297,3 +297,4 @@ export default function MemoryAnalysisChart({ chartType = 'memory-distribution' 
     </div>
   );
 }
+export default MemoryAnalysisChart;

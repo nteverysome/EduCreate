@@ -11,7 +11,7 @@ interface ShortcutsHelpDialogProps {
   onClose: () => void;
 }
 
-export default function ShortcutsHelpDialog({ isOpen, onClose }: ShortcutsHelpDialogProps) {
+const ShortcutsHelpDialog = ({ isOpen, onClose }: ShortcutsHelpDialogProps) {
   const [categories, setCategories] = useState<ShortcutCategory[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('navigation');
   const [searchQuery, setSearchQuery] = useState('');
@@ -230,3 +230,4 @@ function ShortcutItem({ shortcut }: { shortcut: any }) {
     </div>
   );
 }
+export default ShortcutsHelpDialog;

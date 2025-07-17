@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 export interface TrueFalseQuestion {
   id: string;
   statement: string;
@@ -8,14 +7,12 @@ export interface TrueFalseQuestion {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   points: number;
 }
-
 interface TrueFalseGameProps {
   questions: TrueFalseQuestion[];
   timeLimit?: number;
   showTimer?: boolean;
   onComplete?: (results: any) => void;
 }
-
 export default function TrueFalseGame({
   questions,
   timeLimit = 60,
@@ -30,13 +27,10 @@ export default function TrueFalseGame({
   const [gameCompleted, setGameCompleted] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<boolean | null>(null);
-
   const currentQuestion = questions[currentQuestionIndex];
-
   // 計時器
   useEffect(() => {
     if (!gameStarted || gameCompleted || !showTimer) return;
-
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -46,10 +40,8 @@ export default function TrueFalseGame({
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [gameStarted, gameCompleted, showTimer]);
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -61,23 +53,18 @@ export default function TrueFalseGame({
     setShowResult(false);
     setSelectedAnswer(null);
   };
-
   // 選擇答案
   const selectAnswer = (answer: boolean) => {
     if (showResult) return;
-    
     setSelectedAnswer(answer);
     setShowResult(true);
-
     // 記錄答案
     const newAnswers = { ...answers, [currentQuestion.id]: answer };
     setAnswers(newAnswers);
-
     // 計分
     if (answer === currentQuestion.correct) {
       setScore(prev => prev + currentQuestion.points);
     }
-
     // 2秒後進入下一題
     setTimeout(() => {
       if (currentQuestionIndex < questions.length - 1) {
@@ -89,7 +76,6 @@ export default function TrueFalseGame({
       }
     }, 2000);
   };
-
   // 遊戲完成處理
   useEffect(() => {
     if (gameCompleted) {
@@ -97,7 +83,6 @@ export default function TrueFalseGame({
       const totalQuestions = questions.length;
       const accuracy = Math.round((correctAnswers / totalQuestions) * 100);
       const timeSpent = timeLimit - timeLeft;
-
       const results = {
         score,
         correctAnswers,
@@ -106,18 +91,15 @@ export default function TrueFalseGame({
         timeSpent,
         answers
       };
-
       onComplete?.(results);
     }
   }, [gameCompleted, score, answers, questions, timeLimit, timeLeft, onComplete]);
-
   // 格式化時間
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   if (!gameStarted) {
     return (
       <div className="text-center p-8">
@@ -135,16 +117,13 @@ export default function TrueFalseGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const correctAnswers = questions.filter(q => answers[q.id] === q.correct).length;
     const accuracy = Math.round((correctAnswers / questions.length) * 100);
-    
     return (
       <div className="text-center p-8">
         <div className="text-6xl mb-4">🎉</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">遊戲完成！</h2>
-        
         <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -165,7 +144,6 @@ export default function TrueFalseGame({
             </div>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="mt-6 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -175,7 +153,6 @@ export default function TrueFalseGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-2xl mx-auto">
       {/* 遊戲狀態 */}
@@ -197,7 +174,6 @@ export default function TrueFalseGame({
           <div className="text-sm text-gray-600">得分</div>
         </div>
       </div>
-
       {/* 問題區域 */}
       <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
         <div className="text-center mb-8">
@@ -208,7 +184,6 @@ export default function TrueFalseGame({
             {currentQuestion.statement}
           </p>
         </div>
-
         {/* 答案選項 */}
         <div className="grid grid-cols-2 gap-4">
           <button
@@ -229,7 +204,6 @@ export default function TrueFalseGame({
             <div className="text-4xl mb-2">✅</div>
             <div>正確 (True)</div>
           </button>
-
           <button
             onClick={() => selectAnswer(false)}
             disabled={showResult}
@@ -249,7 +223,6 @@ export default function TrueFalseGame({
             <div>錯誤 (False)</div>
           </button>
         </div>
-
         {/* 結果反饋 */}
         {showResult && (
           <div className="mt-6 p-4 rounded-lg border-l-4 border-blue-500 bg-blue-50">
@@ -269,7 +242,6 @@ export default function TrueFalseGame({
           </div>
         )}
       </div>
-
       {/* 進度條 */}
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div

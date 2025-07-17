@@ -2,16 +2,13 @@
  * 測試結果展示組件
  * 在瀏覽器中展示第一階段測試覆蓋情況
  */
-
 import React, { useState, useEffect } from 'react';
-
 interface TestResult {
   name: string;
   status: 'pass' | 'fail' | 'pending';
   duration: number;
   error?: string;
 }
-
 interface TestSuite {
   name: string;
   tests: TestResult[];
@@ -22,12 +19,10 @@ interface TestSuite {
     lines: number;
   };
 }
-
 export default function TestResultsDisplay() {
   const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [currentTest, setCurrentTest] = useState<string>('');
-
   // 模擬測試數據
   const mockTestSuites: TestSuite[] = [
     {
@@ -110,45 +105,36 @@ export default function TestResultsDisplay() {
       coverage: { statements: 83, branches: 78, functions: 87, lines: 82 }
     }
   ];
-
   // 模擬運行測試
   const runTests = async () => {
     setIsRunning(true);
     setTestSuites([]);
-
     for (const suite of mockTestSuites) {
       setCurrentTest(`運行 ${suite.name}...`);
-      
       // 模擬測試運行時間
       await new Promise(resolve => setTimeout(resolve, 500));
-      
       setTestSuites(prev => [...prev, suite]);
     }
-
     setCurrentTest('');
     setIsRunning(false);
   };
-
   // 計算總體統計
   const totalTests = testSuites.reduce((sum, suite) => sum + suite.tests.length, 0);
   const passedTests = testSuites.reduce((sum, suite) => 
     sum + suite.tests.filter(test => test.status === 'pass').length, 0);
   const failedTests = testSuites.reduce((sum, suite) => 
     sum + suite.tests.filter(test => test.status === 'fail').length, 0);
-
   const avgCoverage = testSuites.length > 0 ? {
     statements: Math.round(testSuites.reduce((sum, suite) => sum + suite.coverage.statements, 0) / testSuites.length),
     branches: Math.round(testSuites.reduce((sum, suite) => sum + suite.coverage.branches, 0) / testSuites.length),
     functions: Math.round(testSuites.reduce((sum, suite) => sum + suite.coverage.functions, 0) / testSuites.length),
     lines: Math.round(testSuites.reduce((sum, suite) => sum + suite.coverage.lines, 0) / testSuites.length)
   } : { statements: 0, branches: 0, functions: 0, lines: 0 };
-
   const getCoverageColor = (percentage: number) => {
     if (percentage >= 80) return 'text-green-600 bg-green-100';
     if (percentage >= 60) return 'text-yellow-600 bg-yellow-100';
     return 'text-red-600 bg-red-100';
   };
-
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
@@ -168,7 +154,6 @@ export default function TestResultsDisplay() {
             {isRunning ? '運行中...' : '運行測試'}
           </button>
         </div>
-
         {/* 運行狀態 */}
         {isRunning && (
           <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -178,7 +163,6 @@ export default function TestResultsDisplay() {
             </div>
           </div>
         )}
-
         {/* 總體統計 */}
         {testSuites.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -200,7 +184,6 @@ export default function TestResultsDisplay() {
             </div>
           </div>
         )}
-
         {/* 覆蓋率統計 */}
         {testSuites.length > 0 && (
           <div className="mb-8">
@@ -221,7 +204,6 @@ export default function TestResultsDisplay() {
             </div>
           </div>
         )}
-
         {/* 測試套件詳情 */}
         {testSuites.map((suite, index) => (
           <div key={index} className="mb-6 border border-gray-200 rounded-lg">
@@ -237,7 +219,6 @@ export default function TestResultsDisplay() {
                   </span>
                 </div>
               </div>
-              
               {/* 套件覆蓋率 */}
               <div className="mt-2 flex items-center space-x-4 text-xs">
                 <span className={`px-2 py-1 rounded ${getCoverageColor(suite.coverage.statements)}`}>
@@ -254,7 +235,6 @@ export default function TestResultsDisplay() {
                 </span>
               </div>
             </div>
-            
             <div className="p-4">
               <div className="space-y-2">
                 {suite.tests.map((test, testIndex) => (
@@ -275,7 +255,6 @@ export default function TestResultsDisplay() {
             </div>
           </div>
         ))}
-
         {/* 測試總結 */}
         {testSuites.length > 0 && (
           <div className="mt-8 p-6 bg-green-50 border border-green-200 rounded-lg">

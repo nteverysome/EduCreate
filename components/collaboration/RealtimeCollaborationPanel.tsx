@@ -2,10 +2,8 @@
  * 實時協作面板組件
  * 使用 Supabase Realtime 提供協作功能
  */
-
 import React, { useState, useEffect } from 'react';
 import { useRealtimeCollaboration, useRealtimeDatabase } from '../../hooks/useRealtimeCollaboration';
-
 interface RealtimeCollaborationPanelProps {
   activityId: string;
   userId: string;
@@ -14,7 +12,6 @@ interface RealtimeCollaborationPanelProps {
   onEditOperation?: (operation: any) => void;
   onCommentAdded?: (comment: any) => void;
 }
-
 export default function RealtimeCollaborationPanel({
   activityId,
   userId,
@@ -27,7 +24,6 @@ export default function RealtimeCollaborationPanel({
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [commentPosition, setCommentPosition] = useState({ x: 0, y: 0 });
-
   // 使用實時協作 Hook
   const {
     isConnected,
@@ -52,7 +48,6 @@ export default function RealtimeCollaborationPanel({
     enableCursor: true,
     enableComments: true
   });
-
   // 使用數據庫實時監聽
   const {
     activityUpdates,
@@ -65,7 +60,6 @@ export default function RealtimeCollaborationPanel({
     enableProgressUpdates: true,
     enableCommentUpdates: true
   });
-
   // 處理編輯操作
   useEffect(() => {
     if (editOperations.length > 0) {
@@ -73,7 +67,6 @@ export default function RealtimeCollaborationPanel({
       onEditOperation?.(latestOperation);
     }
   }, [editOperations, onEditOperation]);
-
   // 處理評論添加
   useEffect(() => {
     if (comments.length > 0) {
@@ -81,7 +74,6 @@ export default function RealtimeCollaborationPanel({
       onCommentAdded?.(latestComment);
     }
   }, [comments, onCommentAdded]);
-
   // 處理鼠標移動（游標追蹤）
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isConnected) {
@@ -92,7 +84,6 @@ export default function RealtimeCollaborationPanel({
       });
     }
   };
-
   // 添加評論
   const handleAddComment = () => {
     if (newComment.trim()) {
@@ -105,10 +96,8 @@ export default function RealtimeCollaborationPanel({
       setShowComments(false);
     }
   };
-
   // 獲取會話統計
   const stats = getSessionStats();
-
   return (
     <div className="realtime-collaboration-panel bg-white border-l border-gray-200 w-80 h-full flex flex-col">
       {/* 頭部狀態 */}
@@ -119,24 +108,20 @@ export default function RealtimeCollaborationPanel({
             isConnected ? 'bg-green-500' : 'bg-red-500'
           }`} title={isConnected ? '已連接' : '未連接'}></div>
         </div>
-        
         {isJoining && (
           <div className="text-sm text-blue-600">正在連接...</div>
         )}
-        
         {error && (
           <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
             {error}
           </div>
         )}
-
         {isConnected && (
           <div className="text-sm text-gray-600">
             {stats.participantCount} 人在線 • {stats.editOperationCount} 次編輯
           </div>
         )}
       </div>
-
       {/* 標籤切換 */}
       <div className="flex border-b border-gray-200">
         <button
@@ -160,7 +145,6 @@ export default function RealtimeCollaborationPanel({
           評論 ({comments.length})
         </button>
       </div>
-
       {/* 內容區域 */}
       <div className="flex-1 overflow-y-auto">
         {showParticipants ? (
@@ -193,7 +177,6 @@ export default function RealtimeCollaborationPanel({
                 </div>
               ))}
             </div>
-
             {participants.length === 0 && (
               <div className="text-center text-gray-500 py-8">
                 <div className="text-4xl mb-2">👥</div>
@@ -226,7 +209,6 @@ export default function RealtimeCollaborationPanel({
                 </div>
               ))}
             </div>
-
             {comments.length === 0 && (
               <div className="text-center text-gray-500 py-8">
                 <div className="text-4xl mb-2">💬</div>
@@ -236,7 +218,6 @@ export default function RealtimeCollaborationPanel({
           </div>
         )}
       </div>
-
       {/* 底部操作 */}
       {!showParticipants && (
         <div className="p-4 border-t border-gray-200">
@@ -263,7 +244,6 @@ export default function RealtimeCollaborationPanel({
           </div>
         </div>
       )}
-
       {/* 游標顯示 */}
       {isConnected && (
         <div className="absolute inset-0 pointer-events-none">
@@ -285,7 +265,6 @@ export default function RealtimeCollaborationPanel({
           ))}
         </div>
       )}
-
       {/* 鼠標移動監聽 */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -294,7 +273,6 @@ export default function RealtimeCollaborationPanel({
     </div>
   );
 }
-
 // 簡化的協作狀態組件
 export function CollaborationStatus({ 
   isConnected, 
@@ -316,7 +294,6 @@ export function CollaborationStatus({
     </div>
   );
 }
-
 // 快速協作按鈕
 export function QuickCollaborationButton({
   onClick,

@@ -2,7 +2,6 @@
  * AI 內容生成器組件
  * 基於記憶科學原理的AI輔助內容生成，支持多語言和個性化學習
  */
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   aiContentGenerator,
@@ -16,7 +15,6 @@ import {
   TranslationRequest,
   PersonalizationSuggestion
 } from '../../lib/ai/AIContentGenerator';
-
 export interface AIContentGeneratorProps {
   onContentGenerated?: (content: GeneratedContent) => void;
   onTranslationComplete?: (translation: string) => void;
@@ -26,7 +24,6 @@ export interface AIContentGeneratorProps {
   className?: string;
   'data-testid'?: string;
 }
-
 export default function AIContentGenerator({
   onContentGenerated,
   onTranslationComplete,
@@ -42,7 +39,6 @@ export default function AIContentGenerator({
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [translationResult, setTranslationResult] = useState<string>('');
   const [suggestions, setSuggestions] = useState<PersonalizationSuggestion[]>([]);
-
   // 生成請求狀態
   const [request, setRequest] = useState<AIGenerationRequest>({
     type: 'vocabulary',
@@ -54,7 +50,6 @@ export default function AIContentGenerator({
     keywords: [],
     learnerProfile
   });
-
   // 翻譯請求狀態
   const [translationRequest, setTranslationRequest] = useState<TranslationRequest>({
     text: '',
@@ -63,7 +58,6 @@ export default function AIContentGenerator({
     preserveFormatting: true,
     culturalAdaptation: false
   });
-
   // 初始化
   useEffect(() => {
     ContentGenerator.initialize();
@@ -73,25 +67,20 @@ export default function AIContentGenerator({
       setSelectedModel(models[0].id);
     }
   }, []);
-
   // 生成內容
   const handleGenerate = async () => {
     if (!request.topic?.trim()) {
       alert('請輸入主題');
       return;
     }
-
     setIsGenerating(true);
     setResult(null);
-
     try {
       if (selectedModel) {
         ContentGenerator.setDefaultModel(selectedModel);
       }
-
       const generationResult = await ContentGenerator.generateContent(request as AIGenerationRequest);
       setResult(generationResult);
-      
       if (generationResult.success) {
         const content = generationResult.items.map(item => item.content);
         setPreviewContent(content);
@@ -103,7 +92,6 @@ export default function AIContentGenerator({
       setIsGenerating(false);
     }
   };
-
   // 應用生成的內容
   const handleApplyContent = () => {
     if (previewContent.length > 0) {
@@ -111,18 +99,15 @@ export default function AIContentGenerator({
       onClose?.();
     }
   };
-
   // 重新生成
   const handleRegenerate = () => {
     handleGenerate();
   };
-
   // 更新學習目標
   const updateLearningObjectives = (objectives: string) => {
     const objectiveList = objectives.split('\n').filter(obj => obj.trim());
     setRequest(prev => ({ ...prev, learningObjectives: objectiveList }));
   };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
@@ -143,12 +128,10 @@ export default function AIContentGenerator({
             </button>
           )}
         </div>
-
         <div className="flex h-[calc(90vh-120px)]">
           {/* 配置面板 */}
           <div className="w-1/3 border-r border-gray-200 p-6 overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">生成配置</h3>
-            
             <div className="space-y-4">
               {/* 內容類型 */}
               <div>
@@ -167,7 +150,6 @@ export default function AIContentGenerator({
                   <option value="content">通用內容</option>
                 </select>
               </div>
-
               {/* 主題 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -181,7 +163,6 @@ export default function AIContentGenerator({
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
-
               {/* 難度 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -197,7 +178,6 @@ export default function AIContentGenerator({
                   <option value="advanced">高級</option>
                 </select>
               </div>
-
               {/* 數量 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -212,7 +192,6 @@ export default function AIContentGenerator({
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
-
               {/* 目標年齡 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -226,7 +205,6 @@ export default function AIContentGenerator({
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
-
               {/* AI 模型選擇 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -244,7 +222,6 @@ export default function AIContentGenerator({
                   ))}
                 </select>
               </div>
-
               {/* 學習目標 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -258,7 +235,6 @@ export default function AIContentGenerator({
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
-
               {/* 自定義提示 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -272,7 +248,6 @@ export default function AIContentGenerator({
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
-
               {/* 生成按鈕 */}
               <button
                 onClick={handleGenerate}
@@ -290,7 +265,6 @@ export default function AIContentGenerator({
               </button>
             </div>
           </div>
-
           {/* 結果預覽 */}
           <div className="flex-1 p-6 overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
@@ -312,21 +286,18 @@ export default function AIContentGenerator({
                 </div>
               )}
             </div>
-
             {!result && !isGenerating && (
               <div className="text-center py-12">
                 <div className="text-gray-400 text-6xl mb-4">🤖</div>
                 <p className="text-gray-600">配置參數後點擊生成按鈕開始</p>
               </div>
             )}
-
             {isGenerating && (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
                 <p className="text-gray-600">AI 正在生成內容，請稍候...</p>
               </div>
             )}
-
             {result && !result.success && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <h4 className="font-medium text-red-800 mb-2">生成失敗</h4>
@@ -337,7 +308,6 @@ export default function AIContentGenerator({
                 </ul>
               </div>
             )}
-
             {result && result.success && (
               <div>
                 {/* 生成統計 */}
@@ -362,7 +332,6 @@ export default function AIContentGenerator({
                     </div>
                   </div>
                 </div>
-
                 {/* 生成內容 */}
                 <div className="space-y-4">
                   {result.items.map((item, index) => (
@@ -379,13 +348,11 @@ export default function AIContentGenerator({
                           </span>
                         </div>
                       </div>
-                      
                       <div className="bg-gray-50 rounded p-3 mb-3">
                         <pre className="text-sm text-gray-800 whitespace-pre-wrap">
                           {JSON.stringify(item.content, null, 2)}
                         </pre>
                       </div>
-
                       {item.suggestions && item.suggestions.length > 0 && (
                         <div className="text-sm">
                           <h6 className="font-medium text-gray-700 mb-1">建議:</h6>
@@ -403,7 +370,6 @@ export default function AIContentGenerator({
             )}
           </div>
         </div>
-
         {/* 底部操作欄 */}
         <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
           <div className="text-sm text-gray-600">

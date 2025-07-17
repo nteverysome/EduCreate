@@ -1,17 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-
 interface SimpleWhackGameProps {
   gameTime?: number;
   onComplete?: (results: any) => void;
 }
-
 interface Mole {
   id: number;
   position: number;
   isVisible: boolean;
   timeLeft: number;
 }
-
 export default function SimpleWhackGame({ 
   gameTime = 30, 
   onComplete 
@@ -24,11 +21,9 @@ export default function SimpleWhackGame({
   const [nextMoleId, setNextMoleId] = useState(0);
   const [hits, setHits] = useState(0);
   const [misses, setMisses] = useState(0);
-
   // 創建地鼠
   const createMole = useCallback(() => {
     if (gameEnded || !gameStarted) return;
-
     const position = Math.floor(Math.random() * 9); // 9個洞
     const newMole: Mole = {
       id: nextMoleId,
@@ -36,16 +31,13 @@ export default function SimpleWhackGame({
       isVisible: true,
       timeLeft: 2000 // 2秒後消失
     };
-
     setMoles(prev => [...prev.filter(m => m.position !== position), newMole]);
     setNextMoleId(prev => prev + 1);
-
     // 2秒後自動移除地鼠
     setTimeout(() => {
       setMoles(prev => prev.filter(m => m.id !== newMole.id));
     }, 2000);
   }, [gameEnded, gameStarted, nextMoleId]);
-
   // 打地鼠
   const whackMole = (position: number) => {
     const mole = moles.find(m => m.position === position && m.isVisible);
@@ -57,7 +49,6 @@ export default function SimpleWhackGame({
       setMisses(prev => prev + 1);
     }
   };
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -69,11 +60,9 @@ export default function SimpleWhackGame({
     setMoles([]);
     setNextMoleId(0);
   };
-
   // 遊戲計時器
   useEffect(() => {
     if (!gameStarted || gameEnded) return;
-
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -84,21 +73,16 @@ export default function SimpleWhackGame({
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [gameStarted, gameEnded]);
-
   // 地鼠生成器
   useEffect(() => {
     if (!gameStarted || gameEnded) return;
-
     const moleGenerator = setInterval(() => {
       createMole();
     }, 1500); // 每1.5秒生成一個地鼠
-
     return () => clearInterval(moleGenerator);
   }, [gameStarted, gameEnded, createMole]);
-
   // 遊戲結束處理
   useEffect(() => {
     if (gameEnded) {
@@ -114,7 +98,6 @@ export default function SimpleWhackGame({
       onComplete?.(results);
     }
   }, [gameEnded, score, hits, misses, gameTime, timeLeft, onComplete]);
-
   if (!gameStarted && !gameEnded) {
     return (
       <div className="text-center p-8">
@@ -132,15 +115,12 @@ export default function SimpleWhackGame({
       </div>
     );
   }
-
   if (gameEnded) {
     const accuracy = hits + misses > 0 ? Math.round((hits / (hits + misses)) * 100) : 0;
-    
     return (
       <div className="text-center p-8">
         <div className="text-6xl mb-4">🎉</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">遊戲結束！</h2>
-        
         <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -161,7 +141,6 @@ export default function SimpleWhackGame({
             </div>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="mt-6 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
@@ -171,7 +150,6 @@ export default function SimpleWhackGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-2xl mx-auto">
       {/* 遊戲狀態 */}
@@ -189,7 +167,6 @@ export default function SimpleWhackGame({
           <div className="text-sm text-gray-600">擊中</div>
         </div>
       </div>
-
       {/* 遊戲區域 */}
       <div className="grid grid-cols-3 gap-4 p-6 bg-green-100 rounded-lg">
         {Array.from({ length: 9 }, (_, index) => {
@@ -207,7 +184,6 @@ export default function SimpleWhackGame({
                   <div className="text-2xl animate-bounce">🐹</div>
                 )}
               </div>
-              
               {/* 擊中效果 */}
               {mole && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -218,7 +194,6 @@ export default function SimpleWhackGame({
           );
         })}
       </div>
-
       {/* 遊戲說明 */}
       <div className="mt-4 text-center text-gray-600">
         <p>點擊出現的地鼠來得分！動作要快，地鼠只會出現2秒鐘！</p>

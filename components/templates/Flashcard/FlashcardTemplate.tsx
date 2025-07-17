@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { v4 as uuidv4 } from 'uuid';
-
 interface FlashcardItem {
   id: string;
   front: string;
   back: string;
   tags?: string[];
 }
-
 interface FlashcardTemplateProps {
   initialData?: {
     cards: FlashcardItem[];
@@ -19,7 +17,6 @@ interface FlashcardTemplateProps {
   onSave?: (data: any) => void;
   previewMode?: boolean;
 }
-
 export default function FlashcardTemplate({
   initialData,
   onSave,
@@ -33,7 +30,6 @@ export default function FlashcardTemplate({
   const [newFront, setNewFront] = useState('');
   const [newBack, setNewBack] = useState('');
   const [newTags, setNewTags] = useState('');
-  
   // 處理保存
   const handleSave = () => {
     if (onSave) {
@@ -46,50 +42,42 @@ export default function FlashcardTemplate({
       });
     }
   };
-
   // 處理取消
   const handleCancel = () => {
     router.back();
   };
-
   // 添加卡片
   const handleAddCard = () => {
     if (newFront.trim() && newBack.trim()) {
       const cardId = uuidv4();
       const tagsArray = newTags.trim() ? newTags.split(',').map(tag => tag.trim()) : [];
-      
       setCards([...cards, { 
         id: cardId, 
         front: newFront.trim(), 
         back: newBack.trim(),
         tags: tagsArray
       }]);
-      
       setNewFront('');
       setNewBack('');
       setNewTags('');
     }
   };
-
   // 刪除卡片
   const handleDeleteCard = (id: string) => {
     setCards(cards.filter(card => card.id !== id));
   };
-
   // 更新卡片正面
   const handleUpdateFront = (id: string, value: string) => {
     setCards(cards.map(card => 
       card.id === id ? { ...card, front: value } : card
     ));
   };
-
   // 更新卡片背面
   const handleUpdateBack = (id: string, value: string) => {
     setCards(cards.map(card => 
       card.id === id ? { ...card, back: value } : card
     ));
   };
-
   // 更新卡片標籤
   const handleUpdateTags = (id: string, value: string) => {
     const tagsArray = value.trim() ? value.split(',').map(tag => tag.trim()) : [];
@@ -97,13 +85,11 @@ export default function FlashcardTemplate({
       card.id === id ? { ...card, tags: tagsArray } : card
     ));
   };
-
   return (
     <div className="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
       {!previewMode && (
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">配置單字卡片模板</h2>
-          
           <div className="space-y-4">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -118,7 +104,6 @@ export default function FlashcardTemplate({
                 required
               />
             </div>
-            
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                 描述
@@ -131,7 +116,6 @@ export default function FlashcardTemplate({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
             <div>
               <label htmlFor="instructions" className="block text-sm font-medium text-gray-700 mb-1">
                 使用說明
@@ -147,7 +131,6 @@ export default function FlashcardTemplate({
           </div>
         </div>
       )}
-      
       {previewMode && (
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
@@ -159,11 +142,9 @@ export default function FlashcardTemplate({
           )}
         </div>
       )}
-      
       {!previewMode && (
         <div className="mb-6">
           <h3 className="text-lg font-medium text-gray-900 mb-3">卡片</h3>
-          
           {cards.map((card) => (
             <div key={card.id} className="border border-gray-200 rounded-md p-4 mb-4">
               <div className="grid grid-cols-2 gap-4 mb-3">
@@ -217,7 +198,6 @@ export default function FlashcardTemplate({
               </div>
             </div>
           ))}
-          
           <div className="border border-dashed border-gray-300 rounded-md p-4">
             <h4 className="text-md font-medium text-gray-900 mb-3">添加新卡片</h4>
             <div className="grid grid-cols-2 gap-4 mb-3">
@@ -273,7 +253,6 @@ export default function FlashcardTemplate({
           </div>
         </div>
       )}
-      
       {previewMode && cards.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {cards.map((card) => (
@@ -299,7 +278,6 @@ export default function FlashcardTemplate({
           ))}
         </div>
       )}
-      
       {!previewMode && (
         <div className="mt-6 flex justify-end space-x-3">
           <button

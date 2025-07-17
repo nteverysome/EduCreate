@@ -14,7 +14,7 @@ interface FlashcardGameProps {
   showProgress?: boolean;
 }
 
-export default function FlashcardGame({ cards = [], onComplete, showProgress = true }: FlashcardGameProps) {
+const FlashcardGame = ({ cards = [], onComplete, showProgress = true }: FlashcardGameProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -205,3 +205,5 @@ export default function FlashcardGame({ cards = [], onComplete, showProgress = t
     </div>
   );
 }
+
+export default FlashcardGame;

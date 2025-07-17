@@ -34,7 +34,7 @@ interface VersionCompareProps {
  * 版本比較組件
  * 用於顯示兩個活動版本之間的差異
  */
-export default function VersionCompare({ versionA, versionB, differences, onClose, onRestore }: VersionCompareProps) {
+const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }: VersionCompareProps) {
   const [activeTab, setActiveTab] = useState<'summary' | 'details' | 'visual'>('summary');
   const [groupedDifferences, setGroupedDifferences] = useState<Record<string, any[]>>({});
   const [selectedDiff, setSelectedDiff] = useState<string | null>(null);
@@ -392,3 +392,5 @@ export default function VersionCompare({ versionA, versionB, differences, onClos
     </div>
   );
 }
+
+export default SimpleDiffViewer;

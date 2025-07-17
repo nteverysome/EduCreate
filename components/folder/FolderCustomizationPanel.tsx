@@ -25,7 +25,7 @@ interface FolderCustomizationPanelProps {
   isVisible: boolean;
 }
 
-export default function FolderCustomizationPanel({
+export const FolderCustomizationPanel = ({
   folderId,
   folderName,
   currentCustomization,
@@ -34,7 +34,7 @@ export default function FolderCustomizationPanel({
   onCustomizationChange,
   onClose,
   isVisible
-}: FolderCustomizationPanelProps) {
+}: FolderCustomizationPanelProps) => {
   const [activeTab, setActiveTab] = useState<'themes' | 'colors' | 'icons' | 'accessibility'>('themes');
   const [selectedTheme, setSelectedTheme] = useState<FolderTheme | null>(null);
   const [customColors, setCustomColors] = useState<FolderColorScheme | null>(null);
@@ -521,4 +521,6 @@ function getAccessibilityDescription(key: string): string {
     focusIndicator: '顯示清晰的焦點指示器'
   };
   return descriptions[key as keyof typeof descriptions] || '';
-}
+};
+
+export default FolderCustomizationPanel;

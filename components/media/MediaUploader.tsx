@@ -2,10 +2,8 @@
  * MediaUploader - 多媒體上傳組件
  * 支持拖拽上傳、批量處理和實時進度顯示
  */
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { MediaManager, MediaUploadProgress, MediaFile } from '../../lib/media/MediaManager';
-
 export interface MediaUploaderProps {
   onUploadComplete?: (files: MediaFile[]) => void;
   onUploadProgress?: (progress: MediaUploadProgress[]) => void;
@@ -15,7 +13,6 @@ export interface MediaUploaderProps {
   className?: string;
   'data-testid'?: string;
 }
-
 export default function MediaUploader({
   onUploadComplete,
   onUploadProgress,
@@ -25,39 +22,43 @@ export default function MediaUploader({
   className = '',
   'data-testid': testId = 'media-uploader'
 }: MediaUploaderProps) {
-  const [mediaManager] = useState(() => new MediaManager({
-    maxFileSize,
-    allowedTypes: acceptedTypes
-  }));
-  
+  const [mediaManager] = useState(() => {
+    // 只在瀏覽器環境中創建 MediaManager
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    return new MediaManager({
+      maxFileSize,
+      allowedTypes: acceptedTypes
+    });
+  });
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<MediaUploadProgress[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<MediaFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   // 設置監聽器
   useEffect(() => {
+    if (!mediaManager) return;
+
     const handleProgress = (progress: MediaUploadProgress[]) => {
       setUploadProgress(progress);
       onUploadProgress?.(progress);
     };
-
     const handleLibraryUpdate = (files: MediaFile[]) => {
       setUploadedFiles(files);
     };
-
     mediaManager.addProgressListener(handleProgress);
     mediaManager.addLibraryListener(handleLibraryUpdate);
-
     return () => {
       mediaManager.removeProgressListener(handleProgress);
       mediaManager.removeLibraryListener(handleLibraryUpdate);
       mediaManager.destroy();
     };
   }, [mediaManager, onUploadProgress]);
-
   // 處理文件選擇
   const handleFileSelect = useCallback(async (files: FileList) => {
+    if (!mediaManager) return;
+
     try {
       const fileIds = await mediaManager.uploadFiles(files);
       const uploadedMediaFiles = fileIds.map(id => mediaManager.getMediaFile(id)!).filter(Boolean);
@@ -66,36 +67,30 @@ export default function MediaUploader({
       console.error('文件上傳失敗:', error);
     }
   }, [mediaManager, onUploadComplete]);
-
   // 處理拖拽事件
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(true);
   }, []);
-
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
   }, []);
-
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
-
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       handleFileSelect(files);
     }
   }, [handleFileSelect]);
-
   // 處理點擊上傳
   const handleClick = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
-
   const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -104,12 +99,10 @@ export default function MediaUploader({
     // 清空 input 值，允許重複選擇同一文件
     e.target.value = '';
   }, [handleFileSelect]);
-
   // 格式化文件大小
   const formatFileSize = (bytes: number): string => {
     return mediaManager.formatFileSize(bytes);
   };
-
   // 獲取文件類型圖標
   const getFileTypeIcon = (type: MediaFile['type']): string => {
     switch (type) {
@@ -120,7 +113,6 @@ export default function MediaUploader({
       default: return '📄';
     }
   };
-
   // 獲取進度條顏色
   const getProgressColor = (status: MediaUploadProgress['status']): string => {
     switch (status) {
@@ -131,7 +123,6 @@ export default function MediaUploader({
       default: return 'bg-gray-500';
     }
   };
-
   return (
     <div className={`media-uploader ${className}`} data-testid={testId}>
       {/* 上傳區域 */}
@@ -166,7 +157,6 @@ export default function MediaUploader({
         <p className="text-sm text-gray-500">
           最大文件大小: {formatFileSize(maxFileSize)}
         </p>
-        
         {/* 隱藏的文件輸入 */}
         <input
           ref={fileInputRef}
@@ -178,7 +168,6 @@ export default function MediaUploader({
           data-testid="file-input"
         />
       </div>
-
       {/* 上傳進度 */}
       {uploadProgress.length > 0 && (
         <div className="upload-progress mt-6" data-testid="upload-progress">
@@ -198,7 +187,6 @@ export default function MediaUploader({
                      progress.status === 'uploading' ? '上傳中' : '等待中'}
                   </span>
                 </div>
-                
                 {/* 進度條 */}
                 <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                   <div
@@ -207,7 +195,6 @@ export default function MediaUploader({
                     data-testid={`progress-bar-${progress.fileId}`}
                   />
                 </div>
-                
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>{progress.progress}%</span>
                   {progress.error && (
@@ -221,7 +208,6 @@ export default function MediaUploader({
           </div>
         </div>
       )}
-
       {/* 已上傳文件預覽 */}
       {uploadedFiles.length > 0 && (
         <div className="uploaded-files mt-6" data-testid="uploaded-files">
@@ -252,7 +238,6 @@ export default function MediaUploader({
                     )}
                   </div>
                 </div>
-                
                 {/* 縮略圖 */}
                 {file.thumbnailUrl && (
                   <div className="mt-3">
@@ -267,7 +252,6 @@ export default function MediaUploader({
               </div>
             ))}
           </div>
-          
           {uploadedFiles.length > 6 && (
             <div className="mt-4 text-center">
               <p className="text-gray-600">
@@ -277,7 +261,6 @@ export default function MediaUploader({
           )}
         </div>
       )}
-
       {/* 支持的文件類型說明 */}
       <div className="file-types-info mt-6 p-4 bg-gray-50 rounded-lg">
         <h5 className="font-medium text-gray-900 mb-2">支持的文件類型</h5>

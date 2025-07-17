@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { ActivityVersion, ChangeDetail } from '../../models/activityVersion';
 import { formatDistanceToNow } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
-
 interface EnhancedVersionHistoryProps {
   activityId: string;
   onVersionSelect?: (version: ActivityVersion) => void;
   onVersionRestore?: (versionId: string) => void;
   currentUserId: string;
 }
-
 export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
   activityId,
   onVersionSelect,
@@ -22,12 +20,10 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
   const [showAutoSave, setShowAutoSave] = useState(false);
   const [filterCollaborator, setFilterCollaborator] = useState<string>('');
   const [filterTags, setFilterTags] = useState<string[]>([]);
-
   // 載入版本歷史
   useEffect(() => {
     loadVersions();
   }, [activityId, showAutoSave, filterCollaborator, filterTags]);
-
   const loadVersions = async () => {
     try {
       setLoading(true);
@@ -36,7 +32,6 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
         collaboratorId: filterCollaborator,
         tags: filterTags.join(',')
       }));
-      
       if (response.ok) {
         const data = await response.json();
         setVersions(data);
@@ -47,13 +42,11 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
       setLoading(false);
     }
   };
-
   // 渲染變更詳情
   const renderChangeDetails = (changeDetails: ChangeDetail[]) => {
     if (!changeDetails || changeDetails.length === 0) {
       return <span className="text-gray-500">無變更記錄</span>;
     }
-
     return (
       <div className="mt-2 space-y-1">
         {changeDetails.slice(0, 3).map((change, index) => (
@@ -74,7 +67,6 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
       </div>
     );
   };
-
   // 渲染協作者頭像
   const renderCollaborators = (collaborators: string[]) => {
     return (
@@ -96,11 +88,9 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
       </div>
     );
   };
-
   // 渲染版本標籤
   const renderTags = (tags: string[]) => {
     if (!tags || tags.length === 0) return null;
-
     return (
       <div className="flex flex-wrap gap-1 mt-2">
         {tags.map((tag, index) => (
@@ -114,7 +104,6 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
       </div>
     );
   };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -122,13 +111,11 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
       </div>
     );
   }
-
   return (
     <div className="bg-white rounded-lg shadow-sm border">
       {/* 標題和過濾器 */}
       <div className="p-4 border-b">
         <h3 className="text-lg font-semibold mb-4">版本歷史</h3>
-        
         {/* 過濾選項 */}
         <div className="flex flex-wrap gap-4 mb-4">
           <label className="flex items-center">
@@ -142,7 +129,6 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
           </label>
         </div>
       </div>
-
       {/* 版本列表 */}
       <div className="max-h-96 overflow-y-auto">
         {versions.length === 0 ? (
@@ -183,11 +169,9 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
                         {version.changeType}
                       </span>
                     </div>
-                    
                     {version.versionNotes && (
                       <p className="text-sm text-gray-600 mt-1">{version.versionNotes}</p>
                     )}
-                    
                     <div className="text-xs text-gray-500 mt-1">
                       {formatDistanceToNow(new Date(version.createdAt), { 
                         addSuffix: true, 
@@ -195,7 +179,6 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
                       })}
                     </div>
                   </div>
-                  
                   {/* 操作按鈕 */}
                   <div className="flex gap-2">
                     <button
@@ -209,10 +192,8 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
                     </button>
                   </div>
                 </div>
-
                 {/* 變更詳情 */}
                 {renderChangeDetails(version.changeDetails)}
-
                 {/* 協作者 */}
                 {version.collaborators && version.collaborators.length > 0 && (
                   <div className="mt-2">
@@ -220,7 +201,6 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
                     {renderCollaborators(version.collaborators)}
                   </div>
                 )}
-
                 {/* 標籤 */}
                 {renderTags(version.tags)}
               </div>
@@ -231,5 +211,4 @@ export const EnhancedVersionHistory: React.FC<EnhancedVersionHistoryProps> = ({
     </div>
   );
 };
-
 export default EnhancedVersionHistory;

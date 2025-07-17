@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from './PerformanceOptimizer';
-
 interface Theme {
   id: string;
   name: string;
@@ -20,7 +19,6 @@ interface Theme {
   category: string;
   preview: string;
 }
-
 interface GameConfig {
   theme: string;
   timeLimit: number;
@@ -31,7 +29,6 @@ interface GameConfig {
   autoAdvance: boolean;
   showProgress: boolean;
 }
-
 export default function ThemeConfigurator() {
   const [selectedTheme, setSelectedTheme] = useLocalStorage<string>('selected_theme', 'default');
   const [gameConfig, setGameConfig] = useLocalStorage<GameConfig>('game_config', {
@@ -45,7 +42,6 @@ export default function ThemeConfigurator() {
     showProgress: true
   });
   const [activeTab, setActiveTab] = useState<'themes' | 'settings' | 'advanced'>('themes');
-
   const themes: Theme[] = [
     {
       id: 'default',
@@ -200,17 +196,13 @@ export default function ThemeConfigurator() {
       preview: '🌙'
     }
   ];
-
   const categories = [...new Set(themes.map(theme => theme.category))];
-
   const updateGameConfig = (key: keyof GameConfig, value: any) => {
     setGameConfig(prev => ({ ...prev, [key]: value }));
   };
-
   const applyTheme = (themeId: string) => {
     setSelectedTheme(themeId);
     updateGameConfig('theme', themeId);
-    
     const theme = themes.find(t => t.id === themeId);
     if (theme) {
       // 應用主題到 CSS 變量
@@ -222,14 +214,12 @@ export default function ThemeConfigurator() {
       root.style.setProperty('--color-accent', theme.colors.accent);
     }
   };
-
   const exportConfig = () => {
     const config = {
       theme: selectedTheme,
       gameConfig,
       exportedAt: new Date().toISOString()
     };
-    
     const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -238,7 +228,6 @@ export default function ThemeConfigurator() {
     a.click();
     URL.revokeObjectURL(url);
   };
-
   const importConfig = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -255,7 +244,6 @@ export default function ThemeConfigurator() {
       reader.readAsText(file);
     }
   };
-
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -264,7 +252,6 @@ export default function ThemeConfigurator() {
           <h1 className="text-2xl font-bold mb-2">🎨 主題與配置</h1>
           <p className="text-blue-100">自定義您的遊戲外觀和行為設置</p>
         </div>
-
         {/* Tabs */}
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6">
@@ -287,7 +274,6 @@ export default function ThemeConfigurator() {
             ))}
           </nav>
         </div>
-
         {/* Content */}
         <div className="p-6">
           {activeTab === 'themes' && (
@@ -296,7 +282,6 @@ export default function ThemeConfigurator() {
                 <h2 className="text-lg font-semibold text-gray-900 mb-2">選擇主題</h2>
                 <p className="text-gray-600">選擇適合您教學環境的視覺主題</p>
               </div>
-
               {/* Theme Categories */}
               <div className="mb-6">
                 <div className="flex flex-wrap gap-2">
@@ -310,7 +295,6 @@ export default function ThemeConfigurator() {
                   ))}
                 </div>
               </div>
-
               {/* Theme Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {themes.map((theme) => (
@@ -329,10 +313,8 @@ export default function ThemeConfigurator() {
                         {theme.category}
                       </span>
                     </div>
-                    
                     <h3 className="font-semibold text-gray-900 mb-1">{theme.name}</h3>
                     <p className="text-sm text-gray-600 mb-3">{theme.description}</p>
-                    
                     <div className="flex space-x-1">
                       {Object.values(theme.colors).slice(0, 5).map((color, index) => (
                         <div
@@ -347,13 +329,11 @@ export default function ThemeConfigurator() {
               </div>
             </div>
           )}
-
           {activeTab === 'settings' && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">遊戲設置</h2>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -368,7 +348,6 @@ export default function ThemeConfigurator() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     難度等級
@@ -383,7 +362,6 @@ export default function ThemeConfigurator() {
                     <option value="hard">困難</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     語言設置
@@ -399,7 +377,6 @@ export default function ThemeConfigurator() {
                   </select>
                 </div>
               </div>
-
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -419,7 +396,6 @@ export default function ThemeConfigurator() {
                     />
                   </button>
                 </div>
-
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-medium text-gray-900">音效</h3>
@@ -438,7 +414,6 @@ export default function ThemeConfigurator() {
                     />
                   </button>
                 </div>
-
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-medium text-gray-900">自動前進</h3>
@@ -457,7 +432,6 @@ export default function ThemeConfigurator() {
                     />
                   </button>
                 </div>
-
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-sm font-medium text-gray-900">顯示進度</h3>
@@ -479,13 +453,11 @@ export default function ThemeConfigurator() {
               </div>
             </div>
           )}
-
           {activeTab === 'advanced' && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">高級配置</h2>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h3 className="font-medium text-gray-900 mb-2">導出配置</h3>
@@ -499,7 +471,6 @@ export default function ThemeConfigurator() {
                     📤 導出配置
                   </button>
                 </div>
-
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h3 className="font-medium text-gray-900 mb-2">導入配置</h3>
                   <p className="text-sm text-gray-600 mb-4">
@@ -520,7 +491,6 @@ export default function ThemeConfigurator() {
                   </label>
                 </div>
               </div>
-
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <h3 className="font-medium text-yellow-800 mb-2">⚠️ 注意事項</h3>
                 <ul className="text-sm text-yellow-700 space-y-1">

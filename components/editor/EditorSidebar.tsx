@@ -6,7 +6,7 @@ interface EditorSidebarProps {
   activityType: 'matching' | 'flashcards' | 'quiz';
 }
 
-export default function EditorSidebar({ activityType }: EditorSidebarProps) {
+const EditorSidebar = ({ activityType }: EditorSidebarProps) {
   const addElement = useEditorStore(state => state.addElement);
   const updateActivity = useEditorStore(state => state.updateActivity);
   const [showH5PSelector, setShowH5PSelector] = useState(false);
@@ -219,3 +219,5 @@ export default function EditorSidebar({ activityType }: EditorSidebarProps) {
     </div>
   );
 }
+
+export default EditorSidebar;

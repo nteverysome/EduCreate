@@ -3,10 +3,8 @@
  * 基於字母重組記憶機制的字母重組遊戲
  * 根據WordWall Anagram模板分析設計
  */
-
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-
 interface AnagramWord {
   id: string;
   word: string;
@@ -14,14 +12,12 @@ interface AnagramWord {
   category?: string;
   difficulty: number;
 }
-
 interface LetterTile {
   id: string;
   letter: string;
   originalIndex: number;
   isUsed: boolean;
 }
-
 interface AnagramGameProps {
   words: AnagramWord[];
   timeLimit?: number;
@@ -30,7 +26,6 @@ interface AnagramGameProps {
   onComplete?: (score: number, timeUsed: number) => void;
   onScoreUpdate?: (score: number) => void;
 }
-
 export default function AnagramGame({
   words,
   timeLimit = 0,
@@ -53,16 +48,13 @@ export default function AnagramGame({
   const [showHint, setShowHint] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [hintsUsed, setHintsUsed] = useState(0);
-
   const currentWord = words[currentWordIndex];
-
   // 初始化字母瓷磚
   useEffect(() => {
     if (currentWord) {
       initializeLetters();
     }
   }, [currentWordIndex, currentWord]);
-
   // 計時器
   useEffect(() => {
     if (gameStarted && timeLimit > 0 && timeLeft > 0 && !gameCompleted) {
@@ -74,37 +66,29 @@ export default function AnagramGame({
       handleGameComplete();
     }
   }, [gameStarted, timeLeft, gameCompleted, timeLimit]);
-
   const initializeLetters = () => {
     if (!currentWord) return;
-
     const letters = currentWord.word.toUpperCase().split('');
     const shuffledLetters = [...letters].sort(() => Math.random() - 0.5);
-    
     const tiles: LetterTile[] = shuffledLetters.map((letter, index) => ({
       id: `letter-${index}`,
       letter,
       originalIndex: letters.indexOf(letter),
       isUsed: false
     }));
-
     setLetterTiles(tiles);
     setArrangedLetters([]);
     setShowHint(false);
     setAttempts(0);
   };
-
   const startGame = () => {
     setGameStarted(true);
     setStartTime(Date.now());
     setTimeLeft(timeLimit);
   };
-
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
-
     const { source, destination, draggableId } = result;
-
     // 從字母池拖到排列區
     if (source.droppableId === 'letter-pool' && destination.droppableId === 'arranged-area') {
       const tile = letterTiles.find(t => t.id === draggableId);
@@ -112,13 +96,11 @@ export default function AnagramGame({
         setLetterTiles(prev => prev.map(t => 
           t.id === draggableId ? { ...t, isUsed: true } : t
         ));
-        
         const newArranged = [...arrangedLetters];
         newArranged.splice(destination.index, 0, tile);
         setArrangedLetters(newArranged);
       }
     }
-    
     // 從排列區拖回字母池
     else if (source.droppableId === 'arranged-area' && destination.droppableId === 'letter-pool') {
       const tile = arrangedLetters[source.index];
@@ -127,7 +109,6 @@ export default function AnagramGame({
         t.id === tile.id ? { ...t, isUsed: false } : t
       ));
     }
-    
     // 在排列區內重新排序
     else if (source.droppableId === 'arranged-area' && destination.droppableId === 'arranged-area') {
       const newArranged = [...arrangedLetters];
@@ -136,50 +117,41 @@ export default function AnagramGame({
       setArrangedLetters(newArranged);
     }
   };
-
   const checkWord = () => {
     if (arrangedLetters.length === 0) return;
-
     setAttempts(prev => prev + 1);
     const arrangedWord = arrangedLetters.map(tile => tile.letter).join('');
     const isCorrect = arrangedWord === currentWord.word.toUpperCase();
-
     if (isCorrect) {
       handleCorrectWord();
     } else {
       handleIncorrectWord();
     }
   };
-
   const handleCorrectWord = () => {
     const baseScore = 20;
     const difficultyBonus = currentWord.difficulty * 5;
     const attemptBonus = Math.max(0, 15 - (attempts - 1) * 3);
     const hintPenalty = showHint ? 5 : 0;
     const totalScore = baseScore + difficultyBonus + attemptBonus - hintPenalty;
-
     setScore(prev => {
       const newScore = prev + totalScore;
       onScoreUpdate?.(newScore);
       return newScore;
     });
-
     setSolvedWords(prev => prev + 1);
     setFeedbackMessage(`正確！+${totalScore} 分`);
     setShowFeedback(true);
-
     setTimeout(() => {
       setShowFeedback(false);
       nextWord();
     }, 2000);
   };
-
   const handleIncorrectWord = () => {
     setFeedbackMessage('不正確，再試試看！');
     setShowFeedback(true);
     setTimeout(() => setShowFeedback(false), 1500);
   };
-
   const nextWord = () => {
     if (currentWordIndex < words.length - 1) {
       setCurrentWordIndex(prev => prev + 1);
@@ -187,23 +159,18 @@ export default function AnagramGame({
       handleGameComplete();
     }
   };
-
   const handleGameComplete = () => {
     setGameCompleted(true);
     const timeUsed = startTime ? (Date.now() - startTime) / 1000 : 0;
     onComplete?.(score, timeUsed);
   };
-
   const shuffleLetters = () => {
     if (!allowShuffle) return;
-    
     const availableLetters = letterTiles.filter(tile => !tile.isUsed);
     const shuffled = [...availableLetters].sort(() => Math.random() - 0.5);
-    
     setLetterTiles(prev => {
       const newTiles = [...prev];
       let shuffleIndex = 0;
-      
       return newTiles.map(tile => {
         if (!tile.isUsed) {
           return shuffled[shuffleIndex++];
@@ -212,29 +179,23 @@ export default function AnagramGame({
       });
     });
   };
-
   const clearArrangement = () => {
     setLetterTiles(prev => prev.map(tile => ({ ...tile, isUsed: false })));
     setArrangedLetters([]);
   };
-
   const toggleHint = () => {
     if (!showHints || showHint) return;
-    
     setShowHint(true);
     setHintsUsed(prev => prev + 1);
   };
-
   const skipWord = () => {
     setFeedbackMessage(`跳過！答案是：${currentWord.word.toUpperCase()}`);
     setShowFeedback(true);
-    
     setTimeout(() => {
       setShowFeedback(false);
       nextWord();
     }, 2000);
   };
-
   if (!gameStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -242,7 +203,6 @@ export default function AnagramGame({
         <p className="text-gray-600 mb-6 text-center max-w-md">
           重新排列字母組成正確的單詞。基於字母重組記憶機制，提高您的詞彙識別能力。
         </p>
-        
         <div className="mb-6 p-4 bg-purple-50 rounded-lg">
           <h3 className="font-semibold text-purple-900 mb-2">遊戲設置：</h3>
           <div className="text-purple-800 text-sm space-y-1">
@@ -252,7 +212,6 @@ export default function AnagramGame({
             {timeLimit > 0 && <p>時間限制: {timeLimit} 秒</p>}
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-lg font-semibold"
@@ -262,10 +221,8 @@ export default function AnagramGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const accuracy = words.length > 0 ? (solvedWords / words.length) * 100 : 0;
-    
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
         <h2 className="text-3xl font-bold text-green-600 mb-4">重組完成！</h2>
@@ -284,7 +241,6 @@ export default function AnagramGame({
       </div>
     );
   }
-
   if (!currentWord) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -292,7 +248,6 @@ export default function AnagramGame({
       </div>
     );
   }
-
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="max-w-4xl mx-auto p-6">
@@ -312,7 +267,6 @@ export default function AnagramGame({
             </div>
           )}
         </div>
-
         {/* 反饋消息 */}
         {showFeedback && (
           <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-lg text-white font-semibold z-50 ${
@@ -322,7 +276,6 @@ export default function AnagramGame({
             {feedbackMessage}
           </div>
         )}
-
         {/* 單詞信息 */}
         <div className="mb-6 text-center">
           <div className="mb-4">
@@ -340,10 +293,8 @@ export default function AnagramGame({
               </span>
             )}
           </div>
-          
           <p className="text-gray-600 mb-2">重新排列這些字母組成一個單詞：</p>
           <p className="text-lg text-gray-500">字母數量: {currentWord.word.length}</p>
-          
           {showHint && currentWord.hint && (
             <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
               <p className="text-yellow-800">
@@ -352,7 +303,6 @@ export default function AnagramGame({
             </div>
           )}
         </div>
-
         {/* 排列區域 */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-4 text-center">您的答案：</h3>
@@ -396,7 +346,6 @@ export default function AnagramGame({
             )}
           </Droppable>
         </div>
-
         {/* 字母池 */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-4 text-center">可用字母：</h3>
@@ -428,7 +377,6 @@ export default function AnagramGame({
             )}
           </Droppable>
         </div>
-
         {/* 操作按鈕 */}
         <div className="flex justify-center space-x-4 mb-6">
           <button
@@ -438,14 +386,12 @@ export default function AnagramGame({
           >
             檢查答案
           </button>
-          
           <button
             onClick={clearArrangement}
             className="px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
           >
             清空
           </button>
-          
           {allowShuffle && (
             <button
               onClick={shuffleLetters}
@@ -454,7 +400,6 @@ export default function AnagramGame({
               🔀 洗牌
             </button>
           )}
-          
           {showHints && !showHint && currentWord.hint && (
             <button
               onClick={toggleHint}
@@ -463,7 +408,6 @@ export default function AnagramGame({
               💡 提示
             </button>
           )}
-          
           <button
             onClick={skipWord}
             className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
@@ -471,7 +415,6 @@ export default function AnagramGame({
             跳過
           </button>
         </div>
-
         {/* 進度條 */}
         <div className="mb-6">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
@@ -485,7 +428,6 @@ export default function AnagramGame({
             />
           </div>
         </div>
-
         {/* 操作說明 */}
         <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
           <p className="font-semibold mb-2">操作說明：</p>

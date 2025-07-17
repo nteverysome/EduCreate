@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 export interface HangmanWord {
   id: string;
   word: string;
@@ -8,13 +7,11 @@ export interface HangmanWord {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   points: number;
 }
-
 interface HangmanGameProps {
   words: HangmanWord[];
   maxWrongGuesses?: number;
   onComplete?: (results: any) => void;
 }
-
 export default function HangmanGame({
   words,
   maxWrongGuesses = 6,
@@ -28,21 +25,16 @@ export default function HangmanGame({
   const [gameCompleted, setGameCompleted] = useState(false);
   const [currentWordCompleted, setCurrentWordCompleted] = useState(false);
   const [gameWon, setGameWon] = useState(false);
-
   const currentWord = words[currentWordIndex];
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
   // 檢查當前單詞是否完成
   useEffect(() => {
     if (!currentWord || !gameStarted) return;
-
     const wordLetters = currentWord.word.toUpperCase().split('').filter(letter => /[A-Z]/.test(letter));
     const isCompleted = wordLetters.every(letter => guessedLetters.has(letter));
-    
     if (isCompleted && !currentWordCompleted) {
       setCurrentWordCompleted(true);
       setScore(prev => prev + currentWord.points);
-      
       setTimeout(() => {
         if (currentWordIndex < words.length - 1) {
           // 下一個單詞
@@ -58,7 +50,6 @@ export default function HangmanGame({
       }, 2000);
     }
   }, [guessedLetters, currentWord, gameStarted, currentWordCompleted, currentWordIndex, words.length]);
-
   // 檢查遊戲失敗
   useEffect(() => {
     if (wrongGuesses >= maxWrongGuesses) {
@@ -66,7 +57,6 @@ export default function HangmanGame({
       setGameWon(false);
     }
   }, [wrongGuesses, maxWrongGuesses]);
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -78,28 +68,23 @@ export default function HangmanGame({
     setCurrentWordCompleted(false);
     setGameWon(false);
   };
-
   // 猜字母
   const guessLetter = (letter: string) => {
     if (!gameStarted || gameCompleted || currentWordCompleted) return;
     if (guessedLetters.has(letter)) return;
-
     const newGuessedLetters = new Set([...guessedLetters, letter]);
     setGuessedLetters(newGuessedLetters);
-
     // 檢查字母是否在單詞中
     if (!currentWord.word.toUpperCase().includes(letter)) {
       setWrongGuesses(prev => prev + 1);
     }
   };
-
   // 遊戲完成處理
   useEffect(() => {
     if (gameCompleted) {
       const completedWords = currentWordIndex + (currentWordCompleted ? 1 : 0);
       const totalWords = words.length;
       const accuracy = Math.round((completedWords / totalWords) * 100);
-
       const results = {
         score,
         completedWords,
@@ -109,15 +94,12 @@ export default function HangmanGame({
         wrongGuesses,
         maxWrongGuesses
       };
-
       onComplete?.(results);
     }
   }, [gameCompleted, score, currentWordIndex, currentWordCompleted, words.length, gameWon, wrongGuesses, maxWrongGuesses, onComplete]);
-
   // 渲染單詞顯示
   const renderWord = () => {
     if (!currentWord) return '';
-    
     return currentWord.word.toUpperCase().split('').map((char, index) => {
       if (char === ' ') {
         return <span key={index} className="mx-2">　</span>;
@@ -138,7 +120,6 @@ export default function HangmanGame({
       }
     });
   };
-
   // 渲染絞刑架
   const renderHangman = () => {
     const parts = [
@@ -149,7 +130,6 @@ export default function HangmanGame({
       '/',  // 左腿
       '\\', // 右腿
     ];
-
     return (
       <div className="text-center font-mono text-2xl leading-tight">
         <div>┌─────┐</div>
@@ -161,7 +141,6 @@ export default function HangmanGame({
       </div>
     );
   };
-
   if (!gameStarted) {
     return (
       <div className="text-center p-8">
@@ -179,18 +158,15 @@ export default function HangmanGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const completedWords = currentWordIndex + (currentWordCompleted ? 1 : 0);
     const accuracy = Math.round((completedWords / words.length) * 100);
-    
     return (
       <div className="text-center p-8">
         <div className="text-6xl mb-4">{gameWon ? '🎉' : '😢'}</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
           {gameWon ? '恭喜完成！' : '遊戲結束！'}
         </h2>
-        
         <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -211,7 +187,6 @@ export default function HangmanGame({
             </div>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="mt-6 px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
@@ -221,7 +196,6 @@ export default function HangmanGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto">
       {/* 遊戲狀態 */}
@@ -241,24 +215,20 @@ export default function HangmanGame({
           <div className="text-sm text-gray-600">得分</div>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* 絞刑架 */}
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">絞刑架</h3>
           {renderHangman()}
         </div>
-
         {/* 遊戲區域 */}
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">猜單詞</h3>
-          
           {/* 單詞顯示 */}
           <div className="text-center mb-6">
             <div className="text-2xl mb-4">
               {renderWord()}
             </div>
-            
             {/* 提示和分類 */}
             {currentWord.category && (
               <div className="text-sm text-gray-600 mb-2">
@@ -271,14 +241,12 @@ export default function HangmanGame({
               </div>
             )}
           </div>
-
           {/* 字母選擇 */}
           <div className="grid grid-cols-6 gap-2">
             {alphabet.map(letter => {
               const isGuessed = guessedLetters.has(letter);
               const isCorrect = isGuessed && currentWord.word.toUpperCase().includes(letter);
               const isWrong = isGuessed && !currentWord.word.toUpperCase().includes(letter);
-              
               return (
                 <button
                   key={letter}
@@ -301,7 +269,6 @@ export default function HangmanGame({
           </div>
         </div>
       </div>
-
       {/* 當前單詞完成提示 */}
       {currentWordCompleted && (
         <div className="mt-6 p-4 bg-green-50 border-l-4 border-green-500 rounded">

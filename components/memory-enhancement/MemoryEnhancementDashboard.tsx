@@ -2,17 +2,14 @@
  * 記憶增強儀表板組件
  * 基於 25 個 WordWall 模板分析的記憶科學原理
  */
-
 import React, { useState, useEffect } from 'react';
 import { MemoryConfigurationManager, TemplateMemoryMapping } from '../../lib/memory-enhancement/MemoryConfigurationManager';
 import { MemoryType, MemoryEnhancementEngine } from '../../lib/memory-enhancement/MemoryEnhancementEngine';
-
 interface MemoryEnhancementDashboardProps {
   onTemplateSelect?: (templateId: string) => void;
   userLevel?: number;
   preferredMemoryTypes?: string[];
 }
-
 export default function MemoryEnhancementDashboard({ 
   onTemplateSelect, 
   userLevel = 1, 
@@ -26,43 +23,34 @@ export default function MemoryEnhancementDashboard({
   const [showCompetitive, setShowCompetitive] = useState<boolean>(false);
   const [recommendedTemplates, setRecommendedTemplates] = useState<TemplateMemoryMapping[]>([]);
   const [allMemoryTypes, setAllMemoryTypes] = useState<MemoryType[]>([]);
-
   useEffect(() => {
     // 初始化數據
     setAllMemoryTypes(engine.getAllMemoryTypes());
     updateRecommendedTemplates();
   }, []);
-
   useEffect(() => {
     updateRecommendedTemplates();
   }, [selectedMemoryType, selectedDifficulty, showTimeConstraints, showCompetitive]);
-
   const updateRecommendedTemplates = () => {
     let templates = manager.getAllTemplateMappings();
-
     // 根據記憶類型篩選
     if (selectedMemoryType !== 'all') {
       templates = manager.getTemplatesByMemoryType(selectedMemoryType);
     }
-
     // 根據難度篩選
     if (selectedDifficulty > 0) {
       templates = templates.filter(t => t.optimalConfiguration.difficultyLevel === selectedDifficulty);
     }
-
     // 根據時間約束篩選
     if (showTimeConstraints) {
       templates = templates.filter(t => t.optimalConfiguration.timeConstraints.enabled);
     }
-
     // 根據競爭機制篩選
     if (showCompetitive) {
       templates = templates.filter(t => t.optimalConfiguration.competitiveElements.enabled);
     }
-
     setRecommendedTemplates(templates);
   };
-
   const getMemoryTypeColor = (memoryType: string): string => {
     const colors: { [key: string]: string } = {
       'recognition': 'bg-blue-100 text-blue-800',
@@ -79,12 +67,10 @@ export default function MemoryEnhancementDashboard({
     };
     return colors[memoryType] || 'bg-gray-100 text-gray-800';
   };
-
   const getDifficultyColor = (level: number): string => {
     const colors = ['bg-green-100 text-green-800', 'bg-yellow-100 text-yellow-800', 'bg-orange-100 text-orange-800', 'bg-red-100 text-red-800', 'bg-purple-100 text-purple-800'];
     return colors[level - 1] || 'bg-gray-100 text-gray-800';
   };
-
   const getCognitiveLoadIcon = (load: string): string => {
     switch (load) {
       case 'low': return '🟢';
@@ -93,14 +79,12 @@ export default function MemoryEnhancementDashboard({
       default: return '⚪';
     }
   };
-
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">記憶增強系統</h2>
         <p className="text-gray-600">基於 25 個 WordWall 模板分析的記憶科學原理</p>
       </div>
-
       {/* 篩選控制 */}
       <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
@@ -116,7 +100,6 @@ export default function MemoryEnhancementDashboard({
             ))}
           </select>
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">難度級別</label>
           <select
@@ -132,7 +115,6 @@ export default function MemoryEnhancementDashboard({
             <option value={5}>大師 (5)</option>
           </select>
         </div>
-
         <div className="flex items-center space-x-4">
           <label className="flex items-center">
             <input
@@ -144,7 +126,6 @@ export default function MemoryEnhancementDashboard({
             <span className="text-sm text-gray-700">時間壓力</span>
           </label>
         </div>
-
         <div className="flex items-center space-x-4">
           <label className="flex items-center">
             <input
@@ -157,14 +138,12 @@ export default function MemoryEnhancementDashboard({
           </label>
         </div>
       </div>
-
       {/* 記憶類型概覽 */}
       {selectedMemoryType !== 'all' && (
         <div className="mb-6 p-4 bg-gray-50 rounded-lg">
           {(() => {
             const memoryType = engine.getMemoryType(selectedMemoryType);
             if (!memoryType) return null;
-            
             return (
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -198,13 +177,11 @@ export default function MemoryEnhancementDashboard({
           })()}
         </div>
       )}
-
       {/* 推薦模板 */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           推薦模板 ({recommendedTemplates.length})
         </h3>
-        
         {recommendedTemplates.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <p>沒有找到符合條件的模板</p>
@@ -223,7 +200,6 @@ export default function MemoryEnhancementDashboard({
                     難度 {template.optimalConfiguration.difficultyLevel}
                   </span>
                 </div>
-
                 <div className="mb-3">
                   <span className={`px-2 py-1 text-xs rounded ${getMemoryTypeColor(template.primaryMemoryType)}`}>
                     {engine.getMemoryType(template.primaryMemoryType)?.name}
@@ -234,7 +210,6 @@ export default function MemoryEnhancementDashboard({
                     </span>
                   ))}
                 </div>
-
                 <div className="mb-3">
                   <h5 className="text-sm font-medium text-gray-700 mb-1">增強特性</h5>
                   <div className="flex flex-wrap gap-1">
@@ -245,7 +220,6 @@ export default function MemoryEnhancementDashboard({
                     ))}
                   </div>
                 </div>
-
                 <div className="flex justify-between items-center text-xs text-gray-500">
                   <div className="flex space-x-2">
                     {template.optimalConfiguration.timeConstraints.enabled && (
@@ -273,7 +247,6 @@ export default function MemoryEnhancementDashboard({
           </div>
         )}
       </div>
-
       {/* 記憶科學統計 */}
       <div className="mt-8 p-4 bg-blue-50 rounded-lg">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">記憶科學統計</h3>

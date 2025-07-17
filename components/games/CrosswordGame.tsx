@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 export interface CrosswordClue {
   id: string;
   number: number;
@@ -10,14 +9,12 @@ export interface CrosswordClue {
   startCol: number;
   length: number;
 }
-
 interface CrosswordGameProps {
   clues: CrosswordClue[];
   gridSize?: number;
   timeLimit?: number;
   onComplete?: (results: any) => void;
 }
-
 interface GridCell {
   letter: string;
   isBlocked: boolean;
@@ -25,7 +22,6 @@ interface GridCell {
   userInput: string;
   isCorrect?: boolean;
 }
-
 export default function CrosswordGame({
   clues,
   gridSize = 10,
@@ -40,7 +36,6 @@ export default function CrosswordGame({
   const [gameStarted, setGameStarted] = useState(false);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [score, setScore] = useState(0);
-
   // 初始化網格
   useEffect(() => {
     const newGrid: GridCell[][] = Array(gridSize).fill(null).map(() =>
@@ -51,13 +46,11 @@ export default function CrosswordGame({
         isCorrect: false
       }))
     );
-
     // 根據線索設置網格
     clues.forEach(clue => {
       for (let i = 0; i < clue.length; i++) {
         const row = clue.direction === 'down' ? clue.startRow + i : clue.startRow;
         const col = clue.direction === 'across' ? clue.startCol + i : clue.startCol;
-        
         if (row < gridSize && col < gridSize) {
           newGrid[row][col] = {
             letter: clue.answer[i].toUpperCase(),
@@ -69,14 +62,11 @@ export default function CrosswordGame({
         }
       }
     });
-
     setGrid(newGrid);
   }, [clues, gridSize]);
-
   // 計時器
   useEffect(() => {
     if (!gameStarted || gameCompleted) return;
-
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -86,10 +76,8 @@ export default function CrosswordGame({
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [gameStarted, gameCompleted]);
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -99,19 +87,15 @@ export default function CrosswordGame({
     setTimeLeft(timeLimit);
     setSelectedClue(null);
     setSelectedCell(null);
-    
     // 重置用戶輸入
     setGrid(prev => prev.map(row => 
       row.map(cell => ({ ...cell, userInput: '', isCorrect: false }))
     ));
   };
-
   // 點擊格子
   const handleCellClick = (row: number, col: number) => {
     if (!gameStarted || gameCompleted || grid[row][col].isBlocked) return;
-    
     setSelectedCell({ row, col });
-    
     // 找到包含此格子的線索
     const relevantClues = clues.filter(clue => {
       const inRange = clue.direction === 'across' 
@@ -119,26 +103,21 @@ export default function CrosswordGame({
         : col === clue.startCol && row >= clue.startRow && row < clue.startRow + clue.length;
       return inRange;
     });
-    
     if (relevantClues.length > 0) {
       setSelectedClue(relevantClues[0]);
     }
   };
-
   // 輸入字母
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (!selectedCell || !gameStarted || gameCompleted) return;
-    
     const { row, col } = selectedCell;
     const key = e.key.toUpperCase();
-    
     if (/^[A-Z]$/.test(key)) {
       setGrid(prev => {
         const newGrid = [...prev];
         newGrid[row][col] = { ...newGrid[row][col], userInput: key };
         return newGrid;
       });
-      
       // 移動到下一個格子
       moveToNextCell();
     } else if (e.key === 'Backspace') {
@@ -149,76 +128,59 @@ export default function CrosswordGame({
       });
     }
   };
-
   // 移動到下一個格子
   const moveToNextCell = () => {
     if (!selectedClue || !selectedCell) return;
-    
     const { row, col } = selectedCell;
     let nextRow = row;
     let nextCol = col;
-    
     if (selectedClue.direction === 'across') {
       nextCol = Math.min(col + 1, selectedClue.startCol + selectedClue.length - 1);
     } else {
       nextRow = Math.min(row + 1, selectedClue.startRow + selectedClue.length - 1);
     }
-    
     setSelectedCell({ row: nextRow, col: nextCol });
   };
-
   // 檢查答案
   const checkAnswers = () => {
     let correctCount = 0;
     const newCompletedClues = new Set<string>();
-    
     setGrid(prev => {
       const newGrid = prev.map(row => [...row]);
-      
       clues.forEach(clue => {
         let isClueComplete = true;
         let isClueCorrect = true;
-        
         for (let i = 0; i < clue.length; i++) {
           const row = clue.direction === 'down' ? clue.startRow + i : clue.startRow;
           const col = clue.direction === 'across' ? clue.startCol + i : clue.startCol;
-          
           const userInput = newGrid[row][col].userInput;
           const correctLetter = clue.answer[i].toUpperCase();
-          
           if (!userInput) {
             isClueComplete = false;
           } else if (userInput !== correctLetter) {
             isClueCorrect = false;
           }
-          
           newGrid[row][col].isCorrect = userInput === correctLetter;
         }
-        
         if (isClueComplete && isClueCorrect) {
           newCompletedClues.add(clue.id);
           correctCount++;
         }
       });
-      
       return newGrid;
     });
-    
     setCompletedClues(newCompletedClues);
     setScore(correctCount * 10);
-    
     // 檢查是否完成
     if (newCompletedClues.size === clues.length) {
       setGameCompleted(true);
     }
   };
-
   // 遊戲完成處理
   useEffect(() => {
     if (gameCompleted) {
       const accuracy = Math.round((completedClues.size / clues.length) * 100);
       const timeSpent = timeLimit - timeLeft;
-      
       const results = {
         score,
         completedClues: completedClues.size,
@@ -226,18 +188,15 @@ export default function CrosswordGame({
         accuracy,
         timeSpent
       };
-      
       onComplete?.(results);
     }
   }, [gameCompleted, score, completedClues.size, clues.length, timeLimit, timeLeft, onComplete]);
-
   // 格式化時間
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   if (!gameStarted) {
     return (
       <div className="text-center p-8">
@@ -255,15 +214,12 @@ export default function CrosswordGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const accuracy = Math.round((completedClues.size / clues.length) * 100);
-    
     return (
       <div className="text-center p-8">
         <div className="text-6xl mb-4">🎉</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">遊戲完成！</h2>
-        
         <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -284,7 +240,6 @@ export default function CrosswordGame({
             </div>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="mt-6 px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
@@ -294,7 +249,6 @@ export default function CrosswordGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-6xl mx-auto" onKeyDown={handleKeyPress} tabIndex={0}>
       {/* 遊戲狀態 */}
@@ -314,7 +268,6 @@ export default function CrosswordGame({
           <div className="text-sm text-gray-600">得分</div>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 填字網格 */}
         <div className="lg:col-span-2">
@@ -351,7 +304,6 @@ export default function CrosswordGame({
                 ))
               )}
             </div>
-            
             <div className="mt-4 flex gap-2">
               <button
                 onClick={checkAnswers}
@@ -362,11 +314,9 @@ export default function CrosswordGame({
             </div>
           </div>
         </div>
-
         {/* 線索列表 */}
         <div className="bg-white rounded-lg shadow-lg p-4">
           <h3 className="text-lg font-bold text-gray-800 mb-4">線索</h3>
-          
           <div className="space-y-4">
             <div>
               <h4 className="font-bold text-gray-700 mb-2">橫向 (Across)</h4>
@@ -388,7 +338,6 @@ export default function CrosswordGame({
                 ))}
               </div>
             </div>
-            
             <div>
               <h4 className="font-bold text-gray-700 mb-2">縱向 (Down)</h4>
               <div className="space-y-2">

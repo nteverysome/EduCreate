@@ -220,7 +220,7 @@ function DraggableElement({ element, isSelected }: { element: EditorElement; isS
   );
 }
 
-export default function EditorCanvas({ elements, selectedElementId }: EditorCanvasProps) {
+const EditorCanvas = ({ elements, selectedElementId }: EditorCanvasProps) {
   const selectElement = useEditorStore(state => state.selectElement);
 
   // 處理畫布點擊，取消選中元素
@@ -245,3 +245,5 @@ export default function EditorCanvas({ elements, selectedElementId }: EditorCanv
     </div>
   );
 }
+
+export default handleClick;

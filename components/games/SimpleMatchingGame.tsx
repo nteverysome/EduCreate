@@ -11,7 +11,7 @@ interface SimpleMatchingGameProps {
   onComplete?: (results: any) => void;
 }
 
-export default function SimpleMatchingGame({ pairs, onComplete }: SimpleMatchingGameProps) {
+const SimpleMatchingGame = ({ pairs, onComplete }: SimpleMatchingGameProps) {
   const [selectedLeft, setSelectedLeft] = useState<number | null>(null);
   const [selectedRight, setSelectedRight] = useState<number | null>(null);
   const [matches, setMatches] = useState<Set<number>>(new Set());
@@ -204,3 +204,4 @@ export default function SimpleMatchingGame({ pairs, onComplete }: SimpleMatching
     </div>
   );
 }
+export default SimpleMatchingGame;

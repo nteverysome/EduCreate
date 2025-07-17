@@ -566,10 +566,17 @@ export class MediaManager {
    */
   private loadMediaLibrary(): void {
     try {
+      // 檢查是否在瀏覽器環境中
+      if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+        console.log('📚 服務器端渲染，跳過媒體庫載入');
+        return;
+      }
+
       const saved = localStorage.getItem('media_library');
       if (saved) {
         const data = JSON.parse(saved);
         this.mediaFiles = new Map(data);
+        console.log(`📚 載入媒體庫: ${this.mediaFiles.size} 個文件`);
       }
     } catch (error) {
       console.error('載入媒體庫失敗:', error);

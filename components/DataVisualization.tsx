@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-
 // 數據類型定義
 interface ChartData {
   labels: string[];
@@ -11,7 +10,6 @@ interface ChartData {
     borderWidth?: number;
   }>;
 }
-
 interface AnalyticsData {
   gamePerformance: ChartData;
   learningProgress: ChartData;
@@ -20,7 +18,6 @@ interface AnalyticsData {
   timeSpent: ChartData;
   userEngagement: ChartData;
 }
-
 // 圖表組件接口
 interface ChartProps {
   data: ChartData;
@@ -31,7 +28,6 @@ interface ChartProps {
   showLegend?: boolean;
   showTooltips?: boolean;
 }
-
 // 簡化的圖表組件（不依賴外部庫）
 const SimpleChart: React.FC<ChartProps> = ({ 
   data, 
@@ -44,18 +40,15 @@ const SimpleChart: React.FC<ChartProps> = ({
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [selectedDataset, setSelectedDataset] = useState<number>(0);
-
   const colors = [
     '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
     '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6B7280'
   ];
-
   const renderBarChart = () => {
     const maxValue = Math.max(...data.datasets[selectedDataset].data);
     const barWidth = 40;
     const spacing = 60;
     const chartWidth = data.labels.length * spacing;
-
     return (
       <svg width={chartWidth} height={height} className="overflow-visible">
         {/* Y軸刻度 */}
@@ -80,14 +73,12 @@ const SimpleChart: React.FC<ChartProps> = ({
             </text>
           </g>
         ))}
-
         {/* 柱狀圖 */}
         {data.datasets[selectedDataset].data.map((value, index) => {
           const barHeight = (value / maxValue) * (height - 40);
           const x = index * spacing + spacing / 2 - barWidth / 2;
           const y = height - barHeight - 20;
           const isHovered = hoveredIndex === index;
-
           return (
             <g key={index}>
               <rect
@@ -127,21 +118,17 @@ const SimpleChart: React.FC<ChartProps> = ({
       </svg>
     );
   };
-
   const renderLineChart = () => {
     const maxValue = Math.max(...data.datasets[selectedDataset].data);
     const pointSpacing = 80;
     const chartWidth = (data.labels.length - 1) * pointSpacing + 40;
-
     const points = data.datasets[selectedDataset].data.map((value, index) => ({
       x: index * pointSpacing + 20,
       y: height - (value / maxValue) * (height - 40) - 20
     }));
-
     const pathData = points.map((point, index) => 
       `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
     ).join(' ');
-
     return (
       <svg width={chartWidth} height={height} className="overflow-visible">
         {/* 網格線 */}
@@ -156,7 +143,6 @@ const SimpleChart: React.FC<ChartProps> = ({
             strokeWidth={1}
           />
         ))}
-
         {/* 線條 */}
         <path
           d={pathData}
@@ -165,7 +151,6 @@ const SimpleChart: React.FC<ChartProps> = ({
           strokeWidth={3}
           className="drop-shadow-sm"
         />
-
         {/* 數據點 */}
         {points.map((point, index) => {
           const isHovered = hoveredIndex === index;
@@ -218,47 +203,37 @@ const SimpleChart: React.FC<ChartProps> = ({
       </svg>
     );
   };
-
   const renderPieChart = () => {
     const total = data.datasets[selectedDataset].data.reduce((sum, value) => sum + value, 0);
     const radius = Math.min(height, 300) / 2 - 40;
     const centerX = 150;
     const centerY = height / 2;
-
     let currentAngle = -Math.PI / 2; // 從頂部開始
-
     return (
       <svg width={300} height={height} className="overflow-visible">
         {data.datasets[selectedDataset].data.map((value, index) => {
           const percentage = value / total;
           const angle = percentage * 2 * Math.PI;
           const endAngle = currentAngle + angle;
-          
           const x1 = centerX + radius * Math.cos(currentAngle);
           const y1 = centerY + radius * Math.sin(currentAngle);
           const x2 = centerX + radius * Math.cos(endAngle);
           const y2 = centerY + radius * Math.sin(endAngle);
-          
           const largeArcFlag = angle > Math.PI ? 1 : 0;
-          
           const pathData = [
             `M ${centerX} ${centerY}`,
             `L ${x1} ${y1}`,
             `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
             'Z'
           ].join(' ');
-
           const isHovered = hoveredIndex === index;
           const color = colors[index % colors.length];
-
           // 標籤位置
           const labelAngle = currentAngle + angle / 2;
           const labelRadius = radius + 30;
           const labelX = centerX + labelRadius * Math.cos(labelAngle);
           const labelY = centerY + labelRadius * Math.sin(labelAngle);
-
           currentAngle = endAngle;
-
           return (
             <g key={index}>
               <path
@@ -297,7 +272,6 @@ const SimpleChart: React.FC<ChartProps> = ({
       </svg>
     );
   };
-
   const renderChart = () => {
     switch (type) {
       case 'bar':
@@ -311,7 +285,6 @@ const SimpleChart: React.FC<ChartProps> = ({
         return renderBarChart();
     }
   };
-
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex justify-between items-center mb-4">
@@ -330,11 +303,9 @@ const SimpleChart: React.FC<ChartProps> = ({
           </select>
         )}
       </div>
-
       <div className="flex justify-center mb-4">
         {renderChart()}
       </div>
-
       {showLegend && data.datasets.length > 1 && (
         <div className="flex flex-wrap justify-center gap-4 mt-4">
           {data.datasets.map((dataset, index) => (
@@ -351,12 +322,10 @@ const SimpleChart: React.FC<ChartProps> = ({
     </div>
   );
 };
-
 // 主要數據可視化組件
 export default function DataVisualization() {
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter'>('week');
   const [selectedMetric, setSelectedMetric] = useState<'performance' | 'engagement' | 'retention'>('performance');
-
   // 模擬數據生成
   const generateMockData = (): AnalyticsData => {
     const labels = timeRange === 'week' 
@@ -364,7 +333,6 @@ export default function DataVisualization() {
       : timeRange === 'month'
       ? ['第1週', '第2週', '第3週', '第4週']
       : ['Q1', 'Q2', 'Q3', 'Q4'];
-
     return {
       gamePerformance: {
         labels,
@@ -437,20 +405,16 @@ export default function DataVisualization() {
       }
     };
   };
-
   const analyticsData = useMemo(() => generateMockData(), [timeRange]);
-
   const metrics = [
     { id: 'performance', name: '學習表現', icon: '📊' },
     { id: 'engagement', name: '用戶參與', icon: '👥' },
     { id: 'retention', name: '記憶保持', icon: '🧠' }
   ];
-
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">📈 數據分析儀表板</h1>
-        
         {/* 控制面板 */}
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="flex items-center space-x-2">
@@ -465,7 +429,6 @@ export default function DataVisualization() {
               <option value="quarter">本季</option>
             </select>
           </div>
-
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">關鍵指標:</label>
             <div className="flex space-x-2">
@@ -485,7 +448,6 @@ export default function DataVisualization() {
             </div>
           </div>
         </div>
-
         {/* 關鍵指標卡片 */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
@@ -497,7 +459,6 @@ export default function DataVisualization() {
               <div className="text-4xl opacity-80">🎮</div>
             </div>
           </div>
-
           <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -507,7 +468,6 @@ export default function DataVisualization() {
               <div className="text-4xl opacity-80">🏆</div>
             </div>
           </div>
-
           <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -517,7 +477,6 @@ export default function DataVisualization() {
               <div className="text-4xl opacity-80">🧠</div>
             </div>
           </div>
-
           <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -529,7 +488,6 @@ export default function DataVisualization() {
           </div>
         </div>
       </div>
-
       {/* 圖表網格 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <SimpleChart
@@ -538,35 +496,30 @@ export default function DataVisualization() {
           title="🎯 學習表現趨勢"
           interactive={true}
         />
-
         <SimpleChart
           data={analyticsData.learningProgress}
           type="pie"
           title="📚 學習進度分布"
           interactive={true}
         />
-
         <SimpleChart
           data={analyticsData.memoryRetention}
           type="bar"
           title="🧠 記憶保持率"
           interactive={true}
         />
-
         <SimpleChart
           data={analyticsData.userEngagement}
           type="bar"
           title="👥 用戶參與度"
           interactive={true}
         />
-
         <SimpleChart
           data={analyticsData.difficultyDistribution}
           type="doughnut"
           title="⚖️ 難度偏好分析"
           interactive={true}
         />
-
         <SimpleChart
           data={analyticsData.timeSpent}
           type="line"
@@ -574,11 +527,9 @@ export default function DataVisualization() {
           interactive={true}
         />
       </div>
-
       {/* 詳細分析報告 */}
       <div className="mt-12 bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">📋 詳細分析報告</h2>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-3">🎯 學習效果分析</h3>
@@ -589,7 +540,6 @@ export default function DataVisualization() {
               <li>• 學習時間平均減少 20%，效率顯著提升</li>
             </ul>
           </div>
-
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-3">📈 改進建議</h3>
             <ul className="space-y-2 text-sm text-gray-600">

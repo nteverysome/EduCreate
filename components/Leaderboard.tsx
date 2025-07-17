@@ -16,7 +16,7 @@ interface LeaderboardProps {
   limit?: number;
 }
 
-export default function Leaderboard({ gameId, gameType, limit = 10 }: LeaderboardProps) {
+const Leaderboard = ({ gameId, gameType, limit = 10 }: LeaderboardProps) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
@@ -239,3 +239,4 @@ export const addLeaderboardScore = (entry: Omit<LeaderboardEntry, 'id' | 'create
   // 觸發自定義事件通知排行榜更新
   window.dispatchEvent(new CustomEvent('leaderboard-updated'));
 };
+export default Leaderboard;

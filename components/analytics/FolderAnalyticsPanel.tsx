@@ -17,14 +17,14 @@ interface FolderAnalyticsPanelProps {
   showAdvanced?: boolean;
 }
 
-export default function FolderAnalyticsPanel({
+export const FolderAnalyticsPanel = ({
   folderId,
   folderName,
   statistics,
   onFilterChange,
   className = '',
   showAdvanced = false
-}: FolderAnalyticsPanelProps) {
+}: FolderAnalyticsPanelProps) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'learning' | 'usage' | 'collaboration' | 'trends'>('overview');
   const [filter, setFilter] = useState<AnalyticsFilter>({});
   const [showExportModal, setShowExportModal] = useState(false);
@@ -406,4 +406,6 @@ export default function FolderAnalyticsPanel({
       )}
     </div>
   );
-}
+};
+
+export default FolderAnalyticsPanel;

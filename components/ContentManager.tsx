@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useLocalStorage } from './PerformanceOptimizer';
-
 interface ContentTemplate {
   id: string;
   name: string;
@@ -11,7 +10,6 @@ interface ContentTemplate {
   createdAt: string;
   updatedAt: string;
 }
-
 interface ContentVersion {
   id: string;
   contentId: string;
@@ -21,7 +19,6 @@ interface ContentVersion {
   createdAt: string;
   createdBy: string;
 }
-
 export default function ContentManager() {
   const [templates, setTemplates] = useLocalStorage<ContentTemplate[]>('content_templates', []);
   const [versions, setVersions] = useLocalStorage<ContentVersion[]>('content_versions', []);
@@ -29,7 +26,6 @@ export default function ContentManager() {
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [importData, setImportData] = useState('');
   const [showImportModal, setShowImportModal] = useState(false);
-
   // 創建新模板
   const createTemplate = (templateData: Omit<ContentTemplate, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newTemplate: ContentTemplate = {
@@ -38,11 +34,9 @@ export default function ContentManager() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-
     setTemplates(prev => [...prev, newTemplate]);
     createVersion(newTemplate.id, newTemplate.content, '創建模板');
   };
-
   // 更新模板
   const updateTemplate = (templateId: string, updates: Partial<ContentTemplate>) => {
     setTemplates(prev => prev.map(template => 
@@ -50,12 +44,10 @@ export default function ContentManager() {
         ? { ...template, ...updates, updatedAt: new Date().toISOString() }
         : template
     ));
-
     if (updates.content) {
       createVersion(templateId, updates.content, '更新內容');
     }
   };
-
   // 創建版本記錄
   const createVersion = (contentId: string, content: any, changes: string) => {
     const existingVersions = versions.filter(v => v.contentId === contentId);
@@ -68,10 +60,8 @@ export default function ContentManager() {
       createdAt: new Date().toISOString(),
       createdBy: 'Current User'
     };
-
     setVersions(prev => [...prev, newVersion]);
   };
-
   // 恢復到指定版本
   const restoreVersion = (versionId: string) => {
     const version = versions.find(v => v.id === versionId);
@@ -79,7 +69,6 @@ export default function ContentManager() {
       updateTemplate(version.contentId, { content: version.content });
     }
   };
-
   // 批量導入
   const handleImport = () => {
     try {
@@ -103,7 +92,6 @@ export default function ContentManager() {
       alert('導入失敗：JSON 格式錯誤');
     }
   };
-
   // 批量導出
   const handleExport = () => {
     const exportData = templates.map(template => ({
@@ -113,7 +101,6 @@ export default function ContentManager() {
       content: template.content,
       tags: template.tags
     }));
-
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -122,7 +109,6 @@ export default function ContentManager() {
     a.click();
     URL.revokeObjectURL(url);
   };
-
   // 複製模板
   const duplicateTemplate = (templateId: string) => {
     const template = templates.find(t => t.id === templateId);
@@ -136,7 +122,6 @@ export default function ContentManager() {
       });
     }
   };
-
   // 刪除模板
   const deleteTemplate = (templateId: string) => {
     if (confirm('確定要刪除這個模板嗎？')) {
@@ -144,12 +129,10 @@ export default function ContentManager() {
       setVersions(prev => prev.filter(v => v.contentId !== templateId));
     }
   };
-
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">📚 內容管理</h1>
-        
         <div className="flex space-x-3">
           <button
             onClick={() => setShowImportModal(true)}
@@ -177,13 +160,11 @@ export default function ContentManager() {
           </button>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 模板列表 */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">模板庫</h2>
-            
             {templates.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <div className="text-4xl mb-2">📝</div>
@@ -206,12 +187,10 @@ export default function ContentManager() {
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900">{template.name}</h3>
                         <p className="text-sm text-gray-600 mt-1">{template.description}</p>
-                        
                         <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                           <span>類型: {template.type}</span>
                           <span>更新: {new Date(template.updatedAt).toLocaleDateString()}</span>
                         </div>
-                        
                         {template.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {template.tags.map(tag => (
@@ -225,7 +204,6 @@ export default function ContentManager() {
                           </div>
                         )}
                       </div>
-                      
                       <div className="flex space-x-2 ml-4">
                         <button
                           onClick={(e) => {
@@ -253,7 +231,6 @@ export default function ContentManager() {
             )}
           </div>
         </div>
-
         {/* 詳細信息和版本歷史 */}
         <div>
           {selectedTemplate ? (
@@ -267,7 +244,6 @@ export default function ContentManager() {
                   📜 版本歷史
                 </button>
               </div>
-
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -280,7 +256,6 @@ export default function ContentManager() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     描述
@@ -292,7 +267,6 @@ export default function ContentManager() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     標籤 (用逗號分隔)
@@ -307,7 +281,6 @@ export default function ContentManager() {
                   />
                 </div>
               </div>
-
               {showVersionHistory && (
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <h3 className="font-semibold text-gray-900 mb-3">版本歷史</h3>
@@ -347,14 +320,12 @@ export default function ContentManager() {
           )}
         </div>
       </div>
-
       {/* 導入模態框 */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
             <div className="p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">批量導入模板</h2>
-              
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   JSON 數據
@@ -367,7 +338,6 @@ export default function ContentManager() {
                   placeholder='[{"name": "模板名稱", "description": "描述", "type": "quiz", "content": {...}, "tags": ["標籤1", "標籤2"]}]'
                 />
               </div>
-
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={() => setShowImportModal(false)}

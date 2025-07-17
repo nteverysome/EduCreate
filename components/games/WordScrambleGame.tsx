@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 export interface ScrambleWord {
   id: string;
   word: string;
@@ -9,14 +8,12 @@ export interface ScrambleWord {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   points: number;
 }
-
 interface WordScrambleGameProps {
   words: ScrambleWord[];
   timeLimit?: number;
   showTimer?: boolean;
   onComplete?: (results: any) => void;
 }
-
 export default function WordScrambleGame({
   words,
   timeLimit = 120,
@@ -33,20 +30,16 @@ export default function WordScrambleGame({
   const [isCorrect, setIsCorrect] = useState(false);
   const [answers, setAnswers] = useState<{[key: string]: string}>({});
   const [scrambledLetters, setScrambledLetters] = useState<string[]>([]);
-
   const currentWord = words[currentWordIndex];
-
   // 初始化打亂的字母
   useEffect(() => {
     if (currentWord) {
       setScrambledLetters(currentWord.scrambled.split(''));
     }
   }, [currentWord]);
-
   // 計時器
   useEffect(() => {
     if (!gameStarted || gameCompleted || !showTimer) return;
-
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -56,10 +49,8 @@ export default function WordScrambleGame({
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [gameStarted, gameCompleted, showTimer]);
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -74,25 +65,20 @@ export default function WordScrambleGame({
       setScrambledLetters(words[0].scrambled.split(''));
     }
   };
-
   // 重新打亂字母
   const reshuffleLetters = () => {
     if (!currentWord) return;
     const shuffled = [...currentWord.scrambled.split('')].sort(() => Math.random() - 0.5);
     setScrambledLetters(shuffled);
   };
-
   // 點擊字母
   const clickLetter = (index: number) => {
     if (showResult) return;
-    
     const letter = scrambledLetters[index];
     setUserAnswer(prev => prev + letter);
-    
     // 移除已點擊的字母
     setScrambledLetters(prev => prev.filter((_, i) => i !== index));
   };
-
   // 清除答案
   const clearAnswer = () => {
     if (showResult) return;
@@ -101,25 +87,20 @@ export default function WordScrambleGame({
       setScrambledLetters(currentWord.scrambled.split(''));
     }
   };
-
   // 提交答案
   const submitAnswer = () => {
     if (!userAnswer.trim() || showResult) return;
-
     const correct = userAnswer.toLowerCase() === currentWord.word.toLowerCase();
     setIsCorrect(correct);
     setShowResult(true);
-
     // 記錄答案
     const newAnswers = { ...answers, [currentWord.id]: userAnswer };
     setAnswers(newAnswers);
-
     // 計分
     if (correct) {
       const timeBonus = Math.max(0, Math.floor(timeLeft / 10));
       setScore(prev => prev + currentWord.points + timeBonus);
     }
-
     // 2秒後進入下一題
     setTimeout(() => {
       if (currentWordIndex < words.length - 1) {
@@ -135,7 +116,6 @@ export default function WordScrambleGame({
       }
     }, 2000);
   };
-
   // 遊戲完成處理
   useEffect(() => {
     if (gameCompleted) {
@@ -145,7 +125,6 @@ export default function WordScrambleGame({
       const totalWords = words.length;
       const accuracy = Math.round((correctAnswers / totalWords) * 100);
       const timeSpent = timeLimit - timeLeft;
-
       const results = {
         score,
         correctAnswers,
@@ -154,18 +133,15 @@ export default function WordScrambleGame({
         timeSpent,
         answers
       };
-
       onComplete?.(results);
     }
   }, [gameCompleted, score, answers, words, timeLimit, timeLeft, onComplete]);
-
   // 格式化時間
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   if (!gameStarted) {
     return (
       <div className="text-center p-8">
@@ -183,18 +159,15 @@ export default function WordScrambleGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const correctAnswers = words.filter(word => 
       answers[word.id] && answers[word.id].toLowerCase() === word.word.toLowerCase()
     ).length;
     const accuracy = Math.round((correctAnswers / words.length) * 100);
-    
     return (
       <div className="text-center p-8">
         <div className="text-6xl mb-4">🎉</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">遊戲完成！</h2>
-        
         <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -215,7 +188,6 @@ export default function WordScrambleGame({
             </div>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="mt-6 px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
@@ -225,7 +197,6 @@ export default function WordScrambleGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-3xl mx-auto">
       {/* 遊戲狀態 */}
@@ -247,14 +218,12 @@ export default function WordScrambleGame({
           <div className="text-sm text-gray-600">得分</div>
         </div>
       </div>
-
       {/* 遊戲區域 */}
       <div className="bg-white rounded-lg shadow-lg p-8">
         <div className="text-center mb-8">
           <h3 className="text-xl font-bold text-gray-800 mb-4">
             重新排列字母組成正確的單詞
           </h3>
-          
           {/* 提示和分類 */}
           {currentWord.category && (
             <div className="text-sm text-gray-600 mb-2">
@@ -267,14 +236,12 @@ export default function WordScrambleGame({
             </div>
           )}
         </div>
-
         {/* 用戶答案顯示 */}
         <div className="text-center mb-6">
           <div className="text-2xl font-bold text-blue-600 min-h-[3rem] p-4 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50">
             {userAnswer || '點擊下方字母組成單詞...'}
           </div>
         </div>
-
         {/* 打亂的字母 */}
         <div className="flex flex-wrap justify-center gap-3 mb-6">
           {scrambledLetters.map((letter, index) => (
@@ -288,7 +255,6 @@ export default function WordScrambleGame({
             </button>
           ))}
         </div>
-
         {/* 控制按鈕 */}
         {!showResult && (
           <div className="flex justify-center gap-4">
@@ -313,7 +279,6 @@ export default function WordScrambleGame({
             </button>
           </div>
         )}
-
         {/* 結果反饋 */}
         {showResult && (
           <div className={`mt-6 p-4 rounded-lg border-l-4 ${
@@ -333,7 +298,6 @@ export default function WordScrambleGame({
           </div>
         )}
       </div>
-
       {/* 進度條 */}
       <div className="mt-6 w-full bg-gray-200 rounded-full h-2">
         <div

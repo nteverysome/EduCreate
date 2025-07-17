@@ -25,7 +25,7 @@ interface TemplateConfig {
   defaultData: any;
 }
 
-export default function TemplateConfig({ templateId, templateType, onConfigComplete }: TemplateConfigProps) {
+const TemplateConfig = ({ templateId, templateType, onConfigComplete }: TemplateConfigProps) {
   const router = useRouter();
   const [config, setConfig] = useState<TemplateConfig | null>(null);
   const [formData, setFormData] = useState<any>({});
@@ -507,3 +507,5 @@ export default function TemplateConfig({ templateId, templateType, onConfigCompl
     </div>
   );
 }
+
+export default TemplateConfig;

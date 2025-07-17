@@ -5,7 +5,7 @@ interface H5PElementPreviewProps {
   element: EditorElement;
 }
 
-export default function H5PElementPreview({ element }: H5PElementPreviewProps) {
+const H5PElementPreview = ({ element }: H5PElementPreviewProps) {
   const { content, size, properties } = element;
   const contentId = properties?.contentId;
   
@@ -37,3 +37,5 @@ export default function H5PElementPreview({ element }: H5PElementPreviewProps) {
     </div>
   );
 }
+
+export default H5PElementPreview;

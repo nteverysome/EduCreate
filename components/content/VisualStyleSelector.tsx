@@ -2,10 +2,8 @@
  * 視覺樣式選擇器組件
  * 提供豐富的樣式選擇界面，支持預覽、分類、搜索等功能
  */
-
 import React, { useState, useEffect } from 'react';
 import { VisualStyleManager, VisualStyle } from '../../lib/content/VisualStyleManager';
-
 interface VisualStyleSelectorProps {
   currentStyleId?: string;
   onStyleChange: (styleId: string) => void;
@@ -14,7 +12,6 @@ interface VisualStyleSelectorProps {
   showSearch?: boolean;
   showPreview?: boolean;
 }
-
 export default function VisualStyleSelector({
   currentStyleId = 'classic',
   onStyleChange,
@@ -27,7 +24,6 @@ export default function VisualStyleSelector({
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredStyles, setFilteredStyles] = useState<VisualStyle[]>([]);
   const [previewStyle, setPreviewStyle] = useState<VisualStyle | null>(null);
-
   const categories = [
     { id: 'all', name: '全部', icon: '🎨' },
     { id: 'classic', name: '經典', icon: '📘' },
@@ -37,22 +33,18 @@ export default function VisualStyleSelector({
     { id: 'themed', name: '主題', icon: '🌟' },
     { id: 'seasonal', name: '季節', icon: '🍂' }
   ];
-
   // 初始化樣式
   useEffect(() => {
     VisualStyleManager.initialize();
     updateFilteredStyles();
   }, [selectedCategory, searchQuery]);
-
   // 更新過濾後的樣式
   const updateFilteredStyles = () => {
     let styles = VisualStyleManager.getAllStyles();
-
     // 按類別過濾
     if (selectedCategory !== 'all') {
       styles = VisualStyleManager.getStylesByCategory(selectedCategory as any);
     }
-
     // 按搜索查詢過濾
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -62,10 +54,8 @@ export default function VisualStyleSelector({
         style.tags.some(tag => tag.includes(query))
       );
     }
-
     setFilteredStyles(styles);
   };
-
   // 處理樣式選擇
   const handleStyleSelect = (styleId: string) => {
     onStyleChange(styleId);
@@ -73,12 +63,10 @@ export default function VisualStyleSelector({
       onClose();
     }
   };
-
   // 處理樣式預覽
   const handleStylePreview = (style: VisualStyle) => {
     setPreviewStyle(style);
   };
-
   // 獲取樣式預覽卡片的樣式
   const getStyleCardStyle = (style: VisualStyle) => {
     return {
@@ -88,7 +76,6 @@ export default function VisualStyleSelector({
       fontFamily: style.typography.fontFamily
     };
   };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
@@ -109,7 +96,6 @@ export default function VisualStyleSelector({
             </button>
           )}
         </div>
-
         <div className="flex h-[calc(90vh-120px)]">
           {/* 側邊欄 */}
           <div className="w-64 border-r border-gray-200 p-4 overflow-y-auto">
@@ -130,7 +116,6 @@ export default function VisualStyleSelector({
                 </div>
               </div>
             )}
-
             {/* 類別選擇 */}
             {showCategories && (
               <div>
@@ -153,7 +138,6 @@ export default function VisualStyleSelector({
                 </div>
               </div>
             )}
-
             {/* 快速過濾 */}
             <div className="mt-6">
               <h3 className="text-sm font-medium text-gray-900 mb-3">快速過濾</h3>
@@ -173,7 +157,6 @@ export default function VisualStyleSelector({
               </div>
             </div>
           </div>
-
           {/* 主要內容區域 */}
           <div className="flex-1 flex">
             {/* 樣式網格 */}
@@ -203,7 +186,6 @@ export default function VisualStyleSelector({
                       <div className="absolute bottom-2 right-2 w-6 h-6 rounded-full"
                            style={{ backgroundColor: style.colors.accent }}></div>
                     </div>
-
                     {/* 樣式信息 */}
                     <div>
                       <div className="flex items-center justify-between mb-1">
@@ -218,7 +200,6 @@ export default function VisualStyleSelector({
                       <p className="text-xs opacity-75" style={{ color: style.colors.textSecondary }}>
                         {style.description}
                       </p>
-                      
                       {/* 標籤 */}
                       <div className="flex flex-wrap gap-1 mt-2">
                         {style.tags.slice(0, 3).map(tag => (
@@ -235,7 +216,6 @@ export default function VisualStyleSelector({
                         ))}
                       </div>
                     </div>
-
                     {/* 選中指示器 */}
                     {currentStyleId === style.id && (
                       <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
@@ -247,7 +227,6 @@ export default function VisualStyleSelector({
                   </div>
                 ))}
               </div>
-
               {/* 空狀態 */}
               {filteredStyles.length === 0 && (
                 <div className="text-center py-12">
@@ -257,12 +236,10 @@ export default function VisualStyleSelector({
                 </div>
               )}
             </div>
-
             {/* 預覽面板 */}
             {showPreview && previewStyle && (
               <div className="w-80 border-l border-gray-200 p-6 overflow-y-auto">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">樣式預覽</h3>
-                
                 {/* 樣式信息 */}
                 <div className="mb-6">
                   <h4 className="font-medium text-gray-900">{previewStyle.name}</h4>
@@ -283,7 +260,6 @@ export default function VisualStyleSelector({
                     )}
                   </div>
                 </div>
-
                 {/* 顏色調色板 */}
                 <div className="mb-6">
                   <h5 className="text-sm font-medium text-gray-900 mb-3">顏色調色板</h5>
@@ -301,7 +277,6 @@ export default function VisualStyleSelector({
                     ))}
                   </div>
                 </div>
-
                 {/* 字體預覽 */}
                 <div className="mb-6">
                   <h5 className="text-sm font-medium text-gray-900 mb-3">字體樣式</h5>
@@ -313,7 +288,6 @@ export default function VisualStyleSelector({
                     </div>
                   </div>
                 </div>
-
                 {/* 標籤 */}
                 <div>
                   <h5 className="text-sm font-medium text-gray-900 mb-3">標籤</h5>
@@ -328,7 +302,6 @@ export default function VisualStyleSelector({
                     ))}
                   </div>
                 </div>
-
                 {/* 應用按鈕 */}
                 <button
                   onClick={() => handleStyleSelect(previewStyle.id)}

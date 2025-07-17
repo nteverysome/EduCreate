@@ -4,7 +4,6 @@ import { useEditorStore } from '../../store/editorStore';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import VersionControl from './VersionControl';
-
 interface EditorToolbarProps {
   activityTitle: string;
   activityType: 'matching' | 'flashcards' | 'quiz';
@@ -20,7 +19,6 @@ interface EditorToolbarProps {
   onOpenVersionHistory?: () => void;
   onBack?: () => void;
 }
-
 export default function EditorToolbar({
   activityTitle,
   activityType,
@@ -38,12 +36,10 @@ export default function EditorToolbar({
   const updateActivity = useEditorStore(state => state.updateActivity);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState(activityTitle);
-
   // 處理標題變更
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
   };
-
   // 處理標題編輯完成
   const handleTitleBlur = () => {
     if (title.trim() !== '') {
@@ -53,14 +49,12 @@ export default function EditorToolbar({
     }
     setIsEditingTitle(false);
   };
-
   // 處理按Enter鍵
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleTitleBlur();
     }
   };
-
   // 獲取活動類型的中文名稱
   const getActivityTypeName = (type: string) => {
     switch (type) {
@@ -70,7 +64,6 @@ export default function EditorToolbar({
       default: return '活動';
     }
   };
-
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
       <div className="flex items-center space-x-4">
@@ -87,7 +80,6 @@ export default function EditorToolbar({
             </svg>
           </Link>
         )}
-
         <div className="flex items-center">
           <span className="text-sm text-gray-500 mr-2">{getActivityTypeName(activityType)}:</span>
           {isEditingTitle ? (
@@ -110,22 +102,18 @@ export default function EditorToolbar({
           )}
         </div>
       </div>
-
       <div className="flex items-center space-x-3">
         {/* 版本控制組件 */}
         <VersionControl />
-        
         {showSavedMessage && (
           <span className="text-green-600 text-sm animate-fade-out">已保存</span>
         )}
-
         <button
           onClick={onTogglePreview}
           className={`px-3 py-1.5 rounded-md text-sm font-medium ${isPreviewMode ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
         >
           {isPreviewMode ? '編輯' : '預覽'}
         </button>
-
         <button
           onClick={onSave}
           disabled={isSaving}
@@ -133,7 +121,6 @@ export default function EditorToolbar({
         >
           {isSaving ? '保存中...' : '保存'}
         </button>
-
         <button
           onClick={onPublish}
           disabled={isPublishing || isPublished}

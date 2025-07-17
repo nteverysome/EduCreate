@@ -246,3 +246,4 @@ export class FolderAnalyticsManager {
 
     return statistics;
   }
+}

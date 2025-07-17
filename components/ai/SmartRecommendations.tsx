@@ -2,7 +2,6 @@
  * 智能推薦組件
  * 顯示個性化推薦內容和解釋
  */
-
 import React, { useState, useEffect } from 'react';
 import { 
   RecommendationEngine, 
@@ -11,7 +10,6 @@ import {
   Recommendation 
 } from '../../lib/ai/RecommendationEngine';
 import { GameType } from '../../lib/content/UniversalContentManager';
-
 interface SmartRecommendationsProps {
   userId: string;
   context: 'homepage' | 'after_game' | 'search' | 'topic_page' | 'dashboard';
@@ -20,7 +18,6 @@ interface SmartRecommendationsProps {
   showExplanations?: boolean;
   maxItems?: number;
 }
-
 export default function SmartRecommendations({
   userId,
   context,
@@ -40,15 +37,12 @@ export default function SmartRecommendations({
     gameTypes: [],
     difficulty: []
   });
-
   // 載入推薦
   useEffect(() => {
     loadRecommendations();
   }, [userId, context, currentActivity, filters]);
-
   const loadRecommendations = async () => {
     setLoading(true);
-    
     try {
       const request: RecommendationRequest = {
         userId,
@@ -58,10 +52,8 @@ export default function SmartRecommendations({
         count: maxItems,
         includeExplanation: showExplanations
       };
-
       const result = await RecommendationEngine.getRecommendations(request);
       setRecommendations(result);
-      
       // 設置默認活躍類別
       if (result.categories) {
         const categories = Object.keys(result.categories).filter(cat => result.categories[cat].length > 0);
@@ -75,7 +67,6 @@ export default function SmartRecommendations({
       setLoading(false);
     }
   };
-
   // 處理活動選擇
   const handleActivitySelect = (recommendation: Recommendation) => {
     // 記錄用戶行為
@@ -86,21 +77,16 @@ export default function SmartRecommendations({
       recommendationScore: recommendation.score,
       category: recommendation.category
     });
-
     onActivitySelect?.(recommendation.contentId);
   };
-
   // 獲取當前顯示的推薦
   const getCurrentRecommendations = (): Recommendation[] => {
     if (!recommendations) return [];
-    
     if (activeCategory === 'all') {
       return recommendations.recommendations;
     }
-    
     return recommendations.categories[activeCategory] || [];
   };
-
   // 獲取類別標籤
   const getCategoryLabel = (category: string): string => {
     const labels: { [key: string]: string } = {
@@ -113,7 +99,6 @@ export default function SmartRecommendations({
     };
     return labels[category] || category;
   };
-
   // 獲取類別圖標
   const getCategoryIcon = (category: string): string => {
     const icons: { [key: string]: string } = {
@@ -126,14 +111,12 @@ export default function SmartRecommendations({
     };
     return icons[category] || '📋';
   };
-
   // 獲取信心度顏色
   const getConfidenceColor = (confidence: number): string => {
     if (confidence >= 0.8) return 'text-green-600 bg-green-100';
     if (confidence >= 0.6) return 'text-yellow-600 bg-yellow-100';
     return 'text-red-600 bg-red-100';
   };
-
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
@@ -148,7 +131,6 @@ export default function SmartRecommendations({
       </div>
     );
   }
-
   if (!recommendations || recommendations.recommendations.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-6 text-center">
@@ -158,7 +140,6 @@ export default function SmartRecommendations({
       </div>
     );
   }
-
   return (
     <div className="bg-white rounded-lg shadow">
       {/* 頭部 */}
@@ -174,7 +155,6 @@ export default function SmartRecommendations({
             {recommendations.metadata.processingTime}ms
           </div>
         </div>
-
         {/* 類別標籤 */}
         <div className="flex flex-wrap gap-2">
           <button
@@ -187,10 +167,8 @@ export default function SmartRecommendations({
           >
             🎯 全部 ({recommendations.recommendations.length})
           </button>
-          
           {Object.entries(recommendations.categories).map(([category, recs]) => {
             if (recs.length === 0) return null;
-            
             return (
               <button
                 key={category}
@@ -207,7 +185,6 @@ export default function SmartRecommendations({
           })}
         </div>
       </div>
-
       {/* 推薦內容 */}
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -221,7 +198,6 @@ export default function SmartRecommendations({
             />
           ))}
         </div>
-
         {getCurrentRecommendations().length === 0 && (
           <div className="text-center py-8">
             <div className="text-gray-400 text-3xl mb-2">📭</div>
@@ -229,7 +205,6 @@ export default function SmartRecommendations({
           </div>
         )}
       </div>
-
       {/* 統計信息 */}
       <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between text-sm text-gray-600">
@@ -244,7 +219,6 @@ export default function SmartRecommendations({
     </div>
   );
 }
-
 // 推薦卡片組件
 function RecommendationCard({
   recommendation,
@@ -258,13 +232,11 @@ function RecommendationCard({
   onClick: () => void;
 }) {
   const [showDetails, setShowDetails] = useState(false);
-
   const getConfidenceColor = (confidence: number): string => {
     if (confidence >= 0.8) return 'text-green-600 bg-green-100';
     if (confidence >= 0.6) return 'text-yellow-600 bg-yellow-100';
     return 'text-red-600 bg-red-100';
   };
-
   const getCategoryIcon = (category: string): string => {
     const icons: { [key: string]: string } = {
       trending: '🔥',
@@ -275,7 +247,6 @@ function RecommendationCard({
     };
     return icons[category] || '📋';
   };
-
   return (
     <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
       <div onClick={onClick}>
@@ -299,7 +270,6 @@ function RecommendationCard({
             </svg>
           </button>
         </div>
-
         {/* 內容信息 */}
         <div className="mb-3">
           <h4 className="font-medium text-gray-900 mb-1">
@@ -309,7 +279,6 @@ function RecommendationCard({
             分數: {recommendation.score.toFixed(2)}
           </div>
         </div>
-
         {/* 推薦原因 */}
         <div className="mb-3">
           <div className="text-xs text-gray-500 mb-1">推薦原因:</div>
@@ -326,7 +295,6 @@ function RecommendationCard({
             )}
           </div>
         </div>
-
         {/* 解釋 */}
         {showExplanation && explanation && (
           <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
@@ -334,7 +302,6 @@ function RecommendationCard({
           </div>
         )}
       </div>
-
       {/* 詳細信息 */}
       {showDetails && (
         <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-600">

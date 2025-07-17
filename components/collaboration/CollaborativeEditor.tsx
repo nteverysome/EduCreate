@@ -2,7 +2,6 @@
  * CollaborativeEditor - 實時協作編輯器組件
  * 支持多用戶同時編輯、版本歷史、變更追蹤和衝突解決
  */
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   CollaborationManager,
@@ -11,7 +10,6 @@ import {
   ContentVersion,
   ConflictResolution
 } from '../../lib/collaboration/CollaborationManager';
-
 export interface CollaborativeEditorProps {
   documentId: string;
   initialContent?: string;
@@ -21,7 +19,6 @@ export interface CollaborativeEditorProps {
   className?: string;
   'data-testid'?: string;
 }
-
 export default function CollaborativeEditor({
   documentId,
   initialContent = '',
@@ -41,10 +38,8 @@ export default function CollaborativeEditor({
   const [isJoined, setIsJoined] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [showUserList, setShowUserList] = useState(true);
-
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastChangeRef = useRef<number>(0);
-
   // 初始化協作會話
   useEffect(() => {
     const initializeCollaboration = async () => {
@@ -55,24 +50,19 @@ export default function CollaborativeEditor({
         console.error('加入協作會話失敗:', error);
       }
     };
-
     initializeCollaboration();
-
     return () => {
       collaborationManager.leaveSession();
       collaborationManager.destroy();
     };
   }, [documentId, currentUser, collaborationManager]);
-
   // 設置事件監聽器
   useEffect(() => {
     const handleUsersUpdate = (updatedUsers: CollaborationUser[]) => {
       setUsers(updatedUsers);
     };
-
     const handleContentChange = (change: ContentChange) => {
       setChanges(prev => [...prev, change]);
-
       // 如果不是當前用戶的變更，更新內容
       if (change.userId !== currentUser.id) {
         const session = collaborationManager.getCurrentSession();
@@ -82,26 +72,21 @@ export default function CollaborativeEditor({
         }
       }
     };
-
     const handleVersionCreate = (version: ContentVersion) => {
       setVersions(prev => [...prev, version]);
       onVersionCreate?.(version);
     };
-
     const handleConflictResolution = (conflict: ConflictResolution) => {
       setConflicts(prev => [...prev, conflict]);
     };
-
     const handleConnectionStatus = (status: 'connected' | 'disconnected' | 'reconnecting') => {
       setConnectionStatus(status);
     };
-
     collaborationManager.addUserListener(handleUsersUpdate);
     collaborationManager.addChangeListener(handleContentChange);
     collaborationManager.addVersionListener(handleVersionCreate);
     collaborationManager.addConflictListener(handleConflictResolution);
     collaborationManager.addConnectionListener(handleConnectionStatus);
-
     return () => {
       collaborationManager.removeUserListener(handleUsersUpdate);
       collaborationManager.removeChangeListener(handleContentChange);
@@ -110,7 +95,6 @@ export default function CollaborativeEditor({
       collaborationManager.removeConnectionListener(handleConnectionStatus);
     };
   }, [collaborationManager, currentUser.id, onContentChange, onVersionCreate]);
-
   const handleCollaborationEvent = (event: any) => {
     switch (event.type) {
       case 'edit':
@@ -130,14 +114,11 @@ export default function CollaborativeEditor({
         break;
     }
   };
-
   const handleEditEvent = (operation: EditOperation) => {
     if (operation.userId === userId) return; // 忽略自己的操作
-
     // 應用其他用戶的編輯操作
     applyEditOperation(operation);
   };
-
   const handleCommentEvent = (comment: Comment) => {
     setComments(prev => {
       const existing = prev.find(c => c.id === comment.id);
@@ -148,10 +129,8 @@ export default function CollaborativeEditor({
       }
     });
   };
-
   const handleCursorEvent = (participantUserId: string, cursor: CursorPosition) => {
     if (participantUserId === userId) return;
-
     // 更新其他用戶的游標位置
     setParticipants(prev => 
       prev.map(p => 
@@ -161,7 +140,6 @@ export default function CollaborativeEditor({
       )
     );
   };
-
   const handleUserJoin = (participantUserId: string, data: any) => {
     if (session) {
       const updatedSession = RealtimeCollaboration.getSession(session.id);
@@ -170,7 +148,6 @@ export default function CollaborativeEditor({
       }
     }
   };
-
   const handleUserLeave = (participantUserId: string) => {
     setParticipants(prev => 
       prev.map(p => 
@@ -180,12 +157,10 @@ export default function CollaborativeEditor({
       )
     );
   };
-
   const applyEditOperation = (operation: EditOperation) => {
     // 根據操作類型應用編輯
     const element = document.getElementById(operation.elementId);
     if (!element) return;
-
     switch (operation.type) {
       case 'insert':
         // 插入內容
@@ -216,31 +191,24 @@ export default function CollaborativeEditor({
         element.textContent = operation.content;
         break;
     }
-
     // 觸發內容變更回調
     onContentChange?.(getCurrentContent());
   };
-
   const getCurrentContent = () => {
     if (!editorRef.current) return null;
-    
     // 提取當前編輯器內容
     const elements = editorRef.current.querySelectorAll('[data-element-id]');
     const content: any = {};
-    
     elements.forEach(element => {
       const elementId = element.getAttribute('data-element-id');
       if (elementId) {
         content[elementId] = element.textContent || '';
       }
     });
-    
     return content;
   };
-
   const handleContentEdit = useCallback(async (elementId: string, newContent: string, oldContent: string) => {
     if (!session) return;
-
     const operation: Omit<EditOperation, 'id' | 'timestamp'> = {
       type: 'update',
       elementId,
@@ -248,7 +216,6 @@ export default function CollaborativeEditor({
       oldContent,
       userId
     };
-
     try {
       await RealtimeCollaboration.applyOperation(session.id, operation);
       onContentChange?.(getCurrentContent());
@@ -256,10 +223,8 @@ export default function CollaborativeEditor({
       console.error('應用編輯操作失敗:', error);
     }
   }, [session, userId]);
-
   const handleAddComment = async () => {
     if (!session || !selectedElement || !newComment.trim()) return;
-
     try {
       await RealtimeCollaboration.addComment(
         session.id,
@@ -274,19 +239,15 @@ export default function CollaborativeEditor({
       console.error('添加評論失敗:', error);
     }
   };
-
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!session) return;
-
     const cursor: CursorPosition = {
       x: e.clientX,
       y: e.clientY,
       timestamp: new Date()
     };
-
     RealtimeCollaboration.updateCursor(session.id, userId, cursor);
   }, [session, userId]);
-
   const cleanup = async () => {
     if (session) {
       await RealtimeCollaboration.leaveSession(session.id, userId);
@@ -295,7 +256,6 @@ export default function CollaborativeEditor({
       wsRef.current.close();
     }
   };
-
   const getParticipantColor = (participantUserId: string): string => {
     const colors = [
       'bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500',
@@ -304,7 +264,6 @@ export default function CollaborativeEditor({
     const index = participants.findIndex(p => p.userId === participantUserId);
     return colors[index % colors.length];
   };
-
   if (!session) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -313,7 +272,6 @@ export default function CollaborativeEditor({
       </div>
     );
   }
-
   return (
     <div className="flex h-full bg-white rounded-lg shadow-lg overflow-hidden">
       {/* 主編輯區域 */}
@@ -327,12 +285,10 @@ export default function CollaborativeEditor({
                 {isConnected ? '已連接' : '連接中...'}
               </span>
             </div>
-            
             <div className="text-sm text-gray-600">
               會話 ID: {session.id.slice(-8)}
             </div>
           </div>
-
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowParticipants(!showParticipants)}
@@ -340,7 +296,6 @@ export default function CollaborativeEditor({
             >
               👥 參與者 ({participants.filter(p => p.status === 'online').length})
             </button>
-            
             <button
               onClick={() => setShowComments(!showComments)}
               className="px-3 py-1 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
@@ -349,7 +304,6 @@ export default function CollaborativeEditor({
             </button>
           </div>
         </div>
-
         {/* 編輯器 */}
         <div 
           ref={editorRef}
@@ -375,7 +329,6 @@ export default function CollaborativeEditor({
                 </div>
               </div>
             ))}
-
           {/* 可編輯內容區域 */}
           <div className="space-y-4">
             <div
@@ -393,7 +346,6 @@ export default function CollaborativeEditor({
             >
               {initialContent?.title || '點擊編輯標題'}
             </div>
-
             <div
               data-element-id="description"
               contentEditable
@@ -410,7 +362,6 @@ export default function CollaborativeEditor({
               {initialContent?.description || '點擊編輯描述'}
             </div>
           </div>
-
           {/* 評論標記 */}
           {comments.map(comment => (
             <div
@@ -424,7 +375,6 @@ export default function CollaborativeEditor({
             />
           ))}
         </div>
-
         {/* 評論輸入 */}
         {selectedElement && (
           <div className="p-4 border-t border-gray-200 bg-gray-50">
@@ -452,7 +402,6 @@ export default function CollaborativeEditor({
           </div>
         )}
       </div>
-
       {/* 側邊欄 */}
       <div className="w-80 border-l border-gray-200 bg-gray-50">
         {/* 參與者面板 */}
@@ -482,7 +431,6 @@ export default function CollaborativeEditor({
             </div>
           </div>
         )}
-
         {/* 評論面板 */}
         {showComments && (
           <div className="p-4">
@@ -514,7 +462,6 @@ export default function CollaborativeEditor({
                   )}
                 </div>
               ))}
-              
               {comments.length === 0 && (
                 <div className="text-center text-gray-500 text-sm py-8">
                   暫無評論

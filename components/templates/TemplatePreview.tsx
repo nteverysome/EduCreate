@@ -11,7 +11,7 @@ interface TemplatePreviewProps {
   onEdit: () => void;
 }
 
-export default function TemplatePreview({ templateType, previewData, onSave, onEdit }: TemplatePreviewProps) {
+const TemplatePreview = ({ templateType, previewData, onSave, onEdit }: TemplatePreviewProps) {
   const router = useRouter();
   const [previewMode, setPreviewMode] = useState<'student' | 'teacher'>('student');
 
@@ -154,3 +154,5 @@ export default function TemplatePreview({ templateType, previewData, onSave, onE
     </div>
   );
 }
+
+export default TemplatePreview;

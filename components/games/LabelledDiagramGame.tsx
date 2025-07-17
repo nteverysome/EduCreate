@@ -2,10 +2,8 @@
  * Labelled Diagram Game Component
  * 基於標籤空間記憶機制的圖表標註遊戲
  */
-
 import React, { useState, useEffect, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-
 interface LabelItem {
   id: string;
   text: string;
@@ -13,7 +11,6 @@ interface LabelItem {
   y: number; // 正確位置的 y 坐標 (百分比)
   tolerance: number; // 容錯範圍 (像素)
 }
-
 interface PlacedLabel {
   id: string;
   text: string;
@@ -21,7 +18,6 @@ interface PlacedLabel {
   y: number;
   isCorrect?: boolean;
 }
-
 interface LabelledDiagramGameProps {
   image: string;
   labels: LabelItem[];
@@ -31,7 +27,6 @@ interface LabelledDiagramGameProps {
   onComplete?: (score: number, timeUsed: number) => void;
   onScoreUpdate?: (score: number) => void;
 }
-
 export default function LabelledDiagramGame({
   image,
   labels,
@@ -53,10 +48,8 @@ export default function LabelledDiagramGame({
   const [zoomLevel, setZoomLevel] = useState(1);
   const [draggedLabel, setDraggedLabel] = useState<LabelItem | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
-
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
   // 計時器
   useEffect(() => {
     if (gameStarted && timeLimit > 0 && timeLeft > 0 && !gameCompleted) {
@@ -68,7 +61,6 @@ export default function LabelledDiagramGame({
       handleGameComplete();
     }
   }, [gameStarted, timeLeft, gameCompleted, timeLimit]);
-
   const startGame = () => {
     setGameStarted(true);
     setStartTime(Date.now());
@@ -76,35 +68,26 @@ export default function LabelledDiagramGame({
     // 打亂標籤順序
     setAvailableLabels([...labels].sort(() => Math.random() - 0.5));
   };
-
   const handleImageLoad = () => {
     setImageLoaded(true);
   };
-
   const handleDragStart = (labelId: string) => {
     const label = availableLabels.find(l => l.id === labelId);
     setDraggedLabel(label || null);
   };
-
   const handleDragEnd = () => {
     setDraggedLabel(null);
   };
-
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    
     if (!draggedLabel || !imageRef.current || !containerRef.current) return;
-
     const rect = imageRef.current.getBoundingClientRect();
     const containerRect = containerRef.current.getBoundingClientRect();
-    
     // 計算相對於圖片的位置
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-
     // 檢查是否在正確位置
     const isCorrect = checkLabelPosition(draggedLabel, x, y);
-    
     // 放置標籤
     const newPlacedLabel: PlacedLabel = {
       id: draggedLabel.id,
@@ -113,10 +96,8 @@ export default function LabelledDiagramGame({
       y,
       isCorrect
     };
-
     setPlacedLabels(prev => [...prev, newPlacedLabel]);
     setAvailableLabels(prev => prev.filter(l => l.id !== draggedLabel.id));
-
     // 更新分數和反饋
     if (isCorrect) {
       const points = 10;
@@ -125,7 +106,6 @@ export default function LabelledDiagramGame({
         onScoreUpdate?.(newScore);
         return newScore;
       });
-      
       setFeedbackMessage('正確位置！');
       setShowFeedback(true);
       setTimeout(() => setShowFeedback(false), 1000);
@@ -134,53 +114,41 @@ export default function LabelledDiagramGame({
       setShowFeedback(true);
       setTimeout(() => setShowFeedback(false), 1500);
     }
-
     // 檢查是否完成
     if (availableLabels.length === 1) { // 因為當前標籤還沒從數組中移除
       setTimeout(() => {
         handleGameComplete();
       }, 1000);
     }
-
     setDraggedLabel(null);
   };
-
   const checkLabelPosition = (label: LabelItem, x: number, y: number): boolean => {
     if (!imageRef.current) return false;
-
     const rect = imageRef.current.getBoundingClientRect();
     const tolerance = label.tolerance;
-    
     // 將百分比轉換為像素
     const targetX = (label.x / 100) * rect.width;
     const targetY = (label.y / 100) * rect.height;
     const actualX = (x / 100) * rect.width;
     const actualY = (y / 100) * rect.height;
-    
     // 計算距離
     const distance = Math.sqrt(
       Math.pow(actualX - targetX, 2) + Math.pow(actualY - targetY, 2)
     );
-    
     return distance <= tolerance;
   };
-
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
-
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.2, 3));
   };
-
   const handleZoomOut = () => {
     setZoomLevel(prev => Math.max(prev - 0.2, 0.5));
   };
-
   const resetZoom = () => {
     setZoomLevel(1);
   };
-
   const removePlacedLabel = (labelId: string) => {
     const placedLabel = placedLabels.find(l => l.id === labelId);
     if (placedLabel) {
@@ -188,7 +156,6 @@ export default function LabelledDiagramGame({
       if (originalLabel) {
         setAvailableLabels(prev => [...prev, originalLabel]);
         setPlacedLabels(prev => prev.filter(l => l.id !== labelId));
-        
         // 如果移除的是正確標籤，扣分
         if (placedLabel.isCorrect) {
           setScore(prev => Math.max(0, prev - 10));
@@ -196,13 +163,11 @@ export default function LabelledDiagramGame({
       }
     }
   };
-
   const handleGameComplete = () => {
     setGameCompleted(true);
     const timeUsed = startTime ? (Date.now() - startTime) / 1000 : 0;
     onComplete?.(score, timeUsed);
   };
-
   const showHint = () => {
     // 顯示所有正確位置的提示
     const hints = labels.map(label => ({
@@ -210,16 +175,13 @@ export default function LabelledDiagramGame({
       x: label.x,
       y: label.y
     }));
-    
     // 臨時顯示提示點
     setShowFeedback(true);
     setFeedbackMessage('查看圖片上的提示點！');
-    
     setTimeout(() => {
       setShowFeedback(false);
     }, 3000);
   };
-
   if (!gameStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -241,11 +203,9 @@ export default function LabelledDiagramGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const correctLabels = placedLabels.filter(l => l.isCorrect).length;
     const accuracy = (correctLabels / labels.length) * 100;
-    
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
         <h2 className="text-3xl font-bold text-green-600 mb-4">標註完成！</h2>
@@ -263,7 +223,6 @@ export default function LabelledDiagramGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* 遊戲狀態欄 */}
@@ -311,7 +270,6 @@ export default function LabelledDiagramGame({
           )}
         </div>
       </div>
-
       {/* 反饋消息 */}
       {showFeedback && (
         <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-lg text-white font-semibold z-50 ${
@@ -320,7 +278,6 @@ export default function LabelledDiagramGame({
           {feedbackMessage}
         </div>
       )}
-
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* 圖片區域 */}
         <div className="lg:col-span-3">
@@ -351,7 +308,6 @@ export default function LabelledDiagramGame({
                   userSelect: 'none'
                 }}
               />
-              
               {/* 網格 */}
               {showGrid && imageLoaded && (
                 <div className="absolute inset-0 pointer-events-none">
@@ -365,7 +321,6 @@ export default function LabelledDiagramGame({
                   </svg>
                 </div>
               )}
-              
               {/* 已放置的標籤 */}
               {placedLabels.map((label) => (
                 <div
@@ -390,7 +345,6 @@ export default function LabelledDiagramGame({
             </div>
           </div>
         </div>
-
         {/* 標籤區域 */}
         <div className="lg:col-span-1">
           <h4 className="text-lg font-semibold mb-4">可用標籤</h4>
@@ -407,13 +361,11 @@ export default function LabelledDiagramGame({
               </div>
             ))}
           </div>
-          
           {availableLabels.length === 0 && (
             <p className="text-gray-500 text-center py-8">
               所有標籤已使用
             </p>
           )}
-          
           <div className="mt-6 p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
             <p className="font-semibold mb-2">操作說明：</p>
             <ul className="space-y-1">

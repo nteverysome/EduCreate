@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { format } from 'date-fns';
 import { Dialog } from '@headlessui/react';
-import { ClockIcon } from '@heroicons/react/24/outline';
-import { ArrowPathIcon as RestoreIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, ArrowPathIcon as RestoreIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
 interface Version {
@@ -23,7 +22,7 @@ interface VersionHistoryProps {
   onClose: () => void;
 }
 
-export default function VersionHistory({ activityId, onVersionRestore, isOpen, onClose }: VersionHistoryProps) {
+const VersionHistory = ({ activityId, onVersionRestore, isOpen, onClose }: VersionHistoryProps) {
   const { data: session } = useSession();
   const [versions, setVersions] = useState<Version[]>([]);
   const [loading, setLoading] = useState(true);
@@ -190,3 +189,5 @@ export default function VersionHistory({ activityId, onVersionRestore, isOpen, o
     </Dialog>
   );
 }
+
+export default VersionHistory;

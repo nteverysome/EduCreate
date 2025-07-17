@@ -19,11 +19,11 @@ interface User {
   avatar?: string;
 }
 
-export default function FolderPermissionManager({
+export const FolderPermissionManager = ({
   folderId,
   currentUserId,
   onPermissionChange
-}: FolderPermissionManagerProps) {
+}: FolderPermissionManagerProps) => {
   const [permissions, setPermissions] = useState<UserFolderPermission[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -356,4 +356,6 @@ export default function FolderPermissionManager({
       )}
     </div>
   );
-}
+};
+
+export default FolderPermissionManager;

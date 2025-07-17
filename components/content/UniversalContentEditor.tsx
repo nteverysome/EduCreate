@@ -2,7 +2,6 @@
  * 統一內容編輯器 - 模仿 wordwall.net 的內容管理界面
  * 允許用戶輸入內容並一鍵切換到不同遊戲類型
  */
-
 import React, { useState, useEffect } from 'react';
 // 使用簡單的文字圖標替代 lucide-react
 const Plus = () => <span>+</span>;
@@ -14,13 +13,11 @@ const Play = () => <span>▶️</span>;
 const Lightbulb = () => <span>💡</span>;
 import { UniversalContentManager, UniversalContent, UniversalContentItem, GameType } from '../../lib/content/UniversalContentManager';
 import { GameAdapters } from '../../lib/content/GameAdapters';
-
 interface UniversalContentEditorProps {
   initialContent?: UniversalContent;
   onContentChange?: (content: UniversalContent) => void;
   onGameSelect?: (gameType: GameType, adaptedContent: any) => void;
 }
-
 export default function UniversalContentEditor({
   initialContent,
   onContentChange,
@@ -44,12 +41,10 @@ export default function UniversalContentEditor({
   const [importText, setImportText] = useState('');
   const [showImport, setShowImport] = useState(false);
   const [selectedGame, setSelectedGame] = useState<GameType | null>(null);
-
   useEffect(() => {
     contentManager.setContent(content);
     onContentChange?.(content);
   }, [content, contentManager, onContentChange]);
-
   const addItem = () => {
     if (newItem.term.trim() && newItem.definition.trim()) {
       const item: UniversalContentItem = {
@@ -58,17 +53,14 @@ export default function UniversalContentEditor({
         definition: newItem.definition.trim(),
         category: newItem.category.trim() || undefined
       };
-      
       setContent(prev => ({
         ...prev,
         items: [...prev.items, item],
         updatedAt: new Date()
       }));
-      
       setNewItem({ term: '', definition: '', category: '' });
     }
   };
-
   const removeItem = (id: string) => {
     setContent(prev => ({
       ...prev,
@@ -76,7 +68,6 @@ export default function UniversalContentEditor({
       updatedAt: new Date()
     }));
   };
-
   const updateItem = (id: string, field: keyof UniversalContentItem, value: string) => {
     setContent(prev => ({
       ...prev,
@@ -86,12 +77,10 @@ export default function UniversalContentEditor({
       updatedAt: new Date()
     }));
   };
-
   const handleImport = () => {
     if (importText.trim()) {
       const lines = importText.split('\n').filter(line => line.trim());
       const newItems: UniversalContentItem[] = [];
-      
       lines.forEach(line => {
         const parts = line.split('\t').map(part => part.trim());
         if (parts.length >= 2) {
@@ -103,7 +92,6 @@ export default function UniversalContentEditor({
           });
         }
       });
-      
       if (newItems.length > 0) {
         setContent(prev => ({
           ...prev,
@@ -115,7 +103,6 @@ export default function UniversalContentEditor({
       }
     }
   };
-
   const handleExport = () => {
     const exportData = contentManager.exportContent('txt');
     const blob = new Blob([exportData], { type: 'text/plain' });
@@ -126,7 +113,6 @@ export default function UniversalContentEditor({
     a.click();
     URL.revokeObjectURL(url);
   };
-
   const shuffleItems = () => {
     setContent(prev => ({
       ...prev,
@@ -134,7 +120,6 @@ export default function UniversalContentEditor({
       updatedAt: new Date()
     }));
   };
-
   const playGame = (gameType: GameType) => {
     try {
       const adaptedContent = GameAdapters.adaptContent(content, gameType);
@@ -144,10 +129,8 @@ export default function UniversalContentEditor({
       console.error('遊戲適配失敗:', error);
     }
   };
-
   const availableGames = contentManager.getAvailableGames();
   const recommendedGames = contentManager.getRecommendedGames();
-
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       {/* 標題和基本信息 */}
@@ -178,7 +161,6 @@ export default function UniversalContentEditor({
             </button>
           </div>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -206,7 +188,6 @@ export default function UniversalContentEditor({
           </div>
         </div>
       </div>
-
       {/* 批量導入區域 */}
       {showImport && (
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -236,13 +217,11 @@ export default function UniversalContentEditor({
           </div>
         </div>
       )}
-
       {/* 內容編輯區域 */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-lg font-semibold mb-4">
           內容項目 ({content.items.length})
         </h3>
-
         {/* 添加新項目 */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
           <input
@@ -274,7 +253,6 @@ export default function UniversalContentEditor({
             添加
           </button>
         </div>
-
         {/* 內容列表 */}
         <div className="space-y-2">
           {content.items.map((item, index) => (
@@ -308,14 +286,12 @@ export default function UniversalContentEditor({
             </div>
           ))}
         </div>
-
         {content.items.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             還沒有內容項目，請添加一些詞彙和定義開始創建活動。
           </div>
         )}
       </div>
-
       {/* 遊戲選擇區域 */}
       {content.items.length > 0 && (
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -323,7 +299,6 @@ export default function UniversalContentEditor({
             <Lightbulb className="w-5 h-5 text-yellow-500 mr-2" />
             <h3 className="text-lg font-semibold">推薦遊戲</h3>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             {recommendedGames.map(game => (
               <div
@@ -362,7 +337,6 @@ export default function UniversalContentEditor({
               </div>
             ))}
           </div>
-
           <details className="mt-4">
             <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
               查看所有可用遊戲 ({availableGames.length})

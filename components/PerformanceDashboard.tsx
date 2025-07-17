@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { performanceMonitor, perf } from '../lib/utils/performanceMonitor';
 import { globalCache, sessionCache, permissionCache } from '../lib/cache/CacheManager';
-
 interface PerformanceStats {
   totalMetrics: number;
   averageResponseTime: number;
@@ -16,7 +15,6 @@ interface PerformanceStats {
     [key: string]: number;
   };
 }
-
 /**
  * 性能監控儀表板組件
  * 僅在開發環境中顯示
@@ -25,16 +23,13 @@ export function PerformanceDashboard() {
   const [stats, setStats] = useState<PerformanceStats | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
-
   // 只在開發環境中顯示
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }
-
   // 獲取性能統計
   const fetchStats = () => {
     const report = performanceMonitor.getReport();
-    
     // 獲取 Web Vitals
     const webVitals: { [key: string]: number } = {};
     report.metrics
@@ -42,7 +37,6 @@ export function PerformanceDashboard() {
       .forEach(m => {
         webVitals[m.name.replace('web_vital_', '')] = m.value;
       });
-
     setStats({
       ...report.summary,
       cacheStats: {
@@ -53,7 +47,6 @@ export function PerformanceDashboard() {
       webVitals,
     });
   };
-
   // 自動刷新
   useEffect(() => {
     if (autoRefresh) {
@@ -61,12 +54,10 @@ export function PerformanceDashboard() {
       return () => clearInterval(interval);
     }
   }, [autoRefresh]);
-
   // 初始加載
   useEffect(() => {
     fetchStats();
   }, []);
-
   // 清除所有數據
   const clearAllData = () => {
     performanceMonitor.clear();
@@ -75,7 +66,6 @@ export function PerformanceDashboard() {
     permissionCache.clear();
     fetchStats();
   };
-
   // 導出數據
   const exportData = () => {
     const data = performanceMonitor.export();
@@ -87,7 +77,6 @@ export function PerformanceDashboard() {
     a.click();
     URL.revokeObjectURL(url);
   };
-
   if (!isVisible) {
     return (
       <button
@@ -98,7 +87,6 @@ export function PerformanceDashboard() {
       </button>
     );
   }
-
   return (
     <div className="fixed bottom-4 right-4 bg-white border border-gray-300 rounded-lg shadow-lg p-4 w-96 max-h-96 overflow-y-auto z-50 text-xs font-mono">
       <div className="flex justify-between items-center mb-3">
@@ -128,7 +116,6 @@ export function PerformanceDashboard() {
           </button>
         </div>
       </div>
-
       {stats && (
         <div className="space-y-3">
           {/* 基本統計 */}
@@ -138,7 +125,6 @@ export function PerformanceDashboard() {
             <div>平均響應時間: {stats.averageResponseTime.toFixed(2)}ms</div>
             <div>錯誤率: {stats.errorRate.toFixed(2)}%</div>
           </div>
-
           {/* Web Vitals */}
           {Object.keys(stats.webVitals).length > 0 && (
             <div className="bg-blue-50 p-2 rounded">
@@ -150,7 +136,6 @@ export function PerformanceDashboard() {
               ))}
             </div>
           )}
-
           {/* 緩存統計 */}
           <div className="bg-green-50 p-2 rounded">
             <div className="font-semibold mb-1">緩存統計</div>
@@ -158,7 +143,6 @@ export function PerformanceDashboard() {
             <div>會話: {stats.cacheStats.session.size}/{stats.cacheStats.session.maxSize}</div>
             <div>權限: {stats.cacheStats.permission.size}/{stats.cacheStats.permission.maxSize}</div>
           </div>
-
           {/* 最慢操作 */}
           {stats.slowestOperations.length > 0 && (
             <div className="bg-yellow-50 p-2 rounded">
@@ -170,7 +154,6 @@ export function PerformanceDashboard() {
               ))}
             </div>
           )}
-
           {/* 操作按鈕 */}
           <div className="flex space-x-2 pt-2 border-t">
             <button
@@ -191,7 +174,6 @@ export function PerformanceDashboard() {
     </div>
   );
 }
-
 /**
  * 性能監控 Hook
  * 用於在組件中輕鬆添加性能監控
@@ -199,20 +181,16 @@ export function PerformanceDashboard() {
 export function usePerformanceMonitoring(componentName: string) {
   useEffect(() => {
     perf.start(`component_mount_${componentName}`);
-    
     return () => {
       perf.end(`component_mount_${componentName}`);
     };
   }, [componentName]);
-
   const measureRender = (renderName: string, fn: () => void) => {
     perf.measure(`render_${componentName}_${renderName}`, fn);
   };
-
   const measureAsync = async <T extends any>(operationName: string, fn: () => Promise<T>): Promise<T> => {
     return perf.measureAsync(`async_${componentName}_${operationName}`, fn);
   };
-
   return {
     measureRender,
     measureAsync,
@@ -222,5 +200,4 @@ export function usePerformanceMonitoring(componentName: string) {
       perf.count(`${componentName}_${name}`, value),
   };
 }
-
 export default PerformanceDashboard;

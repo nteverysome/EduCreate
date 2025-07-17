@@ -2,7 +2,6 @@
  * 增強的統一內容編輯器 - 第一階段實現
  * 包含自動保存、內容驗證、活動管理等核心功能
  */
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { UniversalContent, UniversalContentItem, GameType } from '../../lib/content/UniversalContentManager';
 import { GameAdapters } from '../../lib/content/GameAdapters';
@@ -10,7 +9,6 @@ import { TemplateManager } from '../../lib/content/TemplateManager';
 import { useAutoSave, generateActivityId } from '../../lib/content/AutoSaveManager';
 import { ContentValidator, ValidationResult } from '../../lib/content/ContentValidator';
 import RichTextEditor from './RichTextEditor';
-
 interface EnhancedUniversalContentEditorProps {
   initialContent?: UniversalContent;
   activityId?: string;
@@ -18,7 +16,6 @@ interface EnhancedUniversalContentEditorProps {
   onGameSelect?: (gameType: GameType, adaptedContent: any) => void;
   onSave?: (content: UniversalContent) => void;
 }
-
 export default function EnhancedUniversalContentEditor({
   initialContent,
   activityId: providedActivityId,
@@ -28,7 +25,6 @@ export default function EnhancedUniversalContentEditor({
 }: EnhancedUniversalContentEditorProps) {
   // 生成或使用提供的活動 ID
   const [activityId] = useState(() => providedActivityId || generateActivityId());
-  
   // 內容狀態
   const [content, setContent] = useState<UniversalContent>(() => 
     initialContent || {
@@ -43,106 +39,87 @@ export default function EnhancedUniversalContentEditor({
       userId: 'current-user'
     }
   );
-
   // 編輯狀態
   const [newItem, setNewItem] = useState({ term: '', definition: '' });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [importText, setImportText] = useState('');
   const [showImport, setShowImport] = useState(false);
-
   // 驗證狀態
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [showValidation, setShowValidation] = useState(false);
-
   // 自動保存
   const { triggerAutoSave, forceSave, autoSaveState } = useAutoSave(activityId, {
     saveDelay: 2000,
     enableOfflineMode: true
   });
-
   // 內容變更處理
   const handleContentChange = useCallback((newContent: UniversalContent) => {
     setContent(newContent);
     onContentChange?.(newContent);
-    
     // 觸發自動保存
     triggerAutoSave(newContent);
-    
     // 實時驗證
     const validation = ContentValidator.validateContent(newContent);
     setValidationResult(validation);
   }, [onContentChange, triggerAutoSave]);
-
   // 標題變更
   const handleTitleChange = (title: string) => {
     const newContent = { ...content, title, updatedAt: new Date() };
     handleContentChange(newContent);
   };
-
   // 描述變更
   const handleDescriptionChange = (description: string) => {
     const newContent = { ...content, description, updatedAt: new Date() };
     handleContentChange(newContent);
   };
-
   // 添加新項目
   const handleAddItem = () => {
     if (!newItem.term.trim() || !newItem.definition.trim()) {
       alert('請填寫完整的問題和答案');
       return;
     }
-
     const item: UniversalContentItem = {
       id: `item_${Date.now()}`,
       term: newItem.term.trim(),
       definition: newItem.definition.trim()
     };
-
     const newContent = {
       ...content,
       items: [...content.items, item],
       updatedAt: new Date()
     };
-
     handleContentChange(newContent);
     setNewItem({ term: '', definition: '' });
   };
-
   // 編輯項目
   const handleEditItem = (index: number) => {
     setEditingIndex(index);
     const item = content.items[index];
     setNewItem({ term: item.term, definition: item.definition });
   };
-
   // 保存編輯
   const handleSaveEdit = () => {
     if (editingIndex === null) return;
-
     const newItems = [...content.items];
     newItems[editingIndex] = {
       ...newItems[editingIndex],
       term: newItem.term.trim(),
       definition: newItem.definition.trim()
     };
-
     const newContent = {
       ...content,
       items: newItems,
       updatedAt: new Date()
     };
-
     handleContentChange(newContent);
     setEditingIndex(null);
     setNewItem({ term: '', definition: '' });
   };
-
   // 取消編輯
   const handleCancelEdit = () => {
     setEditingIndex(null);
     setNewItem({ term: '', definition: '' });
   };
-
   // 刪除項目
   const handleDeleteItem = (index: number) => {
     const newItems = content.items.filter((_, i) => i !== index);
@@ -153,14 +130,11 @@ export default function EnhancedUniversalContentEditor({
     };
     handleContentChange(newContent);
   };
-
   // 批量導入
   const handleImport = () => {
     if (!importText.trim()) return;
-
     const lines = importText.split('\n').filter(line => line.trim());
     const newItems: UniversalContentItem[] = [];
-
     lines.forEach((line, index) => {
       const parts = line.split('\t');
       if (parts.length >= 2) {
@@ -171,7 +145,6 @@ export default function EnhancedUniversalContentEditor({
         });
       }
     });
-
     if (newItems.length > 0) {
       const newContent = {
         ...content,
@@ -183,7 +156,6 @@ export default function EnhancedUniversalContentEditor({
       setShowImport(false);
     }
   };
-
   // 遊戲選擇
   const handleGameSelect = (gameType: GameType) => {
     // 驗證遊戲兼容性
@@ -192,18 +164,15 @@ export default function EnhancedUniversalContentEditor({
       alert(`無法啟動 ${gameType} 遊戲：\n${gameValidation.map(e => e.message).join('\n')}`);
       return;
     }
-
     const adaptedContent = GameAdapters.adaptContent(content, gameType);
     onGameSelect?.(gameType, adaptedContent);
   };
-
   // 強制保存
   const handleSave = async () => {
     if (!validationResult?.canPublish) {
       setShowValidation(true);
       return;
     }
-
     try {
       await forceSave(content);
       onSave?.(content);
@@ -212,16 +181,13 @@ export default function EnhancedUniversalContentEditor({
       alert('保存失敗，請重試');
     }
   };
-
   // 獲取推薦遊戲
   const recommendations = TemplateManager.getRecommendedTemplates(content.items.length);
-
   return (
     <div className="enhanced-content-editor max-w-6xl mx-auto p-6">
       {/* 自動保存指示器 */}
       <div id="autosave-indicator" className="mb-4" style={{ display: 'none' }}></div>
       <div id="autosave-error" className="mb-4 p-2 bg-yellow-100 border border-yellow-400 rounded" style={{ display: 'none' }}></div>
-
       {/* 頭部信息 */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
@@ -241,7 +207,6 @@ export default function EnhancedUniversalContentEditor({
               rows={2}
             />
           </div>
-          
           <div className="flex items-center space-x-2">
             {autoSaveState && (
               <div className="text-sm text-gray-500">
@@ -261,7 +226,6 @@ export default function EnhancedUniversalContentEditor({
             </button>
           </div>
         </div>
-
         {/* 驗證狀態 */}
         {validationResult && (validationResult.errors.length > 0 || showValidation) && (
           <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -277,7 +241,6 @@ export default function EnhancedUniversalContentEditor({
           </div>
         )}
       </div>
-
       {/* 內容編輯區域 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 左側：內容管理 */}
@@ -296,7 +259,6 @@ export default function EnhancedUniversalContentEditor({
                 </button>
               </div>
             </div>
-
             {/* 批量導入 */}
             {showImport && (
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
@@ -326,13 +288,11 @@ export default function EnhancedUniversalContentEditor({
                 </div>
               </div>
             )}
-
             {/* 添加新項目 - 增強版富文本編輯 */}
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
               <h4 className="font-medium mb-4 text-gray-900">
                 {editingIndex !== null ? '編輯項目' : '添加新項目'}
               </h4>
-
               <div className="space-y-4">
                 {/* 詞彙/問題 - 富文本編輯器 */}
                 <div>
@@ -346,7 +306,6 @@ export default function EnhancedUniversalContentEditor({
                     data-testid="term-rich-editor"
                   />
                 </div>
-
                 {/* 定義/答案 - 富文本編輯器 */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -386,7 +345,6 @@ export default function EnhancedUniversalContentEditor({
                 )}
               </div>
             </div>
-
             {/* 內容項目列表 - 增強版富文本顯示 */}
             <div className="space-y-4">
               {content.items.map((item, index) => (
@@ -404,7 +362,6 @@ export default function EnhancedUniversalContentEditor({
                           data-testid={`item-term-${index}`}
                         />
                       </div>
-
                       {/* 定義/答案顯示 */}
                       <div>
                         <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
@@ -417,7 +374,6 @@ export default function EnhancedUniversalContentEditor({
                         />
                       </div>
                     </div>
-
                     <div className="flex items-center space-x-2 ml-4">
                       <button
                         onClick={() => handleEditItem(index)}
@@ -438,7 +394,6 @@ export default function EnhancedUniversalContentEditor({
                 </div>
               ))}
             </div>
-
             {content.items.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <div className="text-4xl mb-2">📝</div>
@@ -448,12 +403,10 @@ export default function EnhancedUniversalContentEditor({
             )}
           </div>
         </div>
-
         {/* 右側：推薦遊戲 */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">推薦遊戲</h3>
-            
             {recommendations.length > 0 ? (
               <div className="space-y-3">
                 {recommendations.slice(0, 6).map((game) => (

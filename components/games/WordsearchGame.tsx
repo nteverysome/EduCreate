@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
-
 export interface WordsearchWord {
   id: string;
   word: string;
   hint?: string;
   category?: string;
 }
-
 interface WordsearchGameProps {
   words: WordsearchWord[];
   gridSize?: number;
   timeLimit?: number;
   onComplete?: (results: any) => void;
 }
-
 interface GridCell {
   letter: string;
   isPartOfWord: boolean;
@@ -21,7 +18,6 @@ interface GridCell {
   isSelected: boolean;
   isFound: boolean;
 }
-
 interface WordPlacement {
   word: string;
   wordId: string;
@@ -30,7 +26,6 @@ interface WordPlacement {
   direction: 'horizontal' | 'vertical' | 'diagonal';
   positions: {row: number, col: number}[];
 }
-
 export default function WordsearchGame({
   words,
   gridSize = 12,
@@ -46,12 +41,10 @@ export default function WordsearchGame({
   const [gameStarted, setGameStarted] = useState(false);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [score, setScore] = useState(0);
-
   // 生成隨機字母
   const getRandomLetter = () => {
     return String.fromCharCode(65 + Math.floor(Math.random() * 26));
   };
-
   // 檢查位置是否有效
   const isValidPosition = (row: number, col: number, word: string, direction: string) => {
     const directions = {
@@ -59,20 +52,16 @@ export default function WordsearchGame({
       vertical: [1, 0],
       diagonal: [1, 1]
     };
-    
     const [dRow, dCol] = directions[direction as keyof typeof directions];
-    
     for (let i = 0; i < word.length; i++) {
       const newRow = row + i * dRow;
       const newCol = col + i * dCol;
-      
       if (newRow < 0 || newRow >= gridSize || newCol < 0 || newCol >= gridSize) {
         return false;
       }
     }
     return true;
   };
-
   // 放置單詞
   const placeWord = (grid: GridCell[][], word: WordsearchWord, placement: WordPlacement) => {
     const directions = {
@@ -80,20 +69,16 @@ export default function WordsearchGame({
       vertical: [1, 0],
       diagonal: [1, 1]
     };
-    
     const [dRow, dCol] = directions[placement.direction];
-    
     for (let i = 0; i < word.word.length; i++) {
       const row = placement.startRow + i * dRow;
       const col = placement.startCol + i * dCol;
-      
       grid[row][col].letter = word.word[i].toUpperCase();
       grid[row][col].isPartOfWord = true;
       grid[row][col].wordIds.push(word.id);
       placement.positions.push({ row, col });
     }
   };
-
   // 初始化網格
   useEffect(() => {
     const newGrid: GridCell[][] = Array(gridSize).fill(null).map(() =>
@@ -105,20 +90,16 @@ export default function WordsearchGame({
         isFound: false
       }))
     );
-
     const placements: WordPlacement[] = [];
     const directions = ['horizontal', 'vertical', 'diagonal'];
-
     // 嘗試放置每個單詞
     words.forEach(word => {
       let placed = false;
       let attempts = 0;
-      
       while (!placed && attempts < 100) {
         const direction = directions[Math.floor(Math.random() * directions.length)];
         const row = Math.floor(Math.random() * gridSize);
         const col = Math.floor(Math.random() * gridSize);
-        
         if (isValidPosition(row, col, word.word, direction)) {
           const placement: WordPlacement = {
             word: word.word,
@@ -128,7 +109,6 @@ export default function WordsearchGame({
             direction: direction as any,
             positions: []
           };
-          
           placeWord(newGrid, word, placement);
           placements.push(placement);
           placed = true;
@@ -136,7 +116,6 @@ export default function WordsearchGame({
         attempts++;
       }
     });
-
     // 填充剩餘格子
     for (let row = 0; row < gridSize; row++) {
       for (let col = 0; col < gridSize; col++) {
@@ -145,15 +124,12 @@ export default function WordsearchGame({
         }
       }
     }
-
     setGrid(newGrid);
     setWordPlacements(placements);
   }, [words, gridSize]);
-
   // 計時器
   useEffect(() => {
     if (!gameStarted || gameCompleted) return;
-
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -163,10 +139,8 @@ export default function WordsearchGame({
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [gameStarted, gameCompleted]);
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -176,14 +150,11 @@ export default function WordsearchGame({
     setScore(0);
     setTimeLeft(timeLimit);
   };
-
   // 開始選擇
   const handleMouseDown = (row: number, col: number) => {
     if (!gameStarted || gameCompleted) return;
-    
     setIsSelecting(true);
     setSelectedCells([{ row, col }]);
-    
     setGrid(prev => prev.map((gridRow, r) =>
       gridRow.map((cell, c) => ({
         ...cell,
@@ -191,18 +162,14 @@ export default function WordsearchGame({
       }))
     ));
   };
-
   // 選擇過程中
   const handleMouseEnter = (row: number, col: number) => {
     if (!isSelecting || !gameStarted || gameCompleted) return;
-    
     const firstCell = selectedCells[0];
     if (!firstCell) return;
-    
     // 計算選擇路徑
     const newSelectedCells = getSelectionPath(firstCell, { row, col });
     setSelectedCells(newSelectedCells);
-    
     setGrid(prev => prev.map((gridRow, r) =>
       gridRow.map((cell, c) => ({
         ...cell,
@@ -210,13 +177,11 @@ export default function WordsearchGame({
       }))
     ));
   };
-
   // 計算選擇路徑
   const getSelectionPath = (start: {row: number, col: number}, end: {row: number, col: number}) => {
     const path = [];
     const rowDiff = end.row - start.row;
     const colDiff = end.col - start.col;
-    
     // 只允許直線選擇
     if (rowDiff === 0) {
       // 水平
@@ -235,7 +200,6 @@ export default function WordsearchGame({
       const rowStep = rowDiff > 0 ? 1 : -1;
       const colStep = colDiff > 0 ? 1 : -1;
       const steps = Math.abs(rowDiff);
-      
       for (let i = 0; i <= steps; i++) {
         path.push({
           row: start.row + i * rowStep,
@@ -246,29 +210,22 @@ export default function WordsearchGame({
       // 無效選擇，只返回起始點
       return [start];
     }
-    
     return path;
   };
-
   // 結束選擇
   const handleMouseUp = () => {
     if (!isSelecting || !gameStarted || gameCompleted) return;
-    
     setIsSelecting(false);
-    
     // 檢查是否找到單詞
     const selectedWord = selectedCells.map(cell => grid[cell.row][cell.col].letter).join('');
     const reverseWord = selectedWord.split('').reverse().join('');
-    
     const foundPlacement = wordPlacements.find(placement => 
       placement.word.toUpperCase() === selectedWord || placement.word.toUpperCase() === reverseWord
     );
-    
     if (foundPlacement && !foundWords.has(foundPlacement.wordId)) {
       // 找到新單詞
       setFoundWords(prev => new Set([...prev, foundPlacement.wordId]));
       setScore(prev => prev + foundPlacement.word.length * 10);
-      
       // 標記為已找到
       setGrid(prev => prev.map((row, r) =>
         row.map((cell, c) => ({
@@ -283,23 +240,19 @@ export default function WordsearchGame({
         row.map(cell => ({ ...cell, isSelected: false }))
       ));
     }
-    
     setSelectedCells([]);
   };
-
   // 檢查遊戲完成
   useEffect(() => {
     if (foundWords.size === words.length && words.length > 0) {
       setGameCompleted(true);
     }
   }, [foundWords.size, words.length]);
-
   // 遊戲完成處理
   useEffect(() => {
     if (gameCompleted) {
       const accuracy = Math.round((foundWords.size / words.length) * 100);
       const timeSpent = timeLimit - timeLeft;
-      
       const results = {
         score,
         foundWords: foundWords.size,
@@ -307,18 +260,15 @@ export default function WordsearchGame({
         accuracy,
         timeSpent
       };
-      
       onComplete?.(results);
     }
   }, [gameCompleted, score, foundWords.size, words.length, timeLimit, timeLeft, onComplete]);
-
   // 格式化時間
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   if (!gameStarted) {
     return (
       <div className="text-center p-8">
@@ -336,15 +286,12 @@ export default function WordsearchGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const accuracy = Math.round((foundWords.size / words.length) * 100);
-    
     return (
       <div className="text-center p-8">
         <div className="text-6xl mb-4">🎉</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">遊戲完成！</h2>
-        
         <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -365,7 +312,6 @@ export default function WordsearchGame({
             </div>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="mt-6 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
@@ -375,7 +321,6 @@ export default function WordsearchGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-6xl mx-auto">
       {/* 遊戲狀態 */}
@@ -395,7 +340,6 @@ export default function WordsearchGame({
           <div className="text-sm text-gray-600">得分</div>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 字母網格 */}
         <div className="lg:col-span-2">
@@ -427,11 +371,9 @@ export default function WordsearchGame({
             </div>
           </div>
         </div>
-
         {/* 單詞列表 */}
         <div className="bg-white rounded-lg shadow-lg p-4">
           <h3 className="text-lg font-bold text-gray-800 mb-4">要找的單詞</h3>
-          
           <div className="space-y-2">
             {words.map(word => (
               <div
@@ -461,7 +403,6 @@ export default function WordsearchGame({
           </div>
         </div>
       </div>
-
       {/* 遊戲說明 */}
       <div className="mt-6 text-center text-gray-600">
         <p>拖拽選擇字母來找到隱藏的單詞！可以是水平、垂直或對角線方向。</p>

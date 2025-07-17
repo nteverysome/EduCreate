@@ -3,9 +3,7 @@
  * 基於數學記憶機制的數學題目生成遊戲
  * 根據WordWall Maths Generator模板分析設計
  */
-
 import React, { useState, useEffect } from 'react';
-
 interface MathProblem {
   id: string;
   question: string;
@@ -15,7 +13,6 @@ interface MathProblem {
   difficulty: number;
   steps?: string[];
 }
-
 interface MathGeneratorGameProps {
   operations: ('add' | 'subtract' | 'multiply' | 'divide')[];
   range: { min: number; max: number };
@@ -25,7 +22,6 @@ interface MathGeneratorGameProps {
   onComplete?: (score: number, timeUsed: number) => void;
   onScoreUpdate?: (score: number) => void;
 }
-
 export default function MathGeneratorGame({
   operations,
   range,
@@ -48,16 +44,13 @@ export default function MathGeneratorGame({
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [showStepsForCurrent, setShowStepsForCurrent] = useState(false);
-
   const currentProblem = problems[currentProblemIndex];
-
   // 生成數學題目
   useEffect(() => {
     if (gameStarted) {
       generateProblems();
     }
   }, [gameStarted]);
-
   // 計時器
   useEffect(() => {
     if (gameStarted && timeLimit > 0 && timeLeft > 0 && !gameCompleted) {
@@ -69,25 +62,20 @@ export default function MathGeneratorGame({
       handleGameComplete();
     }
   }, [gameStarted, timeLeft, gameCompleted, timeLimit]);
-
   const generateProblems = () => {
     const newProblems: MathProblem[] = [];
-    
     for (let i = 0; i < questionCount; i++) {
       const operation = operations[Math.floor(Math.random() * operations.length)];
       const problem = generateSingleProblem(operation, i);
       newProblems.push(problem);
     }
-    
     setProblems(newProblems);
   };
-
   const generateSingleProblem = (operation: string, index: number): MathProblem => {
     let operands: number[] = [];
     let answer: number = 0;
     let question: string = '';
     let steps: string[] = [];
-    
     switch (operation) {
       case 'add':
         operands = [
@@ -101,7 +89,6 @@ export default function MathGeneratorGame({
           `${operands[0]} + ${operands[1]} = ${answer}`
         ];
         break;
-        
       case 'subtract':
         // 確保結果為正數
         const larger = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
@@ -114,7 +101,6 @@ export default function MathGeneratorGame({
           `${operands[0]} - ${operands[1]} = ${answer}`
         ];
         break;
-        
       case 'multiply':
         operands = [
           Math.floor(Math.random() * 12) + 1, // 1-12
@@ -127,7 +113,6 @@ export default function MathGeneratorGame({
           `${operands[0]} × ${operands[1]} = ${answer}`
         ];
         break;
-        
       case 'divide':
         // 生成能整除的除法
         const divisor = Math.floor(Math.random() * 12) + 1;
@@ -142,7 +127,6 @@ export default function MathGeneratorGame({
         ];
         break;
     }
-    
     return {
       id: `problem-${index}`,
       question,
@@ -153,7 +137,6 @@ export default function MathGeneratorGame({
       steps
     };
   };
-
   const calculateDifficulty = (operation: string, operands: number[]): number => {
     switch (operation) {
       case 'add':
@@ -167,19 +150,15 @@ export default function MathGeneratorGame({
         return 1;
     }
   };
-
   const startGame = () => {
     setGameStarted(true);
     setStartTime(Date.now());
     setTimeLeft(timeLimit);
   };
-
   const handleAnswerSubmit = () => {
     if (!userAnswer.trim()) return;
-    
     const userNum = parseFloat(userAnswer);
     const isCorrect = Math.abs(userNum - currentProblem.answer) < 0.01; // 允許小數點誤差
-    
     if (isCorrect) {
       const points = 10 + (currentProblem.difficulty * 5);
       setScore(prev => {
@@ -193,14 +172,12 @@ export default function MathGeneratorGame({
       setWrongAnswers(prev => prev + 1);
       setFeedbackMessage(`錯誤！正確答案是 ${currentProblem.answer}`);
     }
-    
     setShowFeedback(true);
     setTimeout(() => {
       setShowFeedback(false);
       nextProblem();
     }, 2000);
   };
-
   const nextProblem = () => {
     if (currentProblemIndex < problems.length - 1) {
       setCurrentProblemIndex(prev => prev + 1);
@@ -210,23 +187,19 @@ export default function MathGeneratorGame({
       handleGameComplete();
     }
   };
-
   const handleGameComplete = () => {
     setGameCompleted(true);
     const timeUsed = startTime ? (Date.now() - startTime) / 1000 : 0;
     onComplete?.(score, timeUsed);
   };
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleAnswerSubmit();
     }
   };
-
   const toggleSteps = () => {
     setShowStepsForCurrent(!showStepsForCurrent);
   };
-
   const getOperationSymbol = (operation: string): string => {
     switch (operation) {
       case 'add': return '+';
@@ -236,7 +209,6 @@ export default function MathGeneratorGame({
       default: return '?';
     }
   };
-
   const getOperationName = (operation: string): string => {
     switch (operation) {
       case 'add': return '加法';
@@ -246,7 +218,6 @@ export default function MathGeneratorGame({
       default: return '運算';
     }
   };
-
   if (!gameStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -254,7 +225,6 @@ export default function MathGeneratorGame({
         <p className="text-gray-600 mb-6 text-center max-w-md">
           自動生成數學題目進行練習。基於數學記憶機制，提高您的計算能力和數學思維。
         </p>
-        
         <div className="mb-6 p-4 bg-blue-50 rounded-lg">
           <h3 className="font-semibold text-blue-900 mb-2">遊戲設置：</h3>
           <div className="text-blue-800 text-sm space-y-1">
@@ -265,7 +235,6 @@ export default function MathGeneratorGame({
             {timeLimit > 0 && <p>時間限制: {timeLimit} 秒</p>}
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-lg font-semibold"
@@ -275,10 +244,8 @@ export default function MathGeneratorGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const accuracy = problems.length > 0 ? (correctAnswers / problems.length) * 100 : 0;
-    
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
         <h2 className="text-3xl font-bold text-green-600 mb-4">計算完成！</h2>
@@ -297,7 +264,6 @@ export default function MathGeneratorGame({
       </div>
     );
   }
-
   if (!currentProblem) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -305,7 +271,6 @@ export default function MathGeneratorGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-2xl mx-auto p-6">
       {/* 遊戲狀態欄 */}
@@ -324,7 +289,6 @@ export default function MathGeneratorGame({
           </div>
         )}
       </div>
-
       {/* 反饋消息 */}
       {showFeedback && (
         <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-lg text-white font-semibold z-50 ${
@@ -333,7 +297,6 @@ export default function MathGeneratorGame({
           {feedbackMessage}
         </div>
       )}
-
       {/* 題目區域 */}
       <div className="mb-8 text-center">
         <div className="mb-4">
@@ -345,11 +308,9 @@ export default function MathGeneratorGame({
             {getOperationName(currentProblem.operation)} - 難度 {currentProblem.difficulty}
           </span>
         </div>
-        
         <div className="text-4xl font-bold text-gray-800 mb-6 p-8 bg-gray-50 rounded-lg">
           {currentProblem.question}
         </div>
-
         {/* 答案輸入 */}
         <div className="flex justify-center items-center space-x-4 mb-6">
           <input
@@ -369,7 +330,6 @@ export default function MathGeneratorGame({
             提交
           </button>
         </div>
-
         {/* 步驟顯示 */}
         {showSteps && (
           <div className="mb-6">
@@ -379,7 +339,6 @@ export default function MathGeneratorGame({
             >
               {showStepsForCurrent ? '隱藏步驟' : '顯示解題步驟'}
             </button>
-            
             {showStepsForCurrent && currentProblem.steps && (
               <div className="p-4 bg-yellow-50 rounded-lg text-left">
                 <h4 className="font-semibold text-yellow-800 mb-2">解題步驟：</h4>
@@ -393,7 +352,6 @@ export default function MathGeneratorGame({
           </div>
         )}
       </div>
-
       {/* 進度條 */}
       <div className="mb-6">
         <div className="flex justify-between text-sm text-gray-600 mb-2">
@@ -407,7 +365,6 @@ export default function MathGeneratorGame({
           />
         </div>
       </div>
-
       {/* 操作說明 */}
       <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
         <p className="font-semibold mb-2">操作說明：</p>

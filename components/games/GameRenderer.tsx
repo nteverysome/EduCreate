@@ -2,10 +2,8 @@
  * 遊戲渲染器組件
  * 動態渲染任何遊戲模板
  */
-
 import React, { useState, useEffect } from 'react';
 import { gameTemplateManager, GameTemplateInfo } from '../../lib/game-templates/GameTemplateManager';
-
 interface GameRendererProps {
   templateId: string;
   gameData?: any;
@@ -16,7 +14,6 @@ interface GameRendererProps {
   onGameResume?: () => void;
   className?: string;
 }
-
 interface GameSession {
   id: string;
   templateId: string;
@@ -31,7 +28,6 @@ interface GameSession {
     timeSpent: number;
   };
 }
-
 export default function GameRenderer({
   templateId,
   gameData,
@@ -46,25 +42,20 @@ export default function GameRenderer({
   const [gameSession, setGameSession] = useState<GameSession | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
   // 初始化遊戲模板
   useEffect(() => {
     const loadTemplate = async () => {
       try {
         setIsLoading(true);
         setError(null);
-
         const templateInfo = gameTemplateManager.getTemplate(templateId);
         if (!templateInfo) {
           throw new Error(`Template "${templateId}" not found`);
         }
-
         if (!templateInfo.isImplemented) {
           throw new Error(`Template "${templateId}" is not yet implemented`);
         }
-
         setTemplate(templateInfo);
-        
         // 初始化遊戲會話
         const session: GameSession = {
           id: `session-${Date.now()}`,
@@ -80,7 +71,6 @@ export default function GameRenderer({
             timeSpent: 0
           }
         };
-        
         setGameSession(session);
         setIsLoading(false);
       } catch (err) {
@@ -88,10 +78,8 @@ export default function GameRenderer({
         setIsLoading(false);
       }
     };
-
     loadTemplate();
   }, [templateId]);
-
   // 處理遊戲開始
   const handleGameStart = () => {
     if (gameSession) {
@@ -103,7 +91,6 @@ export default function GameRenderer({
       onGameStart?.();
     }
   };
-
   // 處理分數更新
   const handleScoreUpdate = (score: number) => {
     if (gameSession) {
@@ -114,7 +101,6 @@ export default function GameRenderer({
       onScoreUpdate?.(score);
     }
   };
-
   // 處理遊戲完成
   const handleGameComplete = (score: number, timeUsed: number) => {
     if (gameSession) {
@@ -122,18 +108,15 @@ export default function GameRenderer({
         ...gameSession.stats,
         timeSpent: timeUsed
       };
-
       setGameSession(prev => prev ? {
         ...prev,
         currentScore: score,
         gameState: 'completed',
         stats: finalStats
       } : null);
-
       onGameComplete?.(score, timeUsed, finalStats);
     }
   };
-
   // 處理遊戲暫停
   const handleGamePause = () => {
     if (gameSession && gameSession.gameState === 'playing') {
@@ -144,7 +127,6 @@ export default function GameRenderer({
       onGamePause?.();
     }
   };
-
   // 處理遊戲恢復
   const handleGameResume = () => {
     if (gameSession && gameSession.gameState === 'paused') {
@@ -155,7 +137,6 @@ export default function GameRenderer({
       onGameResume?.();
     }
   };
-
   // 重新開始遊戲
   const handleGameRestart = () => {
     if (gameSession) {
@@ -174,7 +155,6 @@ export default function GameRenderer({
       } : null);
     }
   };
-
   // 渲染加載狀態
   if (isLoading) {
     return (
@@ -186,7 +166,6 @@ export default function GameRenderer({
       </div>
     );
   }
-
   // 渲染錯誤狀態
   if (error) {
     return (
@@ -205,7 +184,6 @@ export default function GameRenderer({
       </div>
     );
   }
-
   // 渲染模板不存在
   if (!template || !gameSession) {
     return (
@@ -218,7 +196,6 @@ export default function GameRenderer({
       </div>
     );
   }
-
   // 準備遊戲屬性
   const gameProps = {
     ...template.defaultProps,
@@ -229,10 +206,8 @@ export default function GameRenderer({
     onPause: handleGamePause,
     onResume: handleGameResume
   };
-
   // 動態渲染遊戲組件
   const GameComponent = template.component;
-
   return (
     <div className={`game-renderer ${className}`}>
       {/* 遊戲信息欄 */}
@@ -252,7 +227,6 @@ export default function GameRenderer({
               難度 {template.difficultyLevel}/5
             </span>
           </div>
-          
           <div className="flex items-center space-x-2">
             {gameSession.gameState === 'playing' && (
               <button
@@ -280,10 +254,8 @@ export default function GameRenderer({
             )}
           </div>
         </div>
-        
         {/* 遊戲描述 */}
         <p className="text-sm text-gray-600 mt-2">{template.description}</p>
-        
         {/* 遊戲特性標籤 */}
         <div className="flex flex-wrap gap-2 mt-3">
           {template.features.map((feature, index) => (
@@ -296,7 +268,6 @@ export default function GameRenderer({
           ))}
         </div>
       </div>
-
       {/* 遊戲狀態指示器 */}
       {gameSession.gameState === 'paused' && (
         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -306,12 +277,10 @@ export default function GameRenderer({
           </div>
         </div>
       )}
-
       {/* 遊戲組件 */}
       <div className="game-component">
         <GameComponent {...gameProps} />
       </div>
-
       {/* 遊戲統計（僅在遊戲進行中或完成後顯示） */}
       {(gameSession.gameState === 'playing' || gameSession.gameState === 'completed') && (
         <div className="mt-4 p-4 bg-gray-50 rounded-lg">
@@ -336,7 +305,6 @@ export default function GameRenderer({
           </div>
         </div>
       )}
-
       {/* 記憶增強提示 */}
       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
         <h5 className="text-sm font-semibold text-blue-800 mb-1">🧠 記憶增強提示</h5>

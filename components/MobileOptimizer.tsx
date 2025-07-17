@@ -467,3 +467,4 @@ export const MobileMemoryEnhancement: React.FC = () => {
     </div>
   );
 };
+export default useIsMobile;

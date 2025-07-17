@@ -11,11 +11,11 @@ interface PerformanceMonitorProps {
   children?: React.ReactNode;
 }
 
-export default function PerformanceMonitor({ 
-  enabled = true, 
+const PerformanceMonitor = ({
+  enabled = true,
   reportInterval = 30000, // 30 秒
-  children 
-}: PerformanceMonitorProps) {
+  children
+}: PerformanceMonitorProps) => {
   const metricsRef = useRef<any[]>([]);
   const observerRef = useRef<PerformanceObserver | null>(null);
   const reportTimerRef = useRef<NodeJS.Timeout>();
@@ -367,3 +367,4 @@ export function usePerformanceMonitoring(enabled = true) {
     measureAsync
   };
 }
+export default PerformanceMonitor;

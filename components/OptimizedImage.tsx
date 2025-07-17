@@ -1,12 +1,10 @@
 import Image, { ImageProps } from 'next/image';
 import { useState, useEffect } from 'react';
-
 type OptimizedImageProps = Omit<ImageProps, 'onLoadingComplete'> & {
   fallbackSrc?: string;
   lowQualitySrc?: string;
   onLoad?: () => void;
 };
-
 /**
  * 優化的圖片組件，提供以下功能：
  * - 自動使用WebP/AVIF格式（由Next.js處理）
@@ -25,14 +23,12 @@ export default function OptimizedImage({
   const [imgSrc, setImgSrc] = useState(lowQualitySrc || src);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
-
   useEffect(() => {
     // 當src變更時重置狀態
     setImgSrc(lowQualitySrc || src);
     setIsLoaded(false);
     setError(false);
   }, [src, lowQualitySrc]);
-
   const handleLoad = () => {
     // 如果使用了低質量預覽，在加載完成後切換到高質量圖片
     if (lowQualitySrc && !isLoaded) {
@@ -41,12 +37,10 @@ export default function OptimizedImage({
     setIsLoaded(true);
     onLoad?.();
   };
-
   const handleError = () => {
     setError(true);
     setImgSrc(fallbackSrc);
   };
-
   return (
     <div className={`relative overflow-hidden ${props.className || ''}`} style={props.style}>
       <Image

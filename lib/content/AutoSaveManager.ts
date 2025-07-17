@@ -378,6 +378,27 @@ export class AutoSaveManager {
       const { compressed, ratio, result } = await this.compressData(saveData);
       this.compressionRatio = ratio;
 
+      // 準備 API 請求數據
+      const apiRequestData = {
+        guid: this.guid,
+        sessionId: this.sessionId,
+        content: saveData,
+        contentHash: result.hash,
+        changeType: this.getChangeType(),
+        changeCount: this.contentChangeCount,
+        isCompressed: this.enableCompression,
+        templateId: saveData.templateId,
+        folderId: saveData.folderId,
+        metadata: {
+          compressionAlgorithm: result.algorithm,
+          originalSize: result.originalSize,
+          compressedSize: result.compressedSize,
+          networkStatus: this.isOnline ? 'online' : 'offline',
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString()
+        }
+      };
+
       // 在線保存到服務器
       const response = await fetch(`/api/universal-content/${this.activityId}/enhanced-autosave`, {
         method: 'POST',
@@ -392,7 +413,7 @@ export class AutoSaveManager {
           'X-Original-Size': result.originalSize.toString(),
           'X-Compressed-Size': result.compressedSize.toString()
         },
-        body: compressed
+        body: JSON.stringify(apiRequestData)
       });
 
       if (!response.ok) {
@@ -1209,6 +1230,21 @@ export class AutoSaveManager {
 
     this.listeners.clear();
     this.performanceMetrics = [];
+  }
+
+  /**
+   * 獲取變更類型 (基於內容變更模式)
+   */
+  private getChangeType(): 'typing' | 'paste' | 'delete' | 'template-switch' | 'manual' {
+    // 這裡可以根據實際的變更模式來判斷
+    // 目前簡化為基於變更計數的判斷
+    if (this.contentChangeCount === 1) {
+      return 'typing';
+    } else if (this.contentChangeCount > 5) {
+      return 'paste';
+    } else {
+      return 'manual';
+    }
   }
 }
 

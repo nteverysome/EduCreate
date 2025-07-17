@@ -2,16 +2,13 @@
  * Watch and Memorize Game Component
  * 基於觀察記憶機制的序列記憶遊戲
  */
-
 import React, { useState, useEffect } from 'react';
-
 interface SequenceItem {
   id: string;
   content: string;
   duration: number; // 顯示時間(毫秒)
   type?: 'text' | 'image' | 'color' | 'number';
 }
-
 interface WatchMemorizeGameProps {
   sequence: SequenceItem[];
   testType?: 'order' | 'content' | 'both';
@@ -21,9 +18,7 @@ interface WatchMemorizeGameProps {
   onComplete?: (score: number, timeUsed: number) => void;
   onScoreUpdate?: (score: number) => void;
 }
-
 type GamePhase = 'intro' | 'watching' | 'testing' | 'completed';
-
 export default function WatchMemorizeGame({
   sequence,
   testType = 'order',
@@ -44,7 +39,6 @@ export default function WatchMemorizeGame({
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [watchingProgress, setWatchingProgress] = useState(0);
-
   // 計時器
   useEffect(() => {
     if (gamePhase === 'testing' && timeLimit > 0 && timeLeft > 0) {
@@ -56,27 +50,22 @@ export default function WatchMemorizeGame({
       handleGameComplete();
     }
   }, [gamePhase, timeLeft, timeLimit]);
-
   const startGame = () => {
     setGamePhase('watching');
     setStartTime(Date.now());
     setTimeLeft(timeLimit);
     startWatchingSequence();
   };
-
   const startWatchingSequence = () => {
     setCurrentItemIndex(0);
     setWatchingProgress(0);
-    
     const totalDuration = showDuration * 1000;
     const itemDuration = totalDuration / sequence.length;
-    
     // 顯示序列
     sequence.forEach((item, index) => {
       setTimeout(() => {
         setCurrentItemIndex(index);
         setWatchingProgress(((index + 1) / sequence.length) * 100);
-        
         // 如果是最後一個項目，開始測試階段
         if (index === sequence.length - 1) {
           setTimeout(() => {
@@ -87,7 +76,6 @@ export default function WatchMemorizeGame({
       }, index * itemDuration);
     });
   };
-
   const prepareTestItems = () => {
     if (testType === 'order') {
       // 打亂順序讓用戶重新排列
@@ -104,17 +92,14 @@ export default function WatchMemorizeGame({
       setAvailableItems(shuffled);
     }
   };
-
   const generateDistractors = (originalSequence: SequenceItem[]): SequenceItem[] => {
     // 生成干擾項的邏輯
     const distractors: SequenceItem[] = [];
     const usedContent = new Set(originalSequence.map(item => item.content));
-    
     // 根據類型生成干擾項
     for (let i = 0; i < Math.min(3, originalSequence.length); i++) {
       let distractor: string;
       const sampleItem = originalSequence[0];
-      
       switch (sampleItem.type) {
         case 'number':
           do {
@@ -131,49 +116,39 @@ export default function WatchMemorizeGame({
           // 對於文字，生成相似但不同的內容
           distractor = `干擾項${i + 1}`;
       }
-      
       distractors.push({
         id: `distractor-${i}`,
         content: distractor,
         duration: sampleItem.duration,
         type: sampleItem.type
       });
-      
       usedContent.add(distractor);
     }
-    
     return distractors;
   };
-
   const handleItemSelect = (item: SequenceItem) => {
     if (userSequence.length < sequence.length) {
       setUserSequence(prev => [...prev, item.content]);
       setAvailableItems(prev => prev.filter(i => i.id !== item.id));
     }
   };
-
   const handleItemRemove = (index: number) => {
     const removedContent = userSequence[index];
     const removedItem = sequence.find(item => item.content === removedContent) || 
                        availableItems.find(item => item.content === removedContent);
-    
     if (removedItem) {
       setUserSequence(prev => prev.filter((_, i) => i !== index));
       setAvailableItems(prev => [...prev, removedItem]);
     }
   };
-
   const checkAnswer = () => {
     setAttempts(prev => prev + 1);
-    
     let isCorrect = false;
     let partialScore = 0;
-    
     if (testType === 'order' || testType === 'both') {
       // 檢查順序
       const correctSequence = sequence.map(item => item.content);
       isCorrect = JSON.stringify(userSequence) === JSON.stringify(correctSequence);
-      
       // 計算部分分數
       for (let i = 0; i < Math.min(userSequence.length, correctSequence.length); i++) {
         if (userSequence[i] === correctSequence[i]) {
@@ -186,26 +161,21 @@ export default function WatchMemorizeGame({
       const userContent = new Set(userSequence);
       isCorrect = correctContent.size === userContent.size && 
                  [...correctContent].every(content => userContent.has(content));
-      
       // 計算部分分數
       partialScore = [...userContent].filter(content => correctContent.has(content)).length * 5;
     }
-    
     if (isCorrect) {
       const baseScore = 50;
       const attemptBonus = Math.max(0, 30 - (attempts - 1) * 10);
       const timeBonus = timeLimit > 0 ? Math.max(0, Math.floor(timeLeft / 5)) : 0;
       const totalScore = baseScore + attemptBonus + timeBonus;
-      
       setScore(prev => {
         const newScore = prev + totalScore;
         onScoreUpdate?.(newScore);
         return newScore;
       });
-      
       setFeedbackMessage(`完全正確！+${totalScore} 分`);
       setShowFeedback(true);
-      
       setTimeout(() => {
         setShowFeedback(false);
         handleGameComplete();
@@ -221,10 +191,8 @@ export default function WatchMemorizeGame({
       } else {
         setFeedbackMessage('不正確，再試試看！');
       }
-      
       setShowFeedback(true);
       setTimeout(() => setShowFeedback(false), 1500);
-      
       if (attempts >= maxAttempts) {
         setTimeout(() => {
           handleGameComplete();
@@ -236,16 +204,13 @@ export default function WatchMemorizeGame({
       }
     }
   };
-
   const handleGameComplete = () => {
     setGamePhase('completed');
     const timeUsed = startTime ? (Date.now() - startTime) / 1000 : 0;
     onComplete?.(score, timeUsed);
   };
-
   const renderSequenceItem = (item: SequenceItem) => {
     const baseClasses = "flex items-center justify-center text-2xl font-bold rounded-lg transition-all duration-300";
-    
     switch (item.type) {
       case 'color':
         const colorMap: { [key: string]: string } = {
@@ -285,7 +250,6 @@ export default function WatchMemorizeGame({
         );
     }
   };
-
   if (gamePhase === 'intro') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -313,12 +277,10 @@ export default function WatchMemorizeGame({
       </div>
     );
   }
-
   if (gamePhase === 'watching') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">仔細觀察序列</h2>
-        
         {/* 進度條 */}
         <div className="w-full max-w-md mb-8">
           <div className="bg-gray-200 rounded-full h-2">
@@ -331,7 +293,6 @@ export default function WatchMemorizeGame({
             {Math.round(watchingProgress)}% 完成
           </p>
         </div>
-
         {/* 當前項目 */}
         <div className="mb-4">
           <p className="text-center text-lg font-semibold mb-4">
@@ -339,14 +300,12 @@ export default function WatchMemorizeGame({
           </p>
           {sequence[currentItemIndex] && renderSequenceItem(sequence[currentItemIndex])}
         </div>
-
         <p className="text-gray-600 text-center">
           請專注觀察每個項目...
         </p>
       </div>
     );
   }
-
   if (gamePhase === 'testing') {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -364,7 +323,6 @@ export default function WatchMemorizeGame({
             </div>
           )}
         </div>
-
         {/* 反饋消息 */}
         {showFeedback && (
           <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-lg text-white font-semibold z-50 ${
@@ -373,7 +331,6 @@ export default function WatchMemorizeGame({
             {feedbackMessage}
           </div>
         )}
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* 用戶序列區域 */}
           <div>
@@ -411,7 +368,6 @@ export default function WatchMemorizeGame({
                 </div>
               )}
             </div>
-            
             <div className="mt-4 flex justify-center">
               <button
                 onClick={checkAnswer}
@@ -422,7 +378,6 @@ export default function WatchMemorizeGame({
               </button>
             </div>
           </div>
-
           {/* 可選項目區域 */}
           <div>
             <h3 className="text-lg font-semibold mb-4">可選項目:</h3>
@@ -437,7 +392,6 @@ export default function WatchMemorizeGame({
                 </div>
               ))}
             </div>
-            
             {availableItems.length === 0 && (
               <p className="text-gray-500 text-center py-8">
                 所有項目已選擇
@@ -445,7 +399,6 @@ export default function WatchMemorizeGame({
             )}
           </div>
         </div>
-
         <div className="mt-6 p-4 bg-blue-50 rounded-lg text-sm text-gray-600">
           <p className="font-semibold mb-2">操作說明:</p>
           <ul className="space-y-1">
@@ -458,10 +411,8 @@ export default function WatchMemorizeGame({
       </div>
     );
   }
-
   if (gamePhase === 'completed') {
     const accuracy = sequence.length > 0 ? (score / (sequence.length * 10)) * 100 : 0;
-    
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
         <h2 className="text-3xl font-bold text-green-600 mb-4">記憶測試完成！</h2>
@@ -479,6 +430,5 @@ export default function WatchMemorizeGame({
       </div>
     );
   }
-
   return null;
 }

@@ -2,7 +2,6 @@
  * 增強文件夾組織器組件
  * 支持嵌套文件夾、拖拽操作、批量管理等功能
  */
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   FolderManager, 
@@ -11,7 +10,6 @@ import {
   BulkOperation,
   FolderStats 
 } from '../../lib/content/FolderManager';
-
 interface EnhancedFolderOrganizerProps {
   userId: string;
   onFolderSelect?: (folder: FolderItem | null) => void;
@@ -20,7 +18,6 @@ interface EnhancedFolderOrganizerProps {
   allowBulkOperations?: boolean;
   maxDepth?: number;
 }
-
 export default function EnhancedFolderOrganizer({
   userId,
   onFolderSelect,
@@ -43,13 +40,11 @@ export default function EnhancedFolderOrganizer({
     y: number;
     folderId: string;
   } | null>(null);
-
   // 加載文件夾樹
   const loadFolderTree = useCallback(async () => {
     try {
       const tree = await FolderManager.buildFolderTree(userId);
       setFolderTree(tree);
-      
       if (showStats) {
         const stats = await FolderManager.getFolderStats(userId);
         setFolderStats(stats);
@@ -58,11 +53,9 @@ export default function EnhancedFolderOrganizer({
       console.error('加載文件夾樹失敗:', error);
     }
   }, [userId, showStats]);
-
   useEffect(() => {
     loadFolderTree();
   }, [loadFolderTree]);
-
   // 切換文件夾展開狀態
   const toggleFolderExpansion = (folderId: string) => {
     setExpandedFolders(prev => {
@@ -75,7 +68,6 @@ export default function EnhancedFolderOrganizer({
       return newSet;
     });
   };
-
   // 選擇文件夾
   const selectFolder = (folder: FolderItem, isMultiSelect = false) => {
     if (isMultiSelect) {
@@ -93,7 +85,6 @@ export default function EnhancedFolderOrganizer({
       onFolderSelect?.(folder);
     }
   };
-
   // 創建新文件夾
   const createFolder = async (name: string, parentId?: string) => {
     try {
@@ -105,35 +96,29 @@ export default function EnhancedFolderOrganizer({
       alert(error instanceof Error ? error.message : '創建文件夾失敗');
     }
   };
-
   // 拖拽開始
   const handleDragStart = (e: React.DragEvent, folderId: string) => {
     setDraggedItem(folderId);
     e.dataTransfer.effectAllowed = 'move';
   };
-
   // 拖拽懸停
   const handleDragOver = (e: React.DragEvent, folderId: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDropTarget(folderId);
   };
-
   // 拖拽離開
   const handleDragLeave = () => {
     setDropTarget(null);
   };
-
   // 拖拽放下
   const handleDrop = async (e: React.DragEvent, targetFolderId: string) => {
     e.preventDefault();
-    
     if (!draggedItem || draggedItem === targetFolderId) {
       setDraggedItem(null);
       setDropTarget(null);
       return;
     }
-
     try {
       await FolderManager.moveFolder(draggedItem, targetFolderId);
       await loadFolderTree();
@@ -141,11 +126,9 @@ export default function EnhancedFolderOrganizer({
       console.error('移動文件夾失敗:', error);
       alert(error instanceof Error ? error.message : '移動文件夾失敗');
     }
-
     setDraggedItem(null);
     setDropTarget(null);
   };
-
   // 批量操作
   const performBulkOperation = async (operation: BulkOperation) => {
     try {
@@ -158,7 +141,6 @@ export default function EnhancedFolderOrganizer({
       alert(error instanceof Error ? error.message : '批量操作失敗');
     }
   };
-
   // 右鍵菜單
   const handleContextMenu = (e: React.MouseEvent, folderId: string) => {
     e.preventDefault();
@@ -168,14 +150,12 @@ export default function EnhancedFolderOrganizer({
       folderId
     });
   };
-
   // 渲染文件夾節點
   const renderFolderNode = (node: FolderTreeNode, level = 0) => {
     const isExpanded = expandedFolders.has(node.id);
     const isSelected = selectedFolders.has(node.id);
     const isDraggedOver = dropTarget === node.id;
     const hasChildren = node.children.length > 0;
-
     return (
       <div key={node.id} className="select-none">
         <div
@@ -203,15 +183,12 @@ export default function EnhancedFolderOrganizer({
               {isExpanded ? '▼' : '▶'}
             </button>
           )}
-
           {/* 文件夾圖標 */}
           <span className="mr-3 text-lg" style={{ color: node.color }}>
             {node.icon || '📁'}
           </span>
-
           {/* 文件夾名稱 */}
           <span className="flex-1 text-sm font-medium">{node.name}</span>
-
           {/* 統計信息 */}
           <div className="flex items-center space-x-2 text-xs text-gray-500">
             {node.subfolderCount > 0 && (
@@ -228,7 +205,6 @@ export default function EnhancedFolderOrganizer({
               <span className="text-green-600">🔗</span>
             )}
           </div>
-
           {/* 多選框 */}
           {allowBulkOperations && (
             <input
@@ -242,7 +218,6 @@ export default function EnhancedFolderOrganizer({
             />
           )}
         </div>
-
         {/* 子文件夾 */}
         {isExpanded && hasChildren && (
           <div className="ml-4">
@@ -252,7 +227,6 @@ export default function EnhancedFolderOrganizer({
       </div>
     );
   };
-
   return (
     <div className="bg-white rounded-lg shadow p-6">
       {/* 頭部 */}
@@ -261,7 +235,6 @@ export default function EnhancedFolderOrganizer({
           <h2 className="text-xl font-bold text-gray-900">文件夾管理</h2>
           <p className="text-gray-600 text-sm mt-1">組織和管理您的活動文件夾</p>
         </div>
-        
         <div className="flex items-center space-x-3">
           {allowBulkOperations && selectedFolders.size > 0 && (
             <button
@@ -271,7 +244,6 @@ export default function EnhancedFolderOrganizer({
               批量操作 ({selectedFolders.size})
             </button>
           )}
-          
           <button
             onClick={() => setShowCreateDialog(true)}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
@@ -280,7 +252,6 @@ export default function EnhancedFolderOrganizer({
           </button>
         </div>
       </div>
-
       {/* 統計信息 */}
       {showStats && folderStats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -302,7 +273,6 @@ export default function EnhancedFolderOrganizer({
           </div>
         </div>
       )}
-
       {/* 搜索框 */}
       <div className="mb-4">
         <div className="relative">
@@ -318,7 +288,6 @@ export default function EnhancedFolderOrganizer({
           </svg>
         </div>
       </div>
-
       {/* 文件夾樹 */}
       <div className="space-y-1 max-h-96 overflow-y-auto">
         {folderTree.length > 0 ? (
@@ -336,7 +305,6 @@ export default function EnhancedFolderOrganizer({
           </div>
         )}
       </div>
-
       {/* 創建文件夾對話框 */}
       {showCreateDialog && (
         <CreateFolderDialog
@@ -345,7 +313,6 @@ export default function EnhancedFolderOrganizer({
           maxDepth={maxDepth}
         />
       )}
-
       {/* 批量操作面板 */}
       {showBulkActions && (
         <BulkActionsPanel
@@ -354,7 +321,6 @@ export default function EnhancedFolderOrganizer({
           onClose={() => setShowBulkActions(false)}
         />
       )}
-
       {/* 右鍵菜單 */}
       {contextMenu && (
         <ContextMenu
@@ -371,7 +337,6 @@ export default function EnhancedFolderOrganizer({
     </div>
   );
 }
-
 // 創建文件夾對話框組件
 function CreateFolderDialog({
   onConfirm,
@@ -384,12 +349,10 @@ function CreateFolderDialog({
 }) {
   const [name, setName] = useState('');
   const [parentId, setParentId] = useState<string>('');
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96">
         <h3 className="text-lg font-semibold mb-4">創建新文件夾</h3>
-        
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -405,7 +368,6 @@ function CreateFolderDialog({
             />
           </div>
         </div>
-
         <div className="flex justify-end space-x-3 mt-6">
           <button
             onClick={onCancel}
@@ -425,7 +387,6 @@ function CreateFolderDialog({
     </div>
   );
 }
-
 // 批量操作面板組件
 function BulkActionsPanel({
   selectedCount,
@@ -442,7 +403,6 @@ function BulkActionsPanel({
         <h3 className="text-lg font-semibold mb-4">
           批量操作 ({selectedCount} 個文件夾)
         </h3>
-        
         <div className="space-y-3">
           <button
             onClick={() => onOperation({ type: 'move', itemIds: [] })}
@@ -450,21 +410,18 @@ function BulkActionsPanel({
           >
             📁 移動到其他文件夾
           </button>
-          
           <button
             onClick={() => onOperation({ type: 'copy', itemIds: [] })}
             className="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
             📋 複製文件夾
           </button>
-          
           <button
             onClick={() => onOperation({ type: 'share', itemIds: [] })}
             className="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
           >
             🔗 批量分享
           </button>
-          
           <button
             onClick={() => onOperation({ type: 'delete', itemIds: [] })}
             className="w-full text-left px-4 py-3 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
@@ -472,7 +429,6 @@ function BulkActionsPanel({
             🗑️ 刪除文件夾
           </button>
         </div>
-
         <div className="flex justify-end mt-6">
           <button
             onClick={onClose}
@@ -485,7 +441,6 @@ function BulkActionsPanel({
     </div>
   );
 }
-
 // 右鍵菜單組件
 function ContextMenu({
   x,

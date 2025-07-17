@@ -5,20 +5,17 @@ import { SortableContext, useSortable, verticalListSortingStrategy, horizontalLi
 import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
 import { useEditorStore, EditorElement } from '../../store/editorStore';
-
 interface DraggableItemProps {
   element: EditorElement;
   isSelected: boolean;
   isDragging?: boolean;
 }
-
 // 可拖動的元素組件
-function DraggableItem({ element, isSelected, isDragging }: DraggableItemProps) {
+const DraggableItem = ({ element, isSelected, isDragging }: DraggableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: element.id });
   const removeElement = useEditorStore(state => state.removeElement);
   const selectElement = useEditorStore(state => state.selectElement);
   const updateElement = useEditorStore(state => state.updateElement);
-  
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -26,24 +23,20 @@ function DraggableItem({ element, isSelected, isDragging }: DraggableItemProps) 
     border: isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb',
     backgroundColor: 'white',
   };
-
   // 處理點擊選中元素
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
     selectElement(element.id);
   };
-
   // 處理刪除元素
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     removeElement(element.id);
   };
-
   // 處理內容變更
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     updateElement(element.id, { content: e.target.value });
   };
-
   // 根據元素類型渲染不同的內容
   const renderContent = () => {
     switch (element.type) {
@@ -189,7 +182,6 @@ function DraggableItem({ element, isSelected, isDragging }: DraggableItemProps) 
         return <div className="p-3">未知元素類型</div>;
     }
   };
-
   return (
     <div
       ref={setNodeRef}
@@ -212,7 +204,6 @@ function DraggableItem({ element, isSelected, isDragging }: DraggableItemProps) 
     </div>
   );
 }
-
 interface EnhancedDragDropEditorProps {
   elements: EditorElement[];
   selectedElementId: string | null;
@@ -220,7 +211,6 @@ interface EnhancedDragDropEditorProps {
   layout?: 'vertical' | 'horizontal' | 'grid';
   allowSorting?: boolean;
 }
-
 export default function EnhancedDragDropEditor({
   elements,
   selectedElementId,
@@ -231,7 +221,6 @@ export default function EnhancedDragDropEditor({
   const [activeId, setActiveId] = useState<string | null>(null);
   const selectElement = useEditorStore(state => state.selectElement);
   const containerRef = useRef<HTMLDivElement>(null);
-  
   // 配置拖放感應器
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -243,7 +232,6 @@ export default function EnhancedDragDropEditor({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-
   // 獲取排序策略
   const getSortingStrategy = () => {
     switch (layout) {
@@ -254,14 +242,12 @@ export default function EnhancedDragDropEditor({
         return verticalListSortingStrategy;
     }
   };
-
   // 處理拖動開始
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
     setActiveId(active.id as string);
     selectElement(active.id as string);
   }, [selectElement]);
-
   // 處理拖動結束
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     setActiveId(null);
@@ -269,22 +255,17 @@ export default function EnhancedDragDropEditor({
       onDragEnd(event);
     }
   }, [onDragEnd]);
-
   // 處理畫布點擊（取消選中）
   const handleCanvasClick = () => {
     selectElement(null);
   };
-
   // 獲取當前拖動的元素
   const activeElement = activeId ? elements.find(el => el.id === activeId) : null;
-
   // 組合修飾器
   const modifiers: Modifier[] = [restrictToWindowEdges];
-
   // 獲取容器類名
   const getContainerClassName = () => {
     let className = "bg-gray-100 min-h-[500px] p-4 rounded-lg border border-gray-300";
-    
     if (layout === 'horizontal') {
       className += " flex flex-row space-x-3 overflow-x-auto";
     } else if (layout === 'grid') {
@@ -292,10 +273,8 @@ export default function EnhancedDragDropEditor({
     } else {
       className += " space-y-3";
     }
-    
     return className;
   };
-
   return (
     <div 
       ref={containerRef}
@@ -326,7 +305,6 @@ export default function EnhancedDragDropEditor({
             </div>
           )}
         </SortableContext>
-        
         {/* 拖動覆蓋層 */}
         <DragOverlay adjustScale={true} modifiers={[snapCenterToCursor]}>
           {activeElement ? (

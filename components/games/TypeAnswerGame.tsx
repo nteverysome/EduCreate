@@ -3,9 +3,7 @@
  * 基於輸入記憶機制的答案輸入遊戲
  * 根據WordWall Type the Answer模板分析設計
  */
-
 import React, { useState, useEffect, useRef } from 'react';
-
 interface TypeQuestion {
   id: string;
   question: string;
@@ -15,7 +13,6 @@ interface TypeQuestion {
   caseSensitive?: boolean;
   exactMatch?: boolean;
 }
-
 interface TypeAnswerGameProps {
   questions: TypeQuestion[];
   timeLimit?: number;
@@ -24,7 +21,6 @@ interface TypeAnswerGameProps {
   onComplete?: (score: number, timeUsed: number) => void;
   onScoreUpdate?: (score: number) => void;
 }
-
 export default function TypeAnswerGame({
   questions,
   timeLimit = 0,
@@ -47,10 +43,8 @@ export default function TypeAnswerGame({
   const [showHint, setShowHint] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState<number>(0);
-
   const inputRef = useRef<HTMLInputElement>(null);
   const currentQuestion = questions[currentQuestionIndex];
-
   // 計時器
   useEffect(() => {
     if (gameStarted && timeLimit > 0 && timeLeft > 0 && !gameCompleted) {
@@ -62,14 +56,12 @@ export default function TypeAnswerGame({
       handleGameComplete();
     }
   }, [gameStarted, timeLeft, gameCompleted, timeLimit]);
-
   // 自動聚焦輸入框
   useEffect(() => {
     if (gameStarted && !gameCompleted && inputRef.current) {
       inputRef.current.focus();
     }
   }, [currentQuestionIndex, gameStarted, gameCompleted]);
-
   // 重置問題狀態
   useEffect(() => {
     setUserAnswer('');
@@ -77,20 +69,16 @@ export default function TypeAnswerGame({
     setAttempts(0);
     setQuestionStartTime(Date.now());
   }, [currentQuestionIndex]);
-
   const startGame = () => {
     setGameStarted(true);
     setStartTime(Date.now());
     setQuestionStartTime(Date.now());
     setTimeLeft(timeLimit);
   };
-
   const checkAnswer = () => {
     if (!userAnswer.trim()) return;
-
     setAttempts(prev => prev + 1);
     const answer = userAnswer.trim();
-    
     // 檢查答案是否正確
     const isCorrect = currentQuestion.correctAnswers.some(correctAnswer => {
       if (currentQuestion.exactMatch) {
@@ -103,42 +91,35 @@ export default function TypeAnswerGame({
           : correctAnswer.toLowerCase().includes(answer.toLowerCase());
       }
     });
-
     if (isCorrect) {
       handleCorrectAnswer();
     } else {
       handleIncorrectAnswer();
     }
   };
-
   const handleCorrectAnswer = () => {
     const baseScore = 20;
     const timeBonus = questionStartTime ? Math.max(0, Math.floor((10000 - (Date.now() - questionStartTime)) / 1000)) : 0;
     const attemptBonus = Math.max(0, 10 - (attempts - 1) * 2);
     const hintPenalty = showHint ? 5 : 0;
     const totalScore = baseScore + timeBonus + attemptBonus - hintPenalty;
-
     setScore(prev => {
       const newScore = prev + totalScore;
       onScoreUpdate?.(newScore);
       return newScore;
     });
-
     setCorrectAnswers(prev => prev + 1);
     setFeedbackMessage(`正確！+${totalScore} 分`);
     setShowFeedback(true);
-
     setTimeout(() => {
       setShowFeedback(false);
       nextQuestion();
     }, 2000);
   };
-
   const handleIncorrectAnswer = () => {
     if (attempts >= 3) {
       setFeedbackMessage(`錯誤！正確答案：${currentQuestion.correctAnswers[0]}`);
       setShowFeedback(true);
-      
       setTimeout(() => {
         setShowFeedback(false);
         nextQuestion();
@@ -147,12 +128,10 @@ export default function TypeAnswerGame({
       setFeedbackMessage(`錯誤！還有 ${3 - attempts} 次機會`);
       setShowFeedback(true);
       setTimeout(() => setShowFeedback(false), 1500);
-      
       // 清空輸入框
       setUserAnswer('');
     }
   };
-
   const nextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -160,36 +139,29 @@ export default function TypeAnswerGame({
       handleGameComplete();
     }
   };
-
   const handleGameComplete = () => {
     setGameCompleted(true);
     const timeUsed = startTime ? (Date.now() - startTime) / 1000 : 0;
     onComplete?.(score, timeUsed);
   };
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       checkAnswer();
     }
   };
-
   const toggleHint = () => {
     if (!allowHints || showHint) return;
-    
     setShowHint(true);
     setHintsUsed(prev => prev + 1);
   };
-
   const skipQuestion = () => {
     setFeedbackMessage(`跳過！正確答案：${currentQuestion.correctAnswers[0]}`);
     setShowFeedback(true);
-    
     setTimeout(() => {
       setShowFeedback(false);
       nextQuestion();
     }, 2000);
   };
-
   if (!gameStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -197,7 +169,6 @@ export default function TypeAnswerGame({
         <p className="text-gray-600 mb-6 text-center max-w-md">
           根據問題輸入正確答案。基於輸入記憶機制，提高您的回憶和表達能力。
         </p>
-        
         <div className="mb-6 p-4 bg-green-50 rounded-lg">
           <h3 className="font-semibold text-green-900 mb-2">遊戲設置：</h3>
           <div className="text-green-800 text-sm space-y-1">
@@ -207,7 +178,6 @@ export default function TypeAnswerGame({
             {timeLimit > 0 && <p>時間限制: {timeLimit} 秒</p>}
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-lg font-semibold"
@@ -217,10 +187,8 @@ export default function TypeAnswerGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const accuracy = questions.length > 0 ? (correctAnswers / questions.length) * 100 : 0;
-    
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
         <h2 className="text-3xl font-bold text-green-600 mb-4">答題完成！</h2>
@@ -239,7 +207,6 @@ export default function TypeAnswerGame({
       </div>
     );
   }
-
   if (!currentQuestion) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -247,7 +214,6 @@ export default function TypeAnswerGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* 遊戲狀態欄 */}
@@ -268,7 +234,6 @@ export default function TypeAnswerGame({
           </div>
         )}
       </div>
-
       {/* 反饋消息 */}
       {showFeedback && (
         <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-lg text-white font-semibold z-50 ${
@@ -278,7 +243,6 @@ export default function TypeAnswerGame({
           {feedbackMessage}
         </div>
       )}
-
       {/* 問題區域 */}
       <div className="mb-8">
         {currentQuestion.image && (
@@ -290,12 +254,10 @@ export default function TypeAnswerGame({
             />
           </div>
         )}
-        
         <div className="text-center mb-6">
           <h3 className="text-2xl font-bold text-gray-800 mb-4">
             {currentQuestion.question}
           </h3>
-          
           {showHint && currentQuestion.hint && (
             <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
               <p className="text-yellow-800">
@@ -304,7 +266,6 @@ export default function TypeAnswerGame({
             </div>
           )}
         </div>
-
         {/* 答案輸入 */}
         <div className="max-w-md mx-auto">
           <div className="mb-4">
@@ -319,7 +280,6 @@ export default function TypeAnswerGame({
               disabled={showFeedback}
             />
           </div>
-          
           <div className="flex justify-center space-x-3">
             <button
               onClick={checkAnswer}
@@ -328,7 +288,6 @@ export default function TypeAnswerGame({
             >
               提交答案
             </button>
-            
             {allowHints && !showHint && currentQuestion.hint && (
               <button
                 onClick={toggleHint}
@@ -337,7 +296,6 @@ export default function TypeAnswerGame({
                 💡 提示
               </button>
             )}
-            
             <button
               onClick={skipQuestion}
               className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
@@ -346,7 +304,6 @@ export default function TypeAnswerGame({
             </button>
           </div>
         </div>
-
         {/* 答案要求說明 */}
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>
@@ -360,7 +317,6 @@ export default function TypeAnswerGame({
           )}
         </div>
       </div>
-
       {/* 進度條 */}
       {showProgress && (
         <div className="mb-6">
@@ -376,7 +332,6 @@ export default function TypeAnswerGame({
           </div>
         </div>
       )}
-
       {/* 操作說明 */}
       <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
         <p className="font-semibold mb-2">操作說明：</p>

@@ -267,3 +267,4 @@ export const GameSettingsPanel: React.FC<GameSettingsProps> = ({
     </div>
   );
 };
+export default handleChange;

@@ -2,10 +2,8 @@
  * Complete the Sentence Game Component
  * 基於語境記憶機制的完形填空遊戲
  */
-
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-
 interface SentenceItem {
   id: string;
   text: string;
@@ -15,7 +13,6 @@ interface SentenceItem {
     options: string[];
   }[];
 }
-
 interface CompleteSentenceGameProps {
   sentences: SentenceItem[];
   timeLimit?: number;
@@ -23,13 +20,11 @@ interface CompleteSentenceGameProps {
   onComplete?: (score: number, timeUsed: number) => void;
   onScoreUpdate?: (score: number) => void;
 }
-
 interface WordBank {
   id: string;
   word: string;
   used: boolean;
 }
-
 export default function CompleteSentenceGame({
   sentences,
   timeLimit = 0,
@@ -47,9 +42,7 @@ export default function CompleteSentenceGame({
   const [startTime, setStartTime] = useState<number>(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
-
   const currentSentence = sentences[currentSentenceIndex];
-
   // 初始化詞庫
   useEffect(() => {
     if (currentSentence) {
@@ -72,14 +65,12 @@ export default function CompleteSentenceGame({
           }
         });
       });
-      
       // 打亂順序
       const shuffledWords = words.sort(() => Math.random() - 0.5);
       setWordBank(shuffledWords);
       setFilledBlanks({});
     }
   }, [currentSentence]);
-
   // 計時器
   useEffect(() => {
     if (gameStarted && timeLimit > 0 && timeLeft > 0 && !gameCompleted) {
@@ -91,79 +82,64 @@ export default function CompleteSentenceGame({
       handleGameComplete();
     }
   }, [gameStarted, timeLeft, gameCompleted, timeLimit]);
-
   const startGame = () => {
     setGameStarted(true);
     setStartTime(Date.now());
     setTimeLeft(timeLimit);
   };
-
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
-
     const { source, destination, draggableId } = result;
-    
     // 如果拖拽到空白處
     if (destination.droppableId.startsWith('blank-')) {
       const blankIndex = parseInt(destination.droppableId.split('-')[1]);
       const word = wordBank.find(w => w.id === draggableId)?.word;
-      
       if (word) {
         // 更新填空
         setFilledBlanks(prev => ({
           ...prev,
           [blankIndex]: word
         }));
-
         // 標記單詞為已使用
         setWordBank(prev => prev.map(w => 
           w.id === draggableId ? { ...w, used: true } : w
         ));
-
         // 檢查答案
         checkAnswer(blankIndex, word);
       }
     }
-    
     // 如果拖拽回詞庫
     if (destination.droppableId === 'word-bank' && source.droppableId.startsWith('blank-')) {
       const blankIndex = parseInt(source.droppableId.split('-')[1]);
-      
       // 清除填空
       setFilledBlanks(prev => {
         const newFilled = { ...prev };
         delete newFilled[blankIndex];
         return newFilled;
       });
-
       // 標記單詞為未使用
       setWordBank(prev => prev.map(w => 
         w.id === draggableId ? { ...w, used: false } : w
       ));
     }
   };
-
   const checkAnswer = (blankIndex: number, word: string) => {
     const correctWord = currentSentence.blanks[blankIndex].correctWord;
     const isCorrect = word.toLowerCase() === correctWord.toLowerCase();
-    
     if (isCorrect) {
       setScore(prev => {
         const newScore = prev + 10;
         onScoreUpdate?.(newScore);
         return newScore;
       });
-      
       setFeedbackMessage('正確！');
       setShowFeedback(true);
       setTimeout(() => setShowFeedback(false), 1000);
-      
       // 檢查是否完成當前句子
       const allBlanksCorrect = currentSentence.blanks.every((blank, index) => {
         const filledWord = index === blankIndex ? word : filledBlanks[index];
         return filledWord?.toLowerCase() === blank.correctWord.toLowerCase();
       });
-      
       if (allBlanksCorrect) {
         setTimeout(() => {
           if (currentSentenceIndex < sentences.length - 1) {
@@ -179,16 +155,13 @@ export default function CompleteSentenceGame({
       setTimeout(() => setShowFeedback(false), 1000);
     }
   };
-
   const handleGameComplete = () => {
     setGameCompleted(true);
     const timeUsed = startTime ? (Date.now() - startTime) / 1000 : 0;
     onComplete?.(score, timeUsed);
   };
-
   const renderSentenceWithBlanks = () => {
     const parts = currentSentence.text.split(/(\[BLANK\d+\])/);
-    
     return (
       <div className="text-xl leading-relaxed mb-8 p-6 bg-gray-50 rounded-lg">
         {parts.map((part, index) => {
@@ -196,7 +169,6 @@ export default function CompleteSentenceGame({
           if (blankMatch) {
             const blankIndex = parseInt(blankMatch[1]);
             const filledWord = filledBlanks[blankIndex];
-            
             return (
               <Droppable key={`blank-${blankIndex}`} droppableId={`blank-${blankIndex}`}>
                 {(provided, snapshot) => (
@@ -239,7 +211,6 @@ export default function CompleteSentenceGame({
       </div>
     );
   };
-
   if (!gameStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -260,7 +231,6 @@ export default function CompleteSentenceGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -278,7 +248,6 @@ export default function CompleteSentenceGame({
       </div>
     );
   }
-
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="max-w-4xl mx-auto p-6">
@@ -296,7 +265,6 @@ export default function CompleteSentenceGame({
             </div>
           )}
         </div>
-
         {/* 反饋消息 */}
         {showFeedback && (
           <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-lg text-white font-semibold z-50 ${
@@ -305,13 +273,11 @@ export default function CompleteSentenceGame({
             {feedbackMessage}
           </div>
         )}
-
         {/* 句子區域 */}
         <div className="mb-8">
           <h3 className="text-lg font-semibold mb-4">完成下面的句子：</h3>
           {renderSentenceWithBlanks()}
         </div>
-
         {/* 詞庫 */}
         <div className="mb-6">
           <h4 className="text-md font-semibold mb-3">詞庫：</h4>
@@ -345,7 +311,6 @@ export default function CompleteSentenceGame({
             )}
           </Droppable>
         </div>
-
         {/* 提示 */}
         {showHints && (
           <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">

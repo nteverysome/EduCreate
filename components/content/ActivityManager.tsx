@@ -23,7 +23,7 @@ interface ActivityManagerProps {
 type SortOption = 'name' | 'modified' | 'lastPlayed';
 type ViewMode = 'grid' | 'list';
 
-export default function ActivityManager({ userId, onActivitySelect, onCreateNew }: ActivityManagerProps) {
+const ActivityManager = ({ userId, onActivitySelect, onCreateNew }: ActivityManagerProps) {
   const [activities, setActivities] = useState<UniversalContent[]>([]);
   const [folders, setFolders] = useState<ActivityFolder[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -336,7 +336,7 @@ interface ActivityCardProps {
   onClick: () => void;
 }
 
-function ActivityCard({ activity, viewMode, isSelected, onSelect, onClick }: ActivityCardProps) {
+const ActivityCard = ({ activity, viewMode, isSelected, onSelect, onClick }: ActivityCardProps) {
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('zh-TW', {
       year: 'numeric',
@@ -413,3 +413,4 @@ function ActivityCard({ activity, viewMode, isSelected, onSelect, onClick }: Act
     </div>
   );
 }
+export default ActivityManager;

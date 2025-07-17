@@ -2,10 +2,8 @@
  * MediaLibrary - 媒體庫組件
  * 展示、搜索和管理已上傳的媒體文件
  */
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { MediaManager, MediaFile, MediaLibraryFilter } from '../../lib/media/MediaManager';
-
 export interface MediaLibraryProps {
   onFileSelect?: (file: MediaFile) => void;
   onFileDelete?: (file: MediaFile) => void;
@@ -14,7 +12,6 @@ export interface MediaLibraryProps {
   className?: string;
   'data-testid'?: string;
 }
-
 export default function MediaLibrary({
   onFileSelect,
   onFileDelete,
@@ -29,41 +26,33 @@ export default function MediaLibrary({
   const [filter, setFilter] = useState<MediaLibraryFilter>({});
   const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
   // 載入媒體文件
   useEffect(() => {
     const handleLibraryUpdate = (files: MediaFile[]) => {
       setMediaFiles(files);
     };
-
     mediaManager.addLibraryListener(handleLibraryUpdate);
-    
     // 初始載入
     const initialFiles = mediaManager.getAllMediaFiles();
     setMediaFiles(initialFiles);
-
     return () => {
       mediaManager.removeLibraryListener(handleLibraryUpdate);
       mediaManager.destroy();
     };
   }, [mediaManager]);
-
   // 應用過濾器
   useEffect(() => {
     const filtered = mediaManager.searchMedia(filter);
     setFilteredFiles(filtered);
   }, [mediaManager, mediaFiles, filter]);
-
   // 處理搜索
   const handleSearch = useCallback((searchQuery: string) => {
     setFilter(prev => ({ ...prev, searchQuery }));
   }, []);
-
   // 處理類型過濾
   const handleTypeFilter = useCallback((type: MediaFile['type'] | undefined) => {
     setFilter(prev => ({ ...prev, type }));
   }, []);
-
   // 處理文件選擇
   const handleFileClick = useCallback((file: MediaFile) => {
     if (selectable) {
@@ -71,18 +60,14 @@ export default function MediaLibrary({
       onFileSelect?.(file);
     }
   }, [selectable, onFileSelect]);
-
   // 處理文件刪除
   const handleFileDelete = useCallback(async (file: MediaFile, e: React.MouseEvent) => {
     e.stopPropagation();
-    
     if (!deletable) return;
-    
     if (confirm(`確定要刪除 "${file.name}" 嗎？`)) {
       try {
         await mediaManager.deleteMediaFile(file.id);
         onFileDelete?.(file);
-        
         // 如果刪除的是當前選中的文件，清除選擇
         if (selectedFile?.id === file.id) {
           setSelectedFile(null);
@@ -93,7 +78,6 @@ export default function MediaLibrary({
       }
     }
   }, [deletable, mediaManager, onFileDelete, selectedFile]);
-
   // 獲取文件類型圖標
   const getFileTypeIcon = (type: MediaFile['type']): string => {
     switch (type) {
@@ -104,12 +88,10 @@ export default function MediaLibrary({
       default: return '📄';
     }
   };
-
   // 格式化文件大小
   const formatFileSize = (bytes: number): string => {
     return mediaManager.formatFileSize(bytes);
   };
-
   // 格式化日期
   const formatDate = (timestamp: number): string => {
     return new Date(timestamp).toLocaleDateString('zh-TW', {
@@ -120,7 +102,6 @@ export default function MediaLibrary({
       minute: '2-digit'
     });
   };
-
   return (
     <div className={`media-library ${className}`} data-testid={testId}>
       {/* 工具列 */}
@@ -136,7 +117,6 @@ export default function MediaLibrary({
               data-testid="search-input"
             />
           </div>
-
           {/* 過濾器和視圖控制 */}
           <div className="flex items-center space-x-4">
             {/* 類型過濾 */}
@@ -151,7 +131,6 @@ export default function MediaLibrary({
               <option value="video">視頻</option>
               <option value="animation">動畫</option>
             </select>
-
             {/* 視圖模式切換 */}
             <div className="flex border border-gray-300 rounded-md overflow-hidden">
               <button
@@ -171,7 +150,6 @@ export default function MediaLibrary({
             </div>
           </div>
         </div>
-
         {/* 統計信息 */}
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex items-center justify-between text-sm text-gray-600">
@@ -184,7 +162,6 @@ export default function MediaLibrary({
           </div>
         </div>
       </div>
-
       {/* 媒體文件展示 */}
       {filteredFiles.length === 0 ? (
         <div className="empty-state text-center py-12" data-testid="empty-state">
@@ -225,7 +202,6 @@ export default function MediaLibrary({
                       </div>
                     )}
                   </div>
-
                   {/* 文件信息 */}
                   <div className="space-y-1">
                     <h4 className="font-medium text-gray-900 truncate" title={file.name}>
@@ -245,7 +221,6 @@ export default function MediaLibrary({
                       </p>
                     )}
                   </div>
-
                   {/* 操作按鈕 */}
                   {deletable && (
                     <button
@@ -276,7 +251,6 @@ export default function MediaLibrary({
                       </div>
                     )}
                   </div>
-
                   {/* 文件信息 */}
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-gray-900 truncate" title={file.name}>
@@ -294,7 +268,6 @@ export default function MediaLibrary({
                       <span>{formatDate(file.uploadedAt)}</span>
                     </div>
                   </div>
-
                   {/* 操作按鈕 */}
                   {deletable && (
                     <button
@@ -311,7 +284,6 @@ export default function MediaLibrary({
           ))}
         </div>
       )}
-
       {/* 選中文件詳情 */}
       {selectedFile && (
         <div className="selected-file-details mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4" data-testid="selected-file-details">

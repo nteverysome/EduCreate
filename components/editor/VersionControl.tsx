@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useEditorStore } from '@/store/editorStore';
-
 // 版本控制組件
 export default function VersionControl() {
   const {
@@ -11,16 +10,13 @@ export default function VersionControl() {
     saveVersion,
     viewVersionHistory,
   } = useEditorStore();
-  
   const [showVersionDialog, setShowVersionDialog] = useState(false);
   const [description, setDescription] = useState('');
-  
   // 打開版本保存對話框
   const handleOpenVersionDialog = () => {
     setDescription('');
     setShowVersionDialog(true);
   };
-  
   // 保存新版本
   const handleSaveVersion = async () => {
     const success = await saveVersion(description);
@@ -28,12 +24,10 @@ export default function VersionControl() {
       setShowVersionDialog(false);
     }
   };
-  
   // 如果沒有活動，不顯示組件
   if (!currentActivity) {
     return null;
   }
-  
   return (
     <div className="flex items-center space-x-2">
       <button
@@ -53,7 +47,6 @@ export default function VersionControl() {
           '保存版本'
         )}
       </button>
-      
       <button
         onClick={viewVersionHistory}
         disabled={!currentActivity}
@@ -61,13 +54,11 @@ export default function VersionControl() {
       >
         版本歷史
       </button>
-      
       {/* 版本保存對話框 */}
       {showVersionDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-medium mb-4">保存新版本</h3>
-            
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 版本描述 (選填)
@@ -80,7 +71,6 @@ export default function VersionControl() {
                 placeholder="描述這個版本的變更內容..."
               />
             </div>
-            
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowVersionDialog(false)}

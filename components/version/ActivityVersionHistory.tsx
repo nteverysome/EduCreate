@@ -2,10 +2,8 @@
  * 活動版本歷史組件
  * 顯示版本歷史、版本對比、版本恢復等功能
  */
-
 import React, { useState, useEffect } from 'react';
 import { VersionInfo, VersionComparison, CollaboratorActivity, VersionType, ChangeType } from '../../lib/version/ActivityVersionManager';
-
 interface ActivityVersionHistoryProps {
   activityId: string;
   currentVersion?: string;
@@ -13,7 +11,6 @@ interface ActivityVersionHistoryProps {
   onVersionCompare?: (sourceVersion: string, targetVersion: string) => void;
   readOnly?: boolean;
 }
-
 export default function ActivityVersionHistory({
   activityId,
   currentVersion,
@@ -30,19 +27,15 @@ export default function ActivityVersionHistory({
   const [activeTab, setActiveTab] = useState<'versions' | 'activities' | 'comparison'>('versions');
   const [showRestoreDialog, setShowRestoreDialog] = useState(false);
   const [restoreVersion, setRestoreVersion] = useState<string | null>(null);
-
   // 載入版本歷史
   const loadVersionHistory = async () => {
     try {
       setIsLoading(true);
       setError(null);
-
       const response = await fetch(`/api/activities/${activityId}/versions`);
-      
       if (!response.ok) {
         throw new Error('載入版本歷史失敗');
       }
-
       const data = await response.json();
       setVersions(data.versions || []);
     } catch (err) {
@@ -51,29 +44,24 @@ export default function ActivityVersionHistory({
       setIsLoading(false);
     }
   };
-
   // 載入協作者活動
   const loadCollaboratorActivities = async () => {
     try {
       const response = await fetch(`/api/activities/${activityId}/collaborator-activities`);
-      
       if (!response.ok) {
         throw new Error('載入協作者活動失敗');
       }
-
       const data = await response.json();
       setCollaboratorActivities(data.activities || []);
     } catch (err) {
       console.error('載入協作者活動失敗:', err);
     }
   };
-
   // 比較版本
   const compareVersions = async (sourceVersion: string, targetVersion: string) => {
     try {
       setIsLoading(true);
       setError(null);
-
       const response = await fetch(`/api/activities/${activityId}/versions/compare`, {
         method: 'POST',
         headers: {
@@ -84,15 +72,12 @@ export default function ActivityVersionHistory({
           targetVersion
         }),
       });
-
       if (!response.ok) {
         throw new Error('版本比較失敗');
       }
-
       const comparisonData = await response.json();
       setComparison(comparisonData);
       setActiveTab('comparison');
-      
       if (onVersionCompare) {
         onVersionCompare(sourceVersion, targetVersion);
       }
@@ -102,13 +87,11 @@ export default function ActivityVersionHistory({
       setIsLoading(false);
     }
   };
-
   // 恢復版本
   const handleVersionRestore = async (version: string) => {
     try {
       setIsLoading(true);
       setError(null);
-
       const response = await fetch(`/api/activities/${activityId}/versions/restore`, {
         method: 'POST',
         headers: {
@@ -123,20 +106,15 @@ export default function ActivityVersionHistory({
           notifyCollaborators: true
         }),
       });
-
       if (!response.ok) {
         throw new Error('版本恢復失敗');
       }
-
       const restoredVersion = await response.json();
-      
       // 重新載入版本歷史
       await loadVersionHistory();
-      
       if (onVersionRestore) {
         onVersionRestore(version);
       }
-      
       setShowRestoreDialog(false);
       setRestoreVersion(null);
     } catch (err) {
@@ -145,7 +123,6 @@ export default function ActivityVersionHistory({
       setIsLoading(false);
     }
   };
-
   // 處理版本選擇
   const handleVersionSelect = (version: string) => {
     if (selectedVersions.includes(version)) {
@@ -156,20 +133,17 @@ export default function ActivityVersionHistory({
       setSelectedVersions([selectedVersions[1], version]);
     }
   };
-
   // 初始載入
   useEffect(() => {
     loadVersionHistory();
     loadCollaboratorActivities();
   }, [activityId]);
-
   // 當選擇了兩個版本時自動比較
   useEffect(() => {
     if (selectedVersions.length === 2) {
       compareVersions(selectedVersions[0], selectedVersions[1]);
     }
   }, [selectedVersions]);
-
   // 格式化日期
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleString('zh-TW', {
@@ -180,7 +154,6 @@ export default function ActivityVersionHistory({
       minute: '2-digit'
     });
   };
-
   // 獲取版本類型顏色
   const getVersionTypeColor = (type: VersionType) => {
     switch (type) {
@@ -196,7 +169,6 @@ export default function ActivityVersionHistory({
         return 'bg-yellow-100 text-yellow-800';
     }
   };
-
   // 獲取變更類型圖標
   const getChangeTypeIcon = (type: ChangeType) => {
     switch (type) {
@@ -220,7 +192,6 @@ export default function ActivityVersionHistory({
         return '📝';
     }
   };
-
   // 渲染版本列表
   const renderVersionList = () => (
     <div className="space-y-4">
@@ -252,11 +223,9 @@ export default function ActivityVersionHistory({
                   </span>
                 )}
               </div>
-              
               {version.description && (
                 <p className="text-gray-600 mb-2">{version.description}</p>
               )}
-              
               <div className="flex items-center space-x-4 text-sm text-gray-500">
                 <span className="flex items-center">
                   <img
@@ -270,7 +239,6 @@ export default function ActivityVersionHistory({
                 <span>{version.changes.length} 個變更</span>
                 <span>{(version.metadata.size / 1024).toFixed(1)} KB</span>
               </div>
-              
               {version.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {version.tags.map((tag, tagIndex) => (
@@ -284,7 +252,6 @@ export default function ActivityVersionHistory({
                 </div>
               )}
             </div>
-            
             {!readOnly && version.version !== currentVersion && (
               <div className="flex space-x-2">
                 <button
@@ -300,7 +267,6 @@ export default function ActivityVersionHistory({
               </div>
             )}
           </div>
-          
           {/* 變更摘要 */}
           {version.changes.length > 0 && (
             <div className="mt-3 pt-3 border-t border-gray-200">
@@ -326,7 +292,6 @@ export default function ActivityVersionHistory({
       ))}
     </div>
   );
-
   // 渲染協作者活動
   const renderCollaboratorActivities = () => (
     <div className="space-y-4">
@@ -344,7 +309,6 @@ export default function ActivityVersionHistory({
                 <span className="text-sm text-gray-500">{activity.action}</span>
                 <span className="text-sm text-gray-400">{formatDate(activity.timestamp)}</span>
               </div>
-              
               {activity.changes.length > 0 && (
                 <div className="space-y-1">
                   {activity.changes.map((change, changeIndex) => (
@@ -361,7 +325,6 @@ export default function ActivityVersionHistory({
       ))}
     </div>
   );
-
   // 渲染版本比較
   const renderVersionComparison = () => {
     if (!comparison) {
@@ -371,7 +334,6 @@ export default function ActivityVersionHistory({
         </div>
       );
     }
-
     return (
       <div className="space-y-6">
         {/* 比較摘要 */}
@@ -379,7 +341,6 @@ export default function ActivityVersionHistory({
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             版本比較: {comparison.sourceVersion} ↔ {comparison.targetVersion}
           </h3>
-          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">{comparison.summary.totalChanges}</div>
@@ -398,7 +359,6 @@ export default function ActivityVersionHistory({
               <div className="text-sm text-gray-600">修改</div>
             </div>
           </div>
-          
           <div className="mt-4 flex items-center justify-between">
             <div className="flex items-center">
               <span className="text-sm text-gray-600 mr-2">相似度:</span>
@@ -412,7 +372,6 @@ export default function ActivityVersionHistory({
                 {(comparison.similarityScore * 100).toFixed(1)}%
               </span>
             </div>
-            
             {comparison.conflictCount > 0 && (
               <div className="text-sm text-red-600">
                 {comparison.conflictCount} 個衝突
@@ -420,11 +379,9 @@ export default function ActivityVersionHistory({
             )}
           </div>
         </div>
-
         {/* 詳細差異 */}
         <div className="space-y-4">
           <h4 className="text-lg font-semibold text-gray-900">詳細差異</h4>
-          
           {comparison.differences.map((diff, index) => (
             <div
               key={index}
@@ -455,9 +412,7 @@ export default function ActivityVersionHistory({
                       {diff.severity}
                     </span>
                   </div>
-                  
                   <p className="text-sm text-gray-700">{diff.description}</p>
-                  
                   {diff.lineNumbers && (
                     <div className="text-xs text-gray-500 mt-1">
                       行號: {diff.lineNumbers.old} → {diff.lineNumbers.new}
@@ -471,7 +426,6 @@ export default function ActivityVersionHistory({
       </div>
     );
   };
-
   return (
     <div className="bg-white rounded-lg shadow-sm border">
       {/* 標籤頁導航 */}
@@ -497,7 +451,6 @@ export default function ActivityVersionHistory({
           ))}
         </nav>
       </div>
-
       {/* 內容區域 */}
       <div className="p-6">
         {error && (
@@ -515,14 +468,12 @@ export default function ActivityVersionHistory({
             </div>
           </div>
         )}
-
         {isLoading && (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
             <span className="ml-3 text-gray-600">載入中...</span>
           </div>
         )}
-
         {!isLoading && (
           <>
             {activeTab === 'versions' && renderVersionList()}
@@ -531,7 +482,6 @@ export default function ActivityVersionHistory({
           </>
         )}
       </div>
-
       {/* 恢復確認對話框 */}
       {showRestoreDialog && restoreVersion && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

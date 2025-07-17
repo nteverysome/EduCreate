@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 // Feedback Analysis Types
 interface UserFeedback {
   id: string;
@@ -17,7 +16,6 @@ interface UserFeedback {
   resolvedAt?: string;
   response?: string;
 }
-
 interface FeedbackAnalytics {
   totalFeedback: number;
   averageRating: number;
@@ -29,14 +27,12 @@ interface FeedbackAnalytics {
   topIssues: Array<{ issue: string; count: number; impact: string }>;
   improvementAreas: Array<{ area: string; score: number; suggestions: string[] }>;
 }
-
 export default function FeedbackAnalyzer() {
   const [feedbackList, setFeedbackList] = useState<UserFeedback[]>([]);
   const [analytics, setAnalytics] = useState<FeedbackAnalytics | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [showDetails, setShowDetails] = useState<string | null>(null);
-
   // Mock feedback data
   useEffect(() => {
     const mockFeedback: UserFeedback[] = [
@@ -113,35 +109,28 @@ export default function FeedbackAnalyzer() {
         createdAt: '2024-01-19T13:20:00Z'
       }
     ];
-
     setFeedbackList(mockFeedback);
     generateAnalytics(mockFeedback);
   }, []);
-
   const generateAnalytics = (feedback: UserFeedback[]) => {
     const totalFeedback = feedback.length;
     const averageRating = feedback.reduce((sum, fb) => sum + fb.rating, 0) / totalFeedback;
-
     const categoryDistribution = feedback.reduce((acc, fb) => {
       acc[fb.category] = (acc[fb.category] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-
     const priorityDistribution = feedback.reduce((acc, fb) => {
       acc[fb.priority] = (acc[fb.priority] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-
     const statusDistribution = feedback.reduce((acc, fb) => {
       acc[fb.status] = (acc[fb.status] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-
     const userRoleDistribution = feedback.reduce((acc, fb) => {
       acc[fb.userRole] = (acc[fb.userRole] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-
     // Generate trend data (mock)
     const trendData = [
       { date: '2024-01-15', count: 5, rating: 3.8 },
@@ -150,14 +139,12 @@ export default function FeedbackAnalyzer() {
       { date: '2024-01-18', count: 15, rating: 4.2 },
       { date: '2024-01-19', count: 18, rating: 4.0 }
     ];
-
     const topIssues = [
       { issue: 'AI生成速度優化', count: 8, impact: '影響用戶體驗' },
       { issue: '移動端界面改進', count: 6, impact: '影響移動用戶' },
       { issue: '系統性能優化', count: 4, impact: '影響系統穩定性' },
       { issue: '遊戲模板擴展', count: 3, impact: '影響功能豐富度' }
     ];
-
     const improvementAreas = [
       {
         area: '用戶界面',
@@ -180,7 +167,6 @@ export default function FeedbackAnalyzer() {
         suggestions: ['提升AI生成質量', '增加內容多樣性', '改進個性化推薦']
       }
     ];
-
     setAnalytics({
       totalFeedback,
       averageRating,
@@ -193,13 +179,11 @@ export default function FeedbackAnalyzer() {
       improvementAreas
     });
   };
-
   const filteredFeedback = feedbackList.filter(fb => {
     const categoryMatch = selectedCategory === 'all' || fb.category === selectedCategory;
     const priorityMatch = selectedPriority === 'all' || fb.priority === selectedPriority;
     return categoryMatch && priorityMatch;
   });
-
   const updateFeedbackStatus = (feedbackId: string, newStatus: UserFeedback['status']) => {
     setFeedbackList(prev => prev.map(fb => 
       fb.id === feedbackId 
@@ -207,7 +191,6 @@ export default function FeedbackAnalyzer() {
         : fb
     ));
   };
-
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical': return 'text-red-600 bg-red-100';
@@ -217,7 +200,6 @@ export default function FeedbackAnalyzer() {
       default: return 'text-gray-600 bg-gray-100';
     }
   };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'new': return 'text-blue-600 bg-blue-100';
@@ -229,15 +211,12 @@ export default function FeedbackAnalyzer() {
       default: return 'text-gray-600 bg-gray-100';
     }
   };
-
   if (!analytics) return <div>Loading...</div>;
-
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">📊 用戶反饋分析</h1>
-        
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-blue-50 rounded-lg p-6">
@@ -249,7 +228,6 @@ export default function FeedbackAnalyzer() {
               <div className="text-blue-500 text-2xl">💬</div>
             </div>
           </div>
-
           <div className="bg-green-50 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -259,7 +237,6 @@ export default function FeedbackAnalyzer() {
               <div className="text-green-500 text-2xl">⭐</div>
             </div>
           </div>
-
           <div className="bg-purple-50 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -269,7 +246,6 @@ export default function FeedbackAnalyzer() {
               <div className="text-purple-500 text-2xl">✅</div>
             </div>
           </div>
-
           <div className="bg-orange-50 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -283,7 +259,6 @@ export default function FeedbackAnalyzer() {
           </div>
         </div>
       </div>
-
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
         <div className="flex flex-wrap gap-4 items-center">
@@ -302,7 +277,6 @@ export default function FeedbackAnalyzer() {
               <option value="suggestion">建議</option>
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">優先級</label>
             <select
@@ -319,14 +293,12 @@ export default function FeedbackAnalyzer() {
           </div>
         </div>
       </div>
-
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Feedback List */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">反饋列表</h2>
-            
             <div className="space-y-4">
               {filteredFeedback.map((feedback) => (
                 <div key={feedback.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -344,14 +316,12 @@ export default function FeedbackAnalyzer() {
                       </span>
                     </div>
                   </div>
-
                   <div className="flex justify-between items-center text-sm text-gray-500">
                     <div className="flex items-center space-x-4">
                       <span>{feedback.userName} ({feedback.userRole})</span>
                       <span>評分: {feedback.rating}/5</span>
                       <span>{new Date(feedback.createdAt).toLocaleDateString()}</span>
                     </div>
-                    
                     <div className="flex space-x-2">
                       {feedback.status !== 'resolved' && (
                         <select
@@ -367,7 +337,6 @@ export default function FeedbackAnalyzer() {
                           <option value="rejected">已拒絕</option>
                         </select>
                       )}
-                      
                       <button
                         onClick={() => setShowDetails(showDetails === feedback.id ? null : feedback.id)}
                         className="text-blue-600 hover:text-blue-800 text-xs"
@@ -376,7 +345,6 @@ export default function FeedbackAnalyzer() {
                       </button>
                     </div>
                   </div>
-
                   {showDetails === feedback.id && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
                       <div className="space-y-2 text-sm">
@@ -395,7 +363,6 @@ export default function FeedbackAnalyzer() {
             </div>
           </div>
         </div>
-
         {/* Analytics Sidebar */}
         <div className="space-y-6">
           {/* Top Issues */}
@@ -415,7 +382,6 @@ export default function FeedbackAnalyzer() {
               ))}
             </div>
           </div>
-
           {/* Improvement Areas */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">改進領域</h3>
@@ -441,7 +407,6 @@ export default function FeedbackAnalyzer() {
               ))}
             </div>
           </div>
-
           {/* Category Distribution */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">分類分布</h3>

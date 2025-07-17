@@ -15,7 +15,7 @@ interface ActivityEditorProps {
   templateType?: 'matching' | 'flashcards' | 'quiz';
 }
 
-export default function ActivityEditor({ activityId, templateId, templateType }: ActivityEditorProps) {
+const ActivityEditor = ({ activityId, templateId, templateType }: ActivityEditorProps) {
   const router = useRouter();
   const [
     currentActivity,
@@ -241,3 +241,5 @@ export default function ActivityEditor({ activityId, templateId, templateType }:
     </div>
   );
 }
+
+export default ActivityEditor;

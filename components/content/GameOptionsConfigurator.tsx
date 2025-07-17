@@ -2,7 +2,6 @@
  * 遊戲選項配置器組件
  * 提供詳細的遊戲選項配置界面
  */
-
 import React, { useState, useEffect } from 'react';
 import { GameType } from '../../lib/content/UniversalContentManager';
 import { 
@@ -10,7 +9,6 @@ import {
   GameOptions, 
   GameOptionDefinition 
 } from '../../lib/content/GameOptionsManager';
-
 interface GameOptionsConfiguratorProps {
   gameType: GameType;
   currentOptions?: Partial<GameOptions>;
@@ -18,7 +16,6 @@ interface GameOptionsConfiguratorProps {
   onClose?: () => void;
   showPreview?: boolean;
 }
-
 export default function GameOptionsConfigurator({
   gameType,
   currentOptions = {},
@@ -30,11 +27,9 @@ export default function GameOptionsConfigurator({
     const defaultOptions = GameOptionsManager.getDefaultOptions(gameType);
     return GameOptionsManager.mergeOptions(defaultOptions, currentOptions);
   });
-  
   const [activeCategory, setActiveCategory] = useState<string>('timer');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [previewMode, setPreviewMode] = useState(false);
-
   const categories = [
     { id: 'timer', name: '計時器', icon: '⏱️' },
     { id: 'scoring', name: '計分', icon: '🏆' },
@@ -46,18 +41,15 @@ export default function GameOptionsConfigurator({
     { id: 'gameplay', name: '遊戲玩法', icon: '🎮' },
     { id: 'specific', name: '特殊選項', icon: '⚙️' }
   ];
-
   // 初始化選項管理器
   useEffect(() => {
     GameOptionsManager.initialize();
   }, []);
-
   // 驗證選項
   useEffect(() => {
     const validation = GameOptionsManager.validateOptions(gameType, options);
     setValidationErrors(validation.errors);
   }, [gameType, options]);
-
   // 更新選項值
   const updateOption = (optionId: string, value: any) => {
     const newOptions = { ...options };
@@ -65,19 +57,16 @@ export default function GameOptionsConfigurator({
     setOptions(newOptions);
     onOptionsChange(newOptions);
   };
-
   // 重置為默認值
   const resetToDefaults = () => {
     const defaultOptions = GameOptionsManager.getDefaultOptions(gameType);
     setOptions(defaultOptions);
     onOptionsChange(defaultOptions);
   };
-
   // 獲取嵌套值
   const getNestedValue = (obj: any, path: string): any => {
     return path.split('.').reduce((current, key) => current?.[key], obj);
   };
-
   // 設置嵌套值
   const setNestedValue = (obj: any, path: string, value: any): void => {
     const keys = path.split('.');
@@ -88,22 +77,18 @@ export default function GameOptionsConfigurator({
     }, obj);
     target[lastKey] = value;
   };
-
   // 檢查依賴關係
   const isDependencyMet = (definition: GameOptionDefinition): boolean => {
     if (!definition.dependencies) return true;
-    
     return definition.dependencies.every(dep => {
       const depValue = getNestedValue(options, dep.optionId);
       return depValue === dep.value;
     });
   };
-
   // 渲染選項控件
   const renderOptionControl = (definition: GameOptionDefinition) => {
     const value = getNestedValue(options, definition.id);
     const isDisabled = !isDependencyMet(definition);
-
     switch (definition.type) {
       case 'boolean':
         return (
@@ -118,7 +103,6 @@ export default function GameOptionsConfigurator({
             <span className="ml-2 text-sm text-gray-700">{definition.name}</span>
           </label>
         );
-
       case 'number':
         return (
           <div>
@@ -140,7 +124,6 @@ export default function GameOptionsConfigurator({
             )}
           </div>
         );
-
       case 'range':
         return (
           <div>
@@ -164,7 +147,6 @@ export default function GameOptionsConfigurator({
             </div>
           </div>
         );
-
       case 'select':
         return (
           <div>
@@ -185,7 +167,6 @@ export default function GameOptionsConfigurator({
             </select>
           </div>
         );
-
       case 'multiselect':
         return (
           <div>
@@ -214,7 +195,6 @@ export default function GameOptionsConfigurator({
             </div>
           </div>
         );
-
       case 'color':
         return (
           <div>
@@ -230,7 +210,6 @@ export default function GameOptionsConfigurator({
             />
           </div>
         );
-
       default:
         return (
           <div>
@@ -248,12 +227,10 @@ export default function GameOptionsConfigurator({
         );
     }
   };
-
   // 獲取當前類別的選項
   const getCurrentCategoryOptions = () => {
     return GameOptionsManager.getOptionsByCategory(gameType, activeCategory as any);
   };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
@@ -294,7 +271,6 @@ export default function GameOptionsConfigurator({
             )}
           </div>
         </div>
-
         <div className="flex h-[calc(90vh-120px)]">
           {/* 側邊欄 - 類別選擇 */}
           <div className="w-64 border-r border-gray-200 p-4 overflow-y-auto">
@@ -303,7 +279,6 @@ export default function GameOptionsConfigurator({
               {categories.map(category => {
                 const categoryOptions = GameOptionsManager.getOptionsByCategory(gameType, category.id as any);
                 if (categoryOptions.length === 0) return null;
-
                 return (
                   <button
                     key={category.id}
@@ -323,7 +298,6 @@ export default function GameOptionsConfigurator({
                 );
               })}
             </div>
-
             {/* 驗證錯誤 */}
             {validationErrors.length > 0 && (
               <div className="mt-6 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -336,14 +310,12 @@ export default function GameOptionsConfigurator({
               </div>
             )}
           </div>
-
           {/* 主要內容區域 */}
           <div className="flex-1 p-6 overflow-y-auto">
             <div className="max-w-2xl">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 {categories.find(c => c.id === activeCategory)?.name} 設置
               </h3>
-
               <div className="space-y-6">
                 {getCurrentCategoryOptions().map(definition => (
                   <div
@@ -360,7 +332,6 @@ export default function GameOptionsConfigurator({
                         <p className="text-xs text-gray-500 mt-1">{definition.description}</p>
                       )}
                     </div>
-
                     {/* 預覽按鈕 */}
                     {definition.preview && (
                       <button
@@ -372,7 +343,6 @@ export default function GameOptionsConfigurator({
                     )}
                   </div>
                 ))}
-
                 {getCurrentCategoryOptions().length === 0 && (
                   <div className="text-center py-8">
                     <div className="text-gray-400 text-4xl mb-2">⚙️</div>
@@ -383,7 +353,6 @@ export default function GameOptionsConfigurator({
             </div>
           </div>
         </div>
-
         {/* 底部操作欄 */}
         <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
           <div className="text-sm text-gray-600">

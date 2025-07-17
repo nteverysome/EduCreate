@@ -1,25 +1,21 @@
 import React, { useState, useEffect } from 'react';
-
 export interface MemoryCard {
   id: string;
   content: string;
   pairId: string; // 配對的卡片ID
   type: 'text' | 'emoji' | 'image';
 }
-
 interface MemoryCardGameProps {
   cards: MemoryCard[];
   timeLimit?: number;
   showTimer?: boolean;
   onComplete?: (results: any) => void;
 }
-
 interface CardState {
   id: string;
   isFlipped: boolean;
   isMatched: boolean;
 }
-
 export default function MemoryCardGame({
   cards,
   timeLimit = 180,
@@ -34,7 +30,6 @@ export default function MemoryCardGame({
   const [gameStarted, setGameStarted] = useState(false);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [score, setScore] = useState(0);
-
   // 初始化卡片狀態
   useEffect(() => {
     if (cards.length > 0) {
@@ -48,11 +43,9 @@ export default function MemoryCardGame({
       setCardStates(initialStates);
     }
   }, [cards]);
-
   // 計時器
   useEffect(() => {
     if (!gameStarted || gameCompleted || !showTimer) return;
-
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -62,17 +55,14 @@ export default function MemoryCardGame({
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [gameStarted, gameCompleted, showTimer]);
-
   // 檢查遊戲是否完成
   useEffect(() => {
     if (matchedPairs.size === cards.length / 2 && cards.length > 0) {
       setGameCompleted(true);
     }
   }, [matchedPairs.size, cards.length]);
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -82,7 +72,6 @@ export default function MemoryCardGame({
     setMoves(0);
     setTimeLeft(timeLimit);
     setScore(0);
-    
     // 重新洗牌
     const shuffledCards = [...cards].sort(() => Math.random() - 0.5);
     const initialStates = shuffledCards.map(card => ({
@@ -92,31 +81,24 @@ export default function MemoryCardGame({
     }));
     setCardStates(initialStates);
   };
-
   // 翻牌
   const flipCard = (cardId: string) => {
     if (!gameStarted || gameCompleted) return;
     if (flippedCards.length >= 2) return;
     if (flippedCards.includes(cardId)) return;
-    
     const cardState = cardStates.find(state => state.id === cardId);
     if (!cardState || cardState.isMatched) return;
-
     const newFlippedCards = [...flippedCards, cardId];
     setFlippedCards(newFlippedCards);
-
     // 更新卡片狀態
     setCardStates(prev => prev.map(state => 
       state.id === cardId ? { ...state, isFlipped: true } : state
     ));
-
     // 如果翻了兩張牌，檢查是否配對
     if (newFlippedCards.length === 2) {
       setMoves(prev => prev + 1);
-      
       const card1 = cards.find(card => card.id === newFlippedCards[0]);
       const card2 = cards.find(card => card.id === newFlippedCards[1]);
-      
       if (card1 && card2 && card1.pairId === card2.id) {
         // 配對成功
         setTimeout(() => {
@@ -127,7 +109,6 @@ export default function MemoryCardGame({
               : state
           ));
           setFlippedCards([]);
-          
           // 計分：基礎分數 + 時間獎勵 - 移動懲罰
           const baseScore = 100;
           const timeBonus = Math.max(0, timeLeft);
@@ -147,7 +128,6 @@ export default function MemoryCardGame({
       }
     }
   };
-
   // 遊戲完成處理
   useEffect(() => {
     if (gameCompleted && matchedPairs.size > 0) {
@@ -155,7 +135,6 @@ export default function MemoryCardGame({
       const completionRate = Math.round((matchedPairs.size / totalPairs) * 100);
       const timeSpent = timeLimit - timeLeft;
       const efficiency = Math.round((totalPairs / moves) * 100);
-
       const results = {
         score,
         matchedPairs: matchedPairs.size,
@@ -165,29 +144,24 @@ export default function MemoryCardGame({
         completionRate,
         efficiency
       };
-
       onComplete?.(results);
     }
   }, [gameCompleted, matchedPairs.size, score, moves, timeLimit, timeLeft, cards.length, onComplete]);
-
   // 格式化時間
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   // 獲取卡片內容
   const getCardContent = (cardId: string) => {
     const card = cards.find(c => c.id === cardId);
     if (!card) return '';
-    
     if (card.type === 'emoji') {
       return <span className="text-4xl">{card.content}</span>;
     }
     return <span className="text-lg font-bold">{card.content}</span>;
   };
-
   if (!gameStarted) {
     return (
       <div className="text-center p-8">
@@ -205,17 +179,14 @@ export default function MemoryCardGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const totalPairs = cards.length / 2;
     const completionRate = Math.round((matchedPairs.size / totalPairs) * 100);
     const efficiency = Math.round((totalPairs / moves) * 100);
-    
     return (
       <div className="text-center p-8">
         <div className="text-6xl mb-4">🎉</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">遊戲完成！</h2>
-        
         <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -244,7 +215,6 @@ export default function MemoryCardGame({
             </div>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="mt-6 px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
@@ -254,7 +224,6 @@ export default function MemoryCardGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto">
       {/* 遊戲狀態 */}
@@ -278,7 +247,6 @@ export default function MemoryCardGame({
           <div className="text-sm text-gray-600">得分</div>
         </div>
       </div>
-
       {/* 卡片網格 */}
       <div className={`grid gap-4 ${
         cards.length <= 8 ? 'grid-cols-4' :
@@ -303,7 +271,6 @@ export default function MemoryCardGame({
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg shadow-lg flex items-center justify-center backface-hidden">
                   <span className="text-white text-2xl">?</span>
                 </div>
-                
                 {/* 卡片正面 */}
                 <div className={`absolute inset-0 w-full h-full rounded-lg shadow-lg flex items-center justify-center backface-hidden rotate-y-180 ${
                   cardState.isMatched ? 'bg-green-100 border-2 border-green-400' : 'bg-white border-2 border-gray-200'
@@ -315,7 +282,6 @@ export default function MemoryCardGame({
           );
         })}
       </div>
-
       {/* 遊戲提示 */}
       <div className="mt-6 text-center text-gray-600">
         <p>點擊卡片翻開，找到相同的配對！</p>

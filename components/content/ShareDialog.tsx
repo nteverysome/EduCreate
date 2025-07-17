@@ -19,13 +19,13 @@ interface ShareDialogProps {
   existingShare?: ShareSettings;
 }
 
-export default function ShareDialog({
+export const ShareDialog = ({
   activityId,
   activityTitle,
   activityDescription,
   onClose,
   existingShare
-}: ShareDialogProps) {
+}: ShareDialogProps) => {
   const [activeTab, setActiveTab] = useState<'link' | 'embed' | 'social' | 'settings'>('link');
   const [shareSettings, setShareSettings] = useState<ShareSettings | null>(existingShare || null);
   const [embedOptions, setEmbedOptions] = useState<EmbedOptions>({
@@ -474,4 +474,6 @@ export default function ShareDialog({
       </div>
     </div>
   );
-}
+};
+
+export default ShareDialog;

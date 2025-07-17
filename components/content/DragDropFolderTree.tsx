@@ -21,14 +21,14 @@ interface DragState {
   dropPosition: 'before' | 'after' | 'inside' | null;
 }
 
-export default function DragDropFolderTree({
+export const DragDropFolderTree = ({
   folders,
   onFolderMove,
   onFolderSelect,
   selectedFolderId,
   maxDepth = 10,
   allowDragDrop = true
-}: DragDropFolderTreeProps) {
+}: DragDropFolderTreeProps) => {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [dragState, setDragState] = useState<DragState>({
     draggedFolderId: null,
@@ -314,4 +314,6 @@ export default function DragDropFolderTree({
       />
     </div>
   );
-}
+};
+
+export default DragDropFolderTree;

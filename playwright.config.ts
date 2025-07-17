@@ -27,7 +27,7 @@ export default defineConfig({
   /* 全局測試配置 */
   use: {
     /* 基礎 URL */
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3002',
     
     /* 收集失敗測試的追蹤信息 */
     trace: 'on-first-retry',
@@ -92,13 +92,13 @@ export default defineConfig({
     },
   ],
 
-  /* 本地開發服務器配置 */
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: true,
-    timeout: 30000,
-  },
+  /* 本地開發服務器配置 - 暫時禁用 */
+  // webServer: {
+  //   command: 'npm run dev',
+  //   url: 'http://localhost:3002',
+  //   reuseExistingServer: true,
+  //   timeout: 60000,
+  // },
 
   /* 輸出目錄 */
   outputDir: 'test-results/',

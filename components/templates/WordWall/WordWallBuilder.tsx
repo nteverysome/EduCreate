@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
-
 interface Word {
   id: string;
   word: string;
   definition: string;
 }
-
 interface WordWallBuilderProps {
   initialWords?: Word[];
   onWordsChange: (words: Word[]) => void;
   readOnly?: boolean;
 }
-
 export default function WordWallBuilder({
   initialWords,
   onWordsChange,
@@ -21,17 +18,14 @@ export default function WordWallBuilder({
   const [newWord, setNewWord] = useState('');
   const [newDefinition, setNewDefinition] = useState('');
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
-
   useEffect(() => {
     setWords(initialWords || []);
   }, [initialWords]);
-
   useEffect(() => {
     if (onWordsChange) {
       onWordsChange(words);
     }
   }, [words, onWordsChange]);
-
   const addWord = () => {
     if (newWord.trim() && newDefinition.trim()) {
       const newWordObj: Word = {
@@ -44,14 +38,12 @@ export default function WordWallBuilder({
       setNewDefinition('');
     }
   };
-
   const removeWord = (id: string) => {
     setWords(words.filter(word => word.id !== id));
     if (selectedWord === id) {
       setSelectedWord(null);
     }
   };
-
   const moveWordUp = (index: number) => {
     if (index > 0) {
       const newWords = [...words];
@@ -59,7 +51,6 @@ export default function WordWallBuilder({
       setWords(newWords);
     }
   };
-
   const moveWordDown = (index: number) => {
     if (index < words.length - 1) {
       const newWords = [...words];
@@ -67,11 +58,9 @@ export default function WordWallBuilder({
       setWords(newWords);
     }
   };
-
   const handleWordClick = (wordId: string) => {
     setSelectedWord(selectedWord === wordId ? null : wordId);
   };
-
   if (readOnly) {
     return (
       <div className="space-y-4">
@@ -97,13 +86,11 @@ export default function WordWallBuilder({
             </div>
           ))}
         </div>
-        
         {words.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             尚未添加任何單詞
           </div>
         )}
-        
         {selectedWord && (
           <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-700">
@@ -114,7 +101,6 @@ export default function WordWallBuilder({
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       {/* 添加新單詞 */}
@@ -157,13 +143,11 @@ export default function WordWallBuilder({
           添加單詞
         </button>
       </div>
-
       {/* 單詞列表 */}
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">
           單詞列表 ({words.length} 個單詞)
         </h3>
-        
         {words.length === 0 ? (
           <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
             尚未添加任何單詞，請使用上方表單添加單詞
@@ -218,7 +202,6 @@ export default function WordWallBuilder({
           </div>
         )}
       </div>
-
       {words.length > 0 && (
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-700">

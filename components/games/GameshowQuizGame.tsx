@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 export interface GameshowQuestion {
   id: string;
   question: string;
@@ -9,13 +8,11 @@ export interface GameshowQuestion {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   category?: string;
 }
-
 interface GameshowQuizGameProps {
   questions: GameshowQuestion[];
   timePerQuestion?: number;
   onComplete?: (results: any) => void;
 }
-
 export default function GameshowQuizGame({
   questions,
   timePerQuestion = 15,
@@ -31,13 +28,10 @@ export default function GameshowQuizGame({
   const [answers, setAnswers] = useState<{[key: string]: number}>({});
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
-
   const currentQuestion = questions[currentQuestionIndex];
-
   // 計時器
   useEffect(() => {
     if (!gameStarted || gameCompleted || showResult) return;
-
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -48,10 +42,8 @@ export default function GameshowQuizGame({
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [gameStarted, gameCompleted, showResult, currentQuestionIndex]);
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -65,41 +57,33 @@ export default function GameshowQuizGame({
     setStreak(0);
     setMaxStreak(0);
   };
-
   // 時間到處理
   const handleTimeUp = () => {
     setSelectedAnswer(-1); // 表示超時
     setShowResult(true);
     setStreak(0); // 重置連擊
-
     // 記錄答案
     const newAnswers = { ...answers, [currentQuestion.id]: -1 };
     setAnswers(newAnswers);
-
     // 2秒後進入下一題
     setTimeout(() => {
       nextQuestion();
     }, 2000);
   };
-
   // 選擇答案
   const selectAnswer = (answerIndex: number) => {
     if (showResult || selectedAnswer !== null) return;
-
     setSelectedAnswer(answerIndex);
     setShowResult(true);
-
     // 記錄答案
     const newAnswers = { ...answers, [currentQuestion.id]: answerIndex };
     setAnswers(newAnswers);
-
     // 計分和連擊
     const isCorrect = answerIndex === currentQuestion.correctAnswer;
     if (isCorrect) {
       const timeBonus = Math.floor(timeLeft / 3); // 時間獎勵
       const streakBonus = streak * 5; // 連擊獎勵
       const totalPoints = currentQuestion.points + timeBonus + streakBonus;
-      
       setScore(prev => prev + totalPoints);
       setStreak(prev => {
         const newStreak = prev + 1;
@@ -109,13 +93,11 @@ export default function GameshowQuizGame({
     } else {
       setStreak(0);
     }
-
     // 2秒後進入下一題
     setTimeout(() => {
       nextQuestion();
     }, 2000);
   };
-
   // 下一題
   const nextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
@@ -127,7 +109,6 @@ export default function GameshowQuizGame({
       setGameCompleted(true);
     }
   };
-
   // 遊戲完成處理
   useEffect(() => {
     if (gameCompleted) {
@@ -136,7 +117,6 @@ export default function GameshowQuizGame({
       ).length;
       const totalQuestions = questions.length;
       const accuracy = Math.round((correctAnswers / totalQuestions) * 100);
-
       const results = {
         score,
         correctAnswers,
@@ -145,33 +125,26 @@ export default function GameshowQuizGame({
         maxStreak,
         answers
       };
-
       onComplete?.(results);
     }
   }, [gameCompleted, score, answers, questions, maxStreak, onComplete]);
-
   // 獲取選項樣式
   const getOptionStyle = (optionIndex: number) => {
     if (!showResult) {
       return 'bg-blue-500 hover:bg-blue-600 text-white transform hover:scale-105';
     }
-
     if (optionIndex === currentQuestion.correctAnswer) {
       return 'bg-green-500 text-white animate-pulse';
     }
-
     if (optionIndex === selectedAnswer && selectedAnswer !== currentQuestion.correctAnswer) {
       return 'bg-red-500 text-white';
     }
-
     return 'bg-gray-300 text-gray-600';
   };
-
   // 獲取進度百分比
   const getProgressPercentage = () => {
     return ((currentQuestionIndex + 1) / questions.length) * 100;
   };
-
   if (!gameStarted) {
     return (
       <div className="text-center p-8">
@@ -202,21 +175,17 @@ export default function GameshowQuizGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const correctAnswers = questions.filter(q => answers[q.id] === q.correctAnswer).length;
     const accuracy = Math.round((correctAnswers / questions.length) * 100);
-    
     return (
       <div className="text-center p-8">
         <div className="text-6xl mb-4">🏆</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">挑戰完成！</h2>
-        
         <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg p-6 max-w-md mx-auto mb-6">
           <div className="text-3xl font-bold mb-2">{score} 分</div>
           <div className="text-lg">最終得分</div>
         </div>
-        
         <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -233,7 +202,6 @@ export default function GameshowQuizGame({
             </div>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="mt-6 px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
@@ -243,7 +211,6 @@ export default function GameshowQuizGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto">
       {/* 遊戲狀態欄 */}
@@ -268,7 +235,6 @@ export default function GameshowQuizGame({
             <div className="text-sm">秒</div>
           </div>
         </div>
-        
         {/* 進度條 */}
         <div className="mt-4 w-full bg-white bg-opacity-20 rounded-full h-2">
           <div
@@ -277,7 +243,6 @@ export default function GameshowQuizGame({
           ></div>
         </div>
       </div>
-
       {/* 問題區域 */}
       <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
         <div className="text-center mb-8">
@@ -302,7 +267,6 @@ export default function GameshowQuizGame({
             <span>{currentQuestion.points} 分</span>
           </div>
         </div>
-
         {/* 答案選項 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {currentQuestion.options.map((option, index) => (
@@ -323,7 +287,6 @@ export default function GameshowQuizGame({
             </button>
           ))}
         </div>
-
         {/* 結果反饋 */}
         {showResult && (
           <div className="mt-6 text-center">
@@ -343,7 +306,6 @@ export default function GameshowQuizGame({
           </div>
         )}
       </div>
-
       {/* 時間警告 */}
       {timeLeft <= 5 && !showResult && (
         <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">

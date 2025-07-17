@@ -1,41 +1,29 @@
 {
   "config": {
-    "configFile": "C:\\Users\\Administrator\\Desktop\\EduCreate\\playwright.config.ts",
+    "configFile": "C:\\Users\\Administrator\\Desktop\\EduCreate\\playwright.config.js",
     "rootDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
     "forbidOnly": false,
-    "fullyParallel": true,
-    "globalSetup": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\global-setup.ts",
-    "globalTeardown": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\global-teardown.ts",
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
     "globalTimeout": 0,
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 2
+      "actualWorkers": 1
     },
     "preserveOutput": "always",
     "reporter": [
       [
         "html",
-        {
-          "outputFolder": "playwright-report"
-        }
+        null
       ],
       [
         "json",
         {
           "outputFile": "test-results/results.json"
         }
-      ],
-      [
-        "junit",
-        {
-          "outputFile": "test-results/junit.xml"
-        }
-      ],
-      [
-        "list",
-        null
       ]
     ],
     "reportSlowTests": {
@@ -47,9 +35,9 @@
       {
         "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
         "repeatEach": 1,
-        "retries": 1,
+        "retries": 0,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "chromium",
         "name": "chromium",
@@ -58,87 +46,7 @@
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
         ],
-        "timeout": 30000
-      },
-      {
-        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
-        "repeatEach": 1,
-        "retries": 1,
-        "metadata": {
-          "actualWorkers": 2
-        },
-        "id": "firefox",
-        "name": "firefox",
-        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
-        "testIgnore": [],
-        "testMatch": [
-          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
-        ],
-        "timeout": 30000
-      },
-      {
-        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
-        "repeatEach": 1,
-        "retries": 1,
-        "metadata": {
-          "actualWorkers": 2
-        },
-        "id": "webkit",
-        "name": "webkit",
-        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
-        "testIgnore": [],
-        "testMatch": [
-          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
-        ],
-        "timeout": 30000
-      },
-      {
-        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
-        "repeatEach": 1,
-        "retries": 1,
-        "metadata": {
-          "actualWorkers": 2
-        },
-        "id": "Mobile Chrome",
-        "name": "Mobile Chrome",
-        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
-        "testIgnore": [],
-        "testMatch": [
-          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
-        ],
-        "timeout": 30000
-      },
-      {
-        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
-        "repeatEach": 1,
-        "retries": 1,
-        "metadata": {
-          "actualWorkers": 2
-        },
-        "id": "Mobile Safari",
-        "name": "Mobile Safari",
-        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
-        "testIgnore": [],
-        "testMatch": [
-          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
-        ],
-        "timeout": 30000
-      },
-      {
-        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
-        "repeatEach": 1,
-        "retries": 1,
-        "metadata": {
-          "actualWorkers": 2
-        },
-        "id": "Tablet",
-        "name": "Tablet",
-        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
-        "testIgnore": [],
-        "testMatch": [
-          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
-        ],
-        "timeout": 30000
+        "timeout": 120000
       }
     ],
     "shard": null,
@@ -148,27 +56,26 @@
     "workers": 16,
     "webServer": {
       "command": "npm run dev",
-      "url": "http://localhost:3000",
-      "reuseExistingServer": true,
-      "timeout": 30000
+      "port": 3000,
+      "reuseExistingServer": true
     }
   },
   "suites": [
     {
-      "title": "universal-content-editor-homepage-integration-video-proof.spec.js",
-      "file": "universal-content-editor-homepage-integration-video-proof.spec.js",
+      "title": "game-switcher-video.spec.ts",
+      "file": "game-switcher-video.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "UniversalContentEditor 主頁整合錄影證明",
-          "file": "universal-content-editor-homepage-integration-video-proof.spec.js",
-          "line": 6,
+          "title": "完整遊戲切換系統 - 生成測試影片",
+          "file": "game-switcher-video.spec.ts",
+          "line": 8,
           "column": 6,
           "specs": [
             {
-              "title": "完整UniversalContentEditor主頁整合功能演示---從主頁開始",
+              "title": "完整遊戲切換系統三層整合驗證",
               "ok": true,
               "tags": [],
               "tests": [
@@ -183,147 +90,75 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 18851,
+                      "duration": 15472,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "🎬 開始錄製 UniversalContentEditor 主頁整合演示...\n"
+                          "text": "🎬 開始錄製完整遊戲切換系統測試影片...\n"
                         },
                         {
-                          "text": "📍 第1步：訪問 EduCreate 主頁\n"
+                          "text": "📍 第一層驗證：主頁可見性測試\n"
                         },
                         {
-                          "text": "❌ 控制台錯誤: Failed to load resource: the server responded with a status of 404 (Not Found)\n"
+                          "text": "✅ 第一層驗證通過：主頁可見性測試成功\n"
                         },
                         {
-                          "text": "📄 頁面標題: EduCreate - 記憶科學驅動的智能教育遊戲平台\n"
+                          "text": "📍 第二層驗證：導航流程測試\n"
                         },
                         {
-                          "text": "📍 第2步：驗證主頁核心元素\n"
+                          "text": "✅ 第二層驗證通過：導航流程測試成功\n"
                         },
                         {
-                          "text": "🎯 主標題: EduCreate\n"
+                          "text": "📍 第三層驗證：功能互動測試\n"
                         },
                         {
-                          "text": "✅ 統一導航系統已載入\n"
+                          "text": "📑 測試標籤切換功能\n"
                         },
                         {
-                          "text": "📍 第3步：尋找統一內容編輯器功能卡片\n"
+                          "text": "🎯 測試源遊戲選擇功能\n"
                         },
                         {
-                          "text": "✅ 找到統一內容編輯器功能卡片\n"
+                          "text": "🎯 測試目標遊戲選擇功能\n"
                         },
                         {
-                          "text": "✅ 功能卡片內容驗證通過\n"
+                          "text": "⚙️ 測試切換配置功能\n"
                         },
                         {
-                          "text": "📍 第4步：檢查快速訪問區域的統一內容編輯器按鈕\n"
+                          "text": "⚡ 測試切換按鈕功能\n"
                         },
                         {
-                          "text": "✅ 快速訪問按鈕驗證通過\n"
+                          "text": "🎯 測試切換模式功能\n"
                         },
                         {
-                          "text": "📍 第5步：點擊功能卡片進入統一內容編輯器\n"
+                          "text": "📦 測試批量轉換功能\n"
                         },
                         {
-                          "text": "🖱️ 已點擊統一內容編輯器功能卡片\n"
+                          "text": "📊 測試切換分析功能\n"
                         },
                         {
-                          "text": "📍 第6步：驗證統一內容編輯器頁面載入\n"
+                          "text": "✅ 第三層驗證通過：功能互動測試成功\n"
                         },
                         {
-                          "text": "🌐 當前 URL: http://localhost:3000/universal-game\n"
+                          "text": "🎯 最終驗證：系統整體功能\n"
                         },
                         {
-                          "text": "❌ 控制台錯誤: Failed to load resource: the server responded with a status of 404 (Not Found)\n"
-                        },
-                        {
-                          "text": "❌ 控制台錯誤: ❌ Service Worker 註冊失敗: TypeError: _lib_utils_performanceMonitor__WEBPACK_IMPORTED_MODULE_7__.perf.mark is not a function\n    at eval (webpack-internal:///./pages/_app.tsx:46:81)\n"
-                        },
-                        {
-                          "text": "❌ 控制台錯誤: ❌ Service Worker 註冊失敗: TypeError: _lib_utils_performanceMonitor__WEBPACK_IMPORTED_MODULE_7__.perf.mark is not a function\n    at eval (webpack-internal:///./pages/_app.tsx:46:81)\n"
-                        },
-                        {
-                          "text": "✅ 找到 h1, h2, h3: 5 個元素\n"
-                        },
-                        {
-                          "text": "✅ 找到 button, input, textarea: 61 個元素\n"
-                        },
-                        {
-                          "text": "📊 統一內容編輯器頁面元素檢查: 2/4 類型元素存在\n"
-                        },
-                        {
-                          "text": "📍 第7步：測試返回主頁功能\n"
-                        },
-                        {
-                          "text": "⚠️ 未找到返回連結，直接導航回主頁\n"
-                        },
-                        {
-                          "text": "📍 第8步：測試快速訪問按鈕功能\n"
-                        },
-                        {
-                          "text": "🖱️ 已點擊快速訪問按鈕\n"
-                        },
-                        {
-                          "text": "❌ 控制台錯誤: Failed to load resource: the server responded with a status of 404 (Not Found)\n"
-                        },
-                        {
-                          "text": "❌ 控制台錯誤: ❌ Service Worker 註冊失敗: TypeError: _lib_utils_performanceMonitor__WEBPACK_IMPORTED_MODULE_7__.perf.mark is not a function\n    at eval (webpack-internal:///./pages/_app.tsx:46:81)\n"
-                        },
-                        {
-                          "text": "❌ 控制台錯誤: ❌ Service Worker 註冊失敗: TypeError: _lib_utils_performanceMonitor__WEBPACK_IMPORTED_MODULE_7__.perf.mark is not a function\n    at eval (webpack-internal:///./pages/_app.tsx:46:81)\n"
-                        },
-                        {
-                          "text": "🚀 快速訪問後 URL: http://localhost:3000/universal-game\n"
-                        },
-                        {
-                          "text": "✅ 快速訪問按鈕功能正常\n"
-                        },
-                        {
-                          "text": "📍 第9步：最終驗證和測試總結\n"
-                        },
-                        {
-                          "text": "🎉 UniversalContentEditor 主頁整合測試完成！\n"
-                        },
-                        {
-                          "text": "📊 測試結果總結:\n"
-                        },
-                        {
-                          "text": "   ✅ 主頁功能卡片存在且可點擊\n"
-                        },
-                        {
-                          "text": "   ✅ 快速訪問按鈕存在且可點擊\n"
-                        },
-                        {
-                          "text": "   ✅ 功能卡片正確跳轉到 /universal-game\n"
-                        },
-                        {
-                          "text": "   ✅ 快速訪問按鈕正確跳轉到 /universal-game\n"
-                        },
-                        {
-                          "text": "   ✅ 頁面導航流程完整\n"
-                        },
-                        {
-                          "text": "   ✅ 用戶體驗流暢\n"
-                        },
-                        {
-                          "text": "🎬 錄影證據已保存到 test-results/ 目錄\n"
+                          "text": "🎉 完整遊戲切換系統三層整合驗證完全成功！\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-07-15T13:47:14.284Z",
+                      "startTime": "2025-07-17T03:57:17.765Z",
                       "annotations": [],
                       "attachments": [
                         {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\universal-content-editor-h-0cdb5-ntentEditor主頁整合功能演示---從主頁開始-chromium\\test-finished-1.png"
-                        },
-                        {
                           "name": "video",
                           "contentType": "video/webm",
-                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\universal-content-editor-h-0cdb5-ntentEditor主頁整合功能演示---從主頁開始-chromium\\video.webm"
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\game-switcher-video-完整遊戲切換系統---生成測試影片-完整遊戲切換系統三層整合驗證-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\game-switcher-video-完整遊戲切換系統---生成測試影片-完整遊戲切換系統三層整合驗證-chromium\\trace.zip"
                         }
                       ]
                     }
@@ -331,13 +166,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "a3115f40668fd8bb3082-b6b3728f2de76283a204",
-              "file": "universal-content-editor-homepage-integration-video-proof.spec.js",
-              "line": 19,
-              "column": 3
+              "id": "f0c9d35f1ff3eeef5510-63012a5bab7171ba9fdd",
+              "file": "game-switcher-video.spec.ts",
+              "line": 9,
+              "column": 7
             },
             {
-              "title": "UniversalContentEditor主頁整合無障礙測試",
+              "title": "完整遊戲切換系統性能測試",
               "ok": true,
               "tags": [],
               "tests": [
@@ -349,39 +184,60 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3343,
+                      "duration": 13587,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "♿ 開始 UniversalContentEditor 無障礙測試...\n"
+                          "text": "🎬 開始錄製完整遊戲切換系統性能測試影片...\n"
                         },
                         {
-                          "text": "❌ 控制台錯誤: Failed to load resource: the server responded with a status of 404 (Not Found)\n"
+                          "text": "📊 完整遊戲切換系統頁面載入時間: 913ms\n"
                         },
                         {
-                          "text": "⌨️ 測試鍵盤導航到統一內容編輯器\n"
+                          "text": "📊 切換標籤切換時間: 1077ms\n"
                         },
                         {
-                          "text": "♿ 無障礙測試完成\n"
+                          "text": "📊 模式標籤切換時間: 1062ms\n"
+                        },
+                        {
+                          "text": "📊 批量標籤切換時間: 1066ms\n"
+                        },
+                        {
+                          "text": "📊 分析標籤切換時間: 1053ms\n"
+                        },
+                        {
+                          "text": "📊 源遊戲選擇時間: 569ms\n"
+                        },
+                        {
+                          "text": "📊 目標遊戲選擇時間: 548ms\n"
+                        },
+                        {
+                          "text": "📊 配置設置時間: 526ms\n"
+                        },
+                        {
+                          "text": "📊 遊戲切換執行時間: 3046ms\n"
+                        },
+                        {
+                          "text": "🎉 完整遊戲切換系統性能測試完成！\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-07-15T13:47:14.318Z",
+                      "startTime": "2025-07-17T03:57:33.932Z",
                       "annotations": [],
                       "attachments": [
                         {
-                          "name": "screenshot",
-                          "contentType": "image/png",
-                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\universal-content-editor-h-14ead-ersalContentEditor主頁整合無障礙測試-chromium\\test-finished-1.png"
-                        },
-                        {
                           "name": "video",
                           "contentType": "video/webm",
-                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\universal-content-editor-h-14ead-ersalContentEditor主頁整合無障礙測試-chromium\\video.webm"
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\game-switcher-video-完整遊戲切換系統---生成測試影片-完整遊戲切換系統性能測試-chromium\\video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\game-switcher-video-完整遊戲切換系統---生成測試影片-完整遊戲切換系統性能測試-chromium\\trace.zip"
                         }
                       ]
                     }
@@ -389,10 +245,10 @@
                   "status": "expected"
                 }
               ],
-              "id": "a3115f40668fd8bb3082-e97ac4ce0a16e5136ef1",
-              "file": "universal-content-editor-homepage-integration-video-proof.spec.js",
-              "line": 211,
-              "column": 3
+              "id": "f0c9d35f1ff3eeef5510-305810c18a1f69e8160e",
+              "file": "game-switcher-video.spec.ts",
+              "line": 161,
+              "column": 7
             }
           ]
         }
@@ -401,8 +257,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-07-15T13:47:10.897Z",
-    "duration": 22862.123,
+    "startTime": "2025-07-17T03:57:16.434Z",
+    "duration": 31580.398,
     "expected": 2,
     "skipped": 0,
     "unexpected": 0,

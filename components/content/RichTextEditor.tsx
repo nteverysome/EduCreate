@@ -21,7 +21,7 @@ interface FormatButton {
   shortcut?: string;
 }
 
-export default function RichTextEditor({
+const RichTextEditor = ({
   value,
   onChange,
   placeholder = '開始輸入內容...',
@@ -55,18 +55,88 @@ export default function RichTextEditor({
     { command: 'indent', icon: '➡', title: '增加縮排' },
   ];
 
+  const styleButtons: FormatButton[] = [
+    { command: 'formatBlock', icon: 'H1', title: '標題1' },
+    { command: 'formatBlock', icon: 'H2', title: '標題2' },
+    { command: 'formatBlock', icon: 'H3', title: '標題3' },
+    { command: 'formatBlock', icon: 'P', title: '段落' },
+  ];
+
+  const colorButtons = [
+    { color: '#000000', title: '黑色' },
+    { color: '#FF0000', title: '紅色' },
+    { color: '#00FF00', title: '綠色' },
+    { color: '#0000FF', title: '藍色' },
+    { color: '#FFFF00', title: '黃色' },
+    { color: '#FF00FF', title: '紫色' },
+  ];
+
   // 執行格式化命令
   const executeCommand = useCallback((command: string, value?: string) => {
     if (disabled) return;
-    
+
     document.execCommand(command, false, value);
     updateCurrentFormat();
-    
+
     // 觸發內容變更
     if (editorRef.current) {
       onChange(editorRef.current.innerHTML);
     }
   }, [disabled, onChange]);
+
+  // 鍵盤快捷鍵處理
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (disabled) return;
+
+    // Ctrl/Cmd + 快捷鍵
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key.toLowerCase()) {
+        case 'b':
+          e.preventDefault();
+          executeCommand('bold');
+          break;
+        case 'i':
+          e.preventDefault();
+          executeCommand('italic');
+          break;
+        case 'u':
+          e.preventDefault();
+          executeCommand('underline');
+          break;
+        case 'z':
+          e.preventDefault();
+          if (e.shiftKey) {
+            executeCommand('redo');
+          } else {
+            executeCommand('undo');
+          }
+          break;
+        case 'y':
+          e.preventDefault();
+          executeCommand('redo');
+          break;
+        case 'k':
+          e.preventDefault();
+          const url = prompt('請輸入連結網址:');
+          if (url) {
+            executeCommand('createLink', url);
+          }
+          break;
+      }
+    }
+
+    // Tab 鍵處理縮排
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        executeCommand('outdent');
+      } else {
+        executeCommand('indent');
+      }
+    }
+  }, [disabled, executeCommand]);
+
+
 
   // 更新當前格式狀態
   const updateCurrentFormat = useCallback(() => {
@@ -95,52 +165,10 @@ export default function RichTextEditor({
     updateCurrentFormat();
   }, [onChange, updateCurrentFormat]);
 
-  // 處理鍵盤快捷鍵
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (disabled) return;
-
-    // 格式化快捷鍵
-    if (e.ctrlKey || e.metaKey) {
-      switch (e.key.toLowerCase()) {
-        case 'b':
-          e.preventDefault();
-          executeCommand('bold');
-          break;
-        case 'i':
-          e.preventDefault();
-          executeCommand('italic');
-          break;
-        case 'u':
-          e.preventDefault();
-          executeCommand('underline');
-          break;
-        case 'z':
-          if (e.shiftKey) {
-            e.preventDefault();
-            executeCommand('redo');
-          } else {
-            e.preventDefault();
-            executeCommand('undo');
-          }
-          break;
-      }
-    }
-
-    // Tab 鍵處理縮排
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      if (e.shiftKey) {
-        executeCommand('outdent');
-      } else {
-        executeCommand('indent');
-      }
-    }
-  }, [disabled, executeCommand]);
-
   // 插入表格
   const insertTable = useCallback(() => {
     if (disabled) return;
-    
+
     const rows = prompt('請輸入行數:', '3');
     const cols = prompt('請輸入列數:', '3');
     
@@ -173,6 +201,12 @@ export default function RichTextEditor({
     if (url) {
       executeCommand('createLink', url);
     }
+  }, [disabled, executeCommand]);
+
+  // 插入分隔線
+  const insertHorizontalRule = useCallback(() => {
+    if (disabled) return;
+    executeCommand('insertHorizontalRule');
   }, [disabled, executeCommand]);
 
   // 字體大小選項
@@ -316,6 +350,69 @@ export default function RichTextEditor({
           ))}
         </div>
 
+        {/* 樣式按鈕組 */}
+        <div className="toolbar-group inline-flex mr-4">
+          {styleButtons.map((button) => (
+            <button
+              key={button.command + button.icon}
+              type="button"
+              className="toolbar-btn px-2 py-1 mx-1 border rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white border-gray-300"
+              onClick={() => {
+                const value = button.icon === 'H1' ? 'h1' :
+                             button.icon === 'H2' ? 'h2' :
+                             button.icon === 'H3' ? 'h3' : 'p';
+                executeCommand(button.command, value);
+              }}
+              title={button.title}
+              disabled={disabled}
+              aria-label={button.title}
+              data-testid={`style-${button.icon.toLowerCase()}`}
+            >
+              {button.icon}
+            </button>
+          ))}
+        </div>
+
+        {/* 表格和特殊功能 */}
+        <div className="toolbar-group inline-flex mr-4">
+          <button
+            type="button"
+            className="toolbar-btn px-2 py-1 mx-1 border rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white border-gray-300"
+            onClick={insertTable}
+            title="插入表格"
+            disabled={disabled}
+            aria-label="插入表格"
+            data-testid="insert-table"
+          >
+            ⊞
+          </button>
+          <button
+            type="button"
+            className="toolbar-btn px-2 py-1 mx-1 border rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white border-gray-300"
+            onClick={insertHorizontalRule}
+            title="插入分隔線"
+            disabled={disabled}
+            aria-label="插入分隔線"
+            data-testid="insert-hr"
+          >
+            ―
+          </button>
+          <button
+            type="button"
+            className="toolbar-btn px-2 py-1 mx-1 border rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white border-gray-300"
+            onClick={() => {
+              const url = prompt('請輸入連結網址:');
+              if (url) executeCommand('createLink', url);
+            }}
+            title="插入連結 (Ctrl+K)"
+            disabled={disabled}
+            aria-label="插入連結"
+            data-testid="insert-link"
+          >
+            🔗
+          </button>
+        </div>
+
         {/* 特殊功能按鈕 */}
         <div className="toolbar-group inline-flex">
           <button
@@ -401,3 +498,5 @@ export default function RichTextEditor({
     </div>
   );
 }
+
+export default RichTextEditor;

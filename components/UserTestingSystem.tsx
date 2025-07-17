@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 // User Testing Data Types
 interface TestUser {
   id: string;
@@ -11,7 +10,6 @@ interface TestUser {
   joinedAt: string;
   status: 'invited' | 'active' | 'completed' | 'dropped';
 }
-
 interface TestTask {
   id: string;
   title: string;
@@ -21,7 +19,6 @@ interface TestTask {
   instructions: string[];
   successCriteria: string[];
 }
-
 interface TestSession {
   id: string;
   userId: string;
@@ -32,7 +29,6 @@ interface TestSession {
   metrics: SessionMetrics;
   status: 'in-progress' | 'completed' | 'abandoned';
 }
-
 interface TestFeedback {
   taskId: string;
   rating: number;
@@ -41,7 +37,6 @@ interface TestFeedback {
   suggestions: string;
   timestamp: string;
 }
-
 interface SessionMetrics {
   totalTime: number;
   tasksCompleted: number;
@@ -49,7 +44,6 @@ interface SessionMetrics {
   helpRequests: number;
   satisfactionScore: number;
 }
-
 // User Testing System Component
 export default function UserTestingSystem() {
   const [activePhase, setActivePhase] = useState<'alpha' | 'beta' | 'production'>('alpha');
@@ -57,7 +51,6 @@ export default function UserTestingSystem() {
   const [testSessions, setTestSessions] = useState<TestSession[]>([]);
   const [selectedUser, setSelectedUser] = useState<TestUser | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
-
   // Test Tasks Configuration
   const testTasks: TestTask[] = [
     {
@@ -174,7 +167,6 @@ export default function UserTestingSystem() {
       ]
     }
   ];
-
   // Mock data for demonstration
   useEffect(() => {
     const mockUsers: TestUser[] = [
@@ -211,7 +203,6 @@ export default function UserTestingSystem() {
     ];
     setTestUsers(mockUsers);
   }, []);
-
   const inviteUser = (userData: Partial<TestUser>) => {
     const newUser: TestUser = {
       id: `user-${Date.now()}`,
@@ -223,15 +214,11 @@ export default function UserTestingSystem() {
       joinedAt: new Date().toISOString(),
       status: 'invited'
     };
-    
     setTestUsers(prev => [...prev, newUser]);
-    
     // Simulate sending invitation email
     console.log(`Invitation sent to ${newUser.email}`);
-    
     setShowInviteModal(false);
   };
-
   const startTestSession = (userId: string) => {
     const newSession: TestSession = {
       id: `session-${Date.now()}`,
@@ -248,16 +235,13 @@ export default function UserTestingSystem() {
       },
       status: 'in-progress'
     };
-    
     setTestSessions(prev => [...prev, newSession]);
   };
-
   const getPhaseStats = () => {
     const activeUsers = testUsers.filter(u => u.status === 'active').length;
     const completedUsers = testUsers.filter(u => u.status === 'completed').length;
     const totalSessions = testSessions.length;
     const avgSatisfaction = testSessions.reduce((sum, s) => sum + s.metrics.satisfactionScore, 0) / totalSessions || 0;
-
     return {
       activeUsers,
       completedUsers,
@@ -265,15 +249,12 @@ export default function UserTestingSystem() {
       avgSatisfaction: avgSatisfaction.toFixed(1)
     };
   };
-
   const stats = getPhaseStats();
-
   return (
     <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">🧪 用戶測試系統</h1>
-        
         {/* Phase Selector */}
         <div className="flex space-x-4 mb-6">
           {(['alpha', 'beta', 'production'] as const).map((phase) => (
@@ -291,7 +272,6 @@ export default function UserTestingSystem() {
             </button>
           ))}
         </div>
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-blue-50 rounded-lg p-6">
@@ -303,7 +283,6 @@ export default function UserTestingSystem() {
               <div className="text-blue-500 text-2xl">👥</div>
             </div>
           </div>
-
           <div className="bg-green-50 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -313,7 +292,6 @@ export default function UserTestingSystem() {
               <div className="text-green-500 text-2xl">✅</div>
             </div>
           </div>
-
           <div className="bg-purple-50 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -323,7 +301,6 @@ export default function UserTestingSystem() {
               <div className="text-purple-500 text-2xl">📊</div>
             </div>
           </div>
-
           <div className="bg-orange-50 rounded-lg p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -335,7 +312,6 @@ export default function UserTestingSystem() {
           </div>
         </div>
       </div>
-
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Test Users */}
@@ -350,7 +326,6 @@ export default function UserTestingSystem() {
                 + 邀請用戶
               </button>
             </div>
-
             <div className="space-y-4">
               {testUsers.map((user) => (
                 <div
@@ -397,12 +372,10 @@ export default function UserTestingSystem() {
             </div>
           </div>
         </div>
-
         {/* Test Tasks */}
         <div>
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">測試任務</h2>
-            
             <div className="space-y-4">
               {testTasks.map((task, index) => (
                 <div key={task.id} className="border rounded-lg p-4">
@@ -435,13 +408,11 @@ export default function UserTestingSystem() {
           </div>
         </div>
       </div>
-
       {/* Invite Modal */}
       {showInviteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">邀請測試用戶</h3>
-            
             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.target as HTMLFormElement);
@@ -463,7 +434,6 @@ export default function UserTestingSystem() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">郵箱</label>
                   <input
@@ -473,7 +443,6 @@ export default function UserTestingSystem() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">角色</label>
                   <select
@@ -486,7 +455,6 @@ export default function UserTestingSystem() {
                     <option value="trainer">培訓師</option>
                   </select>
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">經驗水平</label>
                   <select
@@ -498,7 +466,6 @@ export default function UserTestingSystem() {
                     <option value="advanced">高級</option>
                   </select>
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">主要設備</label>
                   <select
@@ -511,7 +478,6 @@ export default function UserTestingSystem() {
                   </select>
                 </div>
               </div>
-              
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"

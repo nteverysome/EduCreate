@@ -2,10 +2,8 @@
  * 移動端優化布局組件
  * 提供響應式設計和移動端特定功能
  */
-
 import React, { useState, useEffect, useRef } from 'react';
 import { PWAManager } from '../../lib/mobile/PWAManager';
-
 interface MobileOptimizedLayoutProps {
   children: React.ReactNode;
   title?: string;
@@ -15,7 +13,6 @@ interface MobileOptimizedLayoutProps {
   enablePullToRefresh?: boolean;
   onRefresh?: () => Promise<void>;
 }
-
 export default function MobileOptimizedLayout({
   children,
   title = 'EduCreate',
@@ -31,65 +28,50 @@ export default function MobileOptimizedLayout({
   const [pwaStatus, setPwaStatus] = useState(PWAManager.getStatus());
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
-  
   const containerRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
   const currentY = useRef(0);
   const isPulling = useRef(false);
-
   // 檢測移動端
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
   // 更新 PWA 狀態
   useEffect(() => {
     const updatePWAStatus = () => {
       setPwaStatus(PWAManager.getStatus());
     };
-
     const interval = setInterval(updatePWAStatus, 5000);
     return () => clearInterval(interval);
   }, []);
-
   // 設置下拉刷新
   useEffect(() => {
     if (!enablePullToRefresh || !isMobile) return;
-
     const container = containerRef.current;
     if (!container) return;
-
     const handleTouchStart = (e: TouchEvent) => {
       if (container.scrollTop === 0) {
         startY.current = e.touches[0].clientY;
         isPulling.current = true;
       }
     };
-
     const handleTouchMove = (e: TouchEvent) => {
       if (!isPulling.current) return;
-
       currentY.current = e.touches[0].clientY;
       const distance = currentY.current - startY.current;
-
       if (distance > 0 && distance < 150) {
         setPullDistance(distance);
         e.preventDefault();
       }
     };
-
     const handleTouchEnd = async () => {
       if (!isPulling.current) return;
-
       isPulling.current = false;
-      
       if (pullDistance > 80 && onRefresh) {
         setIsRefreshing(true);
         try {
@@ -98,21 +80,17 @@ export default function MobileOptimizedLayout({
           setIsRefreshing(false);
         }
       }
-      
       setPullDistance(0);
     };
-
     container.addEventListener('touchstart', handleTouchStart, { passive: false });
     container.addEventListener('touchmove', handleTouchMove, { passive: false });
     container.addEventListener('touchend', handleTouchEnd);
-
     return () => {
       container.removeEventListener('touchstart', handleTouchStart);
       container.removeEventListener('touchmove', handleTouchMove);
       container.removeEventListener('touchend', handleTouchEnd);
     };
   }, [enablePullToRefresh, isMobile, pullDistance, onRefresh]);
-
   // 處理安裝提示
   const handleInstallApp = async () => {
     const success = await PWAManager.promptInstall();
@@ -120,14 +98,12 @@ export default function MobileOptimizedLayout({
       setShowInstallPrompt(false);
     }
   };
-
   const bottomNavItems = [
     { id: 'home', label: '首頁', icon: '🏠' },
     { id: 'activities', label: '活動', icon: '🎮' },
     { id: 'progress', label: '進度', icon: '📊' },
     { id: 'profile', label: '我的', icon: '👤' }
   ];
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* 頭部 */}
@@ -140,20 +116,17 @@ export default function MobileOptimizedLayout({
               </div>
               <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
             </div>
-            
             <div className="flex items-center space-x-2">
               {/* 網絡狀態指示器 */}
               <div className={`w-2 h-2 rounded-full ${
                 pwaStatus.isOnline ? 'bg-green-500' : 'bg-red-500'
               }`} title={pwaStatus.isOnline ? '在線' : '離線'}></div>
-              
               {/* 離線隊列指示器 */}
               {pwaStatus.offlineQueueSize > 0 && (
                 <div className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
                   {pwaStatus.offlineQueueSize}
                 </div>
               )}
-              
               {/* 安裝按鈕 */}
               {pwaStatus.canInstall && !pwaStatus.isInstalled && (
                 <button
@@ -168,7 +141,6 @@ export default function MobileOptimizedLayout({
           </div>
         </header>
       )}
-
       {/* 下拉刷新指示器 */}
       {enablePullToRefresh && isMobile && (pullDistance > 0 || isRefreshing) && (
         <div 
@@ -187,7 +159,6 @@ export default function MobileOptimizedLayout({
           )}
         </div>
       )}
-
       {/* 主要內容 */}
       <main 
         ref={containerRef}
@@ -195,7 +166,6 @@ export default function MobileOptimizedLayout({
       >
         {children}
       </main>
-
       {/* 底部導航 (僅移動端) */}
       {showBottomNav && isMobile && (
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
@@ -217,7 +187,6 @@ export default function MobileOptimizedLayout({
           </div>
         </nav>
       )}
-
       {/* 安裝提示對話框 */}
       {showInstallPrompt && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -230,7 +199,6 @@ export default function MobileOptimizedLayout({
               <p className="text-gray-600 mb-6">
                 將應用添加到主屏幕，獲得更好的使用體驗
               </p>
-              
               <div className="space-y-3">
                 <button
                   onClick={handleInstallApp}
@@ -249,23 +217,19 @@ export default function MobileOptimizedLayout({
           </div>
         </div>
       )}
-
       {/* 觸覺反饋組件 */}
       <HapticFeedback />
-      
       {/* 手勢處理組件 */}
       {enableSwipeGestures && <SwipeGestureHandler />}
     </div>
   );
 }
-
 // 觸覺反饋組件
 function HapticFeedback() {
   useEffect(() => {
     // 為按鈕添加觸覺反饋
     const addHapticToButtons = () => {
       const buttons = document.querySelectorAll('button, [role="button"]');
-      
       buttons.forEach(button => {
         button.addEventListener('click', () => {
           // 觸覺反饋 (僅支持的設備)
@@ -275,19 +239,14 @@ function HapticFeedback() {
         });
       });
     };
-
     addHapticToButtons();
-    
     // 監聽動態添加的按鈕
     const observer = new MutationObserver(addHapticToButtons);
     observer.observe(document.body, { childList: true, subtree: true });
-    
     return () => observer.disconnect();
   }, []);
-
   return null;
 }
-
 // 手勢處理組件
 function SwipeGestureHandler() {
   useEffect(() => {
@@ -295,24 +254,19 @@ function SwipeGestureHandler() {
     let startY = 0;
     let endX = 0;
     let endY = 0;
-
     const handleTouchStart = (e: TouchEvent) => {
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
     };
-
     const handleTouchEnd = (e: TouchEvent) => {
       endX = e.changedTouches[0].clientX;
       endY = e.changedTouches[0].clientY;
-      
       const deltaX = endX - startX;
       const deltaY = endY - startY;
       const absDeltaX = Math.abs(deltaX);
       const absDeltaY = Math.abs(deltaY);
-
       // 最小滑動距離
       const minSwipeDistance = 50;
-      
       if (absDeltaX > minSwipeDistance && absDeltaX > absDeltaY) {
         if (deltaX > 0) {
           // 向右滑動
@@ -331,19 +285,15 @@ function SwipeGestureHandler() {
         }
       }
     };
-
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
     document.addEventListener('touchend', handleTouchEnd, { passive: true });
-
     return () => {
       document.removeEventListener('touchstart', handleTouchStart);
       document.removeEventListener('touchend', handleTouchEnd);
     };
   }, []);
-
   return null;
 }
-
 // 移動端優化的卡片組件
 export function MobileCard({ 
   children, 
@@ -368,7 +318,6 @@ export function MobileCard({
     </div>
   );
 }
-
 // 移動端優化的按鈕組件
 export function MobileButton({
   children,
@@ -390,20 +339,17 @@ export function MobileButton({
   [key: string]: any;
 }) {
   const baseClasses = 'font-medium rounded-lg transition-all duration-200 active:scale-95 touch-manipulation';
-  
   const variantClasses = {
     primary: 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300',
     secondary: 'bg-gray-600 text-white hover:bg-gray-700 disabled:bg-gray-300',
     outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-50 disabled:border-gray-300 disabled:text-gray-300',
     ghost: 'text-blue-600 hover:bg-blue-50 disabled:text-gray-300'
   };
-  
   const sizeClasses = {
     small: 'px-3 py-2 text-sm',
     medium: 'px-4 py-3 text-base',
     large: 'px-6 py-4 text-lg'
   };
-
   return (
     <button
       className={`
@@ -422,7 +368,6 @@ export function MobileButton({
     </button>
   );
 }
-
 // 移動端優化的輸入框組件
 export function MobileInput({
   label,

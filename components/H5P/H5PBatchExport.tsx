@@ -14,9 +14,9 @@ interface H5PBatchExportProps {
  * H5P內容批量導出組件
  * 提供用戶批量導出多個H5P內容的界面
  */
-export default function H5PBatchExport({ 
-  contentIds, 
-  disabled = false, 
+export default function H5PBatchExport({
+  contentIds,
+  disabled = false,
   className = '',
   onExportStart,
   onExportComplete

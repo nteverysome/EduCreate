@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { v4 as uuidv4 } from 'uuid';
-
 interface MatchingItem {
   id: string;
   content: string;
 }
-
 interface MatchingTemplateProps {
   initialData?: {
     questions: MatchingItem[];
@@ -18,7 +16,6 @@ interface MatchingTemplateProps {
   onSave?: (data: any) => void;
   previewMode?: boolean;
 }
-
 export default function MatchingTemplate({
   initialData,
   onSave,
@@ -32,7 +29,6 @@ export default function MatchingTemplate({
   const [answers, setAnswers] = useState<MatchingItem[]>(initialData?.answers || []);
   const [newQuestion, setNewQuestion] = useState('');
   const [newAnswer, setNewAnswer] = useState('');
-  
   // 處理保存
   const handleSave = () => {
     if (onSave) {
@@ -46,58 +42,47 @@ export default function MatchingTemplate({
       });
     }
   };
-
   // 處理取消
   const handleCancel = () => {
     router.back();
   };
-
   // 添加配對項
   const handleAddPair = () => {
     if (newQuestion.trim() && newAnswer.trim()) {
       const questionId = uuidv4();
       const answerId = uuidv4();
-      
       setQuestions([...questions, { id: questionId, content: newQuestion.trim() }]);
       setAnswers([...answers, { id: answerId, content: newAnswer.trim() }]);
-      
       setNewQuestion('');
       setNewAnswer('');
     }
   };
-
   // 刪除配對項
   const handleDeletePair = (index: number) => {
     const updatedQuestions = [...questions];
     const updatedAnswers = [...answers];
-    
     updatedQuestions.splice(index, 1);
     updatedAnswers.splice(index, 1);
-    
     setQuestions(updatedQuestions);
     setAnswers(updatedAnswers);
   };
-
   // 更新問題
   const handleUpdateQuestion = (index: number, value: string) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index] = { ...updatedQuestions[index], content: value };
     setQuestions(updatedQuestions);
   };
-
   // 更新答案
   const handleUpdateAnswer = (index: number, value: string) => {
     const updatedAnswers = [...answers];
     updatedAnswers[index] = { ...updatedAnswers[index], content: value };
     setAnswers(updatedAnswers);
   };
-
   return (
     <div className="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
       {!previewMode && (
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">配置配對遊戲模板</h2>
-          
           <div className="space-y-4">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -112,7 +97,6 @@ export default function MatchingTemplate({
                 required
               />
             </div>
-            
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                 描述
@@ -125,7 +109,6 @@ export default function MatchingTemplate({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
             <div>
               <label htmlFor="instructions" className="block text-sm font-medium text-gray-700 mb-1">
                 使用說明
@@ -141,7 +124,6 @@ export default function MatchingTemplate({
           </div>
         </div>
       )}
-      
       {previewMode && (
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
@@ -153,11 +135,9 @@ export default function MatchingTemplate({
           )}
         </div>
       )}
-      
       {!previewMode && (
         <div className="mb-6">
           <h3 className="text-lg font-medium text-gray-900 mb-3">配對項目</h3>
-          
           {questions.map((question, index) => (
             <div key={question.id} className="flex items-center space-x-4 mb-3">
               <div className="flex-1">
@@ -189,7 +169,6 @@ export default function MatchingTemplate({
               </button>
             </div>
           ))}
-          
           <div className="flex items-center space-x-4 mt-4">
             <div className="flex-1">
               <input
@@ -222,7 +201,6 @@ export default function MatchingTemplate({
           </div>
         </div>
       )}
-      
       {previewMode && questions.length > 0 && (
         <div className="grid grid-cols-2 gap-6">
           <div>
@@ -247,7 +225,6 @@ export default function MatchingTemplate({
           </div>
         </div>
       )}
-      
       {!previewMode && (
         <div className="mt-6 flex justify-end space-x-3">
           <button

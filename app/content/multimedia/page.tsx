@@ -9,15 +9,38 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import MediaUploader from '../../../components/media/MediaUploader';
 import MediaLibrary from '../../../components/media/MediaLibrary';
+import BatchAudioProcessor from '../../../components/audio/BatchAudioProcessor';
 import { MediaFile } from '../../../lib/media/MediaManager';
+import { VoiceRecording } from '../../../lib/audio/VoiceManager';
 
 export default function MultimediaPage() {
-  const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload');
+  const [activeTab, setActiveTab] = useState<'upload' | 'library' | 'batch'>('upload');
   const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [audioFiles, setAudioFiles] = useState<VoiceRecording[]>([]);
 
   const handleUploadComplete = (files: MediaFile[]) => {
     console.log('上傳完成:', files);
+    setMediaFiles(prev => [...files, ...prev]);
+
+    // 將音頻文件轉換為 VoiceRecording 格式
+    const audioRecordings: VoiceRecording[] = files
+      .filter(file => file.type === 'audio')
+      .map(file => ({
+        id: file.id,
+        name: file.name,
+        blob: new Blob(), // 實際實現需要從 file.url 獲取
+        url: file.url,
+        duration: file.metadata?.duration || 0,
+        format: file.format,
+        size: file.size,
+        createdAt: file.createdAt,
+        metadata: file.metadata
+      }));
+
+    setAudioFiles(prev => [...audioRecordings, ...prev]);
+
     // 自動切換到媒體庫標籤
     setActiveTab('library');
   };
@@ -29,10 +52,33 @@ export default function MultimediaPage() {
 
   const handleFileDelete = (file: MediaFile) => {
     console.log('文件已刪除:', file);
+    setMediaFiles(prev => prev.filter(f => f.id !== file.id));
+    setAudioFiles(prev => prev.filter(f => f.id !== file.id));
+
     if (selectedFile?.id === file.id) {
       setSelectedFile(null);
       setShowPreview(false);
     }
+  };
+
+  const handleBatchProcessComplete = (processedRecordings: VoiceRecording[]) => {
+    console.log('批量處理完成:', processedRecordings);
+    setAudioFiles(prev => [...processedRecordings, ...prev]);
+
+    // 將處理後的音頻轉換為 MediaFile 格式
+    const processedMediaFiles: MediaFile[] = processedRecordings.map(recording => ({
+      id: recording.id,
+      name: recording.name,
+      type: 'audio' as const,
+      format: recording.format,
+      size: recording.size,
+      url: recording.url,
+      createdAt: recording.createdAt,
+      metadata: recording.metadata
+    }));
+
+    setMediaFiles(prev => [...processedMediaFiles, ...prev]);
+    setActiveTab('library');
   };
 
   const renderMediaPreview = (file: MediaFile) => {
@@ -202,6 +248,17 @@ export default function MultimediaPage() {
               >
                 媒體庫
               </button>
+              <button
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'batch'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+                onClick={() => setActiveTab('batch')}
+                data-testid="batch-tab"
+              >
+                批量處理
+              </button>
             </nav>
           </div>
         </div>
@@ -210,7 +267,7 @@ export default function MultimediaPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* 主要內容 */}
           <div className="lg:col-span-2">
-            {activeTab === 'upload' ? (
+            {activeTab === 'upload' && (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">上傳媒體文件</h2>
                 <MediaUploader
@@ -219,7 +276,9 @@ export default function MultimediaPage() {
                   data-testid="main-media-uploader"
                 />
               </div>
-            ) : (
+            )}
+
+            {activeTab === 'library' && (
               <div className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">媒體庫</h2>
                 <MediaLibrary
@@ -229,6 +288,32 @@ export default function MultimediaPage() {
                   deletable={true}
                   data-testid="main-media-library"
                 />
+              </div>
+            )}
+
+            {activeTab === 'batch' && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">批量音頻處理</h2>
+                {audioFiles.length > 0 ? (
+                  <BatchAudioProcessor
+                    recordings={audioFiles}
+                    onProcessComplete={handleBatchProcessComplete}
+                    data-testid="batch-audio-processor"
+                  />
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 text-6xl mb-4">🎵</div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">沒有音頻文件可處理</h3>
+                    <p className="text-gray-600 mb-6">請先上傳一些音頻文件，然後回到這裡進行批量處理</p>
+                    <button
+                      onClick={() => setActiveTab('upload')}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      data-testid="go-to-upload-btn"
+                    >
+                      上傳音頻文件
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

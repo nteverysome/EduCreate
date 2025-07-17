@@ -9,7 +9,7 @@ interface QuizTemplateProps {
   onSave?: (data: any) => void;
 }
 
-export default function QuizTemplate({ mode = 'preview', data, onSave }: QuizTemplateProps) {
+const QuizTemplate = ({ mode = 'preview', data, onSave }: QuizTemplateProps) {
   const router = useRouter();
   const [templateData, setTemplateData] = useState(data || {
     questions: [],
@@ -88,3 +88,5 @@ export default function QuizTemplate({ mode = 'preview', data, onSave }: QuizTem
     </div>
   );
 }
+
+export default QuizTemplate;

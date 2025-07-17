@@ -8,6 +8,7 @@
 import React from 'react';
 import Link from 'next/link';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
+import UniversalContentEditorDashboard from '@/components/dashboard/UniversalContentEditorDashboard';
 
 interface FeatureCard {
   id: string;
@@ -70,6 +71,15 @@ const features: FeatureCard[] = [
   },
   
   // 內容管理功能
+  {
+    id: 'universal-content-editor',
+    title: '統一內容編輯器',
+    description: '一站式內容管理平台，支持文字、圖片輸入，一鍵適配25種教育遊戲，模仿 Wordwall 模式',
+    href: '/universal-game',
+    icon: '📝',
+    status: 'available',
+    category: 'content'
+  },
   {
     id: 'rich-text-editor',
     title: '富文本編輯器',
@@ -264,6 +274,14 @@ export default function Dashboard() {
             </div>
             <div className="text-sm text-gray-600">即將推出</div>
           </div>
+        </div>
+
+        {/* 統一內容編輯器專區 */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6" data-testid="universal-content-editor-section">
+            🎯 統一內容編輯器 - 核心功能中心
+          </h2>
+          <UniversalContentEditorDashboard data-testid="universal-content-editor-dashboard" />
         </div>
 
         {/* 功能分類展示 */}

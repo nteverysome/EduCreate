@@ -2,7 +2,6 @@
  * 遊戲切換器 - 模仿 wordwall.net 的遊戲切換功能
  * 允許用戶在不同遊戲類型間無縫切換，保持內容一致
  */
-
 import React, { useState, useEffect } from 'react';
 // 使用簡單的文字圖標替代 lucide-react
 const ArrowLeft = () => <span>←</span>;
@@ -15,7 +14,6 @@ const SkipForward = () => <span>⏭️</span>;
 import { UniversalContent, GameType, UniversalContentManager } from '../../lib/content/UniversalContentManager';
 import { GameAdapters } from '../../lib/content/GameAdapters';
 import { TemplateManager } from '../../lib/content/TemplateManager';
-
 interface GameSwitcherProps {
   content: UniversalContent;
   currentGameType: GameType;
@@ -23,8 +21,7 @@ interface GameSwitcherProps {
   onBack?: () => void;
   onShare?: () => void;
 }
-
-export default function GameSwitcher({
+const GameSwitcher = ({
   content,
   currentGameType,
   onGameTypeChange,
@@ -35,19 +32,16 @@ export default function GameSwitcher({
   const [isPlaying, setIsPlaying] = useState(false);
   const [showGameMenu, setShowGameMenu] = useState(false);
   const [gameStats, setGameStats] = useState<any>(null);
-
   useEffect(() => {
     contentManager.setContent(content);
     const stats = GameAdapters.getGameStats(content, currentGameType);
     setGameStats(stats);
   }, [content, currentGameType, contentManager]);
-
   // 使用 TemplateManager 獲取可用遊戲和推薦
   const availableGames = TemplateManager.getAllTemplates();
   const recommendedGames = TemplateManager.getRecommendedTemplates(content.items.length);
   const currentTemplate = TemplateManager.getTemplate(currentGameType);
   const currentGameConfig = contentManager.getGameConfig(currentGameType);
-
   const switchGame = async (newGameType: GameType) => {
     try {
       // 檢查內容兼容性
@@ -56,7 +50,6 @@ export default function GameSwitcher({
         alert(`內容不兼容 ${template?.name} 遊戲。需要 ${template?.minItems}-${template?.maxItems} 個項目，當前有 ${content.items.length} 個。`);
         return;
       }
-
       // 如果有活動 ID，調用模板切換 API
       if (content.id && content.id !== 'demo-content') {
         const response = await fetch(`/api/universal-content/${content.id}/switch-template`, {
@@ -64,12 +57,10 @@ export default function GameSwitcher({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ templateId: newGameType })
         });
-
         if (!response.ok) {
           throw new Error('模板切換 API 調用失敗');
         }
       }
-
       const adaptedContent = GameAdapters.adaptContent(content, newGameType);
       onGameTypeChange(newGameType, adaptedContent);
       setShowGameMenu(false);
@@ -79,7 +70,6 @@ export default function GameSwitcher({
       alert('無法切換到此遊戲類型，請檢查內容是否兼容');
     }
   };
-
   const restartGame = () => {
     try {
       const adaptedContent = GameAdapters.adaptContent(content, currentGameType);
@@ -89,11 +79,9 @@ export default function GameSwitcher({
       console.error('重新開始失敗:', error);
     }
   };
-
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
-
   return (
     <div className="bg-white shadow-lg border-b border-gray-200">
       {/* 主要控制欄 */}
@@ -109,7 +97,6 @@ export default function GameSwitcher({
               返回編輯
             </button>
           )}
-          
           <div className="flex items-center space-x-3">
             <span className="text-2xl">{currentGameConfig.icon}</span>
             <div>
@@ -122,7 +109,6 @@ export default function GameSwitcher({
             </div>
           </div>
         </div>
-
         {/* 中間：遊戲控制 */}
         <div className="flex items-center space-x-2">
           <button
@@ -132,7 +118,6 @@ export default function GameSwitcher({
           >
             <RotateCcw className="w-4 h-4" />
           </button>
-          
           <button
             onClick={togglePlay}
             className={`flex items-center px-4 py-2 rounded-md transition-colors ${
@@ -154,7 +139,6 @@ export default function GameSwitcher({
             )}
           </button>
         </div>
-
         {/* 右側：設置和分享 */}
         <div className="flex items-center space-x-2">
           <button
@@ -164,7 +148,6 @@ export default function GameSwitcher({
             <SkipForward className="w-4 h-4 mr-2" />
             切換遊戲
           </button>
-          
           {onShare && (
             <button
               onClick={onShare}
@@ -174,13 +157,11 @@ export default function GameSwitcher({
               分享
             </button>
           )}
-          
           <button className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors">
             <Settings className="w-4 h-4" />
           </button>
         </div>
       </div>
-
       {/* 遊戲統計信息欄 */}
       {gameStats && (
         <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
@@ -203,13 +184,11 @@ export default function GameSwitcher({
           </div>
         </div>
       )}
-
       {/* 遊戲選擇菜單 */}
       {showGameMenu && (
         <div className="absolute top-full left-0 right-0 bg-white shadow-lg border-b border-gray-200 z-50">
           <div className="px-6 py-4">
             <h3 className="text-lg font-semibold mb-4">選擇遊戲類型</h3>
-            
             {/* 推薦遊戲 */}
             <div className="mb-6">
               <h4 className="text-sm font-medium text-gray-700 mb-3">推薦遊戲</h4>
@@ -239,7 +218,6 @@ export default function GameSwitcher({
                 ))}
               </div>
             </div>
-
             {/* 所有可用遊戲 */}
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-3">
@@ -267,7 +245,6 @@ export default function GameSwitcher({
                 ))}
               </div>
             </div>
-
             {/* 關閉按鈕 */}
             <div className="flex justify-end mt-4">
               <button
@@ -280,7 +257,6 @@ export default function GameSwitcher({
           </div>
         </div>
       )}
-
       {/* 遮罩層 */}
       {showGameMenu && (
         <div
@@ -291,3 +267,5 @@ export default function GameSwitcher({
     </div>
   );
 }
+
+export default GameSwitcher;

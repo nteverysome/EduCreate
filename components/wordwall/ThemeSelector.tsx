@@ -182,3 +182,4 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
     </div>
   );
 };
+export default handleThemeSelect;

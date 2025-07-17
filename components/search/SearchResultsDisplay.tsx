@@ -2,10 +2,8 @@
  * 搜索結果顯示組件
  * 展示搜索結果、分面信息和統計數據
  */
-
 import React, { useState } from 'react';
 import { SearchResult, SearchResponse } from '../../lib/search/AdvancedSearchManager';
-
 interface SearchResultsDisplayProps {
   searchResponse: SearchResponse;
   onResultClick?: (result: SearchResult) => void;
@@ -13,7 +11,6 @@ interface SearchResultsDisplayProps {
   viewMode?: 'grid' | 'list';
   onViewModeChange?: (mode: 'grid' | 'list') => void;
 }
-
 export default function SearchResultsDisplay({
   searchResponse,
   onResultClick,
@@ -22,7 +19,6 @@ export default function SearchResultsDisplay({
   onViewModeChange
 }: SearchResultsDisplayProps) {
   const [selectedFacets, setSelectedFacets] = useState<{ [key: string]: string[] }>({});
-
   // 格式化日期
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('zh-TW', {
@@ -31,7 +27,6 @@ export default function SearchResultsDisplay({
       day: 'numeric'
     });
   };
-
   // 格式化數字
   const formatNumber = (num: number) => {
     if (num >= 1000) {
@@ -39,11 +34,9 @@ export default function SearchResultsDisplay({
     }
     return num.toString();
   };
-
   // 渲染搜索統計
   const renderSearchStats = () => {
     if (!searchResponse.stats) return null;
-
     return (
       <div className="bg-blue-50 rounded-lg p-4 mb-6">
         <div className="flex items-center justify-between">
@@ -61,7 +54,6 @@ export default function SearchResultsDisplay({
               </div>
             </div>
           </div>
-          
           {/* 視圖模式切換 */}
           <div className="flex items-center space-x-2">
             <button
@@ -82,7 +74,6 @@ export default function SearchResultsDisplay({
             </button>
           </div>
         </div>
-
         {/* 搜索建議 */}
         {searchResponse.stats.suggestions && searchResponse.stats.suggestions.length > 0 && (
           <div className="mt-4">
@@ -97,15 +88,12 @@ export default function SearchResultsDisplay({
       </div>
     );
   };
-
   // 渲染分面過濾器
   const renderFacets = () => {
     if (!searchResponse.facets) return null;
-
     return (
       <div className="bg-white rounded-lg shadow p-4 mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">過濾器</h3>
-        
         {Object.entries(searchResponse.facets).map(([facetKey, facetValues]) => (
           <div key={facetKey} className="mb-4">
             <h4 className="text-sm font-medium text-gray-700 mb-2">
@@ -144,11 +132,9 @@ export default function SearchResultsDisplay({
       </div>
     );
   };
-
   // 渲染單個搜索結果
   const renderSearchResult = (result: SearchResult) => {
     const isGridView = viewMode === 'grid';
-
     return (
       <div
         key={result.id}
@@ -168,7 +154,6 @@ export default function SearchResultsDisplay({
               />
             </div>
           )}
-          
           <div className="flex-1 min-w-0">
             {/* 標題和類型 */}
             <div className="flex items-start justify-between mb-2">
@@ -179,12 +164,10 @@ export default function SearchResultsDisplay({
                 {result.type}
               </span>
             </div>
-
             {/* 描述 */}
             <p className={`text-gray-600 mb-3 ${isGridView ? 'text-sm line-clamp-2' : 'line-clamp-3'}`}>
               {result.description}
             </p>
-
             {/* 標籤 */}
             {result.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-3">
@@ -203,7 +186,6 @@ export default function SearchResultsDisplay({
                 )}
               </div>
             )}
-
             {/* 元數據 */}
             <div className={`flex items-center justify-between text-sm text-gray-500 ${
               isGridView ? 'flex-col items-start space-y-1' : 'flex-row'
@@ -217,7 +199,6 @@ export default function SearchResultsDisplay({
                   </span>
                 )}
               </div>
-
               {/* 統計信息 */}
               {result.stats && (
                 <div className="flex items-center space-x-3">
@@ -245,7 +226,6 @@ export default function SearchResultsDisplay({
                 </div>
               )}
             </div>
-
             {/* 高亮顯示 */}
             {result.highlights && result.highlights.length > 0 && (
               <div className="mt-3 p-2 bg-yellow-50 rounded">
@@ -259,7 +239,6 @@ export default function SearchResultsDisplay({
                 ))}
               </div>
             )}
-
             {/* 相關性分數 */}
             {result.relevanceScore && result.relevanceScore > 0 && (
               <div className="mt-2">
@@ -282,21 +261,17 @@ export default function SearchResultsDisplay({
       </div>
     );
   };
-
   // 渲染分頁
   const renderPagination = () => {
     const { pagination } = searchResponse;
     if (pagination.totalPages <= 1) return null;
-
     const pages = [];
     const maxVisiblePages = 5;
     const startPage = Math.max(1, pagination.page - Math.floor(maxVisiblePages / 2));
     const endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
-
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-
     return (
       <div className="flex items-center justify-center space-x-2 mt-8">
         <button
@@ -306,7 +281,6 @@ export default function SearchResultsDisplay({
         >
           上一頁
         </button>
-
         {pages.map(page => (
           <button
             key={page}
@@ -320,7 +294,6 @@ export default function SearchResultsDisplay({
             {page}
           </button>
         ))}
-
         <button
           onClick={() => onPageChange?.(pagination.page + 1)}
           disabled={pagination.page === pagination.totalPages}
@@ -331,12 +304,10 @@ export default function SearchResultsDisplay({
       </div>
     );
   };
-
   return (
     <div>
       {/* 搜索統計 */}
       {renderSearchStats()}
-
       <div className="flex gap-6">
         {/* 分面過濾器 */}
         {searchResponse.facets && (
@@ -344,7 +315,6 @@ export default function SearchResultsDisplay({
             {renderFacets()}
           </div>
         )}
-
         {/* 搜索結果 */}
         <div className="flex-1">
           {searchResponse.results.length === 0 ? (
@@ -364,7 +334,6 @@ export default function SearchResultsDisplay({
               }`}>
                 {searchResponse.results.map(renderSearchResult)}
               </div>
-              
               {/* 分頁 */}
               {renderPagination()}
             </>

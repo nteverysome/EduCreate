@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { CalendarIcon, UserIcon, TagIcon, EyeIcon, PencilIcon, TrashIcon, CheckIcon } from '@heroicons/react/24/outline';
-
 // 自定義日期格式化函數，替代date-fns
 const formatRelativeTime = (date: Date): string => {
   const now = new Date();
@@ -12,7 +11,6 @@ const formatRelativeTime = (date: Date): string => {
   const diffDay = Math.round(diffHour / 24);
   const diffMonth = Math.round(diffDay / 30);
   const diffYear = Math.round(diffDay / 365);
-
   if (diffSec < 60) {
     return '剛剛';
   } else if (diffMin < 60) {
@@ -27,7 +25,6 @@ const formatRelativeTime = (date: Date): string => {
     return `${diffYear} 年前`;
   }
 };
-
 interface Activity {
   id: string;
   title: string;
@@ -44,7 +41,6 @@ interface Activity {
     name: string;
   };
 }
-
 interface SelectableActivityCardProps {
   activity: Activity;
   isSelected: boolean;
@@ -53,7 +49,6 @@ interface SelectableActivityCardProps {
   onDelete: (id: string) => void;
   onPublish: (id: string) => void;
 }
-
 const SelectableActivityCard: React.FC<SelectableActivityCardProps> = ({
   activity,
   isSelected,
@@ -73,7 +68,6 @@ const SelectableActivityCard: React.FC<SelectableActivityCardProps> = ({
     tags,
     user
   } = activity;
-
   // 獲取模板類型的顯示名稱和顏色
   const getTemplateInfo = (type: string) => {
     switch (type) {
@@ -87,15 +81,12 @@ const SelectableActivityCard: React.FC<SelectableActivityCardProps> = ({
         return { name: '其他', color: 'bg-gray-100 text-gray-800' };
     }
   };
-
   // 格式化日期
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return formatRelativeTime(date);
   };
-
   const templateInfo = getTemplateInfo(type);
-
   return (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 ${isSelected ? 'ring-2 ring-primary' : 'hover:shadow-lg'}`}>
       <div className="p-5">
@@ -117,13 +108,10 @@ const SelectableActivityCard: React.FC<SelectableActivityCardProps> = ({
             {published ? '已發布' : '草稿'}
           </span>
         </div>
-        
         <h3 className="text-lg font-semibold mb-2 line-clamp-1">{title}</h3>
-        
         {description && (
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">{description}</p>
         )}
-        
         {tags && tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {tags.map(tag => (
@@ -134,7 +122,6 @@ const SelectableActivityCard: React.FC<SelectableActivityCardProps> = ({
             ))}
           </div>
         )}
-        
         <div className="flex items-center text-gray-500 text-xs mb-4">
           {user && (
             <span className="flex items-center mr-3">
@@ -153,7 +140,6 @@ const SelectableActivityCard: React.FC<SelectableActivityCardProps> = ({
             </span>
           )}
         </div>
-        
         <div className="flex justify-between items-center pt-3 border-t border-gray-100">
           <div>
             <button 
@@ -169,7 +155,6 @@ const SelectableActivityCard: React.FC<SelectableActivityCardProps> = ({
               <TrashIcon className="h-4 w-4" />
             </button>
           </div>
-          
           {!published && (
             <button
               onClick={() => onPublish(id)}
@@ -178,7 +163,6 @@ const SelectableActivityCard: React.FC<SelectableActivityCardProps> = ({
               發布
             </button>
           )}
-          
           {published && (
             <Link href={`/preview/${id}`} className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full hover:bg-gray-200 transition-colors">
               查看
@@ -189,5 +173,4 @@ const SelectableActivityCard: React.FC<SelectableActivityCardProps> = ({
     </div>
   );
 };
-
 export default SelectableActivityCard;

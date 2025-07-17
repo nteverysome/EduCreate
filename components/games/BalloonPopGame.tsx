@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-
 export interface BalloonQuestion {
   id: string;
   question: string;
@@ -8,14 +7,12 @@ export interface BalloonQuestion {
   category?: string;
   points: number;
 }
-
 interface BalloonPopGameProps {
   questions: BalloonQuestion[];
   gameTime?: number;
   balloonSpeed?: number;
   onComplete?: (results: any) => void;
 }
-
 interface Balloon {
   id: string;
   question: BalloonQuestion;
@@ -25,7 +22,6 @@ interface Balloon {
   speed: number;
   isPopped: boolean;
 }
-
 export default function BalloonPopGame({
   questions,
   gameTime = 60,
@@ -42,13 +38,10 @@ export default function BalloonPopGame({
   const [showAnswerDialog, setShowAnswerDialog] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [totalAttempts, setTotalAttempts] = useState(0);
-
   const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#a8e6cf'];
-
   // 創建氣球
   const createBalloon = useCallback(() => {
     if (!gameStarted || gameCompleted || questions.length === 0) return;
-
     const question = questions[Math.floor(Math.random() * questions.length)];
     const newBalloon: Balloon = {
       id: `balloon-${Date.now()}-${Math.random()}`,
@@ -59,10 +52,8 @@ export default function BalloonPopGame({
       speed: balloonSpeed + Math.random() * 2,
       isPopped: false
     };
-
     setBalloons(prev => [...prev, newBalloon]);
   }, [gameStarted, gameCompleted, questions, balloonSpeed, colors]);
-
   // 移動氣球
   const moveBalloons = useCallback(() => {
     setBalloons(prev => prev.map(balloon => ({
@@ -70,11 +61,9 @@ export default function BalloonPopGame({
       y: balloon.y - balloon.speed
     })).filter(balloon => balloon.y > -100 && !balloon.isPopped));
   }, []);
-
   // 計時器
   useEffect(() => {
     if (!gameStarted || gameCompleted) return;
-
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -84,26 +73,20 @@ export default function BalloonPopGame({
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(timer);
   }, [gameStarted, gameCompleted]);
-
   // 氣球生成器
   useEffect(() => {
     if (!gameStarted || gameCompleted) return;
-
     const balloonGenerator = setInterval(createBalloon, 2000);
     return () => clearInterval(balloonGenerator);
   }, [gameStarted, gameCompleted, createBalloon]);
-
   // 氣球移動
   useEffect(() => {
     if (!gameStarted || gameCompleted) return;
-
     const moveInterval = setInterval(moveBalloons, 50);
     return () => clearInterval(moveInterval);
   }, [gameStarted, gameCompleted, moveBalloons]);
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -117,45 +100,35 @@ export default function BalloonPopGame({
     setShowAnswerDialog(false);
     setUserAnswer('');
   };
-
   // 點擊氣球
   const popBalloon = (balloon: Balloon) => {
     if (!gameStarted || gameCompleted || showAnswerDialog) return;
-
     setSelectedBalloon(balloon);
     setShowAnswerDialog(true);
     setUserAnswer('');
-
     // 移除被點擊的氣球
     setBalloons(prev => prev.filter(b => b.id !== balloon.id));
   };
-
   // 檢查答案
   const checkAnswer = (answer: string) => {
     const trimmedAnswer = answer.trim().toLowerCase();
     const correctAnswer = selectedBalloon!.question.answer.toLowerCase();
     const alternatives = selectedBalloon!.question.alternatives?.map(alt => alt.toLowerCase()) || [];
-    
     return trimmedAnswer === correctAnswer || alternatives.includes(trimmedAnswer);
   };
-
   // 提交答案
   const submitAnswer = () => {
     if (!selectedBalloon || !userAnswer.trim()) return;
-
     setTotalAttempts(prev => prev + 1);
     const isCorrect = checkAnswer(userAnswer);
-
     if (isCorrect) {
       setScore(prev => prev + selectedBalloon.question.points);
       setCorrectAnswers(prev => prev + 1);
     }
-
     setShowAnswerDialog(false);
     setSelectedBalloon(null);
     setUserAnswer('');
   };
-
   // 跳過問題
   const skipQuestion = () => {
     setTotalAttempts(prev => prev + 1);
@@ -163,7 +136,6 @@ export default function BalloonPopGame({
     setSelectedBalloon(null);
     setUserAnswer('');
   };
-
   // 處理鍵盤事件
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && showAnswerDialog) {
@@ -172,12 +144,10 @@ export default function BalloonPopGame({
       skipQuestion();
     }
   };
-
   // 遊戲完成處理
   useEffect(() => {
     if (gameCompleted) {
       const accuracy = totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0;
-      
       const results = {
         score,
         correctAnswers,
@@ -185,18 +155,15 @@ export default function BalloonPopGame({
         accuracy,
         timeSpent: gameTime - timeLeft
       };
-
       onComplete?.(results);
     }
   }, [gameCompleted, score, correctAnswers, totalAttempts, gameTime, timeLeft, onComplete]);
-
   // 格式化時間
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   if (!gameStarted) {
     return (
       <div className="text-center p-8">
@@ -227,20 +194,16 @@ export default function BalloonPopGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const accuracy = totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0;
-    
     return (
       <div className="text-center p-8">
         <div className="text-6xl mb-4">🎉</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">遊戲完成！</h2>
-        
         <div className="bg-gradient-to-r from-pink-400 to-purple-500 text-white rounded-lg p-6 max-w-md mx-auto mb-6">
           <div className="text-3xl font-bold mb-2">{score} 分</div>
           <div className="text-lg">最終得分</div>
         </div>
-        
         <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -257,7 +220,6 @@ export default function BalloonPopGame({
             </div>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="mt-6 px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
@@ -267,7 +229,6 @@ export default function BalloonPopGame({
       </div>
     );
   }
-
   return (
     <div className="relative w-full h-screen bg-gradient-to-b from-blue-200 to-blue-400 overflow-hidden">
       {/* 遊戲狀態欄 */}
@@ -287,7 +248,6 @@ export default function BalloonPopGame({
           </div>
         </div>
       </div>
-
       {/* 氣球 */}
       {balloons.map(balloon => (
         <div
@@ -317,13 +277,11 @@ export default function BalloonPopGame({
           </div>
         </div>
       ))}
-
       {/* 答題對話框 */}
       {showAnswerDialog && selectedBalloon && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4" onKeyDown={handleKeyPress}>
             <h3 className="text-lg font-bold text-gray-800 mb-4">回答問題</h3>
-            
             <div className="mb-4">
               <p className="text-gray-700 mb-2">{selectedBalloon.question.question}</p>
               {selectedBalloon.question.category && (
@@ -332,7 +290,6 @@ export default function BalloonPopGame({
                 </span>
               )}
             </div>
-
             <input
               type="text"
               value={userAnswer}
@@ -341,7 +298,6 @@ export default function BalloonPopGame({
               className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-blue-500"
               autoFocus
             />
-
             <div className="flex gap-3">
               <button
                 onClick={submitAnswer}
@@ -357,14 +313,12 @@ export default function BalloonPopGame({
                 跳過 (Esc)
               </button>
             </div>
-
             <div className="mt-3 text-center text-sm text-gray-600">
               得分: {selectedBalloon.question.points} 分
             </div>
           </div>
         </div>
       )}
-
       {/* 雲朵裝飾 */}
       <div className="absolute top-20 left-10 text-white text-4xl opacity-70 animate-pulse">☁️</div>
       <div className="absolute top-32 right-20 text-white text-3xl opacity-50 animate-pulse">☁️</div>

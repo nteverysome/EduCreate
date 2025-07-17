@@ -2,10 +2,8 @@
  * VoiceRecorder - 語音錄製組件
  * 支持語音錄製、播放、語音識別和語音合成功能
  */
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { VoiceManager, RecordingState, VoiceRecording, VoiceRecognitionResult } from '../../lib/audio/VoiceManager';
-
 export interface VoiceRecorderProps {
   onRecordingComplete?: (recording: VoiceRecording) => void;
   onTranscriptUpdate?: (transcript: string) => void;
@@ -14,7 +12,6 @@ export interface VoiceRecorderProps {
   className?: string;
   'data-testid'?: string;
 }
-
 export default function VoiceRecorder({
   onRecordingComplete,
   onTranscriptUpdate,
@@ -30,23 +27,19 @@ export default function VoiceRecorder({
     duration: 0,
     volume: 0
   });
-  
   const [recordings, setRecordings] = useState<VoiceRecording[]>([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [isRecognitionActive, setIsRecognitionActive] = useState(false);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
   const [speechText, setSpeechText] = useState('');
-  
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
-
   // 初始化
   useEffect(() => {
     const handleRecordingState = (state: RecordingState) => {
       setRecordingState(state);
     };
-
     const handleRecordingsUpdate = (newRecordings: VoiceRecording[]) => {
       setRecordings(newRecordings);
       if (newRecordings.length > 0) {
@@ -54,23 +47,19 @@ export default function VoiceRecorder({
         onRecordingComplete?.(latestRecording);
       }
     };
-
     const handleRecognitionResult = (result: VoiceRecognitionResult) => {
       if (result.isFinal) {
         setCurrentTranscript(prev => prev + result.transcript + ' ');
         onTranscriptUpdate?.(currentTranscript + result.transcript + ' ');
       }
     };
-
     voiceManager.addRecordingListener(handleRecordingState);
     voiceManager.addRecordingsListener(handleRecordingsUpdate);
     voiceManager.addRecognitionListener(handleRecognitionResult);
-
     // 載入可用語音
     const loadVoices = () => {
       const voices = voiceManager.getAvailableVoices();
       setAvailableVoices(voices);
-      
       // 選擇中文語音作為默認
       const chineseVoice = voices.find(voice => 
         voice.lang.includes('zh') || voice.lang.includes('cmn')
@@ -79,71 +68,56 @@ export default function VoiceRecorder({
         setSelectedVoice(chineseVoice);
       }
     };
-
     loadVoices();
     if (speechSynthesis.onvoiceschanged !== undefined) {
       speechSynthesis.onvoiceschanged = loadVoices;
     }
-
     // 載入現有錄音
     setRecordings(voiceManager.getAllRecordings());
-
     return () => {
       voiceManager.removeRecordingListener(handleRecordingState);
       voiceManager.removeRecordingsListener(handleRecordingsUpdate);
       voiceManager.removeRecognitionListener(handleRecognitionResult);
       voiceManager.destroy();
-      
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
   }, [voiceManager, onRecordingComplete, onTranscriptUpdate, currentTranscript]);
-
   // 音頻波形可視化
   useEffect(() => {
     if (recordingState.isRecording && canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-
       const drawWaveform = () => {
         const waveform = voiceManager.getAudioWaveform();
         if (!waveform) {
           animationRef.current = requestAnimationFrame(drawWaveform);
           return;
         }
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
         const barWidth = canvas.width / waveform.length;
         let x = 0;
-
         for (let i = 0; i < waveform.length; i++) {
           const barHeight = (waveform[i] / 255) * canvas.height;
-          
           // 根據音量設置顏色
           const intensity = waveform[i] / 255;
           ctx.fillStyle = `hsl(${120 - intensity * 60}, 70%, 50%)`;
-          
           ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
           x += barWidth;
         }
-
         animationRef.current = requestAnimationFrame(drawWaveform);
       };
-
       drawWaveform();
     } else if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
   }, [recordingState.isRecording, voiceManager]);
-
   // 開始錄音
   const handleStartRecording = useCallback(async () => {
     try {
       await voiceManager.startRecording();
-      
       if (enableSpeechRecognition && isRecognitionActive) {
         voiceManager.startSpeechRecognition();
       }
@@ -152,21 +126,17 @@ export default function VoiceRecorder({
       alert('無法開始錄音，請檢查麥克風權限');
     }
   }, [voiceManager, enableSpeechRecognition, isRecognitionActive]);
-
   // 停止錄音
   const handleStopRecording = useCallback(() => {
     voiceManager.stopRecording();
-    
     if (isRecognitionActive) {
       voiceManager.stopSpeechRecognition();
     }
   }, [voiceManager, isRecognitionActive]);
-
   // 暫停/恢復錄音
   const handleTogglePause = useCallback(() => {
     voiceManager.toggleRecordingPause();
   }, [voiceManager]);
-
   // 播放錄音
   const handlePlayRecording = useCallback(async (recordingId: string) => {
     try {
@@ -176,23 +146,19 @@ export default function VoiceRecorder({
       alert('播放錄音失敗');
     }
   }, [voiceManager]);
-
   // 刪除錄音
   const handleDeleteRecording = useCallback((recordingId: string) => {
     if (confirm('確定要刪除這個錄音嗎？')) {
       voiceManager.deleteRecording(recordingId);
     }
   }, [voiceManager]);
-
   // 切換語音識別
   const handleToggleRecognition = useCallback(() => {
     setIsRecognitionActive(!isRecognitionActive);
   }, [isRecognitionActive]);
-
   // 語音合成
   const handleSpeakText = useCallback(async () => {
     if (!speechText.trim()) return;
-
     try {
       await voiceManager.speakText({
         text: speechText,
@@ -206,23 +172,19 @@ export default function VoiceRecorder({
       alert('語音合成失敗');
     }
   }, [voiceManager, speechText, selectedVoice]);
-
   // 格式化時長
   const formatDuration = (seconds: number): string => {
     return voiceManager.formatDuration(seconds);
   };
-
   // 格式化文件大小
   const formatFileSize = (bytes: number): string => {
     return voiceManager.formatFileSize(bytes);
   };
-
   return (
     <div className={`voice-recorder bg-white rounded-lg shadow-sm p-6 ${className}`} data-testid={testId}>
       {/* 錄音控制區域 */}
       <div className="recording-controls mb-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">語音錄製</h3>
-        
         {/* 錄音按鈕 */}
         <div className="flex items-center justify-center space-x-4 mb-4">
           {!recordingState.isRecording ? (
@@ -244,7 +206,6 @@ export default function VoiceRecorder({
               >
                 {recordingState.isPaused ? '▶️' : '⏸️'}
               </button>
-              
               <button
                 onClick={handleStopRecording}
                 className="stop-btn w-12 h-12 bg-gray-500 hover:bg-gray-600 text-white rounded-full flex items-center justify-center transition-colors"
@@ -256,7 +217,6 @@ export default function VoiceRecorder({
             </div>
           )}
         </div>
-
         {/* 錄音狀態 */}
         <div className="recording-status text-center mb-4">
           <div className="text-lg font-medium text-gray-900" data-testid="recording-duration">
@@ -274,7 +234,6 @@ export default function VoiceRecorder({
             </div>
           )}
         </div>
-
         {/* 音頻波形可視化 */}
         <div className="waveform-container mb-4">
           <canvas
@@ -285,7 +244,6 @@ export default function VoiceRecorder({
             data-testid="waveform-canvas"
           />
         </div>
-
         {/* 音量指示器 */}
         <div className="volume-indicator mb-4">
           <div className="flex items-center space-x-2">
@@ -303,7 +261,6 @@ export default function VoiceRecorder({
           </div>
         </div>
       </div>
-
       {/* 語音識別區域 */}
       {enableSpeechRecognition && (
         <div className="speech-recognition mb-6 p-4 bg-blue-50 rounded-lg">
@@ -321,7 +278,6 @@ export default function VoiceRecorder({
               {isRecognitionActive ? '關閉識別' : '開啟識別'}
             </button>
           </div>
-          
           <div className="transcript-area">
             <textarea
               value={currentTranscript}
@@ -333,12 +289,10 @@ export default function VoiceRecorder({
           </div>
         </div>
       )}
-
       {/* 語音合成區域 */}
       {enableSpeechSynthesis && (
         <div className="speech-synthesis mb-6 p-4 bg-green-50 rounded-lg">
           <h4 className="font-medium text-gray-900 mb-3">語音合成</h4>
-          
           <div className="space-y-3">
             {/* 語音選擇 */}
             <div>
@@ -362,7 +316,6 @@ export default function VoiceRecorder({
                 ))}
               </select>
             </div>
-
             {/* 文本輸入 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -376,7 +329,6 @@ export default function VoiceRecorder({
                 data-testid="speech-text-input"
               />
             </div>
-
             {/* 朗讀按鈕 */}
             <button
               onClick={handleSpeakText}
@@ -389,11 +341,9 @@ export default function VoiceRecorder({
           </div>
         </div>
       )}
-
       {/* 錄音列表 */}
       <div className="recordings-list">
         <h4 className="font-medium text-gray-900 mb-3">錄音列表</h4>
-        
         {recordings.length === 0 ? (
           <div className="text-center py-8 text-gray-500" data-testid="no-recordings">
             <div className="text-4xl mb-2">🎤</div>
@@ -417,7 +367,6 @@ export default function VoiceRecorder({
                       </div>
                     )}
                   </div>
-                  
                   <div className="flex items-center space-x-2 ml-4">
                     <button
                       onClick={() => handlePlayRecording(recording.id)}

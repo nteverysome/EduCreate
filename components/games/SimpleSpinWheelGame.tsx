@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 export interface WheelSegment {
   id: string;
   text: string;
@@ -7,13 +6,11 @@ export interface WheelSegment {
   points?: number;
   action?: 'question' | 'bonus' | 'penalty' | 'normal';
 }
-
 interface SimpleSpinWheelGameProps {
   segments: WheelSegment[];
   onComplete?: (results: any) => void;
   maxSpins?: number;
 }
-
 export default function SimpleSpinWheelGame({
   segments,
   onComplete,
@@ -27,7 +24,6 @@ export default function SimpleSpinWheelGame({
   const [gameCompleted, setGameCompleted] = useState(false);
   const [spinHistory, setSpinHistory] = useState<WheelSegment[]>([]);
   const [showResult, setShowResult] = useState(false);
-
   // 開始遊戲
   const startGame = () => {
     setGameStarted(true);
@@ -38,31 +34,25 @@ export default function SimpleSpinWheelGame({
     setSelectedSegment(null);
     setShowResult(false);
   };
-
   // 轉動輪盤
   const spinWheel = () => {
     if (isSpinning || spinsLeft <= 0 || gameCompleted) return;
-
     setIsSpinning(true);
     setShowResult(false);
     setSelectedSegment(null);
-
     // 隨機選擇一個扇形
     setTimeout(() => {
       const randomIndex = Math.floor(Math.random() * segments.length);
       const selectedSeg = segments[randomIndex];
-      
       setSelectedSegment(selectedSeg);
       setSpinHistory(prev => [...prev, selectedSeg]);
       setSpinsLeft(prev => prev - 1);
       setIsSpinning(false);
       setShowResult(true);
-
       // 處理得分
       if (selectedSeg.points) {
         setScore(prev => prev + selectedSeg.points!);
       }
-
       // 檢查遊戲是否結束
       if (spinsLeft <= 1) {
         setTimeout(() => {
@@ -71,13 +61,11 @@ export default function SimpleSpinWheelGame({
       }
     }, 2000); // 轉動動畫時間
   };
-
   // 遊戲完成處理
   useEffect(() => {
     if (gameCompleted) {
       const totalSpins = maxSpins;
       const averageScore = Math.round(score / totalSpins);
-      
       const results = {
         score,
         totalSpins,
@@ -88,11 +76,9 @@ export default function SimpleSpinWheelGame({
           spinHistory[0]
         )
       };
-
       onComplete?.(results);
     }
   }, [gameCompleted, score, maxSpins, spinHistory, onComplete]);
-
   if (!gameStarted) {
     return (
       <div className="text-center p-8">
@@ -126,24 +112,20 @@ export default function SimpleSpinWheelGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const averageScore = Math.round(score / maxSpins);
     const bestSpin = spinHistory.reduce((best, current) => 
       (current.points || 0) > (best.points || 0) ? current : best, 
       spinHistory[0]
     );
-    
     return (
       <div className="text-center p-8">
         <div className="text-6xl mb-4">🎊</div>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">遊戲完成！</h2>
-        
         <div className="bg-gradient-to-r from-purple-400 to-pink-400 text-white rounded-lg p-6 max-w-md mx-auto mb-6">
           <div className="text-3xl font-bold mb-2">{score} 分</div>
           <div className="text-lg">總得分</div>
         </div>
-        
         <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
           <div className="space-y-3">
             <div className="flex justify-between">
@@ -160,7 +142,6 @@ export default function SimpleSpinWheelGame({
             </div>
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="mt-6 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:scale-105 transition-transform"
@@ -170,7 +151,6 @@ export default function SimpleSpinWheelGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto">
       {/* 遊戲狀態 */}
@@ -188,7 +168,6 @@ export default function SimpleSpinWheelGame({
           <div className="text-sm text-gray-600">已轉動</div>
         </div>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* 輪盤區域 */}
         <div className="flex flex-col items-center">
@@ -202,13 +181,11 @@ export default function SimpleSpinWheelGame({
                 </div>
               </div>
             </div>
-            
             {/* 指針 */}
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2">
               <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-red-600"></div>
             </div>
           </div>
-          
           <button
             onClick={spinWheel}
             disabled={isSpinning || spinsLeft <= 0}
@@ -221,7 +198,6 @@ export default function SimpleSpinWheelGame({
             {isSpinning ? '轉動中...' : spinsLeft > 0 ? '轉動輪盤！' : '遊戲結束'}
           </button>
         </div>
-
         {/* 結果和歷史 */}
         <div className="space-y-6">
           {/* 當前結果 */}
@@ -239,7 +215,6 @@ export default function SimpleSpinWheelGame({
               </div>
             </div>
           )}
-
           {/* 可用選項 */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4">輪盤選項</h3>
@@ -258,7 +233,6 @@ export default function SimpleSpinWheelGame({
               ))}
             </div>
           </div>
-
           {/* 轉動歷史 */}
           {spinHistory.length > 0 && (
             <div className="bg-white rounded-lg shadow-lg p-6">

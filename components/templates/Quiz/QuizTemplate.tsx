@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { v4 as uuidv4 } from 'uuid';
-
 interface QuizQuestion {
   id: string;
   question: string;
@@ -9,7 +8,6 @@ interface QuizQuestion {
   correctAnswer: number;
   explanation?: string;
 }
-
 interface QuizTemplateProps {
   initialData?: {
     questions: QuizQuestion[];
@@ -23,7 +21,6 @@ interface QuizTemplateProps {
   onSave?: (data: any) => void;
   previewMode?: boolean;
 }
-
 export default function QuizTemplate({
   initialData,
   onSave,
@@ -37,13 +34,11 @@ export default function QuizTemplate({
   const [shuffleQuestions, setShuffleQuestions] = useState(initialData?.shuffleQuestions ?? true);
   const [shuffleOptions, setShuffleOptions] = useState(initialData?.shuffleOptions ?? true);
   const [showExplanation, setShowExplanation] = useState(initialData?.showExplanation ?? true);
-  
   // 新問題表單狀態
   const [newQuestion, setNewQuestion] = useState('');
   const [newOptions, setNewOptions] = useState(['', '', '', '']);
   const [newCorrectAnswer, setNewCorrectAnswer] = useState<number>(0);
   const [newExplanation, setNewExplanation] = useState('');
-  
   // 處理保存
   const handleSave = () => {
     if (onSave) {
@@ -59,17 +54,14 @@ export default function QuizTemplate({
       });
     }
   };
-
   // 處理取消
   const handleCancel = () => {
     router.back();
   };
-
   // 添加問題
   const handleAddQuestion = () => {
     if (newQuestion.trim() && newOptions.filter(opt => opt.trim()).length >= 2) {
       const questionId = uuidv4();
-      
       setQuestions([...questions, { 
         id: questionId, 
         question: newQuestion.trim(), 
@@ -77,7 +69,6 @@ export default function QuizTemplate({
         correctAnswer: newCorrectAnswer,
         explanation: newExplanation.trim() || undefined
       }]);
-      
       // 重置表單
       setNewQuestion('');
       setNewOptions(['', '', '', '']);
@@ -85,12 +76,10 @@ export default function QuizTemplate({
       setNewExplanation('');
     }
   };
-
   // 刪除問題
   const handleDeleteQuestion = (id: string) => {
     setQuestions(questions.filter(q => q.id !== id));
   };
-
   // 更新問題
   const handleUpdateQuestion = (id: string, field: string, value: any) => {
     setQuestions(questions.map(q => {
@@ -100,7 +89,6 @@ export default function QuizTemplate({
       return q;
     }));
   };
-
   // 更新選項
   const handleUpdateOption = (questionId: string, optionIndex: number, value: string) => {
     setQuestions(questions.map(q => {
@@ -112,7 +100,6 @@ export default function QuizTemplate({
       return q;
     }));
   };
-
   // 添加選項
   const handleAddOption = (questionId: string) => {
     setQuestions(questions.map(q => {
@@ -122,16 +109,13 @@ export default function QuizTemplate({
       return q;
     }));
   };
-
   // 刪除選項
   const handleDeleteOption = (questionId: string, optionIndex: number) => {
     setQuestions(questions.map(q => {
       if (q.id === questionId) {
         // 確保至少保留兩個選項
         if (q.options.length <= 2) return q;
-        
         const newOptions = q.options.filter((_, index) => index !== optionIndex);
-        
         // 如果刪除的是正確答案或正確答案在刪除的選項之後，需要調整正確答案索引
         let newCorrectAnswer = q.correctAnswer;
         if (optionIndex === q.correctAnswer) {
@@ -139,34 +123,28 @@ export default function QuizTemplate({
         } else if (optionIndex < q.correctAnswer) {
           newCorrectAnswer = q.correctAnswer - 1;
         }
-        
         return { ...q, options: newOptions, correctAnswer: newCorrectAnswer };
       }
       return q;
     }));
   };
-
   // 更新新問題的選項
   const handleUpdateNewOption = (index: number, value: string) => {
     const updatedOptions = [...newOptions];
     updatedOptions[index] = value;
     setNewOptions(updatedOptions);
   };
-
   // 添加新問題的選項
   const handleAddNewOption = () => {
     if (newOptions.length < 8) { // 限制最多8個選項
       setNewOptions([...newOptions, '']);
     }
   };
-
   // 刪除新問題的選項
   const handleDeleteNewOption = (index: number) => {
     if (newOptions.length <= 2) return; // 至少保留兩個選項
-    
     const updatedOptions = newOptions.filter((_, i) => i !== index);
     setNewOptions(updatedOptions);
-    
     // 如果刪除的是正確答案或正確答案在刪除的選項之後，需要調整正確答案索引
     if (index === newCorrectAnswer) {
       setNewCorrectAnswer(0);
@@ -174,13 +152,11 @@ export default function QuizTemplate({
       setNewCorrectAnswer(newCorrectAnswer - 1);
     }
   };
-
   return (
     <div className="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
       {!previewMode && (
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">配置測驗問答模板</h2>
-          
           <div className="space-y-4">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
@@ -195,7 +171,6 @@ export default function QuizTemplate({
                 required
               />
             </div>
-            
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
                 描述
@@ -208,7 +183,6 @@ export default function QuizTemplate({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
             <div>
               <label htmlFor="instructions" className="block text-sm font-medium text-gray-700 mb-1">
                 使用說明
@@ -221,7 +195,6 @@ export default function QuizTemplate({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center">
                 <input
@@ -235,7 +208,6 @@ export default function QuizTemplate({
                   隨機排序問題
                 </label>
               </div>
-              
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -248,7 +220,6 @@ export default function QuizTemplate({
                   隨機排序選項
                 </label>
               </div>
-              
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -265,7 +236,6 @@ export default function QuizTemplate({
           </div>
         </div>
       )}
-      
       {previewMode && (
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
@@ -277,11 +247,9 @@ export default function QuizTemplate({
           )}
         </div>
       )}
-      
       {!previewMode && (
         <div className="mb-6">
           <h3 className="text-lg font-medium text-gray-900 mb-3">問題列表</h3>
-          
           {questions.map((question, qIndex) => (
             <div key={question.id} className="border border-gray-200 rounded-md p-4 mb-4">
               <div className="flex justify-between items-start mb-3">
@@ -307,7 +275,6 @@ export default function QuizTemplate({
                   </svg>
                 </button>
               </div>
-              
               <div className="mb-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   選項
@@ -344,7 +311,6 @@ export default function QuizTemplate({
                     )}
                   </div>
                 ))}
-                
                 {question.options.length < 8 && (
                   <button
                     onClick={() => handleAddOption(question.id)}
@@ -357,7 +323,6 @@ export default function QuizTemplate({
                   </button>
                 )}
               </div>
-              
               {showExplanation && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -374,10 +339,8 @@ export default function QuizTemplate({
               )}
             </div>
           ))}
-          
           <div className="border border-dashed border-gray-300 rounded-md p-4">
             <h4 className="text-md font-medium text-gray-900 mb-3">添加新問題</h4>
-            
             <div className="mb-3">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 問題
@@ -390,7 +353,6 @@ export default function QuizTemplate({
                 placeholder="輸入問題"
               />
             </div>
-            
             <div className="mb-3">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 選項 (選擇正確答案)
@@ -427,7 +389,6 @@ export default function QuizTemplate({
                   )}
                 </div>
               ))}
-              
               {newOptions.length < 8 && (
                 <button
                   onClick={handleAddNewOption}
@@ -440,7 +401,6 @@ export default function QuizTemplate({
                 </button>
               )}
             </div>
-            
             {showExplanation && (
               <div className="mb-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -455,7 +415,6 @@ export default function QuizTemplate({
                 />
               </div>
             )}
-            
             <div className="mt-3">
               <button
                 onClick={handleAddQuestion}
@@ -468,7 +427,6 @@ export default function QuizTemplate({
           </div>
         </div>
       )}
-      
       {previewMode && questions.length > 0 && (
         <div className="space-y-4">
           {questions.slice(0, 3).map((question, qIndex) => (
@@ -504,7 +462,6 @@ export default function QuizTemplate({
           )}
         </div>
       )}
-      
       {!previewMode && (
         <div className="mt-6 flex justify-end space-x-3">
           <button

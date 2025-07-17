@@ -6,7 +6,7 @@ interface AIGeneratorProps {
   onClose: () => void;
 }
 
-export default function AIContentGenerator({ onContentGenerated, onClose }: AIGeneratorProps) {
+const AIContentGenerator = ({ onContentGenerated, onClose }: AIGeneratorProps) {
   const [formData, setFormData] = useState({
     topic: '',
     difficulty: 'medium' as 'easy' | 'medium' | 'hard',
@@ -337,3 +337,5 @@ export default function AIContentGenerator({ onContentGenerated, onClose }: AIGe
     </div>
   );
 }
+
+export default AIContentGenerator;

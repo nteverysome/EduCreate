@@ -9,13 +9,16 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import GEPTTemplateManager from '../../../components/gept/GEPTTemplateManager';
 import GEPTVocabularyBrowser from '../../../components/gept/GEPTVocabularyBrowser';
-import { ValidationResult, GEPTWord } from '../../../lib/gept/GEPTManager';
+import QuickInsertPanel from '../../../components/gept/QuickInsertPanel';
+import { ValidationResult, GEPTWord, GEPTLevel } from '../../../lib/gept/GEPTManager';
 
 export default function GEPTTemplatesPage() {
-  const [activeTab, setActiveTab] = useState<'templates' | 'vocabulary'>('templates');
+  const [activeTab, setActiveTab] = useState<'templates' | 'vocabulary' | 'quick-insert'>('templates');
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [selectedWord, setSelectedWord] = useState<GEPTWord | null>(null);
   const [generatedContent, setGeneratedContent] = useState('');
+  const [currentLevel, setCurrentLevel] = useState<GEPTLevel>('elementary');
+  const [insertedContent, setInsertedContent] = useState<string[]>([]);
 
   const handleTemplateApply = (content: string) => {
     setGeneratedContent(content);
@@ -30,6 +33,17 @@ export default function GEPTTemplatesPage() {
   const handleWordSelect = (word: GEPTWord) => {
     setSelectedWord(word);
     console.log('選中詞彙:', word);
+  };
+
+  const handleQuickInsert = (content: string, type: string) => {
+    setInsertedContent(prev => [content, ...prev.slice(0, 9)]); // 保留最近10個插入項目
+    setGeneratedContent(prev => prev + (prev ? '\n\n' : '') + content);
+    console.log('快速插入:', { content, type });
+  };
+
+  const clearInsertedContent = () => {
+    setInsertedContent([]);
+    setGeneratedContent('');
   };
 
   return (
@@ -135,6 +149,17 @@ export default function GEPTTemplatesPage() {
               >
                 詞彙瀏覽
               </button>
+              <button
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'quick-insert'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+                onClick={() => setActiveTab('quick-insert')}
+                data-testid="quick-insert-tab"
+              >
+                快速插入
+              </button>
             </nav>
           </div>
         </div>
@@ -143,17 +168,82 @@ export default function GEPTTemplatesPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* 主要內容 */}
           <div className="lg:col-span-3">
-            {activeTab === 'templates' ? (
+            {activeTab === 'templates' && (
               <GEPTTemplateManager
                 onTemplateApply={handleTemplateApply}
                 onValidationResult={handleValidationResult}
                 data-testid="main-template-manager"
               />
-            ) : (
+            )}
+
+            {activeTab === 'vocabulary' && (
               <GEPTVocabularyBrowser
                 onWordSelect={handleWordSelect}
                 data-testid="main-vocabulary-browser"
               />
+            )}
+
+            {activeTab === 'quick-insert' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* 快速插入面板 */}
+                <div>
+                  <QuickInsertPanel
+                    onInsert={handleQuickInsert}
+                    targetLevel={currentLevel}
+                    data-testid="quick-insert-panel"
+                  />
+                </div>
+
+                {/* 插入內容預覽 */}
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">插入內容預覽</h3>
+                    <button
+                      onClick={clearInsertedContent}
+                      className="px-3 py-1 text-sm text-red-600 hover:text-red-800"
+                      data-testid="clear-content-btn"
+                    >
+                      清空
+                    </button>
+                  </div>
+
+                  {generatedContent ? (
+                    <div className="space-y-4">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-medium text-gray-900 mb-2">生成的內容</h4>
+                        <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono">
+                          {generatedContent}
+                        </pre>
+                      </div>
+
+                      {/* 最近插入的項目 */}
+                      {insertedContent.length > 0 && (
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-2">最近插入</h4>
+                          <div className="space-y-2 max-h-48 overflow-y-auto">
+                            {insertedContent.map((content, index) => (
+                              <div
+                                key={index}
+                                className="p-2 bg-blue-50 rounded text-sm text-blue-800 cursor-pointer hover:bg-blue-100"
+                                onClick={() => handleQuickInsert(content, 'repeat')}
+                                data-testid={`recent-item-${index}`}
+                              >
+                                {content.length > 50 ? `${content.substring(0, 50)}...` : content}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      <div className="text-4xl mb-2">📝</div>
+                      <p>選擇左側的內容進行快速插入</p>
+                      <p className="text-sm mt-1">插入的內容將在這裡顯示</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
 

@@ -8,7 +8,7 @@ interface ShareModalProps {
   gameType: string;
 }
 
-export default function ShareModal({ isOpen, onClose, gameId, gameTitle, gameType }: ShareModalProps) {
+const ShareModal = ({ isOpen, onClose, gameId, gameTitle, gameType }: ShareModalProps) {
   const [shareUrl, setShareUrl] = useState('');
   const [embedCode, setEmbedCode] = useState('');
   const [isPublic, setIsPublic] = useState(false);
@@ -281,3 +281,4 @@ export default function ShareModal({ isOpen, onClose, gameId, gameTitle, gameTyp
     </div>
   );
 }
+export default ShareModal;

@@ -3,17 +3,14 @@
  * 基於詞彙組合記憶機制的單詞磁鐵遊戲
  * 根據WordWall Word Magnets模板分析設計
  */
-
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-
 interface WordMagnet {
   id: string;
   word: string;
   type: 'noun' | 'verb' | 'adjective' | 'adverb' | 'preposition' | 'article' | 'other';
   used: boolean;
 }
-
 interface WordMagnetsGameProps {
   words: { word: string; type: string }[];
   targetSentences?: string[];
@@ -23,7 +20,6 @@ interface WordMagnetsGameProps {
   onComplete?: (score: number, timeUsed: number) => void;
   onScoreUpdate?: (score: number) => void;
 }
-
 export default function WordMagnetsGame({
   words,
   targetSentences = [],
@@ -44,7 +40,6 @@ export default function WordMagnetsGame({
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [currentSentence, setCurrentSentence] = useState('');
-
   // 初始化單詞磁鐵
   useEffect(() => {
     const magnets: WordMagnet[] = words.map((word, index) => ({
@@ -53,12 +48,10 @@ export default function WordMagnetsGame({
       type: word.type as any,
       used: false
     }));
-    
     // 打亂順序
     const shuffled = magnets.sort(() => Math.random() - 0.5);
     setWordMagnets(shuffled);
   }, [words]);
-
   // 計時器
   useEffect(() => {
     if (gameStarted && timeLimit > 0 && timeLeft > 0 && !gameCompleted) {
@@ -70,24 +63,19 @@ export default function WordMagnetsGame({
       handleGameComplete();
     }
   }, [gameStarted, timeLeft, gameCompleted, timeLimit]);
-
   // 更新當前句子
   useEffect(() => {
     const sentence = sentenceArea.map(magnet => magnet.word).join(' ');
     setCurrentSentence(sentence);
   }, [sentenceArea]);
-
   const startGame = () => {
     setGameStarted(true);
     setStartTime(Date.now());
     setTimeLeft(timeLimit);
   };
-
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
-
     const { source, destination, draggableId } = result;
-
     // 從單詞區拖到句子區
     if (source.droppableId === 'word-magnets' && destination.droppableId === 'sentence-area') {
       const magnet = wordMagnets.find(m => m.id === draggableId);
@@ -95,23 +83,19 @@ export default function WordMagnetsGame({
         const newSentenceArea = [...sentenceArea];
         newSentenceArea.splice(destination.index, 0, magnet);
         setSentenceArea(newSentenceArea);
-
         setWordMagnets(prev => prev.map(m => 
           m.id === draggableId ? { ...m, used: true } : m
         ));
       }
     }
-    
     // 從句子區拖回單詞區
     else if (source.droppableId === 'sentence-area' && destination.droppableId === 'word-magnets') {
       const magnet = sentenceArea[source.index];
       setSentenceArea(prev => prev.filter((_, index) => index !== source.index));
-      
       setWordMagnets(prev => prev.map(m => 
         m.id === magnet.id ? { ...m, used: false } : m
       ));
     }
-    
     // 在句子區內重新排序
     else if (source.droppableId === 'sentence-area' && destination.droppableId === 'sentence-area') {
       const newSentenceArea = [...sentenceArea];
@@ -120,7 +104,6 @@ export default function WordMagnetsGame({
       setSentenceArea(newSentenceArea);
     }
   };
-
   const checkSentence = () => {
     if (sentenceArea.length === 0) {
       setFeedbackMessage('請先組成一個句子！');
@@ -128,9 +111,7 @@ export default function WordMagnetsGame({
       setTimeout(() => setShowFeedback(false), 1500);
       return;
     }
-
     const sentence = currentSentence.trim();
-    
     if (freeMode) {
       // 自由模式：檢查基本語法結構
       const isValid = checkBasicGrammar(sentenceArea);
@@ -141,7 +122,6 @@ export default function WordMagnetsGame({
           onScoreUpdate?.(newScore);
           return newScore;
         });
-        
         setCreatedSentences(prev => [...prev, sentence]);
         setFeedbackMessage(`很好的句子！+${points} 分`);
         clearSentence();
@@ -153,7 +133,6 @@ export default function WordMagnetsGame({
       const isMatch = targetSentences.some(target => 
         target.toLowerCase().trim() === sentence.toLowerCase()
       );
-      
       if (isMatch) {
         const points = 50;
         setScore(prev => {
@@ -161,11 +140,9 @@ export default function WordMagnetsGame({
           onScoreUpdate?.(newScore);
           return newScore;
         });
-        
         setCreatedSentences(prev => [...prev, sentence]);
         setFeedbackMessage(`完美匹配！+${points} 分`);
         clearSentence();
-        
         // 檢查是否完成所有目標句子
         if (createdSentences.length + 1 >= targetSentences.length) {
           setTimeout(() => handleGameComplete(), 2000);
@@ -174,46 +151,35 @@ export default function WordMagnetsGame({
         setFeedbackMessage('不匹配目標句子，再試試看！');
       }
     }
-    
     setShowFeedback(true);
     setTimeout(() => setShowFeedback(false), 2000);
   };
-
   const checkBasicGrammar = (magnets: WordMagnet[]): boolean => {
     if (magnets.length < 2) return false;
-    
     // 基本檢查：至少包含一個名詞和一個動詞
     const hasNoun = magnets.some(m => m.type === 'noun');
     const hasVerb = magnets.some(m => m.type === 'verb');
-    
     return hasNoun && hasVerb;
   };
-
   const calculatePoints = (magnets: WordMagnet[]): number => {
     let points = 10; // 基礎分數
-    
     // 長度獎勵
     points += Math.min(magnets.length * 2, 20);
-    
     // 詞性多樣性獎勵
     const uniqueTypes = new Set(magnets.map(m => m.type));
     points += uniqueTypes.size * 5;
-    
     return points;
   };
-
   const clearSentence = () => {
     // 將句子區的單詞返回到單詞區
     setWordMagnets(prev => prev.map(m => ({ ...m, used: false })));
     setSentenceArea([]);
   };
-
   const handleGameComplete = () => {
     setGameCompleted(true);
     const timeUsed = startTime ? (Date.now() - startTime) / 1000 : 0;
     onComplete?.(score, timeUsed);
   };
-
   const getWordTypeColor = (type: string): string => {
     switch (type) {
       case 'noun': return 'bg-blue-100 text-blue-800 border-blue-300';
@@ -225,7 +191,6 @@ export default function WordMagnetsGame({
       default: return 'bg-orange-100 text-orange-800 border-orange-300';
     }
   };
-
   const getWordTypeName = (type: string): string => {
     switch (type) {
       case 'noun': return '名詞';
@@ -237,7 +202,6 @@ export default function WordMagnetsGame({
       default: return '其他';
     }
   };
-
   if (!gameStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -245,7 +209,6 @@ export default function WordMagnetsGame({
         <p className="text-gray-600 mb-6 text-center max-w-md">
           使用磁性單詞組合成有意義的句子。基於詞彙組合記憶機制，提高您的語言表達能力。
         </p>
-        
         <div className="mb-6 p-4 bg-blue-50 rounded-lg">
           <h3 className="font-semibold text-blue-900 mb-2">遊戲模式：</h3>
           <div className="text-blue-800 text-sm space-y-1">
@@ -256,7 +219,6 @@ export default function WordMagnetsGame({
             {timeLimit > 0 && <p>時間限制: {timeLimit} 秒</p>}
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-lg font-semibold"
@@ -266,7 +228,6 @@ export default function WordMagnetsGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -274,7 +235,6 @@ export default function WordMagnetsGame({
         <div className="text-center">
           <p className="text-xl mb-2">最終得分: <span className="font-bold text-blue-600">{score}</span></p>
           <p className="text-gray-600">創作句子: {createdSentences.length} 個</p>
-          
           {createdSentences.length > 0 && (
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
               <h4 className="font-semibold mb-2">您的創作：</h4>
@@ -297,7 +257,6 @@ export default function WordMagnetsGame({
       </div>
     );
   }
-
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="max-w-6xl mx-auto p-6">
@@ -323,7 +282,6 @@ export default function WordMagnetsGame({
             )}
           </div>
         </div>
-
         {/* 反饋消息 */}
         {showFeedback && (
           <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-lg text-white font-semibold z-50 ${
@@ -332,7 +290,6 @@ export default function WordMagnetsGame({
             {feedbackMessage}
           </div>
         )}
-
         {/* 目標句子（非自由模式） */}
         {!freeMode && targetSentences.length > 0 && (
           <div className="mb-6 p-4 bg-yellow-50 rounded-lg">
@@ -346,7 +303,6 @@ export default function WordMagnetsGame({
             </ul>
           </div>
         )}
-
         {/* 句子組合區域 */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-4">組合您的句子：</h3>
@@ -391,14 +347,12 @@ export default function WordMagnetsGame({
               </div>
             )}
           </Droppable>
-          
           {/* 當前句子預覽 */}
           {currentSentence && (
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <p className="text-blue-900 font-medium">當前句子: "{currentSentence}"</p>
             </div>
           )}
-          
           {/* 檢查按鈕 */}
           <div className="mt-4 flex justify-center">
             <button
@@ -410,7 +364,6 @@ export default function WordMagnetsGame({
             </button>
           </div>
         </div>
-
         {/* 單詞磁鐵區域 */}
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-4">可用單詞：</h3>
@@ -445,7 +398,6 @@ export default function WordMagnetsGame({
             )}
           </Droppable>
         </div>
-
         {/* 詞性說明 */}
         <div className="mb-6 p-4 bg-gray-50 rounded-lg">
           <h4 className="font-semibold text-gray-700 mb-2">詞性顏色說明：</h4>
@@ -457,7 +409,6 @@ export default function WordMagnetsGame({
             ))}
           </div>
         </div>
-
         {/* 已創作的句子 */}
         {createdSentences.length > 0 && (
           <div className="p-4 bg-green-50 rounded-lg">
@@ -471,7 +422,6 @@ export default function WordMagnetsGame({
             </ul>
           </div>
         )}
-
         {/* 操作說明 */}
         <div className="mt-6 p-4 bg-blue-50 rounded-lg text-sm text-gray-600">
           <p className="font-semibold mb-2">操作說明：</p>

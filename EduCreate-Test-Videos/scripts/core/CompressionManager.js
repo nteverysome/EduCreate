@@ -74,32 +74,97 @@ class CompressionManager {
     ].join(' ');
 
     try {
+      const originalSizeMB = (originalSize / (1024 * 1024)).toFixed(2);
+
       console.log(`🎬 開始壓縮影片: ${path.basename(inputPath)}`);
-      console.log(`   質量設置: ${quality}`);
+      console.log(`   原始大小: ${originalSizeMB} MB`);
+      console.log(`   質量設置: ${quality} (${settings.expectedSize})`);
       console.log(`   目標解析度: ${settings.resolution}`);
-      
+
+      // 檢查文件是否已經很小，不需要壓縮
+      if (originalSize < 1024 * 1024) { // 小於 1MB
+        console.log(`⚡ 文件已經很小，直接複製而不壓縮`);
+
+        // 直接複製文件
+        fs.copyFileSync(inputPath, outputPath);
+
+        const result = {
+          inputPath,
+          outputPath,
+          originalSize,
+          compressedSize: originalSize,
+          originalSizeMB: parseFloat(originalSizeMB),
+          compressedSizeMB: parseFloat(originalSizeMB),
+          compressionRatio: 0, // 沒有壓縮
+          spaceSavedMB: 0,
+          compressionTime: 0,
+          quality: 'skipped',
+          settings: { ...settings, note: 'File too small, copied directly' },
+          timestamp: new Date().toISOString()
+        };
+
+        console.log(`✅ 文件複製完成: ${path.basename(outputPath)}`);
+        console.log(`   大小: ${originalSizeMB} MB (未壓縮)`);
+
+        // 更新壓縮統計
+        await this.updateCompressionStats(result);
+        return result;
+      }
+
       // 執行壓縮
+      const startTime = Date.now();
       execSync(ffmpegCommand, { stdio: 'pipe' });
+      const compressionTime = ((Date.now() - startTime) / 1000).toFixed(1);
 
       // 獲取壓縮後文件大小
       const compressedSize = fs.statSync(outputPath).size;
-      const compressionRatio = ((originalSize - compressedSize) / originalSize * 100).toFixed(1);
+      const compressedSizeMB = (compressedSize / (1024 * 1024)).toFixed(2);
+
+      // 檢查壓縮是否有效（如果壓縮後更大，使用原始文件）
+      let finalSize, finalPath, compressionRatio, spaceSaved, actualQuality;
+
+      if (compressedSize >= originalSize) {
+        console.log(`⚠️ 壓縮後文件更大 (${compressedSizeMB} MB >= ${originalSizeMB} MB)，使用原始文件`);
+
+        // 刪除壓縮後的大文件
+        fs.unlinkSync(outputPath);
+
+        // 複製原始文件
+        fs.copyFileSync(inputPath, outputPath);
+
+        finalSize = originalSize;
+        finalPath = outputPath;
+        compressionRatio = 0;
+        spaceSaved = 0;
+        actualQuality = 'original';
+      } else {
+        finalSize = compressedSize;
+        finalPath = outputPath;
+        compressionRatio = parseFloat(((originalSize - compressedSize) / originalSize * 100).toFixed(1));
+        spaceSaved = parseFloat(((originalSize - compressedSize) / (1024 * 1024)).toFixed(2));
+        actualQuality = quality;
+      }
 
       const result = {
         inputPath,
-        outputPath,
+        outputPath: finalPath,
         originalSize,
-        compressedSize,
-        compressionRatio: parseFloat(compressionRatio),
-        quality,
+        compressedSize: finalSize,
+        originalSizeMB: parseFloat(originalSizeMB),
+        compressedSizeMB: parseFloat((finalSize / (1024 * 1024)).toFixed(2)),
+        compressionRatio,
+        spaceSavedMB: spaceSaved,
+        compressionTime: parseFloat(compressionTime),
+        quality: actualQuality,
         settings,
         timestamp: new Date().toISOString()
       };
 
       console.log(`✅ 壓縮完成: ${path.basename(outputPath)}`);
-      console.log(`   原始大小: ${this.formatFileSize(originalSize)}`);
-      console.log(`   壓縮後: ${this.formatFileSize(compressedSize)}`);
+      console.log(`   壓縮後: ${(finalSize / (1024 * 1024)).toFixed(2)} MB`);
       console.log(`   壓縮率: ${compressionRatio}%`);
+      console.log(`   節省空間: ${spaceSaved} MB`);
+      console.log(`   耗時: ${compressionTime} 秒`);
 
       // 更新壓縮統計
       await this.updateCompressionStats(result);

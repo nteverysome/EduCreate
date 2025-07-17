@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
 export interface QuizQuestion {
   id: string;
   question: string;
@@ -13,7 +12,6 @@ export interface QuizQuestion {
   category?: string;
   points?: number;
 }
-
 export interface QuizGameProps {
   questions: QuizQuestion[];
   timeLimit?: number; // 秒
@@ -26,7 +24,6 @@ export interface QuizGameProps {
   onQuestionAnswer?: (questionId: string, selectedAnswer: number, isCorrect: boolean) => void;
   onGameStart?: () => void;
 }
-
 export interface QuizResults {
   totalQuestions: number;
   correctAnswers: number;
@@ -43,8 +40,7 @@ export interface QuizResults {
     points: number;
   }>;
 }
-
-export default function QuizGame({
+const QuizGame = ({
   questions = [],
   timeLimit = 300,
   showTimer = true,
@@ -74,7 +70,6 @@ export default function QuizGame({
   const [showExplanation, setShowExplanation] = useState(true);
   const [streak, setStreak] = useState(0);
   const [maxStreak, setMaxStreak] = useState(0);
-
   // 初始化測驗
   useEffect(() => {
     if (questions.length > 0) {
@@ -82,18 +77,15 @@ export default function QuizGame({
       const shuffled = shuffleQuestions 
         ? [...questions].sort(() => Math.random() - 0.5)
         : [...questions];
-      
       setShuffledQuestions(shuffled);
       setCurrentQuestionIndex(0);
       setSelectedOption(null);
       setIsAnswered(false);
       setScore(0);
       setQuizCompleted(false);
-      
       // 為每個問題洗牌選項
       if (shuffleAnswers) {
         const optionsMap: {[key: string]: number[]} = {};
-        
         shuffled.forEach(question => {
           // 創建選項索引數組 [0, 1, 2, 3, ...]
           const indices = question.options.map((_, index) => index);
@@ -101,15 +93,12 @@ export default function QuizGame({
           const shuffledIndices = [...indices].sort(() => Math.random() - 0.5);
           optionsMap[question.id] = shuffledIndices;
         });
-        
         setShuffledOptions(optionsMap);
       }
     }
   }, [questions, shuffleQuestions, shuffleAnswers]);
-
   // 當前問題
   const currentQuestion = shuffledQuestions[currentQuestionIndex];
-
   // 獲取選項順序
   const getOptionsOrder = (questionId: string) => {
     if (shuffleAnswers && shuffledOptions[questionId]) {
@@ -118,23 +107,18 @@ export default function QuizGame({
     // 如果不洗牌或尚未設置，返回原始順序
     return currentQuestion?.options.map((_, index) => index) || [];
   };
-
   // 選擇答案
   const handleSelectOption = (optionIndex: number) => {
     if (isAnswered) return;
-    
     setSelectedOption(optionIndex);
     setIsAnswered(true);
-    
     // 檢查答案是否正確
     const optionsOrder = getOptionsOrder(currentQuestion.id);
     const originalIndex = optionsOrder[optionIndex];
-    
     if (originalIndex === currentQuestion.correctAnswer) {
       setScore(score + 1);
     }
   };
-
   // 下一題
   const handleNextQuestion = () => {
     if (currentQuestionIndex < shuffledQuestions.length - 1) {
@@ -146,35 +130,29 @@ export default function QuizGame({
       onComplete?.(score, shuffledQuestions.length);
     }
   };
-
   // 重新開始測驗
   const handleRestartQuiz = () => {
     // 重新洗牌問題
     const shuffled = shuffleQuestions 
       ? [...questions].sort(() => Math.random() - 0.5)
       : [...questions];
-    
     setShuffledQuestions(shuffled);
     setCurrentQuestionIndex(0);
     setSelectedOption(null);
     setIsAnswered(false);
     setScore(0);
     setQuizCompleted(false);
-    
     // 重新洗牌選項
     if (shuffleAnswers) {
       const optionsMap: {[key: string]: number[]} = {};
-      
       shuffled.forEach(question => {
         const indices = question.options.map((_, index) => index);
         const shuffledIndices = [...indices].sort(() => Math.random() - 0.5);
         optionsMap[question.id] = shuffledIndices;
       });
-      
       setShuffledOptions(optionsMap);
     }
   };
-
   if (!currentQuestion && !quizCompleted) {
     return (
       <div className="flex justify-center items-center h-64 bg-gray-100 rounded-lg">
@@ -182,7 +160,6 @@ export default function QuizGame({
       </div>
     );
   }
-
   return (
     <div className="p-4 bg-gray-50 rounded-lg">
       <div className="mb-4 flex justify-between items-center">
@@ -193,7 +170,6 @@ export default function QuizGame({
           </div>
         )}
       </div>
-
       {quizCompleted ? (
         <div className="text-center py-10">
           <h3 className="text-2xl font-bold text-green-600 mb-4">測驗完成！</h3>
@@ -215,15 +191,12 @@ export default function QuizGame({
         <>
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h3 className="text-lg font-medium mb-4">{currentQuestion.question}</h3>
-            
             <div className="space-y-3">
               {getOptionsOrder(currentQuestion.id).map((originalIndex, displayIndex) => {
                 const option = currentQuestion.options[originalIndex];
                 const isSelected = selectedOption === displayIndex;
                 const isCorrect = originalIndex === currentQuestion.correctAnswer;
-                
                 let optionClass = "p-3 border rounded-lg cursor-pointer transition";
-                
                 if (isAnswered) {
                   if (isSelected) {
                     optionClass += isCorrect
@@ -237,7 +210,6 @@ export default function QuizGame({
                     ? " bg-indigo-50 border-indigo-500"
                     : " hover:bg-gray-50 border-gray-200";
                 }
-                
                 return (
                   <div
                     key={displayIndex}
@@ -254,7 +226,6 @@ export default function QuizGame({
                 );
               })}
             </div>
-            
             {isAnswered && showExplanation && currentQuestion.explanation && (
               <div className="mt-6 p-4 bg-blue-50 border-l-4 border-blue-500 text-blue-700">
                 <h4 className="font-medium mb-1">解釋：</h4>
@@ -262,7 +233,6 @@ export default function QuizGame({
               </div>
             )}
           </div>
-          
           <div className="flex justify-between">
             <div className="text-sm text-gray-500 flex items-center">
               得分：{score} / {currentQuestionIndex + (isAnswered ? 1 : 0)}
@@ -275,7 +245,6 @@ export default function QuizGame({
               {currentQuestionIndex < shuffledQuestions.length - 1 ? '下一題' : '完成測驗'}
             </button>
           </div>
-          
           <div className="mt-6">
             <div className="w-full bg-gray-200 rounded-full h-2.5">
               <div
@@ -289,3 +258,5 @@ export default function QuizGame({
     </div>
   );
 }
+
+export default QuizGame;

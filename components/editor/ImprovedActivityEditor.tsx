@@ -13,7 +13,7 @@ interface ImprovedActivityEditorProps {
   templateType?: 'matching' | 'flashcards' | 'quiz';
 }
 
-export default function ImprovedActivityEditor({ activityId, templateId, templateType }: ImprovedActivityEditorProps) {
+const ImprovedActivityEditor = ({ activityId, templateId, templateType }: ImprovedActivityEditorProps) {
   const router = useRouter();
   const [
     currentActivity,
@@ -226,3 +226,5 @@ export default function ImprovedActivityEditor({ activityId, templateId, templat
     </div>
   );
 }
+
+export default ImprovedActivityEditor;

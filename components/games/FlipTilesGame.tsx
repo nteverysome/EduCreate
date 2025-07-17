@@ -3,9 +3,7 @@
  * 基於翻轉記憶機制的瓷磚翻轉遊戲
  * 根據WordWall Flip Tiles模板分析設計
  */
-
 import React, { useState, useEffect } from 'react';
-
 interface TileItem {
   id: string;
   frontContent: string;
@@ -15,7 +13,6 @@ interface TileItem {
   isMatched: boolean;
   position: number;
 }
-
 interface FlipTilesGameProps {
   question: string;
   correctPairs: Array<{ front: string; back: string }>;
@@ -25,7 +22,6 @@ interface FlipTilesGameProps {
   onComplete?: (score: number, timeUsed: number) => void;
   onScoreUpdate?: (score: number) => void;
 }
-
 export default function FlipTilesGame({
   question,
   correctPairs,
@@ -47,14 +43,11 @@ export default function FlipTilesGame({
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [canFlip, setCanFlip] = useState(true);
-
   const totalTiles = gridSize.rows * gridSize.cols;
-
   // 初始化瓷磚
   useEffect(() => {
     generateTiles();
   }, [correctPairs, incorrectItems, gridSize]);
-
   // 計時器
   useEffect(() => {
     if (gameStarted && timeLimit > 0 && timeLeft > 0 && !gameCompleted) {
@@ -66,7 +59,6 @@ export default function FlipTilesGame({
       handleGameComplete();
     }
   }, [gameStarted, timeLeft, gameCompleted, timeLimit]);
-
   // 檢查配對
   useEffect(() => {
     if (flippedTiles.length === 2) {
@@ -76,11 +68,9 @@ export default function FlipTilesGame({
       }, 1000);
     }
   }, [flippedTiles]);
-
   const generateTiles = () => {
     const newTiles: TileItem[] = [];
     let tileId = 0;
-
     // 添加正確配對
     correctPairs.forEach((pair, pairIndex) => {
       // 前面內容
@@ -93,7 +83,6 @@ export default function FlipTilesGame({
         isMatched: false,
         position: 0
       });
-
       // 後面內容
       newTiles.push({
         id: `tile-${tileId++}`,
@@ -105,11 +94,9 @@ export default function FlipTilesGame({
         position: 0
       });
     });
-
     // 添加干擾項
     const remainingSlots = totalTiles - newTiles.length;
     const shuffledIncorrect = [...incorrectItems].sort(() => Math.random() - 0.5);
-    
     for (let i = 0; i < Math.min(remainingSlots, shuffledIncorrect.length); i++) {
       newTiles.push({
         id: `tile-${tileId++}`,
@@ -121,28 +108,22 @@ export default function FlipTilesGame({
         position: 0
       });
     }
-
     // 打亂位置
     const shuffledTiles = newTiles.sort(() => Math.random() - 0.5);
     shuffledTiles.forEach((tile, index) => {
       tile.position = index;
     });
-
     setTiles(shuffledTiles);
   };
-
   const startGame = () => {
     setGameStarted(true);
     setStartTime(Date.now());
     setTimeLeft(timeLimit);
   };
-
   const handleTileClick = (tileId: string) => {
     if (!canFlip || !gameStarted || gameCompleted) return;
-
     const tile = tiles.find(t => t.id === tileId);
     if (!tile || tile.isFlipped || tile.isMatched) return;
-
     if (flippedTiles.length < 2) {
       setFlippedTiles(prev => [...prev, tileId]);
       setTiles(prev => prev.map(t => 
@@ -150,26 +131,21 @@ export default function FlipTilesGame({
       ));
     }
   };
-
   const checkMatch = () => {
     setAttempts(prev => prev + 1);
-
     const [firstId, secondId] = flippedTiles;
     const firstTile = tiles.find(t => t.id === firstId);
     const secondTile = tiles.find(t => t.id === secondId);
-
     if (!firstTile || !secondTile) {
       resetFlippedTiles();
       return;
     }
-
     // 檢查是否配對成功
     const isMatch = (
       firstTile.frontContent === secondTile.backContent &&
       firstTile.backContent === secondTile.frontContent &&
       firstTile.isCorrect && secondTile.isCorrect
     );
-
     if (isMatch) {
       // 配對成功
       const points = 20;
@@ -178,16 +154,13 @@ export default function FlipTilesGame({
         onScoreUpdate?.(newScore);
         return newScore;
       });
-
       setMatchedPairs(prev => new Set([...prev, firstId, secondId]));
       setTiles(prev => prev.map(t => 
         (t.id === firstId || t.id === secondId) ? { ...t, isMatched: true } : t
       ));
-
       setFeedbackMessage(`配對成功！+${points} 分`);
       setShowFeedback(true);
       setTimeout(() => setShowFeedback(false), 1500);
-
       // 檢查是否完成所有配對
       if (matchedPairs.size + 2 >= correctPairs.length * 2) {
         setTimeout(() => {
@@ -200,13 +173,11 @@ export default function FlipTilesGame({
       setShowFeedback(true);
       setTimeout(() => setShowFeedback(false), 1000);
     }
-
     // 重置翻轉狀態
     setTimeout(() => {
       resetFlippedTiles();
     }, isMatch ? 500 : 1500);
   };
-
   const resetFlippedTiles = () => {
     setTiles(prev => prev.map(t => 
       flippedTiles.includes(t.id) && !t.isMatched ? { ...t, isFlipped: false } : t
@@ -214,22 +185,18 @@ export default function FlipTilesGame({
     setFlippedTiles([]);
     setCanFlip(true);
   };
-
   const handleGameComplete = () => {
     setGameCompleted(true);
     const timeUsed = startTime ? (Date.now() - startTime) / 1000 : 0;
-    
     // 完成獎勵
     const completionBonus = matchedPairs.size === correctPairs.length * 2 ? 100 : 0;
     const timeBonus = Math.max(0, Math.floor(timeLeft / 5));
     const efficiencyBonus = attempts > 0 ? Math.max(0, 50 - attempts * 2) : 0;
     const finalScore = score + completionBonus + timeBonus + efficiencyBonus;
-    
     setScore(finalScore);
     onScoreUpdate?.(finalScore);
     onComplete?.(finalScore, timeUsed);
   };
-
   if (!gameStarted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
@@ -237,12 +204,10 @@ export default function FlipTilesGame({
         <p className="text-gray-600 mb-6 text-center max-w-md">
           翻轉瓷磚找到正確的配對。基於翻轉記憶機制，提高您的記憶力和配對能力。
         </p>
-        
         <div className="mb-6 p-4 bg-blue-50 rounded-lg">
           <h3 className="font-semibold text-blue-900 mb-2">遊戲目標：</h3>
           <p className="text-blue-800 text-lg font-medium">{question}</p>
         </div>
-        
         <div className="mb-6 p-4 bg-purple-50 rounded-lg">
           <h3 className="font-semibold text-purple-900 mb-2">遊戲設置：</h3>
           <div className="text-purple-800 text-sm space-y-1">
@@ -252,7 +217,6 @@ export default function FlipTilesGame({
             {timeLimit > 0 && <p>時間限制: {timeLimit} 秒</p>}
           </div>
         </div>
-        
         <button
           onClick={startGame}
           className="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-lg font-semibold"
@@ -262,10 +226,8 @@ export default function FlipTilesGame({
       </div>
     );
   }
-
   if (gameCompleted) {
     const accuracy = correctPairs.length > 0 ? (matchedPairs.size / (correctPairs.length * 2)) * 100 : 0;
-    
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
         <h2 className="text-3xl font-bold text-green-600 mb-4">翻轉完成！</h2>
@@ -287,7 +249,6 @@ export default function FlipTilesGame({
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* 遊戲狀態欄 */}
@@ -305,13 +266,11 @@ export default function FlipTilesGame({
           </div>
         )}
       </div>
-
       {/* 問題顯示 */}
       <div className="mb-6 p-4 bg-blue-50 rounded-lg text-center">
         <h3 className="text-xl font-bold text-blue-900">{question}</h3>
         <p className="text-blue-700 text-sm mt-2">點擊瓷磚翻轉，找到正確的配對！</p>
       </div>
-
       {/* 反饋消息 */}
       {showFeedback && (
         <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-lg text-white font-semibold z-50 ${
@@ -320,7 +279,6 @@ export default function FlipTilesGame({
           {feedbackMessage}
         </div>
       )}
-
       {/* 瓷磚網格 */}
       <div className="mb-6">
         <div 
@@ -349,7 +307,6 @@ export default function FlipTilesGame({
               }`}>
                 {tile.isMatched ? '✓' : '?'}
               </div>
-              
               {/* 瓷磚正面（翻轉時顯示） */}
               <div className={`absolute inset-0 w-full h-full rounded-lg shadow-lg flex items-center justify-center text-gray-800 font-bold text-sm p-2 text-center backface-hidden rotate-y-180 ${
                 tile.isCorrect ? 'bg-white border-2 border-blue-300' : 'bg-red-100 border-2 border-red-300'
@@ -360,7 +317,6 @@ export default function FlipTilesGame({
           ))}
         </div>
       </div>
-
       {/* 進度指示器 */}
       <div className="mb-6">
         <div className="flex justify-between text-sm text-gray-600 mb-2">
@@ -374,7 +330,6 @@ export default function FlipTilesGame({
           />
         </div>
       </div>
-
       {/* 操作說明 */}
       <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
         <p className="font-semibold mb-2">操作說明：</p>
@@ -387,7 +342,6 @@ export default function FlipTilesGame({
           <li>• 完成所有配對即可獲勝</li>
         </ul>
       </div>
-
       <style jsx>{`
         .transform-style-preserve-3d {
           transform-style: preserve-3d;
