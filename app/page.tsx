@@ -5,11 +5,17 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 
 export default function HomePage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* 統一導航系統 */}
@@ -62,6 +68,13 @@ export default function HomePage() {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* 測試卡片 - 強制編譯觸發 */}
+            <div style={{backgroundColor: 'red', color: 'white', padding: '20px', border: '5px solid black', fontSize: '18px'}}>
+              <h3>🔗 測試分享系統卡片 - 強制編譯</h3>
+              <p>如果你看到這個紅色卡片，說明編譯成功！</p>
+              <p>時間戳：{new Date().toLocaleTimeString()}</p>
+            </div>
+
             {/* 智能排序系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-smart-sorting">
               <div className="text-4xl mb-4">🔄</div>
@@ -75,6 +88,25 @@ export default function HomePage() {
                 data-testid="smart-sorting-link"
               >
                 立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* 我的活動管理 - MyActivities 主要入口 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-my-activities">
+              <div className="text-4xl mb-4">📋</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">我的活動管理</h3>
+              <p className="text-gray-600 mb-6">
+                完整的活動管理系統，支持1000+活動、虛擬化列表、多視圖模式、智能搜索、批量操作
+              </p>
+              <Link
+                href="/my-activities"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="my-activities-link"
+              >
+                管理我的活動
                 <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -157,6 +189,8 @@ export default function HomePage() {
               </Link>
             </div>
 
+
+
             {/* 記憶遊戲系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-memory-games">
               <div className="text-4xl mb-4">🎮</div>
@@ -170,6 +204,41 @@ export default function HomePage() {
                 data-testid="memory-games-link"
               >
                 查看更多
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+
+
+            {/* 無障礙支援系統 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow border-2 border-purple-200" data-testid="feature-accessibility">
+              <div className="text-4xl mb-4">♿</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">無障礙支援系統</h3>
+              <p className="text-gray-600 mb-6">
+                完整的鍵盤導航、螢幕閱讀器支援、WCAG 2.1 AA 合規設計，讓所有用戶都能輕鬆使用
+              </p>
+              <div className="flex flex-col space-y-2 mb-6">
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">⌨️</span>
+                  <span>完整鍵盤導航支援</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">🔊</span>
+                  <span>螢幕閱讀器優化</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">✅</span>
+                  <span>WCAG 2.1 AA 合規</span>
+                </div>
+              </div>
+              <Link
+                href="/games/match"
+                className="inline-flex items-center text-purple-600 font-medium hover:text-purple-700"
+                data-testid="accessibility-demo-link"
+              >
+                體驗無障礙遊戲
                 <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -355,7 +424,7 @@ export default function HomePage() {
                 基於記憶科學原理的配對遊戲，支持多種模式和智能適配，挑戰記憶力
               </p>
               <Link
-                href="/games/match"
+                href="/match-game"
                 className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
                 data-testid="match-game-link"
               >
@@ -442,6 +511,25 @@ export default function HomePage() {
               </Link>
             </div>
 
+            {/* 完整檔案空間系統 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-file-space-system">
+              <div className="text-4xl mb-4">📁</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">完整檔案空間系統</h3>
+              <p className="text-gray-600 mb-6">
+                嵌套檔案夾結構、權限系統、高級搜索、批量操作、智能排序等完整功能
+              </p>
+              <Link
+                href="/file-space"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="file-space-system-link"
+              >
+                立即體驗
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
             {/* 完整遊戲切換系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-game-switcher">
               <div className="text-4xl mb-4">🔄</div>
@@ -461,24 +549,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 完整分享系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-share-system">
-              <div className="text-4xl mb-4">🔗</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">完整分享系統</h3>
-              <p className="text-gray-600 mb-6">
-                三層分享模式、連結管理、權限控制、社交媒體集成、嵌入代碼生成等完整功能
-              </p>
-              <Link
-                href="/content/share-system"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="share-system-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
 
             {/* 完整縮圖和預覽系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-thumbnail-preview">
@@ -642,6 +713,13 @@ export default function HomePage() {
               data-testid="quick-dashboard"
             >
               📊 功能儀表板
+            </Link>
+            <Link
+              href="/content/share-system"
+              className="inline-flex items-center px-6 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+              data-testid="quick-share-system"
+            >
+              🔗 完整分享系統
             </Link>
             <Link
               href="/universal-game"

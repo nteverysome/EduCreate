@@ -11,7 +11,7 @@ interface DraggableItemProps {
   isDragging?: boolean;
 }
 // 可拖動的元素組件
-const DraggableItem = ({ element, isSelected, isDragging }: DraggableItemProps) {
+const DraggableItem = ({ element, isSelected, isDragging }: DraggableItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: element.id });
   const removeElement = useEditorStore(state => state.removeElement);
   const selectElement = useEditorStore(state => state.selectElement);

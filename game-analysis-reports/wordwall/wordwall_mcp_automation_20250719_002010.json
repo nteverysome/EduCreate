@@ -1,0 +1,29 @@
+{
+  "automation_type": "wordwall_mcp_automation_github_solution",
+  "timestamp": "2025-07-19T00:19:43.101617",
+  "duration_seconds": 26.865166,
+  "mcp_integration": {
+    "playwright_available": true,
+    "puppeteer_available": false,
+    "total_mcp_calls": 23,
+    "successful_operations": 7
+  },
+  "game_analysis": {
+    "canvas_captures": 7,
+    "airplane_detected": true,
+    "answers_found": 4,
+    "game_active": true
+  },
+  "automation_performance": {
+    "intelligent_clicks": 7,
+    "success_rate": 30.434782608695656,
+    "operations_per_minute": 15.633627575575005,
+    "mcp_efficiency": 0.8561272243767264
+  },
+  "github_mcp_solution": {
+    "puppeteer_mcp_used": false,
+    "automation_mcp_used": false,
+    "computer_vision_applied": true,
+    "intelligent_analysis": true
+  }
+}

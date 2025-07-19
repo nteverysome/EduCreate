@@ -375,6 +375,42 @@ export class GEPTManager {
   }
 
   /**
+   * 獲取詞彙信息（別名方法）
+   */
+  getWordInfo(word: string): GEPTWord | undefined {
+    return this.getGEPTWord(word);
+  }
+
+  /**
+   * 根據等級獲取詞彙
+   */
+  getWordsByLevel(level: GEPTLevel): GEPTWord[] {
+    return Array.from(this.geptWords.values()).filter(word => word.level === level);
+  }
+
+  /**
+   * 尋找相似詞彙
+   */
+  findSimilarWords(word: string, targetLevel: GEPTLevel): GEPTWord[] {
+    const results: GEPTWord[] = [];
+    const queryLower = word.toLowerCase();
+
+    this.geptWords.forEach(geptWord => {
+      if (geptWord.level === targetLevel) {
+        // 基於詞性和定義相似性
+        if (geptWord.word !== queryLower &&
+            (geptWord.definition.includes(word) ||
+             geptWord.word.includes(queryLower) ||
+             queryLower.includes(geptWord.word))) {
+          results.push(geptWord);
+        }
+      }
+    });
+
+    return results.slice(0, 5); // 返回最多5個相似詞彙
+  }
+
+  /**
    * 搜索GEPT詞彙
    */
   searchGEPTWords(query: string, level?: GEPTLevel): GEPTWord[] {

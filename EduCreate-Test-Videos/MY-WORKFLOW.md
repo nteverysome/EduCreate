@@ -25,6 +25,10 @@ node EduCreate-Test-Videos/scripts/utils/initialize-system.js
 # 2. 運行 Playwright 測試生成影片
 npx playwright test [test-file] --headed
 
+# 2.1. 強制錯誤檢查（規則4）
+# 立即掃描輸出中的錯誤關鍵詞：Error、Failed、timeout、did not find
+# 如發現錯誤，立即執行規則4：互動中有看到錯誤用工具修復
+
 # 3. 處理測試影片（關鍵步驟！）
 node EduCreate-Test-Videos/scripts/automation/process-test-videos.js --cleanup
 

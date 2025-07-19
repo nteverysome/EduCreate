@@ -16,7 +16,7 @@ interface LeaderboardProps {
   limit?: number;
 }
 
-const Leaderboard = ({ gameId, gameType, limit = 10 }: LeaderboardProps) {
+const Leaderboard = ({ gameId, gameType, limit = 10 }: LeaderboardProps) => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');

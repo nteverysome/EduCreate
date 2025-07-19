@@ -13,7 +13,7 @@ interface ImprovedActivityEditorProps {
   templateType?: 'matching' | 'flashcards' | 'quiz';
 }
 
-const ImprovedActivityEditor = ({ activityId, templateId, templateType }: ImprovedActivityEditorProps) {
+const ImprovedActivityEditor = ({ activityId, templateId, templateType }: ImprovedActivityEditorProps) => {
   const router = useRouter();
   const [
     currentActivity,

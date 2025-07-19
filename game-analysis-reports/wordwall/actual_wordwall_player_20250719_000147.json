@@ -1,0 +1,22 @@
+{
+  "player_type": "actual_wordwall_intelligent_player",
+  "timestamp": "2025-07-19T00:01:21.096844",
+  "duration_seconds": 26.51648,
+  "game_performance": {
+    "questions_answered": 0,
+    "current_score": 0,
+    "game_active": false
+  },
+  "technical_analysis": {
+    "screenshots_analyzed": 15,
+    "color_detections": 0,
+    "strategic_clicks": 0,
+    "game_responses": 0
+  },
+  "intelligence_metrics": {
+    "analysis_per_minute": 33.94115659393705,
+    "click_accuracy": 0.0,
+    "game_understanding": false,
+    "adaptive_behavior": false
+  }
+}

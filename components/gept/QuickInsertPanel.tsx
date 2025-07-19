@@ -31,7 +31,7 @@ const QuickInsertPanel = ({
   showCategories = ['word', 'phrase', 'template', 'grammar'],
   className = '',
   'data-testid': testId = 'quick-insert-panel'
-}: QuickInsertPanelProps) {
+}: QuickInsertPanelProps) => {
   const [activeCategory, setActiveCategory] = useState<string>(showCategories[0] || 'word');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevel, setSelectedLevel] = useState<GEPTLevel>(targetLevel);

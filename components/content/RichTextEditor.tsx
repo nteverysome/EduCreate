@@ -28,7 +28,7 @@ const RichTextEditor = ({
   disabled = false,
   className = '',
   'data-testid': testId = 'rich-text-editor'
-}: RichTextEditorProps) {
+}: RichTextEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [isEditorFocused, setIsEditorFocused] = useState(false);
   const [currentFormat, setCurrentFormat] = useState<Record<string, boolean>>({});

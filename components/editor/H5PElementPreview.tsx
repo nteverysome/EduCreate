@@ -5,7 +5,7 @@ interface H5PElementPreviewProps {
   element: EditorElement;
 }
 
-const H5PElementPreview = ({ element }: H5PElementPreviewProps) {
+const H5PElementPreview = ({ element }: H5PElementPreviewProps) => {
   const { content, size, properties } = element;
   const contentId = properties?.contentId;
   

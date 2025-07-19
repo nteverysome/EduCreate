@@ -16,7 +16,7 @@ interface H5PSelectorProps {
   onCancel: () => void;
 }
 
-const H5PSelector = ({ onSelect, onCancel }: H5PSelectorProps) {
+const H5PSelector = ({ onSelect, onCancel }: H5PSelectorProps) => {
   const [contents, setContents] = useState<H5PContent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');

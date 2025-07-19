@@ -1,0 +1,24 @@
+{
+  "windows_mcp": {
+    "enabled": true,
+    "server_url": "http://localhost:8932",
+    "features": [
+      "game_automation",
+      "visual_analysis",
+      "performance_tracking",
+      "accessibility_testing"
+    ]
+  },
+  "wordwall_integration": {
+    "supported_games": [
+      "airplane",
+      "match",
+      "quiz",
+      "fill-in",
+      "sequence"
+    ],
+    "analysis_enabled": true,
+    "auto_screenshot": true,
+    "report_generation": true
+  }
+}

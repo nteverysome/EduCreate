@@ -1,0 +1,30 @@
+{
+  "automation_type": "real_wordwall_airplane_game",
+  "game_url": "https://wordwall.net/tc/embed/85d8022ec1fe4e24bd79fe53f316f83b?themeId=46&templateId=48&fontStackId=0",
+  "timestamp": "2025-07-18T23:44:20.037152",
+  "duration_seconds": 25.072052,
+  "canvas_position": {
+    "x": 100,
+    "y": 100,
+    "width": 1200,
+    "height": 882
+  },
+  "statistics": {
+    "screenshots_taken": 5,
+    "clicks_performed": 11,
+    "successful_clicks": 10,
+    "game_interactions": 11
+  },
+  "performance_metrics": {
+    "clicks_per_minute": 26.324131746376402,
+    "success_rate_percentage": 90.9090909090909,
+    "interactions_per_second": 0.4387355291062734,
+    "automation_efficiency": 3.988504810057031
+  },
+  "automation_summary": {
+    "game_active": true,
+    "automation_successful": true,
+    "total_actions": 16,
+    "quality_score": 100
+  }
+}

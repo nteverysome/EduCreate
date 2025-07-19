@@ -8,7 +8,7 @@ interface ShareActivityProps {
   onClose: () => void;
 }
 
-const ShareActivity = ({ activityId, activityTitle, onClose }: ShareActivityProps) {
+const ShareActivity = ({ activityId, activityTitle, onClose }: ShareActivityProps) => {
   const [copied, setCopied] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
   const linkInputRef = useRef<HTMLInputElement>(null);

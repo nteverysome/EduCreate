@@ -51,7 +51,7 @@ const QuizGame = ({
   onComplete,
   onQuestionAnswer,
   onGameStart
-}: QuizGameProps) {
+}: QuizGameProps) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);

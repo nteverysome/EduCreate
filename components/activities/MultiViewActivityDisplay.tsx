@@ -124,6 +124,30 @@ export const MultiViewActivityDisplay: React.FC<MultiViewActivityDisplayProps> =
     onViewModeChange(mode);
   }, [onViewModeChange]);
 
+  // 格式化組標題 - 移到前面避免初始化錯誤
+  const formatGroupTitle = useCallback((key: string, groupBy: string): string => {
+    switch (groupBy) {
+      case 'day':
+        return new Date(key).toLocaleDateString('zh-TW', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      case 'week':
+        const weekStart = new Date(key);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        return `${weekStart.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })}`;
+      case 'month':
+      default:
+        const [year, month] = key.split('-');
+        return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('zh-TW', {
+          year: 'numeric',
+          month: 'long'
+        });
+    }
+  }, []);
+
   // 時間軸數據分組
   const timelineGroups = useMemo(() => {
     const groups = new Map<string, Activity[]>();
@@ -163,7 +187,7 @@ export const MultiViewActivityDisplay: React.FC<MultiViewActivityDisplayProps> =
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
         )
       }));
-  }, [activities, customLayout.timelineGroupBy]);
+  }, [activities, customLayout.timelineGroupBy, formatGroupTitle]);
 
   // 看板數據分組
   const kanbanGroups = useMemo(() => {
@@ -173,29 +197,7 @@ export const MultiViewActivityDisplay: React.FC<MultiViewActivityDisplayProps> =
     }));
   }, [activities, customLayout.kanbanColumns]);
 
-  // 格式化組標題
-  const formatGroupTitle = (key: string, groupBy: string): string => {
-    switch (groupBy) {
-      case 'day':
-        return new Date(key).toLocaleDateString('zh-TW', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        });
-      case 'week':
-        const weekStart = new Date(key);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        return `${weekStart.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })}`;
-      case 'month':
-      default:
-        const [year, month] = key.split('-');
-        return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('zh-TW', {
-          year: 'numeric',
-          month: 'long'
-        });
-    }
-  };
+
 
   // 渲染視圖模式切換器
   const renderViewModeToggle = () => (

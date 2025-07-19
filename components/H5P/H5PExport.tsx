@@ -12,7 +12,7 @@ interface H5PExportProps {
  * H5P內容導出組件
  * 提供用戶導出H5P內容的界面
  */
-const H5PExport = ({ contentId, title, className = '' }: H5PExportProps) {
+const H5PExport = ({ contentId, title, className = '' }: H5PExportProps) => {
   const [isExporting, setIsExporting] = useState(false);
 
   // 處理導出H5P內容

@@ -1,0 +1,17 @@
+{
+  "automation_type": "true_wordwall_visual_analysis",
+  "game_url": "https://wordwall.net/tc/embed/85d8022ec1fe4e24bd79fe53f316f83b?themeId=46&templateId=48&fontStackId=0",
+  "timestamp": "2025-07-18T23:48:50.637412",
+  "duration_seconds": 17.91931,
+  "visual_analysis": {
+    "canvas_captures": 0,
+    "screenshots_taken": 5,
+    "elements_detected": 0,
+    "successful_matches": 0
+  },
+  "success_metrics": {
+    "detection_rate": 0.0,
+    "match_rate": 0.0,
+    "overall_success": false
+  }
+}

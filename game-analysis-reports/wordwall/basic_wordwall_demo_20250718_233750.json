@@ -1,0 +1,26 @@
+{
+  "demo_type": "basic_wordwall_automation_demo",
+  "timestamp": "2025-07-18T23:37:28.114418",
+  "duration_seconds": 22.857435,
+  "game_area": {
+    "x": 480,
+    "y": 270,
+    "width": 960,
+    "height": 540
+  },
+  "statistics": {
+    "screenshots_taken": 3,
+    "clicks_performed": 10,
+    "mouse_movements": 10
+  },
+  "performance_metrics": {
+    "clicks_per_minute": 26.249664496475653,
+    "actions_per_second": 0.8749888165491885,
+    "efficiency_score": 50
+  },
+  "demo_summary": {
+    "total_actions": 20,
+    "automation_successful": true,
+    "screenshots_captured": true
+  }
+}

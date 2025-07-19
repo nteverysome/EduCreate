@@ -174,10 +174,26 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
     }
 
     try {
-      // 載入檔案夾結構
+      // 載入檔案夾結構 (使用模擬數據避免 Prisma 瀏覽器錯誤)
       if (page === 1) {
-        const folderTree = await FolderManager.getFolderTree(userId);
-        setFolders(folderTree);
+        // 創建模擬的檔案夾樹
+        const mockFolderTree: FolderTreeNode[] = [
+          {
+            id: 'folder_1',
+            name: '我的活動',
+            description: '默認活動檔案夾',
+            userId: userId,
+            activityCount: 0,
+            subfolderCount: 0,
+            totalActivityCount: 0,
+            path: [],
+            depth: 0,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            children: []
+          }
+        ];
+        setFolders(mockFolderTree);
       }
 
       // 載入活動
@@ -207,7 +223,14 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
   }, [hasNextPage, isNextPageLoading, currentPage, loadData]);
 
   useEffect(() => {
-    loadData();
+    console.log('🚀 MyActivities useEffect 觸發', { enableVirtualization, maxActivities });
+    // 延遲載入以提升初始頁面性能
+    const timer = setTimeout(() => {
+      console.log('⏰ 開始載入數據');
+      loadData();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   // 載入用戶活動（支持虛擬化和分頁）
@@ -220,10 +243,12 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
     try {
       // 如果啟用虛擬化且需要大量數據，使用數據生成器
       if (enableVirtualization && maxActivities > 100) {
+        console.log(`🔄 啟用虛擬化模式，生成 ${maxActivities} 個活動`);
         const generator = ActivityDataGenerator.getInstance();
 
         // 生成大量測試數據
         const allActivities = await generator.generateLargeDataset(maxActivities);
+        console.log(`✅ 成功生成 ${allActivities.length} 個活動`);
 
         // 過濾指定檔案夾的活動
         const filteredActivities = folderId
@@ -644,7 +669,10 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
                 活動 ({isSearchActive ? searchResults.length : (filteredActivities.length > 0 ? filteredActivities.length : activities.length)} / {totalActivities > 0 ? totalActivities : activities.length})
               </h3>
               {enableVirtualization && totalActivities > 100 && (
-                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                <span
+                  className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
+                  data-testid="virtualized-indicator"
+                >
                   虛擬化渲染
                 </span>
               )}

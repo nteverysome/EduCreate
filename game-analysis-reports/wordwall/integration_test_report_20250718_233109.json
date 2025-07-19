@@ -1,0 +1,18 @@
+{
+  "test_timestamp": "20250718_233109",
+  "test_results": {
+    "browser_control": false,
+    "game_detection": false,
+    "automation_success": false,
+    "screenshots_captured": 0,
+    "errors": []
+  },
+  "automation_report": null,
+  "game_url": "https://wordwall.net/tc/embed/85d8022ec1fe4e24bd79fe53f316f83b?themeId=46&templateId=48&fontStackId=0",
+  "test_summary": {
+    "browser_control_success": false,
+    "game_detection_success": false,
+    "automation_success": false,
+    "total_errors": 0
+  }
+}

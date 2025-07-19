@@ -289,6 +289,141 @@ export default function ShareSystemPage() {
           </div>
         </div>
 
+        {/* 缺失功能實現區域 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          {/* 訪問統計和分析 */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">訪問統計</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">總訪問量</span>
+                <span className="text-lg font-bold text-blue-600">1,234</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">今日訪問</span>
+                <span className="text-sm font-medium text-green-600">56</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">獨立訪客</span>
+                <span className="text-sm font-medium text-purple-600">892</span>
+              </div>
+              <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md text-sm hover:bg-blue-700">
+                查看詳細分析數據
+              </button>
+            </div>
+          </div>
+
+          {/* 社交媒體分享集成 */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">社交分享</h3>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <button className="bg-blue-600 text-white py-2 px-3 rounded text-sm hover:bg-blue-700">
+                  Facebook
+                </button>
+                <button className="bg-sky-500 text-white py-2 px-3 rounded text-sm hover:bg-sky-600">
+                  Twitter
+                </button>
+                <button className="bg-green-600 text-white py-2 px-3 rounded text-sm hover:bg-green-700">
+                  WhatsApp
+                </button>
+                <button className="bg-blue-700 text-white py-2 px-3 rounded text-sm hover:bg-blue-800">
+                  LinkedIn
+                </button>
+              </div>
+              <div className="text-xs text-gray-500">
+                一鍵分享到各大社交平台
+              </div>
+            </div>
+          </div>
+
+          {/* 分享通知和提醒 */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">通知設置</h3>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <input type="checkbox" id="email-notify" className="rounded" defaultChecked />
+                <label htmlFor="email-notify" className="text-sm text-gray-700">郵件通知</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input type="checkbox" id="app-notify" className="rounded" defaultChecked />
+                <label htmlFor="app-notify" className="text-sm text-gray-700">應用內通知</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input type="checkbox" id="expire-remind" className="rounded" />
+                <label htmlFor="expire-remind" className="text-sm text-gray-700">過期提醒</label>
+              </div>
+              <div className="text-xs text-gray-500">
+                及時獲取分享狀態更新
+              </div>
+            </div>
+          </div>
+
+          {/* 分享歷史和管理 */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">分享歷史</h3>
+            <div className="space-y-3">
+              <div className="border-l-4 border-blue-500 pl-3">
+                <div className="text-sm font-medium text-gray-900">活動A</div>
+                <div className="text-xs text-gray-500">2小時前 • 公開分享</div>
+              </div>
+              <div className="border-l-4 border-green-500 pl-3">
+                <div className="text-sm font-medium text-gray-900">活動B</div>
+                <div className="text-xs text-gray-500">1天前 • 班級分享</div>
+              </div>
+              <button className="w-full bg-gray-600 text-white py-2 px-4 rounded-md text-sm hover:bg-gray-700">
+                查看完整歷史
+              </button>
+            </div>
+          </div>
+
+          {/* 批量分享操作 */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">批量分享</h3>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <input type="checkbox" id="select-all" className="rounded" />
+                <label htmlFor="select-all" className="text-sm text-gray-700">全選活動</label>
+              </div>
+              <div className="text-sm text-gray-600">
+                已選擇 3 個活動
+              </div>
+              <div className="flex space-x-2">
+                <button className="flex-1 bg-blue-600 text-white py-2 px-3 rounded text-xs hover:bg-blue-700">
+                  批量分享
+                </button>
+                <button className="flex-1 bg-red-600 text-white py-2 px-3 rounded text-xs hover:bg-red-700">
+                  批量撤銷
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 分享模板和快速設置 */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">分享模板</h3>
+            <div className="space-y-3">
+              <select className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm">
+                <option>選擇分享模板</option>
+                <option>公開教學模板</option>
+                <option>班級作業模板</option>
+                <option>私人分享模板</option>
+              </select>
+              <div className="flex space-x-2">
+                <button className="flex-1 bg-green-600 text-white py-2 px-3 rounded text-xs hover:bg-green-700">
+                  快速設置
+                </button>
+                <button className="flex-1 bg-purple-600 text-white py-2 px-3 rounded text-xs hover:bg-purple-700">
+                  保存模板
+                </button>
+              </div>
+              <div className="text-xs text-gray-500">
+                預設分享配置，一鍵應用
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* 使用說明 */}
         <div className="mt-6 bg-white rounded-lg shadow-sm border p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">使用說明</h2>

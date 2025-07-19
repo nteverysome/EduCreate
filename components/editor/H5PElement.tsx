@@ -8,7 +8,7 @@ interface H5PElementProps {
   onSelect: () => void;
 }
 
-const H5PElement = ({ element, isSelected, onSelect }: H5PElementProps) {
+const H5PElement = ({ element, isSelected, onSelect }: H5PElementProps) => {
   const { id, content, position, size, properties } = element;
   const contentId = properties?.contentId;
   const description = properties?.description;

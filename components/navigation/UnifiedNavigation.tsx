@@ -33,6 +33,16 @@ const navigationItems: NavigationItem[] = [
     testId: 'nav-home'
   },
   {
+    id: 'my-activities',
+    label: '我的活動',
+    href: '/my-activities',
+    icon: '📋',
+    description: '完整的活動管理系統',
+    category: 'main',
+    status: 'available',
+    testId: 'nav-my-activities'
+  },
+  {
     id: 'dashboard',
     label: '功能儀表板',
     href: '/dashboard',
@@ -63,6 +73,16 @@ const navigationItems: NavigationItem[] = [
     category: 'tools',
     status: 'available',
     testId: 'nav-activity-templates'
+  },
+  {
+    id: 'file-space-system',
+    label: '完整檔案空間系統',
+    href: '/file-space',
+    icon: '📁',
+    description: '嵌套檔案夾結構、權限系統、高級搜索、批量操作、智能排序等完整功能',
+    category: 'files',
+    status: 'available',
+    testId: 'nav-file-space-system'
   },
   {
     id: 'five-games-architecture',

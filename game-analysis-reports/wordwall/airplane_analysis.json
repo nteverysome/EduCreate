@@ -1,0 +1,16 @@
+{
+  "game_type": "airplane",
+  "timestamp": 1752851903.765929,
+  "status": "success",
+  "elements_detected": [
+    "airplane_position",
+    "answer_options",
+    "score_display",
+    "timer"
+  ],
+  "recommendations": [
+    "優化點擊精確度",
+    "改善反應時間",
+    "增強視覺識別"
+  ]
+}

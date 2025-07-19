@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>簡化版飛機遊戲 - 確保可見</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f8ff;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        #gameCanvas {
+            border: 3px solid #3498db;
+            border-radius: 8px;
+            background: linear-gradient(to bottom, #87CEEB, #4682B4);
+            display: block;
+            margin: 20px auto;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        .info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f4fd;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .status {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        
+        .question-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .option {
+            padding: 10px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .option:hover {
+            background: #007bff;
+            color: white;
+        }
+        
+        .option.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+        
+        .option.wrong {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛩️ 飛機詞彙遊戲 - 簡化版</h1>
+        
+        <div class="info">
+            <strong>🎯 遊戲說明：</strong><br>
+            點擊「開始遊戲」，飛機會自動飛行。當飛機碰到金色雲朵時會出現詞彙問題。<br>
+            選擇正確的英文翻譯來獲得分數！
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        
+        <div class="controls">
+            <button onclick="startGame()">🚀 開始遊戲</button>
+            <button onclick="pauseGame()">⏸️ 暫停/繼續</button>
+            <button onclick="resetGame()">🔄 重新開始</button>
+        </div>
+        
+        <div class="status" id="status">
+            分數: <span id="score">0</span> | 
+            正確: <span id="correct">0</span> | 
+            錯誤: <span id="wrong">0</span>
+        </div>
+        
+        <div id="feedback" class="status">點擊「開始遊戲」來開始您的學習之旅！</div>
+        
+        <div class="question-box" id="questionBox">
+            <div id="questionText" style="font-size: 20px; font-weight: bold; margin-bottom: 15px;"></div>
+            <div class="options" id="optionsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // 詞彙數據
+        const vocabulary = [
+            { chinese: "飛機", english: "airplane" },
+            { chinese: "汽車", english: "car" },
+            { chinese: "房子", english: "house" },
+            { chinese: "學校", english: "school" },
+            { chinese: "書本", english: "book" },
+            { chinese: "蘋果", english: "apple" },
+            { chinese: "貓咪", english: "cat" },
+            { chinese: "狗狗", english: "dog" }
+        ];
+
+        // 遊戲變量
+        let canvas, ctx;
+        let isRunning = false;
+        let isPaused = false;
+        let airplane = { x: 50, y: 200, width: 60, height: 30 };
+        let clouds = [];
+        let score = 0;
+        let correct = 0;
+        let wrong = 0;
+        let currentQuestion = null;
+
+        // 初始化
+        function init() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // 創建雲朵
+            for (let i = 0; i < 4; i++) {
+                clouds.push({
+                    x: 200 + i * 150,
+                    y: 80 + Math.random() * 200,
+                    width: 80,
+                    height: 50,
+                    hasQuestion: i % 2 === 0,
+                    triggered: false
+                });
+            }
+            
+            // 開始渲染循環
+            gameLoop();
+            
+            console.log('遊戲初始化完成');
+        }
+
+        function startGame() {
+            isRunning = true;
+            isPaused = false;
+            document.getElementById('feedback').textContent = '🎮 遊戲開始！飛機正在飛行...';
+            console.log('遊戲開始');
+        }
+
+        function pauseGame() {
+            isPaused = !isPaused;
+            document.getElementById('feedback').textContent = isPaused ? '⏸️ 遊戲暫停' : '▶️ 遊戲繼續';
+        }
+
+        function resetGame() {
+            isRunning = false;
+            isPaused = false;
+            score = 0;
+            correct = 0;
+            wrong = 0;
+            airplane.x = 50;
+            airplane.y = 200;
+            
+            clouds.forEach(cloud => {
+                cloud.triggered = false;
+                cloud.x = 200 + Math.random() * 400;
+            });
+            
+            updateUI();
+            hideQuestion();
+            document.getElementById('feedback').textContent = '🔄 遊戲重置完成';
+        }
+
+        function update() {
+            if (!isRunning || isPaused) return;
+            
+            // 移動飛機
+            airplane.x += 2;
+            airplane.y += Math.sin(Date.now() * 0.003) * 0.8;
+            
+            // 邊界檢查
+            if (airplane.x > canvas.width) {
+                airplane.x = -airplane.width;
+                clouds.forEach(cloud => {
+                    cloud.x = 200 + Math.random() * 400;
+                    cloud.triggered = false;
+                });
+            }
+            
+            // 移動雲朵
+            clouds.forEach(cloud => {
+                cloud.x -= 1;
+                if (cloud.x < -cloud.width) {
+                    cloud.x = canvas.width + 100;
+                    cloud.triggered = false;
+                }
+            });
+            
+            // 檢查碰撞
+            clouds.forEach(cloud => {
+                if (cloud.hasQuestion && !cloud.triggered && 
+                    airplane.x < cloud.x + cloud.width &&
+                    airplane.x + airplane.width > cloud.x &&
+                    airplane.y < cloud.y + cloud.height &&
+                    airplane.y + airplane.height > cloud.y) {
+                    
+                    cloud.triggered = true;
+                    showQuestion();
+                }
+            });
+        }
+
+        function render() {
+            // 清除畫布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 繪製天空背景
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#4682B4');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 繪製雲朵
+            clouds.forEach(cloud => {
+                ctx.fillStyle = cloud.hasQuestion ? '#FFD700' : '#FFFFFF';
+                ctx.fillRect(cloud.x, cloud.y, cloud.width, cloud.height);
+                
+                // 雲朵標記
+                ctx.fillStyle = '#333';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                if (cloud.hasQuestion) {
+                    ctx.fillText('?', cloud.x + cloud.width/2, cloud.y + cloud.height/2 + 7);
+                }
+            });
+            
+            // 繪製飛機
+            ctx.fillStyle = '#FF6B6B';
+            ctx.fillRect(airplane.x, airplane.y, airplane.width, airplane.height);
+            
+            // 飛機裝飾
+            ctx.fillStyle = '#4ECDC4';
+            ctx.fillRect(airplane.x + 10, airplane.y + 8, 40, 14);
+            
+            // 飛機圖標
+            ctx.fillStyle = '#FFF';
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('✈️', airplane.x + airplane.width/2, airplane.y + airplane.height/2 + 7);
+        }
+
+        function showQuestion() {
+            isPaused = true;
+            const word = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+            currentQuestion = word;
+            
+            // 生成選項
+            const options = [word.english];
+            while (options.length < 4) {
+                const randomWord = vocabulary[Math.floor(Math.random() * vocabulary.length)].english;
+                if (!options.includes(randomWord)) {
+                    options.push(randomWord);
+                }
+            }
+            
+            // 打亂選項
+            options.sort(() => Math.random() - 0.5);
+            
+            document.getElementById('questionText').textContent = `"${word.chinese}" 的英文是？`;
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+            
+            options.forEach(option => {
+                const btn = document.createElement('div');
+                btn.className = 'option';
+                btn.textContent = option;
+                btn.onclick = () => answerQuestion(option);
+                container.appendChild(btn);
+            });
+            
+            document.getElementById('questionBox').style.display = 'block';
+        }
+
+        function answerQuestion(answer) {
+            const isCorrect = answer === currentQuestion.english;
+            
+            // 更新按鈕樣式
+            const buttons = document.querySelectorAll('.option');
+            buttons.forEach(btn => {
+                if (btn.textContent === currentQuestion.english) {
+                    btn.className = 'option correct';
+                } else if (btn.textContent === answer && !isCorrect) {
+                    btn.className = 'option wrong';
+                }
+            });
+            
+            // 更新分數
+            if (isCorrect) {
+                score += 10;
+                correct++;
+                document.getElementById('feedback').textContent = '✅ 正確！太棒了！';
+            } else {
+                wrong++;
+                document.getElementById('feedback').textContent = `❌ 錯誤！正確答案是 "${currentQuestion.english}"`;
+            }
+            
+            updateUI();
+            
+            // 2秒後繼續
+            setTimeout(() => {
+                hideQuestion();
+                isPaused = false;
+            }, 2000);
+        }
+
+        function hideQuestion() {
+            document.getElementById('questionBox').style.display = 'none';
+        }
+
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('correct').textContent = correct;
+            document.getElementById('wrong').textContent = wrong;
+        }
+
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 啟動遊戲
+        window.onload = init;
+    </script>
+</body>
+</html>

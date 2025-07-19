@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飛機詞彙遊戲 - 實際可玩版本</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #87CEEB, #4682B4);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .game-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .game-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto;
+            background: linear-gradient(to bottom, #87CEEB, #4682B4);
+        }
+        
+        .game-ui {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .question-panel {
+            background: #f8f9fa;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .question-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .option-btn {
+            padding: 10px 15px;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            background: white;
+            color: #2c3e50;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option-btn:hover {
+            background: #3498db;
+            color: white;
+        }
+        
+        .option-btn.correct {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+        
+        .option-btn.wrong {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        .score-panel {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .controls {
+            margin: 10px 0;
+        }
+        
+        .control-btn {
+            padding: 8px 16px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .control-btn:hover {
+            background: #2980b9;
+        }
+        
+        .feedback {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            min-height: 20px;
+        }
+        
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .feedback.wrong {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        
+        .instructions ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .demo-note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="demo-note">
+            🎮 這是一個實際可玩的飛機詞彙遊戲原型 - 證明我們能創建真正的遊戲！
+        </div>
+        
+        <h1 class="game-title">🛩️ 飛機詞彙遊戲</h1>
+        
+        <div class="instructions">
+            <h3>🎯 遊戲說明：</h3>
+            <ul>
+                <li>點擊「開始遊戲」啟動</li>
+                <li>飛機會自動飛行，碰到金色雲朵會出現問題</li>
+                <li>選擇正確的英文翻譯來獲得分數</li>
+                <li>這個遊戲使用 Canvas 2D 技術，模擬 Wordwall 的架構</li>
+            </ul>
+        </div>
+        
+        <canvas id="gameCanvas" width="760" height="400"></canvas>
+        
+        <div class="game-ui">
+            <div class="score-panel">
+                <span>分數: <span id="score">0</span></span>
+                <span>正確: <span id="correct">0</span></span>
+                <span>錯誤: <span id="wrong">0</span></span>
+            </div>
+            
+            <div class="controls">
+                <button class="control-btn" onclick="game.startGame()">🚀 開始遊戲</button>
+                <button class="control-btn" onclick="game.pauseGame()">⏸️ 暫停</button>
+                <button class="control-btn" onclick="game.resetGame()">🔄 重新開始</button>
+            </div>
+            
+            <div class="feedback" id="feedback">點擊「開始遊戲」來開始您的詞彙學習之旅！</div>
+            
+            <div class="question-panel" id="questionPanel" style="display: none;">
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="optionsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 詞彙數據 - 模擬 GEPT 分級
+        const vocabularyData = [
+            { chinese: "飛機", english: "airplane", level: 1 },
+            { chinese: "汽車", english: "car", level: 1 },
+            { chinese: "房子", english: "house", level: 1 },
+            { chinese: "學校", english: "school", level: 1 },
+            { chinese: "書本", english: "book", level: 1 },
+            { chinese: "蘋果", english: "apple", level: 1 },
+            { chinese: "貓咪", english: "cat", level: 1 },
+            { chinese: "狗狗", english: "dog", level: 1 },
+            { chinese: "太陽", english: "sun", level: 2 },
+            { chinese: "月亮", english: "moon", level: 2 },
+            { chinese: "星星", english: "star", level: 2 },
+            { chinese: "雲朵", english: "cloud", level: 2 }
+        ];
+
+        // 遊戲類 - 模擬 Wordwall 的架構
+        class AirplaneVocabularyGame {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.isRunning = false;
+                this.isPaused = false;
+                
+                // 遊戲對象
+                this.airplane = { x: 50, y: 200, width: 60, height: 30, speed: 2 };
+                this.clouds = [];
+                this.currentQuestion = null;
+                this.score = 0;
+                this.correctAnswers = 0;
+                this.wrongAnswers = 0;
+                
+                // 初始化雲朵
+                this.initializeClouds();
+                
+                // 開始渲染循環
+                this.gameLoop();
+                
+                console.log('🎮 飛機詞彙遊戲已初始化！');
+            }
+            
+            initializeClouds() {
+                for (let i = 0; i < 5; i++) {
+                    this.clouds.push({
+                        x: 200 + i * 150,
+                        y: 50 + Math.random() * 200,
+                        width: 80,
+                        height: 50,
+                        speed: 0.5 + Math.random() * 0.5,
+                        hasQuestion: i % 2 === 0,
+                        triggered: false
+                    });
+                }
+            }
+            
+            startGame() {
+                this.isRunning = true;
+                this.isPaused = false;
+                document.getElementById('feedback').textContent = '🎮 遊戲開始！飛機正在飛行，碰到金色雲朵來回答問題！';
+                document.getElementById('feedback').className = 'feedback';
+                console.log('🚀 遊戲開始！');
+            }
+            
+            pauseGame() {
+                this.isPaused = !this.isPaused;
+                document.getElementById('feedback').textContent = this.isPaused ? '⏸️ 遊戲暫停' : '▶️ 遊戲繼續';
+            }
+            
+            resetGame() {
+                this.isRunning = false;
+                this.isPaused = false;
+                this.score = 0;
+                this.correctAnswers = 0;
+                this.wrongAnswers = 0;
+                this.airplane.x = 50;
+                this.airplane.y = 200;
+                this.currentQuestion = null;
+                
+                // 重置雲朵
+                this.clouds.forEach(cloud => {
+                    cloud.triggered = false;
+                    cloud.x = 200 + Math.random() * 400;
+                });
+                
+                this.updateUI();
+                this.hideQuestion();
+                document.getElementById('feedback').textContent = '🔄 遊戲重置完成，點擊開始遊戲！';
+                document.getElementById('feedback').className = 'feedback';
+            }
+            
+            update() {
+                if (!this.isRunning || this.isPaused) return;
+                
+                // 更新飛機位置 (簡單的自動飛行)
+                this.airplane.x += this.airplane.speed;
+                this.airplane.y += Math.sin(Date.now() * 0.003) * 0.5;
+                
+                // 邊界檢查
+                if (this.airplane.x > this.canvas.width) {
+                    this.airplane.x = -this.airplane.width;
+                    // 重新生成雲朵位置
+                    this.clouds.forEach(cloud => {
+                        cloud.x = 200 + Math.random() * 400;
+                        cloud.triggered = false;
+                    });
+                }
+                
+                // 更新雲朵
+                this.clouds.forEach(cloud => {
+                    cloud.x -= cloud.speed;
+                    if (cloud.x < -cloud.width) {
+                        cloud.x = this.canvas.width + Math.random() * 200;
+                        cloud.triggered = false;
+                    }
+                });
+                
+                // 檢查碰撞
+                this.checkCollisions();
+            }
+            
+            checkCollisions() {
+                this.clouds.forEach(cloud => {
+                    if (cloud.hasQuestion && !cloud.triggered && this.isColliding(this.airplane, cloud)) {
+                        cloud.triggered = true;
+                        this.triggerQuestion();
+                    }
+                });
+            }
+            
+            isColliding(rect1, rect2) {
+                return rect1.x < rect2.x + rect2.width &&
+                       rect1.x + rect1.width > rect2.x &&
+                       rect1.y < rect2.y + rect2.height &&
+                       rect1.y + rect1.height > rect2.y;
+            }
+            
+            triggerQuestion() {
+                this.isPaused = true;
+                const randomWord = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
+                this.currentQuestion = randomWord;
+                
+                // 生成選項
+                const options = [randomWord.english];
+                while (options.length < 4) {
+                    const randomOption = vocabularyData[Math.floor(Math.random() * vocabularyData.length)].english;
+                    if (!options.includes(randomOption)) {
+                        options.push(randomOption);
+                    }
+                }
+                
+                // 打亂選項
+                for (let i = options.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [options[i], options[j]] = [options[j], options[i]];
+                }
+                
+                this.showQuestion(randomWord.chinese, options);
+                console.log(`❓ 問題：${randomWord.chinese} = ${randomWord.english}`);
+            }
+            
+            showQuestion(questionText, options) {
+                document.getElementById('questionText').textContent = `"${questionText}" 的英文是？`;
+                const container = document.getElementById('optionsContainer');
+                container.innerHTML = '';
+                
+                options.forEach(option => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = option;
+                    btn.onclick = () => this.answerQuestion(option);
+                    container.appendChild(btn);
+                });
+                
+                document.getElementById('questionPanel').style.display = 'block';
+            }
+            
+            answerQuestion(selectedAnswer) {
+                const correct = selectedAnswer === this.currentQuestion.english;
+                
+                // 更新按鈕樣式
+                const buttons = document.querySelectorAll('.option-btn');
+                buttons.forEach(btn => {
+                    if (btn.textContent === this.currentQuestion.english) {
+                        btn.className = 'option-btn correct';
+                    } else if (btn.textContent === selectedAnswer && !correct) {
+                        btn.className = 'option-btn wrong';
+                    }
+                });
+                
+                // 更新分數
+                if (correct) {
+                    this.score += 10;
+                    this.correctAnswers++;
+                    document.getElementById('feedback').textContent = '✅ 正確！太棒了！';
+                    document.getElementById('feedback').className = 'feedback correct';
+                    console.log('✅ 答對了！');
+                } else {
+                    this.wrongAnswers++;
+                    document.getElementById('feedback').textContent = `❌ 錯誤！正確答案是 "${this.currentQuestion.english}"`;
+                    document.getElementById('feedback').className = 'feedback wrong';
+                    console.log('❌ 答錯了！');
+                }
+                
+                this.updateUI();
+                
+                // 2秒後繼續遊戲
+                setTimeout(() => {
+                    this.hideQuestion();
+                    this.isPaused = false;
+                }, 2000);
+            }
+            
+            hideQuestion() {
+                document.getElementById('questionPanel').style.display = 'none';
+            }
+            
+            updateUI() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('correct').textContent = this.correctAnswers;
+                document.getElementById('wrong').textContent = this.wrongAnswers;
+            }
+            
+            render() {
+                // 清除畫布
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 繪製天空背景
+                const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                gradient.addColorStop(0, '#87CEEB');
+                gradient.addColorStop(1, '#4682B4');
+                this.ctx.fillStyle = gradient;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 繪製雲朵
+                this.clouds.forEach(cloud => {
+                    this.ctx.fillStyle = cloud.hasQuestion ? '#FFD700' : '#FFFFFF';
+                    this.ctx.fillRect(cloud.x, cloud.y, cloud.width, cloud.height);
+                    
+                    // 雲朵文字
+                    this.ctx.fillStyle = '#333';
+                    this.ctx.font = '12px Arial';
+                    this.ctx.textAlign = 'center';
+                    if (cloud.hasQuestion) {
+                        this.ctx.fillText('?', cloud.x + cloud.width/2, cloud.y + cloud.height/2 + 4);
+                    }
+                });
+                
+                // 繪製飛機
+                this.ctx.fillStyle = '#FF6B6B';
+                this.ctx.fillRect(this.airplane.x, this.airplane.y, this.airplane.width, this.airplane.height);
+                
+                // 飛機細節
+                this.ctx.fillStyle = '#4ECDC4';
+                this.ctx.fillRect(this.airplane.x + 10, this.airplane.y + 5, 40, 20);
+                
+                // 飛機文字
+                this.ctx.fillStyle = '#FFF';
+                this.ctx.font = '16px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('✈️', this.airplane.x + this.airplane.width/2, this.airplane.y + this.airplane.height/2 + 6);
+            }
+            
+            gameLoop() {
+                this.update();
+                this.render();
+                requestAnimationFrame(() => this.gameLoop());
+            }
+        }
+        
+        // 初始化遊戲
+        console.log('🎮 正在初始化飛機詞彙遊戲...');
+        const game = new AirplaneVocabularyGame();
+        console.log('✅ 遊戲初始化完成！您可以點擊「開始遊戲」來開始！');
+    </script>
+</body>
+</html>

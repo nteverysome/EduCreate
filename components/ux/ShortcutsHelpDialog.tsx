@@ -11,7 +11,7 @@ interface ShortcutsHelpDialogProps {
   onClose: () => void;
 }
 
-const ShortcutsHelpDialog = ({ isOpen, onClose }: ShortcutsHelpDialogProps) {
+const ShortcutsHelpDialog = ({ isOpen, onClose }: ShortcutsHelpDialogProps) => {
   const [categories, setCategories] = useState<ShortcutCategory[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('navigation');
   const [searchQuery, setSearchQuery] = useState('');

@@ -33,7 +33,25 @@ export default function MatchGamePage() {
     shuffleItems: true,
     maxAttempts: undefined,
     penaltyTime: 5,
-    bonusPoints: 10
+    bonusPoints: 10,
+    // 自適應難度設置
+    enableAdaptiveDifficulty: true,
+    difficultyStrategy: 'adaptive' as any,
+    cognitiveLoadThreshold: 0.75,
+    performanceThreshold: 0.60,
+    // 計分系統設置
+    scoringMode: 'standard' as any,
+    timeMode: 'fixed' as any,
+    baseScore: 100,
+    streakMultiplier: 1.2,
+    timeBonus: true,
+    accuracyBonus: true,
+    perfectGameBonus: 500,
+    // 時間系統設置
+    warningTime: 30,
+    urgentTime: 10,
+    timeExtension: 15,
+    maxTimeExtensions: 2
   });
 
   const [gameStarted, setGameStarted] = useState(false);
@@ -441,6 +459,268 @@ export default function MatchGamePage() {
                   />
                   <span className="text-sm text-gray-700">隨機排列</span>
                 </label>
+              </div>
+            </div>
+
+            {/* 自適應難度設置 */}
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-medium text-blue-900 mb-4">🧠 自適應難度系統</h3>
+
+              <div className="space-y-4">
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={gameConfig.enableAdaptiveDifficulty}
+                    onChange={(e) => updateConfig('enableAdaptiveDifficulty', e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    data-testid="enable-adaptive-difficulty-checkbox"
+                  />
+                  <span className="text-sm font-medium text-blue-800">啟用智能難度調整</span>
+                </label>
+
+                {gameConfig.enableAdaptiveDifficulty && (
+                  <div className="ml-6 space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-blue-700 mb-1">調整策略</label>
+                      <select
+                        value={gameConfig.difficultyStrategy}
+                        onChange={(e) => updateConfig('difficultyStrategy', e.target.value)}
+                        className="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        data-testid="difficulty-strategy-select"
+                      >
+                        <option value="conservative">保守調整</option>
+                        <option value="moderate">適中調整</option>
+                        <option value="aggressive">激進調整</option>
+                        <option value="adaptive">自適應調整</option>
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-blue-700 mb-1">
+                          認知負荷閾值: {(gameConfig.cognitiveLoadThreshold! * 100).toFixed(0)}%
+                        </label>
+                        <input
+                          type="range"
+                          min="0.5"
+                          max="1.0"
+                          step="0.05"
+                          value={gameConfig.cognitiveLoadThreshold}
+                          onChange={(e) => updateConfig('cognitiveLoadThreshold', parseFloat(e.target.value))}
+                          className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                          data-testid="cognitive-load-threshold-slider"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-blue-700 mb-1">
+                          表現閾值: {(gameConfig.performanceThreshold! * 100).toFixed(0)}%
+                        </label>
+                        <input
+                          type="range"
+                          min="0.3"
+                          max="0.9"
+                          step="0.05"
+                          value={gameConfig.performanceThreshold}
+                          onChange={(e) => updateConfig('performanceThreshold', parseFloat(e.target.value))}
+                          className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                          data-testid="performance-threshold-slider"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
+                      💡 自適應難度系統會根據您的學習表現和認知負荷自動調整遊戲難度，提供最佳的學習體驗。
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 計分系統設置 */}
+            <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+              <h3 className="text-lg font-medium text-green-900 mb-4">🏆 計分系統設置</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-green-700 mb-1">計分模式</label>
+                  <select
+                    value={gameConfig.scoringMode}
+                    onChange={(e) => updateConfig('scoringMode', e.target.value)}
+                    className="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    data-testid="scoring-mode-select"
+                  >
+                    <option value="standard">標準計分</option>
+                    <option value="time-based">時間基礎</option>
+                    <option value="streak-based">連續基礎</option>
+                    <option value="accuracy-based">準確率基礎</option>
+                    <option value="adaptive">自適應計分</option>
+                    <option value="competitive">競技模式</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-green-700 mb-1">時間模式</label>
+                  <select
+                    value={gameConfig.timeMode}
+                    onChange={(e) => updateConfig('timeMode', e.target.value)}
+                    className="w-full px-3 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    data-testid="time-mode-select"
+                  >
+                    <option value="unlimited">無限時間</option>
+                    <option value="fixed">固定時間</option>
+                    <option value="countdown">倒數計時</option>
+                    <option value="pressure">壓力模式</option>
+                    <option value="adaptive">自適應時間</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-green-700 mb-1">
+                    基礎分數: {gameConfig.baseScore}
+                  </label>
+                  <input
+                    type="range"
+                    min="50"
+                    max="200"
+                    step="10"
+                    value={gameConfig.baseScore}
+                    onChange={(e) => updateConfig('baseScore', parseInt(e.target.value))}
+                    className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer"
+                    data-testid="base-score-slider"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-green-700 mb-1">
+                    連續倍數: {gameConfig.streakMultiplier?.toFixed(1)}x
+                  </label>
+                  <input
+                    type="range"
+                    min="1.0"
+                    max="2.0"
+                    step="0.1"
+                    value={gameConfig.streakMultiplier}
+                    onChange={(e) => updateConfig('streakMultiplier', parseFloat(e.target.value))}
+                    className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer"
+                    data-testid="streak-multiplier-slider"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-2">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={gameConfig.timeBonus}
+                    onChange={(e) => updateConfig('timeBonus', e.target.checked)}
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    data-testid="time-bonus-checkbox"
+                  />
+                  <span className="text-sm text-green-700">時間獎勵</span>
+                </label>
+
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={gameConfig.accuracyBonus}
+                    onChange={(e) => updateConfig('accuracyBonus', e.target.checked)}
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    data-testid="accuracy-bonus-checkbox"
+                  />
+                  <span className="text-sm text-green-700">準確率獎勵</span>
+                </label>
+              </div>
+
+              <div className="mt-3">
+                <label className="block text-sm font-medium text-green-700 mb-1">
+                  完美遊戲獎勵: {gameConfig.perfectGameBonus}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1000"
+                  step="50"
+                  value={gameConfig.perfectGameBonus}
+                  onChange={(e) => updateConfig('perfectGameBonus', parseInt(e.target.value))}
+                  className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer"
+                  data-testid="perfect-game-bonus-slider"
+                />
+              </div>
+            </div>
+
+            {/* 時間系統設置 */}
+            <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+              <h3 className="text-lg font-medium text-yellow-900 mb-4">⏰ 時間系統設置</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-yellow-700 mb-1">
+                    警告時間: {gameConfig.warningTime}秒
+                  </label>
+                  <input
+                    type="range"
+                    min="10"
+                    max="60"
+                    step="5"
+                    value={gameConfig.warningTime}
+                    onChange={(e) => updateConfig('warningTime', parseInt(e.target.value))}
+                    className="w-full h-2 bg-yellow-200 rounded-lg appearance-none cursor-pointer"
+                    data-testid="warning-time-slider"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-yellow-700 mb-1">
+                    緊急時間: {gameConfig.urgentTime}秒
+                  </label>
+                  <input
+                    type="range"
+                    min="5"
+                    max="30"
+                    step="5"
+                    value={gameConfig.urgentTime}
+                    onChange={(e) => updateConfig('urgentTime', parseInt(e.target.value))}
+                    className="w-full h-2 bg-yellow-200 rounded-lg appearance-none cursor-pointer"
+                    data-testid="urgent-time-slider"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-yellow-700 mb-1">
+                    時間延長: {gameConfig.timeExtension}秒
+                  </label>
+                  <input
+                    type="range"
+                    min="5"
+                    max="30"
+                    step="5"
+                    value={gameConfig.timeExtension}
+                    onChange={(e) => updateConfig('timeExtension', parseInt(e.target.value))}
+                    className="w-full h-2 bg-yellow-200 rounded-lg appearance-none cursor-pointer"
+                    data-testid="time-extension-slider"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-yellow-700 mb-1">
+                    最大延長次數: {gameConfig.maxTimeExtensions}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="5"
+                    step="1"
+                    value={gameConfig.maxTimeExtensions}
+                    onChange={(e) => updateConfig('maxTimeExtensions', parseInt(e.target.value))}
+                    className="w-full h-2 bg-yellow-200 rounded-lg appearance-none cursor-pointer"
+                    data-testid="max-time-extensions-slider"
+                  />
+                </div>
+              </div>
+
+              <div className="text-xs text-yellow-600 bg-yellow-100 p-2 rounded mt-3">
+                ⏱️ 時間系統會根據設定提供警告提示，並在自適應模式下智能調整時間限制。
               </div>
             </div>
 

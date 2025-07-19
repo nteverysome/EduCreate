@@ -22,7 +22,7 @@ interface VersionHistoryProps {
   onClose: () => void;
 }
 
-const VersionHistory = ({ activityId, onVersionRestore, isOpen, onClose }: VersionHistoryProps) {
+const VersionHistory = ({ activityId, onVersionRestore, isOpen, onClose }: VersionHistoryProps) => {
   const { data: session } = useSession();
   const [versions, setVersions] = useState<Version[]>([]);
   const [loading, setLoading] = useState(true);

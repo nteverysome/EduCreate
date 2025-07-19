@@ -1,0 +1,48 @@
+{
+  "success": false,
+  "errors": [
+    {
+      "line": 17,
+      "message": "Failed to compile.",
+      "file": "./pages/api/folders/[id]/permissions/[userId].ts",
+      "type": "MODULE_NOT_FOUND",
+      "description": "模組路徑錯誤",
+      "autoFixable": false,
+      "priority": "MEDIUM",
+      "context": [
+        "Failed to compile.",
+        "",
+        "./pages/api/folders/[id]/permissions/[userId].ts",
+        "Module not found: Can't resolve '../../auth/[...nextauth]'",
+        "",
+        "https://nextjs.org/docs/messages/module-not-found",
+        "",
+        "",
+        "> Build failed because of webpack errors",
+        ""
+      ]
+    }
+  ],
+  "statistics": {
+    "total": 1,
+    "byType": {
+      "MODULE_NOT_FOUND": 1
+    },
+    "byPriority": {
+      "MEDIUM": 1
+    },
+    "autoFixable": 0,
+    "files": {},
+    "affectedFiles": 1
+  },
+  "suggestions": [
+    {
+      "type": "MODULE_NOT_FOUND",
+      "priority": "MEDIUM",
+      "action": "MANUAL_FIX_IMPORTS",
+      "description": "手動檢查和修復模組導入路徑",
+      "affectedFiles": 1,
+      "estimatedTime": "10-30 分鐘"
+    }
+  ]
+}

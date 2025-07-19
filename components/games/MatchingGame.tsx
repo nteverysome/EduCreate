@@ -44,7 +44,7 @@ function DraggableCard({ item, isActive }: { item: MatchingItem; isActive: boole
 }
 
 // 配對遊戲組件
-const MatchingGame = ({ items, onComplete }: MatchingGameProps) {
+const MatchingGame = ({ items, onComplete }: MatchingGameProps) => {
   const [questions, setQuestions] = useState<MatchingItem[]>([]);
   const [answers, setAnswers] = useState<MatchingItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);

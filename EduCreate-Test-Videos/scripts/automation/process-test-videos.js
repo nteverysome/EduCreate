@@ -5,6 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const TestVideoProcessor = require('../core/TestVideoProcessor');
+const rule4Checker = require('../utils/rule4-checker');
 const ReportGenerator = require('./generate-reports');
 
 class BatchVideoProcessor {

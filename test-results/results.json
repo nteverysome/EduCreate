@@ -1,29 +1,39 @@
 {
   "config": {
-    "configFile": "C:\\Users\\Administrator\\Desktop\\EduCreate\\playwright.config.js",
+    "configFile": "C:\\Users\\Administrator\\Desktop\\EduCreate\\playwright.config.ts",
     "rootDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
     "forbidOnly": false,
-    "fullyParallel": false,
-    "globalSetup": null,
-    "globalTeardown": null,
+    "fullyParallel": true,
+    "globalSetup": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\global-setup.ts",
+    "globalTeardown": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\global-teardown.ts",
     "globalTimeout": 0,
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {
-      "actualWorkers": 1
-    },
+    "metadata": {},
     "preserveOutput": "always",
     "reporter": [
       [
         "html",
-        null
+        {
+          "outputFolder": "playwright-report"
+        }
       ],
       [
         "json",
         {
           "outputFile": "test-results/results.json"
         }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/junit.xml"
+        }
+      ],
+      [
+        "list",
+        null
       ]
     ],
     "reportSlowTests": {
@@ -35,10 +45,8 @@
       {
         "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
         "repeatEach": 1,
-        "retries": 0,
-        "metadata": {
-          "actualWorkers": 1
-        },
+        "retries": 1,
+        "metadata": {},
         "id": "chromium",
         "name": "chromium",
         "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
@@ -46,7 +54,77 @@
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
         ],
-        "timeout": 120000
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {},
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {},
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {},
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {},
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/Desktop/EduCreate/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {},
+        "id": "Tablet",
+        "name": "Tablet",
+        "testDir": "C:/Users/Administrator/Desktop/EduCreate/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
       }
     ],
     "shard": null,
@@ -54,212 +132,25 @@
     "updateSourceMethod": "patch",
     "version": "1.53.1",
     "workers": 16,
-    "webServer": {
-      "command": "npm run dev",
-      "port": 3000,
-      "reuseExistingServer": true
-    }
+    "webServer": null
   },
-  "suites": [
+  "suites": [],
+  "errors": [
     {
-      "title": "game-switcher-video.spec.ts",
-      "file": "game-switcher-video.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "完整遊戲切換系統 - 生成測試影片",
-          "file": "game-switcher-video.spec.ts",
-          "line": 8,
-          "column": 6,
-          "specs": [
-            {
-              "title": "完整遊戲切換系統三層整合驗證",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 15472,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "🎬 開始錄製完整遊戲切換系統測試影片...\n"
-                        },
-                        {
-                          "text": "📍 第一層驗證：主頁可見性測試\n"
-                        },
-                        {
-                          "text": "✅ 第一層驗證通過：主頁可見性測試成功\n"
-                        },
-                        {
-                          "text": "📍 第二層驗證：導航流程測試\n"
-                        },
-                        {
-                          "text": "✅ 第二層驗證通過：導航流程測試成功\n"
-                        },
-                        {
-                          "text": "📍 第三層驗證：功能互動測試\n"
-                        },
-                        {
-                          "text": "📑 測試標籤切換功能\n"
-                        },
-                        {
-                          "text": "🎯 測試源遊戲選擇功能\n"
-                        },
-                        {
-                          "text": "🎯 測試目標遊戲選擇功能\n"
-                        },
-                        {
-                          "text": "⚙️ 測試切換配置功能\n"
-                        },
-                        {
-                          "text": "⚡ 測試切換按鈕功能\n"
-                        },
-                        {
-                          "text": "🎯 測試切換模式功能\n"
-                        },
-                        {
-                          "text": "📦 測試批量轉換功能\n"
-                        },
-                        {
-                          "text": "📊 測試切換分析功能\n"
-                        },
-                        {
-                          "text": "✅ 第三層驗證通過：功能互動測試成功\n"
-                        },
-                        {
-                          "text": "🎯 最終驗證：系統整體功能\n"
-                        },
-                        {
-                          "text": "🎉 完整遊戲切換系統三層整合驗證完全成功！\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2025-07-17T03:57:17.765Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "video",
-                          "contentType": "video/webm",
-                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\game-switcher-video-完整遊戲切換系統---生成測試影片-完整遊戲切換系統三層整合驗證-chromium\\video.webm"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\game-switcher-video-完整遊戲切換系統---生成測試影片-完整遊戲切換系統三層整合驗證-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "f0c9d35f1ff3eeef5510-63012a5bab7171ba9fdd",
-              "file": "game-switcher-video.spec.ts",
-              "line": 9,
-              "column": 7
-            },
-            {
-              "title": "完整遊戲切換系統性能測試",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 120000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 13587,
-                      "errors": [],
-                      "stdout": [
-                        {
-                          "text": "🎬 開始錄製完整遊戲切換系統性能測試影片...\n"
-                        },
-                        {
-                          "text": "📊 完整遊戲切換系統頁面載入時間: 913ms\n"
-                        },
-                        {
-                          "text": "📊 切換標籤切換時間: 1077ms\n"
-                        },
-                        {
-                          "text": "📊 模式標籤切換時間: 1062ms\n"
-                        },
-                        {
-                          "text": "📊 批量標籤切換時間: 1066ms\n"
-                        },
-                        {
-                          "text": "📊 分析標籤切換時間: 1053ms\n"
-                        },
-                        {
-                          "text": "📊 源遊戲選擇時間: 569ms\n"
-                        },
-                        {
-                          "text": "📊 目標遊戲選擇時間: 548ms\n"
-                        },
-                        {
-                          "text": "📊 配置設置時間: 526ms\n"
-                        },
-                        {
-                          "text": "📊 遊戲切換執行時間: 3046ms\n"
-                        },
-                        {
-                          "text": "🎉 完整遊戲切換系統性能測試完成！\n"
-                        }
-                      ],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2025-07-17T03:57:33.932Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "video",
-                          "contentType": "video/webm",
-                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\game-switcher-video-完整遊戲切換系統---生成測試影片-完整遊戲切換系統性能測試-chromium\\video.webm"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "C:\\Users\\Administrator\\Desktop\\EduCreate\\test-results\\game-switcher-video-完整遊戲切換系統---生成測試影片-完整遊戲切換系統性能測試-chromium\\trace.zip"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "f0c9d35f1ff3eeef5510-305810c18a1f69e8160e",
-              "file": "game-switcher-video.spec.ts",
-              "line": 161,
-              "column": 7
-            }
-          ]
-        }
-      ]
+      "message": "Error: 開發服務器在指定時間內未能啟動",
+      "stack": "Error: 開發服務器在指定時間內未能啟動\n    at globalSetup (C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\global-setup.ts:72:11)",
+      "location": {
+        "file": "C:\\Users\\Administrator\\Desktop\\EduCreate\\tests\\global-setup.ts",
+        "column": 11,
+        "line": 72
+      },
+      "snippet": "\u001b[90m   at \u001b[39mglobal-setup.ts:72\n\n\u001b[0m \u001b[90m 70 |\u001b[39m   \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39mserverReady) {\n \u001b[90m 71 |\u001b[39m     console\u001b[33m.\u001b[39merror(\u001b[32m'❌ 開發服務器啟動失敗'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 72 |\u001b[39m     \u001b[36mthrow\u001b[39m \u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m'開發服務器在指定時間內未能啟動'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 73 |\u001b[39m   }\n \u001b[90m 74 |\u001b[39m\n \u001b[90m 75 |\u001b[39m   \u001b[90m// 檢查關鍵頁面（跳過 API 端點檢查）\u001b[39m\u001b[0m"
     }
   ],
-  "errors": [],
   "stats": {
-    "startTime": "2025-07-17T03:57:16.434Z",
-    "duration": 31580.398,
-    "expected": 2,
+    "startTime": "2025-07-17T16:44:54.048Z",
+    "duration": 130788.38699999999,
+    "expected": 0,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

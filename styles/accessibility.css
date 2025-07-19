@@ -1,0 +1,404 @@
+/**
+ * 無障礙支援樣式
+ * 符合 WCAG 2.1 AA 標準的無障礙設計
+ */
+
+/* 螢幕閱讀器專用內容 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 跳過連結 */
+.skip-links {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000;
+  color: #fff;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* 鍵盤焦點指示器 */
+.keyboard-focus-highlight {
+  outline: 3px solid #4A90E2 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px #4A90E2 !important;
+}
+
+/* 增強焦點指示器 */
+*:focus {
+  outline: 2px solid #4A90E2;
+  outline-offset: 2px;
+}
+
+/* 高對比模式 */
+.high-contrast {
+  --text-color: #000;
+  --bg-color: #fff;
+  --link-color: #0000ff;
+  --visited-link-color: #800080;
+  --border-color: #000;
+}
+
+.high-contrast * {
+  color: var(--text-color) !important;
+  background-color: var(--bg-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+.high-contrast a {
+  color: var(--link-color) !important;
+}
+
+.high-contrast a:visited {
+  color: var(--visited-link-color) !important;
+}
+
+/* 深色模式 */
+.dark-mode {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --border-color: #404040;
+}
+
+.dark-mode body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.dark-mode .bg-white {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark-mode .text-gray-900 {
+  color: var(--text-primary) !important;
+}
+
+.dark-mode .text-gray-600 {
+  color: var(--text-secondary) !important;
+}
+
+.dark-mode .border-gray-200 {
+  border-color: var(--border-color) !important;
+}
+
+/* 字體大小調整 */
+.font-size-small {
+  font-size: var(--accessibility-font-size, 14px) !important;
+}
+
+.font-size-medium {
+  font-size: var(--accessibility-font-size, 16px) !important;
+}
+
+.font-size-large {
+  font-size: var(--accessibility-font-size, 18px) !important;
+}
+
+.font-size-extra-large {
+  font-size: var(--accessibility-font-size, 20px) !important;
+}
+
+/* 行高調整 */
+.line-height-accessible {
+  line-height: var(--accessibility-line-height, 1.5) !important;
+}
+
+/* 字母間距調整 */
+.letter-spacing-accessible {
+  letter-spacing: var(--accessibility-letter-spacing, 0px) !important;
+}
+
+/* 動畫控制 */
+.reduce-motion * {
+  animation-duration: var(--accessibility-animation-duration, 0s) !important;
+  transition-duration: var(--accessibility-animation-duration, 0s) !important;
+}
+
+/* 遊戲項目無障礙樣式 */
+.game-item {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.game-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.game-item:focus {
+  outline: 3px solid #4A90E2;
+  outline-offset: 2px;
+}
+
+.game-item[aria-pressed="true"] {
+  background-color: #E3F2FD !important;
+  border-color: #2196F3 !important;
+  box-shadow: 0 0 0 2px #2196F3;
+}
+
+.game-item[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f5f5f5 !important;
+}
+
+/* 鍵盤導航指示器 */
+.keyboard-navigation-active .game-item:focus {
+  background-color: #FFF3E0 !important;
+  border: 2px solid #FF9800 !important;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.3);
+}
+
+/* 螢幕閱讀器優化 */
+.screen-reader-optimized .game-item::after {
+  content: attr(aria-label);
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* 按鈕無障礙樣式 */
+button:focus {
+  outline: 2px solid #4A90E2;
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 表單控件無障礙樣式 */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #4A90E2;
+  outline-offset: 2px;
+  border-color: #4A90E2;
+}
+
+/* 錯誤狀態 */
+.error {
+  border-color: #f44336 !important;
+  background-color: #ffebee !important;
+}
+
+.error:focus {
+  outline-color: #f44336 !important;
+}
+
+/* 成功狀態 */
+.success {
+  border-color: #4caf50 !important;
+  background-color: #e8f5e8 !important;
+}
+
+/* 警告狀態 */
+.warning {
+  border-color: #ff9800 !important;
+  background-color: #fff3e0 !important;
+}
+
+/* 對話框無障礙樣式 */
+[role="dialog"] {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+[role="dialog"]:focus {
+  outline: 2px solid #4A90E2;
+  outline-offset: -2px;
+}
+
+/* 模態背景 */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* 工具提示無障礙樣式 */
+[role="tooltip"] {
+  position: absolute;
+  z-index: 1001;
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+/* 進度條無障礙樣式 */
+[role="progressbar"] {
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+[role="progressbar"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #4A90E2;
+  width: var(--progress-value, 0%);
+  transition: width 0.3s ease;
+}
+
+/* 標籤頁無障礙樣式 */
+[role="tablist"] {
+  display: flex;
+  border-bottom: 1px solid #ccc;
+}
+
+[role="tab"] {
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+[role="tab"]:hover {
+  background-color: #f5f5f5;
+}
+
+[role="tab"][aria-selected="true"] {
+  border-bottom-color: #4A90E2;
+  background-color: #e3f2fd;
+}
+
+[role="tab"]:focus {
+  outline: 2px solid #4A90E2;
+  outline-offset: -2px;
+}
+
+/* 菜單無障礙樣式 */
+[role="menu"] {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+}
+
+[role="menuitem"] {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+[role="menuitem"]:hover,
+[role="menuitem"]:focus {
+  background-color: #e3f2fd;
+  outline: none;
+}
+
+/* 響應式無障礙設計 */
+@media (max-width: 768px) {
+  .skip-link {
+    font-size: 16px;
+    padding: 12px;
+  }
+  
+  .game-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* 打印樣式 */
+@media print {
+  .skip-links,
+  .keyboard-focus-highlight,
+  [role="dialog"] {
+    display: none !important;
+  }
+}
+
+/* 偏好設定：減少動畫 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 偏好設定：高對比 */
+@media (prefers-contrast: high) {
+  * {
+    border-width: 2px !important;
+  }
+  
+  .game-item:focus {
+    outline-width: 4px !important;
+  }
+}
+
+/* 偏好設定：深色模式 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+  }
+}

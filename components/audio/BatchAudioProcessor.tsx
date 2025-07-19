@@ -36,7 +36,7 @@ const BatchAudioProcessor = ({
   onProgress,
   className = '',
   'data-testid': testId = 'batch-audio-processor'
-}: BatchAudioProcessorProps) {
+}: BatchAudioProcessorProps) => {
   const [selectedRecordings, setSelectedRecordings] = useState<Set<string>>(new Set());
   const [processingOptions, setProcessingOptions] = useState<BatchProcessingOptions>({
     format: 'mp3',

@@ -27,7 +27,7 @@ const GameSwitcher = ({
   onGameTypeChange,
   onBack,
   onShare
-}: GameSwitcherProps) {
+}: GameSwitcherProps) => {
   const [contentManager] = useState(() => new UniversalContentManager());
   const [isPlaying, setIsPlaying] = useState(false);
   const [showGameMenu, setShowGameMenu] = useState(false);

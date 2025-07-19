@@ -15,7 +15,7 @@ interface ActivityEditorProps {
   templateType?: 'matching' | 'flashcards' | 'quiz';
 }
 
-const ActivityEditor = ({ activityId, templateId, templateType }: ActivityEditorProps) {
+const ActivityEditor = ({ activityId, templateId, templateType }: ActivityEditorProps) => {
   const router = useRouter();
   const [
     currentActivity,
