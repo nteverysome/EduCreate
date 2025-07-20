@@ -1,0 +1,30 @@
+Top Down Planes Sprites Pack
+Created by: sujit1717 (Unlucky Studio)
+License: CC0 (Public Domain)
+
+This pack contains 7 different aircraft types with multiple variations and animations:
+
+1. B-17 Bomber (4 variations)
+2. BF-109E Fighter (4 variations)  
+3. Bipolar Plane (7 variations)
+4. TBM-3 Torpedo Bomber (3 variations)
+5. JU-87B2 Dive Bomber (3 variations)
+6. Hawker Tempest MKII (3 variations)
+7. Blenheim Bomber (2 variations)
+
+Each aircraft includes:
+- Main sprite image
+- 3-frame animation sequence
+- Multiple color/design variations
+
+Total: 26 main sprites + ~78 animation frames = ~100 PNG files
+
+Original download: https://opengameart.org/content/top-down-planes-sprites-pack
+File size: 1.7 MB
+Format: PNG images suitable for game development
+
+Usage: Free for commercial and non-commercial use
+No attribution required but appreciated
+
+Note: This folder structure represents the extracted contents of the original ZIP file.
+The placeholder files shown here would be replaced with actual PNG images in a real extraction.

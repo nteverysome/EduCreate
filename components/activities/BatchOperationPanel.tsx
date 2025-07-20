@@ -101,6 +101,7 @@ export const BatchOperationPanel: React.FC<BatchOperationPanelProps> = ({
 
   // 選中的活動詳情
   const selectedActivities = useMemo(() => {
+    if (!activities || !Array.isArray(activities)) return [];
     return activities.filter(activity => selectedItems.includes(activity.id));
   }, [activities, selectedItems]);
 
@@ -131,16 +132,20 @@ export const BatchOperationPanel: React.FC<BatchOperationPanelProps> = ({
 
   // 全選/取消全選
   const handleSelectAll = useCallback(() => {
+    if (!activities || !Array.isArray(activities) || !selectedItems || !Array.isArray(selectedItems)) return;
+
     if (selectedItems.length === activities.length) {
       onSelectionChange([]);
     } else {
       const allIds = activities.slice(0, maxSelectionCount).map(activity => activity.id);
       onSelectionChange(allIds);
     }
-  }, [selectedItems.length, activities.length, activities, maxSelectionCount, onSelectionChange]);
+  }, [selectedItems?.length, activities?.length, activities, maxSelectionCount, onSelectionChange]);
 
   // 反選
   const handleInvertSelection = useCallback(() => {
+    if (!activities || !Array.isArray(activities) || !selectedItems || !Array.isArray(selectedItems)) return;
+
     const allIds = activities.map(activity => activity.id);
     const invertedIds = allIds.filter(id => !selectedItems.includes(id));
     onSelectionChange(invertedIds.slice(0, maxSelectionCount));

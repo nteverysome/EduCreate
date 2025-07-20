@@ -1,0 +1,20 @@
+{
+  "lastUpdated": "2025-07-20T08:43:43.440Z",
+  "current": {
+    "todayTests": 0,
+    "weekTests": 0,
+    "monthTests": 0,
+    "successRate": 0,
+    "spaceSaved": 0
+  },
+  "trends": {},
+  "alerts": [],
+  "quickStats": {
+    "todayTests": 0,
+    "weekTests": 0,
+    "monthTests": 0,
+    "successRate": 0,
+    "spaceSaved": 0,
+    "activeIssues": 0
+  }
+}

@@ -7,7 +7,7 @@ const path = require('path');
 
 class SystemInitializer {
   constructor() {
-    this.baseDir = 'EduCreate-Test-Videos';
+    this.baseDir = '.'; // 當前目錄就是 EduCreate-Test-Videos
   }
 
   // 初始化整個系統

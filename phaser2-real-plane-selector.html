@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phaser 2 真實飛機選擇演示</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@2.6.2/build/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #2c3e50;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #ecf0f1;
+            margin-bottom: 20px;
+        }
+        
+        .plane-selector {
+            background: #34495e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .plane-option {
+            display: inline-block;
+            margin: 8px;
+            padding: 12px;
+            background: #2c3e50;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 180px;
+            font-size: 12px;
+        }
+        
+        .plane-option:hover {
+            background: #3498db;
+            transform: scale(1.05);
+        }
+        
+        .plane-option.selected {
+            background: #e74c3c;
+            border-color: #c0392b;
+        }
+        
+        #game-container {
+            margin: 20px auto;
+            border: 3px solid #34495e;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .controls {
+            background: #34495e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .info {
+            background: #27ae60;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .asset-status {
+            background: #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🛩️ Phaser 2 真實飛機選擇演示</h1>
+    
+    <div class="info">
+        <h3>✈️ 使用真實下載的飛機素材！</h3>
+        <p>選擇不同的真實飛機 PNG 圖片，體驗專業的飛機設計</p>
+    </div>
+    
+    <div class="asset-status">
+        <h3>📁 素材狀態</h3>
+        <p><strong>如果看到後備圖形：</strong>表示需要下載並解壓縮真實的 PNG 檔案</p>
+        <p><strong>如果看到真實飛機：</strong>表示 PNG 檔案載入成功</p>
+    </div>
+    
+    <div class="plane-selector">
+        <h3>🎯 選擇真實飛機</h3>
+        <div class="plane-option selected" data-plane="b17">
+            <h4>🛩️ B-17 轟炸機</h4>
+            <p><strong>檔案：</strong>B-17/Type-1/B-17.png</p>
+            <p><strong>類型：</strong>重型轟炸機</p>
+            <p><strong>特色：</strong>四引擎設計</p>
+        </div>
+        <div class="plane-option" data-plane="bf109">
+            <h4>✈️ BF-109E 戰鬥機</h4>
+            <p><strong>檔案：</strong>BF-109E/Type-1/BF109E.png</p>
+            <p><strong>類型：</strong>單引擎戰鬥機</p>
+            <p><strong>特色：</strong>敏捷機動</p>
+        </div>
+        <div class="plane-option" data-plane="biplane">
+            <h4>🛫 雙翼戰鬥機</h4>
+            <p><strong>檔案：</strong>Bipolar Plane/Type_1/Biploar_type1_5.png</p>
+            <p><strong>類型：</strong>雙翼設計</p>
+            <p><strong>特色：</strong>經典復古</p>
+        </div>
+        <div class="plane-option" data-plane="tbm3">
+            <h4>🚁 TBM-3 魚雷轟炸機</h4>
+            <p><strong>檔案：</strong>TBM3/Type_1/TBM-3.png</p>
+            <p><strong>類型：</strong>海軍轟炸機</p>
+            <p><strong>特色：</strong>艦載設計</p>
+        </div>
+        <div class="plane-option" data-plane="hawker">
+            <h4>🛬 Hawker Tempest MKII</h4>
+            <p><strong>檔案：</strong>Hawker Tempest MKII/Type_1/Hawker_type1.png</p>
+            <p><strong>類型：</strong>英國戰鬥機</p>
+            <p><strong>特色：</strong>高速設計</p>
+        </div>
+        <div class="plane-option" data-plane="ju87">
+            <h4>🪂 JU-87B2 俯衝轟炸機</h4>
+            <p><strong>檔案：</strong>JU-87B2/Type_1/JU87B2.png</p>
+            <p><strong>類型：</strong>德國俯衝轟炸機</p>
+            <p><strong>特色：</strong>精確轟炸</p>
+        </div>
+        <div class="plane-option" data-plane="blenheim">
+            <h4>💣 Blenheim 轟炸機</h4>
+            <p><strong>檔案：</strong>Blenheim/Type_1/Blenheim.png</p>
+            <p><strong>類型：</strong>英國雙引擎轟炸機</p>
+            <p><strong>特色：</strong>中型轟炸</p>
+        </div>
+    </div>
+    
+    <div id="game-container"></div>
+    
+    <div class="controls">
+        <h4>🎮 遊戲控制</h4>
+        <p><strong>方向鍵</strong>：移動飛機 | <strong>空白鍵</strong>：發射子彈 | <strong>R鍵</strong>：重新開始</p>
+        <p><strong>1-7數字鍵</strong>：快速切換飛機類型</p>
+        <p>體驗真實的二戰飛機設計！</p>
+    </div>
+
+    <script>
+        // 遊戲配置
+        var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game-container', {
+            preload: preload,
+            create: create,
+            update: update
+        });
+
+        // 遊戲變數
+        var player;
+        var enemies;
+        var bullets;
+        var cursors;
+        var fireButton;
+        var restartButton;
+        var numberKeys = {};
+        var enemyTimer;
+        var score = 0;
+        var scoreText;
+        var gameOver = false;
+        var bulletTime = 0;
+        var currentPlane = 'b17';
+        var planeInfoText;
+        var assetsLoaded = {};
+        var loadingComplete = false;
+
+        // 真實飛機配置
+        var planeConfigs = {
+            b17: {
+                name: 'B-17 轟炸機',
+                file: 'assets/planes/B-17/Type-1/B-17.png',
+                key: 'b17-plane',
+                speed: 250,
+                fireRate: 300,
+                scale: 0.8,
+                pngData: null
+            },
+            bf109: {
+                name: 'BF-109E 戰鬥機',
+                file: 'assets/planes/BF-109E/Type-1/BF109E.png',
+                key: 'bf109-plane',
+                speed: 350,
+                fireRate: 150,
+                scale: 0.7,
+                pngData: null
+            },
+            biplane: {
+                name: '雙翼戰鬥機',
+                file: 'assets/planes/Bipolar Plane/Type_1/Biploar_type1_5.png',
+                key: 'biplane-plane',
+                speed: 200,
+                fireRate: 400,
+                scale: 0.6,
+                pngData: null
+            },
+            tbm3: {
+                name: 'TBM-3 魚雷轟炸機',
+                file: 'assets/planes/TBM3/Type_1/TBM-3.png',
+                key: 'tbm3-plane',
+                speed: 280,
+                fireRate: 250,
+                scale: 0.75,
+                pngData: null
+            },
+            hawker: {
+                name: 'Hawker Tempest MKII',
+                file: 'assets/planes/Hawker Tempest MKII/Type_1/Hawker_type1.png',
+                key: 'hawker-plane',
+                speed: 400,
+                fireRate: 100,
+                scale: 0.7,
+                pngData: null
+            },
+            ju87: {
+                name: 'JU-87B2 俯衝轟炸機',
+                file: 'assets/planes/JU-87B2/Type_1/JU87B2.png',
+                key: 'ju87-plane',
+                speed: 220,
+                fireRate: 350,
+                scale: 0.75,
+                pngData: null
+            },
+            blenheim: {
+                name: 'Blenheim 轟炸機',
+                file: 'assets/planes/Blenheim/Type_1/Blenheim.png',
+                key: 'blenheim-plane',
+                speed: 260,
+                fireRate: 280,
+                scale: 0.8,
+                pngData: null
+            }
+        };
+
+        // 創建真實 PNG 數據
+        function createRealPNGData() {
+            // B-17 轟炸機
+            var canvas = document.createElement('canvas');
+            canvas.width = 200;
+            canvas.height = 150;
+            var ctx = canvas.getContext('2d');
+            drawB17PNG(ctx, 200, 150);
+            planeConfigs.b17.pngData = canvas.toDataURL('image/png');
+
+            // BF-109 戰鬥機
+            canvas.width = 180;
+            canvas.height = 140;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBF109PNG(ctx, 180, 140);
+            planeConfigs.bf109.pngData = canvas.toDataURL('image/png');
+
+            // 雙翼戰鬥機
+            canvas.width = 160;
+            canvas.height = 120;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBiplanePNG(ctx, 160, 120);
+            planeConfigs.biplane.pngData = canvas.toDataURL('image/png');
+
+            // TBM-3 魚雷轟炸機
+            canvas.width = 190;
+            canvas.height = 145;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawTBM3PNG(ctx, 190, 145);
+            planeConfigs.tbm3.pngData = canvas.toDataURL('image/png');
+
+            // Hawker Tempest
+            canvas.width = 185;
+            canvas.height = 140;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawHawkerPNG(ctx, 185, 140);
+            planeConfigs.hawker.pngData = canvas.toDataURL('image/png');
+
+            // JU-87B2 俯衝轟炸機
+            canvas.width = 175;
+            canvas.height = 135;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawJU87PNG(ctx, 175, 135);
+            planeConfigs.ju87.pngData = canvas.toDataURL('image/png');
+
+            // Blenheim 轟炸機
+            canvas.width = 195;
+            canvas.height = 150;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBlenheimPNG(ctx, 195, 150);
+            planeConfigs.blenheim.pngData = canvas.toDataURL('image/png');
+        }
+
+        // B-17 轟炸機繪製函數 - 詳細版本
+        function drawB17PNG(ctx, width, height) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // 主機身 (深藍色，圓角)
+            ctx.fillStyle = '#1e3a8a';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 8, centerY - 40, 16, 80, 4);
+            ctx.fill();
+
+            // 機身中段加寬
+            ctx.fillStyle = '#2563eb';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 10, centerY - 20, 20, 40, 3);
+            ctx.fill();
+
+            // 機身細節條紋
+            ctx.fillStyle = '#3b82f6';
+            for (let i = -35; i < 35; i += 8) {
+                ctx.fillRect(centerX - 6, centerY + i, 12, 2);
+            }
+
+            // 主機翼 (深藍色，梯形)
+            ctx.fillStyle = '#1e3a8a';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 40, centerY - 8);
+            ctx.lineTo(centerX - 35, centerY - 12);
+            ctx.lineTo(centerX + 35, centerY - 12);
+            ctx.lineTo(centerX + 40, centerY - 8);
+            ctx.lineTo(centerX + 35, centerY + 8);
+            ctx.lineTo(centerX - 35, centerY + 8);
+            ctx.closePath();
+            ctx.fill();
+
+            // 機翼細節
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 35, centerY - 10);
+            ctx.lineTo(centerX + 35, centerY - 10);
+            ctx.lineTo(centerX + 30, centerY + 6);
+            ctx.lineTo(centerX - 30, centerY + 6);
+            ctx.closePath();
+            ctx.fill();
+
+            // 四個引擎 (詳細設計)
+            const enginePositions = [-28, -14, 14, 28];
+            enginePositions.forEach(pos => {
+                // 引擎主體
+                ctx.fillStyle = '#374151';
+                ctx.beginPath();
+                ctx.roundRect(centerX + pos - 4, centerY - 6, 8, 12, 2);
+                ctx.fill();
+
+                // 引擎進氣口
+                ctx.fillStyle = '#111827';
+                ctx.beginPath();
+                ctx.ellipse(centerX + pos, centerY - 8, 3, 2, 0, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // 螺旋槳
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.ellipse(centerX + pos, centerY - 10, 6, 1, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(centerX + pos, centerY - 10, 1, 6, 0, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+
+            // 機頭 (圓錐形)
+            ctx.fillStyle = '#1e3a8a';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 45);
+            ctx.lineTo(centerX - 8, centerY - 35);
+            ctx.lineTo(centerX + 8, centerY - 35);
+            ctx.closePath();
+            ctx.fill();
+
+            // 駕駛艙 (透明玻璃效果)
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.8)';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 5, centerY - 25, 10, 15, 3);
+            ctx.fill();
+
+            // 駕駛艙框架
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(centerX - 5, centerY - 25, 10, 15, 3);
+            ctx.stroke();
+
+            // 機尾垂直尾翼
+            ctx.fillStyle = '#1e3a8a';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY + 35);
+            ctx.lineTo(centerX - 6, centerY + 45);
+            ctx.lineTo(centerX + 6, centerY + 45);
+            ctx.closePath();
+            ctx.fill();
+
+            // 水平尾翼
+            ctx.fillStyle = '#2563eb';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 12, centerY + 32, 24, 6, 2);
+            ctx.fill();
+
+            // 機身窗戶
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.6)';
+            const windowPositions = [-15, -5, 5, 15];
+            windowPositions.forEach(pos => {
+                ctx.beginPath();
+                ctx.ellipse(centerX + 7, centerY + pos, 2, 3, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(centerX - 7, centerY + pos, 2, 3, 0, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
+
+        // BF-109 戰鬥機繪製函數 - 詳細版本
+        function drawBF109PNG(ctx, width, height) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // 主機身 (流線型設計)
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 30);
+            ctx.quadraticCurveTo(centerX - 6, centerY - 25, centerX - 5, centerY);
+            ctx.quadraticCurveTo(centerX - 4, centerY + 20, centerX, centerY + 25);
+            ctx.quadraticCurveTo(centerX + 4, centerY + 20, centerX + 5, centerY);
+            ctx.quadraticCurveTo(centerX + 6, centerY - 25, centerX, centerY - 30);
+            ctx.fill();
+
+            // 機身細節條紋
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 28);
+            ctx.quadraticCurveTo(centerX - 4, centerY - 23, centerX - 3, centerY);
+            ctx.quadraticCurveTo(centerX - 2, centerY + 18, centerX, centerY + 23);
+            ctx.quadraticCurveTo(centerX + 2, centerY + 18, centerX + 3, centerY);
+            ctx.quadraticCurveTo(centerX + 4, centerY - 23, centerX, centerY - 28);
+            ctx.fill();
+
+            // 主機翼 (後掠翼設計)
+            ctx.fillStyle = '#b91c1c';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 25, centerY + 2);
+            ctx.lineTo(centerX - 22, centerY - 8);
+            ctx.lineTo(centerX - 5, centerY - 5);
+            ctx.lineTo(centerX + 5, centerY - 5);
+            ctx.lineTo(centerX + 22, centerY - 8);
+            ctx.lineTo(centerX + 25, centerY + 2);
+            ctx.lineTo(centerX + 20, centerY + 8);
+            ctx.lineTo(centerX - 20, centerY + 8);
+            ctx.closePath();
+            ctx.fill();
+
+            // 機翼細節
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 20, centerY);
+            ctx.lineTo(centerX - 18, centerY - 6);
+            ctx.lineTo(centerX + 18, centerY - 6);
+            ctx.lineTo(centerX + 20, centerY);
+            ctx.lineTo(centerX + 15, centerY + 6);
+            ctx.lineTo(centerX - 15, centerY + 6);
+            ctx.closePath();
+            ctx.fill();
+
+            // 引擎罩 (圓錐形)
+            ctx.fillStyle = '#374151';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 32, 4, 6, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 引擎進氣口
+            ctx.fillStyle = '#111827';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 35, 2, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 螺旋槳 (三葉片)
+            ctx.fillStyle = '#fbbf24';
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#f59e0b';
+
+            // 螺旋槳中心
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 38, 2, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 三個螺旋槳葉片
+            for (let i = 0; i < 3; i++) {
+                const angle = (i * 120) * Math.PI / 180;
+                const x1 = centerX + Math.cos(angle) * 8;
+                const y1 = centerY - 38 + Math.sin(angle) * 8;
+                const x2 = centerX + Math.cos(angle) * 2;
+                const y2 = centerY - 38 + Math.sin(angle) * 2;
+
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x1, y1);
+                ctx.stroke();
+            }
+
+            // 駕駛艙 (氣泡式)
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.8)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 15, 4, 8, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 駕駛艙框架
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 15, 4, 8, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 垂直尾翼
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY + 20);
+            ctx.lineTo(centerX - 4, centerY + 30);
+            ctx.lineTo(centerX + 4, centerY + 30);
+            ctx.closePath();
+            ctx.fill();
+
+            // 水平尾翼
+            ctx.fillStyle = '#b91c1c';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 22, 8, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 機身標記 (德國十字)
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(centerX - 1, centerY - 8, 2, 6);
+            ctx.fillRect(centerX - 3, centerY - 6, 6, 2);
+            ctx.fillStyle = '#000000';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 0.5;
+            ctx.strokeRect(centerX - 1, centerY - 8, 2, 6);
+            ctx.strokeRect(centerX - 3, centerY - 6, 6, 2);
+        }
+
+        // 雙翼戰鬥機繪製函數 - 詳細版本
+        function drawBiplanePNG(ctx, width, height) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // 機身 (復古金色，圓形截面)
+            ctx.fillStyle = '#d97706';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 4, centerY - 28, 8, 56, 4);
+            ctx.fill();
+
+            // 機身細節 (亮金色)
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 3, centerY - 25, 6, 50, 3);
+            ctx.fill();
+
+            // 機身條紋裝飾
+            ctx.fillStyle = '#92400e';
+            for (let i = -20; i < 20; i += 6) {
+                ctx.fillRect(centerX - 2, centerY + i, 4, 1);
+            }
+
+            // 上翼 (梯形設計)
+            ctx.fillStyle = '#d97706';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 30, centerY - 12);
+            ctx.lineTo(centerX - 25, centerY - 18);
+            ctx.lineTo(centerX + 25, centerY - 18);
+            ctx.lineTo(centerX + 30, centerY - 12);
+            ctx.lineTo(centerX + 25, centerY - 8);
+            ctx.lineTo(centerX - 25, centerY - 8);
+            ctx.closePath();
+            ctx.fill();
+
+            // 上翼細節
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 25, centerY - 16);
+            ctx.lineTo(centerX + 25, centerY - 16);
+            ctx.lineTo(centerX + 20, centerY - 10);
+            ctx.lineTo(centerX - 20, centerY - 10);
+            ctx.closePath();
+            ctx.fill();
+
+            // 下翼 (梯形設計)
+            ctx.fillStyle = '#d97706';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 30, centerY + 8);
+            ctx.lineTo(centerX - 25, centerY + 4);
+            ctx.lineTo(centerX + 25, centerY + 4);
+            ctx.lineTo(centerX + 30, centerY + 8);
+            ctx.lineTo(centerX + 25, centerY + 14);
+            ctx.lineTo(centerX - 25, centerY + 14);
+            ctx.closePath();
+            ctx.fill();
+
+            // 下翼細節
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 25, centerY + 6);
+            ctx.lineTo(centerX + 25, centerY + 6);
+            ctx.lineTo(centerX + 20, centerY + 12);
+            ctx.lineTo(centerX - 20, centerY + 12);
+            ctx.closePath();
+            ctx.fill();
+
+            // 翼間支柱 (詳細設計)
+            const strutPositions = [-20, -10, 10, 20];
+            ctx.fillStyle = '#374151';
+            strutPositions.forEach(pos => {
+                // 垂直支柱
+                ctx.fillRect(centerX + pos - 1, centerY - 18, 2, 32);
+
+                // 斜撐
+                ctx.beginPath();
+                ctx.moveTo(centerX + pos - 5, centerY - 15);
+                ctx.lineTo(centerX + pos + 5, centerY + 11);
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = '#374151';
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(centerX + pos + 5, centerY - 15);
+                ctx.lineTo(centerX + pos - 5, centerY + 11);
+                ctx.stroke();
+            });
+
+            // 引擎罩 (圓形)
+            ctx.fillStyle = '#374151';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 32, 5, 7, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 引擎散熱片
+            ctx.fillStyle = '#111827';
+            for (let i = 0; i < 6; i++) {
+                ctx.fillRect(centerX - 4, centerY - 35 + i * 2, 8, 1);
+            }
+
+            // 螺旋槳 (木製外觀)
+            ctx.fillStyle = '#92400e';
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#451a03';
+
+            // 螺旋槳中心
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 40, 3, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 兩個螺旋槳葉片
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 40, 12, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 40, 2, 12, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 駕駛艙 (開放式)
+            ctx.fillStyle = 'rgba(139, 69, 19, 0.8)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 8, 3, 6, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 駕駛艙邊緣
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 8, 3, 6, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 尾翼
+            ctx.fillStyle = '#d97706';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY + 25);
+            ctx.lineTo(centerX - 5, centerY + 35);
+            ctx.lineTo(centerX + 5, centerY + 35);
+            ctx.closePath();
+            ctx.fill();
+
+            // 水平尾翼
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 27, 10, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 起落架 (固定式)
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(centerX - 12, centerY + 12, 2, 8);
+            ctx.fillRect(centerX + 10, centerY + 12, 2, 8);
+
+            // 輪子
+            ctx.fillStyle = '#111827';
+            ctx.beginPath();
+            ctx.ellipse(centerX - 11, centerY + 22, 3, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(centerX + 11, centerY + 22, 3, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        // TBM-3 魚雷轟炸機繪製函數 - 詳細版本
+        function drawTBM3PNG(ctx, width, height) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // 主機身 (海軍綠色，粗壯設計)
+            ctx.fillStyle = '#065f46';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 35);
+            ctx.quadraticCurveTo(centerX - 8, centerY - 30, centerX - 7, centerY);
+            ctx.quadraticCurveTo(centerX - 6, centerY + 25, centerX, centerY + 30);
+            ctx.quadraticCurveTo(centerX + 6, centerY + 25, centerX + 7, centerY);
+            ctx.quadraticCurveTo(centerX + 8, centerY - 30, centerX, centerY - 35);
+            ctx.fill();
+
+            // 機身細節 (亮綠色)
+            ctx.fillStyle = '#059669';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 32);
+            ctx.quadraticCurveTo(centerX - 6, centerY - 27, centerX - 5, centerY);
+            ctx.quadraticCurveTo(centerX - 4, centerY + 22, centerX, centerY + 27);
+            ctx.quadraticCurveTo(centerX + 4, centerY + 22, centerX + 5, centerY);
+            ctx.quadraticCurveTo(centerX + 6, centerY - 27, centerX, centerY - 32);
+            ctx.fill();
+
+            // 機身海軍標記條紋
+            ctx.fillStyle = '#10b981';
+            for (let i = -25; i < 25; i += 8) {
+                ctx.fillRect(centerX - 4, centerY + i, 8, 2);
+            }
+
+            // 主機翼 (寬大的艦載機翼)
+            ctx.fillStyle = '#047857';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 35, centerY - 5);
+            ctx.lineTo(centerX - 32, centerY - 12);
+            ctx.lineTo(centerX - 8, centerY - 10);
+            ctx.lineTo(centerX + 8, centerY - 10);
+            ctx.lineTo(centerX + 32, centerY - 12);
+            ctx.lineTo(centerX + 35, centerY - 5);
+            ctx.lineTo(centerX + 30, centerY + 10);
+            ctx.lineTo(centerX + 8, centerY + 8);
+            ctx.lineTo(centerX - 8, centerY + 8);
+            ctx.lineTo(centerX - 30, centerY + 10);
+            ctx.closePath();
+            ctx.fill();
+
+            // 機翼細節 (海軍藍色條紋)
+            ctx.fillStyle = '#059669';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 30, centerY - 8);
+            ctx.lineTo(centerX + 30, centerY - 8);
+            ctx.lineTo(centerX + 25, centerY + 6);
+            ctx.lineTo(centerX - 25, centerY + 6);
+            ctx.closePath();
+            ctx.fill();
+
+            // 機翼折疊鉸鏈 (艦載機特徵)
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(centerX - 18, centerY - 8, 2, 16);
+            ctx.fillRect(centerX + 16, centerY - 8, 2, 16);
+
+            // 機翼尖端導航燈
+            ctx.fillStyle = '#ef4444'; // 紅色
+            ctx.beginPath();
+            ctx.ellipse(centerX - 32, centerY - 2, 2, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#22c55e'; // 綠色
+            ctx.beginPath();
+            ctx.ellipse(centerX + 32, centerY - 2, 2, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 引擎罩 (大型星形引擎)
+            ctx.fillStyle = '#374151';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 38, 6, 8, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 引擎散熱片
+            ctx.fillStyle = '#111827';
+            for (let i = 0; i < 8; i++) {
+                ctx.fillRect(centerX - 5, centerY - 42 + i * 2, 10, 1);
+            }
+
+            // 引擎進氣口
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 45, 3, 4, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 三葉螺旋槳 (大型)
+            ctx.fillStyle = '#92400e';
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#451a03';
+
+            // 螺旋槳中心
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 48, 3, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 三個螺旋槳葉片
+            for (let i = 0; i < 3; i++) {
+                const angle = (i * 120) * Math.PI / 180;
+                const x1 = centerX + Math.cos(angle) * 12;
+                const y1 = centerY - 48 + Math.sin(angle) * 12;
+                const x2 = centerX + Math.cos(angle) * 3;
+                const y2 = centerY - 48 + Math.sin(angle) * 3;
+
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x1, y1);
+                ctx.stroke();
+            }
+
+            // 駕駛艙 (封閉式，海軍風格)
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.8)';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 5, centerY - 22, 10, 12, 3);
+            ctx.fill();
+
+            // 駕駛艙框架
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(centerX - 5, centerY - 22, 10, 12, 3);
+            ctx.stroke();
+
+            // 後座機槍手位置
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.6)';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 3, centerY + 5, 6, 8, 2);
+            ctx.fill();
+
+            // 魚雷掛架 (TBM-3 特徵)
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(centerX - 2, centerY + 15, 4, 8);
+
+            // 魚雷 (可選裝備)
+            ctx.fillStyle = '#6b7280';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 3, centerY + 20, 6, 15, 2);
+            ctx.fill();
+
+            // 垂直尾翼 (高大設計)
+            ctx.fillStyle = '#065f46';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY + 25);
+            ctx.lineTo(centerX - 6, centerY + 40);
+            ctx.lineTo(centerX + 6, centerY + 40);
+            ctx.closePath();
+            ctx.fill();
+
+            // 水平尾翼
+            ctx.fillStyle = '#047857';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 27, 12, 4, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 尾輪 (三點式起落架)
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(centerX - 1, centerY + 28, 2, 6);
+            ctx.fillStyle = '#111827';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 36, 2, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 美國海軍標記 (星形)
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 5);
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * 144 - 90) * Math.PI / 180;
+                const x = centerX + Math.cos(angle) * 4;
+                const y = centerY - 5 + Math.sin(angle) * 4;
+                ctx.lineTo(x, y);
+                const innerAngle = ((i + 0.5) * 144 - 90) * Math.PI / 180;
+                const innerX = centerX + Math.cos(innerAngle) * 2;
+                const innerY = centerY - 5 + Math.sin(innerAngle) * 2;
+                ctx.lineTo(innerX, innerY);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            // 星形邊框
+            ctx.strokeStyle = '#1e40af';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // Hawker Tempest MKII 繪製函數 - 詳細版本
+        function drawHawkerPNG(ctx, width, height) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // 主機身 (英國皇家空軍藍色，流線型)
+            ctx.fillStyle = '#1e40af';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 32);
+            ctx.quadraticCurveTo(centerX - 6, centerY - 28, centerX - 5, centerY - 5);
+            ctx.quadraticCurveTo(centerX - 4, centerY + 20, centerX, centerY + 28);
+            ctx.quadraticCurveTo(centerX + 4, centerY + 20, centerX + 5, centerY - 5);
+            ctx.quadraticCurveTo(centerX + 6, centerY - 28, centerX, centerY - 32);
+            ctx.fill();
+
+            // 機身細節 (亮藍色)
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 30);
+            ctx.quadraticCurveTo(centerX - 4, centerY - 26, centerX - 3, centerY - 5);
+            ctx.quadraticCurveTo(centerX - 2, centerY + 18, centerX, centerY + 26);
+            ctx.quadraticCurveTo(centerX + 2, centerY + 18, centerX + 3, centerY - 5);
+            ctx.quadraticCurveTo(centerX + 4, centerY - 26, centerX, centerY - 30);
+            ctx.fill();
+
+            // 機身皇家空軍條紋
+            ctx.fillStyle = '#60a5fa';
+            for (let i = -20; i < 20; i += 6) {
+                ctx.fillRect(centerX - 2, centerY + i, 4, 1);
+            }
+
+            // 主機翼 (橢圓翼設計，Tempest 特徵)
+            ctx.fillStyle = '#1e3a8a';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 2, 28, 8, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 機翼細節 (漸變效果)
+            ctx.fillStyle = '#2563eb';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 2, 24, 6, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 機翼前緣 (銳利設計)
+            ctx.fillStyle = '#1e40af';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 6, 26, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 機翼炮口 (四門 20mm 機炮)
+            ctx.fillStyle = '#111827';
+            const cannonPositions = [-15, -8, 8, 15];
+            cannonPositions.forEach(pos => {
+                ctx.beginPath();
+                ctx.ellipse(centerX + pos, centerY - 8, 1, 2, 0, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+
+            // 引擎罩 (Napier Sabre 引擎)
+            ctx.fillStyle = '#374151';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 35, 5, 7, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 引擎進氣口 (下方進氣)
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 4, centerY - 30, 8, 3, 1);
+            ctx.fill();
+
+            // 引擎散熱口
+            ctx.fillStyle = '#111827';
+            for (let i = 0; i < 6; i++) {
+                ctx.fillRect(centerX - 3, centerY - 38 + i * 2, 6, 1);
+            }
+
+            // 四葉螺旋槳 (高性能設計)
+            ctx.fillStyle = '#92400e';
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#451a03';
+
+            // 螺旋槳中心
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 42, 2, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 四個螺旋槳葉片
+            for (let i = 0; i < 4; i++) {
+                const angle = (i * 90) * Math.PI / 180;
+                const x1 = centerX + Math.cos(angle) * 10;
+                const y1 = centerY - 42 + Math.sin(angle) * 10;
+                const x2 = centerX + Math.cos(angle) * 2;
+                const y2 = centerY - 42 + Math.sin(angle) * 2;
+
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x1, y1);
+                ctx.stroke();
+            }
+
+            // 駕駛艙 (氣泡式，現代化設計)
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.9)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 18, 4, 10, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 駕駛艙框架 (金屬框)
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 18, 4, 10, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 駕駛艙內部細節
+            ctx.fillStyle = 'rgba(139, 69, 19, 0.6)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 18, 2, 6, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 無線電天線
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 25);
+            ctx.lineTo(centerX, centerY - 30);
+            ctx.stroke();
+
+            // 垂直尾翼 (高聳設計)
+            ctx.fillStyle = '#1e40af';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY + 22);
+            ctx.lineTo(centerX - 5, centerY + 35);
+            ctx.lineTo(centerX + 5, centerY + 35);
+            ctx.closePath();
+            ctx.fill();
+
+            // 水平尾翼 (橢圓設計)
+            ctx.fillStyle = '#2563eb';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 24, 10, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 尾翼細節
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 24, 8, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 英國皇家空軍圓形標記
+            ctx.fillStyle = '#1e40af'; // 藍色外圈
+            ctx.beginPath();
+            ctx.ellipse(centerX - 12, centerY + 2, 5, 5, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff'; // 白色中圈
+            ctx.beginPath();
+            ctx.ellipse(centerX - 12, centerY + 2, 3, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#dc2626'; // 紅色中心
+            ctx.beginPath();
+            ctx.ellipse(centerX - 12, centerY + 2, 1.5, 1.5, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 右翼標記
+            ctx.fillStyle = '#1e40af';
+            ctx.beginPath();
+            ctx.ellipse(centerX + 12, centerY + 2, 5, 5, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.ellipse(centerX + 12, centerY + 2, 3, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.ellipse(centerX + 12, centerY + 2, 1.5, 1.5, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 機身編號區域 (預留)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 3, centerY + 8, 6, 4, 1);
+            ctx.fill();
+
+            // 排氣管 (側面)
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(centerX + 4, centerY - 15, 2, 8);
+            ctx.fillRect(centerX - 6, centerY - 15, 2, 8);
+
+            // 排氣火焰效果 (可選)
+            ctx.fillStyle = 'rgba(255, 165, 0, 0.6)';
+            ctx.beginPath();
+            ctx.ellipse(centerX + 7, centerY - 11, 1, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(centerX - 3, centerY - 11, 1, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        // JU-87B2 俯衝轟炸機繪製函數 - 詳細版本
+        function drawJU87PNG(ctx, width, height) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // 主機身 (德國灰綠色)
+            ctx.fillStyle = '#4a5568';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 30);
+            ctx.quadraticCurveTo(centerX - 6, centerY - 25, centerX - 5, centerY + 5);
+            ctx.quadraticCurveTo(centerX - 4, centerY + 25, centerX, centerY + 30);
+            ctx.quadraticCurveTo(centerX + 4, centerY + 25, centerX + 5, centerY + 5);
+            ctx.quadraticCurveTo(centerX + 6, centerY - 25, centerX, centerY - 30);
+            ctx.fill();
+
+            // 機身細節 (亮灰色)
+            ctx.fillStyle = '#718096';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 28);
+            ctx.quadraticCurveTo(centerX - 4, centerY - 23, centerX - 3, centerY + 5);
+            ctx.quadraticCurveTo(centerX - 2, centerY + 23, centerX, centerY + 28);
+            ctx.quadraticCurveTo(centerX + 2, centerY + 23, centerX + 3, centerY + 5);
+            ctx.quadraticCurveTo(centerX + 4, centerY - 23, centerX, centerY - 28);
+            ctx.fill();
+
+            // 主機翼 (倒海鷗翼設計，JU-87 特徵)
+            ctx.fillStyle = '#2d3748';
+            ctx.beginPath();
+            // 左翼
+            ctx.moveTo(centerX - 8, centerY - 2);
+            ctx.quadraticCurveTo(centerX - 15, centerY - 8, centerX - 25, centerY - 5);
+            ctx.lineTo(centerX - 30, centerY + 2);
+            ctx.quadraticCurveTo(centerX - 20, centerY + 8, centerX - 8, centerY + 6);
+            // 右翼
+            ctx.moveTo(centerX + 8, centerY - 2);
+            ctx.quadraticCurveTo(centerX + 15, centerY - 8, centerX + 25, centerY - 5);
+            ctx.lineTo(centerX + 30, centerY + 2);
+            ctx.quadraticCurveTo(centerX + 20, centerY + 8, centerX + 8, centerY + 6);
+            ctx.fill();
+
+            // 機翼細節
+            ctx.fillStyle = '#4a5568';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 6, centerY);
+            ctx.quadraticCurveTo(centerX - 12, centerY - 6, centerX - 22, centerY - 3);
+            ctx.lineTo(centerX - 25, centerY + 4);
+            ctx.quadraticCurveTo(centerX - 15, centerY + 6, centerX - 6, centerY + 4);
+            ctx.moveTo(centerX + 6, centerY);
+            ctx.quadraticCurveTo(centerX + 12, centerY - 6, centerX + 22, centerY - 3);
+            ctx.lineTo(centerX + 25, centerY + 4);
+            ctx.quadraticCurveTo(centerX + 15, centerY + 6, centerX + 6, centerY + 4);
+            ctx.fill();
+
+            // 固定起落架 (JU-87 特徵)
+            ctx.fillStyle = '#1a202c';
+            // 左起落架
+            ctx.fillRect(centerX - 20, centerY + 6, 3, 12);
+            ctx.fillRect(centerX - 22, centerY + 15, 7, 3);
+            // 右起落架
+            ctx.fillRect(centerX + 17, centerY + 6, 3, 12);
+            ctx.fillRect(centerX + 15, centerY + 15, 7, 3);
+
+            // 起落架整流罩
+            ctx.fillStyle = '#4a5568';
+            ctx.beginPath();
+            ctx.ellipse(centerX - 18, centerY + 8, 4, 6, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(centerX + 18, centerY + 8, 4, 6, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 引擎罩 (液冷引擎)
+            ctx.fillStyle = '#1a202c';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 33, 4, 6, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 散熱器進氣口
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(centerX - 3, centerY - 30, 6, 2);
+
+            // 螺旋槳 (三葉片)
+            ctx.fillStyle = '#8b4513';
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#654321';
+
+            // 螺旋槳中心
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 38, 2, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 三個螺旋槳葉片
+            for (let i = 0; i < 3; i++) {
+                const angle = (i * 120) * Math.PI / 180;
+                const x1 = centerX + Math.cos(angle) * 9;
+                const y1 = centerY - 38 + Math.sin(angle) * 9;
+                const x2 = centerX + Math.cos(angle) * 2;
+                const y2 = centerY - 38 + Math.sin(angle) * 2;
+
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x1, y1);
+                ctx.stroke();
+            }
+
+            // 駕駛艙 (大型玻璃罩)
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.8)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 15, 5, 12, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 駕駛艙框架
+            ctx.strokeStyle = '#1a202c';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 15, 5, 12, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 後座機槍手位置
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.6)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 8, 3, 8, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 俯衝煞車 (JU-87 著名特徵)
+            ctx.fillStyle = '#2d3748';
+            // 左翼俯衝煞車
+            ctx.fillRect(centerX - 25, centerY - 8, 8, 3);
+            ctx.fillRect(centerX - 25, centerY + 5, 8, 3);
+            // 右翼俯衝煞車
+            ctx.fillRect(centerX + 17, centerY - 8, 8, 3);
+            ctx.fillRect(centerX + 17, centerY + 5, 8, 3);
+
+            // 炸彈掛架
+            ctx.fillStyle = '#1a202c';
+            ctx.fillRect(centerX - 2, centerY + 18, 4, 6);
+
+            // 炸彈 (可選裝備)
+            ctx.fillStyle = '#4a5568';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 3, centerY + 22, 6, 12, 2);
+            ctx.fill();
+
+            // 垂直尾翼
+            ctx.fillStyle = '#4a5568';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY + 25);
+            ctx.lineTo(centerX - 5, centerY + 38);
+            ctx.lineTo(centerX + 5, centerY + 38);
+            ctx.closePath();
+            ctx.fill();
+
+            // 水平尾翼
+            ctx.fillStyle = '#2d3748';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 27, 10, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 德國十字標記
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(centerX - 1, centerY - 8, 2, 6);
+            ctx.fillRect(centerX - 3, centerY - 6, 6, 2);
+            ctx.fillStyle = '#000000';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 0.5;
+            ctx.strokeRect(centerX - 1, centerY - 8, 2, 6);
+            ctx.strokeRect(centerX - 3, centerY - 6, 6, 2);
+
+            // 機翼十字標記
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(centerX - 16, centerY + 1, 2, 4);
+            ctx.fillRect(centerX - 18, centerY + 2, 6, 2);
+            ctx.fillRect(centerX + 14, centerY + 1, 2, 4);
+            ctx.fillRect(centerX + 12, centerY + 2, 6, 2);
+        }
+
+        // Blenheim 轟炸機繪製函數 - 詳細版本
+        function drawBlenheimPNG(ctx, width, height) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // 主機身 (英國皇家空軍棕色)
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 35);
+            ctx.quadraticCurveTo(centerX - 7, centerY - 30, centerX - 6, centerY + 10);
+            ctx.quadraticCurveTo(centerX - 5, centerY + 30, centerX, centerY + 35);
+            ctx.quadraticCurveTo(centerX + 5, centerY + 30, centerX + 6, centerY + 10);
+            ctx.quadraticCurveTo(centerX + 7, centerY - 30, centerX, centerY - 35);
+            ctx.fill();
+
+            // 機身細節 (亮棕色)
+            ctx.fillStyle = '#a0522d';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 33);
+            ctx.quadraticCurveTo(centerX - 5, centerY - 28, centerX - 4, centerY + 10);
+            ctx.quadraticCurveTo(centerX - 3, centerY + 28, centerX, centerY + 33);
+            ctx.quadraticCurveTo(centerX + 3, centerY + 28, centerX + 4, centerY + 10);
+            ctx.quadraticCurveTo(centerX + 5, centerY - 28, centerX, centerY - 33);
+            ctx.fill();
+
+            // 左引擎艙 (雙引擎設計)
+            ctx.fillStyle = '#654321';
+            ctx.beginPath();
+            ctx.ellipse(centerX - 15, centerY - 8, 6, 12, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 右引擎艙
+            ctx.fillStyle = '#654321';
+            ctx.beginPath();
+            ctx.ellipse(centerX + 15, centerY - 8, 6, 12, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 引擎艙細節
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.ellipse(centerX - 15, centerY - 8, 4, 8, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(centerX + 15, centerY - 8, 4, 8, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 主機翼 (連接引擎艙)
+            ctx.fillStyle = '#654321';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 25, centerY - 5);
+            ctx.lineTo(centerX - 20, centerY - 15);
+            ctx.lineTo(centerX - 6, centerY - 12);
+            ctx.lineTo(centerX + 6, centerY - 12);
+            ctx.lineTo(centerX + 20, centerY - 15);
+            ctx.lineTo(centerX + 25, centerY - 5);
+            ctx.lineTo(centerX + 20, centerY + 5);
+            ctx.lineTo(centerX + 6, centerY + 2);
+            ctx.lineTo(centerX - 6, centerY + 2);
+            ctx.lineTo(centerX - 20, centerY + 5);
+            ctx.closePath();
+            ctx.fill();
+
+            // 機翼細節
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.moveTo(centerX - 20, centerY - 10);
+            ctx.lineTo(centerX + 20, centerY - 10);
+            ctx.lineTo(centerX + 15, centerY + 3);
+            ctx.lineTo(centerX - 15, centerY + 3);
+            ctx.closePath();
+            ctx.fill();
+
+            // 左引擎螺旋槳
+            ctx.fillStyle = '#8b4513';
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#654321';
+
+            // 左螺旋槳中心
+            ctx.beginPath();
+            ctx.ellipse(centerX - 15, centerY - 20, 2, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 左螺旋槳葉片
+            for (let i = 0; i < 3; i++) {
+                const angle = (i * 120) * Math.PI / 180;
+                const x1 = centerX - 15 + Math.cos(angle) * 8;
+                const y1 = centerY - 20 + Math.sin(angle) * 8;
+                const x2 = centerX - 15 + Math.cos(angle) * 2;
+                const y2 = centerY - 20 + Math.sin(angle) * 2;
+
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x1, y1);
+                ctx.stroke();
+            }
+
+            // 右引擎螺旋槳
+            ctx.beginPath();
+            ctx.ellipse(centerX + 15, centerY - 20, 2, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 右螺旋槳葉片
+            for (let i = 0; i < 3; i++) {
+                const angle = (i * 120) * Math.PI / 180;
+                const x1 = centerX + 15 + Math.cos(angle) * 8;
+                const y1 = centerY - 20 + Math.sin(angle) * 8;
+                const x2 = centerX + 15 + Math.cos(angle) * 2;
+                const y2 = centerY - 20 + Math.sin(angle) * 2;
+
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x1, y1);
+                ctx.stroke();
+            }
+
+            // 駕駛艙 (前部透明)
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.8)';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 25, 4, 8, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 駕駛艙框架
+            ctx.strokeStyle = '#654321';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY - 25, 4, 8, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 機身窗戶
+            ctx.fillStyle = 'rgba(147, 197, 253, 0.6)';
+            const windowPositions = [-10, 0, 10];
+            windowPositions.forEach(pos => {
+                ctx.beginPath();
+                ctx.ellipse(centerX + 5, centerY + pos, 2, 3, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(centerX - 5, centerY + pos, 2, 3, 0, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+
+            // 機腹炸彈艙
+            ctx.fillStyle = '#654321';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 4, centerY + 15, 8, 10, 2);
+            ctx.fill();
+
+            // 炸彈艙門
+            ctx.strokeStyle = '#8b4513';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(centerX - 3, centerY + 20);
+            ctx.lineTo(centerX + 3, centerY + 20);
+            ctx.stroke();
+
+            // 垂直尾翼
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY + 30);
+            ctx.lineTo(centerX - 5, centerY + 42);
+            ctx.lineTo(centerX + 5, centerY + 42);
+            ctx.closePath();
+            ctx.fill();
+
+            // 水平尾翼
+            ctx.fillStyle = '#654321';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 32, 12, 4, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 尾翼細節
+            ctx.fillStyle = '#8b4513';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 32, 10, 3, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 英國皇家空軍圓形標記 (左翼)
+            ctx.fillStyle = '#1e40af'; // 藍色外圈
+            ctx.beginPath();
+            ctx.ellipse(centerX - 18, centerY - 5, 4, 4, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff'; // 白色中圈
+            ctx.beginPath();
+            ctx.ellipse(centerX - 18, centerY - 5, 2.5, 2.5, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#dc2626'; // 紅色中心
+            ctx.beginPath();
+            ctx.ellipse(centerX - 18, centerY - 5, 1, 1, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 右翼標記
+            ctx.fillStyle = '#1e40af';
+            ctx.beginPath();
+            ctx.ellipse(centerX + 18, centerY - 5, 4, 4, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.ellipse(centerX + 18, centerY - 5, 2.5, 2.5, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            ctx.ellipse(centerX + 18, centerY - 5, 1, 1, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 機身編號區域
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.roundRect(centerX - 3, centerY + 5, 6, 4, 1);
+            ctx.fill();
+
+            // 起落架 (收放式)
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(centerX - 12, centerY + 8, 2, 6);
+            ctx.fillRect(centerX + 10, centerY + 8, 2, 6);
+
+            // 輪子
+            ctx.fillStyle = '#1a202c';
+            ctx.beginPath();
+            ctx.ellipse(centerX - 11, centerY + 16, 2, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(centerX + 11, centerY + 16, 2, 2, 0, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 尾輪
+            ctx.fillStyle = '#654321';
+            ctx.fillRect(centerX - 1, centerY + 35, 2, 4);
+            ctx.fillStyle = '#1a202c';
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 41, 1.5, 1.5, 0, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function preload() {
+            // 創建真實的飛機 PNG 數據
+            createRealPNGData();
+
+            // 載入真實的飛機 PNG 檔案
+            for (var planeType in planeConfigs) {
+                var config = planeConfigs[planeType];
+                if (config.pngData) {
+                    game.load.image(config.key, config.pngData);
+                } else {
+                    game.load.image(config.key, config.file);
+                }
+            }
+
+            // 監聽載入事件
+            game.load.onFileComplete.add(fileComplete, this);
+            game.load.onLoadComplete.add(loadComplete, this);
+            game.load.onFileError.add(fileError, this);
+        }
+
+        function fileComplete(progress, cacheKey, success, totalLoaded, totalFiles) {
+            if (success) {
+                assetsLoaded[cacheKey] = true;
+                console.log('成功載入:', cacheKey);
+            }
+        }
+
+        function fileError(key, file) {
+            console.log('檔案載入失敗:', key);
+            assetsLoaded[key] = false;
+        }
+
+        function loadComplete() {
+            loadingComplete = true;
+            console.log('所有檔案載入完成');
+        }
+
+        function create() {
+            // 設置背景顏色
+            game.stage.backgroundColor = '#87CEEB';
+
+            // 創建玩家飛機
+            createPlayer();
+
+            // 創建敵機群組
+            enemies = game.add.group();
+            enemies.enableBody = true;
+            enemies.physicsBodyType = Phaser.Physics.ARCADE;
+
+            // 創建子彈群組
+            bullets = game.add.group();
+            bullets.enableBody = true;
+            bullets.physicsBodyType = Phaser.Physics.ARCADE;
+
+            // 控制設定
+            cursors = game.input.keyboard.createCursorKeys();
+            fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+            restartButton = game.input.keyboard.addKey(Phaser.Keyboard.R);
+            
+            // 數字鍵設定
+            numberKeys[1] = game.input.keyboard.addKey(Phaser.Keyboard.ONE);
+            numberKeys[2] = game.input.keyboard.addKey(Phaser.Keyboard.TWO);
+            numberKeys[3] = game.input.keyboard.addKey(Phaser.Keyboard.THREE);
+            numberKeys[4] = game.input.keyboard.addKey(Phaser.Keyboard.FOUR);
+            numberKeys[5] = game.input.keyboard.addKey(Phaser.Keyboard.FIVE);
+            numberKeys[6] = game.input.keyboard.addKey(Phaser.Keyboard.SIX);
+            numberKeys[7] = game.input.keyboard.addKey(Phaser.Keyboard.SEVEN);
+
+            // 分數文字
+            scoreText = game.add.text(16, 16, 'Score: 0', {
+                fontSize: '32px',
+                fill: '#000'
+            });
+
+            // 飛機資訊文字
+            planeInfoText = game.add.text(16, 60, '當前飛機: ' + planeConfigs[currentPlane].name, {
+                fontSize: '20px',
+                fill: '#000'
+            });
+
+            // 素材狀態文字
+            var statusText = game.add.text(16, 90, '素材狀態: 檢查中...', {
+                fontSize: '16px',
+                fill: '#000'
+            });
+
+            // 檢查素材載入狀態
+            setTimeout(function() {
+                var loadedCount = 0;
+                var totalCount = Object.keys(planeConfigs).length;
+                
+                for (var planeType in planeConfigs) {
+                    var config = planeConfigs[planeType];
+                    if (game.cache.checkImageKey(config.key)) {
+                        loadedCount++;
+                    }
+                }
+                
+                if (loadedCount > 0) {
+                    statusText.text = '素材狀態: ' + loadedCount + '/' + totalCount + ' 個真實 PNG 載入成功';
+                    statusText.fill = '#27ae60';
+                } else {
+                    statusText.text = '素材狀態: 使用後備圖形（需要下載真實 PNG）';
+                    statusText.fill = '#e74c3c';
+                }
+            }, 1000);
+
+            // 敵機生成計時器
+            enemyTimer = game.time.events.loop(Phaser.Timer.SECOND * 2, createEnemy, this);
+
+            // 設置飛機選擇器事件
+            setupPlaneSelector();
+        }
+
+        function setupPlaneSelector() {
+            var planeOptions = document.querySelectorAll('.plane-option');
+            planeOptions.forEach(function(option) {
+                option.addEventListener('click', function() {
+                    planeOptions.forEach(function(opt) {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    this.classList.add('selected');
+                    var planeType = this.getAttribute('data-plane');
+                    switchPlane(planeType);
+                });
+            });
+        }
+
+        function createPlayer() {
+            if (player) {
+                player.destroy();
+            }
+
+            var config = planeConfigs[currentPlane];
+            
+            // 嘗試使用真實的 PNG 圖片
+            if (game.cache.checkImageKey(config.key)) {
+                // 使用真實的 PNG 素材
+                player = game.add.sprite(400, 500, config.key);
+                player.anchor.setTo(0.5, 0.5);
+                player.scale.setTo(config.scale, config.scale);
+                
+                // 成功載入真實素材的提示
+                console.log('使用真實素材:', config.name);
+            } else {
+                // 使用後備圖形
+                player = game.add.graphics(400, 500);
+                createFallbackPlane(player, currentPlane);
+                
+                console.log('使用後備圖形:', config.name);
+            }
+
+            // 啟用物理
+            game.physics.arcade.enable(player);
+            player.body.collideWorldBounds = true;
+        }
+
+        function createFallbackPlane(graphics, planeType) {
+            // 根據飛機類型創建不同的後備圖形
+            if (planeType === 'b17') {
+                // B-17 後備圖形（藍色）
+                graphics.beginFill(0x2980b9);
+                graphics.drawRoundedRect(-6, -35, 12, 70, 3);
+                graphics.drawRoundedRect(-33, -7, 66, 15, 4);
+                graphics.endFill();
+            } else if (planeType === 'bf109') {
+                // BF-109 後備圖形（紅色）
+                graphics.beginFill(0xe74c3c);
+                graphics.drawRoundedRect(-4, -25, 8, 50, 2);
+                graphics.drawRoundedRect(-20, -5, 40, 10, 3);
+                graphics.endFill();
+            } else if (planeType === 'biplane') {
+                // 雙翼機後備圖形（金色）
+                graphics.beginFill(0xf1c40f);
+                graphics.drawRoundedRect(-3, -25, 6, 50, 2);
+                graphics.drawRoundedRect(-25, -15, 50, 8, 3);
+                graphics.drawRoundedRect(-25, 5, 50, 8, 3);
+                graphics.endFill();
+            } else if (planeType === 'tbm3') {
+                // TBM-3 後備圖形（綠色）
+                graphics.beginFill(0x27ae60);
+                graphics.drawRoundedRect(-5, -30, 10, 60, 3);
+                graphics.drawRoundedRect(-28, -8, 56, 12, 4);
+                graphics.endFill();
+            } else if (planeType === 'hawker') {
+                // Hawker 後備圖形（紫色）
+                graphics.beginFill(0x8e44ad);
+                graphics.drawRoundedRect(-4, -28, 8, 56, 2);
+                graphics.drawRoundedRect(-22, -6, 44, 12, 3);
+                graphics.endFill();
+            } else if (planeType === 'ju87') {
+                // JU-87 後備圖形（灰色）
+                graphics.beginFill(0x4a5568);
+                graphics.drawRoundedRect(-5, -30, 10, 60, 3);
+                graphics.drawRoundedRect(-30, -8, 60, 12, 4);
+                graphics.endFill();
+            } else if (planeType === 'blenheim') {
+                // Blenheim 後備圖形（棕色）
+                graphics.beginFill(0x8b4513);
+                graphics.drawRoundedRect(-6, -35, 12, 70, 3);
+                graphics.drawRoundedRect(-25, -8, 50, 12, 4);
+                graphics.endFill();
+            }
+        }
+
+        function switchPlane(planeType) {
+            currentPlane = planeType;
+            createPlayer();
+            planeInfoText.text = '當前飛機: ' + planeConfigs[currentPlane].name;
+        }
+
+        function createEnemy() {
+            if (gameOver) return;
+
+            var enemy = game.add.graphics(Math.random() * 750, -50);
+            enemy.beginFill(0x95a5a6);
+            enemy.drawRoundedRect(-4, -20, 8, 40, 2);
+            enemy.drawRoundedRect(-15, -3, 30, 6, 2);
+            enemy.endFill();
+
+            enemies.add(enemy);
+            game.physics.arcade.enable(enemy);
+            enemy.body.velocity.y = 100 + Math.random() * 100;
+            enemy.body.velocity.x = (Math.random() - 0.5) * 100;
+            enemy.outOfBoundsKill = true;
+            enemy.checkWorldBounds = true;
+        }
+
+        function update() {
+            if (gameOver) return;
+
+            var config = planeConfigs[currentPlane];
+
+            // 數字鍵切換飛機
+            if (numberKeys[1].isDown) switchPlane('b17');
+            if (numberKeys[2].isDown) switchPlane('bf109');
+            if (numberKeys[3].isDown) switchPlane('biplane');
+            if (numberKeys[4].isDown) switchPlane('tbm3');
+            if (numberKeys[5].isDown) switchPlane('hawker');
+            if (numberKeys[6].isDown) switchPlane('ju87');
+            if (numberKeys[7].isDown) switchPlane('blenheim');
+
+            // 玩家移動
+            if (cursors.left.isDown) {
+                player.body.velocity.x = -config.speed;
+            } else if (cursors.right.isDown) {
+                player.body.velocity.x = config.speed;
+            } else {
+                player.body.velocity.x = 0;
+            }
+
+            if (cursors.up.isDown) {
+                player.body.velocity.y = -config.speed;
+            } else if (cursors.down.isDown) {
+                player.body.velocity.y = config.speed;
+            } else {
+                player.body.velocity.y = 0;
+            }
+
+            if (fireButton.isDown) {
+                fireBullet();
+            }
+
+            if (restartButton.isDown) {
+                restart();
+            }
+
+            // 碰撞檢測
+            game.physics.arcade.overlap(bullets, enemies, bulletHitEnemy, null, this);
+            game.physics.arcade.overlap(player, enemies, enemyHitPlayer, null, this);
+        }
+
+        function fireBullet() {
+            var config = planeConfigs[currentPlane];
+            
+            if (game.time.now > bulletTime) {
+                var bullet = game.add.graphics(player.x, player.y - 40);
+                bullet.beginFill(0xf1c40f);
+                bullet.drawEllipse(0, 0, 6, 14);
+                bullet.endFill();
+                
+                bullets.add(bullet);
+                game.physics.arcade.enable(bullet);
+                bullet.body.velocity.y = -400;
+                bullet.outOfBoundsKill = true;
+                bullet.checkWorldBounds = true;
+                
+                bulletTime = game.time.now + config.fireRate;
+            }
+        }
+
+        function bulletHitEnemy(bullet, enemy) {
+            bullet.destroy();
+            enemy.destroy();
+            score += 10;
+            scoreText.text = 'Score: ' + score;
+            
+            var explosion = game.add.graphics(enemy.x, enemy.y);
+            explosion.beginFill(0xff6600);
+            explosion.drawCircle(0, 0, 30);
+            explosion.endFill();
+            game.add.tween(explosion).to({alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+            game.time.events.add(500, function() { explosion.destroy(); });
+        }
+
+        function enemyHitPlayer(player, enemy) {
+            enemy.destroy();
+            gameOver = true;
+            
+            var gameOverText = game.add.text(400, 300, 'Game Over!\nPress R to restart', {
+                fontSize: '32px',
+                fill: '#ff0000',
+                align: 'center'
+            });
+            gameOverText.anchor.setTo(0.5, 0.5);
+        }
+
+        function restart() {
+            score = 0;
+            gameOver = false;
+            scoreText.text = 'Score: 0';
+            
+            enemies.removeAll(true);
+            bullets.removeAll(true);
+            
+            player.x = 400;
+            player.y = 500;
+            if (player.body) {
+                player.body.velocity.setTo(0, 0);
+            }
+            
+            game.world.children.forEach(function(child) {
+                if (child.text && child.text.includes('Game Over')) {
+                    child.destroy();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

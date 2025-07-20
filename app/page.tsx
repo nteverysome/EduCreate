@@ -664,6 +664,43 @@ export default function HomePage() {
                 </svg>
               </Link>
             </div>
+
+            {/* 視差背景系統 - 新增功能 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow border-2 border-green-200" data-testid="feature-parallax-background">
+              <div className="text-4xl mb-4">🌄</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">視差背景系統</h3>
+              <p className="text-gray-600 mb-6">
+                專業級視差背景效果，支援森林、沙漠、天空、月亮四種主題，增強記憶科學遊戲的沉浸式體驗
+              </p>
+              <div className="flex flex-col space-y-2 mb-6">
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">🌲</span>
+                  <span>四種主題場景（森林、沙漠、天空、月亮）</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">📱</span>
+                  <span>支援水平和垂直佈局</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">♿</span>
+                  <span>無障礙設計（可禁用動畫）</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">🎮</span>
+                  <span>完整遊戲素材包含</span>
+                </div>
+              </div>
+              <Link
+                href="/games/parallax-background-demo"
+                className="inline-flex items-center text-green-600 font-medium hover:text-green-700"
+                data-testid="parallax-background-link"
+              >
+                立即體驗視差背景
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
           </div>
         </div>
 

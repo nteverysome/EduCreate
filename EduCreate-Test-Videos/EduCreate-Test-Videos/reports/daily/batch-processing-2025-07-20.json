@@ -1,0 +1,21 @@
+{
+  "reportType": "batch_processing",
+  "generatedAt": "2025-07-20T04:43:44.278Z",
+  "summary": {
+    "totalFiles": 0,
+    "successfulProcessing": 0,
+    "failedProcessing": 0,
+    "successRate": 0,
+    "averageProcessingTime": 0
+  },
+  "moduleBreakdown": {},
+  "featureBreakdown": {},
+  "errors": [],
+  "recommendations": [
+    {
+      "type": "quality",
+      "priority": "high",
+      "message": "處理成功率 0% 偏低，建議檢查失敗原因並改進處理流程"
+    }
+  ]
+}

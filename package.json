@@ -64,6 +64,7 @@
     "critters": "^0.0.23",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
+    "express": "^5.1.0",
     "formidable": "^3.5.4",
     "framer-motion": "^10.18.0",
     "ioredis": "^5.3.2",

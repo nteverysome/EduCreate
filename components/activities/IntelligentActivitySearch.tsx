@@ -162,7 +162,8 @@ export const IntelligentActivitySearch: React.FC<IntelligentActivitySearchProps>
 
       // 搜索各個字段
       searchConfig.searchFields.forEach(field => {
-        const fieldValue = (activity[field as keyof Activity] as string)?.toLowerCase() || '';
+        const rawValue = activity[field as keyof Activity];
+        const fieldValue = (typeof rawValue === 'string' ? rawValue : String(rawValue || '')).toLowerCase();
         const boost = searchConfig.boostFactors[field as keyof typeof searchConfig.boostFactors] || 1.0;
 
         // 精確匹配
@@ -219,7 +220,7 @@ export const IntelligentActivitySearch: React.FC<IntelligentActivitySearchProps>
       const highlights: string[] = [];
 
       // 檢查標題相似度
-      const titleSimilarity = calculateSimilarity(queryLower, activity.title.toLowerCase());
+      const titleSimilarity = calculateSimilarity(queryLower, (activity.title || '').toLowerCase());
       if (titleSimilarity > maxSimilarity) {
         maxSimilarity = titleSimilarity;
         bestMatch = 'title';

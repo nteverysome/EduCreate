@@ -1,0 +1,28 @@
+<svg width="70" height="85" viewBox="0 0 70 85" xmlns="http://www.w3.org/2000/svg">
+  <!-- BF-109 戰鬥機設計 -->
+  <!-- 機身 -->
+  <rect x="30" y="15" width="10" height="55" fill="#e74c3c" stroke="#c0392b" stroke-width="1"/>
+  
+  <!-- 主機翼 -->
+  <rect x="15" y="40" width="40" height="10" fill="#e74c3c" stroke="#c0392b" stroke-width="1"/>
+  
+  <!-- 機頭 -->
+  <polygon points="35,15 25,5 45,5" fill="#e74c3c" stroke="#c0392b" stroke-width="1"/>
+  
+  <!-- 機尾 -->
+  <rect x="25" y="70" width="20" height="6" fill="#e74c3c" stroke="#c0392b" stroke-width="1"/>
+  <rect x="30" y="76" width="10" height="9" fill="#e74c3c" stroke="#c0392b" stroke-width="1"/>
+  
+  <!-- 引擎 -->
+  <circle cx="35" cy="45" r="3" fill="#2c3e50" stroke="#34495e" stroke-width="1"/>
+  
+  <!-- 駕駛艙 -->
+  <rect x="32" y="20" width="6" height="6" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="1"/>
+  
+  <!-- 機身細節 -->
+  <line x1="35" y1="25" x2="35" y2="65" stroke="#c0392b" stroke-width="1"/>
+  <line x1="20" y1="45" x2="50" y2="45" stroke="#c0392b" stroke-width="1"/>
+  
+  <!-- 武器 -->
+  <rect x="33" y="10" width="4" height="8" fill="#34495e"/>
+</svg>
