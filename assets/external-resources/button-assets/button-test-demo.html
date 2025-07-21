@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Phaser 2 按鈕素材測試</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@2.6.2/build/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        #game-container {
+            margin: 20px auto;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .button-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .button-category {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .button-category h3 {
+            margin-top: 0;
+            color: #ffeb3b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Phaser 2 按鈕素材相容性測試</h1>
+        
+        <div class="info">
+            <h3>✅ CraftPix 按鈕素材包分析</h3>
+            <p><strong>素材來源</strong>: craftpix-779104-free-buttons-2d-game-objects.zip</p>
+            <p><strong>格式</strong>: PNG (完美支援 Phaser 2)</p>
+            <p><strong>數量</strong>: 40個按鈕 (20個簡約風格 + 20個光澤風格)</p>
+        </div>
+        
+        <div id="game-container"></div>
+        
+        <div class="button-info">
+            <div class="button-category">
+                <h3>🔘 Simple 風格 (20個)</h3>
+                <p>簡約扁平設計，適合現代 UI</p>
+                <p>檔案: simple/1.png ~ simple/20.png</p>
+                <p>用途: 主選單、設定按鈕</p>
+            </div>
+            <div class="button-category">
+                <h3>✨ Shiny 風格 (20個)</h3>
+                <p>光澤立體效果，適合遊戲內按鈕</p>
+                <p>檔案: shiny/1.png ~ shiny/20.png</p>
+                <p>用途: 遊戲按鈕、特效按鈕</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Phaser 2 遊戲設定
+        var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game-container', {
+            preload: preload,
+            create: create,
+            update: update
+        });
+
+        var buttons = [];
+        var currentPage = 0;
+        var buttonsPerPage = 8;
+        var totalButtons = 40;
+        var buttonData = [];
+
+        function preload() {
+            // 載入簡約風格按鈕 (1-20)
+            for (var i = 1; i <= 20; i++) {
+                var key = 'simple-' + i;
+                game.load.image(key, 'PNG/simple/' + i + '.png');
+                buttonData.push({
+                    key: key,
+                    type: 'Simple',
+                    number: i
+                });
+            }
+            
+            // 載入光澤風格按鈕 (1-20)
+            for (var i = 1; i <= 20; i++) {
+                var key = 'shiny-' + i;
+                game.load.image(key, 'PNG/shiny/' + i + '.png');
+                buttonData.push({
+                    key: key,
+                    type: 'Shiny',
+                    number: i
+                });
+            }
+            
+            // 載入成功回調
+            game.load.onLoadComplete.add(function() {
+                console.log('✅ 所有按鈕素材載入完成！');
+                console.log('📊 總計載入:', totalButtons, '個按鈕');
+            });
+        }
+
+        function create() {
+            // 設置背景
+            game.stage.backgroundColor = '#2c3e50';
+            
+            // 標題文字
+            var titleText = game.add.text(400, 30, '🎮 CraftPix 按鈕素材展示', {
+                font: '24px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            });
+            titleText.anchor.setTo(0.5, 0.5);
+            
+            // 頁面指示文字
+            var pageText = game.add.text(400, 70, '', {
+                font: '16px Arial',
+                fill: '#ecf0f1',
+                align: 'center'
+            });
+            pageText.anchor.setTo(0.5, 0.5);
+            
+            // 創建按鈕展示
+            createButtonDisplay();
+            
+            // 創建導航按鈕
+            createNavigationButtons();
+            
+            // 更新頁面資訊
+            updatePageInfo();
+        }
+        
+        function createButtonDisplay() {
+            // 清除現有按鈕
+            buttons.forEach(function(btn) {
+                if (btn.sprite) btn.sprite.destroy();
+                if (btn.text) btn.text.destroy();
+            });
+            buttons = [];
+            
+            var startIndex = currentPage * buttonsPerPage;
+            var endIndex = Math.min(startIndex + buttonsPerPage, totalButtons);
+            
+            var cols = 4;
+            var rows = 2;
+            var startX = 150;
+            var startY = 150;
+            var spacingX = 150;
+            var spacingY = 120;
+            
+            for (var i = startIndex; i < endIndex; i++) {
+                var data = buttonData[i];
+                var col = (i - startIndex) % cols;
+                var row = Math.floor((i - startIndex) / cols);
+                
+                var x = startX + col * spacingX;
+                var y = startY + row * spacingY;
+                
+                // 創建按鈕精靈
+                var buttonSprite = game.add.sprite(x, y, data.key);
+                buttonSprite.anchor.setTo(0.5, 0.5);
+                buttonSprite.scale.setTo(0.8, 0.8);
+                
+                // 添加互動效果
+                buttonSprite.inputEnabled = true;
+                buttonSprite.events.onInputOver.add(function(sprite) {
+                    sprite.scale.setTo(0.9, 0.9);
+                }, this);
+                buttonSprite.events.onInputOut.add(function(sprite) {
+                    sprite.scale.setTo(0.8, 0.8);
+                }, this);
+                buttonSprite.events.onInputDown.add(function(sprite) {
+                    sprite.scale.setTo(0.7, 0.7);
+                }, this);
+                buttonSprite.events.onInputUp.add(function(sprite) {
+                    sprite.scale.setTo(0.9, 0.9);
+                }, this);
+                
+                // 創建標籤文字
+                var labelText = game.add.text(x, y + 50, data.type + ' ' + data.number, {
+                    font: '12px Arial',
+                    fill: '#ffffff',
+                    align: 'center'
+                });
+                labelText.anchor.setTo(0.5, 0.5);
+                
+                buttons.push({
+                    sprite: buttonSprite,
+                    text: labelText,
+                    data: data
+                });
+            }
+        }
+        
+        function createNavigationButtons() {
+            // 上一頁按鈕
+            var prevButton = game.add.graphics(100, 550);
+            prevButton.beginFill(0x3498db);
+            prevButton.drawRoundedRect(0, 0, 80, 40, 5);
+            prevButton.endFill();
+            prevButton.inputEnabled = true;
+            prevButton.events.onInputDown.add(function() {
+                if (currentPage > 0) {
+                    currentPage--;
+                    createButtonDisplay();
+                    updatePageInfo();
+                }
+            });
+            
+            var prevText = game.add.text(140, 570, '上一頁', {
+                font: '14px Arial',
+                fill: '#ffffff'
+            });
+            prevText.anchor.setTo(0.5, 0.5);
+            
+            // 下一頁按鈕
+            var nextButton = game.add.graphics(620, 550);
+            nextButton.beginFill(0x3498db);
+            nextButton.drawRoundedRect(0, 0, 80, 40, 5);
+            nextButton.endFill();
+            nextButton.inputEnabled = true;
+            nextButton.events.onInputDown.add(function() {
+                var maxPages = Math.ceil(totalButtons / buttonsPerPage);
+                if (currentPage < maxPages - 1) {
+                    currentPage++;
+                    createButtonDisplay();
+                    updatePageInfo();
+                }
+            });
+            
+            var nextText = game.add.text(660, 570, '下一頁', {
+                font: '14px Arial',
+                fill: '#ffffff'
+            });
+            nextText.anchor.setTo(0.5, 0.5);
+        }
+        
+        function updatePageInfo() {
+            var maxPages = Math.ceil(totalButtons / buttonsPerPage);
+            var pageInfo = '第 ' + (currentPage + 1) + ' 頁 / 共 ' + maxPages + ' 頁';
+            
+            // 更新頁面資訊文字
+            game.world.children.forEach(function(child) {
+                if (child.text && child.text.includes('第')) {
+                    child.text = pageInfo;
+                }
+            });
+            
+            // 如果找不到現有的頁面資訊文字，創建新的
+            var pageText = game.add.text(400, 70, pageInfo, {
+                font: '16px Arial',
+                fill: '#ecf0f1',
+                align: 'center'
+            });
+            pageText.anchor.setTo(0.5, 0.5);
+        }
+
+        function update() {
+            // 遊戲更新邏輯
+        }
+    </script>
+</body>
+</html>
