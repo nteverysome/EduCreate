@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>☁️ Phaser 2 雲朵素材測試</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@2.6.2/build/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        #game-container {
+            margin: 20px auto;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .cloud-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .cloud-category {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .cloud-category h3 {
+            margin-top: 0;
+            color: #ffeb3b;
+        }
+        
+        .cloud-list {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .list-controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .list-controls button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .list-controls button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .cloud-names-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .cloud-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .cloud-item:hover {
+            border-color: #ffeb3b;
+            transform: translateY(-2px);
+        }
+        
+        .cloud-item img {
+            width: 60px;
+            height: 40px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+        
+        .cloud-item .name {
+            font-weight: bold;
+            color: #ffeb3b;
+            margin-bottom: 5px;
+        }
+        
+        .cloud-item .type {
+            font-size: 12px;
+            color: #ecf0f1;
+        }
+        
+        .animation-indicator {
+            background: #ff4444;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>☁️ Phaser 2 雲朵素材相容性測試</h1>
+        
+        <div class="info">
+            <h3>⛅ CraftPix 雲朵素材包分析</h3>
+            <p><strong>素材來源</strong>: craftpix-net-801184-free-clouds-pixel-art-asset-pack.zip</p>
+            <p><strong>格式</strong>: PNG (完美支援 Phaser 2)</p>
+            <p><strong>數量</strong>: 125個檔案 (120個雲朵動畫幀 + 5個閃電動畫幀)</p>
+        </div>
+        
+        <div id="game-container"></div>
+        
+        <div class="cloud-info">
+            <div class="cloud-category">
+                <h3>☁️ 白色雲朵 (40個)</h3>
+                <p>8種形狀，每種5幀動畫</p>
+                <p>檔案: Clouds_white/Shape1-8/</p>
+                <p>用途: 晴天背景、日間場景</p>
+            </div>
+            <div class="cloud-category">
+                <h3>🌫️ 灰色雲朵 (40個)</h3>
+                <p>8種形狀，每種5幀動畫</p>
+                <p>檔案: Clouds_gray/Shape1-8/</p>
+                <p>用途: 陰天背景、黃昏場景</p>
+            </div>
+            <div class="cloud-category">
+                <h3>⛈️ 黑色雲朵 (40個)</h3>
+                <p>8種形狀，每種5幀動畫</p>
+                <p>檔案: Clouds_black/Shape1-8/</p>
+                <p>用途: 暴風雨、夜間場景</p>
+            </div>
+            <div class="cloud-category">
+                <h3>⚡ 閃電動畫 (5個)</h3>
+                <p>5幀閃電動畫序列</p>
+                <p>檔案: Lightning/lightning1-5.png</p>
+                <p>用途: 雷電效果、特殊技能</p>
+            </div>
+        </div>
+        
+        <div class="cloud-list">
+            <h2>📋 雲朵完整列表</h2>
+            <div class="list-controls">
+                <button onclick="showWhiteClouds()">☁️ 白色雲朵</button>
+                <button onclick="showGrayClouds()">🌫️ 灰色雲朵</button>
+                <button onclick="showBlackClouds()">⛈️ 黑色雲朵</button>
+                <button onclick="showLightning()">⚡ 閃電動畫</button>
+                <button onclick="showAllClouds()">📋 全部素材</button>
+            </div>
+            <div id="cloud-names-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // Phaser 2 遊戲設定
+        var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game-container', {
+            preload: preload,
+            create: create,
+            update: update
+        });
+
+        var clouds = [];
+        var lightning = [];
+        var cloudAnimations = [];
+        var lightningAnimation;
+        var cloudData = [];
+
+        function preload() {
+            // 載入白色雲朵動畫
+            for (var shape = 1; shape <= 8; shape++) {
+                for (var frame = 1; frame <= 5; frame++) {
+                    var key = 'white-cloud-' + shape + '-' + frame;
+                    var filename = shape === 8 ? 'clouds_shape' + shape + '_' + frame + '.png' : 'cloud_shape' + shape + '_' + frame + '.png';
+                    game.load.image(key, 'PNG/Clouds_white/Shape' + shape + '/' + filename);
+                }
+                cloudData.push({
+                    type: 'white',
+                    shape: shape,
+                    name: '白雲形狀' + shape,
+                    frames: 5,
+                    animated: true
+                });
+            }
+            
+            // 載入灰色雲朵動畫
+            for (var shape = 1; shape <= 8; shape++) {
+                for (var frame = 1; frame <= 5; frame++) {
+                    var key = 'gray-cloud-' + shape + '-' + frame;
+                    var filename = shape === 8 ? 'clouds_shape' + shape + '_' + frame + '.png' : 'cloud_shape' + shape + '_' + frame + '.png';
+                    game.load.image(key, 'PNG/Clouds_gray/Shape' + shape + '/' + filename);
+                }
+                cloudData.push({
+                    type: 'gray',
+                    shape: shape,
+                    name: '灰雲形狀' + shape,
+                    frames: 5,
+                    animated: true
+                });
+            }
+            
+            // 載入黑色雲朵動畫
+            for (var shape = 1; shape <= 8; shape++) {
+                for (var frame = 1; frame <= 5; frame++) {
+                    var key = 'black-cloud-' + shape + '-' + frame;
+                    var filename = shape === 8 ? 'clouds_shape' + shape + '_' + frame + '.png' : 'cloud_shape' + shape + '_' + frame + '.png';
+                    game.load.image(key, 'PNG/Clouds_black/Shape' + shape + '/' + filename);
+                }
+                cloudData.push({
+                    type: 'black',
+                    shape: shape,
+                    name: '黑雲形狀' + shape,
+                    frames: 5,
+                    animated: true
+                });
+            }
+            
+            // 載入閃電動畫
+            for (var i = 1; i <= 5; i++) {
+                var key = 'lightning-' + i;
+                game.load.image(key, 'PNG/Lightning/lightning' + i + '.png');
+            }
+            cloudData.push({
+                type: 'lightning',
+                shape: 1,
+                name: '閃電動畫',
+                frames: 5,
+                animated: true
+            });
+            
+            // 載入成功回調
+            game.load.onLoadComplete.add(function() {
+                console.log('✅ 所有雲朵素材載入完成！');
+                console.log('☁️ 總計載入: 125 個檔案');
+                console.log('🎬 動畫數量: 25 個動畫 (24個雲朵 + 1個閃電)');
+            });
+        }
+
+        function create() {
+            // 設置背景
+            game.stage.backgroundColor = '#87CEEB';
+            
+            // 標題文字
+            var titleText = game.add.text(400, 30, '☁️ CraftPix 雲朵素材展示', {
+                font: '24px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            });
+            titleText.anchor.setTo(0.5, 0.5);
+            
+            // 創建雲朵動畫展示
+            createCloudAnimations();
+            
+            // 說明文字
+            var instructionText = game.add.text(400, 570, '觀看雲朵和閃電的動畫效果！每個雲朵都有5幀動畫！', {
+                font: '16px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            });
+            instructionText.anchor.setTo(0.5, 0.5);
+        }
+        
+        function createCloudAnimations() {
+            // 創建白色雲朵動畫示例
+            createAnimatedCloud('white', 1, 150, 150);
+            createAnimatedCloud('white', 2, 350, 150);
+            createAnimatedCloud('white', 3, 550, 150);
+            
+            // 創建灰色雲朵動畫示例
+            createAnimatedCloud('gray', 1, 150, 250);
+            createAnimatedCloud('gray', 2, 350, 250);
+            createAnimatedCloud('gray', 3, 550, 250);
+            
+            // 創建黑色雲朵動畫示例
+            createAnimatedCloud('black', 1, 150, 350);
+            createAnimatedCloud('black', 2, 350, 350);
+            createAnimatedCloud('black', 3, 550, 350);
+            
+            // 創建閃電動畫
+            createLightningAnimation(650, 200);
+        }
+        
+        function createAnimatedCloud(type, shape, x, y) {
+            var frames = [];
+            for (var i = 1; i <= 5; i++) {
+                frames.push(type + '-cloud-' + shape + '-' + i);
+            }
+            
+            var cloud = game.add.sprite(x, y, frames[0]);
+            cloud.anchor.setTo(0.5, 0.5);
+            cloud.scale.setTo(0.8, 0.8);
+            
+            // 創建動畫
+            var animKey = type + '-cloud-anim-' + shape;
+            cloud.animations.add(animKey, frames, 3, true);
+            cloud.animations.play(animKey);
+            
+            clouds.push(cloud);
+        }
+        
+        function createLightningAnimation(x, y) {
+            var frames = [];
+            for (var i = 1; i <= 5; i++) {
+                frames.push('lightning-' + i);
+            }
+            
+            var lightning = game.add.sprite(x, y, frames[0]);
+            lightning.anchor.setTo(0.5, 0.5);
+            lightning.scale.setTo(1.2, 1.2);
+            
+            // 創建閃電動畫
+            lightning.animations.add('lightning-anim', frames, 8, true);
+            lightning.animations.play('lightning-anim');
+            
+            this.lightning = lightning;
+        }
+
+        function update() {
+            // 遊戲更新邏輯
+        }
+
+        // 雲朵名稱和類型數據
+        var cloudNames = {
+            white: [
+                "積雲", "層雲", "卷雲", "高積雲", "層積雲", "雨雲", "捲積雲", "高層雲"
+            ],
+            gray: [
+                "陰雲", "雨雲", "霧雲", "暴雲", "厚雲", "密雲", "重雲", "濃雲"
+            ],
+            black: [
+                "雷雲", "暴雲", "烏雲", "風暴雲", "龍捲雲", "颱風雲", "雹雲", "閃電雲"
+            ],
+            lightning: ["閃電"]
+        };
+
+        function showWhiteClouds() {
+            displayCloudList('white');
+        }
+
+        function showGrayClouds() {
+            displayCloudList('gray');
+        }
+
+        function showBlackClouds() {
+            displayCloudList('black');
+        }
+
+        function showLightning() {
+            displayCloudList('lightning');
+        }
+
+        function showAllClouds() {
+            displayCloudList('all');
+        }
+
+        function displayCloudList(type) {
+            var container = document.getElementById('cloud-names-list');
+            container.innerHTML = '';
+            container.className = 'cloud-names-list';
+
+            if (type === 'white' || type === 'all') {
+                for (var i = 0; i < cloudNames.white.length; i++) {
+                    var item = createCloudItem('white', i + 1, cloudNames.white[i], true);
+                    container.appendChild(item);
+                }
+            }
+
+            if (type === 'gray' || type === 'all') {
+                for (var i = 0; i < cloudNames.gray.length; i++) {
+                    var item = createCloudItem('gray', i + 1, cloudNames.gray[i], true);
+                    container.appendChild(item);
+                }
+            }
+
+            if (type === 'black' || type === 'all') {
+                for (var i = 0; i < cloudNames.black.length; i++) {
+                    var item = createCloudItem('black', i + 1, cloudNames.black[i], true);
+                    container.appendChild(item);
+                }
+            }
+
+            if (type === 'lightning' || type === 'all') {
+                var item = createCloudItem('lightning', 1, cloudNames.lightning[0], true);
+                container.appendChild(item);
+            }
+        }
+
+        function createCloudItem(type, number, name, animated) {
+            var item = document.createElement('div');
+            item.className = 'cloud-item';
+
+            var img = document.createElement('img');
+            if (type === 'lightning') {
+                img.src = 'PNG/Lightning/lightning1.png';
+            } else {
+                var filename = number === 8 ? 'clouds_shape' + number + '_1.png' : 'cloud_shape' + number + '_1.png';
+                img.src = 'PNG/Clouds_' + type + '/Shape' + number + '/' + filename;
+            }
+            img.alt = name;
+            img.onerror = function() {
+                this.style.display = 'none';
+            };
+
+            var nameDiv = document.createElement('div');
+            nameDiv.className = 'name';
+            nameDiv.textContent = name;
+
+            var typeDiv = document.createElement('div');
+            typeDiv.className = 'type';
+            if (type === 'lightning') {
+                typeDiv.textContent = 'Lightning';
+            } else {
+                typeDiv.textContent = type.charAt(0).toUpperCase() + type.slice(1) + ' Shape ' + number;
+            }
+
+            if (animated) {
+                var animDiv = document.createElement('div');
+                animDiv.className = 'animation-indicator';
+                animDiv.textContent = '5幀動畫';
+                item.appendChild(animDiv);
+            }
+
+            item.appendChild(img);
+            item.appendChild(nameDiv);
+            item.appendChild(typeDiv);
+
+            return item;
+        }
+
+        // 頁面載入完成後顯示所有雲朵
+        window.onload = function() {
+            setTimeout(function() {
+                showAllClouds();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

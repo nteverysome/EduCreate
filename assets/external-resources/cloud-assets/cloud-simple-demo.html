@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>☁️ 雲朵素材包展示</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@2.6.2/build/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        #game-container {
+            margin: 20px auto;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: #87CEEB;
+        }
+        
+        .cloud-list {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .list-controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .list-controls button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .list-controls button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .cloud-names-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .cloud-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .cloud-item:hover {
+            border-color: #ffeb3b;
+            transform: translateY(-2px);
+        }
+        
+        .cloud-item img {
+            width: 60px;
+            height: 40px;
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+        
+        .cloud-item .name {
+            font-weight: bold;
+            color: #ffeb3b;
+            margin-bottom: 5px;
+        }
+        
+        .cloud-item .type {
+            font-size: 12px;
+            color: #ecf0f1;
+        }
+        
+        .animation-indicator {
+            background: #ff4444;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>☁️ 雲朵素材包完整展示</h1>
+    
+    <div class="info">
+        <h3>⛅ CraftPix 雲朵素材包分析</h3>
+        <p><strong>素材來源</strong>: craftpix-net-801184-free-clouds-pixel-art-asset-pack.zip</p>
+        <p><strong>格式</strong>: PNG (完美支援 Phaser 2)</p>
+        <p><strong>數量</strong>: 125個檔案 (120個雲朵動畫幀 + 5個閃電動畫幀)</p>
+        <p><strong>狀態</strong>: ✅ 完全適合我們的引擎！</p>
+    </div>
+    
+    <div id="game-container"></div>
+    
+    <div class="cloud-list">
+        <h2>📋 雲朵完整列表</h2>
+        <div class="list-controls">
+            <button onclick="showWhiteClouds()">☁️ 白色雲朵</button>
+            <button onclick="showGrayClouds()">🌫️ 灰色雲朵</button>
+            <button onclick="showBlackClouds()">⛈️ 黑色雲朵</button>
+            <button onclick="showLightning()">⚡ 閃電動畫</button>
+            <button onclick="showAllClouds()">📋 全部素材</button>
+        </div>
+        <div id="cloud-names-list"></div>
+    </div>
+
+    <script>
+        // Phaser 2 遊戲設定 - 簡化版本
+        var game = new Phaser.Game(800, 400, Phaser.CANVAS, 'game-container', {
+            preload: preload,
+            create: create,
+            update: update
+        });
+
+        var clouds = [];
+        var cloudSprites = [];
+
+        function preload() {
+            // 只載入部分雲朵作為展示
+            for (var shape = 1; shape <= 3; shape++) {
+                var filename = 'cloud_shape' + shape + '_1.png';
+                game.load.image('white-cloud-' + shape, 'PNG/Clouds_white/Shape' + shape + '/' + filename);
+                game.load.image('gray-cloud-' + shape, 'PNG/Clouds_gray/Shape' + shape + '/' + filename);
+                game.load.image('black-cloud-' + shape, 'PNG/Clouds_black/Shape' + shape + '/' + filename);
+            }
+            
+            // 載入閃電
+            game.load.image('lightning', 'PNG/Lightning/lightning1.png');
+            
+            console.log('🎮 開始載入雲朵素材展示...');
+        }
+
+        function create() {
+            // 設置背景
+            game.stage.backgroundColor = '#87CEEB';
+            
+            // 標題文字
+            var titleText = game.add.text(400, 30, '☁️ 雲朵素材展示', {
+                font: '24px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            });
+            titleText.anchor.setTo(0.5, 0.5);
+            
+            // 創建靜態雲朵展示
+            createStaticClouds();
+            
+            // 說明文字
+            var instructionText = game.add.text(400, 370, '✅ 素材載入成功！查看下方完整列表！', {
+                font: '16px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            });
+            instructionText.anchor.setTo(0.5, 0.5);
+            
+            console.log('✅ 雲朵素材展示初始化完成！');
+        }
+        
+        function createStaticClouds() {
+            // 創建白色雲朵展示
+            var whiteCloud1 = game.add.sprite(100, 100, 'white-cloud-1');
+            whiteCloud1.anchor.setTo(0.5, 0.5);
+            whiteCloud1.scale.setTo(0.8, 0.8);
+            cloudSprites.push(whiteCloud1);
+            
+            var whiteCloud2 = game.add.sprite(250, 120, 'white-cloud-2');
+            whiteCloud2.anchor.setTo(0.5, 0.5);
+            whiteCloud2.scale.setTo(0.6, 0.6);
+            cloudSprites.push(whiteCloud2);
+            
+            // 創建灰色雲朵展示
+            var grayCloud1 = game.add.sprite(400, 110, 'gray-cloud-1');
+            grayCloud1.anchor.setTo(0.5, 0.5);
+            grayCloud1.scale.setTo(0.7, 0.7);
+            cloudSprites.push(grayCloud1);
+            
+            // 創建黑色雲朵展示
+            var blackCloud1 = game.add.sprite(550, 100, 'black-cloud-1');
+            blackCloud1.anchor.setTo(0.5, 0.5);
+            blackCloud1.scale.setTo(0.8, 0.8);
+            cloudSprites.push(blackCloud1);
+            
+            // 創建閃電展示
+            var lightning = game.add.sprite(700, 150, 'lightning');
+            lightning.anchor.setTo(0.5, 0.5);
+            lightning.scale.setTo(1.2, 1.2);
+            cloudSprites.push(lightning);
+            
+            // 添加標籤
+            addCloudLabels();
+        }
+        
+        function addCloudLabels() {
+            var labelStyle = {
+                font: '12px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            };
+            
+            var label1 = game.add.text(100, 160, '白雲', labelStyle);
+            label1.anchor.setTo(0.5, 0.5);
+            
+            var label2 = game.add.text(250, 180, '白雲', labelStyle);
+            label2.anchor.setTo(0.5, 0.5);
+            
+            var label3 = game.add.text(400, 170, '灰雲', labelStyle);
+            label3.anchor.setTo(0.5, 0.5);
+            
+            var label4 = game.add.text(550, 160, '黑雲', labelStyle);
+            label4.anchor.setTo(0.5, 0.5);
+            
+            var label5 = game.add.text(700, 220, '閃電', labelStyle);
+            label5.anchor.setTo(0.5, 0.5);
+        }
+
+        function update() {
+            // 簡單的浮動效果
+            for (var i = 0; i < cloudSprites.length; i++) {
+                var cloud = cloudSprites[i];
+                cloud.y += Math.sin(game.time.now * 0.001 + i) * 0.5;
+            }
+        }
+        
+        // 雲朵名稱數據
+        var cloudNames = {
+            white: [
+                "積雲", "層雲", "卷雲", "高積雲", "層積雲", "雨雲", "捲積雲", "高層雲"
+            ],
+            gray: [
+                "陰雲", "雨雲", "霧雲", "暴雲", "厚雲", "密雲", "重雲", "濃雲"
+            ],
+            black: [
+                "雷雲", "暴雲", "烏雲", "風暴雲", "龍捲雲", "颱風雲", "雹雲", "閃電雲"
+            ],
+            lightning: ["閃電"]
+        };
+        
+        function showWhiteClouds() {
+            displayCloudList('white');
+        }
+        
+        function showGrayClouds() {
+            displayCloudList('gray');
+        }
+        
+        function showBlackClouds() {
+            displayCloudList('black');
+        }
+        
+        function showLightning() {
+            displayCloudList('lightning');
+        }
+        
+        function showAllClouds() {
+            displayCloudList('all');
+        }
+        
+        function displayCloudList(type) {
+            var container = document.getElementById('cloud-names-list');
+            container.innerHTML = '';
+            container.className = 'cloud-names-list';
+            
+            if (type === 'white' || type === 'all') {
+                for (var i = 0; i < cloudNames.white.length; i++) {
+                    var item = createCloudItem('white', i + 1, cloudNames.white[i], true);
+                    container.appendChild(item);
+                }
+            }
+            
+            if (type === 'gray' || type === 'all') {
+                for (var i = 0; i < cloudNames.gray.length; i++) {
+                    var item = createCloudItem('gray', i + 1, cloudNames.gray[i], true);
+                    container.appendChild(item);
+                }
+            }
+            
+            if (type === 'black' || type === 'all') {
+                for (var i = 0; i < cloudNames.black.length; i++) {
+                    var item = createCloudItem('black', i + 1, cloudNames.black[i], true);
+                    container.appendChild(item);
+                }
+            }
+            
+            if (type === 'lightning' || type === 'all') {
+                var item = createCloudItem('lightning', 1, cloudNames.lightning[0], true);
+                container.appendChild(item);
+            }
+        }
+        
+        function createCloudItem(type, number, name, animated) {
+            var item = document.createElement('div');
+            item.className = 'cloud-item';
+
+            // 添加點擊事件
+            item.onclick = function() {
+                showCloudInCanvas(type, number, name);
+            };
+            item.style.cursor = 'pointer';
+
+            var img = document.createElement('img');
+            if (type === 'lightning') {
+                img.src = 'PNG/Lightning/lightning1.png';
+            } else {
+                var filename = number === 8 ? 'clouds_shape' + number + '_1.png' : 'cloud_shape' + number + '_1.png';
+                img.src = 'PNG/Clouds_' + type + '/Shape' + number + '/' + filename;
+            }
+            img.alt = name;
+            img.onerror = function() {
+                this.style.display = 'none';
+            };
+
+            var nameDiv = document.createElement('div');
+            nameDiv.className = 'name';
+            nameDiv.textContent = name;
+
+            var typeDiv = document.createElement('div');
+            typeDiv.className = 'type';
+            if (type === 'lightning') {
+                typeDiv.textContent = 'Lightning (點擊在畫布中查看)';
+            } else {
+                typeDiv.textContent = type.charAt(0).toUpperCase() + type.slice(1) + ' Shape ' + number + ' (點擊在畫布中查看)';
+            }
+
+            if (animated) {
+                var animDiv = document.createElement('div');
+                animDiv.className = 'animation-indicator';
+                animDiv.textContent = '5幀動畫';
+                item.appendChild(animDiv);
+            }
+
+            item.appendChild(img);
+            item.appendChild(nameDiv);
+            item.appendChild(typeDiv);
+
+            return item;
+        }
+
+        // 在畫布中顯示選中的雲朵
+        function showCloudInCanvas(type, number, name) {
+            // 清除現有的雲朵
+            for (var i = 0; i < cloudSprites.length; i++) {
+                cloudSprites[i].destroy();
+            }
+            cloudSprites = [];
+
+            // 載入並顯示選中的雲朵
+            var spriteKey;
+            if (type === 'lightning') {
+                spriteKey = 'lightning';
+            } else {
+                spriteKey = type + '-cloud-' + number;
+
+                // 如果素材還沒載入，先載入
+                if (!game.cache.checkImageKey(spriteKey)) {
+                    var filename = number === 8 ? 'clouds_shape' + number + '_1.png' : 'cloud_shape' + number + '_1.png';
+                    game.load.image(spriteKey, 'PNG/Clouds_' + type + '/Shape' + number + '/' + filename);
+                    game.load.start();
+
+                    // 載入完成後顯示
+                    game.load.onLoadComplete.addOnce(function() {
+                        displaySelectedCloud(spriteKey, name);
+                    });
+                } else {
+                    displaySelectedCloud(spriteKey, name);
+                }
+            }
+
+            if (type === 'lightning') {
+                displaySelectedCloud(spriteKey, name);
+            }
+        }
+
+        function displaySelectedCloud(spriteKey, name) {
+            // 在畫布中央顯示選中的雲朵
+            var selectedCloud = game.add.sprite(400, 200, spriteKey);
+            selectedCloud.anchor.setTo(0.5, 0.5);
+            selectedCloud.scale.setTo(1.5, 1.5);
+            cloudSprites.push(selectedCloud);
+
+            // 更新標題
+            var titleText = game.add.text(400, 30, '☁️ 當前顯示: ' + name, {
+                font: '24px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            });
+            titleText.anchor.setTo(0.5, 0.5);
+
+            // 添加說明
+            var instructionText = game.add.text(400, 370, '✅ 點擊下方列表中的任何雲朵在此查看！', {
+                font: '16px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            });
+            instructionText.anchor.setTo(0.5, 0.5);
+
+            console.log('✅ 在畫布中顯示:', name);
+        }
+        
+        // 頁面載入完成後顯示所有雲朵
+        window.onload = function() {
+            setTimeout(function() {
+                showAllClouds();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

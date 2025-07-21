@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✈️☁️ 飛機遊戲 + 動態雲朵背景</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@2.6.2/build/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #87CEEB 0%, #4682B4 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        #game-container {
+            margin: 20px auto;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .controls {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .controls button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .controls button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <h1>✈️☁️ 飛機遊戲 + 動態雲朵背景演示</h1>
+    
+    <div class="info">
+        <h3>🎮 遊戲說明</h3>
+        <p><strong>操作</strong>: 方向鍵移動飛機，空白鍵發射子彈</p>
+        <p><strong>背景</strong>: 動態雲朵動畫，閃電特效，三種天氣模式</p>
+        <p><strong>特色</strong>: 125個雲朵動畫幀，真實的天氣變化效果</p>
+    </div>
+    
+    <div id="game-container"></div>
+    
+    <div class="controls">
+        <h3>🌤️ 天氣控制</h3>
+        <button onclick="setWeather('sunny')">☀️ 晴天模式</button>
+        <button onclick="setWeather('cloudy')">🌫️ 陰天模式</button>
+        <button onclick="setWeather('stormy')">⛈️ 暴風雨模式</button>
+        <button onclick="toggleLightning()">⚡ 切換閃電</button>
+    </div>
+
+    <script>
+        // Phaser 2 遊戲設定
+        var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game-container', {
+            preload: preload,
+            create: create,
+            update: update
+        });
+
+        var player;
+        var clouds;
+        var lightning;
+        var bullets;
+        var cursors;
+        var fireButton;
+        var currentWeather = 'sunny';
+        var lightningEnabled = true;
+        var cloudSpawnTimer = 0;
+        var lightningTimer = 0;
+
+        function preload() {
+            // 載入飛機素材 (使用簡單的幾何圖形代替)
+            game.load.image('player', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+            game.load.image('bullet', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+            
+            // 載入雲朵動畫 (載入部分形狀作為演示)
+            for (var shape = 1; shape <= 3; shape++) {
+                for (var frame = 1; frame <= 5; frame++) {
+                    var filename = 'cloud_shape' + shape + '_' + frame + '.png';
+                    game.load.image('white-cloud-' + shape + '-' + frame, 'PNG/Clouds_white/Shape' + shape + '/' + filename);
+                    game.load.image('gray-cloud-' + shape + '-' + frame, 'PNG/Clouds_gray/Shape' + shape + '/' + filename);
+                    game.load.image('black-cloud-' + shape + '-' + frame, 'PNG/Clouds_black/Shape' + shape + '/' + filename);
+                }
+            }
+            
+            // 載入閃電動畫
+            for (var i = 1; i <= 5; i++) {
+                game.load.image('lightning-' + i, 'PNG/Lightning/lightning' + i + '.png');
+            }
+            
+            console.log('🎮 開始載入飛機遊戲 + 雲朵背景...');
+        }
+
+        function create() {
+            // 設置背景
+            game.stage.backgroundColor = '#87CEEB';
+            
+            // 創建玩家飛機
+            player = game.add.sprite(100, 300, 'player');
+            player.width = 40;
+            player.height = 30;
+            player.tint = 0x00ff00; // 綠色飛機
+            game.physics.arcade.enable(player);
+            player.body.collideWorldBounds = true;
+            
+            // 創建群組
+            clouds = game.add.group();
+            clouds.enableBody = true;
+            clouds.physicsBodyType = Phaser.Physics.ARCADE;
+            
+            bullets = game.add.group();
+            bullets.enableBody = true;
+            bullets.physicsBodyType = Phaser.Physics.ARCADE;
+            
+            // 控制設定
+            cursors = game.input.keyboard.createCursorKeys();
+            fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+            
+            // 遊戲資訊
+            var infoText = game.add.text(16, 16, '✈️ 飛機遊戲 + 動態雲朵背景', {
+                fontSize: '20px',
+                fill: '#ffffff'
+            });
+            
+            var weatherText = game.add.text(16, 50, '🌤️ 當前天氣: 晴天', {
+                fontSize: '16px',
+                fill: '#ffeb3b'
+            });
+            
+            console.log('✅ 飛機遊戲 + 雲朵背景系統初始化完成！');
+        }
+
+        function update() {
+            // 玩家移動
+            player.body.velocity.setTo(0, 0);
+            
+            if (cursors.left.isDown) {
+                player.body.velocity.x = -200;
+            } else if (cursors.right.isDown) {
+                player.body.velocity.x = 200;
+            }
+            
+            if (cursors.up.isDown) {
+                player.body.velocity.y = -200;
+            } else if (cursors.down.isDown) {
+                player.body.velocity.y = 200;
+            }
+            
+            // 發射子彈
+            if (fireButton.isDown) {
+                fireBullet();
+            }
+            
+            // 生成雲朵
+            cloudSpawnTimer += game.time.elapsed;
+            if (cloudSpawnTimer > 3000) { // 每3秒生成一個雲朵
+                spawnCloud();
+                cloudSpawnTimer = 0;
+            }
+            
+            // 閃電效果
+            if (lightningEnabled && currentWeather === 'stormy') {
+                lightningTimer += game.time.elapsed;
+                if (lightningTimer > 5000) { // 每5秒閃電
+                    createLightning();
+                    lightningTimer = 0;
+                }
+            }
+            
+            // 清理超出邊界的物件
+            clouds.forEachAlive(function(cloud) {
+                if (cloud.x < -100) {
+                    cloud.kill();
+                }
+            });
+            
+            bullets.forEachAlive(function(bullet) {
+                if (bullet.x > 850) {
+                    bullet.kill();
+                }
+            });
+        }
+        
+        function fireBullet() {
+            if (game.time.now > bulletTime) {
+                var bullet = bullets.create(player.x + 40, player.y + 15, 'bullet');
+                bullet.width = 10;
+                bullet.height = 5;
+                bullet.tint = 0xffff00; // 黃色子彈
+                bullet.body.velocity.x = 400;
+                bulletTime = game.time.now + 200;
+            }
+        }
+        var bulletTime = 0;
+        
+        function spawnCloud() {
+            var cloudType = getCloudTypeByWeather();
+            var shape = Math.floor(Math.random() * 3) + 1; // 1-3
+            var frames = [];
+            
+            for (var i = 1; i <= 5; i++) {
+                frames.push(cloudType + '-cloud-' + shape + '-' + i);
+            }
+            
+            var cloud = clouds.create(800, Math.random() * 400 + 50, frames[0]);
+            cloud.anchor.setTo(0.5, 0.5);
+            cloud.scale.setTo(0.6, 0.6);
+            cloud.body.velocity.x = -50;
+            cloud.alpha = 0.8;
+            
+            // 創建雲朵動畫
+            var animKey = cloudType + '-cloud-anim-' + shape + '-' + Math.floor(Math.random() * 1000);
+            try {
+                cloud.animations.add(animKey, frames, 2, true);
+                cloud.animations.play(animKey);
+            } catch (error) {
+                console.log('動畫創建失敗:', error);
+                // 如果動畫失敗，至少顯示靜態雲朵
+                cloud.loadTexture(frames[0]);
+            }
+        }
+        
+        function getCloudTypeByWeather() {
+            switch(currentWeather) {
+                case 'sunny': return 'white';
+                case 'cloudy': return 'gray';
+                case 'stormy': return 'black';
+                default: return 'white';
+            }
+        }
+        
+        function createLightning() {
+            var frames = [];
+            for (var i = 1; i <= 5; i++) {
+                frames.push('lightning-' + i);
+            }
+            
+            var lightning = game.add.sprite(Math.random() * 600 + 100, Math.random() * 200 + 50, frames[0]);
+            lightning.anchor.setTo(0.5, 0.5);
+            lightning.scale.setTo(1.5, 1.5);
+            lightning.alpha = 0.9;
+            
+            // 創建閃電動畫
+            var animKey = 'lightning-anim-' + Math.floor(Math.random() * 1000);
+            try {
+                lightning.animations.add(animKey, frames, 10, false);
+                lightning.animations.play(animKey);
+
+                // 動畫完成後銷毀
+                lightning.animations.currentAnim.onComplete.add(function() {
+                    lightning.destroy();
+                });
+            } catch (error) {
+                console.log('閃電動畫創建失敗:', error);
+                // 如果動畫失敗，3秒後銷毀
+                game.time.events.add(3000, function() {
+                    lightning.destroy();
+                });
+            }
+            
+            // 閃電音效模擬 (改變背景色)
+            game.stage.backgroundColor = '#ffffff';
+            game.time.events.add(100, function() {
+                game.stage.backgroundColor = getBackgroundColor();
+            });
+        }
+        
+        function getBackgroundColor() {
+            switch(currentWeather) {
+                case 'sunny': return '#87CEEB';
+                case 'cloudy': return '#708090';
+                case 'stormy': return '#2F4F4F';
+                default: return '#87CEEB';
+            }
+        }
+        
+        // 全域函數供按鈕調用
+        window.setWeather = function(weather) {
+            currentWeather = weather;
+            game.stage.backgroundColor = getBackgroundColor();
+            
+            // 更新天氣文字
+            var weatherNames = {
+                'sunny': '晴天',
+                'cloudy': '陰天', 
+                'stormy': '暴風雨'
+            };
+            
+            console.log('🌤️ 天氣切換為:', weatherNames[weather]);
+        };
+        
+        window.toggleLightning = function() {
+            lightningEnabled = !lightningEnabled;
+            console.log('⚡ 閃電效果:', lightningEnabled ? '開啟' : '關閉');
+        };
+    </script>
+</body>
+</html>
