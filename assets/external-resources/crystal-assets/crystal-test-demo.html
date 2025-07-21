@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💎 Phaser 2 水晶素材測試</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@2.6.2/build/phaser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        #game-container {
+            margin: 20px auto;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .crystal-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .crystal-category {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .crystal-category h3 {
+            margin-top: 0;
+            color: #ffeb3b;
+        }
+
+        .crystal-list {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .list-controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .list-controls button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .list-controls button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .crystal-names-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .crystal-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .crystal-item:hover {
+            border-color: #ffeb3b;
+            transform: translateY(-2px);
+        }
+
+        .crystal-item img {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+        }
+
+        .crystal-item .name {
+            font-weight: bold;
+            color: #ffeb3b;
+            margin-bottom: 5px;
+        }
+
+        .crystal-item .type {
+            font-size: 12px;
+            color: #ecf0f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💎 Phaser 2 水晶素材相容性測試</h1>
+        
+        <div class="info">
+            <h3>✨ CraftPix 水晶素材包分析</h3>
+            <p><strong>素材來源</strong>: craftpix-556112-free-crystals-2d-game-items.zip</p>
+            <p><strong>格式</strong>: PNG (完美支援 Phaser 2)</p>
+            <p><strong>數量</strong>: 40個水晶 (20個簡約風格 + 20個光澤風格)</p>
+        </div>
+        
+        <div id="game-container"></div>
+        
+        <div class="crystal-info">
+            <div class="crystal-category">
+                <h3>💎 Simple 風格 (20個)</h3>
+                <p>簡約扁平設計，適合現代遊戲</p>
+                <p>檔案: simple/1.png ~ simple/20.png</p>
+                <p>用途: 收集品、獎勵道具</p>
+            </div>
+            <div class="crystal-category">
+                <h3>✨ Shiny 風格 (20個)</h3>
+                <p>光澤立體效果，適合高級道具</p>
+                <p>檔案: shiny/1.png ~ shiny/20.png</p>
+                <p>用途: 稀有寶石、特殊獎勵</p>
+            </div>
+        </div>
+
+        <div class="crystal-list">
+            <h2>📋 水晶完整列表</h2>
+            <div id="crystal-list-container">
+                <div class="list-controls">
+                    <button onclick="showSimpleList()">💎 Simple 風格</button>
+                    <button onclick="showShinyList()">✨ Shiny 風格</button>
+                    <button onclick="showAllList()">📋 全部水晶</button>
+                </div>
+                <div id="crystal-names-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Phaser 2 遊戲設定
+        var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game-container', {
+            preload: preload,
+            create: create,
+            update: update
+        });
+
+        var crystals = [];
+        var currentPage = 0;
+        var crystalsPerPage = 40;
+        var totalCrystals = 40;
+        var crystalData = [];
+        var floatingCrystals = [];
+
+        function preload() {
+            // 載入簡約風格水晶 (1-20)
+            for (var i = 1; i <= 20; i++) {
+                var key = 'simple-' + i;
+                game.load.image(key, 'PNG/simple/' + i + '.png');
+                crystalData.push({
+                    key: key,
+                    type: 'Simple',
+                    number: i
+                });
+            }
+            
+            // 載入光澤風格水晶 (1-20)
+            for (var i = 1; i <= 20; i++) {
+                var key = 'shiny-' + i;
+                game.load.image(key, 'PNG/shiny/' + i + '.png');
+                crystalData.push({
+                    key: key,
+                    type: 'Shiny',
+                    number: i
+                });
+            }
+            
+            // 載入成功回調
+            game.load.onLoadComplete.add(function() {
+                console.log('✅ 所有水晶素材載入完成！');
+                console.log('💎 總計載入:', totalCrystals, '個水晶');
+            });
+        }
+
+        function create() {
+            // 設置背景
+            game.stage.backgroundColor = '#1a1a2e';
+            
+            // 標題文字
+            var titleText = game.add.text(400, 30, '💎 CraftPix 水晶素材展示', {
+                font: '24px Arial',
+                fill: '#ffffff',
+                align: 'center'
+            });
+            titleText.anchor.setTo(0.5, 0.5);
+            
+            // 創建水晶展示
+            createCrystalDisplay();
+            
+            // 創建浮動水晶效果
+            createFloatingCrystals();
+            
+            // 說明文字
+            var instructionText = game.add.text(400, 570, '點擊水晶收集！體驗真實的水晶素材效果！', {
+                font: '16px Arial',
+                fill: '#ecf0f1',
+                align: 'center'
+            });
+            instructionText.anchor.setTo(0.5, 0.5);
+        }
+        
+        function createCrystalDisplay() {
+            // 清除現有水晶
+            crystals.forEach(function(crystal) {
+                if (crystal.sprite) crystal.sprite.destroy();
+                if (crystal.text) crystal.text.destroy();
+            });
+            crystals = [];
+            
+            var cols = 10;
+            var rows = 4;
+            var startX = 80;
+            var startY = 120;
+            var spacingX = 70;
+            var spacingY = 60;
+            
+            for (var i = 0; i < totalCrystals; i++) {
+                var data = crystalData[i];
+                var col = i % cols;
+                var row = Math.floor(i / cols);
+                
+                var x = startX + col * spacingX;
+                var y = startY + row * spacingY;
+                
+                // 創建水晶精靈
+                var crystalSprite = game.add.sprite(x, y, data.key);
+                crystalSprite.anchor.setTo(0.5, 0.5);
+                crystalSprite.scale.setTo(0.15, 0.15); // 適合的水晶大小
+                
+                // 添加互動效果
+                crystalSprite.inputEnabled = true;
+                crystalSprite.events.onInputOver.add(function(sprite) {
+                    sprite.scale.setTo(0.2, 0.2);
+                    // 添加發光效果
+                    var tween = game.add.tween(sprite).to({alpha: 0.7}, 300, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+                }, this);
+                crystalSprite.events.onInputOut.add(function(sprite) {
+                    sprite.scale.setTo(0.15, 0.15);
+                    sprite.alpha = 1;
+                    game.tweens.removeFrom(sprite);
+                }, this);
+                crystalSprite.events.onInputDown.add(function(sprite) {
+                    // 收集效果
+                    var collectTween = game.add.tween(sprite.scale).to({x: 0.3, y: 0.3}, 200, Phaser.Easing.Back.Out, true);
+                    collectTween.onComplete.add(function() {
+                        var shrinkTween = game.add.tween(sprite.scale).to({x: 0, y: 0}, 300, Phaser.Easing.Back.In, true);
+                        shrinkTween.onComplete.add(function() {
+                            sprite.scale.setTo(0.15, 0.15);
+                            sprite.alpha = 1;
+                        });
+                    });
+                }, this);
+                
+                // 創建標籤文字
+                var labelText = game.add.text(x, y + 35, data.type + ' ' + data.number, {
+                    font: '10px Arial',
+                    fill: '#ffffff',
+                    align: 'center'
+                });
+                labelText.anchor.setTo(0.5, 0.5);
+                
+                crystals.push({
+                    sprite: crystalSprite,
+                    text: labelText,
+                    data: data
+                });
+            }
+        }
+        
+        function createFloatingCrystals() {
+            // 創建背景浮動水晶效果
+            for (var i = 0; i < 10; i++) {
+                var randomCrystal = crystalData[Math.floor(Math.random() * crystalData.length)];
+                var floatingCrystal = game.add.sprite(
+                    Math.random() * 800,
+                    Math.random() * 600,
+                    randomCrystal.key
+                );
+                floatingCrystal.anchor.setTo(0.5, 0.5);
+                floatingCrystal.scale.setTo(0.05, 0.05);
+                floatingCrystal.alpha = 0.3;
+                
+                // 添加浮動動畫
+                var floatTween = game.add.tween(floatingCrystal).to({
+                    y: floatingCrystal.y + (Math.random() * 100 - 50)
+                }, 3000 + Math.random() * 2000, Phaser.Easing.Sinusoidal.InOut, true, 0, -1, true);
+                
+                // 移除旋轉動畫，保持水晶靜止
+                
+                floatingCrystals.push(floatingCrystal);
+            }
+        }
+
+        function update() {
+            // 遊戲更新邏輯
+        }
+
+        // 水晶名稱數據
+        var crystalNames = {
+            simple: [
+                "藍寶石", "紅寶石", "綠寶石", "紫水晶", "黃水晶",
+                "白水晶", "粉水晶", "黑曜石", "瑪瑙", "碧玉",
+                "石榴石", "橄欖石", "海藍寶", "月光石", "日光石",
+                "虎眼石", "貓眼石", "蛋白石", "珍珠石", "琥珀石"
+            ],
+            shiny: [
+                "鑽石", "藍鑽", "紅鑽", "綠鑽", "黃鑽",
+                "白鑽", "粉鑽", "黑鑽", "彩鑽", "星光鑽",
+                "皇家藍寶", "血紅寶石", "祖母綠", "帝王紫晶", "金黃水晶",
+                "極光水晶", "彩虹水晶", "星辰石", "月亮石", "太陽石"
+            ]
+        };
+
+        function showSimpleList() {
+            displayCrystalList('simple');
+        }
+
+        function showShinyList() {
+            displayCrystalList('shiny');
+        }
+
+        function showAllList() {
+            displayCrystalList('all');
+        }
+
+        function displayCrystalList(type) {
+            var container = document.getElementById('crystal-names-list');
+            container.innerHTML = '';
+            container.className = 'crystal-names-list';
+
+            if (type === 'simple' || type === 'all') {
+                for (var i = 0; i < crystalNames.simple.length; i++) {
+                    var item = createCrystalItem('simple', i + 1, crystalNames.simple[i]);
+                    container.appendChild(item);
+                }
+            }
+
+            if (type === 'shiny' || type === 'all') {
+                for (var i = 0; i < crystalNames.shiny.length; i++) {
+                    var item = createCrystalItem('shiny', i + 1, crystalNames.shiny[i]);
+                    container.appendChild(item);
+                }
+            }
+        }
+
+        function createCrystalItem(type, number, name) {
+            var item = document.createElement('div');
+            item.className = 'crystal-item';
+
+            var img = document.createElement('img');
+            img.src = 'PNG/' + type + '/' + number + '.png';
+            img.alt = name;
+            img.onerror = function() {
+                this.style.display = 'none';
+            };
+
+            var nameDiv = document.createElement('div');
+            nameDiv.className = 'name';
+            nameDiv.textContent = name;
+
+            var typeDiv = document.createElement('div');
+            typeDiv.className = 'type';
+            typeDiv.textContent = type.charAt(0).toUpperCase() + type.slice(1) + ' ' + number;
+
+            item.appendChild(img);
+            item.appendChild(nameDiv);
+            item.appendChild(typeDiv);
+
+            return item;
+        }
+
+        // 頁面載入完成後顯示所有水晶
+        window.onload = function() {
+            setTimeout(function() {
+                showAllList();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

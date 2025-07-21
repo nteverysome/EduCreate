@@ -100,7 +100,7 @@
 
         var buttons = [];
         var currentPage = 0;
-        var buttonsPerPage = 8;
+        var buttonsPerPage = 40;
         var totalButtons = 40;
         var buttonData = [];
 
@@ -175,12 +175,12 @@
             var startIndex = currentPage * buttonsPerPage;
             var endIndex = Math.min(startIndex + buttonsPerPage, totalButtons);
             
-            var cols = 4;
-            var rows = 2;
-            var startX = 150;
-            var startY = 150;
-            var spacingX = 150;
-            var spacingY = 120;
+            var cols = 10;
+            var rows = 4;
+            var startX = 80;
+            var startY = 120;
+            var spacingX = 70;
+            var spacingY = 60;
             
             for (var i = startIndex; i < endIndex; i++) {
                 var data = buttonData[i];
@@ -193,21 +193,21 @@
                 // 創建按鈕精靈
                 var buttonSprite = game.add.sprite(x, y, data.key);
                 buttonSprite.anchor.setTo(0.5, 0.5);
-                buttonSprite.scale.setTo(0.8, 0.8);
+                buttonSprite.scale.setTo(0.12, 0.12);
                 
                 // 添加互動效果
                 buttonSprite.inputEnabled = true;
                 buttonSprite.events.onInputOver.add(function(sprite) {
-                    sprite.scale.setTo(0.9, 0.9);
+                    sprite.scale.setTo(0.18, 0.18);
                 }, this);
                 buttonSprite.events.onInputOut.add(function(sprite) {
-                    sprite.scale.setTo(0.8, 0.8);
+                    sprite.scale.setTo(0.12, 0.12);
                 }, this);
                 buttonSprite.events.onInputDown.add(function(sprite) {
-                    sprite.scale.setTo(0.7, 0.7);
+                    sprite.scale.setTo(0.09, 0.09);
                 }, this);
                 buttonSprite.events.onInputUp.add(function(sprite) {
-                    sprite.scale.setTo(0.9, 0.9);
+                    sprite.scale.setTo(0.18, 0.18);
                 }, this);
                 
                 // 創建標籤文字

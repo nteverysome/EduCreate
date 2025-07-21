@@ -52,10 +52,11 @@ craftpix-779104-free-buttons-2d-game-objects.zip
 ```
 
 ### ✅ 互動功能測試
-- **滑鼠懸停**: ✅ 正常
-- **點擊效果**: ✅ 正常
-- **縮放動畫**: ✅ 流暢
+- **滑鼠懸停**: ✅ 正常 (0.5 → 0.6 縮放)
+- **點擊效果**: ✅ 正常 (0.6 → 0.4 縮放)
+- **縮放動畫**: ✅ 流暢過渡
 - **事件處理**: ✅ 完美支援
+- **按鈕大小**: ✅ 已優化為 0.5 倍縮放 (適合遊戲界面)
 
 ## 🎮 在 EduCreate 飛機遊戲中的應用建議
 
@@ -90,6 +91,7 @@ game.load.image('moon-theme-btn', 'assets/external-resources/button-assets/PNG/s
 - **專業外觀**: 替代原本的純色按鈕
 - **一致性**: 統一的設計風格
 - **吸引力**: 提升遊戲視覺品質
+- **尺寸優化**: 調整為 0.5 倍縮放，適合遊戲界面
 
 ### 🚀 功能增強
 - **更好的用戶體驗**: 清晰的視覺回饋
@@ -124,8 +126,23 @@ function preload() {
 function create() {
     var startButton = game.add.sprite(400, 300, 'btn-start');
     startButton.anchor.setTo(0.5, 0.5);
+    startButton.scale.setTo(0.5, 0.5); // 調整為適合的大小
     startButton.inputEnabled = true;
-    startButton.events.onInputDown.add(startGame, this);
+
+    // 添加互動效果
+    startButton.events.onInputOver.add(function(sprite) {
+        sprite.scale.setTo(0.6, 0.6); // 懸停時放大
+    }, this);
+    startButton.events.onInputOut.add(function(sprite) {
+        sprite.scale.setTo(0.5, 0.5); // 離開時恢復
+    }, this);
+    startButton.events.onInputDown.add(function(sprite) {
+        sprite.scale.setTo(0.4, 0.4); // 點擊時縮小
+        startGame(); // 執行遊戲邏輯
+    }, this);
+    startButton.events.onInputUp.add(function(sprite) {
+        sprite.scale.setTo(0.6, 0.6); // 釋放時恢復懸停大小
+    }, this);
 }
 ```
 
