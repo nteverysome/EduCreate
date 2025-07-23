@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phaser 3 飛機選擇器 - 現代化版本</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #3498db, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            background: rgba(52, 73, 94, 0.8);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            border: 2px solid #3498db;
+        }
+        
+        #game-container {
+            border: 3px solid #34495e;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: #2c3e50;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            background: rgba(52, 73, 94, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .controls h3 {
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .control-item {
+            background: rgba(44, 62, 80, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .control-item strong {
+            color: #f39c12;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 100;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .version-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                margin: 20px 10px;
+                padding: 15px;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛩️ Phaser 3 飛機選擇器</h1>
+        <p>現代化的飛行射擊遊戲體驗</p>
+        <div class="status" id="game-status">
+            <div class="spinner"></div>
+            正在載入遊戲引擎...
+        </div>
+    </div>
+    
+    <div id="game-container">
+        <div class="loading" id="loading-screen">
+            <div class="spinner"></div>
+            <p>載入中...</p>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <h3>🎮 遊戲控制</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <strong>移動：</strong>方向鍵 ↑↓←→
+            </div>
+            <div class="control-item">
+                <strong>射擊：</strong>空白鍵 SPACE
+            </div>
+            <div class="control-item">
+                <strong>重新開始：</strong>R 鍵
+            </div>
+            <div class="control-item">
+                <strong>飛機切換：</strong>數字鍵 1-7
+            </div>
+        </div>
+        <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.8;">
+            體驗 7 種不同的二戰飛機，每架都有獨特的性能和特色！
+        </p>
+    </div>
+    
+    <div class="version-info">
+        Phaser 3 + Vite + TypeScript
+    </div>
+    
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
