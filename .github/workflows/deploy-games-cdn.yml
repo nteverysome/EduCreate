@@ -1,0 +1,254 @@
+name: Deploy Games to CDN
+
+on:
+  push:
+    paths: 
+      - 'games/**'
+      - 'vercel-deployment/games-cdn/**'
+    branches: [main, develop]
+  pull_request:
+    paths:
+      - 'games/**'
+    branches: [main]
+
+env:
+  NODE_VERSION: '18'
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_GAMES_PROJECT_ID }}
+
+jobs:
+  # 檢測變更的遊戲
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      airplane-changed: ${{ steps.changes.outputs.airplane }}
+      match-changed: ${{ steps.changes.outputs.match }}
+      quiz-changed: ${{ steps.changes.outputs.quiz }}
+      any-game-changed: ${{ steps.changes.outputs.any-game }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            airplane:
+              - 'games/airplane-game/**'
+            match:
+              - 'games/match-game/**'
+            quiz:
+              - 'games/quiz-game/**'
+            any-game:
+              - 'games/**'
+
+  # 構建飛機遊戲
+  build-airplane-game:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.airplane-changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'games/airplane-game/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd games/airplane-game
+          npm ci
+
+      - name: Run tests
+        run: |
+          cd games/airplane-game
+          npm run test:unit || true
+
+      - name: Build for production
+        run: |
+          cd games/airplane-game
+          npm run build
+        env:
+          NODE_ENV: production
+          VITE_CDN_URL: https://games.educreat.vercel.app
+          VITE_API_URL: https://educreat.vercel.app/api
+
+      - name: Optimize build
+        run: |
+          cd games/airplane-game
+          # 壓縮 JavaScript 文件
+          npx terser dist/main-*.js -o dist/main-optimized.js --compress --mangle
+          # 優化圖片資源
+          npx imagemin dist/assets/**/*.{png,jpg,jpeg} --out-dir=dist/assets/optimized/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: airplane-game-build
+          path: games/airplane-game/dist/
+          retention-days: 7
+
+  # 構建配對遊戲
+  build-match-game:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.match-changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'games/match-game/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd games/match-game
+          npm ci
+
+      - name: Build for production
+        run: |
+          cd games/match-game
+          npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: match-game-build
+          path: games/match-game/dist/
+          retention-days: 7
+
+  # 部署到 Vercel CDN
+  deploy-to-cdn:
+    needs: [detect-changes, build-airplane-game, build-match-game]
+    if: always() && needs.detect-changes.outputs.any-game-changed == 'true'
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Create deployment directory
+        run: |
+          mkdir -p deployment/games-cdn
+          cp -r vercel-deployment/games-cdn/* deployment/games-cdn/
+
+      - name: Download airplane game build
+        if: needs.detect-changes.outputs.airplane-changed == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: airplane-game-build
+          path: deployment/games-cdn/airplane-game/dist/
+
+      - name: Download match game build
+        if: needs.detect-changes.outputs.match-changed == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: match-game-build
+          path: deployment/games-cdn/match-game/dist/
+
+      - name: Generate deployment manifest
+        run: |
+          cat > deployment/games-cdn/deployment-manifest.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "branch": "${{ github.ref_name }}",
+            "games": {
+              "airplane": {
+                "updated": ${{ needs.detect-changes.outputs.airplane-changed }},
+                "version": "1.0.${{ github.run_number }}"
+              },
+              "match": {
+                "updated": ${{ needs.detect-changes.outputs.match-changed }},
+                "version": "1.0.${{ github.run_number }}"
+              }
+            }
+          }
+          EOF
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: |
+          cd deployment/games-cdn
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
+          fi
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_GAMES_PROJECT_ID }}
+
+      - name: Update deployment status
+        if: success()
+        run: |
+          echo "🚀 Games CDN deployed successfully!"
+          echo "URL: ${{ steps.deploy.outputs.url }}"
+
+  # 部署後測試
+  post-deploy-tests:
+    needs: deploy-to-cdn
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run CDN health checks
+        run: |
+          # 檢查遊戲配置 API
+          curl -f "https://games.educreat.vercel.app/api/games/config" || exit 1
+          
+          # 檢查飛機遊戲可用性
+          curl -f "https://games.educreat.vercel.app/airplane-game/index.html" || exit 1
+          
+          echo "✅ CDN health checks passed"
+
+      - name: Run E2E tests
+        run: |
+          npx playwright test tests/cdn-games-e2e.spec.ts
+        env:
+          GAMES_CDN_URL: https://games.educreat.vercel.app
+
+  # 通知部署結果
+  notify-deployment:
+    needs: [deploy-to-cdn, post-deploy-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify success
+        if: needs.deploy-to-cdn.result == 'success' && needs.post-deploy-tests.result == 'success'
+        run: |
+          echo "🎉 Games CDN deployment completed successfully!"
+          
+      - name: Notify failure
+        if: needs.deploy-to-cdn.result == 'failure' || needs.post-deploy-tests.result == 'failure'
+        run: |
+          echo "❌ Games CDN deployment failed!"
+          exit 1

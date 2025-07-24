@@ -9,7 +9,7 @@ interface QuizTemplateProps {
   onSave?: (data: any) => void;
 }
 
-const QuizTemplate = ({ mode = 'preview', data, onSave }: QuizTemplateProps) {
+const QuizTemplate = ({ mode = 'preview', data, onSave }: QuizTemplateProps) => {
   const router = useRouter();
   const [templateData, setTemplateData] = useState(data || {
     questions: [],

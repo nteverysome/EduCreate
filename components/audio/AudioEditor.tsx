@@ -30,7 +30,7 @@ const AudioEditor = ({
   onCancel,
   className = '',
   'data-testid': testId = 'audio-editor'
-}: AudioEditorProps) {
+}: AudioEditorProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [editState, setEditState] = useState<AudioEditState>({

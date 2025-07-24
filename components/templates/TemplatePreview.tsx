@@ -11,7 +11,7 @@ interface TemplatePreviewProps {
   onEdit: () => void;
 }
 
-const TemplatePreview = ({ templateType, previewData, onSave, onEdit }: TemplatePreviewProps) {
+const TemplatePreview = ({ templateType, previewData, onSave, onEdit }: TemplatePreviewProps) => {
   const router = useRouter();
   const [previewMode, setPreviewMode] = useState<'student' | 'teacher'>('student');
 

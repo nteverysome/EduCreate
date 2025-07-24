@@ -1,0 +1,206 @@
+{
+  "timestamp": "2025-07-24T08:48:56.051Z",
+  "summary": {
+    "totalFiles": 9,
+    "totalSize": 11815164,
+    "totalSizeFormatted": "11.27 MB"
+  },
+  "javascript": {
+    "totalFiles": 4,
+    "totalSize": 1508172,
+    "files": [
+      {
+        "name": "managers-BDCOAzdU.js",
+        "path": "chunks\\managers-BDCOAzdU.js",
+        "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\managers-BDCOAzdU.js",
+        "size": 11382,
+        "sizeFormatted": "11.12 KB",
+        "extension": ".js",
+        "directory": "chunks",
+        "isLarge": false,
+        "isVeryLarge": false
+      },
+      {
+        "name": "phaser-CjIEy6U-.js",
+        "path": "chunks\\phaser-CjIEy6U-.js",
+        "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\phaser-CjIEy6U-.js",
+        "size": 1481286,
+        "sizeFormatted": "1.41 MB",
+        "extension": ".js",
+        "directory": "chunks",
+        "isLarge": true,
+        "isVeryLarge": true
+      },
+      {
+        "name": "scenes-D5GcjUem.js",
+        "path": "chunks\\scenes-D5GcjUem.js",
+        "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\scenes-D5GcjUem.js",
+        "size": 11270,
+        "sizeFormatted": "11.01 KB",
+        "extension": ".js",
+        "directory": "chunks",
+        "isLarge": false,
+        "isVeryLarge": false
+      },
+      {
+        "name": "main-D-PoGkIq.js",
+        "path": "main-D-PoGkIq.js",
+        "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\main-D-PoGkIq.js",
+        "size": 4234,
+        "sizeFormatted": "4.13 KB",
+        "extension": ".js",
+        "directory": ".",
+        "isLarge": false,
+        "isVeryLarge": false
+      }
+    ],
+    "totalSizeFormatted": "1.44 MB",
+    "largeFiles": [
+      {
+        "name": "phaser-CjIEy6U-.js",
+        "path": "chunks\\phaser-CjIEy6U-.js",
+        "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\phaser-CjIEy6U-.js",
+        "size": 1481286,
+        "sizeFormatted": "1.41 MB",
+        "extension": ".js",
+        "directory": "chunks",
+        "isLarge": true,
+        "isVeryLarge": true
+      }
+    ],
+    "veryLargeFiles": [
+      {
+        "name": "phaser-CjIEy6U-.js",
+        "path": "chunks\\phaser-CjIEy6U-.js",
+        "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\phaser-CjIEy6U-.js",
+        "size": 1481286,
+        "sizeFormatted": "1.41 MB",
+        "extension": ".js",
+        "directory": "chunks",
+        "isLarge": true,
+        "isVeryLarge": true
+      }
+    ]
+  },
+  "assets": {
+    "totalFiles": 0,
+    "totalSize": 0,
+    "files": [],
+    "byType": {},
+    "totalSizeFormatted": "0 B"
+  },
+  "suggestions": [
+    {
+      "type": "critical",
+      "category": "JavaScript",
+      "title": "發現超大 JavaScript 文件",
+      "description": "有 1 個文件超過 1MB",
+      "files": [
+        "phaser-CjIEy6U-.js"
+      ],
+      "recommendations": [
+        "考慮使用動態導入 (dynamic import) 進行代碼分割",
+        "檢查是否包含了不必要的依賴",
+        "使用 Tree Shaking 移除未使用的代碼",
+        "考慮使用 Webpack Bundle Analyzer 進行詳細分析"
+      ]
+    },
+    {
+      "type": "warning",
+      "category": "JavaScript",
+      "title": "發現大型 JavaScript 文件",
+      "description": "有 1 個文件超過 500KB",
+      "files": [
+        "phaser-CjIEy6U-.js"
+      ],
+      "recommendations": [
+        "考慮代碼分割以改善載入性能",
+        "檢查是否可以延遲載入某些功能",
+        "優化第三方庫的使用"
+      ]
+    }
+  ],
+  "allFiles": [
+    {
+      "name": "managers-BDCOAzdU.js",
+      "path": "chunks\\managers-BDCOAzdU.js",
+      "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\managers-BDCOAzdU.js",
+      "size": 11382,
+      "sizeFormatted": "11.12 KB",
+      "extension": ".js",
+      "directory": "chunks"
+    },
+    {
+      "name": "managers-BDCOAzdU.js.map",
+      "path": "chunks\\managers-BDCOAzdU.js.map",
+      "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\managers-BDCOAzdU.js.map",
+      "size": 37266,
+      "sizeFormatted": "36.39 KB",
+      "extension": ".map",
+      "directory": "chunks"
+    },
+    {
+      "name": "phaser-CjIEy6U-.js",
+      "path": "chunks\\phaser-CjIEy6U-.js",
+      "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\phaser-CjIEy6U-.js",
+      "size": 1481286,
+      "sizeFormatted": "1.41 MB",
+      "extension": ".js",
+      "directory": "chunks"
+    },
+    {
+      "name": "phaser-CjIEy6U-.js.map",
+      "path": "chunks\\phaser-CjIEy6U-.js.map",
+      "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\phaser-CjIEy6U-.js.map",
+      "size": 10221962,
+      "sizeFormatted": "9.75 MB",
+      "extension": ".map",
+      "directory": "chunks"
+    },
+    {
+      "name": "scenes-D5GcjUem.js",
+      "path": "chunks\\scenes-D5GcjUem.js",
+      "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\scenes-D5GcjUem.js",
+      "size": 11270,
+      "sizeFormatted": "11.01 KB",
+      "extension": ".js",
+      "directory": "chunks"
+    },
+    {
+      "name": "scenes-D5GcjUem.js.map",
+      "path": "chunks\\scenes-D5GcjUem.js.map",
+      "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\chunks\\scenes-D5GcjUem.js.map",
+      "size": 33615,
+      "sizeFormatted": "32.83 KB",
+      "extension": ".map",
+      "directory": "chunks"
+    },
+    {
+      "name": "index.html",
+      "path": "index.html",
+      "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\index.html",
+      "size": 7904,
+      "sizeFormatted": "7.72 KB",
+      "extension": ".html",
+      "directory": "."
+    },
+    {
+      "name": "main-D-PoGkIq.js",
+      "path": "main-D-PoGkIq.js",
+      "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\main-D-PoGkIq.js",
+      "size": 4234,
+      "sizeFormatted": "4.13 KB",
+      "extension": ".js",
+      "directory": "."
+    },
+    {
+      "name": "main-D-PoGkIq.js.map",
+      "path": "main-D-PoGkIq.js.map",
+      "fullPath": "C:\\Users\\Administrator\\Desktop\\EduCreate\\games\\airplane-game\\dist\\main-D-PoGkIq.js.map",
+      "size": 6245,
+      "sizeFormatted": "6.1 KB",
+      "extension": ".map",
+      "directory": "."
+    }
+  ]
+}

@@ -39,7 +39,7 @@ const EnhancedDragDropUploader = ({
   enableFormatConversion = false,
   className = '',
   'data-testid': testId = 'enhanced-drag-drop-uploader'
-}: EnhancedDragDropUploaderProps) {
+}: EnhancedDragDropUploaderProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<UploadFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);

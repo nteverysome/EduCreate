@@ -9,7 +9,7 @@ interface MatchingTemplateProps {
   onSave?: (data: any) => void;
 }
 
-const MatchingTemplate = ({ mode = 'preview', data, onSave }: MatchingTemplateProps) {
+const MatchingTemplate = ({ mode = 'preview', data, onSave }: MatchingTemplateProps) => {
   const router = useRouter();
   const [templateData, setTemplateData] = useState(data || {
     questions: [],

@@ -75,6 +75,44 @@ export default function HomePage() {
               <p>時間戳：{new Date().toLocaleTimeString()}</p>
             </div>
 
+            {/* 記憶科學遊戲中心 - 遊戲切換器入口 */}
+            <div className="bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow text-white" data-testid="feature-game-switcher">
+              <div className="text-4xl mb-4">🎮</div>
+              <h3 className="text-xl font-semibold mb-3">記憶科學遊戲中心</h3>
+              <p className="text-purple-100 mb-6">
+                動態切換多種記憶科學遊戲，支援 AirplaneCollisionGame 等已完成遊戲，60fps 世界級性能
+              </p>
+              <Link
+                href="/games/switcher"
+                className="inline-flex items-center bg-white text-purple-600 font-medium px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors"
+                data-testid="game-switcher-link"
+              >
+                進入遊戲中心
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            {/* AirplaneCollisionGame - 世界級性能遊戲 */}
+            <div className="bg-gradient-to-br from-green-500 to-teal-600 rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow text-white" data-testid="feature-airplane-game">
+              <div className="text-4xl mb-4">✈️</div>
+              <h3 className="text-xl font-semibold mb-3">飛機碰撞遊戲</h3>
+              <p className="text-green-100 mb-6">
+                世界級 60fps 性能，記憶體使用僅 5.1%，基於記憶科學原理的英語詞彙學習遊戲
+              </p>
+              <Link
+                href="/games/airplane"
+                className="inline-flex items-center bg-white text-green-600 font-medium px-4 py-2 rounded-lg hover:bg-green-50 transition-colors"
+                data-testid="airplane-game-link"
+              >
+                立即遊戲
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
             {/* 智能排序系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-smart-sorting">
               <div className="text-4xl mb-4">🔄</div>
@@ -210,7 +248,83 @@ export default function HomePage() {
               </Link>
             </div>
 
+            {/* Airplane Collision Game - 新增功能 - 強制更新 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow border-2 border-blue-200" data-testid="feature-airplane-game">
+              <div className="text-4xl mb-4">🛩️</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">🛩️ Airplane Collision Game</h3>
+              <p className="text-gray-600 mb-6">
+                基於主動回憶記憶科學原理的飛機碰撞遊戲，支援 GEPT 分級詞彙、多模態特效、觸覺反饋
+              </p>
+              <div className="flex flex-col space-y-2 mb-6">
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">🧠</span>
+                  <span>主動回憶 + 視覺記憶 + 模式識別</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">🎯</span>
+                  <span>GEPT 三級詞彙分級系統</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">✨</span>
+                  <span>音效、視覺、觸覺三重特效</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">📊</span>
+                  <span>實時學習數據追蹤</span>
+                </div>
+              </div>
+              <Link
+                href="/games/airplane"
+                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
+                data-testid="airplane-game-link"
+              >
+                立即體驗飛機遊戲
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
 
+            {/* Airplane Collision Game (Vite iframe 版本) - 新技術架構 */}
+            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow border-2 border-purple-200" data-testid="feature-airplane-iframe-game">
+              <div className="text-4xl mb-4">⚡</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">⚡ Airplane Game (Vite 版本)</h3>
+              <p className="text-gray-600 mb-6">
+                使用 Vite + Phaser 3 技術架構的飛機碰撞遊戲，通過 iframe 嵌入，提供極致的遊戲性能和開發體驗
+              </p>
+              <div className="flex flex-col space-y-2 mb-6">
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">⚡</span>
+                  <span>Vite 極速熱重載 + WebGL 硬體加速</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">🎮</span>
+                  <span>Phaser 3.90.0 遊戲引擎</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">🌙</span>
+                  <span>月亮主題視差背景系統</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">📱</span>
+                  <span>iframe 響應式嵌入 + 父子通信</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span className="mr-2">🔧</span>
+                  <span>完整的錯誤處理 + 全螢幕支援</span>
+                </div>
+              </div>
+              <Link
+                href="/games/airplane-iframe"
+                className="inline-flex items-center text-purple-600 font-medium hover:text-purple-700"
+                data-testid="airplane-iframe-game-link"
+              >
+                體驗 Vite 版本遊戲
+                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
 
             {/* 無障礙支援系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow border-2 border-purple-200" data-testid="feature-accessibility">

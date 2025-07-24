@@ -27,7 +27,7 @@ export default defineConfig({
   /* 全局測試配置 */
   use: {
     /* 基礎 URL */
-    baseURL: 'http://localhost:3002',
+    baseURL: 'http://localhost:3000',
     
     /* 收集失敗測試的追蹤信息 */
     trace: 'on-first-retry',

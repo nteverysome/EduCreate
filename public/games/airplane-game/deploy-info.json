@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "buildTime": "2025-07-24T08:45:03.222Z",
+  "environment": "development",
+  "nodeVersion": "v24.4.0",
+  "platform": "win32",
+  "arch": "x64",
+  "git": {
+    "branch": "",
+    "commit": "",
+    "tag": ""
+  }
+}

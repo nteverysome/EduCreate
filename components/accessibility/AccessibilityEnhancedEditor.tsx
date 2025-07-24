@@ -34,7 +34,7 @@ const AccessibilityEnhancedEditor = ({
   onAccessibilityChange,
   className = '',
   'data-testid': testId = 'accessibility-enhanced-editor'
-}: AccessibilityEnhancedEditorProps) {
+}: AccessibilityEnhancedEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [isEditorFocused, setIsEditorFocused] = useState(false);
   const [showAccessibilityPanel, setShowAccessibilityPanel] = useState(false);

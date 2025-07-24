@@ -62,7 +62,7 @@ const EnhancedContentValidator = ({
   customRules = [],
   className = '',
   'data-testid': testId = 'enhanced-content-validator'
-}: EnhancedContentValidatorProps) {
+}: EnhancedContentValidatorProps) => {
   const [validationResult, setValidationResult] = useState<EnhancedValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [activeTab, setActiveTab] = useState<'errors' | 'quality' | 'suggestions' | 'rules'>('errors');

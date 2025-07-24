@@ -47,6 +47,13 @@ export interface MemoryConfiguration {
   };
 }
 
+export interface MemoryMetrics {
+  responseTime: number[];
+  accuracyRate: number;
+  spacedRepetitionSchedule: Map<string, number>;
+  cognitiveLoadLevel: number;
+}
+
 export class MemoryEnhancementEngine {
   private memoryTypes: Map<string, MemoryType> = new Map();
   

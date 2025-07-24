@@ -1,0 +1,470 @@
+'use client';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ChevronDownIcon, PlayIcon, CogIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+
+// 遊戲配置類型定義
+interface GameConfig {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string;
+  url: string;
+  type: 'main' | 'iframe' | 'vite';
+  memoryType: string;
+  geptLevels: ('elementary' | 'intermediate' | 'advanced')[];
+  status: 'completed' | 'development' | 'planned';
+  icon: string;
+  estimatedLoadTime: number; // ms
+}
+
+// 遊戲狀態類型
+interface GameState {
+  score: number;
+  level: string;
+  progress: number;
+  timeSpent: number;
+}
+
+// 組件 Props
+interface GameSwitcherProps {
+  defaultGame?: string;
+  geptLevel?: 'elementary' | 'intermediate' | 'advanced';
+  onGameChange?: (gameId: string) => void;
+  onGameStateUpdate?: (gameId: string, state: GameState) => void;
+  className?: string;
+}
+
+// 遊戲配置數據
+const GAMES_CONFIG: GameConfig[] = [
+  {
+    id: 'airplane-main',
+    name: 'airplane',
+    displayName: '飛機碰撞遊戲',
+    description: '通過飛機碰撞雲朵學習英語詞彙，基於主動回憶和視覺記憶原理',
+    url: '/games/airplane',
+    type: 'main',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '✈️',
+    estimatedLoadTime: 800
+  },
+  {
+    id: 'airplane-iframe',
+    name: 'airplane',
+    displayName: '飛機遊戲 (iframe版)',
+    description: 'iframe 嵌入版本的飛機碰撞遊戲',
+    url: '/games/airplane-iframe',
+    type: 'iframe',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🎮',
+    estimatedLoadTime: 1000
+  },
+  {
+    id: 'airplane-vite',
+    name: 'airplane',
+    displayName: '飛機遊戲 (Vite版)',
+    description: 'Vite 獨立服務器版本的飛機碰撞遊戲',
+    url: 'http://localhost:3001/games/airplane-game/',
+    type: 'vite',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '⚡',
+    estimatedLoadTime: 600
+  },
+  // 未來遊戲預留位置
+  {
+    id: 'matching-pairs',
+    name: 'matching',
+    displayName: '配對遊戲',
+    description: '通過配對卡片強化視覺記憶和關聯學習',
+    url: '/games/matching-pairs',
+    type: 'main',
+    memoryType: '空間視覺記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'development',
+    icon: '🃏',
+    estimatedLoadTime: 700
+  },
+  {
+    id: 'quiz-game',
+    name: 'quiz',
+    displayName: '問答遊戲',
+    description: '基於主動回憶的快速問答學習',
+    url: '/games/quiz',
+    type: 'main',
+    memoryType: '基礎記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'development',
+    icon: '❓',
+    estimatedLoadTime: 500
+  },
+  {
+    id: 'sequence-game',
+    name: 'sequence',
+    displayName: '序列遊戲',
+    description: '通過序列記憶強化學習效果',
+    url: '/games/sequence',
+    type: 'main',
+    memoryType: '重構邏輯記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'planned',
+    icon: '🔢',
+    estimatedLoadTime: 600
+  },
+  {
+    id: 'flashcard-game',
+    name: 'flashcard',
+    displayName: '閃卡遊戲',
+    description: '經典閃卡學習，支援間隔重複算法',
+    url: '/games/flashcard',
+    type: 'main',
+    memoryType: '基礎記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'planned',
+    icon: '📚',
+    estimatedLoadTime: 400
+  }
+];
+
+const GameSwitcher: React.FC<GameSwitcherProps> = ({
+  defaultGame = 'airplane-main',
+  geptLevel = 'elementary',
+  onGameChange,
+  onGameStateUpdate,
+  className = ''
+}) => {
+  // 狀態管理
+  const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingProgress, setLoadingProgress] = useState<number>(0);
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
+  const [gameStates, setGameStates] = useState<Record<string, GameState>>({});
+  const [currentGeptLevel, setCurrentGeptLevel] = useState(geptLevel);
+  
+  // Refs
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout>();
+  const progressIntervalRef = useRef<NodeJS.Timeout>();
+
+  // 獲取當前遊戲配置
+  const currentGame = GAMES_CONFIG.find(game => game.id === currentGameId);
+  
+  // 獲取可用遊戲（已完成的遊戲）
+  const availableGames = GAMES_CONFIG.filter(game => game.status === 'completed');
+  
+  // 獲取開發中遊戲
+  const developmentGames = GAMES_CONFIG.filter(game => game.status === 'development');
+
+  // 載入進度模擬
+  const simulateLoading = useCallback((estimatedTime: number) => {
+    setIsLoading(true);
+    setLoadingProgress(0);
+    
+    const progressStep = 100 / (estimatedTime / 50); // 每50ms更新一次
+    
+    progressIntervalRef.current = setInterval(() => {
+      setLoadingProgress(prev => {
+        const next = prev + progressStep + Math.random() * 5; // 添加隨機性
+        return Math.min(next, 95); // 最多到95%，等待實際載入完成
+      });
+    }, 50);
+
+    loadingTimeoutRef.current = setTimeout(() => {
+      setLoadingProgress(100);
+      setTimeout(() => {
+        setIsLoading(false);
+        setLoadingProgress(0);
+      }, 200);
+    }, estimatedTime);
+  }, []);
+
+  // 切換遊戲
+  const switchGame = useCallback((gameId: string) => {
+    if (gameId === currentGameId || isLoading) return;
+    
+    const game = GAMES_CONFIG.find(g => g.id === gameId);
+    if (!game || game.status !== 'completed') return;
+
+    // 清理之前的計時器
+    if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+
+    // 開始載入新遊戲
+    simulateLoading(game.estimatedLoadTime);
+    
+    setCurrentGameId(gameId);
+    setIsDropdownOpen(false);
+    
+    // 通知父組件
+    onGameChange?.(gameId);
+    
+    console.log(`🎮 切換到遊戲: ${game.displayName} (${game.type})`);
+  }, [currentGameId, isLoading, simulateLoading, onGameChange]);
+
+  // iframe 載入完成處理
+  const handleIframeLoad = useCallback(() => {
+    if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    
+    setLoadingProgress(100);
+    setTimeout(() => {
+      setIsLoading(false);
+      setLoadingProgress(0);
+    }, 100);
+    
+    console.log(`✅ 遊戲載入完成: ${currentGame?.displayName}`);
+  }, [currentGame]);
+
+  // iframe 消息處理
+  const handleIframeMessage = useCallback((event: MessageEvent) => {
+    if (!currentGame) return;
+    
+    try {
+      const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+      
+      if (data.type === 'GAME_STATE_UPDATE') {
+        const newState: GameState = {
+          score: data.score || 0,
+          level: data.level || currentGeptLevel,
+          progress: data.progress || 0,
+          timeSpent: data.timeSpent || 0
+        };
+        
+        setGameStates(prev => ({
+          ...prev,
+          [currentGameId]: newState
+        }));
+        
+        onGameStateUpdate?.(currentGameId, newState);
+      }
+    } catch (error) {
+      console.warn('處理 iframe 消息時出錯:', error);
+    }
+  }, [currentGame, currentGameId, currentGeptLevel, onGameStateUpdate]);
+
+  // 設置消息監聽
+  useEffect(() => {
+    window.addEventListener('message', handleIframeMessage);
+    return () => window.removeEventListener('message', handleIframeMessage);
+  }, [handleIframeMessage]);
+
+  // 清理計時器
+  useEffect(() => {
+    return () => {
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+      if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+    };
+  }, []);
+
+  // 獲取狀態指示器顏色
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'text-green-600';
+      case 'development': return 'text-yellow-600';
+      case 'planned': return 'text-gray-400';
+      default: return 'text-gray-400';
+    }
+  };
+
+  // 獲取狀態文字
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'completed': return '已完成';
+      case 'development': return '開發中';
+      case 'planned': return '計劃中';
+      default: return '未知';
+    }
+  };
+
+  if (!currentGame) {
+    return (
+      <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
+        <div className="text-center">
+          <div className="text-gray-500 text-lg">找不到指定的遊戲</div>
+          <div className="text-gray-400 text-sm mt-2">遊戲 ID: {currentGameId}</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`game-switcher ${className}`}>
+      {/* 遊戲選擇器標頭 */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4">
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            {/* 當前遊戲信息 */}
+            <div className="flex items-center space-x-3">
+              <div className="text-2xl">{currentGame.icon}</div>
+              <div>
+                <h3 className="font-semibold text-gray-900">{currentGame.displayName}</h3>
+                <p className="text-sm text-gray-600">{currentGame.memoryType}</p>
+              </div>
+              <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(currentGame.status)}`}>
+                {getStatusText(currentGame.status)}
+              </div>
+            </div>
+
+            {/* 遊戲選擇下拉選單 */}
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={isLoading}
+              >
+                <PlayIcon className="w-4 h-4" />
+                <span>切換遊戲</span>
+                <ChevronDownIcon className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* 下拉選單 */}
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="p-2">
+                    <div className="text-sm font-medium text-gray-700 px-3 py-2">可用遊戲</div>
+                    {availableGames.map((game) => (
+                      <button
+                        key={game.id}
+                        onClick={() => switchGame(game.id)}
+                        className={`w-full text-left px-3 py-2 rounded-md hover:bg-gray-50 transition-colors ${
+                          game.id === currentGameId ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="text-lg">{game.icon}</span>
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900">{game.displayName}</div>
+                            <div className="text-xs text-gray-500">{game.description}</div>
+                            <div className="text-xs text-gray-400 mt-1">
+                              載入時間: ~{game.estimatedLoadTime}ms | {game.type}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                    
+                    {developmentGames.length > 0 && (
+                      <>
+                        <div className="text-sm font-medium text-gray-700 px-3 py-2 mt-4 border-t">開發中遊戲</div>
+                        {developmentGames.map((game) => (
+                          <div
+                            key={game.id}
+                            className="w-full text-left px-3 py-2 rounded-md opacity-60 cursor-not-allowed"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <span className="text-lg">{game.icon}</span>
+                              <div className="flex-1">
+                                <div className="font-medium text-gray-900">{game.displayName}</div>
+                                <div className="text-xs text-gray-500">{game.description}</div>
+                                <div className="text-xs text-yellow-600 mt-1">🚧 開發中...</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* GEPT 等級選擇器 */}
+          <div className="flex items-center space-x-4 mt-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center space-x-2">
+              <BookOpenIcon className="w-4 h-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">GEPT 等級:</span>
+            </div>
+            <div className="flex space-x-2">
+              {['elementary', 'intermediate', 'advanced'].map((level) => (
+                <button
+                  key={level}
+                  onClick={() => setCurrentGeptLevel(level as any)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    currentGeptLevel === level
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                  disabled={isLoading}
+                >
+                  {level === 'elementary' ? '初級' : level === 'intermediate' ? '中級' : '高級'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 載入進度條 */}
+        {isLoading && (
+          <div className="px-4 pb-4">
+            <div className="flex items-center space-x-3">
+              <div className="flex-1 bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${loadingProgress}%` }}
+                />
+              </div>
+              <div className="text-sm text-gray-600">{Math.round(loadingProgress)}%</div>
+            </div>
+            <div className="text-xs text-gray-500 mt-1">正在載入 {currentGame.displayName}...</div>
+          </div>
+        )}
+      </div>
+
+      {/* 遊戲 iframe 容器 */}
+      <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <div className="mt-4 text-gray-600">載入中...</div>
+              <div className="text-sm text-gray-500 mt-1">{currentGame.displayName}</div>
+            </div>
+          </div>
+        )}
+        
+        <iframe
+          ref={iframeRef}
+          src={currentGame.url}
+          className="w-full h-[600px] border-0"
+          title={currentGame.displayName}
+          onLoad={handleIframeLoad}
+          allow="fullscreen; autoplay; microphone; camera"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+        />
+      </div>
+
+      {/* 遊戲狀態顯示 */}
+      {gameStates[currentGameId] && (
+        <div className="mt-4 bg-gray-50 rounded-lg p-4">
+          <h4 className="font-medium text-gray-900 mb-2">遊戲狀態</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <div className="text-gray-500">分數</div>
+              <div className="font-semibold">{gameStates[currentGameId].score}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">等級</div>
+              <div className="font-semibold">{gameStates[currentGameId].level}</div>
+            </div>
+            <div>
+              <div className="text-gray-500">進度</div>
+              <div className="font-semibold">{gameStates[currentGameId].progress}%</div>
+            </div>
+            <div>
+              <div className="text-gray-500">遊戲時間</div>
+              <div className="font-semibold">{Math.round(gameStates[currentGameId].timeSpent / 1000)}s</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default GameSwitcher;

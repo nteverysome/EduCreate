@@ -9,7 +9,7 @@ interface FlashcardTemplateProps {
   onSave?: (data: any) => void;
 }
 
-const FlashcardTemplate = ({ mode = 'preview', data, onSave }: FlashcardTemplateProps) {
+const FlashcardTemplate = ({ mode = 'preview', data, onSave }: FlashcardTemplateProps) => {
   const router = useRouter();
   const [templateData, setTemplateData] = useState(data || {
     cards: [],

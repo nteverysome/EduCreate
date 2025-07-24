@@ -1,0 +1,104 @@
+[ ] NAME:Current Task List DESCRIPTION:Root task for conversation 80cf319b-460d-401d-81a0-3e13dc74a587
+-[ ] NAME:Phase 1: Phaser 3 飛機碰撞遊戲核心整合 DESCRIPTION:將現有 GameScene.ts 整合到 EduCreate 平台，實現雲朵英文單字顯示功能和飛機碰撞機制，符合統一遊戲架構標準
+--[ ] NAME:Task 1.5: 中英文雙語顯示系統 DESCRIPTION:為飛機碰撞遊戲實現完整的中英文雙語顯示功能，包括中文提示系統、雙語對應機制、視覺設計和遊戲流程整合。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+---[ ] NAME:Task 1.5.1: 分析中英文雙語系統需求 DESCRIPTION:深度分析中英文雙語顯示系統的技術需求，包括中文提示位置、雙語對應關係、GEPT 分級整合、無障礙設計要求等，創建詳細的設計文檔
+---[ ] NAME:Task 1.5.2: 設計中英文詞彙管理系統 DESCRIPTION:設計中英文詞彙對應管理系統，包括詞彙對數據結構、GEPT 分級整合、動態載入機制、詞彙驗證和快取系統的技術架構
+---[ ] NAME:Task 1.5.3: 實現中文提示 UI 系統 DESCRIPTION:實現遊戲中的中文提示顯示系統，包括提示框設計、位置定位、字體樣式、顏色對比、動畫效果和無障礙支援
+---[ ] NAME:Task 1.5.4: 實現雙語碰撞識別邏輯 DESCRIPTION:實現中英文雙語碰撞識別的核心邏輯，包括目標中文與英文雲朵的對應檢查、正確/錯誤判斷、得分/扣血計算和雙語反饋顯示
+---[ ] NAME:Task 1.5.5: 測試用例設計和實現 DESCRIPTION:為中英文雙語系統創建完整的測試用例，包括中文提示顯示、雙語對應正確性、碰撞識別、UI 顯示、無障礙功能、GEPT 分級整合等測試
+---[ ] NAME:Task 1.5.6: 代碼實現和驗證 DESCRIPTION:實現完整的中英文雙語顯示功能，執行所有測試用例驗證功能正確性，確保雙語系統穩定可靠且符合記憶科學原理
+---[ ] NAME:Task 1.5.7: 性能優化和相容性測試 DESCRIPTION:優化中英文雙語系統性能，確保雙語顯示不影響遊戲流暢度，優化詞彙載入和快取機制，測試跨平台相容性和穩定性
+---[ ] NAME:Task 1.5.8: 文檔和交付準備 DESCRIPTION:創建中英文雙語系統的完整技術文檔、API 文檔和使用指南，包括詞彙管理、UI 設計、無障礙功能等，準備代碼交付包
+--[/] NAME:Task 1.0: Vite + Phaser 3 子專案架構實施 DESCRIPTION:實施 Vite + Phaser 3 子專案架構，解決當前 Canvas 空白問題，建立獨立的遊戲開發環境並通過 iframe 嵌入到 Next.js 平台。包括：1)創建 games/airplane-game Vite 子專案 2)遷移現有遊戲邏輯 3)實現 iframe 嵌入機制 4)建立自動化構建流程 5)驗證完整功能
+---[x] NAME:Task 1.0.1: 創建 Vite + Phaser 3 子專案 DESCRIPTION:在 games/airplane-game/ 目錄創建獨立的 Vite + TypeScript + Phaser 3 專案，配置開發環境、構建設定和基本的遊戲架構。包括 package.json、vite.config.ts、tsconfig.json 和基本的 Phaser 遊戲初始化
+---[x] NAME:Task 1.0.2: 遷移現有遊戲邏輯到 Vite 專案 DESCRIPTION:將現有的 ModifiedGameScene、CollisionDetectionSystem、GEPTManager 等遊戲邏輯完整遷移到 Vite 子專案中，確保所有功能在獨立環境中正常運行，解決 Canvas 空白問題
+---[x] NAME:Task 1.0.3: 實現 iframe 嵌入機制 DESCRIPTION:在 Next.js 中創建 GameIframe 組件，實現 Vite 打包後的遊戲通過 iframe 嵌入到平台中。包括響應式設計、載入狀態、錯誤處理和父子頁面通信機制
+---[x] NAME:Task 1.0.4: 建立自動化構建和部署流程 DESCRIPTION:創建自動化腳本，實現 Vite 專案構建後自動複製 dist 到 Next.js public 目錄。包括 npm scripts、構建優化、資源管理和版本控制
+---[x] NAME:Task 1.0.5: 完整功能驗證和測試 DESCRIPTION:驗證 Vite + Phaser 3 架構的完整功能，包括遊戲載入、視覺渲染、碰撞檢測、詞彙顯示等。使用 Playwright 測試完整的用戶流程並錄製影片證明
+-[/] NAME:Task 1.1: 創建 AirplaneCollisionGame 統一組件 DESCRIPTION:基於 MemoryGameTemplate 接口創建飛機碰撞遊戲組件，整合 Phaser 3 GameScene.ts，移除射擊系統改為碰撞機制，支援記憶科學原理和 GEPT 分級
+--[x] NAME:Task 1.1.1: 分析現有 GameScene.ts 架構 DESCRIPTION:深度分析 phaser3-plane-selector/src/game/scenes/GameScene.ts 的現有架構，識別需要移除的射擊系統組件和需要保留的核心功能，創建詳細的技術文檔
+--[x] NAME:Task 1.1.2: 設計 MemoryGameTemplate 接口實現 DESCRIPTION:基於 EduCreate 的 MemoryGameTemplate 接口設計 AirplaneCollisionGame 組件的完整架構，包括記憶科學原理、GEPT 分級支援和無障礙設計要求
+--[x] NAME:Task 1.1.3: 實現碰撞檢測系統 DESCRIPTION:移除原有的子彈系統，實現飛機與雲朵的直接碰撞檢測，包括碰撞事件處理、特效顯示和音效反饋
+--[x] NAME:Task 1.1.4: 測試用例設計和實現 DESCRIPTION:為 AirplaneCollisionGame 組件創建完整的單元測試和整合測試，包括碰撞檢測、分數計算、生命值管理等核心功能測試
+--[x] NAME:Task 1.1.5: 代碼實現和驗證 DESCRIPTION:實現完整的 AirplaneCollisionGame 組件代碼，執行所有測試用例驗證功能正確性，確保代碼品質和可用性
+--[x] NAME:Task 1.1.6: 性能優化和相容性測試 DESCRIPTION:執行性能測試，確保遊戲在不同設備和瀏覽器上都能以 60fps 流暢運行，記憶體使用優化，並解決相容性問題
+--[x] NAME:Task 1.1.7: 文檔和交付準備 DESCRIPTION:創建完整的技術文檔、使用指南和 API 文檔，準備代碼交付包，確保所有測試通過後才進行交付
+-[ ] NAME:Task 1.2: 雲朵英文單字顯示系統 DESCRIPTION:修改 spawnEnemy() 函數，在雲朵上動態顯示英文單字，支援多種字體大小和顏色，確保可讀性和無障礙設計。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+--[ ] NAME:Task 1.2.1: 分析雲朵文字顯示需求 DESCRIPTION:深度分析雲朵上英文單字顯示的技術需求，包括字體選擇、大小調整、顏色對比、無障礙要求等，創建詳細的設計文檔
+--[ ] NAME:Task 1.2.2: 設計文字渲染系統 DESCRIPTION:設計在 Phaser 3 中在雲朵物件上動態渲染文字的技術方案，包括文字物件創建、位置計算、層級管理等
+--[ ] NAME:Task 1.2.3: 實現文字顯示核心功能 DESCRIPTION:修改 spawnEnemy() 函數，實現在雲朵上動態添加英文單字文字物件，支援多種字體樣式和無障礙設計
+--[ ] NAME:Task 1.2.4: 測試用例設計 DESCRIPTION:為文字顯示系統創建完整的測試用例，包括文字渲染正確性、字體大小調整、顏色對比、無障礙功能等測試
+--[ ] NAME:Task 1.2.5: 代碼實現和驗證 DESCRIPTION:實現完整的文字顯示功能，執行所有測試用例驗證功能正確性，確保文字在不同情況下都能正確顯示
+--[ ] NAME:Task 1.2.6: 性能優化和相容性測試 DESCRIPTION:優化文字渲染性能，確保在大量雲朵同時顯示文字時不影響遊戲流暢度，測試跨瀏覽器相容性
+--[ ] NAME:Task 1.2.7: 文檔和交付準備 DESCRIPTION:創建文字顯示系統的技術文檔和使用指南，準備代碼交付包，確保所有測試通過後才進行交付
+-[ ] NAME:Task 1.3: GEPT 詞彙載入和管理 DESCRIPTION:整合 GEPTManager.ts，實現根據難度等級動態載入詞彙，支援詞彙頻率權重和間隔重複算法。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+--[ ] NAME:Task 1.3.1: 分析 GEPTManager 整合需求 DESCRIPTION:深度分析 GEPTManager.ts 的現有功能和 API，設計與飛機碰撞遊戲的整合方案，包括詞彙載入、難度管理、頻率權重等
+--[ ] NAME:Task 1.3.2: 設計詞彙管理系統 DESCRIPTION:設計動態詞彙載入系統，包括 GEPT 分級篩選、詞彙難度調整、間隔重複算法和頻率權重系統的技術架構
+--[ ] NAME:Task 1.3.3: 實現詞彙載入核心功能 DESCRIPTION:實現與 GEPTManager 的整合，包括詞彙查詢、難度篩選、動態載入和快取機制，確保遊戲性能不受影響
+--[ ] NAME:Task 1.3.4: 測試用例設計 DESCRIPTION:為 GEPT 詞彙管理系統創建完整的測試用例，包括詞彙載入正確性、難度篩選、頻率權重、間隔重複算法等測試
+--[ ] NAME:Task 1.3.5: 代碼實現和驗證 DESCRIPTION:實現完整的 GEPT 詞彙管理功能，執行所有測試用例驗證功能正確性，確保詞彙系統穩定可靠
+--[ ] NAME:Task 1.3.6: 性能優化和相容性測試 DESCRIPTION:優化詞彙載入性能，實現詞彙快取和懶加載，確保大量詞彙載入時不影響遊戲流暢度，測試跨平台相容性
+--[ ] NAME:Task 1.3.7: 文檔和交付準備 DESCRIPTION:創建 GEPT 詞彙管理系統的技術文檔和 API 文檔，準備代碼交付包，確保所有測試通過後才進行交付
+-[ ] NAME:Task 1.4: 碰撞目標識別系統 DESCRIPTION:實現玩家飛機與特定英文單字雲朵的碰撞邏輯，包括目標詞彙提示、正確碰撞得分/錯誤碰撞扣血機制、分數計算和記憶科學反饋系統。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+--[ ] NAME:Task 1.4.1: 分析碰撞目標識別需求 DESCRIPTION:深度分析碰撞目標識別系統的技術需求，包括目標詞彙提示、正確/錯誤判斷、得分/扣血機制、記憶科學反饋等
+--[ ] NAME:Task 1.4.2: 設計碰撞識別系統 DESCRIPTION:設計碰撞目標識別系統的技術架構，包括目標詞彙管理、碰撞事件處理、分數計算、生命值管理和反饋系統
+--[ ] NAME:Task 1.4.3: 實現碰撞識別核心功能 DESCRIPTION:實現碰撞目標識別的核心邏輯，包括目標詞彙與雲朵詞彙的比對、正確/錯誤判斷、得分/扣血計算和特效顯示
+--[ ] NAME:Task 1.4.4: 測試用例設計 DESCRIPTION:為碰撞目標識別系統創建完整的測試用例，包括正確碰撞、錯誤碰撞、分數計算、生命值管理、記憶科學反饋等測試
+--[ ] NAME:Task 1.4.5: 代碼實現和驗證 DESCRIPTION:實現完整的碰撞目標識別功能，執行所有測試用例驗證功能正確性，確保碰撞識別系統穩定可靠
+--[ ] NAME:Task 1.4.6: 性能優化和相容性測試 DESCRIPTION:優化碰撞識別性能，確保高頻率碰撞檢測時不影響遊戲流暢度，測試跨平台相容性和穩定性
+--[ ] NAME:Task 1.4.7: 文檔和交付準備 DESCRIPTION:創建碰撞目標識別系統的技術文檔和使用指南，準備代碼交付包，確保所有測試通過後才進行交付
+-[ ] NAME:Phase 2: EduCreate 平台整合 DESCRIPTION:將飛機射手遊戲完整整合到 EduCreate 平台，遵循主頁優先原則和三層整合驗證要求
+-[ ] NAME:Task 2.1: 主頁入口點創建 DESCRIPTION:在 app/page.tsx 主頁添加飛機碰撞遊戲功能卡片，包含遊戲描述（碰撞學習模式）、特色說明和直接訪問連結，確保主頁可見性。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+--[ ] NAME:Task 2.1.1: 分析主頁整合需求 DESCRIPTION:深度分析 app/page.tsx 主頁的現有結構，設計飛機碰撞遊戲功能卡片的整合方案，確保符合 EduCreate 主頁設計標準
+--[ ] NAME:Task 2.1.2: 設計功能卡片組件 DESCRIPTION:設計飛機碰撞遊戲功能卡片的 UI/UX 設計，包括遊戲描述、特色說明、訪問連結、無障礙設計和響應式佈局
+--[ ] NAME:Task 2.1.3: 實現主頁卡片整合 DESCRIPTION:在 app/page.tsx 中實現飛機碰撞遊戲功能卡片的添加，確保與現有卡片風格一致，支援無障礙設計
+--[ ] NAME:Task 2.1.4: 測試用例設計 DESCRIPTION:為主頁入口點創建完整的測試用例，包括卡片顯示正確性、連結功能、無障礙支援、響應式設計等測試
+--[ ] NAME:Task 2.1.5: 代碼實現和驗證 DESCRIPTION:實現完整的主頁入口點功能，執行所有測試用例驗證功能正確性，確保主頁可見性和用戶體驗
+--[ ] NAME:Task 2.1.6: 性能優化和相容性測試 DESCRIPTION:優化主頁載入性能，確保新增卡片不影響主頁載入速度，測試跨瀏覽器和設備相容性
+--[ ] NAME:Task 2.1.7: 文檔和交付準備 DESCRIPTION:創建主頁整合的技術文檔和使用指南，準備代碼交付包，確保所有測試通過後才進行交付
+-[ ] NAME:Task 2.2: 遊戲頁面路由創建 DESCRIPTION:創建 /games/airplane-collision 頁面，整合 AirplaneCollisionGame 組件，提供完整的碰撞遊戲體驗和統計追蹤。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+--[ ] NAME:Task 2.2.1: 分析遊戲頁面路由需求 DESCRIPTION:深度分析 /games/airplane-collision 頁面的技術需求，包括路由設定、組件整合、統計追蹤、SEO 優化等
+--[ ] NAME:Task 2.2.2: 設計遊戲頁面架構 DESCRIPTION:設計遊戲頁面的整體架構，包括 AirplaneCollisionGame 組件整合、統計面板、導航系統、無障礙設計和響應式佈局
+--[ ] NAME:Task 2.2.3: 實現遊戲頁面核心功能 DESCRIPTION:實現 /games/airplane-collision 頁面的核心功能，包括 AirplaneCollisionGame 組件整合、遊戲統計顯示、導航功能和用戶體驗優化
+--[ ] NAME:Task 2.2.4: 測試用例設計 DESCRIPTION:為遊戲頁面創建完整的測試用例，包括頁面載入、組件整合、統計追蹤、導航功能、無障礙支援等測試
+--[ ] NAME:Task 2.2.5: 代碼實現和驗證 DESCRIPTION:實現完整的遊戲頁面功能，執行所有測試用例驗證功能正確性，確保遊戲體驗和統計追蹤正常運作
+--[ ] NAME:Task 2.2.6: 性能優化和相容性測試 DESCRIPTION:優化遊戲頁面載入性能，確保遊戲組件快速啟動，測試跨瀏覽器和設備相容性，優化 SEO 和網頁性能
+--[ ] NAME:Task 2.2.7: 文檔和交付準備 DESCRIPTION:創建遊戲頁面的技術文檔和使用指南，準備代碼交付包，確保所有測試通過後才進行交付
+-[ ] NAME:Task 2.3: 統一導航系統整合 DESCRIPTION:更新 UnifiedNavigation 組件，添加飛機碰撞遊戲到遊戲選單中，確保從任何頁面都能訪問。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+--[ ] NAME:Task 2.3.1: 分析 UnifiedNavigation 整合需求 DESCRIPTION:深度分析 UnifiedNavigation 組件的現有架構，設計飛機碰撞遊戲的整合方案，確保符合導航系統設計標準
+--[ ] NAME:Task 2.3.2: 設計導航選單項目 DESCRIPTION:設計飛機碰撞遊戲在導航選單中的顯示方式，包括選單項目設計、圖示選擇、無障礙支援和響應式設計
+--[ ] NAME:Task 2.3.3: 實現導航系統整合 DESCRIPTION:在 UnifiedNavigation 組件中實現飛機碰撞遊戲的添加，確保與現有導航項目風格一致，支援無障礙設計
+--[ ] NAME:Task 2.3.4: 測試用例設計 DESCRIPTION:為導航系統整合創建完整的測試用例，包括導航項目顯示、連結功能、無障礙支援、響應式設計等測試
+--[ ] NAME:Task 2.3.5: 代碼實現和驗證 DESCRIPTION:實現完整的導航系統整合功能，執行所有測試用例驗證功能正確性，確保導航系統穩定可靠
+--[ ] NAME:Task 2.3.6: 性能優化和相容性測試 DESCRIPTION:優化導航系統性能，確保新增項目不影響導航速度，測試跨瀏覽器和設備相容性
+--[ ] NAME:Task 2.3.7: 文檔和交付準備 DESCRIPTION:創建導航系統整合的技術文檔和使用指南，準備代碼交付包，確保所有測試通過後才進行交付
+-[ ] NAME:Task 2.4: 儀表板整合 DESCRIPTION:在 /dashboard 頁面添加飛機碰撞遊戲卡片，顯示遊戲統計、學習進度和快速啟動功能。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+-[ ] NAME:Phase 3: 用戶內容輸入系統 DESCRIPTION:實現用戶自定義詞彙輸入功能，支援文字、圖片輸入和與統一內容管理系統的整合
+-[ ] NAME:Task 3.1: 詞彙輸入介面設計 DESCRIPTION:創建用戶友好的詞彙輸入介面，支援單個詞彙輸入、批量輸入、CSV 導入和 GEPT 自動分級檢測。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+-[ ] NAME:Task 3.2: 圖片 OCR 整合 DESCRIPTION:整合 OCR 技術，支援用戶上傳圖片自動識別英文單字，並自動添加到詞彙庫中。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+-[ ] NAME:Task 3.3: UniversalContent 系統整合 DESCRIPTION:將飛機碰撞遊戲整合到 UniversalContent 系統，支援跨遊戲內容切換和統一內容管理。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+-[ ] NAME:Task 3.4: Wordwall 格式相容性 DESCRIPTION:實現 Wordwall.net 格式的詞彙導入功能，確保用戶可以輕鬆遷移現有內容到飛機碰撞遊戲。必須通過嚴格驗證流程：1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整
+-[ ] NAME:Phase 4: 記憶科學功能實現 DESCRIPTION:實現完整的記憶科學算法，包括間隔重複、主動回憶、認知負荷管理和個人化學習路徑
+-[ ] NAME:Task 4.1: 間隔重複算法 DESCRIPTION:實現基於 Ebbinghaus 遺忘曲線的間隔重複算法，錯誤單字更頻繁出現，已掌握單字間隔延長
+-[ ] NAME:Task 4.2: 主動回憶機制 DESCRIPTION:設計多種回憶模式：英翻中、中翻英、聽音辨字，增強主動回憶效果
+-[ ] NAME:Task 4.3: 認知負荷管理 DESCRIPTION:實現動態難度調整系統，根據玩家表現自動調整詞彙難度、雲朵生成速度和遊戲複雜度
+-[ ] NAME:Task 4.4: 學習效果追蹤 DESCRIPTION:實現詳細的學習數據追蹤，包括反應時間、準確率、學習曲線分析和個人化建議生成
+-[ ] NAME:Phase 5: 自動保存和同步系統 DESCRIPTION:整合 EduCreate 的自動保存系統，確保遊戲進度和學習數據的完整保存和同步
+-[ ] NAME:Task 5.1: AutoSaveManager 整合 DESCRIPTION:將飛機碰撞遊戲整合到 AutoSaveManager 系統，實現遊戲狀態、學習進度的實時自動保存
+-[ ] NAME:Task 5.2: 離線模式支援 DESCRIPTION:實現離線遊戲模式，支援離線詞彙學習和數據本地存儲，網絡恢復後自動同步
+-[ ] NAME:Task 5.3: 跨設備同步 DESCRIPTION:實現學習進度跨設備同步，用戶可在不同設備間無縫繼續學習
+-[ ] NAME:Phase 6: 無障礙設計和多主題支援 DESCRIPTION:實現完整的無障礙設計標準和多主題風格切換系統，確保所有用戶都能使用
+-[ ] NAME:Task 6.1: WCAG 2.1 AA 合規 DESCRIPTION:實現鍵盤導航、螢幕閱讀器支援、高對比模式、字體大小調整等無障礙功能
+-[ ] NAME:Task 6.2: 多主題風格系統 DESCRIPTION:基於現有視差背景系統，實現多種主題風格：森林、沙漠、太空、海洋等，增強學習體驗
+-[ ] NAME:Task 6.3: 語音控制支援 DESCRIPTION:整合語音識別技術，支援語音輸入詞彙、語音控制遊戲和語音反饋功能
+-[ ] NAME:Phase 7: 社區分享和協作功能 DESCRIPTION:實現社區分享生態系統，支援詞彙列表分享、遊戲成績排行榜和協作學習功能
+-[ ] NAME:Task 7.1: 詞彙列表分享 DESCRIPTION:實現詞彙列表的公開分享、私人分享和班級群組分享功能，支援評分和評論系統
+-[ ] NAME:Task 7.2: 排行榜系統 DESCRIPTION:創建全球排行榜、好友排行榜和班級排行榜，激勵學習動機和競爭意識
+-[ ] NAME:Task 7.3: 協作學習模式 DESCRIPTION:實現多人協作模式，支援團隊挑戰、詞彙接龍和協作編輯詞彙列表
+-[ ] NAME:Phase 8: 完整測試和驗證 DESCRIPTION:執行完整的三層整合驗證，包括 Playwright 端到端測試、影片錄製和性能優化
+-[ ] NAME:Task 8.1: 主頁可見性測試 DESCRIPTION:使用 Playwright 測試用戶能否在主頁找到飛機射手遊戲入口，錄製完整用戶發現流程
+-[ ] NAME:Task 8.2: 導航流程測試 DESCRIPTION:測試從主頁到遊戲頁面的完整導航流程，確保用戶能順利進入和退出遊戲
+-[ ] NAME:Task 8.3: 功能互動測試 DESCRIPTION:測試遊戲本身的所有功能：詞彙載入、射擊機制、分數計算、學習追蹤等核心功能
+-[ ] NAME:Task 8.4: 性能和相容性測試 DESCRIPTION:測試遊戲在不同設備、瀏覽器的性能表現，確保 60fps 流暢運行和記憶體使用優化
+-[ ] NAME:Task 8.5: 影片證明生成 DESCRIPTION:錄製完整的功能演示影片，展示從主頁發現到完整遊戲體驗的全流程，存檔到測試影片管理系統
+-[ ] NAME:定義全局驗證標準 DESCRIPTION:為所有任務定義統一的嚴格驗證流程：每個子任務都必須通過 1)完成開發 2)通過所有測試 3)性能驗證 4)代碼審查 5)文檔完整 五個步驟後才能交付實際可用的代碼

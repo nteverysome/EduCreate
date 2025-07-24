@@ -42,7 +42,7 @@ const EnhancedCollaborationPanel = ({
   onSyncForce,
   className = '',
   'data-testid': testId = 'enhanced-collaboration-panel'
-}: EnhancedCollaborationPanelProps) {
+}: EnhancedCollaborationPanelProps) => {
   const [activeTab, setActiveTab] = useState<'users' | 'activity' | 'conflicts' | 'metrics'>('users');
   const [showDetails, setShowDetails] = useState<{ [key: string]: boolean }>({});
   const [autoRefresh, setAutoRefresh] = useState(true);

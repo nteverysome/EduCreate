@@ -11,7 +11,7 @@ interface DraggableItemProps {
 }
 
 // 可拖動的元素組件
-const DraggableItem = ({ element, isSelected }: DraggableItemProps) {
+const DraggableItem = ({ element, isSelected }: DraggableItemProps) => {
   const { attributes, listeners, setNodeRef, transform } = useSortable({ id: element.id });
   const removeElement = useEditorStore(state => state.removeElement);
   const selectElement = useEditorStore(state => state.selectElement);
@@ -102,7 +102,7 @@ interface DragDropEditorProps {
   onDragEnd?: (event: DragEndEvent) => void;
 }
 
-const DragDropEditor = ({ elements, selectedElementId, onDragEnd }: DragDropEditorProps) {
+const DragDropEditor = ({ elements, selectedElementId, onDragEnd }: DragDropEditorProps) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const selectElement = useEditorStore(state => state.selectElement);
   

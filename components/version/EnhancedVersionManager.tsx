@@ -72,7 +72,7 @@ const EnhancedVersionManager = ({
   readOnly = false,
   className = '',
   'data-testid': testId = 'enhanced-version-manager'
-}: EnhancedVersionManagerProps) {
+}: EnhancedVersionManagerProps) => {
   const [activeTab, setActiveTab] = useState<'history' | 'compare' | 'branches'>('history');
   const [selectedVersions, setSelectedVersions] = useState<string[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
