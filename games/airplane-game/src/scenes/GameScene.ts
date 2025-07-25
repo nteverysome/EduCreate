@@ -9,6 +9,8 @@ import { GameConfig, GameState, GEPTWord, ParentMessage } from '../types/game';
 import { GEPTManager, GEPTLevel } from '../managers/GEPTManager';
 import { CollisionDetectionSystem, CollisionEvent } from '../managers/CollisionDetectionSystem';
 import { MemoryEnhancementEngine, LearningEvent } from '../managers/MemoryEnhancementEngine';
+import { BilingualManager } from '../managers/BilingualManager';
+import { ChineseUIManager } from '../managers/ChineseUIManager';
 
 export default class GameScene extends Phaser.Scene {
   // 遊戲配置和狀態
@@ -39,6 +41,8 @@ export default class GameScene extends Phaser.Scene {
   private geptManager!: GEPTManager;
   private collisionSystem!: CollisionDetectionSystem;
   private memoryEngine!: MemoryEnhancementEngine;
+  private bilingualManager!: BilingualManager;
+  private chineseUIManager!: ChineseUIManager;
 
   // 遊戲邏輯
   private cloudSpawnTimer!: Phaser.Time.TimerEvent;
@@ -96,7 +100,13 @@ export default class GameScene extends Phaser.Scene {
       }
     );
 
-    console.log('🔧 管理器初始化完成');
+    // 初始化雙語管理器
+    this.bilingualManager = new BilingualManager(this, this.geptManager);
+
+    // 初始化中文 UI 管理器
+    this.chineseUIManager = new ChineseUIManager(this, this.geptManager, this.bilingualManager);
+
+    console.log('🔧 管理器初始化完成（包含雙語系統）');
   }
 
   preload() {
@@ -395,13 +405,7 @@ export default class GameScene extends Phaser.Scene {
       fontStyle: 'bold'
     }).setOrigin(0.5, 0).setDepth(100);
 
-    // GEPT 等級顯示
-    const geptLevelText = this.add.text(400, 50, `GEPT: ${this.gameConfig.geptLevel}`, {
-      fontSize: '16px',
-      color: '#00ff00',
-      backgroundColor: '#000000',
-      padding: { x: 8, y: 4 }
-    }).setOrigin(0.5, 0).setDepth(100);
+    // 移除 GEPT 等級顯示（不是統一控制的元素）
   }
 
   private setupInput() {
@@ -448,6 +452,12 @@ export default class GameScene extends Phaser.Scene {
         this.currentTargetWord.english,
         this.currentTargetWord.chinese
       );
+
+      // 更新雙語管理器的目標詞彙
+      this.bilingualManager.updateTargetWord(this.currentTargetWord.english);
+
+      // 更新中文 UI 管理器的目標詞彙
+      this.chineseUIManager.updateTargetWord(this.currentTargetWord);
 
       console.log('🎯 設置目標詞彙:', this.currentTargetWord.english);
     }
@@ -501,6 +511,11 @@ export default class GameScene extends Phaser.Scene {
     // 將文字綁定到雲朵
     cloud.setData('wordText', wordText);
 
+    // 如果是目標詞彙，顯示中文提示
+    if (isTarget && this.bilingualManager) {
+      this.bilingualManager.showChinesePrompt(word.english, { x: x, y: y - 60 });
+    }
+
     this.clouds.add(cloud);
 
     console.log('☁️ 生成雲朵 (修復版本):', word.english, isTarget ? '(目標)' : '', {
@@ -546,12 +561,28 @@ export default class GameScene extends Phaser.Scene {
       this.gameState.currentScore += 10;
       this.gameState.wordsLearned++;
 
+      // 顯示成功提示
+      if (this.chineseUIManager) {
+        this.chineseUIManager.showSuccessMessage(word, 10);
+      }
+
+      // 隱藏中文提示
+      if (this.bilingualManager) {
+        this.bilingualManager.hideChinesePrompt();
+      }
+
       // 設置新的目標詞彙
       this.setRandomTargetWord();
 
       console.log('✅ 正確碰撞:', word.english);
     } else {
       this.gameState.currentHealth -= 20;
+
+      // 顯示錯誤提示
+      if (this.chineseUIManager) {
+        this.chineseUIManager.showErrorMessage(word, 20);
+      }
+
       console.log('❌ 錯誤碰撞:', word.english);
 
       if (this.gameState.currentHealth <= 0) {
@@ -648,6 +679,9 @@ export default class GameScene extends Phaser.Scene {
     // 玩家移動控制
     this.handlePlayerMovement();
 
+    // 更新中文 UI 系統
+    this.updateChineseUI();
+
     // 清理超出邊界的物件
     this.cleanupObjects();
   }
@@ -666,6 +700,24 @@ export default class GameScene extends Phaser.Scene {
     // 每隔一段時間輸出日誌（減少頻率）
     if (Math.floor(Date.now() / 1000) % 10 === 0) {
       console.log('� 更新月亮主題視差背景');
+    }
+  }
+
+  /**
+   * 更新中文 UI 系統
+   */
+  private updateChineseUI(): void {
+    if (this.chineseUIManager) {
+      // 更新分數顯示
+      this.chineseUIManager.updateScore(this.gameState.currentScore);
+
+      // 更新生命值顯示
+      this.chineseUIManager.updateLives(this.gameState.currentHealth);
+
+      // 更新遊戲狀態
+      const status = this.gameState.isPlaying ? 'playing' :
+                    this.gameState.isPaused ? 'paused' : 'waiting';
+      this.chineseUIManager.updateGameStatus(status);
     }
   }
 
