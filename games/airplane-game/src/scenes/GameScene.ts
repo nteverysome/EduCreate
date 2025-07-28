@@ -25,7 +25,8 @@ export default class GameScene extends Phaser.Scene {
   };
 
   // 遊戲物件
-  private player!: Phaser.Physics.Arcade.Image;
+  private player!: Phaser.Physics.Arcade.Sprite;
+  private shooterContainer?: Phaser.GameObjects.Container;
   private clouds!: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private backgroundLayers: Phaser.GameObjects.TileSprite[] = [];
@@ -52,6 +53,12 @@ export default class GameScene extends Phaser.Scene {
   // 遊戲統計
   private totalCollisions: number = 0;
   private correctCollisions: number = 0;
+
+  // 開始畫面狀態 (Wordwall 風格)
+  private showStartScreen: boolean = true;
+  private gameStarted: boolean = false;
+  private startScreen?: Phaser.GameObjects.Container;
+  private playButton?: Phaser.GameObjects.Image;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -115,6 +122,41 @@ export default class GameScene extends Phaser.Scene {
     // 載入月亮主題背景圖片
     this.loadMoonBackground();
 
+    // 載入新的玩家太空船精靈表 - 一艘太空船的7幀飛行動畫
+    // 根據實際檢測：總寬度2450px，7幀橫向排列，高度150px
+    this.load.spritesheet('player_spaceship', 'assets/sprite_player_spaceship_up_down.png', {
+      frameWidth: Math.floor(2450 / 7),  // 2450px ÷ 7幀 = 350px
+      frameHeight: 150                   // 實際高度150px
+    });
+
+    // 添加載入完成事件來檢查紋理
+    this.load.on('complete', () => {
+      console.log('🔍 檢查精靈表載入狀況');
+      const texture = this.textures.get('player_spaceship');
+      if (texture) {
+        console.log('✅ 精靈表載入成功:', {
+          key: 'player_spaceship',
+          width: texture.source[0].width,
+          height: texture.source[0].height,
+          frames: texture.frameTotal
+        });
+      } else {
+        console.log('❌ 精靈表載入失敗: player_spaceship');
+      }
+    });
+
+    // 保留原始精靈表作為備用方案
+    this.load.spritesheet('random_shooter', 'assets/random_shooter-sheet.png', {
+      frameWidth: 64,   // 備用方案
+      frameHeight: 64   // 備用方案
+    });
+
+    // 備用：用戶自定義完整太空船圖片
+    this.load.image('complete_spaceship', 'assets/complete_spaceship.png');
+
+    // 備用方案：創建太空船形狀的動態精靈（暫時停用）
+    // this.createSpaceshipSprite();
+
     // 修復紋理生成問題 - 使用正確的方法
     // 玩家飛機 - 藍色三角形
     const planeGraphics = this.add.graphics();
@@ -143,26 +185,161 @@ export default class GameScene extends Phaser.Scene {
   }
 
   /**
+   * 創建太空船動畫 - 使用新的玩家太空船精靈表
+   */
+  private createSpaceshipAnimation(): void {
+    console.log('🚀 創建新太空船動畫配置');
+
+    // 優先檢查新的玩家太空船精靈表
+    if (this.textures.exists('player_spaceship')) {
+      console.log('✨ 使用新的玩家太空船精靈表');
+
+      // 檢查紋理詳細信息
+      const texture = this.textures.get('player_spaceship');
+      console.log('🔍 精靈表詳細信息:', {
+        key: 'player_spaceship',
+        width: texture.source[0].width,
+        height: texture.source[0].height,
+        frameTotal: texture.frameTotal,
+        frames: Object.keys(texture.frames)
+      });
+
+      // 創建太空船飛行動畫 - 使用7幀飛行動畫（0-6）
+      this.anims.create({
+        key: 'spaceship_fly',
+        frames: this.anims.generateFrameNumbers('player_spaceship', {
+          start: 0,
+          end: 6     // 使用7幀：0, 1, 2, 3, 4, 5, 6
+        }),
+        frameRate: 10,       // 每秒10幀，流暢的飛行動畫
+        repeat: -1,          // 無限循環
+        yoyo: false          // 不反向播放，正常循環
+      });
+
+      console.log('✅ 太空船飛行動畫創建完成: spaceship_fly (7幀動畫，292x512)');
+
+    } else if (this.textures.exists('random_shooter')) {
+      console.log('🔄 備用方案：使用原始精靈表');
+
+      // 備用方案：使用原始精靈表
+      this.anims.create({
+        key: 'spaceship_fly',
+        frames: this.anims.generateFrameNumbers('random_shooter', {
+          start: 0,  // 第一幀
+          end: 3     // 使用前4幀作為動畫
+        }),
+        frameRate: 6,        // 每秒6幀
+        repeat: -1,          // 無限循環
+        yoyo: false          // 不反向播放
+      });
+
+      console.log('✅ 備用太空船動畫創建完成: spaceship_fly (原始精靈表)');
+    } else {
+      console.warn('⚠️ 沒有可用的太空船精靈表，跳過動畫創建');
+    }
+  }
+
+  /**
+   * 創建太空船形狀的動態精靈（備用方案）
+   */
+  private createSpaceshipSprite(): void {
+    // 創建多幀太空船精靈
+    const frames = [];
+    for (let i = 0; i < 4; i++) {
+      const graphics = this.add.graphics();
+
+      // 太空船主體顏色變化
+      const hue = 200 + (i * 10); // 藍色系變化
+      const color = Phaser.Display.Color.HSVToRGB(hue / 360, 0.8, 0.9);
+
+      // 繪製太空船形狀
+      graphics.fillStyle(color.color);
+
+      // 主體（橢圓形）
+      graphics.fillEllipse(32, 32, 24, 40);
+
+      // 機翼
+      graphics.fillTriangle(8, 20, 20, 32, 8, 44);
+      graphics.fillTriangle(56, 20, 44, 32, 56, 44);
+
+      // 駕駛艙
+      graphics.fillStyle(0x00ffff);
+      graphics.fillEllipse(32, 28, 8, 12);
+
+      // 引擎噴射效果（根據幀變化）
+      const flameIntensity = 0.5 + (i * 0.2);
+      graphics.fillStyle(Phaser.Display.Color.GetColor(255, 100 + i * 30, 0));
+      graphics.fillEllipse(32, 50 + i, 6, 8 * flameIntensity);
+
+      graphics.generateTexture(`spaceship_${i}`, 64, 64);
+      graphics.destroy();
+      frames.push({ key: `spaceship_${i}` });
+    }
+
+    // 創建太空船動畫配置
+    this.anims.create({
+      key: 'spaceship_backup_anim',
+      frames: frames,
+      frameRate: 8,
+      repeat: -1
+    });
+  }
+
+  /**
+   * 創建動態精靈圖片
+   */
+  private createDynamicSprite(): void {
+    // 創建多幀圓形精靈
+    const frames = [];
+    for (let i = 0; i < 8; i++) {
+      const graphics = this.add.graphics();
+      const hue = (i * 45) % 360; // 每幀不同顏色
+      const color = Phaser.Display.Color.HSVToRGB(hue / 360, 0.8, 0.9);
+      graphics.fillStyle(color.color);
+      graphics.fillCircle(32, 32, 28);
+      graphics.lineStyle(3, 0xffffff);
+      graphics.strokeCircle(32, 32, 28);
+      graphics.generateTexture(`enemy_circle_${i}`, 64, 64);
+      graphics.destroy();
+      frames.push({ key: `enemy_circle_${i}` });
+    }
+
+    // 創建動畫配置
+    this.anims.create({
+      key: 'enemy_circle_anim',
+      frames: frames,
+      frameRate: 10,
+      repeat: -1
+    });
+  }
+
+  /**
    * 載入月亮主題背景圖片
    */
   private loadMoonBackground(): void {
     console.log('🌙 載入月亮主題背景');
 
-    // 嘗試載入背景圖片，如果不存在則使用備用方案
+    // 載入真實的月亮視差背景圖片
     try {
-      // 背景層 1 - 最遠的背景（天空/星空）
-      this.load.image('moon-bg-1', '/assets/backgrounds/moon/layer-1.png');
+      // 天空層 - 最遠的背景
+      this.load.image('moon-sky', 'assets/backgrounds/moon/moon_sky.png');
 
-      // 背景層 2 - 中景（山脈/地形）
-      this.load.image('moon-bg-2', '/assets/backgrounds/moon/layer-2.png');
+      // 後景層 - 遠山/星空
+      this.load.image('moon-back', 'assets/backgrounds/moon/moon_back.png');
 
-      // 背景層 3 - 近景（樹木/建築）
-      this.load.image('moon-bg-3', '/assets/backgrounds/moon/layer-3.png');
+      // 中景層 - 月球表面
+      this.load.image('moon-mid', 'assets/backgrounds/moon/moon_mid.png');
 
-      // 月亮
-      this.load.image('moon', '/assets/backgrounds/moon/moon.png');
+      // 地球層 - 地球視圖
+      this.load.image('moon-earth', 'assets/backgrounds/moon/moon_earth.png');
 
-      console.log('🌙 月亮背景圖片載入排程完成');
+      // 前景層 - 近景元素
+      this.load.image('moon-front', 'assets/backgrounds/moon/moon_front.png');
+
+      // 地面層 - 月球地面
+      this.load.image('moon-floor', 'assets/backgrounds/moon/moon_floor.png');
+
+      console.log('🌙 真實月亮背景圖片載入排程完成（相對路徑）');
     } catch (error) {
       console.warn('⚠️ 月亮背景載入失敗，將使用備用背景:', error);
     }
@@ -170,6 +347,9 @@ export default class GameScene extends Phaser.Scene {
 
   create() {
     console.log('🏗️ 創建遊戲場景');
+
+    // 創建太空船動畫
+    this.createSpaceshipAnimation();
 
     // 創建視差背景
     this.createParallaxBackground();
@@ -192,13 +372,132 @@ export default class GameScene extends Phaser.Scene {
     // 設置目標詞彙
     this.setRandomTargetWord();
 
-    // 開始雲朵生成
-    this.startCloudSpawning();
-
     console.log('✅ 遊戲場景創建完成');
 
-    // 自動開始遊戲
+    // 🎯 暫時跳過開始畫面，直接開始遊戲（解決點擊問題）
+    console.log('🚀 跳過開始畫面，直接開始遊戲');
+    this.showStartScreen = false;
+    this.gameStarted = true;
     this.startGame();
+  }
+
+  /**
+   * 創建 Wordwall 風格的開始畫面
+   */
+  private createStartScreen(): void {
+    console.log('🎮 創建 Wordwall 風格開始畫面');
+    console.log('🔍 當前狀態 - showStartScreen:', this.showStartScreen, 'gameStarted:', this.gameStarted);
+
+    // 創建半透明遮罩 - 設為可互動
+    const overlay = this.add.rectangle(634, 336, 1268, 672, 0x000000, 0.7);
+    overlay.setDepth(1000);
+    overlay.setInteractive(); // 🎯 讓遮罩可以接收點擊事件
+
+    // 在遮罩上添加點擊事件
+    overlay.on('pointerdown', () => {
+      console.log('🖱️ 遮罩點擊檢測，開始遊戲');
+      if (this.showStartScreen) {
+        this.hideStartScreen();
+        this.startGame();
+      }
+    });
+
+    // 創建開始畫面容器
+    this.startScreen = this.add.container(634, 336);
+    this.startScreen.setDepth(1001);
+
+    // 遊戲標題
+    const title = this.add.text(0, -150, '🛩️ 飛機英語學習遊戲', {
+      fontSize: '48px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#FFFFFF',
+      align: 'center',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    // 遊戲說明
+    const instruction = this.add.text(0, -80, '駕駛飛機收集目標英文單字\n避開其他單字，學習更有效！', {
+      fontSize: '24px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#CCCCCC',
+      align: 'center',
+      lineSpacing: 10
+    }).setOrigin(0.5);
+
+    // 創建 Wordwall 風格的 Play 按鈕
+    const playButtonBg = this.add.circle(0, 50, 80, 0x4CAF50);
+    playButtonBg.setStrokeStyle(4, 0xFFFFFF);
+
+    const playText = this.add.text(0, 50, 'PLAY', {
+      fontSize: '32px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#FFFFFF',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    // 添加到容器
+    this.startScreen.add([title, instruction, playButtonBg, playText]);
+
+    // 設置按鈕互動 - 使用更大的互動區域
+    playButtonBg.setInteractive(new Phaser.Geom.Circle(0, 0, 100), Phaser.Geom.Circle.Contains);
+    playText.setInteractive({ useHandCursor: true });
+
+    // 按鈕點擊事件
+    const startGameHandler = () => {
+      console.log('🎮 點擊 Play 按鈕，開始遊戲');
+      this.hideStartScreen();
+      this.startGame();
+    };
+
+    playButtonBg.on('pointerdown', startGameHandler);
+    playText.on('pointerdown', startGameHandler);
+
+    // 添加全畫面點擊監聽器作為備用
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      console.log('🖱️ 檢測到點擊事件，showStartScreen:', this.showStartScreen);
+      if (this.showStartScreen) {
+        console.log('🎮 全畫面點擊檢測，開始遊戲');
+        this.hideStartScreen();
+        this.startGame();
+      } else {
+        console.log('⚠️ 開始畫面已隱藏，忽略點擊');
+      }
+    });
+
+    // 按鈕懸停效果
+    playButtonBg.on('pointerover', () => {
+      playButtonBg.setFillStyle(0x45a049);
+      playButtonBg.setScale(1.1);
+    });
+
+    playButtonBg.on('pointerout', () => {
+      playButtonBg.setFillStyle(0x4CAF50);
+      playButtonBg.setScale(1.0);
+    });
+
+    console.log('✅ Wordwall 風格開始畫面創建完成');
+  }
+
+  /**
+   * 隱藏開始畫面並開始遊戲
+   */
+  private hideStartScreen(): void {
+    if (this.startScreen) {
+      this.startScreen.destroy();
+      this.startScreen = undefined;
+    }
+
+    // 移除遮罩（通過深度查找）
+    this.children.list.forEach(child => {
+      if ((child as any).depth === 1000) {
+        child.destroy();
+      }
+    });
+
+    this.showStartScreen = false;
+    this.gameStarted = true;
+
+    console.log('🎮 開始畫面已隱藏，遊戲開始');
   }
 
   /**
@@ -207,8 +506,8 @@ export default class GameScene extends Phaser.Scene {
   private createParallaxBackground(): void {
     console.log('� 創建月亮主題視差背景');
 
-    // 創建基礎背景色（深夜藍色）
-    const bgRect = this.add.rectangle(400, 300, 800, 600, 0x0a0a2e);
+    // 創建基礎背景色（深太空黑色）- Wordwall 尺寸，符合參考圖片
+    const bgRect = this.add.rectangle(634, 336, 1268, 672, 0x000000);  // 🎯 深黑色太空背景
     bgRect.setDepth(-20);
 
     // 嘗試使用月亮主題背景，如果載入失敗則使用備用方案
@@ -226,45 +525,74 @@ export default class GameScene extends Phaser.Scene {
   private createMoonBackgroundLayers(): void {
     const backgroundLayers: Phaser.GameObjects.TileSprite[] = [];
 
-    // 檢查月亮背景圖片是否載入成功
-    const hasMoonBg1 = this.textures.exists('moon-bg-1');
-    const hasMoonBg2 = this.textures.exists('moon-bg-2');
-    const hasMoonBg3 = this.textures.exists('moon-bg-3');
-    const hasMoon = this.textures.exists('moon');
+    // 檢查真實月亮背景圖片是否載入成功
+    const hasMoonSky = this.textures.exists('moon-sky');
+    const hasMoonBack = this.textures.exists('moon-back');
+    const hasMoonMid = this.textures.exists('moon-mid');
+    const hasMoonEarth = this.textures.exists('moon-earth');
+    const hasMoonFront = this.textures.exists('moon-front');
+    const hasMoonFloor = this.textures.exists('moon-floor');
 
-    if (hasMoonBg1 || hasMoonBg2 || hasMoonBg3) {
-      console.log('🌙 使用月亮主題背景圖片');
+    if (hasMoonSky || hasMoonBack || hasMoonMid || hasMoonEarth || hasMoonFront || hasMoonFloor) {
+      console.log('🌙 使用真實月亮主題背景圖片');
 
-      // 背景層 1 - 最遠的背景（天空）
-      if (hasMoonBg1) {
-        const layer1 = this.add.tileSprite(0, 0, 800, 600, 'moon-bg-1');
-        layer1.setOrigin(0, 0);
-        layer1.setDepth(-15);
-        backgroundLayers.push(layer1);
+      // 天空層 - 最遠的背景
+      if (hasMoonSky) {
+        const skyLayer = this.add.tileSprite(0, 0, 1268, 672, 'moon-sky');
+        skyLayer.setOrigin(0, 0);
+        skyLayer.setDepth(-20);
+        backgroundLayers.push(skyLayer);
       }
 
-      // 月亮
-      if (hasMoon) {
-        const moon = this.add.image(650, 150, 'moon');
-        moon.setDepth(-14);
-        moon.setScale(0.8);
-        moon.setAlpha(0.9);
+      // 後景層 - 遠山/星空
+      if (hasMoonBack) {
+        const backLayer = this.add.tileSprite(0, 0, 1268, 672, 'moon-back');
+        backLayer.setOrigin(0, 0);
+        backLayer.setDepth(-18);
+        backgroundLayers.push(backLayer);
       }
 
-      // 背景層 2 - 中景（山脈）
-      if (hasMoonBg2) {
-        const layer2 = this.add.tileSprite(0, 0, 800, 600, 'moon-bg-2');
-        layer2.setOrigin(0, 0);
-        layer2.setDepth(-13);
-        backgroundLayers.push(layer2);
+      // 地球層 - 重新對比參考圖片，正確調整大小和位置
+      if (hasMoonEarth) {
+        console.log('🌍 重新分析參考圖片，修正地球大小和位置');
+        const earthLayer = this.add.image(1220, 277, 'moon-earth');  // 🎯 第三次往上移動1/10
+        earthLayer.setDepth(100);   // 🎯 最前景深度，確保可見
+        earthLayer.setScale(0.45);  // 🎯 放大0.5倍：0.3*1.5=0.45，3800*0.45=1710px
+        earthLayer.setAlpha(1.0);   // 🎯 完全不透明
+        // 🎯 不裁剪，保持完整圖片
+
+        console.log('🌍 地球第三次往上移動1/10完成:', {
+          x: earthLayer.x,
+          y: earthLayer.y,
+          scale: earthLayer.scale,
+          calculatedWidth: '3800*0.45=1710px',
+          position: '第三次往上移動 (1220, 277)',
+          depth: earthLayer.depth
+        });
       }
 
-      // 背景層 3 - 近景（樹木）
-      if (hasMoonBg3) {
-        const layer3 = this.add.tileSprite(0, 0, 800, 600, 'moon-bg-3');
-        layer3.setOrigin(0, 0);
-        layer3.setDepth(-12);
-        backgroundLayers.push(layer3);
+      // 中景層 - 月球表面
+      if (hasMoonMid) {
+        const midLayer = this.add.tileSprite(0, 0, 1268, 672, 'moon-mid');
+        midLayer.setOrigin(0, 0);
+        midLayer.setDepth(-14);
+        backgroundLayers.push(midLayer);
+      }
+
+      // 前景層 - 近景元素
+      if (hasMoonFront) {
+        const frontLayer = this.add.tileSprite(0, 0, 1268, 672, 'moon-front');
+        frontLayer.setOrigin(0, 0);
+        frontLayer.setDepth(-12);
+        backgroundLayers.push(frontLayer);
+      }
+
+      // 地面層 - 月球地面
+      if (hasMoonFloor) {
+        const floorLayer = this.add.tileSprite(0, 0, 1268, 672, 'moon-floor');
+        floorLayer.setOrigin(0, 0);
+        floorLayer.setDepth(-10);
+        backgroundLayers.push(floorLayer);
       }
 
     } else {
@@ -305,24 +633,25 @@ export default class GameScene extends Phaser.Scene {
   private createStarField(): void {
     console.log('⭐ 創建星空背景');
 
-    // 創建不同大小的星星
-    for (let i = 0; i < 80; i++) {
-      const x = Phaser.Math.Between(0, 800);
-      const y = Phaser.Math.Between(0, 400); // 星星主要在上半部分
+    // 創建星空效果 - 符合參考圖片的分布
+    for (let i = 0; i < 150; i++) {
+      const x = Phaser.Math.Between(0, 1268);  // 🎯 全寬度分布
+      const y = Phaser.Math.Between(0, 500);   // 🎯 擴大垂直範圍，符合參考圖片
       const star = this.add.image(x, y, 'star');
 
-      const scale = Phaser.Math.FloatBetween(0.3, 1.2);
-      const alpha = Phaser.Math.FloatBetween(0.4, 1);
+      // 🎯 更小更精緻的星星，符合參考圖片
+      const scale = Phaser.Math.FloatBetween(0.2, 0.8);
+      const alpha = Phaser.Math.FloatBetween(0.6, 1.0);  // 🎯 更亮的星星
 
       star.setScale(scale);
       star.setAlpha(alpha);
-      star.setDepth(-11);
+      star.setDepth(-19);  // 🎯 調整深度層級
 
-      // 添加閃爍效果
+      // 🎯 更慢的閃爍效果，營造深太空氛圍
       this.tweens.add({
         targets: star,
-        alpha: alpha * 0.3,
-        duration: Phaser.Math.Between(2000, 4000),
+        alpha: alpha * 0.4,
+        duration: Phaser.Math.Between(3000, 6000),
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut'
@@ -331,24 +660,130 @@ export default class GameScene extends Phaser.Scene {
   }
 
   /**
-   * 創建玩家飛機
+   * 創建玩家飛機 - 使用太空船動畫精靈表
    */
   private createPlayer(): void {
-    console.log('✈️ 創建玩家飛機 (修復版本)');
+    console.log('🎯 創建玩家射手角色 - 使用太空船動畫');
 
-    this.player = this.physics.add.image(100, 300, 'player-plane');
+    // 檢查可用的太空船資源（優先級順序）
+    const hasPlayerSpaceshipImage = this.textures.exists('player_spaceship_image');
+    const hasPlayerSpaceship = this.textures.exists('player_spaceship');
+    const hasShooterImage = this.textures.exists('random_shooter');
+    const hasCompleteSpaceship = this.textures.exists('complete_spaceship');
+
+    if (hasPlayerSpaceship) {
+      console.log('🚀 使用新的玩家太空船精靈表 - 創建一艘太空船');
+
+      // 創建一艘太空船精靈（只創建1個精靈）
+      this.player = this.physics.add.sprite(150, 336, 'player_spaceship');
+
+      // 設置錨點為中心 (0.5, 0.5)
+      this.player.setOrigin(0.5, 0.5);
+
+      // 播放7幀飛行動畫（0-6幀）
+      this.player.play('spaceship_fly');
+
+      console.log('✅ 太空船創建完成：1個精靈 + 7幀飛行動畫 (292x512)');
+
+    } else if (hasPlayerSpaceshipImage) {
+      console.log('� 備用方案：使用新的玩家太空船圖片（普通圖片模式）');
+
+      // 備用方案：使用普通圖片模式
+      this.player = this.physics.add.sprite(150, 336, 'player_spaceship_image');
+
+      console.log('✅ 新太空船圖片載入中（靜態模式）');
+
+    } else if (hasShooterImage) {
+      console.log('🔄 備用方案1：使用原始精靈表創建太空船動畫');
+
+      // 備用方案1：使用原始精靈表創建太空船
+      this.player = this.physics.add.sprite(150, 336, 'random_shooter');
+
+      // 播放太空船飛行動畫（使用原始精靈表的多個幀）
+      this.player.play('spaceship_fly');
+
+      console.log('✅ 太空船動畫播放中：spaceship_fly (原始精靈表)');
+
+    } else if (hasCompleteSpaceship) {
+      console.log('🚀 備用方案1：使用用戶提供的完整太空船圖片');
+
+      // 使用用戶提供的完整太空船圖片
+      this.player = this.physics.add.sprite(150, 336, 'complete_spaceship');
+
+      // 創建引擎火焰效果
+      this.createEngineFlameEffect();
+
+    } else if (hasShooterImage) {
+      console.log('🚀 備用方案2：使用原始精靈表第0幀');
+
+      // 備用方案：使用原始精靈表
+      this.player = this.physics.add.sprite(150, 336, 'random_shooter', 0);
+
+      // 創建引擎火焰效果
+      this.createEngineFlameEffect();
+    } else {
+      console.log('❌ 沒有可用的太空船資源，使用預設飛機');
+
+      // 最後備用方案：使用預設的藍色三角形飛機
+      this.player = this.physics.add.sprite(150, 336, 'player-plane');
+    }
+
+    // 統一的太空船配置（適用於所有方案）
+    this.setupSpaceshipProperties();
+  }
+
+  /**
+   * 設置太空船的統一屬性，確保位置一致
+   */
+  private setupSpaceshipProperties(): void {
+    console.log('⚙️ 設置太空船統一屬性');
+
+    // 錨點已在創建時設置為中心 (0.5, 0.5)
+
+    // 設置適當的縮放比例，讓太空船大小合適
+    this.player.setScale(0.6);
+
+    // 保持原始方向，不進行旋轉和翻轉
+
+    // 設置物理屬性
     this.player.setCollideWorldBounds(true);
-    this.player.setScale(1.5);
-    this.player.setDepth(10); // 確保在前景
-    this.player.setAlpha(1); // 確保不透明
-    this.player.setVisible(true); // 確保可見
+    this.player.setDepth(10);
 
-    console.log('✈️ 玩家飛機創建完成:', {
+    // 添加微妙的脈動效果（不影響位置）
+    this.tweens.add({
+      targets: this.player,
+      scaleX: { from: 0.5, to: 0.53 },
+      scaleY: { from: 0.5, to: 0.53 },
+      duration: 300,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+
+    console.log('✅ 太空船屬性設置完成: 中心錨點 + 0.6倍縮放 + 保持原始方向（無旋轉翻轉）');
+
+    // 視覺調試輔助線已隱藏
+    // if (process.env.NODE_ENV === 'development') {
+    //   // 在太空船位置畫十字線幫助視覺對齊檢查
+    //   const graphics = this.add.graphics();
+    //   graphics.lineStyle(2, 0xff0000, 0.8);
+    //   // 水平線
+    //   graphics.moveTo(this.player.x - 50, this.player.y);
+    //   graphics.lineTo(this.player.x + 50, this.player.y);
+    //   // 垂直線
+    //   graphics.moveTo(this.player.x, this.player.y - 50);
+    //   graphics.lineTo(this.player.x, this.player.y + 50);
+    //   graphics.strokePath();
+    //   console.log('🎯 添加視覺調試十字線: 中心點(' + this.player.x + ', ' + this.player.y + ')');
+    // }
+
+    console.log('🎯 玩家射手角色創建完成:', {
       x: this.player.x,
       y: this.player.y,
       visible: this.player.visible,
       alpha: this.player.alpha,
       depth: this.player.depth,
+      scale: this.player.scale,
       texture: this.player.texture.key
     });
   }
@@ -396,12 +831,12 @@ export default class GameScene extends Phaser.Scene {
       padding: { x: 8, y: 4 }
     }).setDepth(100);
 
-    // 目標詞彙顯示 - 更大更明顯
-    this.targetWordText = this.add.text(400, 16, '目標: 載入中...', {
-      fontSize: '24px',
+    // 目標詞彙顯示 - Wordwall 尺寸版本
+    this.targetWordText = this.add.text(634, 20, '目標: 載入中...', {  // 🎯 Wordwall 寬度中央 (1268/2)
+      fontSize: '32px',  // 🎯 放大字體適應 Wordwall 尺寸
       color: '#ffff00',
       backgroundColor: '#000000',
-      padding: { x: 12, y: 8 },
+      padding: { x: 16, y: 12 },  // 🎯 增加內邊距
       fontStyle: 'bold'
     }).setOrigin(0.5, 0).setDepth(100);
 
@@ -483,8 +918,8 @@ export default class GameScene extends Phaser.Scene {
     const word = this.geptManager.getRandomWord();
     if (!word) return;
 
-    const x = 850;
-    const y = Phaser.Math.Between(100, 500);
+    const x = 1320;  // 🎯 Wordwall 寬度 1268 + 50 像素
+    const y = Phaser.Math.Between(100, 572);  // 🎯 Wordwall 高度 672 - 100 像素
 
     const cloud = this.physics.add.image(x, y, 'cloud-word');
     cloud.setVelocityX(-100);
@@ -638,6 +1073,9 @@ export default class GameScene extends Phaser.Scene {
     this.gameState.isPlaying = true;
     this.gameState.isPaused = false;
     console.log('🚀 遊戲開始');
+
+    // 開始雲朵生成
+    this.startCloudSpawning();
     
     this.sendMessageToParent({
       type: 'GAME_STATE_CHANGE',
@@ -678,6 +1116,8 @@ export default class GameScene extends Phaser.Scene {
 
     // 玩家移動控制
     this.handlePlayerMovement();
+
+    // 太空船脈動效果已通過 Tween 自動處理
 
     // 更新中文 UI 系統
     this.updateChineseUI();
@@ -743,6 +1183,37 @@ export default class GameScene extends Phaser.Scene {
     } else {
       this.player.setVelocityY(0);
     }
+  }
+
+  /**
+   * 創建引擎火焰效果 - 只有引擎部分動畫
+   */
+  private createEngineFlameEffect(): void {
+    console.log('🔥 創建引擎火焰效果');
+
+    // 計算引擎火焰位置（太空船後方）
+    const flameX = this.player.x;
+    const flameY = this.player.y + 30; // 太空船後方位置
+
+    // 使用簡單的動畫精靈作為引擎火焰
+    const engineFlame = this.add.sprite(flameX, flameY, 'cloud');
+    engineFlame.setScale(0.3);
+    engineFlame.setTint(0xff6600); // 橙色火焰
+    engineFlame.setDepth(this.player.depth - 1);
+
+    // 創建火焰閃爍動畫
+    this.tweens.add({
+      targets: engineFlame,
+      alpha: { from: 0.8, to: 0.3 },
+      scaleX: { from: 0.3, to: 0.4 },
+      scaleY: { from: 0.3, to: 0.4 },
+      duration: 150,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+
+    console.log('🔥 引擎火焰效果創建完成');
   }
 
   /**
