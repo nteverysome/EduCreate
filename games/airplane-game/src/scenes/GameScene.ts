@@ -11,6 +11,7 @@ import { CollisionDetectionSystem, CollisionEvent } from '../managers/CollisionD
 import { MemoryEnhancementEngine, LearningEvent } from '../managers/MemoryEnhancementEngine';
 import { BilingualManager } from '../managers/BilingualManager';
 import { ChineseUIManager } from '../managers/ChineseUIManager';
+import { HealthBar } from '../ui/HealthBar';
 
 export default class GameScene extends Phaser.Scene {
   // 遊戲配置和狀態
@@ -33,7 +34,7 @@ export default class GameScene extends Phaser.Scene {
 
   // UI 元素
   private scoreText!: Phaser.GameObjects.Text;
-  private healthText!: Phaser.GameObjects.Text;
+  private healthBar!: HealthBar;  // 🔧 替換文字為血條
   private targetWordText!: Phaser.GameObjects.Text;
   private accuracyText!: Phaser.GameObjects.Text;
   private wordsLearnedText!: Phaser.GameObjects.Text;
@@ -875,7 +876,9 @@ export default class GameScene extends Phaser.Scene {
   private createGameHUD(): void {
     console.log('📊 創建遊戲 HUD (已擴展目標詞彙顯示)');
 
-    // 分數顯示
+    // 🔧 重新調整左上角文字佈局，平均分佈填補生命值空間
+
+    // 分數顯示（保持原位置）
     this.scoreText = this.add.text(16, 16, '分數: 0', {
       fontSize: '24px',
       color: '#000000',  // 黑色文字適應白色背景
@@ -883,29 +886,25 @@ export default class GameScene extends Phaser.Scene {
       padding: { x: 8, y: 4 }
     }).setDepth(100);
 
-    // 生命值顯示
-    this.healthText = this.add.text(16, 50, '生命值: 100', {
-      fontSize: '20px',
+    // 準確率顯示（移到原生命值位置）
+    this.accuracyText = this.add.text(16, 50, '準確率: 0%', {
+      fontSize: '20px',  // 🔧 稍微增大字體填補空間
       color: '#000000',  // 黑色文字適應白色背景
       backgroundColor: '#f8f9fa',  // 淺灰背景提供對比
       padding: { x: 8, y: 4 }
     }).setDepth(100);
 
-    // 準確率顯示
-    this.accuracyText = this.add.text(16, 84, '準確率: 0%', {
-      fontSize: '18px',
+    // 學習詞彙數顯示（調整位置平均分佈）
+    this.wordsLearnedText = this.add.text(16, 84, '學習詞彙: 0', {
+      fontSize: '20px',  // 🔧 稍微增大字體保持一致性
       color: '#000000',  // 黑色文字適應白色背景
       backgroundColor: '#f8f9fa',  // 淺灰背景提供對比
       padding: { x: 8, y: 4 }
     }).setDepth(100);
 
-    // 學習詞彙數顯示
-    this.wordsLearnedText = this.add.text(16, 118, '學習詞彙: 0', {
-      fontSize: '18px',
-      color: '#000000',  // 黑色文字適應白色背景
-      backgroundColor: '#f8f9fa',  // 淺灰背景提供對比
-      padding: { x: 8, y: 4 }
-    }).setDepth(100);
+    // 🔧 血條顯示（移動到左下角）
+    this.healthBar = new HealthBar(this, 16, this.cameras.main.height - 60);
+    console.log('❤️ 血條 UI 已創建（左下角位置）');
 
     // 目標詞彙顯示 - 完整容器尺寸版本
     this.targetWordText = this.add.text(637, 20, '目標: 載入中...', {  // 🎯 完整容器寬度中央 (1274/2)
@@ -1418,7 +1417,8 @@ export default class GameScene extends Phaser.Scene {
    */
   private updateUI(): void {
     this.scoreText.setText(`分數: ${this.gameState.currentScore}`);
-    this.healthText.setText(`生命值: ${this.gameState.currentHealth}`);
+    // 🔧 使用血條更新生命值顯示
+    this.healthBar.updateHealth(this.gameState.currentHealth, true);
     this.accuracyText.setText(`準確率: ${this.gameState.accuracy}%`);
     this.wordsLearnedText.setText(`學習詞彙: ${this.gameState.wordsLearned}`);
 
