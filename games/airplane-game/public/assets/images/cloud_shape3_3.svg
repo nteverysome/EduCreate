@@ -1,0 +1,13 @@
+<svg width="128" height="64" xmlns="http://www.w3.org/2000/svg">
+  <!-- 雲朵形狀 -->
+  <g fill="white" stroke="#cccccc" stroke-width="2">
+    <!-- 主要雲朵 -->
+    <ellipse cx="64" cy="32" rx="50" ry="25"/>
+    <!-- 左側小雲朵 -->
+    <ellipse cx="30" cy="35" rx="20" ry="15"/>
+    <!-- 右側小雲朵 -->
+    <ellipse cx="98" cy="35" rx="20" ry="15"/>
+    <!-- 頂部小雲朵 -->
+    <ellipse cx="64" cy="20" rx="15" ry="12"/>
+  </g>
+</svg>

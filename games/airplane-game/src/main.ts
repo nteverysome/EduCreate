@@ -37,11 +37,11 @@ async function initGame() {
       gameMode: 'practice'
     };
     
-    // Phaser 遊戲配置
+    // Phaser 遊戲配置 (Wordwall 實際尺寸 1274x739)
     const phaserConfig: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
-      width: 800,
-      height: 600,
+      width: 1274,
+      height: 739,
       parent: 'game-container',
       backgroundColor: '#000033',
       
@@ -61,8 +61,8 @@ async function initGame() {
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: 800,
-        height: 600
+        width: 1274,
+        height: 739
       },
       
       // 音頻配置

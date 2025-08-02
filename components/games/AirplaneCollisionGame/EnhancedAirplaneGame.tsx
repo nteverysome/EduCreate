@@ -114,11 +114,11 @@ export default function EnhancedAirplaneGame({
         currentTargetChinese: firstTarget.chinese
       }));
 
-      // 創建增強的 Phaser 配置
+      // 創建增強的 Phaser 配置 (Wordwall 實際尺寸 1274x739)
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
-        width: 800,
-        height: 500,
+        width: 1274,
+        height: 739,
         parent: gameRef.current,
         backgroundColor: '#87CEEB', // 天空藍
         physics: {
@@ -163,13 +163,16 @@ export default function EnhancedAirplaneGame({
       .fillTriangle(0, 16, 32, 0, 32, 32)
       .generateTexture('player-plane', 32, 32);
       
-    // 創建雲朵紋理（白色橢圓）
+    // 載入真實雲朵圖片 (使用用戶提供的白色雲朵)
+    this.load.image('word-cloud', '/games/airplane-game/assets/images/cloud_shape3_3.png');
+
+    // 備用：創建雲朵紋理（白色橢圓）
     this.add.graphics()
       .fillStyle(0xffffff)
       .fillEllipse(32, 16, 64, 32)
       .lineStyle(2, 0xcccccc)
       .strokeEllipse(32, 16, 64, 32)
-      .generateTexture('word-cloud', 64, 32);
+      .generateTexture('word-cloud-fallback', 64, 32);
 
     // 創建背景雲朵
     this.add.graphics()
@@ -445,11 +448,11 @@ export default function EnhancedAirplaneGame({
 
   return (
     <div className={`enhanced-airplane-game ${className}`} data-testid={testId}>
-      {/* 遊戲容器 */}
-      <div 
-        ref={gameRef} 
+      {/* 遊戲容器 - Wordwall 實際尺寸 1274x739 */}
+      <div
+        ref={gameRef}
         className="game-container border-2 border-blue-300 rounded-lg shadow-lg"
-        style={{ width: '800px', height: '500px', margin: '0 auto' }}
+        style={{ width: '1274px', height: '739px', margin: '0 auto' }}
       />
       
       {/* 載入狀態 */}

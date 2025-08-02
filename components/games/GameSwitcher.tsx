@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronDownIcon, PlayIcon, CogIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, PlayIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 
 // 遊戲配置類型定義
 interface GameConfig {
@@ -35,8 +35,21 @@ interface GameSwitcherProps {
   className?: string;
 }
 
-// 遊戲配置數據
+// 遊戲配置數據 (Vite 版排在第一位)
 const GAMES_CONFIG: GameConfig[] = [
+  {
+    id: 'airplane-vite',
+    name: 'airplane',
+    displayName: '飛機遊戲 (Vite版)',
+    description: 'Vite 獨立服務器版本的飛機碰撞遊戲，性能最佳',
+    url: 'http://localhost:3001/games/airplane-game/',
+    type: 'vite',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '⚡',
+    estimatedLoadTime: 600
+  },
   {
     id: 'airplane-main',
     name: 'airplane',
@@ -62,19 +75,6 @@ const GAMES_CONFIG: GameConfig[] = [
     status: 'completed',
     icon: '🎮',
     estimatedLoadTime: 1000
-  },
-  {
-    id: 'airplane-vite',
-    name: 'airplane',
-    displayName: '飛機遊戲 (Vite版)',
-    description: 'Vite 獨立服務器版本的飛機碰撞遊戲',
-    url: 'http://localhost:3001/games/airplane-game/',
-    type: 'vite',
-    memoryType: '動態反應記憶',
-    geptLevels: ['elementary', 'intermediate', 'advanced'],
-    status: 'completed',
-    icon: '⚡',
-    estimatedLoadTime: 600
   },
   // 未來遊戲預留位置
   {
@@ -132,7 +132,7 @@ const GAMES_CONFIG: GameConfig[] = [
 ];
 
 const GameSwitcher: React.FC<GameSwitcherProps> = ({
-  defaultGame = 'airplane-main',
+  defaultGame = 'airplane-vite',
   geptLevel = 'elementary',
   onGameChange,
   onGameStateUpdate,
@@ -294,33 +294,44 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
   return (
     <div className={`game-switcher ${className}`}>
-      {/* 遊戲選擇器標頭 */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4">
-        <div className="p-4">
+      {/* 簡化的遊戲控制器 - 緊湊佈局 */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-2">
+        <div className="p-3">
           <div className="flex items-center justify-between">
-            {/* 當前遊戲信息 */}
-            <div className="flex items-center space-x-3">
-              <div className="text-2xl">{currentGame.icon}</div>
-              <div>
-                <h3 className="font-semibold text-gray-900">{currentGame.displayName}</h3>
-                <p className="text-sm text-gray-600">{currentGame.memoryType}</p>
+            {/* 遊戲詳細信息 */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className="text-2xl">{currentGame.icon}</div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">{currentGame.displayName}</h3>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-sm text-gray-600">{currentGame.memoryType}</p>
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(currentGame.status)}`}>
+                      {getStatusText(currentGame.status)}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(currentGame.status)}`}>
-                {getStatusText(currentGame.status)}
+
+              {/* 載入時間顯示 */}
+              <div className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                載入: ~{currentGame.estimatedLoadTime}ms
               </div>
             </div>
 
-            {/* 遊戲選擇下拉選單 */}
-            <div className="relative">
-              <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                disabled={isLoading}
-              >
-                <PlayIcon className="w-4 h-4" />
-                <span>切換遊戲</span>
-                <ChevronDownIcon className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
+            {/* 遊戲控制按鈕組 */}
+            <div className="flex items-center space-x-3">
+              {/* 切換遊戲下拉選單 */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  disabled={isLoading}
+                >
+                  <PlayIcon className="w-4 h-4" />
+                  <span>切換遊戲</span>
+                  <ChevronDownIcon className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
 
               {/* 下拉選單 */}
               {isDropdownOpen && (
@@ -371,11 +382,12 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
                   </div>
                 </div>
               )}
+              </div>
             </div>
           </div>
 
-          {/* GEPT 等級選擇器 */}
-          <div className="flex items-center space-x-4 mt-4 pt-4 border-t border-gray-100">
+          {/* GEPT 等級選擇器 - 緊湊佈局 */}
+          <div className="flex items-center space-x-4 mt-3 pt-3 border-t border-gray-100">
             <div className="flex items-center space-x-2">
               <BookOpenIcon className="w-4 h-4 text-gray-500" />
               <span className="text-sm font-medium text-gray-700">GEPT 等級:</span>
@@ -416,8 +428,11 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         )}
       </div>
 
-      {/* 遊戲 iframe 容器 */}
-      <div className="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      {/* 遊戲 iframe 容器 - Wordwall 尺寸 1274x739 (緊湊佈局) */}
+      <div
+        className="relative bg-white rounded-lg shadow-sm overflow-hidden mx-auto"
+        style={{ width: '1274px', height: '739px' }}
+      >
         {isLoading && (
           <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10">
             <div className="text-center">
@@ -431,7 +446,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         <iframe
           ref={iframeRef}
           src={currentGame.url}
-          className="w-full h-[600px] border-0"
+          className="w-full h-[739px] border-0"
           title={currentGame.displayName}
           onLoad={handleIframeLoad}
           allow="fullscreen; autoplay; microphone; camera"

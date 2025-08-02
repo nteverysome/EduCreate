@@ -45,6 +45,9 @@ export default class GameScene extends Phaser.Scene {
   private bilingualManager!: BilingualManager;
   private chineseUIManager!: ChineseUIManager;
 
+  // 雲朵圖片載入狀態
+  private useBackupCloudTexture: boolean = false;
+
   // 遊戲邏輯
   private cloudSpawnTimer!: Phaser.Time.TimerEvent;
   private currentTargetWord?: GEPTWord;
@@ -165,13 +168,29 @@ export default class GameScene extends Phaser.Scene {
     planeGraphics.generateTexture('player-plane', 32, 32);
     planeGraphics.destroy();
 
-    // 詞彙雲朵 - 白色橢圓
+    // 載入真實雲朵圖片 (使用用戶提供的白色雲朵)
+    this.load.image('cloud-word', 'assets/images/cloud_shape3_3.png');
+
+    // 添加載入成功和錯誤處理
+    this.load.on('filecomplete-image-cloud-word', () => {
+      console.log('✅ 雲朵圖片載入成功');
+    });
+
+    this.load.on('loaderror', (fileObj: any) => {
+      if (fileObj.key === 'cloud-word') {
+        console.log('⚠️ 雲朵圖片載入失敗，使用備用紋理');
+        // 強制使用備用紋理
+        this.useBackupCloudTexture = true;
+      }
+    });
+
+    // 備用：詞彙雲朵 - 白色橢圓 (如果圖片載入失敗)
     const cloudGraphics = this.add.graphics();
     cloudGraphics.fillStyle(0xffffff);
     cloudGraphics.fillEllipse(32, 16, 60, 28);
     cloudGraphics.lineStyle(2, 0x888888);
     cloudGraphics.strokeEllipse(32, 16, 60, 28);
-    cloudGraphics.generateTexture('cloud-word', 64, 32);
+    cloudGraphics.generateTexture('cloud-word-fallback', 64, 32);
     cloudGraphics.destroy();
 
     // 背景星星 - 小白點
@@ -378,7 +397,48 @@ export default class GameScene extends Phaser.Scene {
     console.log('🚀 跳過開始畫面，直接開始遊戲');
     this.showStartScreen = false;
     this.gameStarted = true;
-    this.startGame();
+
+    // 延遲啟動遊戲，確保所有系統初始化完成
+    this.time.delayedCall(1000, () => {
+      console.log('🎮 延遲啟動遊戲...');
+      this.startGame();
+
+      // 🧪 測試雲朵已移除，遊戲更加乾淨
+
+      // 🔴 紅色方塊測試已移除，遊戲更加乾淨
+    });
+  }
+
+
+
+  /**
+   * 更新雲朵位置和清理離開螢幕的雲朵
+   */
+  private updateClouds(): void {
+    const cloudCount = this.clouds.children.entries.length;
+
+    // 每 5 秒輸出一次雲朵狀態
+    if (Math.floor(Date.now() / 1000) % 5 === 0) {
+      console.log('🔄 雲朵更新檢查 - 總數:', cloudCount);
+    }
+
+    this.clouds.children.entries.forEach((cloud: any, index: number) => {
+      // 每 5 秒輸出雲朵位置
+      if (Math.floor(Date.now() / 1000) % 5 === 0) {
+        console.log(`☁️ 雲朵 ${index}: x=${Math.round(cloud.x)}, y=${Math.round(cloud.y)}, velocity=${cloud.body?.velocity?.x || 'N/A'}`);
+      }
+
+      // 檢查雲朵是否移出螢幕左側
+      if (cloud.x < -100) {
+        // 清理雲朵和相關文字
+        const wordText = cloud.getData('wordText');
+        if (wordText) {
+          wordText.destroy();
+        }
+        cloud.destroy();
+        console.log('🗑️ 清理離開螢幕的雲朵 - 位置:', cloud.x);
+      }
+    });
   }
 
   /**
@@ -791,6 +851,19 @@ export default class GameScene extends Phaser.Scene {
   private createClouds() {
     this.clouds = this.physics.add.group();
     console.log('☁️ 創建雲朵群組');
+
+    // 檢查物理世界狀態
+    console.log('🌍 物理世界狀態:', {
+      gravity: this.physics.world.gravity,
+      bounds: this.physics.world.bounds,
+      isPaused: this.physics.world.isPaused
+    });
+
+    // 強制確保物理世界運行
+    if (this.physics.world.isPaused) {
+      console.log('⚡ 物理世界已暫停，強制恢復');
+      this.physics.world.resume();
+    }
   }
 
   /**
@@ -905,41 +978,87 @@ export default class GameScene extends Phaser.Scene {
       callbackScope: this,
       loop: true
     });
-    console.log('☁️ 開始雲朵生成');
+    console.log('☁️ 開始雲朵生成 - 每 2 秒生成一個雲朵');
+    console.log('🎮 遊戲狀態:', this.gameState);
+
+    // 立即生成第一個雲朵進行測試
+    this.time.delayedCall(500, () => {
+      console.log('🧪 測試：立即生成第一個雲朵');
+      this.spawnCloud();
+    });
   }
 
   /**
    * 生成詞彙雲朵 (修復版本)
    */
   private spawnCloud(): void {
-    if (!this.gameState.isPlaying) return;
+    console.log('🔄 嘗試生成雲朵...');
+    console.log('🎮 遊戲狀態 isPlaying:', this.gameState.isPlaying);
+
+    if (!this.gameState.isPlaying) {
+      console.log('❌ 遊戲未在進行中，跳過雲朵生成');
+      return;
+    }
 
     // 從 GEPT 管理器獲取隨機詞彙
     const word = this.geptManager.getRandomWord();
-    if (!word) return;
+    console.log('📝 獲取詞彙:', word);
 
-    const x = 1320;  // 🎯 Wordwall 寬度 1268 + 50 像素
-    const y = Phaser.Math.Between(100, 572);  // 🎯 Wordwall 高度 672 - 100 像素
+    if (!word) {
+      console.log('❌ 無法獲取詞彙，跳過雲朵生成');
+      return;
+    }
 
-    const cloud = this.physics.add.image(x, y, 'cloud-word');
-    cloud.setVelocityX(-100);
+    const x = 1350;  // 🎯 從最右邊邊界開始 (Wordwall 寬度 1274 + 邊距)
+    const y = Phaser.Math.Between(100, 639);  // 🎯 Wordwall 高度 739 - 100 像素
+
+    // 創建雲朵精靈 (使用備用紋理如果主圖片載入失敗)
+    const cloudTexture = this.useBackupCloudTexture ? 'cloud-word-fallback' : 'cloud-word';
+    const cloud = this.physics.add.image(x, y, cloudTexture);
+
+    console.log('☁️ 使用雲朵紋理:', cloudTexture, '位置:', x, y);
+
+    // 🔧 設定雲朵大小 (增加 44% = 1.2 * 1.2)
+    cloud.setScale(1.44);
+
+    // 🔧 強制確保物理體正確設定
+    if (!cloud.body) {
+      console.log('❌ 雲朵沒有物理體，強制啟用物理');
+      this.physics.world.enable(cloud);
+    }
+
+    // 設定速度 - 使用多種方法確保生效
+    cloud.setVelocityX(-200); // 方法1: 直接設定
+    if (cloud.body) {
+      cloud.body.setVelocityX(-200); // 方法2: 通過 body 設定
+      cloud.body.velocity.x = -200;  // 方法3: 直接設定 velocity 屬性
+    }
+
+    // 調試：檢查物理屬性
+    console.log('🔧 雲朵物理屬性 (修復後):', {
+      hasBody: !!cloud.body,
+      velocity: cloud.body?.velocity,
+      velocityX: cloud.body?.velocity?.x,
+      position: { x: cloud.x, y: cloud.y },
+      bodyType: cloud.body?.constructor.name
+    });
     cloud.setData('word', word);
     cloud.setData('isTarget', word.english === this.currentTargetWord?.english);
-    cloud.setDepth(5); // 確保在前景
+    cloud.setDepth(110); // 🌍 確保在地球(depth=100)上方
     cloud.setAlpha(1); // 確保不透明
     cloud.setVisible(true); // 確保可見
 
-    // 添加詞彙文字
+    // 添加詞彙文字 (增加 44% = 16px * 1.44 ≈ 23px)
     const isTarget = word.english === this.currentTargetWord?.english;
     const wordText = this.add.text(x, y, word.english, {
-      fontSize: '16px',
+      fontSize: '23px',
       color: isTarget ? '#ff0000' : '#000000',
       fontStyle: isTarget ? 'bold' : 'normal',
       backgroundColor: isTarget ? '#ffff00' : '#ffffff',
-      padding: { x: 4, y: 2 }
+      padding: { x: 6, y: 3 }
     }).setOrigin(0.5);
 
-    wordText.setDepth(6); // 文字在雲朵之上
+    wordText.setDepth(111); // 🌍 文字在雲朵(depth=110)之上，也在地球(depth=100)上方
     wordText.setAlpha(1);
     wordText.setVisible(true);
 
@@ -951,13 +1070,134 @@ export default class GameScene extends Phaser.Scene {
       this.bilingualManager.showChinesePrompt(word.english, { x: x, y: y - 60 });
     }
 
+    // 🔧 在添加到群組前再次確認速度
+    console.log('🔧 添加到群組前的速度:', cloud.body?.velocity?.x);
+
     this.clouds.add(cloud);
+
+    // 🔧 添加到群組後檢查速度是否被重置
+    console.log('🔧 添加到群組後的速度:', cloud.body?.velocity?.x);
+
+    // 🚀 強制重新設定速度（防止群組重置）
+    if (cloud.body?.velocity?.x !== -200) {
+      console.log('⚠️ 速度被重置，強制恢復');
+      cloud.setVelocityX(-200);
+      cloud.body.velocity.x = -200;
+    }
 
     console.log('☁️ 生成雲朵 (修復版本):', word.english, isTarget ? '(目標)' : '', {
       cloudVisible: cloud.visible,
       textVisible: wordText.visible,
       cloudDepth: cloud.depth,
       textDepth: wordText.depth
+    });
+  }
+
+  /**
+   * 強制生成測試雲朵（用於調試）
+   */
+  private forceSpawnTestCloud(): void {
+    console.log('🧪 強制生成測試雲朵 - 開始');
+
+    // 創建簡單的測試雲朵
+    const x = 1000;  // 更靠左，確保在螢幕內可見
+    const y = 300;   // 中間位置
+
+    // 使用備用紋理如果主圖片載入失敗
+    const cloudTexture = this.useBackupCloudTexture ? 'cloud-word-fallback' : 'cloud-word';
+    const testCloud = this.physics.add.image(x, y, cloudTexture);
+
+    // 🔧 強制確保測試雲朵物理體正確設定
+    if (!testCloud.body) {
+      console.log('❌ 測試雲朵沒有物理體，強制啟用物理');
+      this.physics.world.enable(testCloud);
+    }
+
+    // 設定速度 - 使用多種方法確保生效
+    testCloud.setVelocityX(-150); // 方法1: 直接設定
+    if (testCloud.body) {
+      testCloud.body.setVelocityX(-150); // 方法2: 通過 body 設定
+      testCloud.body.velocity.x = -150;  // 方法3: 直接設定 velocity 屬性
+    }
+
+    testCloud.setDepth(10); // 最高深度
+    testCloud.setAlpha(1);
+    testCloud.setVisible(true);
+    testCloud.setTint(0xff0000); // 紅色，容易識別
+
+    console.log('🧪 測試雲朵使用紋理:', cloudTexture);
+    console.log('🧪 測試雲朵物理屬性:', {
+      hasBody: !!testCloud.body,
+      velocity: testCloud.body?.velocity,
+      velocityX: testCloud.body?.velocity?.x
+    });
+
+    // 添加測試文字
+    const testText = this.add.text(x, y, 'TEST', {
+      fontSize: '20px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      backgroundColor: '#ff0000',
+      padding: { x: 8, y: 4 }
+    }).setOrigin(0.5);
+
+    testText.setDepth(11);
+    testText.setAlpha(1);
+    testText.setVisible(true);
+
+    // 綁定文字到雲朵
+    testCloud.setData('wordText', testText);
+    testCloud.setData('word', { english: 'test', chinese: '測試' });
+    testCloud.setData('isTarget', false);
+
+    // 🔧 在添加到群組前再次確認測試雲朵速度
+    console.log('🧪 添加到群組前的測試雲朵速度:', testCloud.body?.velocity?.x);
+
+    this.clouds.add(testCloud);
+
+    // 🔧 添加到群組後檢查測試雲朵速度是否被重置
+    console.log('🧪 添加到群組後的測試雲朵速度:', testCloud.body?.velocity?.x);
+
+    // 🚀 強制重新設定測試雲朵速度（防止群組重置）
+    if (testCloud.body?.velocity?.x !== -150) {
+      console.log('⚠️ 測試雲朵速度被重置，強制恢復');
+      testCloud.setVelocityX(-150);
+      testCloud.body.velocity.x = -150;
+    }
+
+    console.log('🧪 測試雲朵已生成:', {
+      x: x,
+      y: y,
+      visible: testCloud.visible,
+      depth: testCloud.depth,
+      velocity: testCloud.body?.velocity
+    });
+  }
+
+  /**
+   * 創建簡單的測試物件
+   */
+  private createSimpleTestObject(): void {
+    console.log('🔴 創建簡單紅色方塊');
+
+    const testRect = this.add.rectangle(600, 200, 50, 50, 0xff0000);
+    testRect.setDepth(20);
+    testRect.setAlpha(1);
+    testRect.setVisible(true);
+
+    // 添加移動動畫
+    this.tweens.add({
+      targets: testRect,
+      x: 100,
+      duration: 3000,
+      ease: 'Linear'
+    });
+
+    console.log('🔴 紅色方塊已創建:', {
+      x: testRect.x,
+      y: testRect.y,
+      visible: testRect.visible,
+      depth: testRect.depth
     });
   }
 
@@ -1116,6 +1356,9 @@ export default class GameScene extends Phaser.Scene {
 
     // 玩家移動控制
     this.handlePlayerMovement();
+
+    // 更新雲朵位置和清理
+    this.updateClouds();
 
     // 太空船脈動效果已通過 Tween 自動處理
 

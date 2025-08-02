@@ -5,10 +5,10 @@ import { LoadingScene } from '../scenes/LoadingScene';
 
 // 遊戲常數
 export const GAME_CONFIG = {
-  // 畫面設定
+  // 畫面設定 (Wordwall 實際尺寸)
   SCREEN: {
-    WIDTH: 1200,
-    HEIGHT: 900,
+    WIDTH: 1274,
+    HEIGHT: 739,
     BACKGROUND_COLOR: '#2c3e50'
   },
   
@@ -100,8 +100,8 @@ export const phaserConfig: Phaser.Types.Core.GameConfig = {
   scale: {
     mode: Phaser.Scale.NONE,
     autoCenter: Phaser.Scale.NO_CENTER,
-    width: 1200,
-    height: 900
+    width: 1274,
+    height: 739
   }
 };
 

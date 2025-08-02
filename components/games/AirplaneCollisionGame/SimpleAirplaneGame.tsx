@@ -72,11 +72,11 @@ export default function SimpleAirplaneGame({
         throw new Error('遊戲容器未找到');
       }
 
-      // 創建簡化的 Phaser 配置
+      // 創建簡化的 Phaser 配置 (Wordwall 實際尺寸 1274x739)
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
-        width: 800,
-        height: 400,
+        width: 1274,
+        height: 739,
         parent: gameRef.current,
         backgroundColor: '#87CEEB', // 天空藍
         physics: {
@@ -243,10 +243,10 @@ export default function SimpleAirplaneGame({
   return (
     <div className={`simple-airplane-game ${className}`} data-testid={testId}>
       {/* 遊戲容器 */}
-      <div 
-        ref={gameRef} 
+      <div
+        ref={gameRef}
         className="game-container border-2 border-gray-300 rounded-lg"
-        style={{ width: '800px', height: '400px', margin: '0 auto' }}
+        style={{ width: '1274px', height: '739px', margin: '0 auto' }}
       />
       
       {/* 載入狀態 */}

@@ -368,11 +368,11 @@ export class AirplaneCollisionGame extends React.Component<
 
     return (
       <div className={`airplane-collision-game ${className}`} data-testid={testId}>
-        {/* 遊戲容器 */}
-        <div 
-          ref={this.gameRef} 
+        {/* 遊戲容器 - Wordwall 實際尺寸 1274x739 */}
+        <div
+          ref={this.gameRef}
           className="game-container"
-          style={{ width: '800px', height: '600px', margin: '0 auto' }}
+          style={{ width: '1274px', height: '739px', margin: '0 auto' }}
         />
         
         {/* 載入狀態 */}
