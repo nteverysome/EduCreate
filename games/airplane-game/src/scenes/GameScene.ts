@@ -179,20 +179,22 @@ export default class GameScene extends Phaser.Scene {
 
     this.load.on('loaderror', (fileObj: any) => {
       if (fileObj.key === 'cloud-word') {
-        console.log('⚠️ 雲朵圖片載入失敗，使用備用紋理');
+        console.log('⚠️ 雲朵圖片載入失敗，使用淺藍色備用紋理（防止白色閃爍）');
         // 強制使用備用紋理
         this.useBackupCloudTexture = true;
       }
     });
 
-    // 備用：詞彙雲朵 - 白色橢圓 (如果圖片載入失敗)
+    // 🔧 修復白色閃爍：備用雲朵使用淺藍色而不是白色
     const cloudGraphics = this.add.graphics();
-    cloudGraphics.fillStyle(0xffffff);
+    cloudGraphics.fillStyle(0xe6f3ff); // 淺藍色而不是純白色，防止白色閃爍
     cloudGraphics.fillEllipse(32, 16, 60, 28);
-    cloudGraphics.lineStyle(2, 0x888888);
+    cloudGraphics.lineStyle(2, 0x4a90e2); // 藍色邊框
     cloudGraphics.strokeEllipse(32, 16, 60, 28);
     cloudGraphics.generateTexture('cloud-word-fallback', 64, 32);
     cloudGraphics.destroy();
+
+    console.log('☁️ 備用雲朵紋理已創建（淺藍色，防止白色閃爍）');
 
     // 背景星星 - 小白點
     const starGraphics = this.add.graphics();
@@ -1118,12 +1120,13 @@ export default class GameScene extends Phaser.Scene {
     cloud.setVisible(true); // 確保可見
 
     // 添加詞彙文字 (增加 44% = 16px * 1.44 ≈ 23px)
+    // 🔧 修復白色閃爍：使用透明背景而不是白色背景
     const isTarget = word.english === this.currentTargetWord?.english;
     const wordText = this.add.text(x, y, word.english, {
       fontSize: '23px',
       color: isTarget ? '#ff0000' : '#000000',
       fontStyle: isTarget ? 'bold' : 'normal',
-      backgroundColor: isTarget ? '#ffff00' : '#ffffff',
+      backgroundColor: isTarget ? '#ffff00' : 'rgba(255, 255, 255, 0.8)', // 半透明白色而不是純白色
       padding: { x: 6, y: 3 }
     }).setOrigin(0.5);
 
@@ -1357,9 +1360,8 @@ export default class GameScene extends Phaser.Scene {
           );
         }
 
-        // 移除雲朵和文字
-        if (wordText) wordText.destroy();
-        cloud.destroy();
+        // 🔧 修復白色閃爍：使用淡出動畫移除雲朵和文字
+        this.removeCloudWithAnimation(cloud, wordText);
 
         // 延遲1秒後結束遊戲，讓玩家看到分數歸零
         this.time.delayedCall(1000, () => {
@@ -1378,18 +1380,16 @@ export default class GameScene extends Phaser.Scene {
 
       // 普通錯誤：檢查生命值
       if (this.gameState.currentHealth <= 0) {
-        // 移除雲朵和文字
-        if (wordText) wordText.destroy();
-        cloud.destroy();
+        // 🔧 修復白色閃爍：使用淡出動畫移除雲朵和文字
+        this.removeCloudWithAnimation(cloud, wordText);
 
         this.endGame();
         return;
       }
     }
 
-    // 移除雲朵和文字
-    if (wordText) wordText.destroy();
-    cloud.destroy();
+    // 🔧 修復白色閃爍：使用淡出動畫移除雲朵和文字
+    this.removeCloudWithAnimation(cloud, wordText);
 
     // 更新 UI 和統計
     this.updateGameStats();
@@ -1466,13 +1466,90 @@ export default class GameScene extends Phaser.Scene {
       this.cloudSpawnTimer.destroy();
     }
 
-    // 清除所有雲朵
-    this.clouds.clear(true, true);
+    // 🔧 修復白色閃爍：漸進式清理雲朵而不是瞬間清空
+    this.clearCloudsGradually();
 
     this.sendMessageToParent({
       type: 'GAME_COMPLETE',
       score: this.gameState.currentScore,
       health: this.gameState.currentHealth  // 現在會是0
+    });
+  }
+
+  /**
+   * 漸進式清理雲朵，防止白色閃爍
+   */
+  private clearCloudsGradually(): void {
+    console.log('🌤️ 開始漸進式清理雲朵，防止白色閃爍');
+
+    const clouds = this.clouds.children.entries;
+    if (clouds.length === 0) {
+      console.log('✅ 沒有雲朵需要清理');
+      return;
+    }
+
+    // 為每個雲朵添加淡出動畫
+    clouds.forEach((cloud: any, index: number) => {
+      this.tweens.add({
+        targets: cloud,
+        alpha: 0,
+        scale: 0.5,
+        duration: 300,
+        delay: index * 50, // 錯開動畫時間
+        ease: 'Power2',
+        onComplete: () => {
+          if (cloud && cloud.active) {
+            cloud.destroy();
+          }
+        }
+      });
+    });
+
+    // 延遲清理群組，確保所有動畫完成
+    this.time.delayedCall(1000, () => {
+      this.clouds.clear(false, false); // 不銷毀子物件，因為已經在動畫中銷毀
+      console.log('✅ 雲朵漸進式清理完成');
+    });
+  }
+
+  /**
+   * 使用動畫移除單個雲朵，防止白色閃爍
+   */
+  private removeCloudWithAnimation(cloud: any, wordText?: any): void {
+    console.log('🌤️ 使用淡出動畫移除雲朵');
+
+    // 🔧 修復白色閃爍：先處理文字，確保白色背景不會造成閃爍
+    if (wordText && wordText.active) {
+      // 文字立即開始淡出，比雲朵稍快
+      this.tweens.add({
+        targets: wordText,
+        alpha: 0,
+        scale: 0.2,
+        duration: 150, // 比雲朵快50ms
+        ease: 'Power2',
+        onComplete: () => {
+          if (wordText && wordText.active) {
+            wordText.destroy();
+            console.log('✅ 文字已銷毀');
+          }
+        }
+      });
+    }
+
+    // 雲朵稍後開始淡出
+    this.tweens.add({
+      targets: cloud,
+      alpha: 0,
+      scale: 0.3,
+      duration: 200,
+      delay: 50, // 延遲50ms，確保文字先開始淡出
+      ease: 'Power2',
+      onComplete: () => {
+        if (cloud && cloud.active) {
+          cloud.destroy();
+          console.log('✅ 雲朵已銷毀');
+        }
+      }
     });
   }
 

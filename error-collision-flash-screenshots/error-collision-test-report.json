@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-08-02T08:51:58.149Z",
+  "testType": "error-collision-white-flash-test",
+  "totalScreenshots": 56,
+  "gameUrl": "http://localhost:3001/games/airplane-game/",
+  "testDuration": "50 movements, 200ms each",
+  "errorCollisionCount": 3,
+  "whiteFlashDetected": false,
+  "findings": [
+    "專門測試錯誤碰撞的白色閃爍問題",
+    "通過故意移動增加錯誤碰撞機會",
+    "監控每次錯誤碰撞後的視覺效果",
+    "特別關注第5次錯誤的處理"
+  ],
+  "screenshotDirectory": "error-collision-flash-screenshots",
+  "errorCollisionMessages": [
+    "log: ❌ 錯誤碰撞：輕微震動特效",
+    "log: ❌ 錯誤碰撞: family (第1次錯誤)",
+    "log: 🌤️ 使用淡出動畫移除雲朵"
+  ]
+}

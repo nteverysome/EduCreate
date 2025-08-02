@@ -138,7 +138,7 @@ export class CollisionDetectionSystem {
   }
 
   /**
-   * 觸發碰撞特效
+   * 觸發碰撞特效 - 優化版本，減少閃爍
    */
   private triggerCollisionEffects(
     event: CollisionEvent,
@@ -146,24 +146,33 @@ export class CollisionDetectionSystem {
   ): void {
     const { x, y } = event.cloudPosition;
 
-    // 視覺反饋
+    // 視覺反饋 - 所有碰撞都顯示
     if (this.effectConfig.enableVisualFeedback && event.type !== 'neutral') {
       this.createVisualFeedback(event.type, x, y);
     }
 
-    // 粒子特效
-    if (this.effectConfig.enableParticles && event.type !== 'neutral') {
-      this.createParticleEffect(event.type, x, y);
-    }
-
-    // 螢幕震動
-    if (this.effectConfig.enableScreenShake && event.type !== 'neutral') {
-      this.triggerScreenShake(event.type);
-    }
-
-    // 音效
-    if (this.effectConfig.enableSoundEffects && event.type !== 'neutral') {
-      this.playSoundEffect(event.type);
+    // 根據碰撞類型選擇性觸發特效，減少閃爍
+    if (event.type === 'correct') {
+      // 正確碰撞：只顯示粒子特效和音效，不震動
+      if (this.effectConfig.enableParticles) {
+        this.createParticleEffect(event.type, x, y);
+      }
+      if (this.effectConfig.enableSoundEffects) {
+        this.playSoundEffect(event.type);
+      }
+      console.log('✅ 正確碰撞：溫和特效');
+    } else if (event.type === 'incorrect') {
+      // 錯誤碰撞：輕微震動 + 粒子特效 + 音效
+      if (this.effectConfig.enableParticles) {
+        this.createParticleEffect(event.type, x, y);
+      }
+      if (this.effectConfig.enableScreenShake) {
+        this.triggerScreenShake(event.type);
+      }
+      if (this.effectConfig.enableSoundEffects) {
+        this.playSoundEffect(event.type);
+      }
+      console.log('❌ 錯誤碰撞：輕微震動特效');
     }
   }
 
@@ -227,15 +236,17 @@ export class CollisionDetectionSystem {
   }
 
   /**
-   * 觸發螢幕震動
+   * 觸發螢幕震動 - 優化版本，減少閃爍
    */
   private triggerScreenShake(type: 'correct' | 'incorrect'): void {
-    const intensity = type === 'correct' ? 5 : 10;
-    const duration = type === 'correct' ? 200 : 400;
+    // 大幅降低震動強度和持續時間以減少閃爍
+    const intensity = type === 'correct' ? 1 : 3;  // 從 5/10 降低到 1/3
+    const duration = type === 'correct' ? 100 : 200;  // 從 200/400 降低到 100/200
 
     // 簡單的相機震動效果
     if (this.scene.cameras.main) {
       this.scene.cameras.main.shake(duration, intensity);
+      console.log(`📳 觸發${type === 'correct' ? '輕微' : '溫和'}震動 (強度: ${intensity}, 時長: ${duration}ms)`);
     }
   }
 

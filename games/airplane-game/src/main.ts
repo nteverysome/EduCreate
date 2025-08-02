@@ -43,7 +43,7 @@ async function initGame() {
       width: 1274,
       height: 739,
       parent: 'game-container',
-      backgroundColor: '#ffffff',  // 白色背景，與切換器一致
+      backgroundColor: 'transparent',  // 🔧 修復容器消失：使用透明背景，避免白色閃爍
       
       // 物理引擎配置
       physics: {

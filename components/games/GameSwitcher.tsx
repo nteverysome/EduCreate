@@ -223,10 +223,12 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   // iframe 消息處理
   const handleIframeMessage = useCallback((event: MessageEvent) => {
     if (!currentGame) return;
-    
+
     try {
       const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-      
+
+      console.log('🎮 GameSwitcher 收到消息:', data);
+
       if (data.type === 'GAME_STATE_UPDATE') {
         const newState: GameState = {
           score: data.score || 0,
@@ -234,13 +236,53 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
           progress: data.progress || 0,
           timeSpent: data.timeSpent || 0
         };
-        
+
         setGameStates(prev => ({
           ...prev,
           [currentGameId]: newState
         }));
-        
+
         onGameStateUpdate?.(currentGameId, newState);
+      } else if (data.type === 'GAME_COMPLETE') {
+        // 🔧 修復白色閃爍：正確處理遊戲完成消息，防止意外重載
+        console.log('🏁 遊戲完成，分數:', data.score, '生命值:', data.health);
+
+        const finalState: GameState = {
+          score: data.score || 0,
+          level: currentGeptLevel,
+          progress: 100, // 遊戲完成，進度100%
+          timeSpent: 0 // 可以從遊戲數據中獲取
+        };
+
+        setGameStates(prev => ({
+          ...prev,
+          [currentGameId]: finalState
+        }));
+
+        onGameStateUpdate?.(currentGameId, finalState);
+
+        // 不重載 iframe，保持遊戲狀態
+        console.log('✅ 遊戲完成處理完畢，不重載 iframe');
+      } else if (data.type === 'GAME_SCORE_UPDATE') {
+        // 處理分數更新消息
+        console.log('🏆 分數更新:', data.score, '生命值:', data.health);
+
+        const updatedState: GameState = {
+          score: data.score || 0,
+          level: currentGeptLevel,
+          progress: 0, // 遊戲進行中
+          timeSpent: 0
+        };
+
+        setGameStates(prev => ({
+          ...prev,
+          [currentGameId]: updatedState
+        }));
+
+        onGameStateUpdate?.(currentGameId, updatedState);
+      } else if (data.type === 'GAME_STATE_CHANGE') {
+        // 處理遊戲狀態變化消息
+        console.log('📊 遊戲狀態變化:', data.state);
       }
     } catch (error) {
       console.warn('處理 iframe 消息時出錯:', error);

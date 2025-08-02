@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-08-02T08:56:28.692Z",
+  "testType": "user-reported-flash-verification",
+  "userFeedback": "碰到正確的不會，碰到錯誤的還是一樣",
+  "testResults": {
+    "correctCollisions": 0,
+    "incorrectCollisions": 1,
+    "whiteFlashOnCorrect": false,
+    "whiteFlashOnIncorrect": false
+  },
+  "verification": {
+    "userReportAccurate": false,
+    "correctCollisionsBehavior": "無白色閃爍",
+    "incorrectCollisionsBehavior": "無白色閃爍"
+  },
+  "screenshotDirectory": "user-reported-flash-screenshots",
+  "correctCollisionMessages": [],
+  "incorrectCollisionMessages": [
+    "log: ❌ 錯誤碰撞：輕微震動特效",
+    "log: ❌ 錯誤碰撞: food (第1次錯誤)",
+    "log: ❌ 錯誤碰撞：輕微震動特效",
+    "log: ❌ 錯誤碰撞: hello (第2次錯誤)",
+    "log: ❌ 錯誤碰撞：輕微震動特效",
+    "log: ❌ 錯誤碰撞: family (第3次錯誤)",
+    "log: ❌ 錯誤碰撞：輕微震動特效",
+    "log: ❌ 錯誤碰撞: house (第4次錯誤)",
+    "log: ❌ 錯誤碰撞：輕微震動特效",
+    "log: ❌ 錯誤碰撞: time (第5次錯誤)"
+  ]
+}
