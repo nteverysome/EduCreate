@@ -90,3 +90,60 @@ test-results/screenshots/
 # 🚫 系統生成的日誌文件
 *.log
 EduCreate-Test-Videos/**/*.log
+
+# =============================================================================
+# 測試截圖和分析文件排除規則 (避免 Git 倉庫過大)
+# =============================================================================
+
+# 🚫 所有測試截圖目錄
+*-screenshots/
+collision-analysis-screenshots/
+error-collision-flash-screenshots/
+fifth-error-flash-screenshots/
+flicker-fix-test-screenshots/
+iframe-reload-test-screenshots/
+user-reported-flash-screenshots/
+white-flash-fix-screenshots/
+white-flash-test-screenshots/
+iframe-canvas-flash-screenshots/
+dom-canvas-changes-screenshots/
+container-disappear-screenshots/
+
+# 🚫 單獨的測試截圖文件
+*.png
+*.jpg
+*.jpeg
+!public/**/*.png
+!public/**/*.jpg
+!public/**/*.jpeg
+!games/**/assets/**/*.png
+!games/**/assets/**/*.jpg
+!games/**/assets/**/*.jpeg
+!components/**/*.png
+!components/**/*.jpg
+!components/**/*.jpeg
+
+# 🚫 測試腳本文件 (保留在本地用於調試)
+test-*.js
+debug-*.js
+mcp-integrated-check.js
+
+# 🚫 分析報告文件
+*-analysis-report.md
+*-fix-summary.md
+collision-flicker-analysis-report.md
+white-flash-fix-summary.md
+
+# 🚫 測試報告 JSON 文件
+*-report.json
+*-test-report.json
+*-verification.json
+
+# 🚫 臨時測試文件
+backup-texture-fix-*.png
+container-disappear-*.png
+dom-canvas-error-*.png
+final-white-flash-*.png
+game-switcher-test.png
+transparent-background-*.png
+vite-*.png

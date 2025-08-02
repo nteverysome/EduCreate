@@ -1,9 +1,0 @@
-{
-  "timestamp": "2025-08-02T08:26:39.943Z",
-  "totalScreenshots": 62,
-  "gameUrl": "http://localhost:3001/games/airplane-game/",
-  "testDuration": "30 seconds",
-  "screenshotInterval": "500ms",
-  "purpose": "分析碰撞雲朵時的遊戲閃爍問題",
-  "screenshotDirectory": "collision-analysis-screenshots"
-}
