@@ -9,7 +9,7 @@ export const GAME_CONFIG = {
   SCREEN: {
     WIDTH: 1274,
     HEIGHT: 739,
-    BACKGROUND_COLOR: '#2c3e50'
+    BACKGROUND_COLOR: '#ffffff'  // 白色背景，與切換器一致
   },
   
   // 物理設定

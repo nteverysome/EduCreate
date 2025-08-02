@@ -43,7 +43,7 @@ async function initGame() {
       width: 1274,
       height: 739,
       parent: 'game-container',
-      backgroundColor: '#000033',
+      backgroundColor: '#ffffff',  // 白色背景，與切換器一致
       
       // 物理引擎配置
       physics: {

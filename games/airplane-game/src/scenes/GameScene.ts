@@ -56,6 +56,7 @@ export default class GameScene extends Phaser.Scene {
   // 遊戲統計
   private totalCollisions: number = 0;
   private correctCollisions: number = 0;
+  private wrongCollisions: number = 0; // 🎯 追蹤錯誤次數
 
   // 開始畫面狀態 (Wordwall 風格)
   private showStartScreen: boolean = true;
@@ -448,8 +449,8 @@ export default class GameScene extends Phaser.Scene {
     console.log('🎮 創建 Wordwall 風格開始畫面');
     console.log('🔍 當前狀態 - showStartScreen:', this.showStartScreen, 'gameStarted:', this.gameStarted);
 
-    // 創建半透明遮罩 - 設為可互動
-    const overlay = this.add.rectangle(634, 336, 1268, 672, 0x000000, 0.7);
+    // 創建半透明遮罩 - 設為可互動，完整容器尺寸
+    const overlay = this.add.rectangle(637, 369.5, 1274, 739, 0x000000, 0.7);
     overlay.setDepth(1000);
     overlay.setInteractive(); // 🎯 讓遮罩可以接收點擊事件
 
@@ -566,8 +567,8 @@ export default class GameScene extends Phaser.Scene {
   private createParallaxBackground(): void {
     console.log('� 創建月亮主題視差背景');
 
-    // 創建基礎背景色（深太空黑色）- Wordwall 尺寸，符合參考圖片
-    const bgRect = this.add.rectangle(634, 336, 1268, 672, 0x000000);  // 🎯 深黑色太空背景
+    // 創建基礎背景色（深太空黑色）- 完整容器尺寸，消除白色空間
+    const bgRect = this.add.rectangle(637, 369.5, 1274, 739, 0x000000);  // 🎯 完整容器尺寸 1274x739
     bgRect.setDepth(-20);
 
     // 嘗試使用月亮主題背景，如果載入失敗則使用備用方案
@@ -598,7 +599,7 @@ export default class GameScene extends Phaser.Scene {
 
       // 天空層 - 最遠的背景
       if (hasMoonSky) {
-        const skyLayer = this.add.tileSprite(0, 0, 1268, 672, 'moon-sky');
+        const skyLayer = this.add.tileSprite(0, 0, 1274, 739, 'moon-sky');
         skyLayer.setOrigin(0, 0);
         skyLayer.setDepth(-20);
         backgroundLayers.push(skyLayer);
@@ -606,7 +607,7 @@ export default class GameScene extends Phaser.Scene {
 
       // 後景層 - 遠山/星空
       if (hasMoonBack) {
-        const backLayer = this.add.tileSprite(0, 0, 1268, 672, 'moon-back');
+        const backLayer = this.add.tileSprite(0, 0, 1274, 739, 'moon-back');
         backLayer.setOrigin(0, 0);
         backLayer.setDepth(-18);
         backgroundLayers.push(backLayer);
@@ -633,7 +634,7 @@ export default class GameScene extends Phaser.Scene {
 
       // 中景層 - 月球表面
       if (hasMoonMid) {
-        const midLayer = this.add.tileSprite(0, 0, 1268, 672, 'moon-mid');
+        const midLayer = this.add.tileSprite(0, 0, 1274, 739, 'moon-mid');
         midLayer.setOrigin(0, 0);
         midLayer.setDepth(-14);
         backgroundLayers.push(midLayer);
@@ -641,7 +642,7 @@ export default class GameScene extends Phaser.Scene {
 
       // 前景層 - 近景元素
       if (hasMoonFront) {
-        const frontLayer = this.add.tileSprite(0, 0, 1268, 672, 'moon-front');
+        const frontLayer = this.add.tileSprite(0, 0, 1274, 739, 'moon-front');
         frontLayer.setOrigin(0, 0);
         frontLayer.setDepth(-12);
         backgroundLayers.push(frontLayer);
@@ -649,7 +650,7 @@ export default class GameScene extends Phaser.Scene {
 
       // 地面層 - 月球地面
       if (hasMoonFloor) {
-        const floorLayer = this.add.tileSprite(0, 0, 1268, 672, 'moon-floor');
+        const floorLayer = this.add.tileSprite(0, 0, 1274, 739, 'moon-floor');
         floorLayer.setOrigin(0, 0);
         floorLayer.setDepth(-10);
         backgroundLayers.push(floorLayer);
@@ -875,40 +876,40 @@ export default class GameScene extends Phaser.Scene {
     // 分數顯示
     this.scoreText = this.add.text(16, 16, '分數: 0', {
       fontSize: '24px',
-      color: '#ffffff',
-      backgroundColor: '#000000',
+      color: '#000000',  // 黑色文字適應白色背景
+      backgroundColor: '#f8f9fa',  // 淺灰背景提供對比
       padding: { x: 8, y: 4 }
     }).setDepth(100);
 
     // 生命值顯示
     this.healthText = this.add.text(16, 50, '生命值: 100', {
       fontSize: '20px',
-      color: '#ffffff',
-      backgroundColor: '#000000',
+      color: '#000000',  // 黑色文字適應白色背景
+      backgroundColor: '#f8f9fa',  // 淺灰背景提供對比
       padding: { x: 8, y: 4 }
     }).setDepth(100);
 
     // 準確率顯示
     this.accuracyText = this.add.text(16, 84, '準確率: 0%', {
       fontSize: '18px',
-      color: '#ffffff',
-      backgroundColor: '#000000',
+      color: '#000000',  // 黑色文字適應白色背景
+      backgroundColor: '#f8f9fa',  // 淺灰背景提供對比
       padding: { x: 8, y: 4 }
     }).setDepth(100);
 
     // 學習詞彙數顯示
     this.wordsLearnedText = this.add.text(16, 118, '學習詞彙: 0', {
       fontSize: '18px',
-      color: '#ffffff',
-      backgroundColor: '#000000',
+      color: '#000000',  // 黑色文字適應白色背景
+      backgroundColor: '#f8f9fa',  // 淺灰背景提供對比
       padding: { x: 8, y: 4 }
     }).setDepth(100);
 
-    // 目標詞彙顯示 - Wordwall 尺寸版本
-    this.targetWordText = this.add.text(634, 20, '目標: 載入中...', {  // 🎯 Wordwall 寬度中央 (1268/2)
-      fontSize: '32px',  // 🎯 放大字體適應 Wordwall 尺寸
-      color: '#ffff00',
-      backgroundColor: '#000000',
+    // 目標詞彙顯示 - 完整容器尺寸版本
+    this.targetWordText = this.add.text(637, 20, '目標: 載入中...', {  // 🎯 完整容器寬度中央 (1274/2)
+      fontSize: '32px',  // 🎯 放大字體適應完整尺寸
+      color: '#1f2937',  // 深灰色文字適應白色背景
+      backgroundColor: '#fef3c7',  // 淺黃背景保持目標詞彙的突出效果
       padding: { x: 16, y: 12 },  // 🎯 增加內邊距
       fontStyle: 'bold'
     }).setOrigin(0.5, 0).setDepth(100);
@@ -918,12 +919,80 @@ export default class GameScene extends Phaser.Scene {
 
   private setupInput() {
     this.cursors = this.input.keyboard!.createCursorKeys();
-    
+
     // WASD 控制
     const wasd = this.input.keyboard!.addKeys('W,S,A,D');
     (this as any).wasd = wasd;
-    
-    console.log('🎮 設置輸入控制');
+
+    // 🖱️ 添加觸碰和滑鼠控制
+    this.setupTouchAndMouseControls();
+
+    console.log('🎮 設置輸入控制（鍵盤 + 觸碰 + 滑鼠）');
+  }
+
+  /**
+   * 設置觸碰和滑鼠控制
+   */
+  private setupTouchAndMouseControls(): void {
+    console.log('👆 設置觸碰和滑鼠控制');
+
+    // 添加觸碰/滑鼠控制變數
+    (this as any).touchControl = {
+      isPressed: false,
+      moveUp: false,
+      moveDown: false
+    };
+
+    // 監聽指針按下事件（滑鼠左鍵或觸碰）
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // 只在遊戲進行中響應控制
+      if (!this.gameState.isPlaying || this.gameState.isPaused || this.showStartScreen) {
+        return;
+      }
+
+      const touchControl = (this as any).touchControl;
+      touchControl.isPressed = true;
+
+      // 根據點擊位置決定移動方向
+      const gameHeight = 739; // 遊戲容器高度
+      const centerY = gameHeight / 2;
+
+      if (pointer.y < centerY) {
+        // 點擊上半部分 - 向上移動
+        touchControl.moveUp = true;
+        touchControl.moveDown = false;
+        console.log('👆 觸碰控制：向上移動');
+      } else {
+        // 點擊下半部分 - 向下移動
+        touchControl.moveUp = false;
+        touchControl.moveDown = true;
+        console.log('👇 觸碰控制：向下移動');
+      }
+    });
+
+    // 監聽指針釋放事件
+    this.input.on('pointerup', () => {
+      const touchControl = (this as any).touchControl;
+      touchControl.isPressed = false;
+      touchControl.moveUp = false;
+      touchControl.moveDown = false;
+      console.log('✋ 觸碰控制：停止移動');
+    });
+
+    // 監聽指針移出遊戲區域
+    this.input.on('pointerout', () => {
+      const touchControl = (this as any).touchControl;
+      touchControl.isPressed = false;
+      touchControl.moveUp = false;
+      touchControl.moveDown = false;
+      console.log('🚫 觸碰控制：指針移出，停止移動');
+    });
+
+    console.log('✅ 觸碰和滑鼠控制設置完成');
+    console.log('📱 使用方法：');
+    console.log('  - 點擊/觸碰畫面上半部分：飛機向上移動');
+    console.log('  - 點擊/觸碰畫面下半部分：飛機向下移動');
+    console.log('  - 釋放滑鼠/手指：停止移動');
   }
 
   /**
@@ -1135,9 +1204,9 @@ export default class GameScene extends Phaser.Scene {
     // 添加測試文字
     const testText = this.add.text(x, y, 'TEST', {
       fontSize: '20px',
-      color: '#ffffff',
+      color: '#ffffff',  // 白色文字在紅色背景上保持可見
       fontStyle: 'bold',
-      backgroundColor: '#ff0000',
+      backgroundColor: '#dc2626',  // 紅色背景保持測試標識
       padding: { x: 8, y: 4 }
     }).setOrigin(0.5);
 
@@ -1205,9 +1274,22 @@ export default class GameScene extends Phaser.Scene {
    * 處理高級碰撞檢測
    */
   private handleAdvancedCollision(player: any, cloud: any): void {
+    // 🎯 防止重複碰撞：如果遊戲已結束或暫停，忽略碰撞
+    if (!this.gameState.isPlaying || this.gameState.isPaused) {
+      return;
+    }
+
     const word: GEPTWord = cloud.getData('word');
     const isTarget: boolean = cloud.getData('isTarget');
     const wordText = cloud.getData('wordText');
+
+    // 🎯 防止重複碰撞：檢查雲朵是否已被處理
+    if (cloud.getData('processed')) {
+      return;
+    }
+
+    // 標記雲朵為已處理
+    cloud.setData('processed', true);
 
     // 使用碰撞檢測系統處理碰撞
     const collisionEvent = this.collisionSystem.handleCollision(player, cloud, word);
@@ -1251,6 +1333,42 @@ export default class GameScene extends Phaser.Scene {
 
       console.log('✅ 正確碰撞:', word.english);
     } else {
+      // 🎯 追蹤錯誤次數
+      this.wrongCollisions++;
+
+      console.log('❌ 錯誤碰撞:', word.english, `(第${this.wrongCollisions}次錯誤)`);
+
+      // 🎯 第5次錯誤：分數歸零後立即結束遊戲
+      if (this.wrongCollisions >= 5) {
+        console.log('💥 第5次錯誤！分數歸零後結束遊戲');
+
+        // 立即停止遊戲狀態，防止更多碰撞
+        this.gameState.isPlaying = false;
+
+        // 先將分數歸零
+        this.gameState.currentScore = 0;
+        this.updateUI(); // 立即更新UI顯示分數歸零
+
+        // 顯示特殊提示
+        if (this.chineseUIManager) {
+          this.chineseUIManager.showErrorMessage(
+            { english: 'GAME OVER', chinese: '遊戲結束' } as GEPTWord,
+            0
+          );
+        }
+
+        // 移除雲朵和文字
+        if (wordText) wordText.destroy();
+        cloud.destroy();
+
+        // 延遲1秒後結束遊戲，讓玩家看到分數歸零
+        this.time.delayedCall(1000, () => {
+          this.endGame();
+        });
+        return;
+      }
+
+      // 普通錯誤：減少生命值
       this.gameState.currentHealth -= 20;
 
       // 顯示錯誤提示
@@ -1258,9 +1376,12 @@ export default class GameScene extends Phaser.Scene {
         this.chineseUIManager.showErrorMessage(word, 20);
       }
 
-      console.log('❌ 錯誤碰撞:', word.english);
-
+      // 普通錯誤：檢查生命值
       if (this.gameState.currentHealth <= 0) {
+        // 移除雲朵和文字
+        if (wordText) wordText.destroy();
+        cloud.destroy();
+
         this.endGame();
         return;
       }
@@ -1312,11 +1433,17 @@ export default class GameScene extends Phaser.Scene {
   private startGame() {
     this.gameState.isPlaying = true;
     this.gameState.isPaused = false;
-    console.log('🚀 遊戲開始');
+
+    // 🎯 重置遊戲統計（包括錯誤次數）
+    this.totalCollisions = 0;
+    this.correctCollisions = 0;
+    this.wrongCollisions = 0;
+
+    console.log('🚀 遊戲開始（錯誤次數已重置）');
 
     // 開始雲朵生成
     this.startCloudSpawning();
-    
+
     this.sendMessageToParent({
       type: 'GAME_STATE_CHANGE',
       state: 'playing'
@@ -1325,20 +1452,27 @@ export default class GameScene extends Phaser.Scene {
 
   private endGame() {
     this.gameState.isPlaying = false;
-    console.log('🏁 遊戲結束');
-    
+
+    // 🎯 遊戲結束時生命值歸零
+    this.gameState.currentHealth = 0;
+
+    // 立即更新UI顯示生命值為0
+    this.updateUI();
+
+    console.log('🏁 遊戲結束 - 生命值歸零');
+
     // 停止雲朵生成
     if (this.cloudSpawnTimer) {
       this.cloudSpawnTimer.destroy();
     }
-    
+
     // 清除所有雲朵
     this.clouds.clear(true, true);
-    
+
     this.sendMessageToParent({
       type: 'GAME_COMPLETE',
       score: this.gameState.currentScore,
-      health: this.gameState.currentHealth
+      health: this.gameState.currentHealth  // 現在會是0
     });
   }
 
@@ -1405,23 +1539,24 @@ export default class GameScene extends Phaser.Scene {
   }
 
   /**
-   * 處理玩家移動
+   * 處理玩家移動 - 只允許上下移動（鍵盤 + 觸碰 + 滑鼠）
    */
   private handlePlayerMovement(): void {
     const speed = 250;
     const wasd = (this as any).wasd;
+    const touchControl = (this as any).touchControl;
 
-    if (this.cursors.left.isDown || wasd?.A.isDown) {
-      this.player.setVelocityX(-speed);
-    } else if (this.cursors.right.isDown || wasd?.D.isDown) {
-      this.player.setVelocityX(speed);
-    } else {
-      this.player.setVelocityX(0);
-    }
+    // 🚫 移除左右移動控制，飛機只能上下移動
+    // 保持飛機在水平位置固定
+    this.player.setVelocityX(0);
 
-    if (this.cursors.up.isDown || wasd?.W.isDown) {
+    // ✅ 整合所有控制方式：鍵盤 + 觸碰 + 滑鼠
+    const moveUp = this.cursors.up.isDown || wasd?.W.isDown || touchControl?.moveUp;
+    const moveDown = this.cursors.down.isDown || wasd?.S.isDown || touchControl?.moveDown;
+
+    if (moveUp) {
       this.player.setVelocityY(-speed);
-    } else if (this.cursors.down.isDown || wasd?.S.isDown) {
+    } else if (moveDown) {
       this.player.setVelocityY(speed);
     } else {
       this.player.setVelocityY(0);

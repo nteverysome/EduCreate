@@ -427,9 +427,9 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         )}
       </div>
 
-      {/* 遊戲 iframe 容器 - Wordwall 尺寸 1274x739 (超緊湊佈局) */}
+      {/* 遊戲 iframe 容器 - Wordwall 尺寸 1274x739 (無邊框版本) */}
       <div
-        className="relative bg-white rounded-lg shadow-sm overflow-hidden mx-auto"
+        className="relative bg-white overflow-hidden mx-auto"
         style={{ width: '1274px', height: '739px' }}
       >
         {isLoading && (
