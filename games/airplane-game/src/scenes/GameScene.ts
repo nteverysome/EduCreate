@@ -11,7 +11,9 @@ import { CollisionDetectionSystem, CollisionEvent } from '../managers/CollisionD
 import { MemoryEnhancementEngine, LearningEvent } from '../managers/MemoryEnhancementEngine';
 import { BilingualManager } from '../managers/BilingualManager';
 import { ChineseUIManager } from '../managers/ChineseUIManager';
+import { ResponsiveManager } from '../managers/ResponsiveManager';
 import { HealthBar } from '../ui/HealthBar';
+import { FullscreenButton } from '../ui/FullscreenButton';
 
 export default class GameScene extends Phaser.Scene {
   // 遊戲配置和狀態
@@ -45,6 +47,10 @@ export default class GameScene extends Phaser.Scene {
   private memoryEngine!: MemoryEnhancementEngine;
   private bilingualManager!: BilingualManager;
   private chineseUIManager!: ChineseUIManager;
+  private responsiveManager!: ResponsiveManager;
+
+  // UI 組件
+  private fullscreenButton!: FullscreenButton;
 
   // 雲朵圖片載入狀態
   private useBackupCloudTexture: boolean = false;
@@ -91,34 +97,61 @@ export default class GameScene extends Phaser.Scene {
    * 初始化管理器系統
    */
   private initializeManagers(): void {
-    // 初始化 GEPT 管理器
-    this.geptManager = new GEPTManager();
-    this.geptManager.setLevel(this.gameConfig.geptLevel);
+    try {
+      console.log('🔧 開始初始化管理器系統...');
 
-    // 初始化記憶增強引擎
-    this.memoryEngine = new MemoryEnhancementEngine();
+      // 初始化 GEPT 管理器
+      console.log('📚 初始化 GEPT 管理器...');
+      this.geptManager = new GEPTManager();
+      this.geptManager.setLevel(this.gameConfig.geptLevel);
+      console.log('✅ GEPT 管理器初始化完成');
 
-    // 初始化碰撞檢測系統
-    this.collisionSystem = new CollisionDetectionSystem(
-      this,
-      this.gameConfig.geptLevel,
-      {
-        enableParticles: true,
-        enableScreenShake: true,
-        enableSoundEffects: this.gameConfig.enableSound,
-        enableVisualFeedback: true,
-        particleIntensity: 'medium',
-        soundVolume: 0.7
-      }
-    );
+      // 初始化記憶增強引擎
+      console.log('🧠 初始化記憶增強引擎...');
+      this.memoryEngine = new MemoryEnhancementEngine();
+      console.log('✅ 記憶增強引擎初始化完成');
 
-    // 初始化雙語管理器
-    this.bilingualManager = new BilingualManager(this, this.geptManager);
+      // 初始化碰撞檢測系統
+      console.log('💥 初始化碰撞檢測系統...');
+      this.collisionSystem = new CollisionDetectionSystem(
+        this,
+        this.gameConfig.geptLevel,
+        {
+          enableParticles: true,
+          enableScreenShake: true,
+          enableSoundEffects: this.gameConfig.enableSound,
+          enableVisualFeedback: true,
+          particleIntensity: 'medium',
+          soundVolume: 0.7
+        }
+      );
+      console.log('✅ 碰撞檢測系統初始化完成');
 
-    // 初始化中文 UI 管理器
-    this.chineseUIManager = new ChineseUIManager(this, this.geptManager, this.bilingualManager);
+      // 初始化雙語管理器
+      console.log('🌐 初始化雙語管理器...');
+      this.bilingualManager = new BilingualManager(this, this.geptManager);
+      console.log('✅ 雙語管理器初始化完成');
 
-    console.log('🔧 管理器初始化完成（包含雙語系統）');
+      // 初始化中文 UI 管理器
+      console.log('🈳 初始化中文 UI 管理器...');
+      this.chineseUIManager = new ChineseUIManager(this, this.geptManager, this.bilingualManager);
+      console.log('✅ 中文 UI 管理器初始化完成');
+
+      // 初始化響應式管理器
+      console.log('📱 初始化響應式管理器...');
+      this.responsiveManager = new ResponsiveManager(this, {
+        baseWidth: 1274,
+        baseHeight: 739,
+        enableSmoothing: true,
+        animationDuration: 300
+      });
+      console.log('✅ 響應式管理器初始化完成');
+
+      console.log('🎉 所有管理器初始化完成（包含雙語系統 + 響應式管理器）');
+    } catch (error) {
+      console.error('❌ 管理器初始化失敗:', error);
+      throw error;
+    }
   }
 
   preload() {
@@ -127,27 +160,14 @@ export default class GameScene extends Phaser.Scene {
     // 載入月亮主題背景圖片
     this.loadMoonBackground();
 
+    // 🚀 載入您的太空船精靈表 - 恢復完整載入
+    console.log('🚀 載入玩家太空船精靈表...');
+
     // 載入新的玩家太空船精靈表 - 一艘太空船的7幀飛行動畫
     // 根據實際檢測：總寬度2450px，7幀橫向排列，高度150px
     this.load.spritesheet('player_spaceship', 'assets/sprite_player_spaceship_up_down.png', {
       frameWidth: Math.floor(2450 / 7),  // 2450px ÷ 7幀 = 350px
       frameHeight: 150                   // 實際高度150px
-    });
-
-    // 添加載入完成事件來檢查紋理
-    this.load.on('complete', () => {
-      console.log('🔍 檢查精靈表載入狀況');
-      const texture = this.textures.get('player_spaceship');
-      if (texture) {
-        console.log('✅ 精靈表載入成功:', {
-          key: 'player_spaceship',
-          width: texture.source[0].width,
-          height: texture.source[0].height,
-          frames: texture.frameTotal
-        });
-      } else {
-        console.log('❌ 精靈表載入失敗: player_spaceship');
-      }
     });
 
     // 保留原始精靈表作為備用方案
@@ -156,19 +176,36 @@ export default class GameScene extends Phaser.Scene {
       frameHeight: 64   // 備用方案
     });
 
+    // 載入新的玩家太空船圖片（普通圖片模式）
+    this.load.image('player_spaceship_image', 'assets/sprite_player_spaceship_up_down.png');
+
     // 備用：用戶自定義完整太空船圖片
     this.load.image('complete_spaceship', 'assets/complete_spaceship.png');
+
+    console.log('✅ 太空船資源載入配置完成');
 
     // 備用方案：創建太空船形狀的動態精靈（暫時停用）
     // this.createSpaceshipSprite();
 
-    // 修復紋理生成問題 - 使用正確的方法
-    // 玩家飛機 - 藍色三角形
-    const planeGraphics = this.add.graphics();
-    planeGraphics.fillStyle(0x0066ff);
-    planeGraphics.fillTriangle(16, 0, 0, 32, 32, 32);
-    planeGraphics.generateTexture('player-plane', 32, 32);
-    planeGraphics.destroy();
+    // 🔄 恢復原來的飛機紋理創建，但增強錯誤處理
+    console.log('✈️ 創建玩家飛機紋理 - 恢復原版 + 增強');
+
+    try {
+      // 玩家飛機 - 藍色三角形 (備用方案)
+      const planeGraphics = this.add.graphics();
+      planeGraphics.fillStyle(0x0066ff);
+      planeGraphics.fillTriangle(16, 0, 0, 32, 32, 32);
+
+      // 添加白色邊框讓飛機更明顯
+      planeGraphics.lineStyle(2, 0xffffff, 1);
+      planeGraphics.strokeTriangle(16, 0, 0, 32, 32, 32);
+
+      planeGraphics.generateTexture('player-plane', 32, 32);
+      planeGraphics.destroy();
+      console.log('✅ 備用飛機紋理創建完成');
+    } catch (error) {
+      console.error('❌ 備用飛機紋理創建失敗:', error);
+    }
 
     // 載入真實雲朵圖片 (使用用戶提供的白色雲朵)
     this.load.image('cloud-word', 'assets/images/cloud_shape3_3.png');
@@ -204,7 +241,12 @@ export default class GameScene extends Phaser.Scene {
     starGraphics.generateTexture('star', 4, 4);
     starGraphics.destroy();
 
-    console.log('✅ 遊戲資源載入完成 - 包含月亮背景');
+    // 添加載入完成事件
+    this.load.on('complete', () => {
+      console.log('✅ 簡化資源載入完成 - 準備測試全螢幕按鈕');
+    });
+
+    console.log('🎨 簡化遊戲資源載入排程完成（專注測試全螢幕按鈕）');
   }
 
   /**
@@ -502,6 +544,16 @@ export default class GameScene extends Phaser.Scene {
     // 添加到容器
     this.startScreen.add([title, instruction, playButtonBg, playText]);
 
+    // 📝 註冊開始畫面到響應式管理器
+    this.responsiveManager.registerElement('startScreen', this.startScreen, 'ui', {
+      anchor: { x: 0.5, y: 0.5 }, // 中央錨點
+      constraints: {
+        keepAspectRatio: true,
+        minScale: 0.6,
+        maxScale: 1.2
+      }
+    });
+
     // 設置按鈕互動 - 使用更大的互動區域
     playButtonBg.setInteractive(new Phaser.Geom.Circle(0, 0, 100), Phaser.Geom.Circle.Contains);
     playText.setInteractive({ useHandCursor: true });
@@ -547,6 +599,9 @@ export default class GameScene extends Phaser.Scene {
    */
   private hideStartScreen(): void {
     if (this.startScreen) {
+      // 📝 從響應式管理器中移除開始畫面
+      this.responsiveManager.unregisterElement('startScreen');
+
       this.startScreen.destroy();
       this.startScreen = undefined;
     }
@@ -689,6 +744,9 @@ export default class GameScene extends Phaser.Scene {
     }
 
     this.backgroundLayers = backgroundLayers;
+
+    // 📝 註冊背景層到響應式管理器
+    this.registerBackgroundLayersToResponsiveManager();
   }
 
   /**
@@ -727,13 +785,22 @@ export default class GameScene extends Phaser.Scene {
    * 創建玩家飛機 - 使用太空船動畫精靈表
    */
   private createPlayer(): void {
-    console.log('🎯 創建玩家射手角色 - 使用太空船動畫');
+    console.log('🎯 創建玩家射手角色 - 恢復原版太空船邏輯');
 
     // 檢查可用的太空船資源（優先級順序）
     const hasPlayerSpaceshipImage = this.textures.exists('player_spaceship_image');
     const hasPlayerSpaceship = this.textures.exists('player_spaceship');
     const hasShooterImage = this.textures.exists('random_shooter');
     const hasCompleteSpaceship = this.textures.exists('complete_spaceship');
+    const hasPlayerPlane = this.textures.exists('player-plane');
+
+    console.log('🔍 檢查可用資源:', {
+      player_spaceship_image: hasPlayerSpaceshipImage,
+      player_spaceship: hasPlayerSpaceship,
+      random_shooter: hasShooterImage,
+      complete_spaceship: hasCompleteSpaceship,
+      'player-plane': hasPlayerPlane
+    });
 
     if (hasPlayerSpaceship) {
       console.log('🚀 使用新的玩家太空船精靈表 - 創建一艘太空船');
@@ -750,7 +817,7 @@ export default class GameScene extends Phaser.Scene {
       console.log('✅ 太空船創建完成：1個精靈 + 7幀飛行動畫 (292x512)');
 
     } else if (hasPlayerSpaceshipImage) {
-      console.log('� 備用方案：使用新的玩家太空船圖片（普通圖片模式）');
+      console.log('🚀 備用方案：使用新的玩家太空船圖片（普通圖片模式）');
 
       // 備用方案：使用普通圖片模式
       this.player = this.physics.add.sprite(150, 336, 'player_spaceship_image');
@@ -769,7 +836,7 @@ export default class GameScene extends Phaser.Scene {
       console.log('✅ 太空船動畫播放中：spaceship_fly (原始精靈表)');
 
     } else if (hasCompleteSpaceship) {
-      console.log('🚀 備用方案1：使用用戶提供的完整太空船圖片');
+      console.log('🚀 備用方案2：使用用戶提供的完整太空船圖片');
 
       // 使用用戶提供的完整太空船圖片
       this.player = this.physics.add.sprite(150, 336, 'complete_spaceship');
@@ -777,54 +844,81 @@ export default class GameScene extends Phaser.Scene {
       // 創建引擎火焰效果
       this.createEngineFlameEffect();
 
-    } else if (hasShooterImage) {
-      console.log('🚀 備用方案2：使用原始精靈表第0幀');
+    } else if (hasPlayerPlane) {
+      console.log('🔧 備用方案3：使用藍色三角形飛機');
 
-      // 備用方案：使用原始精靈表
-      this.player = this.physics.add.sprite(150, 336, 'random_shooter', 0);
-
-      // 創建引擎火焰效果
-      this.createEngineFlameEffect();
-    } else {
-      console.log('❌ 沒有可用的太空船資源，使用預設飛機');
-
-      // 最後備用方案：使用預設的藍色三角形飛機
+      // 使用預設的藍色三角形飛機
       this.player = this.physics.add.sprite(150, 336, 'player-plane');
+
+    } else {
+      console.log('❌ 沒有可用的飛機資源，創建緊急備用');
+
+      // 最後備用方案：立即創建紅色矩形
+      const emergencyRect = this.add.rectangle(150, 336, 40, 40, 0xff0000);
+      emergencyRect.setDepth(200);
+      this.physics.world.enable(emergencyRect);
+      this.player = emergencyRect as any;
+
+      console.log('🚨 使用緊急紅色矩形作為飛機');
+      return; // 跳過後續設置
     }
 
     // 統一的太空船配置（適用於所有方案）
     this.setupSpaceshipProperties();
+
+    // 📝 註冊玩家太空船到響應式管理器
+    this.responsiveManager.registerElement('player', this.player, 'gameObject', {
+      anchor: { x: 0.5, y: 0.5 }, // 中心錨點
+      constraints: {
+        keepAspectRatio: true,
+        minScale: 0.1,  // 🔧 更寬鬆的最小縮放
+        maxScale: 2.0   // 🔧 更寬鬆的最大縮放，支援全螢幕放大
+      }
+    });
+
+    console.log('📝 玩家太空船已註冊到響應式管理器');
   }
 
   /**
    * 設置太空船的統一屬性，確保位置一致
    */
   private setupSpaceshipProperties(): void {
-    console.log('⚙️ 設置太空船統一屬性');
+    console.log('⚙️ 設置太空船統一屬性 - 恢復原版');
 
-    // 錨點已在創建時設置為中心 (0.5, 0.5)
+    try {
+      // 錨點已在創建時設置為中心 (0.5, 0.5)
 
-    // 設置適當的縮放比例，讓太空船大小合適
-    this.player.setScale(0.6);
+      // 🔧 用戶要求縮小50%：0.8 × 0.5 = 0.4
+      this.player.setScale(0.4);
 
-    // 保持原始方向，不進行旋轉和翻轉
+      // 保持原始方向，不進行旋轉和翻轉
 
-    // 設置物理屬性
-    this.player.setCollideWorldBounds(true);
-    this.player.setDepth(10);
+      // 設置物理屬性
+      this.player.setCollideWorldBounds(true);
+      this.player.setDepth(10);
 
-    // 添加微妙的脈動效果（不影響位置）
+      // 🔧 確保飛機完全可見
+      this.player.setAlpha(1.0);
+      this.player.setVisible(true);
+
+      console.log('✅ 太空船屬性設置完成: 中心錨點 + 0.8倍縮放 + 深度10');
+
+    } catch (error) {
+      console.error('❌ 太空船屬性設置失敗:', error);
+    }
+
+    // 添加微妙的脈動效果（不影響位置）- 調整為50%大小
     this.tweens.add({
       targets: this.player,
-      scaleX: { from: 0.5, to: 0.53 },
-      scaleY: { from: 0.5, to: 0.53 },
-      duration: 300,
+      scaleX: { from: 0.4, to: 0.42 },
+      scaleY: { from: 0.4, to: 0.42 },
+      duration: 1000,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut'
     });
 
-    console.log('✅ 太空船屬性設置完成: 中心錨點 + 0.6倍縮放 + 保持原始方向（無旋轉翻轉）');
+    console.log('✅ 太空船屬性設置完成: 中心錨點 + 0.4倍縮放（50%大小）+ 保持原始方向（無旋轉翻轉）+ 脈動效果');
 
     // 視覺調試輔助線已隱藏
     // if (process.env.NODE_ENV === 'development') {
@@ -841,14 +935,35 @@ export default class GameScene extends Phaser.Scene {
     //   console.log('🎯 添加視覺調試十字線: 中心點(' + this.player.x + ', ' + this.player.y + ')');
     // }
 
-    console.log('🎯 玩家射手角色創建完成:', {
+    // 🔧 詳細的飛機狀態輸出
+    console.log('🎯 玩家飛機創建完成 - 詳細狀態:', {
       x: this.player.x,
       y: this.player.y,
       visible: this.player.visible,
       alpha: this.player.alpha,
       depth: this.player.depth,
-      scale: this.player.scale,
-      texture: this.player.texture.key
+      scaleX: this.player.scaleX,
+      scaleY: this.player.scaleY,
+      texture: this.player.texture.key,
+      width: this.player.width,
+      height: this.player.height,
+      originX: this.player.originX,
+      originY: this.player.originY,
+      active: this.player.active
+    });
+
+    // 🔧 檢查飛機是否在可見範圍內
+    const gameWidth = 1274;
+    const gameHeight = 739;
+    const isInBounds = this.player.x >= 0 && this.player.x <= gameWidth &&
+                      this.player.y >= 0 && this.player.y <= gameHeight;
+
+    console.log('📍 飛機位置檢查:', {
+      gameSize: `${gameWidth}x${gameHeight}`,
+      playerPosition: `${this.player.x}, ${this.player.y}`,
+      isInBounds: isInBounds,
+      distanceFromLeft: this.player.x,
+      distanceFromTop: this.player.y
     });
   }
 
@@ -916,6 +1031,74 @@ export default class GameScene extends Phaser.Scene {
     }).setOrigin(0.5, 0).setDepth(100);
 
     // 移除 GEPT 等級顯示（不是統一控制的元素）
+
+    // 🚀 創建全螢幕按鈕
+    try {
+      console.log('🖥️ 開始創建全螢幕按鈕...');
+      this.fullscreenButton = new FullscreenButton(this);
+      console.log('✅ 全螢幕按鈕已創建（右下角位置）');
+    } catch (error) {
+      console.error('❌ 全螢幕按鈕創建失敗:', error);
+      // 不拋出錯誤，讓遊戲繼續運行
+    }
+
+    // 📝 註冊所有 UI 元素到響應式管理器
+    this.registerUIElementsToResponsiveManager();
+  }
+
+  /**
+   * 註冊 UI 元素到響應式管理器
+   */
+  private registerUIElementsToResponsiveManager(): void {
+    // 註冊分數顯示
+    this.responsiveManager.registerElement('scoreText', this.scoreText, 'ui', {
+      anchor: { x: 0, y: 0 }, // 左上角錨點
+      constraints: { fixedPosition: false }
+    });
+
+    // 註冊準確率顯示
+    this.responsiveManager.registerElement('accuracyText', this.accuracyText, 'ui', {
+      anchor: { x: 0, y: 0 }, // 左上角錨點
+      constraints: { fixedPosition: false }
+    });
+
+    // 註冊學習詞彙數顯示
+    this.responsiveManager.registerElement('wordsLearnedText', this.wordsLearnedText, 'ui', {
+      anchor: { x: 0, y: 0 }, // 左上角錨點
+      constraints: { fixedPosition: false }
+    });
+
+    // 註冊血條
+    this.responsiveManager.registerElement('healthBar', this.healthBar.getContainer(), 'ui', {
+      anchor: { x: 0, y: 1 }, // 左下角錨點
+      constraints: { fixedPosition: false }
+    });
+
+    // 註冊目標詞彙顯示
+    this.responsiveManager.registerElement('targetWordText', this.targetWordText, 'ui', {
+      anchor: { x: 0.5, y: 0 }, // 頂部中央錨點
+      constraints: { fixedPosition: false }
+    });
+
+    console.log('📝 所有 UI 元素已註冊到響應式管理器');
+  }
+
+  /**
+   * 註冊背景層到響應式管理器
+   */
+  private registerBackgroundLayersToResponsiveManager(): void {
+    this.backgroundLayers.forEach((layer, index) => {
+      this.responsiveManager.registerElement(`backgroundLayer_${index}`, layer, 'background', {
+        anchor: { x: 0, y: 0 }, // 左上角錨點
+        constraints: {
+          keepAspectRatio: true,
+          minScale: 0.5,
+          maxScale: 2.0
+        }
+      });
+    });
+
+    console.log(`📝 ${this.backgroundLayers.length} 個背景層已註冊到響應式管理器`);
   }
 
   private setupInput() {
@@ -1135,6 +1318,26 @@ export default class GameScene extends Phaser.Scene {
 
     // 將文字綁定到雲朵
     cloud.setData('wordText', wordText);
+
+    // 📝 註冊雲朵和文字到響應式管理器
+    const cloudId = `cloud_${Date.now()}_${Math.random()}`;
+    const textId = `cloudText_${Date.now()}_${Math.random()}`;
+
+    this.responsiveManager.registerElement(cloudId, cloud, 'gameObject', {
+      constraints: {
+        keepAspectRatio: true,
+        minScale: 0.8,
+        maxScale: 2.0
+      }
+    });
+
+    this.responsiveManager.registerElement(textId, wordText, 'text', {
+      constraints: {
+        keepAspectRatio: true,
+        minScale: 0.6,
+        maxScale: 1.8
+      }
+    });
 
     // 如果是目標詞彙，顯示中文提示
     if (isTarget && this.bilingualManager) {

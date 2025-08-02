@@ -273,6 +273,13 @@ export class HealthBar {
   public getMaxHealth(): number {
     return this.maxHealth;
   }
+
+  /**
+   * 獲取容器（用於響應式管理器）
+   */
+  public getContainer(): Phaser.GameObjects.Container {
+    return this.container;
+  }
   
   /**
    * 設置最大生命值

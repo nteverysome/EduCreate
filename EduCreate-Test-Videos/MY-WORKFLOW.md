@@ -12,9 +12,14 @@ view_tasklist
 # 2. 開始新任務
 update_tasks [{"task_id": "xxx", "state": "IN_PROGRESS"}]
 
-# 3. 使用 codebase-retrieval 分析現有代碼
-# 4. 創建新組件和功能
-# 5. 整合到現有系統
+# 3. 🎯 Phaser 3 專門檢查（強制執行）
+# 如果任務涉及 Phaser 3、遊戲開發、phaser、game 關鍵詞：
+node EduCreate-Test-Videos/scripts/phaser3-learning-persistence.js reminder
+# ⚠️ 重要：這會顯示關鍵錯誤預防提醒和最近學習記錄
+
+# 4. 使用 codebase-retrieval 分析現有代碼
+# 5. 創建新組件和功能
+# 6. 整合到現有系統
 ```
 
 ### Phase 2: 測試和驗證（含截圖比對）
@@ -46,6 +51,11 @@ npx playwright test [test-file] --headed
 
 # 7. ✅ 功能驗證測試
 # 測試相關功能確保正常運行
+
+# 7.1. 🎯 Phaser 3 專門驗證（如果涉及 Phaser 3）
+# 如果是 Phaser 3 相關功能，運行完整驗證工作流程：
+node EduCreate-Test-Videos/scripts/phaser3-verified-workflow.js verify "問題類型" "解決方案" "代碼模板" "文件路徑"
+# ⚠️ 重要：只有通過技術驗證+測試驗證+用戶確認才記錄成功
 
 # 8. 處理測試影片（關鍵步驟！）
 node EduCreate-Test-Videos/scripts/automation/process-test-videos.js --cleanup
@@ -90,6 +100,19 @@ update_tasks [{"task_id": "xxx", "state": "COMPLETE"}]
 7. **AutoGen Microsoft MCP** - 多代理協作
 8. **Langfuse MCP** - 測試追蹤和分析
 9. **filesystem-mcp** - 文件操作
+
+### 🎯 Phaser 3 自動檢測機制（新增）
+**觸發條件**：任務描述或對話中包含以下關鍵詞時自動執行
+- `phaser`、`Phaser`、`phaser3`、`Phaser 3`
+- `遊戲`、`game`、`Game`、`gaming`
+- `AirplaneCollisionGame`、`GameScene`、`sprite`
+- 文件路徑包含 `/games/` 或 `Game.tsx`
+
+**自動執行步驟**：
+1. 立即運行：`node EduCreate-Test-Videos/scripts/phaser3-learning-persistence.js reminder`
+2. 顯示 Phaser 3 關鍵錯誤預防提醒
+3. 在驗證階段自動運行 Phaser 3 專門驗證工作流程
+4. 確保所有 Phaser 3 相關學習都被正確記錄
 
 ### 工具整合檢查清單
 - [ ] Sequential Thinking 記錄已生成

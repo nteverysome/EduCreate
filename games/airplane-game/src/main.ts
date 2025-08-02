@@ -5,10 +5,13 @@
 
 import Phaser from 'phaser';
 import { GameConfig } from './types/game';
+import { ResponsivePhaserConfig } from './config/ResponsivePhaserConfig';
 
-// 動態導入場景（避免循環依賴）
+// 直接導入場景（簡化調試）
+import GameScene from './scenes/GameScene';
+
 const loadGameScene = async () => {
-  const { default: GameScene } = await import('./scenes/GameScene');
+  console.log('✅ GameScene 直接導入成功');
   return GameScene;
 };
 
@@ -19,16 +22,22 @@ async function initGame() {
   console.log('🎮 初始化 Airplane Collision Game - Vite 版本');
   
   try {
+    console.log('🔧 開始初始化流程...');
+
     // 隱藏載入畫面
     const loadingElement = document.getElementById('loading');
     if (loadingElement) {
       loadingElement.style.display = 'none';
+      console.log('✅ 載入畫面已隱藏');
     }
-    
+
     // 載入遊戲場景
+    console.log('📦 載入遊戲場景...');
     const GameScene = await loadGameScene();
-    
+    console.log('✅ 遊戲場景載入完成:', GameScene.name);
+
     // 默認遊戲配置
+    console.log('⚙️ 設置遊戲配置...');
     const defaultConfig: GameConfig = {
       geptLevel: 'elementary',
       enableSound: true,
@@ -36,52 +45,32 @@ async function initGame() {
       difficulty: 'medium',
       gameMode: 'practice'
     };
-    
-    // Phaser 遊戲配置 (Wordwall 實際尺寸 1274x739)
-    const phaserConfig: Phaser.Types.Core.GameConfig = {
-      type: Phaser.AUTO,
-      width: 1274,
-      height: 739,
-      parent: 'game-container',
-      backgroundColor: 'transparent',  // 🔧 修復容器消失：使用透明背景，避免白色閃爍
-      
-      // 物理引擎配置
-      physics: {
-        default: 'arcade',
-        arcade: {
-          gravity: { x: 0, y: 0 },
-          debug: false
-        }
-      },
-      
-      // 場景配置
-      scene: GameScene,
-      
-      // 縮放配置
-      scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: 1274,
-        height: 739
-      },
-      
-      // 音頻配置
-      audio: {
-        disableWebAudio: false
-      },
-      
-      // 渲染配置
-      render: {
-        antialias: true,
-        pixelArt: false
-      }
-    };
+    console.log('✅ 遊戲配置設置完成');
+
+    // 🚀 使用優化後的響應式 Phaser 配置
+    console.log('🎯 獲取響應式 Phaser 配置...');
+    const phaserConfig = ResponsivePhaserConfig.getAdaptiveConfig();
+    console.log('✅ 響應式配置獲取完成');
+
+    // 設置場景
+    console.log('🎬 設置場景到配置...');
+    phaserConfig.scene = GameScene;
+    console.log('✅ 場景設置完成');
+
+    // 顯示配置比較信息
+    console.log('📊 顯示配置比較...');
+    ResponsivePhaserConfig.compareConfigs();
+    console.log('✅ 配置比較完成');
     
     // 創建 Phaser 遊戲實例
+    console.log('🎮 創建 Phaser 遊戲實例...');
     const game = new Phaser.Game(phaserConfig);
-    
+    console.log('✅ Phaser 遊戲實例創建完成');
+
     // 將配置傳遞給場景
+    console.log('📋 傳遞配置給場景...');
     game.registry.set('gameConfig', defaultConfig);
+    console.log('✅ 配置傳遞完成');
     
     // 設置全局錯誤處理
     game.events.on('error', (error: Error) => {
