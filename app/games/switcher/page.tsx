@@ -124,24 +124,24 @@ const GameSwitcherPage: React.FC = () => {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-6">
-              {/* 主標題區域 */}
+            <div className="flex items-center justify-between w-full">
+              {/* 左側：主標題區域 */}
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">記憶科學遊戲中心</h1>
                 <p className="text-sm text-gray-600">25 種記憶科學遊戲，基於主動回憶和間隔重複原理</p>
               </div>
 
-              {/* 當前遊戲標籤 */}
-              <div className="flex items-center space-x-2 px-3 py-1 bg-blue-50 rounded-lg border border-blue-200">
-                <span className="text-lg">⚡</span>
+              {/* 右側：當前遊戲標籤 */}
+              <div className="flex items-center space-x-2 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
+                <span className="text-xl">⚡</span>
                 <div>
-                  <div className="text-sm font-medium text-blue-900">{getGameName(currentGameId)}</div>
-                  <div className="text-xs text-blue-600">當前遊戲</div>
+                  <div className="text-base font-medium text-blue-900">{getGameName(currentGameId)}</div>
+                  <div className="text-xs text-blue-600">載入: ~600ms | 已完成</div>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               {/* GEPT 等級快速顯示 */}
               <div className="flex items-center space-x-2">
                 <span className="text-xs text-gray-500">GEPT:</span>
@@ -150,7 +150,7 @@ const GameSwitcherPage: React.FC = () => {
 
               <button
                 onClick={() => setShowStats(!showStats)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 {showStats ? '隱藏統計' : '顯示統計'}
               </button>
@@ -158,7 +158,7 @@ const GameSwitcherPage: React.FC = () => {
               {/* 出遊戲按鈕 */}
               <button
                 onClick={() => window.open('http://localhost:3001/games/airplane-game/', '_blank')}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 🚀 出遊戲
               </button>
@@ -167,10 +167,10 @@ const GameSwitcherPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 主要內容 - 緊湊佈局 */}
-      <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      {/* 主要內容 - 超緊湊佈局 */}
+      <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-2">
         {/* 遊戲切換器 - 主要區域 */}
-        <div className="mb-4">
+        <div className="mb-2">
           <GameSwitcher
             defaultGame="airplane-vite"
             geptLevel="elementary"

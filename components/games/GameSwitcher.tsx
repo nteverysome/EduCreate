@@ -294,9 +294,9 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
   return (
     <div className={`game-switcher ${className}`}>
-      {/* 簡化的遊戲控制器 - 緊湊佈局 */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-2">
-        <div className="p-3">
+      {/* 簡化的遊戲控制器 - 超緊湊佈局 */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-1">
+        <div className="p-2">
           <div className="flex items-center justify-between">
             {/* 遊戲詳細信息 */}
             <div className="flex items-center space-x-4">
@@ -319,8 +319,29 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
               </div>
             </div>
 
-            {/* 遊戲控制按鈕組 */}
-            <div className="flex items-center space-x-3">
+            {/* 遊戲控制按鈕組 + GEPT 等級選擇器 */}
+            <div className="flex items-center space-x-4">
+              {/* GEPT 等級選擇器 */}
+              <div className="flex items-center space-x-2">
+                <BookOpenIcon className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">GEPT:</span>
+                <div className="flex space-x-1">
+                  {['elementary', 'intermediate', 'advanced'].map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => setCurrentGeptLevel(level as any)}
+                      className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                        currentGeptLevel === level
+                          ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300'
+                      }`}
+                    >
+                      {level === 'elementary' ? '初級' : level === 'intermediate' ? '中級' : '高級'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* 切換遊戲下拉選單 */}
               <div className="relative">
                 <button
@@ -386,29 +407,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
             </div>
           </div>
 
-          {/* GEPT 等級選擇器 - 緊湊佈局 */}
-          <div className="flex items-center space-x-4 mt-3 pt-3 border-t border-gray-100">
-            <div className="flex items-center space-x-2">
-              <BookOpenIcon className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">GEPT 等級:</span>
-            </div>
-            <div className="flex space-x-2">
-              {['elementary', 'intermediate', 'advanced'].map((level) => (
-                <button
-                  key={level}
-                  onClick={() => setCurrentGeptLevel(level as any)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    currentGeptLevel === level
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                  disabled={isLoading}
-                >
-                  {level === 'elementary' ? '初級' : level === 'intermediate' ? '中級' : '高級'}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* GEPT 等級選擇器已移到按鈕區域 */}
         </div>
 
         {/* 載入進度條 */}
@@ -428,7 +427,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         )}
       </div>
 
-      {/* 遊戲 iframe 容器 - Wordwall 尺寸 1274x739 (緊湊佈局) */}
+      {/* 遊戲 iframe 容器 - Wordwall 尺寸 1274x739 (超緊湊佈局) */}
       <div
         className="relative bg-white rounded-lg shadow-sm overflow-hidden mx-auto"
         style={{ width: '1274px', height: '739px' }}
