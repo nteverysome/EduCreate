@@ -147,3 +147,27 @@ final-white-flash-*.png
 game-switcher-test.png
 transparent-background-*.png
 vite-*.png
+
+# =============================================================================
+# Phaser 學習資源排除規則 (避免大檔案)
+# =============================================================================
+
+# 🚫 PDF 書籍檔案 (太大)
+PhaserByExample-v2.pdf
+
+# 🚫 下載的遊戲源代碼 (可重新下載)
+phaser-by-example/
+phaser-book-source/
+
+# 🚫 Python 腳本 (臨時分析用)
+analyze-phaser-pdf.py
+check-phaser-downloads.py
+test-browser-persistence.py
+phaser-account-helper.py
+
+# 🚫 PowerShell 腳本 (臨時用)
+download-phaser-resources.ps1
+fix-chrome.ps1
+
+# 🚫 Playwright 報告檔案
+playwright-report/

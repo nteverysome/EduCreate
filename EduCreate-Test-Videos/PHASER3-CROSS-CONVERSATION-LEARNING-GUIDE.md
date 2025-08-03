@@ -151,3 +151,259 @@ node EduCreate-Test-Videos/scripts/phaser3-auto-fix.js scan
 ✅ **跨對話持續性**：知識不會丟失
 
 這個系統將徹底解決您提到的 Phaser 3 重複錯誤問題，確保每次對話都能基於之前的學習經驗繼續改進！
+
+---
+
+## 📖 **Phaser by Example v2 核心知識點**
+
+> 從 539 頁官方書籍中提取的實用技術要點
+
+### 🎯 **射擊遊戲核心技術（Chapter 2: Starshake）**
+
+#### **敵人生成模式**
+```javascript
+// 敵人生成器模式
+class EnemySpawner {
+    constructor(scene) {
+        this.scene = scene;
+        this.spawnTimer = 0;
+        this.spawnRate = 1000; // 毫秒
+    }
+
+    update(time, delta) {
+        this.spawnTimer += delta;
+        if (this.spawnTimer >= this.spawnRate) {
+            this.spawnEnemy();
+            this.spawnTimer = 0;
+        }
+    }
+}
+```
+
+#### **射擊模式系統**
+```javascript
+// 多種射擊模式
+const SHOOTING_PATTERNS = {
+    SINGLE: 'single',
+    SPREAD: 'spread',
+    RAPID: 'rapid'
+};
+
+// 射擊模式實現
+shootBullet(pattern = SHOOTING_PATTERNS.SINGLE) {
+    switch(pattern) {
+        case SHOOTING_PATTERNS.SPREAD:
+            this.shootSpread();
+            break;
+        case SHOOTING_PATTERNS.RAPID:
+            this.shootRapid();
+            break;
+        default:
+            this.shootSingle();
+    }
+}
+```
+
+### 🔧 **Game Objects 核心組件（Chapter 10）**
+
+#### **Factory 模式最佳實踐**
+```javascript
+// 自定義 Game Object 添加到 Factory
+Phaser.GameObjects.GameObjectFactory.register('customSprite', function (x, y, texture) {
+    const sprite = new CustomSprite(this.scene, x, y, texture);
+    this.displayList.add(sprite);
+    this.updateList.add(sprite);
+    return sprite;
+});
+
+// 使用方式
+this.add.customSprite(100, 100, 'player');
+```
+
+#### **組件系統使用**
+```javascript
+// Alpha 組件
+sprite.setAlpha(0.5);
+
+// Blend Mode 組件
+sprite.setBlendMode(Phaser.BlendModes.ADD);
+
+// Transform 組件
+sprite.setPosition(x, y).setRotation(angle).setScale(scale);
+```
+
+### 🎨 **實用技巧（Chapter 11: Cookbook）**
+
+#### **粒子效果系統**
+```javascript
+// 爆炸粒子效果
+createExplosion(x, y) {
+    const particles = this.add.particles(x, y, 'spark', {
+        speed: { min: 100, max: 200 },
+        scale: { start: 0.5, end: 0 },
+        lifespan: 300
+    });
+
+    // 自動清理
+    this.time.delayedCall(300, () => particles.destroy());
+}
+```
+
+#### **無限滾動背景**
+```javascript
+// 無限滾動實現
+class ScrollingBackground {
+    constructor(scene, texture) {
+        this.scene = scene;
+        this.bg1 = scene.add.image(0, 0, texture).setOrigin(0, 0);
+        this.bg2 = scene.add.image(scene.game.config.width, 0, texture).setOrigin(0, 0);
+        this.scrollSpeed = 2;
+    }
+
+    update() {
+        this.bg1.x -= this.scrollSpeed;
+        this.bg2.x -= this.scrollSpeed;
+
+        if (this.bg1.x <= -this.scene.game.config.width) {
+            this.bg1.x = this.bg2.x + this.scene.game.config.width;
+        }
+        if (this.bg2.x <= -this.scene.game.config.width) {
+            this.bg2.x = this.bg1.x + this.scene.game.config.width;
+        }
+    }
+}
+```
+
+#### **敵人 AI 射擊**
+```javascript
+// 敵人自動瞄準玩家
+aimAtPlayer(enemy, player) {
+    const angle = Phaser.Math.Angle.Between(
+        enemy.x, enemy.y,
+        player.x, player.y
+    );
+
+    // 發射子彈
+    const bullet = this.add.sprite(enemy.x, enemy.y, 'bullet');
+    this.physics.add.existing(bullet);
+
+    // 設置速度方向
+    const speed = 200;
+    bullet.body.setVelocity(
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed
+    );
+}
+```
+
+### 🚀 **Scale 模式最佳實踐**
+
+#### **響應式設計**
+```javascript
+// 推薦的 Scale 配置
+const config = {
+    scale: {
+        mode: Phaser.Scale.FIT,
+        parent: 'game-container',
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 800,
+        height: 600
+    }
+};
+
+// 響應式事件處理
+this.scale.on('resize', (gameSize) => {
+    // 調整遊戲元素位置
+    this.adjustGameElements(gameSize);
+});
+```
+
+### 🎯 **4:44 法則（Chapter 16）**
+
+#### **快速開發原則**
+- **4 小時**：完成核心遊戲機制
+- **4 天**：完成可玩版本
+- **4 週**：完成完整遊戲
+- **4 個月**：完成商業級產品
+
+#### **應用到 EduCreate**
+```javascript
+// 4:44 法則在教育遊戲中的應用
+const DEVELOPMENT_PHASES = {
+    CORE_MECHANIC: '4小時 - 基礎互動',
+    PLAYABLE_VERSION: '4天 - 教育內容整合',
+    COMPLETE_GAME: '4週 - 完整功能',
+    COMMERCIAL_READY: '4月 - 平台級產品'
+};
+```
+
+### 🔍 **常見錯誤預防**
+
+#### **物理引擎使用**
+```javascript
+// ❌ 錯誤：忘記啟用物理
+const sprite = this.add.sprite(x, y, 'player');
+
+// ✅ 正確：啟用物理
+const sprite = this.physics.add.sprite(x, y, 'player');
+```
+
+#### **記憶體管理**
+```javascript
+// ✅ 正確：場景切換時清理
+shutdown() {
+    // 清理計時器
+    this.time.removeAllEvents();
+
+    // 清理粒子系統
+    this.particles?.destroy();
+
+    // 清理音效
+    this.sounds?.forEach(sound => sound.destroy());
+}
+```
+
+### 📊 **性能優化要點**
+
+#### **物件池使用**
+```javascript
+// 子彈物件池
+class BulletPool {
+    constructor(scene, size = 50) {
+        this.scene = scene;
+        this.pool = [];
+
+        // 預創建物件
+        for (let i = 0; i < size; i++) {
+            const bullet = scene.add.sprite(0, 0, 'bullet');
+            bullet.setActive(false).setVisible(false);
+            this.pool.push(bullet);
+        }
+    }
+
+    getBullet() {
+        return this.pool.find(bullet => !bullet.active) || this.createBullet();
+    }
+}
+```
+
+---
+
+## 🎯 **EduCreate 專用應用指南**
+
+### **飛機遊戲改進重點**
+1. **射擊系統**：參考 Starshake 的射擊模式
+2. **敵人 AI**：實現自動瞄準和多種行為
+3. **特效系統**：添加爆炸和粒子效果
+4. **無限滾動**：優化背景滾動性能
+
+### **新遊戲類型擴展**
+1. **益智遊戲**：參考 PushPull 的邏輯設計
+2. **跑酷遊戲**：參考 Runner 的無限生成
+3. **多人遊戲**：參考 Blastemup 的 WebSocket 實現
+
+### **技術架構優化**
+1. **組件系統**：使用 Phaser 內建組件
+2. **Factory 模式**：統一遊戲物件創建
+3. **場景管理**：標準化場景切換
+4. **資源管理**：優化載入和清理
