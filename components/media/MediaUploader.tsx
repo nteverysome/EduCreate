@@ -101,6 +101,14 @@ export default function MediaUploader({
   }, [handleFileSelect]);
   // 格式化文件大小
   const formatFileSize = (bytes: number): string => {
+    if (!mediaManager) {
+      // 服務器端渲染時的備用實現
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
     return mediaManager.formatFileSize(bytes);
   };
   // 獲取文件類型圖標

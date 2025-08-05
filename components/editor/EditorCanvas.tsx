@@ -246,4 +246,4 @@ const EditorCanvas = ({ elements, selectedElementId }: EditorCanvasProps) => {
   );
 }
 
-export default handleClick;
+export default EditorCanvas;

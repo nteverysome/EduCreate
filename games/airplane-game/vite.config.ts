@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // 設置基礎路徑，用於部署到 Next.js public 目錄
-  base: '/games/airplane-game/',
+  // 設置基礎路徑，開發時使用根路徑
+  base: '/',
   
   // 構建配置
   build: {
@@ -47,7 +47,7 @@ export default defineConfig({
   
   // 開發服務器配置
   server: {
-    port: 3001,
+    port: 3002,
     host: true,
     open: false,
     cors: true,

@@ -623,7 +623,7 @@ export default class GameScene extends Phaser.Scene {
    * 創建月亮主題視差背景
    */
   private createParallaxBackground(): void {
-    console.log('� 創建月亮主題視差背景');
+    console.log('🌌 創建視差背景');
 
     // 創建基礎背景色（深太空黑色）- 完整容器尺寸，消除白色空間
     const bgRect = this.add.rectangle(637, 369.5, 1274, 739, 0x000000);  // 🎯 完整容器尺寸 1274x739
@@ -635,7 +635,7 @@ export default class GameScene extends Phaser.Scene {
     // 創建星空背景
     this.createStarField();
 
-    console.log('🌙 月亮主題視差背景創建完成');
+    console.log('🌌 視差背景創建完成');
   }
 
   /**
@@ -1794,10 +1794,8 @@ export default class GameScene extends Phaser.Scene {
       layer.tilePositionX += speed;
     });
 
-    // 每隔一段時間輸出日誌（減少頻率）
-    if (Math.floor(Date.now() / 1000) % 10 === 0) {
-      console.log('� 更新月亮主題視差背景');
-    }
+    // 輸出視差背景更新日誌（與 main 版本一致）
+    console.log('🌌 更新視差背景');
   }
 
   /**
