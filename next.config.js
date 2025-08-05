@@ -57,34 +57,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
 
-  // HTTP 頭配置 - 允許 iframe 嵌入 + 移動端優化
+  // HTTP 頭配置 - 允許 iframe 嵌入
   async headers() {
     return [
-      {
-        source: '/games/:path*',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://*.vercel.app https://edu-create-lw9cacn25-minamisums-projects.vercel.app; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.vercel.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' ws: wss: https://*.vercel.app;",
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'accelerometer=*, gyroscope=*, magnetometer=*, camera=*, microphone=*, geolocation=*, fullscreen=*',
-          },
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'unsafe-none',
-          },
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups',
-          },
-        ],
-      },
       {
         source: '/(.*)',
         headers: [
