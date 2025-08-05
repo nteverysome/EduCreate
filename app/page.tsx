@@ -68,14 +68,7 @@ export default function HomePage() {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* 測試卡片 - 強制編譯觸發 */}
-            <div style={{backgroundColor: 'red', color: 'white', padding: '20px', border: '5px solid black', fontSize: '18px'}}>
-              <h3>🔗 測試分享系統卡片 - 強制編譯</h3>
-              <p>如果你看到這個紅色卡片，說明編譯成功！</p>
-              <p>時間戳：{new Date().toLocaleTimeString()}</p>
-            </div>
-
-            {/* 記憶科學遊戲中心 - 遊戲切換器入口 */}
+            {/* 🎮 記憶科學遊戲中心 - 遊戲切換器入口 - 最高優先級 */}
             <div className="bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow text-white" data-testid="feature-game-switcher">
               <div className="text-4xl mb-4">🎮</div>
               <h3 className="text-xl font-semibold mb-3">記憶科學遊戲中心</h3>
@@ -94,7 +87,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* AirplaneCollisionGame - 世界級性能遊戲 */}
+            {/* ✈️ 飛機碰撞遊戲 - 世界級性能遊戲 */}
             <div className="bg-gradient-to-br from-green-500 to-teal-600 rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow text-white" data-testid="feature-airplane-game">
               <div className="text-4xl mb-4">✈️</div>
               <h3 className="text-xl font-semibold mb-3">飛機碰撞遊戲</h3>
@@ -112,6 +105,8 @@ export default function HomePage() {
                 </svg>
               </Link>
             </div>
+
+
 
             {/* 智能排序系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-smart-sorting">
