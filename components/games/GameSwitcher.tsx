@@ -2,6 +2,15 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDownIcon, PlayIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+import dynamic from 'next/dynamic';
+
+// 動態載入遊戲組件
+const AirplaneCollisionGame = dynamic(() => import('./AirplaneCollisionGame/AirplaneCollisionGame'), {
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-96 bg-gray-900 rounded-lg">
+    <div className="text-white">載入飛機遊戲中...</div>
+  </div>
+});
 
 // 遊戲配置類型定義
 interface GameConfig {
@@ -491,55 +500,85 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
           </div>
         )}
         
-        {/* 移動端遊戲提示和按鈕 */}
-        <div className="absolute inset-0 bg-white bg-opacity-95 flex flex-col items-center justify-center z-20 md:hidden">
-          <div className="text-center p-6">
-            <div className="text-6xl mb-4">🎮</div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">手機專用遊戲模式</h3>
-            <p className="text-gray-600 mb-4 text-sm">
-              為了最佳的遊戲體驗，請點擊下方按鈕<br />
-              在全螢幕模式中遊玩
-            </p>
+        {/* 移動端遊戲提示和按鈕 - 僅對 iframe 遊戲顯示 */}
+        {currentGame.id !== 'airplane-vite' && (
+          <div className="absolute inset-0 bg-white bg-opacity-95 flex flex-col items-center justify-center z-20 md:hidden">
+            <div className="text-center p-6">
+              <div className="text-6xl mb-4">🎮</div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">手機專用遊戲模式</h3>
+              <p className="text-gray-600 mb-4 text-sm">
+                為了最佳的遊戲體驗，請點擊下方按鈕<br />
+                在全螢幕模式中遊玩
+              </p>
+              <button
+                onClick={() => window.open(currentGame.url, '_blank')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium shadow-lg transition-colors flex items-center space-x-2 mx-auto"
+              >
+                <span>🚀</span>
+                <span>開始遊戲</span>
+              </button>
+              <p className="text-xs text-gray-500 mt-3">
+                💡 提示：遊戲將在新視窗中開啟，支援觸控操作
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* 桌面端直接遊玩按鈕 - 僅對 iframe 遊戲顯示 */}
+        {currentGame.id !== 'airplane-vite' && (
+          <div className="absolute top-4 right-4 z-20 hidden md:block">
             <button
               onClick={() => window.open(currentGame.url, '_blank')}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium shadow-lg transition-colors flex items-center space-x-2 mx-auto"
+              className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-lg flex items-center space-x-2 transition-colors"
+              title="在新視窗中直接遊玩"
             >
-              <span>🚀</span>
-              <span>開始遊戲</span>
+              <span>🎮</span>
+              <span>直接遊玩</span>
             </button>
-            <p className="text-xs text-gray-500 mt-3">
-              💡 提示：遊戲將在新視窗中開啟，支援觸控操作
-            </p>
           </div>
-        </div>
+        )}
 
-        {/* 桌面端直接遊玩按鈕 */}
-        <div className="absolute top-4 right-4 z-20 hidden md:block">
-          <button
-            onClick={() => window.open(currentGame.url, '_blank')}
-            className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-lg flex items-center space-x-2 transition-colors"
-            title="在新視窗中直接遊玩"
-          >
-            <span>🎮</span>
-            <span>直接遊玩</span>
-          </button>
-        </div>
+        {/* 直接嵌入遊戲組件 */}
+        {currentGame.id === 'airplane-vite' && (
+          <div className="w-full h-full">
+            <AirplaneCollisionGame
+              config={{
+                geptLevel: geptLevel as any,
+                enableSound: true,
+                enableHapticFeedback: true,
+                difficulty: 'medium',
+                gameMode: 'practice'
+              }}
+              onScoreUpdate={(score) => {
+                onGameStateUpdate?.(currentGame.id, {
+                  score,
+                  level: geptLevel,
+                  progress: 0,
+                  timeSpent: 0
+                });
+              }}
+            />
+          </div>
+        )}
 
-        <iframe
-          ref={iframeRef}
-          src={currentGame.url}
-          className="w-full h-full border-0"
-          title={currentGame.displayName}
-          onLoad={handleIframeLoad}
-          allow="fullscreen; autoplay; microphone; camera; accelerometer; gyroscope; web-share"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-pointer-lock allow-orientation-lock allow-downloads"
-          style={{
-            touchAction: 'manipulation',
-            WebkitTouchCallout: 'none',
-            WebkitUserSelect: 'none',
-            userSelect: 'none'
-          }}
-        />
+        {/* 其他遊戲仍使用 iframe */}
+        {currentGame.id !== 'airplane-vite' && (
+          <iframe
+            ref={iframeRef}
+            src={currentGame.url}
+            className="w-full h-full border-0"
+            title={currentGame.displayName}
+            onLoad={handleIframeLoad}
+            allow="fullscreen; autoplay; microphone; camera; accelerometer; gyroscope; web-share"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-pointer-lock allow-orientation-lock allow-downloads"
+            style={{
+              touchAction: 'manipulation',
+              WebkitTouchCallout: 'none',
+              WebkitUserSelect: 'none',
+              userSelect: 'none'
+            }}
+          />
+        )}
       </div>
 
       {/* 遊戲狀態顯示 */}
