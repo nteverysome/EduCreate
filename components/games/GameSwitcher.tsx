@@ -35,16 +35,13 @@ interface GameSwitcherProps {
   className?: string;
 }
 
-// 遊戲配置數據 (Vite 版排在第一位)
-const GAMES_CONFIG: GameConfig[] = [
+// 基礎遊戲配置數據 (不包含動態 URL)
+const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
   {
     id: 'airplane-vite',
     name: 'airplane',
     displayName: '飛機遊戲 (Vite版)',
     description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
-    url: typeof window !== 'undefined' && window.location.hostname === 'localhost'
-      ? 'http://localhost:3002/'
-      : '/games/airplane',
     type: 'iframe',
     memoryType: '動態反應記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -57,7 +54,6 @@ const GAMES_CONFIG: GameConfig[] = [
     name: 'airplane',
     displayName: '飛機碰撞遊戲',
     description: '通過飛機碰撞雲朵學習英語詞彙，基於主動回憶和視覺記憶原理',
-    url: '/games/airplane',
     type: 'main',
     memoryType: '動態反應記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -70,9 +66,6 @@ const GAMES_CONFIG: GameConfig[] = [
     name: 'airplane',
     displayName: '飛機遊戲 (iframe版)',
     description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
-    url: typeof window !== 'undefined' && window.location.hostname === 'localhost'
-      ? 'http://localhost:3002/'
-      : '/games/airplane-iframe',
     type: 'iframe',
     memoryType: '動態反應記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -86,7 +79,6 @@ const GAMES_CONFIG: GameConfig[] = [
     name: 'matching',
     displayName: '配對遊戲',
     description: '通過配對卡片強化視覺記憶和關聯學習',
-    url: '/games/matching-pairs',
     type: 'main',
     memoryType: '空間視覺記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -99,7 +91,6 @@ const GAMES_CONFIG: GameConfig[] = [
     name: 'quiz',
     displayName: '問答遊戲',
     description: '基於主動回憶的快速問答學習',
-    url: '/games/quiz',
     type: 'main',
     memoryType: '基礎記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -112,7 +103,6 @@ const GAMES_CONFIG: GameConfig[] = [
     name: 'sequence',
     displayName: '序列遊戲',
     description: '通過序列記憶強化學習效果',
-    url: '/games/sequence',
     type: 'main',
     memoryType: '重構邏輯記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -125,7 +115,6 @@ const GAMES_CONFIG: GameConfig[] = [
     name: 'flashcard',
     displayName: '閃卡遊戲',
     description: '經典閃卡學習，支援間隔重複算法',
-    url: '/games/flashcard',
     type: 'main',
     memoryType: '基礎記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -134,6 +123,38 @@ const GAMES_CONFIG: GameConfig[] = [
     estimatedLoadTime: 400
   }
 ];
+
+// 動態生成完整的遊戲配置
+const getGamesConfig = (): GameConfig[] => {
+  const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+
+  return BASE_GAMES_CONFIG.map(game => ({
+    ...game,
+    url: getGameUrl(game.id, isLocalhost)
+  }));
+};
+
+// 獲取遊戲 URL 的輔助函數
+const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
+  switch (gameId) {
+    case 'airplane-vite':
+      return isLocalhost ? 'http://localhost:3002/' : '/games/airplane';
+    case 'airplane-main':
+      return '/games/airplane';
+    case 'airplane-iframe':
+      return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-iframe';
+    case 'matching-pairs':
+      return '/games/matching-pairs';
+    case 'quiz-game':
+      return '/games/quiz';
+    case 'sequence-game':
+      return '/games/sequence';
+    case 'flashcard-game':
+      return '/games/flashcard';
+    default:
+      return '/games/default';
+  }
+};
 
 const GameSwitcher: React.FC<GameSwitcherProps> = ({
   defaultGame = 'airplane-vite',
@@ -149,20 +170,29 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [gameStates, setGameStates] = useState<Record<string, GameState>>({});
   const [currentGeptLevel, setCurrentGeptLevel] = useState(geptLevel);
-  
+  const [mounted, setMounted] = useState<boolean>(false);
+
   // Refs
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
+  // 客戶端掛載狀態
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // 獲取遊戲配置（只在客戶端執行）
+  const gamesConfig = mounted ? getGamesConfig() : BASE_GAMES_CONFIG.map(game => ({ ...game, url: '' }));
+
   // 獲取當前遊戲配置
-  const currentGame = GAMES_CONFIG.find(game => game.id === currentGameId);
-  
+  const currentGame = gamesConfig.find(game => game.id === currentGameId);
+
   // 獲取可用遊戲（已完成的遊戲）
-  const availableGames = GAMES_CONFIG.filter(game => game.status === 'completed');
-  
+  const availableGames = gamesConfig.filter(game => game.status === 'completed');
+
   // 獲取開發中遊戲
-  const developmentGames = GAMES_CONFIG.filter(game => game.status === 'development');
+  const developmentGames = gamesConfig.filter(game => game.status === 'development');
 
   // 載入進度模擬
   const simulateLoading = useCallback((estimatedTime: number) => {
@@ -190,8 +220,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   // 切換遊戲
   const switchGame = useCallback((gameId: string) => {
     if (gameId === currentGameId || isLoading) return;
-    
-    const game = GAMES_CONFIG.find(g => g.id === gameId);
+
+    const game = gamesConfig.find(g => g.id === gameId);
     if (!game || game.status !== 'completed') return;
 
     // 清理之前的計時器
