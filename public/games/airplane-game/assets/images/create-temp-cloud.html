@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>創建臨時雲朵圖片</title>
+</head>
+<body>
+    <canvas id="cloudCanvas" width="128" height="64"></canvas>
+    <br>
+    <button onclick="downloadCloud()">下載雲朵圖片</button>
+    
+    <script>
+        // 創建臨時雲朵圖片
+        const canvas = document.getElementById('cloudCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 繪製雲朵形狀
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#cccccc';
+        ctx.lineWidth = 2;
+        
+        // 主要雲朵形狀
+        ctx.beginPath();
+        ctx.ellipse(64, 32, 50, 25, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+        
+        // 左側小雲朵
+        ctx.beginPath();
+        ctx.ellipse(30, 35, 20, 15, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+        
+        // 右側小雲朵
+        ctx.beginPath();
+        ctx.ellipse(98, 35, 20, 15, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+        
+        function downloadCloud() {
+            const link = document.createElement('a');
+            link.download = 'cloud_shape3_3.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        console.log('臨時雲朵圖片已創建，點擊按鈕下載');
+    </script>
+</body>
+</html>

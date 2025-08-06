@@ -1,0 +1,15 @@
+{
+  "compressions": [],
+  "totalStats": {
+    "totalCompressions": 0,
+    "totalOriginalSizeMB": 0,
+    "totalCompressedSizeMB": 0,
+    "totalSpaceSavedMB": 0,
+    "averageCompressionRatio": 0,
+    "averageCompressionTime": 0,
+    "spaceSavingPercentage": 0,
+    "lastUpdated": "2025-08-06T15:09:47.215Z"
+  },
+  "qualityStats": {},
+  "moduleStats": {}
+}

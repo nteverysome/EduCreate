@@ -7,7 +7,7 @@
   <meta name="description" content="記憶科學驅動的英語詞彙學習遊戲 - 飛機碰撞模式" />
   
   <!-- 預載入關鍵資源 -->
-  <link rel="preload" href="data:video/mp2t;base64,LyoqCiAqIEFpcnBsYW5lIENvbGxpc2lvbiBHYW1lIC0gVml0ZSArIFBoYXNlciAzIOWFpeWPo+m7ngogKiDln7rmlrzoqJjmhrbnp5HlrbjnmoToi7Hoqp7oqZ7lvZnlrbjnv5LpgYrmiLIKICovCgppbXBvcnQgUGhhc2VyIGZyb20gJ3BoYXNlcic7CmltcG9ydCB7IEdhbWVDb25maWcgfSBmcm9tICcuL3R5cGVzL2dhbWUnOwoKLy8g5YuV5oWL5bCO5YWl5aC05pmv77yI6YG/5YWN5b6q55Kw5L6d6LO077yJCmNvbnN0IGxvYWRHYW1lU2NlbmUgPSBhc3luYyAoKSA9PiB7CiAgY29uc3QgeyBkZWZhdWx0OiBHYW1lU2NlbmUgfSA9IGF3YWl0IGltcG9ydCgnLi9zY2VuZXMvR2FtZVNjZW5lJyk7CiAgcmV0dXJuIEdhbWVTY2VuZTsKfTsKCi8qKgogKiDliJ3lp4vljJYgUGhhc2VyIOmBiuaIsgogKi8KYXN5bmMgZnVuY3Rpb24gaW5pdEdhbWUoKSB7CiAgY29uc29sZS5sb2coJ/Cfjq4g5Yid5aeL5YyWIEFpcnBsYW5lIENvbGxpc2lvbiBHYW1lIC0gVml0ZSDniYjmnKwnKTsKICAKICB0cnkgewogICAgLy8g6Zqx6JeP6LyJ5YWl55Wr6Z2iCiAgICBjb25zdCBsb2FkaW5nRWxlbWVudCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdsb2FkaW5nJyk7CiAgICBpZiAobG9hZGluZ0VsZW1lbnQpIHsKICAgICAgbG9hZGluZ0VsZW1lbnQuc3R5bGUuZGlzcGxheSA9ICdub25lJzsKICAgIH0KICAgIAogICAgLy8g6LyJ5YWl6YGK5oiy5aC05pmvCiAgICBjb25zdCBHYW1lU2NlbmUgPSBhd2FpdCBsb2FkR2FtZVNjZW5lKCk7CiAgICAKICAgIC8vIOm7mOiqjemBiuaIsumFjee9rgogICAgY29uc3QgZGVmYXVsdENvbmZpZzogR2FtZUNvbmZpZyA9IHsKICAgICAgZ2VwdExldmVsOiAnZWxlbWVudGFyeScsCiAgICAgIGVuYWJsZVNvdW5kOiB0cnVlLAogICAgICBlbmFibGVIYXB0aWNGZWVkYmFjazogdHJ1ZSwKICAgICAgZGlmZmljdWx0eTogJ21lZGl1bScsCiAgICAgIGdhbWVNb2RlOiAncHJhY3RpY2UnCiAgICB9OwogICAgCiAgICAvLyBQaGFzZXIg6YGK5oiy6YWN572uCiAgICBjb25zdCBwaGFzZXJDb25maWc6IFBoYXNlci5UeXBlcy5Db3JlLkdhbWVDb25maWcgPSB7CiAgICAgIHR5cGU6IFBoYXNlci5BVVRPLAogICAgICB3aWR0aDogODAwLAogICAgICBoZWlnaHQ6IDYwMCwKICAgICAgcGFyZW50OiAnZ2FtZS1jb250YWluZXInLAogICAgICBiYWNrZ3JvdW5kQ29sb3I6ICcjMDAwMDMzJywKICAgICAgCiAgICAgIC8vIOeJqeeQhuW8leaTjumFjee9rgogICAgICBwaHlzaWNzOiB7CiAgICAgICAgZGVmYXVsdDogJ2FyY2FkZScsCiAgICAgICAgYXJjYWRlOiB7CiAgICAgICAgICBncmF2aXR5OiB7IHg6IDAsIHk6IDAgfSwKICAgICAgICAgIGRlYnVnOiBmYWxzZQogICAgICAgIH0KICAgICAgfSwKICAgICAgCiAgICAgIC8vIOWgtOaZr+mFjee9rgogICAgICBzY2VuZTogR2FtZVNjZW5lLAogICAgICAKICAgICAgLy8g57iu5pS+6YWN572uCiAgICAgIHNjYWxlOiB7CiAgICAgICAgbW9kZTogUGhhc2VyLlNjYWxlLkZJVCwKICAgICAgICBhdXRvQ2VudGVyOiBQaGFzZXIuU2NhbGUuQ0VOVEVSX0JPVEgsCiAgICAgICAgd2lkdGg6IDgwMCwKICAgICAgICBoZWlnaHQ6IDYwMAogICAgICB9LAogICAgICAKICAgICAgLy8g6Z+z6aC76YWN572uCiAgICAgIGF1ZGlvOiB7CiAgICAgICAgZGlzYWJsZVdlYkF1ZGlvOiBmYWxzZQogICAgICB9LAogICAgICAKICAgICAgLy8g5riy5p+T6YWN572uCiAgICAgIHJlbmRlcjogewogICAgICAgIGFudGlhbGlhczogdHJ1ZSwKICAgICAgICBwaXhlbEFydDogZmFsc2UKICAgICAgfQogICAgfTsKICAgIAogICAgLy8g5Ym15bu6IFBoYXNlciDpgYrmiLLlr6bkvosKICAgIGNvbnN0IGdhbWUgPSBuZXcgUGhhc2VyLkdhbWUocGhhc2VyQ29uZmlnKTsKICAgIAogICAgLy8g5bCH6YWN572u5YKz6YGe57Wm5aC05pmvCiAgICBnYW1lLnJlZ2lzdHJ5LnNldCgnZ2FtZUNvbmZpZycsIGRlZmF1bHRDb25maWcpOwogICAgCiAgICAvLyDoqK3nva7lhajlsYDpjK/oqqTomZXnkIYKICAgIGdhbWUuZXZlbnRzLm9uKCdlcnJvcicsIChlcnJvcjogRXJyb3IpID0+IHsKICAgICAgY29uc29sZS5lcnJvcign4p2MIFBoYXNlciDpgYrmiLLpjK/oqqQ6JywgZXJyb3IpOwogICAgfSk7CiAgICAKICAgIC8vIOmBiuaIsuWwsee3kuWbnuiqvwogICAgZ2FtZS5ldmVudHMub25jZSgncmVhZHknLCAoKSA9PiB7CiAgICAgIGNvbnNvbGUubG9nKCfinIUgQWlycGxhbmUgQ29sbGlzaW9uIEdhbWUg5Yid5aeL5YyW5a6M5oiQJyk7CiAgICAgIAogICAgICAvLyDlkJHniLbpoIHpnaLnmbzpgIHlsLHnt5Lmtojmga8KICAgICAgaWYgKHdpbmRvdy5wYXJlbnQgIT09IHdpbmRvdykgewogICAgICAgIHdpbmRvdy5wYXJlbnQucG9zdE1lc3NhZ2UoewogICAgICAgICAgdHlwZTogJ0dBTUVfUkVBRFknLAogICAgICAgICAgdGltZXN0YW1wOiBEYXRlLm5vdygpCiAgICAgICAgfSwgJyonKTsKICAgICAgfQogICAgfSk7CiAgICAKICAgIC8vIOWwh+mBiuaIsuWvpuS+i+aatOmcsuWIsOWFqOWxgO+8iOeUqOaWvOiqv+ippu+8iQogICAgaWYgKHR5cGVvZiB3aW5kb3cgIT09ICd1bmRlZmluZWQnKSB7CiAgICAgICh3aW5kb3cgYXMgYW55KS5waGFzZXJHYW1lID0gZ2FtZTsKICAgIH0KICAgIAogICAgcmV0dXJuIGdhbWU7CiAgICAKICB9IGNhdGNoIChlcnJvcikgewogICAgY29uc29sZS5lcnJvcign4p2MIOmBiuaIsuWIneWni+WMluWkseaVlzonLCBlcnJvcik7CiAgICAKICAgIC8vIOmhr+ekuumMr+iqpOS/oeaBrwogICAgY29uc3QgZ2FtZUNvbnRhaW5lciA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdnYW1lLWNvbnRhaW5lcicpOwogICAgaWYgKGdhbWVDb250YWluZXIpIHsKICAgICAgZ2FtZUNvbnRhaW5lci5pbm5lckhUTUwgPSBgCiAgICAgICAgPGRpdiBzdHlsZT0iCiAgICAgICAgICBkaXNwbGF5OiBmbGV4OwogICAgICAgICAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjsKICAgICAgICAgIGp1c3RpZnktY29udGVudDogY2VudGVyOwogICAgICAgICAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICAgICAgICAgIGhlaWdodDogMTAwJTsKICAgICAgICAgIGNvbG9yOiB3aGl0ZTsKICAgICAgICAgIHRleHQtYWxpZ246IGNlbnRlcjsKICAgICAgICAgIHBhZGRpbmc6IDIwcHg7CiAgICAgICAgIj4KICAgICAgICAgIDxoMiBzdHlsZT0iY29sb3I6ICNmZjZiNmI7IG1hcmdpbi1ib3R0b206IDE2cHg7Ij7imqDvuI8g6YGK5oiy6LyJ5YWl5aSx5pWXPC9oMj4KICAgICAgICAgIDxwIHN0eWxlPSJtYXJnaW4tYm90dG9tOiAxNnB4OyI+54Sh5rOV5Yid5aeL5YyWIFBoYXNlciDpgYrmiLLlvJXmk448L3A+CiAgICAgICAgICA8cCBzdHlsZT0iZm9udC1zaXplOiAxNHB4OyBvcGFjaXR5OiAwLjc7Ij4ke2Vycm9yIGluc3RhbmNlb2YgRXJyb3IgPyBlcnJvci5tZXNzYWdlIDogJ+acquefpemMr+iqpCd9PC9wPgogICAgICAgICAgPGJ1dHRvbiAKICAgICAgICAgICAgb25jbGljaz0ibG9jYXRpb24ucmVsb2FkKCkiIAogICAgICAgICAgICBzdHlsZT0iCiAgICAgICAgICAgICAgbWFyZ2luLXRvcDogMjBweDsKICAgICAgICAgICAgICBwYWRkaW5nOiAxMHB4IDIwcHg7CiAgICAgICAgICAgICAgYmFja2dyb3VuZDogIzRDQUY1MDsKICAgICAgICAgICAgICBjb2xvcjogd2hpdGU7CiAgICAgICAgICAgICAgYm9yZGVyOiBub25lOwogICAgICAgICAgICAgIGJvcmRlci1yYWRpdXM6IDRweDsKICAgICAgICAgICAgICBjdXJzb3I6IHBvaW50ZXI7CiAgICAgICAgICAgICIKICAgICAgICAgID4KICAgICAgICAgICAg6YeN5paw6LyJ5YWlCiAgICAgICAgICA8L2J1dHRvbj4KICAgICAgICA8L2Rpdj4KICAgICAgYDsKICAgIH0KICAgIAogICAgdGhyb3cgZXJyb3I7CiAgfQp9CgovLyDnrYnlvoUgRE9NIOi8ieWFpeWujOaIkOW+jOWIneWni+WMlumBiuaIsgppZiAoZG9jdW1lbnQucmVhZHlTdGF0ZSA9PT0gJ2xvYWRpbmcnKSB7CiAgZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGluaXRHYW1lKTsKfSBlbHNlIHsKICBpbml0R2FtZSgpOwp9CgovLyDlsI7lh7rliJ3lp4vljJblh73mlbjvvIjnlKjmlrzmuKzoqabvvIkKZXhwb3J0IHsgaW5pdEdhbWUgfTsK" as="script" type="module" />
+  <link rel="preload" href="/assets/main-CLUSOIqT.ts" as="script" type="module" />
   
   <!-- 遊戲樣式 -->
   <style>
@@ -18,23 +18,23 @@
     }
     
     body {
-      background: linear-gradient(135deg, #000033 0%, #000066 100%);
+      background: #ffffff;  /* 白色背景與切換器一致 */
       font-family: 'Arial', sans-serif;
       overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      margin: 0;
+      padding: 0;
     }
     
     #game-container {
-      width: 800px;
-      height: 600px;
-      border: 2px solid #333;
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-      background: #000033;
+      width: 1274px;
+      height: 739px;
+      border: none;  /* 移除邊框 */
+      border-radius: 0;  /* 移除圓角 */
+      box-shadow: none;  /* 移除陰影 */
+      background: #ffffff;  /* 白色背景與遊戲一致 */
       position: relative;
+      margin: 0;
+      padding: 0;
     }
     
     #loading {
@@ -82,8 +82,10 @@
       }
     }
   </style>
-  <script type="module" crossorigin src="/games/airplane-game/main-af6Jg_O_.js"></script>
-  <link rel="modulepreload" crossorigin href="/games/airplane-game/chunks/phaser-CjIEy6U-.js">
+  <script type="module" crossorigin src="/main-C_hPhCVQ.js"></script>
+  <link rel="modulepreload" crossorigin href="/chunks/phaser-CjIEy6U-.js">
+  <link rel="modulepreload" crossorigin href="/chunks/managers-BXLQW2UW.js">
+  <link rel="modulepreload" crossorigin href="/chunks/scenes-DHN9EBcS.js">
 </head>
 <body>
   <div id="game-container">
@@ -95,6 +97,6 @@
     </div>
   </div>
   
-  <!-- Vite 入口點 -->
+  <!-- Vite 入口點 -->
 </body>
 </html>
