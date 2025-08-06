@@ -5,7 +5,7 @@ export default defineConfig({
   // 開發服務器配置
   server: {
     host: 'localhost',
-    port: 3000,
+    port: 3002,
     open: true,
     cors: true,
     hmr: {
