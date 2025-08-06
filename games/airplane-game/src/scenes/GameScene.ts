@@ -179,8 +179,8 @@ export default class GameScene extends Phaser.Scene {
     // 載入新的玩家太空船圖片（普通圖片模式）
     this.load.image('player_spaceship_image', 'assets/sprite_player_spaceship_up_down.png');
 
-    // 備用：用戶自定義完整太空船圖片
-    this.load.image('complete_spaceship', 'assets/complete_spaceship.png');
+    // 備用：用戶自定義完整太空船圖片（暫時停用，文件不存在）
+    // this.load.image('complete_spaceship', 'assets/complete_spaceship.png');
 
     console.log('✅ 太空船資源載入配置完成');
 

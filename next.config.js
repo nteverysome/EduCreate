@@ -82,6 +82,14 @@ const nextConfig = {
       {
         source: '/unified-content-manager',
         destination: '/unified-content-manager.html'
+      },
+      {
+        source: '/games/airplane-game',
+        destination: '/games/airplane-game/index.html'
+      },
+      {
+        source: '/games/airplane-game/:path*',
+        destination: '/games/airplane-game/:path*'
       }
     ];
   },

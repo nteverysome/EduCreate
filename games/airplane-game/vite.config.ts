@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // 設置基礎路徑，開發時使用根路徑
-  base: '/',
+  // 設置基礎路徑，生產環境使用相對路徑
+  base: './',
   
   // 構建配置
   build: {

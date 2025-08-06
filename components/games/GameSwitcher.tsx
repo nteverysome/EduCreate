@@ -140,7 +140,7 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
     case 'airplane-vite':
       return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
     case 'airplane-main':
-      return '/games/airplane';
+      return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
     case 'airplane-iframe':
       return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
     case 'matching-pairs':
