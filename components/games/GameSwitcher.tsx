@@ -496,9 +496,6 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
           </div>
         </div>
 
-          {/* GEPT 等級選擇器已移到按鈕區域 */}
-        </div>
-
         {/* 載入進度條 */}
         {isLoading && (
           <div className="px-4 pb-4">
