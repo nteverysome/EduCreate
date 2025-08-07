@@ -172,10 +172,10 @@ const GameSwitcherPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 主要內容 - 超緊湊佈局 */}
-      <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        {/* 遊戲切換器 - 主要區域 */}
-        <div className="mb-2">
+      {/* 主要內容 - 手機優化佈局 */}
+      <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-2">
+        {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
+        <div className="mb-1 sm:mb-2">
           <GameSwitcher
             defaultGame="airplane-vite"
             geptLevel="elementary"

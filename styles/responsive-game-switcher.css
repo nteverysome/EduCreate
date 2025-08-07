@@ -25,16 +25,21 @@
   margin: 0 auto;
 }
 
-/* 手機優先設計 */
+/* 手機優先設計 - 優化間距 */
 @media (max-width: 640px) {
   .game-switcher-container {
     padding: var(--mobile-padding);
   }
-  
-  /* 頁面標頭響應式 */
+
+  /* 頁面標頭響應式 - 減少下邊距 */
   .page-header {
-    padding: 12px 16px !important;
+    padding: 12px 16px 8px 16px !important; /* 下邊距從 12px 減少到 8px */
     min-height: auto !important;
+  }
+
+  /* 主要內容區域 - 減少上邊距 */
+  .max-w-none.mx-auto {
+    padding-top: 4px !important; /* 進一步減少頂部間距 */
   }
   
   .page-header h1 {
@@ -73,7 +78,7 @@
   .gept-selector {
     flex-wrap: wrap;
     justify-content: center;
-    margin-bottom: 16px;
+    margin-bottom: 8px; /* 從 16px 減少到 8px，向上移動 8px */
   }
   
   .gept-selector .gept-buttons {
@@ -160,15 +165,15 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 手機端：全寬度，固定高度比例 */
+/* 手機端：全寬度，固定高度比例，優化間距 */
 @media (max-width: 640px) {
   .game-iframe-container {
     aspect-ratio: 16/9 !important;
     min-height: 300px !important;
     max-height: 400px !important;
-    margin: 16px 0;
+    margin: 8px 0; /* 從 16px 減少到 8px，向上移動 8px */
   }
-  
+
   .game-iframe-container iframe {
     width: 100% !important;
     height: 100% !important;
