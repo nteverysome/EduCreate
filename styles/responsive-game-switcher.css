@@ -1,0 +1,370 @@
+/**
+ * 🎮 EduCreate 遊戲切換器響應式設計樣式
+ * 
+ * 針對手機、平板、桌面的完整響應式適配
+ * 基於記憶科學原理和無障礙設計標準
+ */
+
+/* ===== 基礎響應式斷點 ===== */
+:root {
+  --mobile-breakpoint: 640px;
+  --tablet-breakpoint: 768px;
+  --desktop-breakpoint: 1024px;
+  
+  /* 觸控友好的尺寸 */
+  --touch-target-min: 44px;
+  --mobile-padding: 16px;
+  --tablet-padding: 24px;
+  --desktop-padding: 32px;
+}
+
+/* ===== 遊戲切換器主容器 ===== */
+.game-switcher-container {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+}
+
+/* 手機優先設計 */
+@media (max-width: 640px) {
+  .game-switcher-container {
+    padding: var(--mobile-padding);
+  }
+  
+  /* 頁面標頭響應式 */
+  .page-header {
+    padding: 12px 16px !important;
+    min-height: auto !important;
+  }
+  
+  .page-header h1 {
+    font-size: 1.25rem !important;
+    line-height: 1.4 !important;
+  }
+  
+  .page-header p {
+    font-size: 0.75rem !important;
+    margin-top: 2px !important;
+  }
+  
+  /* 右側控制區域 */
+  .header-controls {
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 8px !important;
+  }
+  
+  .header-controls button {
+    font-size: 0.75rem !important;
+    padding: 6px 12px !important;
+    min-height: var(--touch-target-min);
+  }
+}
+
+/* ===== GEPT 等級選擇器響應式 ===== */
+.gept-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .gept-selector {
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  
+  .gept-selector .gept-buttons {
+    display: flex;
+    width: 100%;
+    gap: 4px;
+  }
+  
+  .gept-selector button {
+    flex: 1;
+    min-height: var(--touch-target-min);
+    font-size: 0.75rem;
+    padding: 8px 4px;
+    text-align: center;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .gept-selector {
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  
+  .gept-selector button {
+    min-height: var(--touch-target-min);
+    padding: 8px 16px;
+  }
+}
+
+/* ===== 遊戲切換下拉選單響應式 ===== */
+.game-switcher-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .game-switcher-dropdown button {
+    width: 100%;
+    min-height: var(--touch-target-min);
+    font-size: 0.875rem;
+    padding: 12px 16px;
+    justify-content: space-between;
+  }
+  
+  .game-switcher-dropdown .dropdown-menu {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-height: 60vh !important;
+    border-radius: 16px 16px 0 0 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
+    z-index: 9999 !important;
+    overflow-y: auto;
+  }
+  
+  .game-switcher-dropdown .dropdown-item {
+    padding: 16px !important;
+    border-bottom: 1px solid #f3f4f6;
+    min-height: var(--touch-target-min);
+  }
+  
+  .game-switcher-dropdown .dropdown-item:last-child {
+    border-bottom: none;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .game-switcher-dropdown .dropdown-menu {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+/* ===== 遊戲 iframe 容器響應式 ===== */
+.game-iframe-container {
+  position: relative;
+  width: 100%;
+  background: white;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 手機端：全寬度，固定高度比例 */
+@media (max-width: 640px) {
+  .game-iframe-container {
+    aspect-ratio: 16/9 !important;
+    min-height: 300px !important;
+    max-height: 400px !important;
+    margin: 16px 0;
+  }
+  
+  .game-iframe-container iframe {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+/* 平板端：適中尺寸 */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .game-iframe-container {
+    aspect-ratio: 1274/739 !important;
+    max-width: 800px !important;
+    min-height: 400px !important;
+    max-height: 500px !important;
+    margin: 20px auto;
+  }
+}
+
+/* 桌面端：原始尺寸 */
+@media (min-width: 1025px) {
+  .game-iframe-container {
+    aspect-ratio: 1274/739 !important;
+    max-width: 1274px !important;
+    min-height: 400px !important;
+    max-height: 739px !important;
+    margin: 24px auto;
+  }
+}
+
+/* ===== 載入狀態響應式 ===== */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+@media (max-width: 640px) {
+  .loading-overlay .loading-content {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .loading-overlay .spinner {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  
+  .loading-overlay .loading-text {
+    font-size: 0.875rem;
+    margin-top: 12px;
+  }
+}
+
+/* ===== 遊戲狀態顯示響應式 ===== */
+.game-status-panel {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 640px) {
+  .game-status-panel {
+    padding: 12px;
+  }
+  
+  .game-status-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  
+  .game-status-item {
+    text-align: center;
+    padding: 8px;
+  }
+  
+  .game-status-item .label {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+  
+  .game-status-item .value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .game-status-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+}
+
+/* ===== 統計面板響應式 ===== */
+.stats-grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  .stats-card {
+    padding: 16px !important;
+  }
+  
+  .stats-card h3 {
+    font-size: 1rem !important;
+    margin-bottom: 12px !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* ===== 無障礙和觸控優化 ===== */
+@media (max-width: 640px) {
+  /* 確保所有可點擊元素符合觸控標準 */
+  button, .clickable {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+  
+  /* 增加文字可讀性 */
+  .text-xs {
+    font-size: 0.75rem !important;
+  }
+  
+  .text-sm {
+    font-size: 0.875rem !important;
+  }
+  
+  /* 優化間距 */
+  .space-y-2 > * + * {
+    margin-top: 8px !important;
+  }
+  
+  .space-x-2 > * + * {
+    margin-left: 8px !important;
+  }
+}
+
+/* ===== 橫屏模式優化 ===== */
+@media (max-width: 640px) and (orientation: landscape) {
+  .game-iframe-container {
+    aspect-ratio: 16/9 !important;
+    min-height: 250px !important;
+    max-height: 300px !important;
+  }
+  
+  .page-header {
+    padding: 8px 16px !important;
+  }
+  
+  .stats-grid {
+    display: none; /* 橫屏時隱藏統計面板節省空間 */
+  }
+}
+
+/* ===== 高對比度模式支援 ===== */
+@media (prefers-contrast: high) {
+  .game-switcher-container {
+    border: 2px solid #000;
+  }
+  
+  button {
+    border: 2px solid #000 !important;
+  }
+  
+  .dropdown-menu {
+    border: 2px solid #000 !important;
+  }
+}
+
+/* ===== 減少動畫模式支援 ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

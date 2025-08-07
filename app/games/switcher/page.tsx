@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import GameSwitcher from '@/components/games/GameSwitcher';
+import '@/styles/responsive-game-switcher.css';
 
 // 遊戲統計類型
 interface GameStats {
@@ -120,47 +121,51 @@ const GameSwitcherPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 統一頁面標頭 - 整合飛機遊戲和記憶科學遊戲中心 */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
+      {/* 統一頁面標頭 - 響應式設計 */}
+      <div className="page-header bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between min-h-16 py-2">
             <div className="flex items-center justify-between w-full">
-              {/* 左側：主標題區域 */}
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">記憶科學遊戲中心</h1>
-                <p className="text-sm text-gray-600">25 種記憶科學遊戲，基於主動回憶和間隔重複原理</p>
+              {/* 左側：主標題區域 - 響應式 */}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">記憶科學遊戲中心</h1>
+                <p className="text-xs sm:text-sm text-gray-600 truncate">25 種記憶科學遊戲，基於主動回憶和間隔重複原理</p>
               </div>
 
-              {/* 右側：當前遊戲標籤 */}
-              <div className="flex items-center space-x-2 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
-                <span className="text-xl">⚡</span>
+              {/* 右側：當前遊戲標籤 - 響應式 */}
+              <div className="hidden md:flex items-center space-x-2 px-3 py-2 bg-blue-50 rounded-lg border border-blue-200 ml-4 flex-shrink-0">
+                <span className="text-lg">⚡</span>
                 <div>
-                  <div className="text-base font-medium text-blue-900">{getGameName(currentGameId)}</div>
+                  <div className="text-sm font-medium text-blue-900">{getGameName(currentGameId)}</div>
                   <div className="text-xs text-blue-600">載入: ~600ms | 已完成</div>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              {/* GEPT 等級快速顯示 */}
-              <div className="flex items-center space-x-2">
+            <div className="header-controls flex items-center space-x-2 ml-4 flex-shrink-0">
+              {/* GEPT 等級快速顯示 - 響應式 */}
+              <div className="hidden sm:flex items-center space-x-2">
                 <span className="text-xs text-gray-500">GEPT:</span>
                 <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">初級</span>
               </div>
 
               <button
                 onClick={() => setShowStats(!showStats)}
-                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                style={{ minHeight: '44px' }}
               >
-                {showStats ? '隱藏統計' : '顯示統計'}
+                <span className="hidden sm:inline">{showStats ? '隱藏統計' : '顯示統計'}</span>
+                <span className="sm:hidden">📊</span>
               </button>
 
-              {/* 出遊戲按鈕 */}
+              {/* 出遊戲按鈕 - 響應式 */}
               <button
                 onClick={() => window.open('http://localhost:3001/games/airplane-game/', '_blank')}
-                className="px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                style={{ minHeight: '44px' }}
               >
-                🚀 出遊戲
+                <span className="hidden sm:inline">🚀 出遊戲</span>
+                <span className="sm:hidden">🚀</span>
               </button>
             </div>
           </div>
@@ -180,25 +185,25 @@ const GameSwitcherPage: React.FC = () => {
           />
         </div>
 
-        {/* 統計和歷史 - 移到下方 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* 統計和歷史 - 響應式網格佈局 */}
+        <div className="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
           {/* 學習統計 */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">學習統計</h3>
-            <div className="space-y-4">
+          <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+            <h3 className="font-semibold text-gray-900 mb-3 md:mb-4">學習統計</h3>
+            <div className="space-y-3 md:space-y-4">
               <div>
                 <div className="text-sm text-gray-500">總遊戲次數</div>
-                <div className="text-2xl font-bold text-blue-600">{gameStats.totalGamesPlayed}</div>
+                <div className="text-xl md:text-2xl font-bold text-blue-600">{gameStats.totalGamesPlayed}</div>
               </div>
               <div>
                 <div className="text-sm text-gray-500">總學習時間</div>
-                <div className="text-lg font-semibold text-gray-900">
+                <div className="text-base md:text-lg font-semibold text-gray-900">
                   {formatTime(gameStats.totalTimeSpent)}
                 </div>
               </div>
               <div>
                 <div className="text-sm text-gray-500">平均分數</div>
-                <div className="text-lg font-semibold text-gray-900">
+                <div className="text-base md:text-lg font-semibold text-gray-900">
                   {Math.round(gameStats.averageScore)}
                 </div>
               </div>
@@ -206,8 +211,8 @@ const GameSwitcherPage: React.FC = () => {
           </div>
 
           {/* GEPT 進度 */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">GEPT 學習進度</h3>
+          <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+            <h3 className="font-semibold text-gray-900 mb-3 md:mb-4">GEPT 學習進度</h3>
             <div className="space-y-3">
               {Object.entries(gameStats.geptProgress).map(([level, progress]) => (
                 <div key={level}>
@@ -233,24 +238,24 @@ const GameSwitcherPage: React.FC = () => {
 
           {/* 遊戲歷史 */}
           {gameHistory.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">最近遊戲</h3>
+            <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 md:col-span-2 lg:col-span-1">
+              <h3 className="font-semibold text-gray-900 mb-3 md:mb-4">最近遊戲</h3>
               <div className="space-y-3">
                 {gameHistory.slice(-5).reverse().map((entry, index) => (
                   <div key={index} className="flex items-center justify-between text-sm">
-                    <div>
-                      <div className="font-medium text-gray-900">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 truncate">
                         {getGameName(entry.gameId)}
                       </div>
-                      <div className="text-gray-500">
+                      <div className="text-gray-500 text-xs">
                         {new Date(entry.timestamp).toLocaleTimeString()}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0 ml-2">
                       <div className="font-semibold text-blue-600">
                         {entry.state.score}分
                       </div>
-                      <div className="text-gray-500">
+                      <div className="text-gray-500 text-xs">
                         {entry.state.progress}%
                       </div>
                     </div>
