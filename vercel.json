@@ -5,7 +5,8 @@
   "build": {
     "env": {
       "NODE_ENV": "production",
-      "SKIP_ENV_VALIDATION": "true"
+      "SKIP_ENV_VALIDATION": "true",
+      "FORCE_REBUILD": "2025-08-07-16-13"
     }
   },
   "functions": {

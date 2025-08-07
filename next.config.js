@@ -46,6 +46,7 @@ const nextConfig = {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
+    FORCE_REBUILD: '2025-08-07-16-13',
   },
 
   // 構建配置
