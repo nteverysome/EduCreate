@@ -42,7 +42,14 @@
     "integration:reminder": "node scripts/integration-workflow-reminder.js",
     "wordwall:status": "node check-augment-status.js",
     "test:responsive": "node scripts/responsive-workflow/responsive-testing-workflow.js",
-    "test:responsive:integration": "node scripts/responsive-workflow/workflow-integration.js"
+    "test:responsive:integration": "node scripts/responsive-workflow/workflow-integration.js",
+    "workflow:master": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js",
+    "workflow:phase1": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js phase1",
+    "workflow:phase2": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js phase2",
+    "workflow:phase3": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js phase3",
+    "workflow:full": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js full-workflow",
+    "workflow:core": "node EduCreate-Test-Videos/scripts/automation/core-workflow-principles.js",
+    "workflow:responsive": "node EduCreate-Test-Videos/scripts/automation/responsive-testing-automation.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.28.2",
