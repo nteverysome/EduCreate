@@ -39,6 +39,82 @@
   gap: 1rem;
 }
 
+/* ===== 緊湊標頭設計 - 手機優化 ===== */
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f0f4ff;
+  font-size: 14px;
+  border-bottom: 1px solid #ccc;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-radius: 8px;
+}
+
+.game-header .left-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.game-header .right-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.game-header .status {
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.game-header .gept {
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.game-header .switch-button {
+  white-space: nowrap;
+  font-size: 12px;
+  min-height: 36px;
+}
+
+/* 手機優化 */
+@media (max-width: 768px) {
+  .game-header {
+    padding: 6px 10px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .game-header .left-info {
+    gap: 6px;
+  }
+
+  .game-header .right-controls {
+    gap: 6px;
+  }
+
+  .game-header .gept {
+    font-size: 11px;
+  }
+
+  .game-header .switch-button {
+    font-size: 11px;
+    padding: 6px 8px !important;
+    min-height: 32px !important;
+  }
+
+  .game-header strong {
+    font-size: 13px;
+  }
+}
+
 /* ===== 手機版 GEPT 彈出選單樣式 ===== */
 .mobile-gept-menu {
   position: fixed;

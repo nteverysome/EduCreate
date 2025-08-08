@@ -66,7 +66,18 @@ export default defineConfig({
     
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        // Firefox 專用優化設置
+        launchOptions: {
+          slowMo: 100, // 減慢操作速度
+          timeout: 60000, // 增加啟動超時
+        },
+        // 增加各種超時時間
+        navigationTimeout: 60000,
+        actionTimeout: 30000,
+      },
+      timeout: 60000, // 增加測試超時時間
     },
     
     {

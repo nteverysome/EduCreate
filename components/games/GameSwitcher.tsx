@@ -34,6 +34,7 @@ interface GameSwitcherProps {
   onGameStateUpdate?: (gameId: string, state: GameState) => void;
   className?: string;
   hideGeptSelector?: boolean;
+  currentGeptLevel?: string;
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -163,7 +164,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   onGameChange,
   onGameStateUpdate,
   className = '',
-  hideGeptSelector = false
+  hideGeptSelector = false,
+  currentGeptLevel: propGeptLevel = 'elementary'
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -173,6 +175,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const [gameStates, setGameStates] = useState<Record<string, GameState>>({});
   const [currentGeptLevel, setCurrentGeptLevel] = useState(geptLevel);
   const [mounted, setMounted] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   // Refs
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -182,6 +185,18 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   // 客戶端掛載狀態
   useEffect(() => {
     setMounted(true);
+
+    // 檢測螢幕尺寸
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+    };
   }, []);
 
   // 獲取遊戲配置（只在客戶端執行）
@@ -372,137 +387,174 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
   return (
     <div className={`game-switcher-container ${className} w-full`} data-testid="game-switcher">
-      {/* 簡化的遊戲控制器 - 響應式佈局 */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-1">
-        <div className="p-2 md:p-3">
-          <div className="flex flex-col space-y-3 md:space-y-2">
-            {/* 遊戲詳細信息 - 響應式佈局 */}
-            <div className="flex items-center space-x-2 md:space-x-4 w-full">
-              <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0">
-                <div className="text-xl md:text-2xl flex-shrink-0">{currentGame.icon}</div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">{currentGame.displayName}</h3>
-                  <div className="flex items-center space-x-1 md:space-x-2 flex-wrap">
-                    <p className="text-xs md:text-sm text-gray-600 truncate">{currentGame.memoryType}</p>
-                    <div className={`px-1 md:px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(currentGame.status)}`}>
-                      {getStatusText(currentGame.status)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 載入時間顯示 - 桌面版顯示 */}
-              <div className="hidden lg:block text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded flex-shrink-0">
-                載入: ~{currentGame.estimatedLoadTime}ms
-              </div>
+      {/* 緊湊標頭設計 - 手機優化，使用 JavaScript 控制顯示 */}
+      {isMobile && (
+        <div className="game-header bg-white rounded-lg shadow-sm border border-gray-200 mb-1" data-testid="game-header">
+          <div className="flex justify-between items-center p-2 flex-wrap gap-2">
+            {/* 左側資訊 */}
+            <div className="left-info flex items-center gap-2 flex-1 min-w-0">
+              <span className="text-lg flex-shrink-0">{currentGame.icon}</span>
+              <strong className="font-semibold text-gray-900 text-sm truncate">{currentGame.displayName}</strong>
+              <span className="status px-2 py-1 text-xs bg-green-100 text-green-800 rounded flex-shrink-0">✅ 已完成</span>
             </div>
 
-            {/* GEPT 等級選擇器 - 響應式設計 (條件渲染) */}
-            {!hideGeptSelector && (
-              <div className="gept-selector flex items-center space-x-2 w-full" data-testid="gept-selector">
-                <BookOpenIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                <span className="text-xs md:text-sm font-medium text-gray-700 flex-shrink-0">GEPT:</span>
-                <div className="gept-buttons flex space-x-1 flex-1">
-                  {['elementary', 'intermediate', 'advanced'].map((level) => (
-                    <button
-                      key={level}
-                      onClick={() => setCurrentGeptLevel(level as any)}
-                      className={`px-2 py-2 rounded-full text-xs font-medium transition-colors flex-1 sm:flex-none sm:px-3 ${
-                        currentGeptLevel === level
-                          ? 'bg-blue-100 text-blue-800 border border-blue-300'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300'
-                      }`}
-                      style={{ minHeight: '44px' }}
-                    >
-                      {level === 'elementary' ? '初級' : level === 'intermediate' ? '中級' : '高級'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 切換遊戲下拉選單 - 響應式設計 */}
-            <div className="game-switcher-dropdown relative w-full">
+            {/* 右側控制 */}
+            <div className="right-controls flex items-center gap-2 flex-shrink-0">
+              <span className="gept text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded">
+                GEPT：{propGeptLevel === 'elementary' ? '初級' : propGeptLevel === 'intermediate' ? '中級' : '高級'}
+              </span>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center justify-between space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full text-sm font-medium"
+                className="switch-button px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
                 disabled={isLoading}
-                style={{ minHeight: '44px' }}
+                style={{ minHeight: '36px' }}
               >
-                <div className="flex items-center space-x-2">
-                  <PlayIcon className="w-4 h-4" />
-                  <span>切換遊戲</span>
-                </div>
-                <ChevronDownIcon className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                切換遊戲
               </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-              {/* 下拉選單 - 響應式設計 */}
-              {isDropdownOpen && (
-                <>
-                  {/* 手機版遮罩 */}
-                  <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 sm:hidden"
-                    onClick={() => setIsDropdownOpen(false)}
-                  />
-
-                  <div className="dropdown-menu absolute right-0 left-0 sm:left-auto mt-2 w-full sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
-                    <div className="p-2">
-                      <div className="text-sm font-medium text-gray-700 px-3 py-2 border-b border-gray-100">
-                        可用遊戲 ({availableGames.length})
+      {/* 原始設計 - 桌面版，使用 JavaScript 控制顯示 */}
+      {!isMobile && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-1">
+          <div className="p-2 md:p-3">
+            <div className="flex flex-col space-y-3 md:space-y-2">
+              {/* 遊戲詳細信息 - 響應式佈局 */}
+              <div className="flex items-center space-x-2 md:space-x-4 w-full">
+                <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0">
+                  <div className="text-xl md:text-2xl flex-shrink-0">{currentGame.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">{currentGame.displayName}</h3>
+                    <div className="flex items-center space-x-1 md:space-x-2 flex-wrap">
+                      <p className="text-xs md:text-sm text-gray-600 truncate">{currentGame.memoryType}</p>
+                      <div className={`px-1 md:px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(currentGame.status)}`}>
+                        {getStatusText(currentGame.status)}
                       </div>
-                      {availableGames.map((game) => (
-                        <button
-                          key={game.id}
-                          onClick={() => switchGame(game.id)}
-                          className={`dropdown-item w-full text-left px-3 py-3 rounded-md hover:bg-gray-50 transition-colors ${
-                            game.id === currentGameId ? 'bg-blue-50 border-l-4 border-blue-500' : ''
-                          }`}
-                          style={{ minHeight: '44px' }}
-                        >
-                          <div className="flex items-center space-x-3">
-                            <span className="text-lg flex-shrink-0">{game.icon}</span>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-gray-900 truncate">{game.displayName}</div>
-                              <div className="text-xs text-gray-500 truncate">{game.description}</div>
-                              <div className="text-xs text-gray-400 mt-1">
-                                載入時間: ~{game.estimatedLoadTime}ms | {game.type}
-                              </div>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-
-                      {developmentGames.length > 0 && (
-                        <>
-                          <div className="text-sm font-medium text-gray-700 px-3 py-2 mt-4 border-t">開發中遊戲</div>
-                          {developmentGames.map((game) => (
-                            <div
-                              key={game.id}
-                              className="w-full text-left px-3 py-3 rounded-md opacity-60 cursor-not-allowed"
-                            >
-                              <div className="flex items-center space-x-3">
-                                <span className="text-lg flex-shrink-0">{game.icon}</span>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-medium text-gray-900 truncate">{game.displayName}</div>
-                                  <div className="text-xs text-gray-500 truncate">{game.description}</div>
-                                  <div className="text-xs text-yellow-600 mt-1">🚧 開發中...</div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </>
-                      )}
                     </div>
                   </div>
+                </div>
+
+                {/* 載入時間顯示 - 桌面版顯示 */}
+                <div className="hidden lg:block text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded flex-shrink-0">
+                  載入: ~{currentGame.estimatedLoadTime}ms
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GEPT 等級選擇器 - 響應式設計 (條件渲染) - 只在桌面版顯示 */}
+      {!hideGeptSelector && !isMobile && (
+        <div className="gept-selector flex items-center space-x-2 w-full bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-1" data-testid="gept-selector">
+          <BookOpenIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
+          <span className="text-xs md:text-sm font-medium text-gray-700 flex-shrink-0">GEPT:</span>
+          <div className="gept-buttons flex space-x-1 flex-1">
+            {['elementary', 'intermediate', 'advanced'].map((level) => (
+              <button
+                key={level}
+                onClick={() => setCurrentGeptLevel(level as any)}
+                className={`px-2 py-2 rounded-full text-xs font-medium transition-colors flex-1 sm:flex-none sm:px-3 ${
+                  currentGeptLevel === level
+                    ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300'
+                }`}
+                style={{ minHeight: '44px' }}
+              >
+                {level === 'elementary' ? '初級' : level === 'intermediate' ? '中級' : '高級'}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 切換遊戲下拉選單 - 響應式設計 - 只在桌面版顯示 */}
+      {!isMobile && (
+        <div className="game-switcher-dropdown relative w-full bg-white rounded-lg shadow-sm border border-gray-200 mb-1">
+          <div className="p-3">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center justify-between space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full text-sm font-medium"
+              disabled={isLoading}
+              style={{ minHeight: '44px' }}
+            >
+              <div className="flex items-center space-x-2">
+                <PlayIcon className="w-4 h-4" />
+                <span>切換遊戲</span>
+              </div>
+              <ChevronDownIcon className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 下拉選單 - 響應式設計 */}
+      {isDropdownOpen && (
+        <div className="dropdown-overlay fixed inset-0 z-40">
+          {/* 手機版遮罩 */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 sm:hidden"
+            onClick={() => setIsDropdownOpen(false)}
+          />
+
+          <div className="dropdown-menu absolute top-full left-0 right-0 sm:left-auto sm:right-0 mt-2 w-full sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
+            <div className="p-2">
+              <div className="text-sm font-medium text-gray-700 px-3 py-2 border-b border-gray-100">
+                可用遊戲 ({availableGames.length})
+              </div>
+              {availableGames.map((game) => (
+                <button
+                  key={game.id}
+                  onClick={() => switchGame(game.id)}
+                  className={`dropdown-item w-full text-left px-3 py-3 rounded-md hover:bg-gray-50 transition-colors ${
+                    game.id === currentGameId ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                  }`}
+                  style={{ minHeight: '44px' }}
+                >
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg flex-shrink-0">{game.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 truncate">{game.displayName}</div>
+                      <div className="text-xs text-gray-500 truncate">{game.description}</div>
+                      <div className="text-xs text-gray-400 mt-1">
+                        載入時間: ~{game.estimatedLoadTime}ms | {game.type}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+
+              {developmentGames.length > 0 && (
+                <>
+                  <div className="text-sm font-medium text-gray-700 px-3 py-2 mt-4 border-t">開發中遊戲</div>
+                  {developmentGames.map((game) => (
+                    <div
+                      key={game.id}
+                      className="w-full text-left px-3 py-3 rounded-md opacity-60 cursor-not-allowed"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className="text-lg flex-shrink-0">{game.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 truncate">{game.displayName}</div>
+                          <div className="text-xs text-gray-500 truncate">{game.description}</div>
+                          <div className="text-xs text-yellow-600 mt-1">🚧 開發中...</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </>
               )}
             </div>
           </div>
         </div>
+      )}
 
-        {/* 載入進度條 */}
-        {isLoading && (
-          <div className="px-4 pb-4">
+      {/* 載入進度條 - 在所有模式顯示 */}
+      {isLoading && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-1">
+          <div className="px-4 py-4">
             <div className="flex items-center space-x-3">
               <div className="flex-1 bg-gray-200 rounded-full h-2">
                 <div
@@ -514,8 +566,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
             </div>
             <div className="text-xs text-gray-500 mt-1">正在載入 {currentGame.displayName}...</div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* 遊戲 iframe 容器 - 響應式設計 */}
       <div

@@ -78,7 +78,7 @@ node EduCreate-Test-Videos/scripts/phaser3-learning-persistence.js reminder
 # 6. 整合到現有系統
 ```
 
-### Phase 2: 測試和驗證（含截圖比對）
+### Phase 2: 測試和驗證（含響應式視覺驗證）
 ```bash
 # 1. 初始化測試影片管理系統
 node EduCreate-Test-Videos/scripts/utils/initialize-system.js
@@ -98,29 +98,54 @@ browser_take_screenshot_Playwright --filename="after-fix-[issue-name].png"
 # 比較修復前後差異，確認問題真正解決
 # ⚠️ 重要：所有比對截圖都必須提供完整路徑
 
-# 6. 運行 Playwright 測試生成影片
+# 6. 📱 響應式佈局視覺驗證（新增 - 強制執行）
+# ⚠️ 重要：每次功能開發完成後必須執行響應式測試
+npm run test:responsive "[功能名稱]" "http://localhost:3000/[功能路徑]"
+
+# 6.1. 📊 響應式測試報告檢查
+# 自動生成的報告位置：reports/visual-comparisons/YYYYMMDD_功能名稱_responsive-report.html
+# ✅ 檢查 5 種設備配置：手機直向、手機橫向、平板直向、平板橫向、桌面版
+# ✅ 確認 100% 測試成功率
+# ✅ 查看視覺對比報告（支援全螢幕檢視）
+
+# 6.2. 📸 響應式截圖存檔檢查
+# 自動生成的截圖位置：reports/visual-comparisons/screenshots/
+# 檢查截圖命名格式：YYYYMMDD_功能名稱_設備類型_尺寸.png
+# ✅ 手機直向 (375x667)
+# ✅ 手機橫向 (812x375)
+# ✅ 平板直向 (768x1024)
+# ✅ 平板橫向 (1024x768)
+# ✅ 桌面版 (1440x900)
+
+# 6.3. 🔧 響應式問題修復（如有需要）
+# 如果響應式測試發現問題：
+# - 立即修復響應式佈局問題
+# - 重新運行響應式測試
+# - 確認所有設備配置都正常
+
+# 7. 運行 Playwright 測試生成影片
 npx playwright test [test-file] --headed
 
-# 6.1. 強制錯誤檢查（規則4）
+# 7.1. 強制錯誤檢查（規則4）
 # 立即掃描輸出中的錯誤關鍵詞：Error、Failed、timeout、did not find
 # 如發現錯誤，立即執行規則4：互動中有看到錯誤用工具修復
 
-# 7. ✅ 功能驗證測試
+# 8. ✅ 功能驗證測試
 # 測試相關功能確保正常運行
 
-# 7.1. 🎯 Phaser 3 專門驗證（如果涉及 Phaser 3）
+# 8.1. 🎯 Phaser 3 專門驗證（如果涉及 Phaser 3）
 # 如果是 Phaser 3 相關功能，運行完整驗證工作流程：
 node EduCreate-Test-Videos/scripts/phaser3-verified-workflow.js verify "問題類型" "解決方案" "代碼模板" "文件路徑"
 # ⚠️ 重要：只有通過技術驗證+測試驗證+用戶確認才記錄成功
 
-# 8. 處理測試影片（關鍵步驟！）
+# 9. 處理測試影片（關鍵步驟！）
 node EduCreate-Test-Videos/scripts/automation/process-test-videos.js --cleanup
 
-# 9. 生成完整報告
+# 10. 生成完整報告
 node EduCreate-Test-Videos/scripts/automation/generate-reports.js all
 ```
 
-### Phase 3: 記錄和反饋（含截圖比對報告）
+### Phase 3: 記錄和反饋（含響應式測試報告）
 ```bash
 # 1. 查看測試結果
 cat EduCreate-Test-Videos/reports/daily/daily-report-$(date +%Y-%m-%d).json
@@ -128,19 +153,28 @@ cat EduCreate-Test-Videos/reports/daily/daily-report-$(date +%Y-%m-%d).json
 # 2. 檢查 MCP 整合記錄
 cat EduCreate-Test-Videos/mcp-integration/langfuse-traces/2025-07/trace_*.json
 
-# 3. 📋 生成截圖比對報告（使用標準模板）
+# 3. 📱 查看響應式測試報告（新增 - 強制執行）
+# 打開響應式視覺對比報告：
+# reports/visual-comparisons/YYYYMMDD_功能名稱_responsive-report.html
+# ✅ 確認 5 種設備配置測試結果
+# ✅ 查看響應式設計智能性分析
+# ✅ 使用全螢幕檢視功能檢查詳細對比
+
+# 4. 📋 生成完整測試報告（使用標準模板）
 # 🔧 修復問題: [問題描述]
 # 📸 修復前截圖: [問題狀態]
 # 💻 代碼修改: [修改內容]
 # 📸 修復後截圖: [修復狀態]
 # 🔍 比對結果: [差異分析]
-# ✅ 驗證結果: [功能確認]
+# 📱 響應式測試: [5種設備配置測試結果]
+# 📊 響應式報告: [視覺對比報告路徑]
+# ✅ 驗證結果: [功能確認 + 響應式確認]
 
-# 4. 使用 mcp-feedback-collector 收集反饋（強制執行）
-# ⚠️ 重要：必須包含所有截圖的完整路徑
+# 5. 使用 mcp-feedback-collector 收集反饋（強制執行）
+# ⚠️ 重要：必須包含所有截圖的完整路徑和響應式報告路徑
 collect_feedback_mcp-feedback-collector
 
-# 5. 完成任務
+# 6. 完成任務
 update_tasks [{"task_id": "xxx", "state": "COMPLETE"}]
 ```
 
@@ -177,8 +211,11 @@ update_tasks [{"task_id": "xxx", "state": "COMPLETE"}]
 - [ ] 測試影片已正確存檔
 - [ ] 報告已生成
 - [ ] 反饋已收集
+- [ ] **響應式測試已完成**（新增 - 強制執行）
+- [ ] **5種設備截圖已生成**（手機直向、手機橫向、平板直向、平板橫向、桌面版）
+- [ ] **響應式視覺對比報告已生成**（reports/visual-comparisons/）
 
-### 📸 截圖比對檢查清單（新增）
+### 📸 截圖比對檢查清單（含響應式測試）
 - [ ] 修復前截圖已拍攝
 - [ ] 分析代碼修改要真實實現功能已完成
 - [ ] 修復後截圖已拍攝
@@ -186,6 +223,10 @@ update_tasks [{"task_id": "xxx", "state": "COMPLETE"}]
 - [ ] 視覺問題已確認真實解決
 - [ ] 功能不要簡化測試已通過
 - [ ] 比對報告已生成
+- [ ] **響應式測試已執行**（新增 - 強制執行）
+- [ ] **5種設備響應式截圖已生成**（375x667, 812x375, 768x1024, 1024x768, 1440x900）
+- [ ] **響應式視覺對比報告已查看**（支援全螢幕檢視）
+- [ ] **響應式問題已修復**（如有發現）
 - [ ] mcp-feedback-collector 已執行
 - [ ] **所有截圖完整路徑已提供給用戶**
 
@@ -322,6 +363,16 @@ cat EduCreate-Test-Videos/metadata/test-catalog.json
 
 ## 📈 工作流程改進記錄
 
+### 2025-08-08: 響應式測試工作流整合（重大改進）
+- ✅ **響應式測試工作流建立**: 自動化5種設備配置測試系統
+- ✅ **視覺對比報告生成**: 專業的響應式佈局視覺對比報告
+- ✅ **工作流強制整合**: 每次功能開發完成後必須執行響應式測試
+- ✅ **5種設備全覆蓋**: 手機直向、手機橫向、平板直向、平板橫向、桌面版
+- ✅ **自動化截圖收集**: 標準化命名和存檔系統
+- ✅ **全螢幕檢視功能**: 真正佔據95%螢幕空間的專業報告
+- ✅ **MCP工具深度整合**: 與現有8個MCP工具無縫協作
+- ✅ **package.json腳本整合**: npm run test:responsive 一鍵執行
+
 ### 2025-08-03: 核心工作原則建立（重大改進）
 - ✅ **建立核心工作原則**: 看到問題 → 深度分析根本原因 → 基於經驗思考 → 設計正確方案 → 實施修復
 - ✅ **禁止直接修復**: 必須先分析根本原因，不能直接跳到解決方案
@@ -341,6 +392,7 @@ cat EduCreate-Test-Videos/metadata/test-catalog.json
 - [ ] 💭 **多方案對比** - 不只考慮一種解決方案
 - [ ] 🎯 **根本性解決** - 從根源解決，不是表面修復
 - [ ] 📝 **記錄學習** - 將經驗記錄到學習記憶系統
+- [ ] 📱 **響應式測試驗證** - 每次功能開發完成後執行5種設備測試（新增）
 
 ### 下一步改進計劃
 - [ ] 自動化工作流程腳本
@@ -349,4 +401,4 @@ cat EduCreate-Test-Videos/metadata/test-catalog.json
 - [ ] 建立問題分析模板和檢查清單
 
 ---
-*最後更新: 2025-08-03 by Augment Agent - 添加核心工作原則*
+*最後更新: 2025-08-08 by Augment Agent - 整合響應式測試工作流*

@@ -316,19 +316,6 @@ const GameSwitcherPage: React.FC = () => {
 
       {/* 主要內容 - 手機優化佈局 */}
       <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-2">
-        {/* 手機版遊戲狀態資訊 */}
-        <div className="md:hidden mb-3 flex items-center justify-between bg-blue-50 rounded-lg px-3 py-2">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-blue-900">🎮 {getGameName(currentGameId)}</span>
-            <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">✅</span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-blue-700">
-            <span>GEPT:</span>
-            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">
-              {currentGeptLevel === 'elementary' ? '初級' : currentGeptLevel === 'intermediate' ? '中級' : '高級'}
-            </span>
-          </div>
-        </div>
 
         {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
         <div className="mb-1 sm:mb-2" data-testid="game-container">
@@ -339,6 +326,7 @@ const GameSwitcherPage: React.FC = () => {
             onGameStateUpdate={handleGameStateUpdate}
             className="w-full"
             hideGeptSelector={true}
+            currentGeptLevel={currentGeptLevel}
           />
         </div>
 

@@ -40,7 +40,9 @@
     "wordwall:trigger": "node wordwall-deep-trigger-analysis.js",
     "integration:check": "node scripts/integration-workflow-reminder.js",
     "integration:reminder": "node scripts/integration-workflow-reminder.js",
-    "wordwall:status": "node check-augment-status.js"
+    "wordwall:status": "node check-augment-status.js",
+    "test:responsive": "node scripts/responsive-workflow/responsive-testing-workflow.js",
+    "test:responsive:integration": "node scripts/responsive-workflow/workflow-integration.js"
   },
   "dependencies": {
     "@babel/runtime": "^7.28.2",

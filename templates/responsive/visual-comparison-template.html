@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{FEATURE_NAME}} - 響應式佈局對比報告</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background: #f5f5f5;
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+            width: 100vw;
+            overflow-x: hidden;
+        }
+        .fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .fullscreen-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #f5f5f5;
+            z-index: 999;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .fullscreen-mode .container {
+            max-width: none;
+            width: 100%;
+            height: auto;
+        }
+        .container {
+            max-width: 95vw;
+            width: 95vw;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            min-height: 95vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 3.5em;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 15px 0 0 0;
+            font-size: 1.4em;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 60px;
+        }
+        h2 {
+            font-size: 2.2em;
+            margin: 40px 0 30px 0;
+            color: #333;
+        }
+        h3 {
+            font-size: 1.8em;
+            margin: 30px 0 20px 0;
+            color: #444;
+        }
+        .full-comparison {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 30px;
+            margin: 40px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            border: 3px solid #dee2e6;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            width: calc(100% - 80px);
+        }
+        .layout-column {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .layout-column:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+        }
+        .layout-column h4 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+        .large-screenshot {
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .large-screenshot img {
+            width: 100%;
+            height: auto;
+            min-height: 400px;
+            max-height: 600px;
+            object-fit: contain;
+            background: #f8f9fa;
+        }
+        .layout-features {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .feature-badge {
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: white;
+            text-align: center;
+            background: linear-gradient(135deg, #4caf50, #45a049);
+        }
+        .layout-description {
+            text-align: left;
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: #555;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .test-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .test-result {
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .test-result.success {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+        }
+        .test-result.failed {
+            background: #ffeaea;
+            border-left: 4px solid #f44336;
+        }
+        .intelligence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .intelligence-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .breakpoint {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #4caf50;
+            margin-bottom: 10px;
+        }
+        .strategy {
+            font-size: 1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .description {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.5;
+        }
+        @media (max-width: 1600px) {
+            .full-comparison {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 25px;
+                padding: 30px;
+            }
+        }
+        @media (max-width: 1200px) {
+            .full-comparison {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+                padding: 20px;
+            }
+            .layout-column {
+                padding: 20px;
+            }
+        }
+        @media (max-width: 800px) {
+            .full-comparison {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 15px;
+            }
+            .layout-column {
+                padding: 15px;
+            }
+            .feature-badge {
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">🔍 全螢幕檢視</button>
+    <div class="container" id="main-container">
+        <div class="header">
+            <h1>🎉 {{FEATURE_NAME}}</h1>
+            <p>響應式佈局對比報告 - {{TIMESTAMP}}</p>
+            <p>測試URL: {{TEST_URL}}</p>
+        </div>
+        <div class="content">
+            <h2>📱 響應式佈局完整對比</h2>
+            <h3>📱 手機直向 vs 📱 手機橫向 vs 📱 平板直向 vs 📱 平板橫向 vs 🖥️ 桌面版</h3>
+            <div class="full-comparison">
+                {{DEVICE_COMPARISONS}}
+            </div>
+            
+            <h2>🧠 響應式設計的智能性</h2>
+            {{RESPONSIVE_ANALYSIS}}
+            
+            {{TEST_RESULTS}}
+            
+            <h2>🔍 如何查看效果</h2>
+            <div class="instructions">
+                <div class="intelligence-item">
+                    <div class="strategy">🔍 全螢幕檢視</div>
+                    <div class="description">點擊右上角的 "🔍 全螢幕檢視" 按鈕，或按 F11 鍵進入全螢幕模式，獲得最佳查看體驗</div>
+                </div>
+                <div class="intelligence-item">
+                    <div class="strategy">⌨️ 鍵盤快捷鍵</div>
+                    <div class="description">F11：進入全螢幕模式 | Escape：退出全螢幕模式 | 支援鍵盤操作</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isFullscreen = false;
+        
+        function toggleFullscreen() {
+            const container = document.getElementById('main-container');
+            const button = document.querySelector('.fullscreen-btn');
+            
+            if (!isFullscreen) {
+                container.classList.add('fullscreen-mode');
+                button.textContent = '❌ 退出全螢幕';
+                button.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
+                isFullscreen = true;
+                container.scrollTop = 0;
+            } else {
+                container.classList.remove('fullscreen-mode');
+                button.textContent = '🔍 全螢幕檢視';
+                button.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                isFullscreen = false;
+                window.scrollTo(0, 0);
+            }
+        }
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F11' || event.key === 'Escape') {
+                event.preventDefault();
+                if (event.key === 'F11' && !isFullscreen) {
+                    toggleFullscreen();
+                } else if (event.key === 'Escape' && isFullscreen) {
+                    toggleFullscreen();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
