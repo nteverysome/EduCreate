@@ -12,6 +12,7 @@
 #### 🔍 第一階段：深度分析根本原因
 - **先問為什麼**: 為什麼會出現這個問題？
 - **查閱學習記憶**: 過去是否遇到類似問題？
+- **Sentry MCP 錯誤分析**: 使用 AI 驅動的根本原因分析和歷史錯誤模式查詢
 - **事件時序分析**: 記錄問題發生的完整時序
 - **狀態對比分析**: 問題狀態 vs 正常狀態的具體差異
 - **避免直接跳到解決方案**: 必須先理解問題本質
@@ -74,6 +75,12 @@ node EduCreate-Test-Videos/scripts/phaser3-learning-persistence.js reminder
 # ⚠️ 重要：這會顯示關鍵錯誤預防提醒和最近學習記錄
 
 # 4. 使用 codebase-retrieval 分析現有代碼
+
+# 4.1. Sentry MCP 錯誤預防檢查（如果是修復任務）
+npm run sentry:analyze "問題描述"
+# → 獲取 AI 修復建議和類似問題解決方案
+# → 查找歷史錯誤模式和成功修復案例
+
 # 5. 創建新組件和功能
 # 6. 整合到現有系統
 ```
@@ -154,6 +161,12 @@ cat EduCreate-Test-Videos/reports/daily/daily-report-$(date +%Y-%m-%d).json
 
 # 2. 檢查 MCP 整合記錄
 cat EduCreate-Test-Videos/mcp-integration/langfuse-traces/2025-07/trace_*.json
+
+# 2.1. 生成 Sentry MCP 錯誤分析報告
+npm run sentry:report
+# → 查看錯誤統計和改進建議
+# → 分析錯誤趨勢和模式
+# → 獲取 AI 驅動的系統健康建議
 
 # 3. 📱 查看響應式測試報告（新增 - 強制執行）
 # 打開響應式視覺對比報告：
@@ -394,6 +407,7 @@ cat EduCreate-Test-Videos/metadata/test-catalog.json
 ### 核心原則實施檢查清單
 - [ ] 🔍 **深度分析根本原因** - 每個問題都要分析為什麼會發生
 - [ ] 🧠 **查閱學習記憶** - 主動使用 Phaser 3 學習記憶系統等
+- [ ] 🚨 **Sentry MCP 錯誤分析** - 使用 AI 驅動的根本原因分析和歷史錯誤模式查詢
 - [ ] 💭 **多方案對比** - 不只考慮一種解決方案
 - [ ] 🎯 **根本性解決** - 從根源解決，不是表面修復
 - [ ] 📝 **記錄學習** - 將經驗記錄到學習記憶系統
@@ -406,4 +420,4 @@ cat EduCreate-Test-Videos/metadata/test-catalog.json
 - [ ] 建立問題分析模板和檢查清單
 
 ---
-*最後更新: 2025-08-08 by Augment Agent - 整合響應式測試工作流*
+*最後更新: 2025-08-09 by Augment Agent - 完整整合 Sentry MCP 雙層錯誤監控系統*

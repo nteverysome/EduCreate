@@ -79,6 +79,15 @@ npm run sentry:monitor                   # 啟動實時錯誤監控
 npm run sentry:report                    # 生成錯誤統計報告
 ```
 
+### **MCP 工具生態系統**
+```bash
+# 9個 MCP 工具自動協調
+npm run workflow:master mcp-integration  # 自動協調所有 MCP 工具
+
+# 個別 MCP 工具檢查
+npm run sentry:health                    # Sentry MCP 健康檢查
+```
+
 ### **演示和學習**
 ```bash
 node EduCreate-Test-Videos/scripts/automation/demo-workflow.js full
@@ -123,12 +132,16 @@ node EduCreate-Test-Videos/scripts/automation/demo-workflow.js full
 - 🎯 完整工作流程（第42-405行）
 - 🚨 強制執行規則
 - 📋 Phase 1-3 詳細步驟
+- 🔧 9個 MCP 工具整合（第185-208行）
+- 🚨 Sentry MCP 雙層錯誤監控系統
 
 ### **automation/README.md 核心內容**
 - 🚀 快速開始命令
 - 🏗️ 系統架構說明
 - 🔧 配置和自定義
 - 🔍 故障排除指南
+- 🔧 9個 MCP 工具深度整合
+- 🚨 Sentry MCP 專門命令和配置
 
 ## 💡 **最佳實踐建議**
 
@@ -154,3 +167,6 @@ node EduCreate-Test-Videos/scripts/automation/demo-workflow.js full
 - **兩者結合** = 🚀 **高效開發** (既理解原理又會使用工具)
 
 **記住**：自動化工具是基於核心原則設計的，理解原則讓您更好地使用工具！
+
+---
+*最後更新: 2025-08-09 by Augment Agent - 完整整合 Sentry MCP 雙層錯誤監控系統*
