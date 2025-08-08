@@ -1,3 +1,6 @@
+// Import Sentry for Next.js integration
+const { withSentryConfig } = require('@sentry/nextjs');
+
 /** @type {import('next-pwa').PWAConfig} */
 const withPWA = require('next-pwa')({
   dest: 'public',
@@ -96,4 +99,23 @@ const nextConfig = {
   },
 }
 
-module.exports = withPWA(nextConfig)
+// Sentry configuration options
+const sentryWebpackPluginOptions = {
+  // Additional config options for the Sentry Webpack plugin. Keep in mind that
+  // the following options are set automatically, and overriding them is not
+  // recommended:
+  //   release, url, org, project, authToken, configFile, stripPrefix,
+  //   urlPrefix, include, ignore
+
+  org: "educreate",
+  project: "javascript-nextjs",
+
+  // Only print logs for uploading source maps in CI
+  silent: !process.env.CI,
+
+  // For all available options, see:
+  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+};
+
+// Make sure adding Sentry options is the last code to run before exporting
+module.exports = withSentryConfig(withPWA(nextConfig), sentryWebpackPluginOptions);

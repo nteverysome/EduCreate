@@ -68,6 +68,15 @@ npm run workflow:phase3                  # 記錄反饋
 ```bash
 npm run workflow:core "問題描述"         # 核心工作原則分析
 npm run workflow:responsive "功能" "URL" # 響應式測試
+npm run workflow:sentry "錯誤分析"       # Sentry 錯誤分析和 AI 修復建議
+```
+
+### **Sentry MCP 錯誤監控**
+```bash
+npm run sentry:health                    # 檢查 Sentry MCP 連接狀態
+npm run sentry:analyze "錯誤描述"        # AI 錯誤分析和修復建議
+npm run sentry:monitor                   # 啟動實時錯誤監控
+npm run sentry:report                    # 生成錯誤統計報告
 ```
 
 ### **演示和學習**

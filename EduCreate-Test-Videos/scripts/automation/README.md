@@ -9,10 +9,10 @@ EduCreate 自動化開發助手系統是基於 MongoDB MCP 成功整合經驗，
 
 ### 核心特色
 - 🧠 **核心工作原則自動執行**：看到問題 → 深度分析根本原因 → 基於經驗思考 → 設計正確方案 → 實施修復
-- 🔧 **8個 MCP 工具深度整合**：自動化協調使用所有 MCP 工具
+- 🔧 **9個 MCP 工具深度整合**：自動化協調使用所有 MCP 工具（新增 Sentry MCP）
 - 📱 **響應式測試自動化**：5種設備配置的完整測試流程
 - 🎮 **Phaser 3 專門檢測**：自動檢測和提醒系統
-- 🚨 **錯誤自動檢測修復**：實時錯誤檢測和自動修復
+- 🚨 **雙層錯誤監控系統**：本地檢測 + Sentry 雲端監控 + AI 修復建議
 - 📊 **完整報告生成**：自動生成測試報告和分析
 
 ## 🏗️ 系統架構
@@ -123,18 +123,24 @@ npm run workflow:responsive "遊戲切換器" "http://localhost:3000/games/switc
 node EduCreate-Test-Videos/scripts/phaser3-learning-persistence.js reminder
 ```
 
-### 🚨 錯誤自動檢測修復
+### 🚨 雙層錯誤監控系統
 
 當檢測到以下錯誤關鍵詞時自動觸發：
 - `Error`, `Failed`, `timeout`, `did not find`
 - `ECONNREFUSED`, `404`, `500`, `ENOENT`
 - `SyntaxError`, `TypeError`, `ReferenceError`
 
-**自動修復工具**：
+**第一層：本地自動修復工具**：
 - `diagnostics` - 檢查語法錯誤
 - `codebase-retrieval` - 理解代碼結構
 - `view` - 查看具體文件內容
 - `str-replace-editor` - 自動修復代碼
+
+**第二層：Sentry MCP 雲端分析**：
+- `analyze_issue_with_seer` - AI 根本原因分析
+- `search_issues` - 查找類似問題和解決方案
+- `get_issue_details` - 獲取詳細錯誤上下文
+- `update_issue` - 自動更新問題狀態
 
 ## 🔧 配置說明
 
@@ -151,6 +157,7 @@ node EduCreate-Test-Videos/scripts/phaser3-learning-persistence.js reminder
   "mcpTools": {
     "sequentialThinking": { "enabled": true, "priority": 1 },
     "localMemory": { "enabled": true, "priority": 2 },
+    "sentry": { "enabled": true, "priority": 3, "autoAnalysis": true, "aiFixSuggestions": true },
     "mongodb": { "enabled": true, "priority": 9 }
   },
   "responsiveTesting": {

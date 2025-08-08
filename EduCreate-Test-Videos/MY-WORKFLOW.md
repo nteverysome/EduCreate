@@ -126,9 +126,11 @@ npm run test:responsive "[功能名稱]" "http://localhost:3000/[功能路徑]"
 # 7. 運行 Playwright 測試生成影片
 npx playwright test [test-file] --headed
 
-# 7.1. 強制錯誤檢查（規則4）
+# 7.1. 強制錯誤檢查（規則4 + Sentry MCP 雙層監控）
 # 立即掃描輸出中的錯誤關鍵詞：Error、Failed、timeout、did not find
-# 如發現錯誤，立即執行規則4：互動中有看到錯誤用工具修復
+# 如發現錯誤，立即執行雙層錯誤處理：
+# - 規則4：本地工具修復（diagnostics、codebase-retrieval、view）
+# - Sentry MCP：雲端錯誤分析、AI 修復建議、根本原因分析
 
 # 8. ✅ 功能驗證測試
 # 測試相關功能確保正常運行
@@ -180,7 +182,7 @@ update_tasks [{"task_id": "xxx", "state": "COMPLETE"}]
 
 ## 🧠 MCP 工具使用流程
 
-### 自動使用的 8 個 MCP 工具
+### 自動使用的 9 個 MCP 工具
 1. **Sequential Thinking MCP** - 邏輯推理過程記錄
 2. **本地記憶系統** - 測試記憶管理
 3. **SQLite MCP** - 數據庫操作
@@ -189,7 +191,8 @@ update_tasks [{"task_id": "xxx", "state": "COMPLETE"}]
 6. **MCP Feedback Collector** - 反饋收集
 7. **AutoGen Microsoft MCP** - 多代理協作
 8. **Langfuse MCP** - 測試追蹤和分析
-9. **filesystem-mcp** - 文件操作
+9. **Sentry MCP** - 企業級錯誤監控和 AI 修復建議
+10. **filesystem-mcp** - 文件操作
 
 ### 🎯 Phaser 3 自動檢測機制（新增）
 **觸發條件**：任務描述或對話中包含以下關鍵詞時自動執行
@@ -211,6 +214,8 @@ update_tasks [{"task_id": "xxx", "state": "COMPLETE"}]
 - [ ] 測試影片已正確存檔
 - [ ] 報告已生成
 - [ ] 反饋已收集
+- [ ] **Sentry MCP 錯誤監控已啟用**（新增 - 企業級監控）
+- [ ] **AI 錯誤分析已完成**（根本原因分析和修復建議）
 - [ ] **響應式測試已完成**（新增 - 強制執行）
 - [ ] **5種設備截圖已生成**（手機直向、手機橫向、平板直向、平板橫向、桌面版）
 - [ ] **響應式視覺對比報告已生成**（reports/visual-comparisons/）
