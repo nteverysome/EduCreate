@@ -29,6 +29,7 @@ const GameSwitcherPage: React.FC = () => {
   const [currentGameId, setCurrentGameId] = useState<string>('airplane-vite');
   const [showStats, setShowStats] = useState<boolean>(false);
   const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
+  const [showMobileGeptMenu, setShowMobileGeptMenu] = useState<boolean>(false);
   
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -123,6 +124,52 @@ const GameSwitcherPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 手機版 GEPT 選擇器彈出選單 */}
+      {showMobileGeptMenu && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden" onClick={() => setShowMobileGeptMenu(false)}>
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-lg p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">選擇 GEPT 等級</h3>
+              <button
+                onClick={() => setShowMobileGeptMenu(false)}
+                className="p-2 text-gray-400 hover:text-gray-600"
+                style={{ minHeight: '44px', minWidth: '44px' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 手機版 GEPT 選擇器 - 保持測試兼容性 */}
+            <div className="gept-selector" data-testid="gept-selector">
+              <div className="flex items-center space-x-2 mb-4">
+                <BookOpenIcon className="w-5 h-5 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">GEPT 等級：</span>
+              </div>
+
+              <div className="gept-buttons space-y-3">
+                {['elementary', 'intermediate', 'advanced'].map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => {
+                      setCurrentGeptLevel(level);
+                      setShowMobileGeptMenu(false);
+                    }}
+                    className={`w-full px-4 py-3 rounded-lg text-sm font-medium transition-colors border ${
+                      currentGeptLevel === level
+                        ? 'bg-blue-100 text-blue-800 border-blue-300'
+                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-300'
+                    }`}
+                    style={{ minHeight: '44px' }}
+                  >
+                    {level === 'elementary' ? '初級 (Elementary)' : level === 'intermediate' ? '中級 (Intermediate)' : '高級 (Advanced)'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 緊湊合併標頭 - 單行整合設計 */}
       <div className="unified-game-header bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
@@ -136,8 +183,8 @@ const GameSwitcherPage: React.FC = () => {
                 <p className="text-xs text-gray-600 hidden sm:block">25 種記憶科學遊戲</p>
               </div>
 
-              {/* GEPT 選擇器 */}
-              <div className="gept-selector flex items-center gap-2 flex-1 max-w-xs" data-testid="gept-selector">
+              {/* 桌面版 GEPT 選擇器 */}
+              <div className="gept-selector hidden md:flex items-center gap-2 flex-1 max-w-xs" data-testid="gept-selector">
                 <BookOpenIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
                 <span className="text-xs font-medium text-gray-700 flex-shrink-0">GEPT:</span>
                 <div className="gept-buttons flex gap-1 flex-1">
@@ -157,6 +204,14 @@ const GameSwitcherPage: React.FC = () => {
                   ))}
                 </div>
               </div>
+
+              {/* 手機版當前 GEPT 等級顯示 */}
+              <div className="md:hidden flex items-center gap-2">
+                <span className="text-xs text-gray-600">GEPT:</span>
+                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                  {currentGeptLevel === 'elementary' ? '初級' : currentGeptLevel === 'intermediate' ? '中級' : '高級'}
+                </span>
+              </div>
             </div>
 
             {/* 右側：遊戲狀態 + 控制按鈕 */}
@@ -168,6 +223,16 @@ const GameSwitcherPage: React.FC = () => {
               </div>
 
               {/* 控制按鈕組 */}
+              {/* 手機版更多選項按鈕 */}
+              <button
+                onClick={() => setShowMobileGeptMenu(true)}
+                className="md:hidden px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                style={{ minHeight: '44px', minWidth: '44px' }}
+                title="更多選項"
+              >
+                ⚙️
+              </button>
+
               <button
                 onClick={() => setShowStats(!showStats)}
                 className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"

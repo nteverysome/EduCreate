@@ -39,6 +39,25 @@
   gap: 1rem;
 }
 
+/* ===== 手機版 GEPT 彈出選單樣式 ===== */
+.mobile-gept-menu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.mobile-gept-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
 /* 手機優先設計 - 優化間距 */
 @media (max-width: 640px) {
   .game-switcher-container {
@@ -66,10 +85,25 @@
     z-index: 10 !important; /* 確保按鈕在最上層 */
   }
 
-  /* 防止元素重疊 */
+  /* 手機版 GEPT 選擇器隱藏，防止重疊 */
   .unified-game-header .gept-selector {
-    max-width: 240px !important;
-    overflow: visible !important;
+    display: none !important; /* 手機模式下完全隱藏 */
+  }
+
+  /* 手機版更多選項按鈕樣式 */
+  .unified-game-header button[title="更多選項"] {
+    background: #f9fafb !important;
+    border: 1px solid #d1d5db !important;
+    color: #374151 !important;
+    font-size: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .unified-game-header button[title="更多選項"]:hover {
+    background: #f3f4f6 !important;
+    border-color: #9ca3af !important;
   }
 
   /* 主要內容區域 - 減少上邊距 */
