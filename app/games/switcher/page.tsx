@@ -30,6 +30,7 @@ const GameSwitcherPage: React.FC = () => {
   const [showStats, setShowStats] = useState<boolean>(false);
   const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
   const [showMobileGeptMenu, setShowMobileGeptMenu] = useState<boolean>(false);
+  const [hasUserScrolled, setHasUserScrolled] = useState<boolean>(false);
   
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -92,6 +93,45 @@ const GameSwitcherPage: React.FC = () => {
       return updated;
     });
   }, []);
+
+  // 智能自動滾動到遊戲區域（僅手機模式且用戶未手動滾動時）
+  useEffect(() => {
+    const handleScroll = () => {
+      setHasUserScrolled(true);
+    };
+
+    const autoScrollToGame = () => {
+      // 檢查是否為手機模式
+      const isMobile = window.innerWidth <= 768;
+
+      // 檢查用戶是否偏好減少動畫
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (isMobile && !hasUserScrolled && !prefersReducedMotion) {
+        const gameContainer = document.querySelector('[data-testid="game-container"]');
+        if (gameContainer) {
+          // 延遲執行，確保頁面完全載入
+          setTimeout(() => {
+            gameContainer.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+              inline: 'nearest'
+            });
+          }, 1000);
+        }
+      }
+    };
+
+    // 監聽滾動事件
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // 執行自動滾動
+    autoScrollToGame();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [hasUserScrolled]);
 
   // 格式化時間
   const formatTime = (milliseconds: number): string => {
@@ -170,21 +210,58 @@ const GameSwitcherPage: React.FC = () => {
         </div>
       )}
 
-      {/* 緊湊合併標頭 - 單行整合設計 */}
+      {/* 緊湊合併標頭 - 手機優化佈局 */}
       <div className="unified-game-header bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-          {/* 單行整合佈局 - 修復重疊問題 */}
-          <div className="flex items-center justify-between gap-4 min-h-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1 md:py-2">
+          {/* 手機模式：極簡單行佈局 */}
+          <div className="md:hidden flex items-center justify-between gap-2 min-h-12">
+            {/* 左側：緊湊標題 */}
+            <div className="flex-shrink-0">
+              <h1 className="text-sm font-bold text-gray-900">記憶科學遊戲</h1>
+            </div>
+
+            {/* 右側：控制按鈕組 */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {/* 手機版更多選項按鈕 */}
+              <button
+                onClick={() => setShowMobileGeptMenu(true)}
+                className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                style={{ minHeight: '44px', minWidth: '44px' }}
+                title="更多選項"
+              >
+                ⚙️
+              </button>
+
+              <button
+                onClick={() => setShowStats(!showStats)}
+                className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                style={{ minHeight: '44px' }}
+              >
+                📊
+              </button>
+
+              <button
+                onClick={() => window.open('http://localhost:3001/games/airplane-game/', '_blank')}
+                className="px-2 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+                style={{ minHeight: '44px' }}
+              >
+                🚀
+              </button>
+            </div>
+          </div>
+
+          {/* 桌面模式：完整佈局 */}
+          <div className="hidden md:flex items-center justify-between gap-4 min-h-16">
             {/* 左側：標題 + GEPT 選擇器 */}
             <div className="flex items-center gap-4 flex-1 min-w-0 overflow-hidden">
               {/* 標題區域 */}
               <div className="flex-shrink-0">
-                <h1 className="text-base sm:text-lg font-bold text-gray-900">記憶科學遊戲中心</h1>
-                <p className="text-xs text-gray-600 hidden sm:block">25 種記憶科學遊戲</p>
+                <h1 className="text-base lg:text-lg font-bold text-gray-900">記憶科學遊戲中心</h1>
+                <p className="text-xs text-gray-600">25 種記憶科學遊戲</p>
               </div>
 
               {/* 桌面版 GEPT 選擇器 */}
-              <div className="gept-selector hidden md:flex items-center gap-2 flex-1 max-w-xs" data-testid="gept-selector">
+              <div className="gept-selector flex items-center gap-2 flex-1 max-w-xs" data-testid="gept-selector">
                 <BookOpenIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
                 <span className="text-xs font-medium text-gray-700 flex-shrink-0">GEPT:</span>
                 <div className="gept-buttons flex gap-1 flex-1">
@@ -204,42 +281,24 @@ const GameSwitcherPage: React.FC = () => {
                   ))}
                 </div>
               </div>
-
-              {/* 手機版當前 GEPT 等級顯示 */}
-              <div className="md:hidden flex items-center gap-2">
-                <span className="text-xs text-gray-600">GEPT:</span>
-                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                  {currentGeptLevel === 'elementary' ? '初級' : currentGeptLevel === 'intermediate' ? '中級' : '高級'}
-                </span>
-              </div>
             </div>
 
             {/* 右側：遊戲狀態 + 控制按鈕 */}
             <div className="flex items-center gap-2 flex-shrink-0">
               {/* 當前遊戲狀態 */}
-              <div className="hidden md:flex items-center space-x-1">
+              <div className="flex items-center space-x-1">
                 <span className="text-sm font-medium text-blue-900">🎮 {getGameName(currentGameId)}</span>
                 <span className="px-1 py-0.5 text-xs bg-green-100 text-green-800 rounded">✅</span>
               </div>
 
               {/* 控制按鈕組 */}
-              {/* 手機版更多選項按鈕 */}
-              <button
-                onClick={() => setShowMobileGeptMenu(true)}
-                className="md:hidden px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                style={{ minHeight: '44px', minWidth: '44px' }}
-                title="更多選項"
-              >
-                ⚙️
-              </button>
-
               <button
                 onClick={() => setShowStats(!showStats)}
                 className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
                 style={{ minHeight: '44px' }}
               >
-                <span className="hidden sm:inline">{showStats ? '隱藏統計' : '顯示統計'}</span>
-                <span className="sm:hidden">📊</span>
+                <span className="hidden lg:inline">{showStats ? '隱藏統計' : '顯示統計'}</span>
+                <span className="lg:hidden">📊</span>
               </button>
 
               <button
@@ -247,8 +306,8 @@ const GameSwitcherPage: React.FC = () => {
                 className="px-2 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
                 style={{ minHeight: '44px' }}
               >
-                <span className="hidden sm:inline">🚀 出遊戲</span>
-                <span className="sm:hidden">🚀</span>
+                <span className="hidden lg:inline">🚀 出遊戲</span>
+                <span className="lg:hidden">🚀</span>
               </button>
             </div>
           </div>
@@ -257,8 +316,22 @@ const GameSwitcherPage: React.FC = () => {
 
       {/* 主要內容 - 手機優化佈局 */}
       <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-2">
+        {/* 手機版遊戲狀態資訊 */}
+        <div className="md:hidden mb-3 flex items-center justify-between bg-blue-50 rounded-lg px-3 py-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-blue-900">🎮 {getGameName(currentGameId)}</span>
+            <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">✅</span>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-blue-700">
+            <span>GEPT:</span>
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">
+              {currentGeptLevel === 'elementary' ? '初級' : currentGeptLevel === 'intermediate' ? '中級' : '高級'}
+            </span>
+          </div>
+        </div>
+
         {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
-        <div className="mb-1 sm:mb-2">
+        <div className="mb-1 sm:mb-2" data-testid="game-container">
           <GameSwitcher
             defaultGame="airplane-vite"
             geptLevel={currentGeptLevel}

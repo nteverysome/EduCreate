@@ -64,9 +64,13 @@
     padding: var(--mobile-padding);
   }
 
-  /* 緊湊合併標頭手機模式 */
+  /* 手機版極簡標頭 */
   .unified-game-header {
-    padding: 8px 16px !important; /* 減少垂直內邊距 */
+    padding: 4px 16px !important; /* 極度減少垂直內邊距 */
+  }
+
+  .unified-game-header .min-h-12 {
+    min-height: 48px !important; /* 手機模式最小高度 */
   }
 
   .unified-game-header .min-h-16 {
