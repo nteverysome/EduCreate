@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import GameSwitcher from '@/components/games/GameSwitcher';
+import { BookOpenIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
 
 // 遊戲統計類型
@@ -27,6 +28,7 @@ interface GameState {
 const GameSwitcherPage: React.FC = () => {
   const [currentGameId, setCurrentGameId] = useState<string>('airplane-vite');
   const [showStats, setShowStats] = useState<boolean>(false);
+  const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
   
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -121,47 +123,63 @@ const GameSwitcherPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 統一頁面標頭 - 響應式設計 */}
-      <div className="page-header bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between min-h-16 py-2">
-            <div className="flex items-center justify-between w-full">
-              {/* 左側：主標題區域 - 響應式 */}
-              <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">記憶科學遊戲中心</h1>
-                <p className="text-xs sm:text-sm text-gray-600 truncate">25 種記憶科學遊戲，基於主動回憶和間隔重複原理</p>
+      {/* 緊湊合併標頭 - 單行整合設計 */}
+      <div className="unified-game-header bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          {/* 單行整合佈局 - 修復重疊問題 */}
+          <div className="flex items-center justify-between gap-4 min-h-16">
+            {/* 左側：標題 + GEPT 選擇器 */}
+            <div className="flex items-center gap-4 flex-1 min-w-0 overflow-hidden">
+              {/* 標題區域 */}
+              <div className="flex-shrink-0">
+                <h1 className="text-base sm:text-lg font-bold text-gray-900">記憶科學遊戲中心</h1>
+                <p className="text-xs text-gray-600 hidden sm:block">25 種記憶科學遊戲</p>
               </div>
 
-              {/* 右側：當前遊戲標籤 - 響應式 */}
-              <div className="hidden md:flex items-center space-x-2 px-3 py-2 bg-blue-50 rounded-lg border border-blue-200 ml-4 flex-shrink-0">
-                <span className="text-lg">⚡</span>
-                <div>
-                  <div className="text-sm font-medium text-blue-900">{getGameName(currentGameId)}</div>
-                  <div className="text-xs text-blue-600">載入: ~600ms | 已完成</div>
+              {/* GEPT 選擇器 */}
+              <div className="gept-selector flex items-center gap-2 flex-1 max-w-xs" data-testid="gept-selector">
+                <BookOpenIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <span className="text-xs font-medium text-gray-700 flex-shrink-0">GEPT:</span>
+                <div className="gept-buttons flex gap-1 flex-1">
+                  {['elementary', 'intermediate', 'advanced'].map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => setCurrentGeptLevel(level)}
+                      className={`px-2 py-2 rounded text-xs font-medium transition-colors flex-1 ${
+                        currentGeptLevel === level
+                          ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300'
+                      }`}
+                      style={{ minHeight: '44px', minWidth: '44px' }}
+                    >
+                      {level === 'elementary' ? '初級' : level === 'intermediate' ? '中級' : '高級'}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
 
-            <div className="header-controls flex items-center space-x-2 ml-4 flex-shrink-0">
-              {/* GEPT 等級快速顯示 - 響應式 */}
-              <div className="hidden sm:flex items-center space-x-2">
-                <span className="text-xs text-gray-500">GEPT:</span>
-                <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">初級</span>
+            {/* 右側：遊戲狀態 + 控制按鈕 */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {/* 當前遊戲狀態 */}
+              <div className="hidden md:flex items-center space-x-1">
+                <span className="text-sm font-medium text-blue-900">🎮 {getGameName(currentGameId)}</span>
+                <span className="px-1 py-0.5 text-xs bg-green-100 text-green-800 rounded">✅</span>
               </div>
 
+              {/* 控制按鈕組 */}
               <button
                 onClick={() => setShowStats(!showStats)}
-                className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
                 style={{ minHeight: '44px' }}
               >
                 <span className="hidden sm:inline">{showStats ? '隱藏統計' : '顯示統計'}</span>
                 <span className="sm:hidden">📊</span>
               </button>
 
-              {/* 出遊戲按鈕 - 響應式 */}
               <button
                 onClick={() => window.open('http://localhost:3001/games/airplane-game/', '_blank')}
-                className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-2 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
                 style={{ minHeight: '44px' }}
               >
                 <span className="hidden sm:inline">🚀 出遊戲</span>
@@ -178,10 +196,11 @@ const GameSwitcherPage: React.FC = () => {
         <div className="mb-1 sm:mb-2">
           <GameSwitcher
             defaultGame="airplane-vite"
-            geptLevel="elementary"
+            geptLevel={currentGeptLevel}
             onGameChange={handleGameChange}
             onGameStateUpdate={handleGameStateUpdate}
             className="w-full"
+            hideGeptSelector={true}
           />
         </div>
 

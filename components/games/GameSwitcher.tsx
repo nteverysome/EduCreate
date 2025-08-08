@@ -33,6 +33,7 @@ interface GameSwitcherProps {
   onGameChange?: (gameId: string) => void;
   onGameStateUpdate?: (gameId: string, state: GameState) => void;
   className?: string;
+  hideGeptSelector?: boolean;
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -161,7 +162,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   geptLevel = 'elementary',
   onGameChange,
   onGameStateUpdate,
-  className = ''
+  className = '',
+  hideGeptSelector = false
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -395,27 +397,29 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
               </div>
             </div>
 
-            {/* GEPT 等級選擇器 - 響應式設計 */}
-            <div className="gept-selector flex items-center space-x-2 w-full" data-testid="gept-selector">
-              <BookOpenIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
-              <span className="text-xs md:text-sm font-medium text-gray-700 flex-shrink-0">GEPT:</span>
-              <div className="gept-buttons flex space-x-1 flex-1">
-                {['elementary', 'intermediate', 'advanced'].map((level) => (
-                  <button
-                    key={level}
-                    onClick={() => setCurrentGeptLevel(level as any)}
-                    className={`px-2 py-2 rounded-full text-xs font-medium transition-colors flex-1 sm:flex-none sm:px-3 ${
-                      currentGeptLevel === level
-                        ? 'bg-blue-100 text-blue-800 border border-blue-300'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300'
-                    }`}
-                    style={{ minHeight: '44px' }}
-                  >
-                    {level === 'elementary' ? '初級' : level === 'intermediate' ? '中級' : '高級'}
-                  </button>
-                ))}
+            {/* GEPT 等級選擇器 - 響應式設計 (條件渲染) */}
+            {!hideGeptSelector && (
+              <div className="gept-selector flex items-center space-x-2 w-full" data-testid="gept-selector">
+                <BookOpenIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <span className="text-xs md:text-sm font-medium text-gray-700 flex-shrink-0">GEPT:</span>
+                <div className="gept-buttons flex space-x-1 flex-1">
+                  {['elementary', 'intermediate', 'advanced'].map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => setCurrentGeptLevel(level as any)}
+                      className={`px-2 py-2 rounded-full text-xs font-medium transition-colors flex-1 sm:flex-none sm:px-3 ${
+                        currentGeptLevel === level
+                          ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-300'
+                      }`}
+                      style={{ minHeight: '44px' }}
+                    >
+                      {level === 'elementary' ? '初級' : level === 'intermediate' ? '中級' : '高級'}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* 切換遊戲下拉選單 - 響應式設計 */}
             <div className="game-switcher-dropdown relative w-full">

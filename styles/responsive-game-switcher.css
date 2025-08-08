@@ -25,16 +25,51 @@
   margin: 0 auto;
 }
 
+/* ===== 合併統一標頭樣式 ===== */
+.unified-game-header {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.game-controls-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 /* 手機優先設計 - 優化間距 */
 @media (max-width: 640px) {
   .game-switcher-container {
     padding: var(--mobile-padding);
   }
 
-  /* 頁面標頭響應式 - 減少下邊距 */
-  .page-header {
-    padding: 12px 16px 8px 16px !important; /* 下邊距從 12px 減少到 8px */
-    min-height: auto !important;
+  /* 緊湊合併標頭手機模式 */
+  .unified-game-header {
+    padding: 8px 16px !important; /* 減少垂直內邊距 */
+  }
+
+  .unified-game-header .min-h-16 {
+    min-height: 48px !important; /* 減少最小高度 */
+  }
+
+  .unified-game-header h1 {
+    font-size: 0.875rem !important; /* 手機模式下更小的標題 */
+    line-height: 1.2;
+  }
+
+  .unified-game-header .gept-buttons button {
+    padding: 8px 4px !important;
+    font-size: 0.75rem !important;
+    min-width: 44px !important;
+    z-index: 10 !important; /* 確保按鈕在最上層 */
+  }
+
+  /* 防止元素重疊 */
+  .unified-game-header .gept-selector {
+    max-width: 240px !important;
+    overflow: visible !important;
   }
 
   /* 主要內容區域 - 減少上邊距 */
