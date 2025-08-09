@@ -81,17 +81,25 @@ npm run sentry:report                    # 生成錯誤統計報告
 
 ### **MCP 工具生態系統**
 ```bash
-# 9個 MCP 工具自動協調
+# 10個 MCP 工具自動協調
 npm run workflow:master mcp-integration  # 自動協調所有 MCP 工具
 
 # 個別 MCP 工具檢查
 npm run sentry:health                    # Sentry MCP 健康檢查
 ```
 
+**完整工具列表**: 詳見 [automation/README.md MCP 工具整合](scripts/automation/README.md#-10個-mcp-工具深度整合)
+
 ### **演示和學習**
 ```bash
 node EduCreate-Test-Videos/scripts/automation/demo-workflow.js full
 ```
+
+### **詳細技術說明**
+👉 **完整配置**: [automation/README.md 配置說明](scripts/automation/README.md#-配置說明)
+👉 **故障排除**: [automation/README.md 故障排除](scripts/automation/README.md#-故障排除)
+👉 **最佳實踐**: [automation/README.md 最佳實踐](scripts/automation/README.md#-最佳實踐)
+👉 **成功案例**: [automation/README.md 成功案例](scripts/automation/README.md#-成功案例)
 
 ## 📖 **文檔維護策略**
 
@@ -132,7 +140,7 @@ node EduCreate-Test-Videos/scripts/automation/demo-workflow.js full
 - 🎯 完整工作流程（第42-405行）
 - 🚨 強制執行規則
 - 📋 Phase 1-3 詳細步驟
-- 🔧 9個 MCP 工具整合（第185-208行）
+- 🔧 10個 MCP 工具整合（第185-208行）
 - 🚨 Sentry MCP 雙層錯誤監控系統
 
 ### **automation/README.md 核心內容**
@@ -140,7 +148,7 @@ node EduCreate-Test-Videos/scripts/automation/demo-workflow.js full
 - 🏗️ 系統架構說明
 - 🔧 配置和自定義
 - 🔍 故障排除指南
-- 🔧 9個 MCP 工具深度整合
+- 🔧 10個 MCP 工具深度整合（包含 filesystem-mcp）
 - 🚨 Sentry MCP 專門命令和配置
 
 ## 💡 **最佳實踐建議**

@@ -127,7 +127,7 @@ node EduCreate-Test-Videos/scripts/phaser3-learning-persistence.js reminder
 
 基於 MY-WORKFLOW.md 第185-208行的 MCP 工具生態系統：
 
-#### 自動使用的 9 個 MCP 工具
+#### 自動使用的 10 個 MCP 工具
 1. **Sequential Thinking MCP** - 邏輯推理過程記錄
 2. **本地記憶系統** - 測試記憶管理
 3. **SQLite MCP** - 數據庫操作
