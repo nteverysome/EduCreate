@@ -2,43 +2,52 @@
  * Playwright 配置文件 - 支持視頻錄製
  */
 
+const { devices } = require('@playwright/test');
+
+// 動態組裝多瀏覽器專案（默認僅 chromium；以環境變數逐步啟用）
+const projects = [
+  {
+    name: 'chromium',
+    use: {
+      ...devices['Desktop Chrome'],
+      video: { mode: 'on', size: { width: 1280, height: 720 } },
+      trace: 'on'
+    }
+  },
+  ...(process.env.PW_ENABLE_FIREFOX ? [{
+    name: 'firefox',
+    use: {
+      ...devices['Desktop Firefox'],
+      video: { mode: 'on', size: { width: 1280, height: 720 } },
+      trace: 'on'
+    }
+  }] : []),
+  ...(process.env.PW_ENABLE_WEBKIT ? [{
+    name: 'webkit',
+    use: {
+      ...devices['Desktop Safari'],
+      video: { mode: 'on', size: { width: 1280, height: 720 } },
+      trace: 'on'
+    }
+  }] : [])
+];
+
 module.exports = {
   testDir: './tests',
   timeout: 60000,
-  expect: {
-    timeout: 10000
-  },
+  expect: { timeout: 10000 },
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [
-    ['html'],
-    ['json', { outputFile: 'test-results/results.json' }]
-  ],
+  reporter: [ ['html'], ['json', { outputFile: 'test-results/results.json' }] ],
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
-    video: 'on', // 啟用視頻錄製
+    video: 'on',
     screenshot: 'only-on-failure',
-    headless: false, // 顯示瀏覽器
+    headless: false,
   },
-  projects: [
-    {
-      name: 'chromium',
-      use: {
-        ...require('@playwright/test').devices['Desktop Chrome'],
-        video: {
-          mode: 'on',
-          size: { width: 1280, height: 720 }
-        },
-        trace: 'on'
-      },
-    },
-  ],
-  webServer: {
-    command: 'npm run dev',
-    port: 3000,
-    reuseExistingServer: !process.env.CI,
-  },
+  projects,
+  webServer: { command: 'npm run dev', port: 3000, reuseExistingServer: !process.env.CI },
 };
