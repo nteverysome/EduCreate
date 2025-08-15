@@ -314,13 +314,15 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 手機端：全寬度，固定高度比例，優化間距 */
+/* 手機端：全寬度，動態高度比例，優化間距 */
 @media (max-width: 640px) {
   .game-iframe-container {
-    aspect-ratio: 16/9 !important;
+    /* 移除固定的 aspect-ratio，讓 TypeScript 控制 */
     min-height: 300px !important;
     max-height: 400px !important;
     margin: 8px 0; /* 從 16px 減少到 8px，向上移動 8px */
+    width: 100% !important;
+    max-width: none !important; /* 強制移除寬度限制 */
   }
 
   .game-iframe-container iframe {
@@ -332,22 +334,24 @@
 /* 平板端：適中尺寸 */
 @media (min-width: 641px) and (max-width: 1024px) {
   .game-iframe-container {
-    aspect-ratio: 1274/739 !important;
-    max-width: 800px !important;
+    /* 移除固定的 aspect-ratio，讓 TypeScript 控制 */
+    max-width: none !important; /* 移除寬度限制 */
     min-height: 400px !important;
     max-height: 500px !important;
     margin: 20px auto;
+    width: 100% !important;
   }
 }
 
 /* 桌面端：原始尺寸 */
 @media (min-width: 1025px) {
   .game-iframe-container {
-    aspect-ratio: 1274/739 !important;
-    max-width: 1274px !important;
+    /* 移除固定的 aspect-ratio，讓 TypeScript 控制 */
+    max-width: none !important; /* 移除寬度限制 */
     min-height: 400px !important;
     max-height: 739px !important;
     margin: 24px auto;
+    width: 100% !important;
   }
 }
 
@@ -485,15 +489,18 @@
 /* ===== 橫屏模式優化 ===== */
 @media (max-width: 640px) and (orientation: landscape) {
   .game-iframe-container {
-    aspect-ratio: 16/9 !important;
+    /* 移除固定的 aspect-ratio，讓 TypeScript 控制 */
     min-height: 250px !important;
-    max-height: 300px !important;
+    max-height: 375px !important; /* 適應手機橫向模式高度 */
+    width: 100% !important;
+    max-width: none !important; /* 強制移除寬度限制 */
+    aspect-ratio: 812/375 !important; /* 強制手機橫向比例 */
   }
-  
+
   .page-header {
     padding: 8px 16px !important;
   }
-  
+
   .stats-grid {
     display: none; /* 橫屏時隱藏統計面板節省空間 */
   }

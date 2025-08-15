@@ -31,6 +31,7 @@ const GameSwitcherPage: React.FC = () => {
   const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
   const [showMobileGeptMenu, setShowMobileGeptMenu] = useState<boolean>(false);
   const [hasUserScrolled, setHasUserScrolled] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -94,20 +95,24 @@ const GameSwitcherPage: React.FC = () => {
     });
   }, []);
 
-  // 智能自動滾動到遊戲區域（僅手機模式且用戶未手動滾動時）
+  // 檢測螢幕尺寸和智能自動滾動
   useEffect(() => {
     const handleScroll = () => {
       setHasUserScrolled(true);
     };
 
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
     const autoScrollToGame = () => {
       // 檢查是否為手機模式
-      const isMobile = window.innerWidth <= 768;
+      const isMobileDevice = window.innerWidth <= 768;
 
       // 檢查用戶是否偏好減少動畫
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      if (isMobile && !hasUserScrolled && !prefersReducedMotion) {
+      if (isMobileDevice && !hasUserScrolled && !prefersReducedMotion) {
         const gameContainer = document.querySelector('[data-testid="game-container"]');
         if (gameContainer) {
           // 延遲執行，確保頁面完全載入
@@ -122,14 +127,19 @@ const GameSwitcherPage: React.FC = () => {
       }
     };
 
-    // 監聽滾動事件
+    // 初始檢查螢幕尺寸
+    checkScreenSize();
+
+    // 監聽滾動事件和尺寸變化
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', checkScreenSize);
 
     // 執行自動滾動
     autoScrollToGame();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', checkScreenSize);
     };
   }, [hasUserScrolled]);
 
@@ -163,7 +173,13 @@ const GameSwitcherPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div
+      className="bg-gray-50"
+      style={{
+        minHeight: isMobile ? `${window.innerHeight}px` : '100vh',
+        height: isMobile ? `${window.innerHeight}px` : 'auto'
+      }}
+    >
       {/* 手機版 GEPT 選擇器彈出選單 */}
       {showMobileGeptMenu && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden" onClick={() => setShowMobileGeptMenu(false)}>

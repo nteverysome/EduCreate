@@ -199,6 +199,50 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     };
   }, []);
 
+  // 動態設置容器尺寸以適應手機橫向模式
+  useEffect(() => {
+    const handleContainerResize = () => {
+      const container = document.querySelector('.game-iframe-container') as HTMLElement;
+      if (container) {
+        const isLandscapeMobile = window.innerWidth === 812 && window.innerHeight === 375;
+
+        if (isLandscapeMobile) {
+          // 強制設置手機橫向模式樣式，覆蓋所有 CSS
+          container.style.width = '100%';
+          container.style.height = '375px';
+          container.style.maxWidth = 'none';
+          container.style.aspectRatio = '812/375';
+          container.style.minHeight = '375px';
+          container.style.maxHeight = '375px';
+
+          console.log('🎯 強制設置手機橫向模式容器樣式:', {
+            width: container.style.width,
+            height: container.style.height,
+            maxWidth: container.style.maxWidth,
+            aspectRatio: container.style.aspectRatio,
+            actualSize: `${container.offsetWidth}x${container.offsetHeight}`
+          });
+        }
+      }
+    };
+
+    // 初始檢查
+    handleContainerResize();
+
+    // 監聽視窗尺寸變化
+    window.addEventListener('resize', handleContainerResize);
+
+    // 延遲執行以確保 DOM 已載入
+    const timer = setTimeout(handleContainerResize, 100);
+    const timer2 = setTimeout(handleContainerResize, 500);
+
+    return () => {
+      window.removeEventListener('resize', handleContainerResize);
+      clearTimeout(timer);
+      clearTimeout(timer2);
+    };
+  }, []);
+
   // 獲取遊戲配置（只在客戶端執行）
   const gamesConfig = mounted ? getGamesConfig() : BASE_GAMES_CONFIG.map(game => ({ ...game, url: '' }));
 
@@ -573,9 +617,13 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       <div
         className="game-iframe-container relative bg-white overflow-hidden mx-auto w-full"
         style={{
-          aspectRatio: '1274/739',
+          aspectRatio: isMobile ? '812/375' : '1274/739',
           minHeight: '300px',
-          maxHeight: '739px'
+          maxHeight: isMobile ? '375px' : '739px',
+          width: '100%',
+          height: isMobile ? '375px' : 'auto',
+          // 強制覆蓋CSS限制
+          maxWidth: 'none !important' as any,
         }}
         data-testid="game-container"
       >
