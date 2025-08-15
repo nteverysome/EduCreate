@@ -126,7 +126,7 @@ test.describe('Airplane - LRIV 真互動驗證', () => {
     }
   });
 
-  test('平板直/橫 + 長時互動（完成後自動觸發 Responsive 視覺報告）', async ({ page }) => {
+  test('平板直/橫 + 長時互動（報告統一由流程層執行）', async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 });
     const { ctx } = await getGameContext(page);
     await assertAspectAndNoOverflow(ctx);
@@ -140,12 +140,7 @@ test.describe('Airplane - LRIV 真互動驗證', () => {
     const fps = await estimateFPS(ctx);
     expect(fps).toBeGreaterThan(30);
 
-    // 自動觸發 Responsive 視覺報告（互動 + 視覺合併）
-    try {
-      execSync('npm run test:responsive "AirplaneLRIV" "http://localhost:3000/games/airplane-game"', { stdio: 'inherit' });
-    } catch (e) {
-      console.warn('responsive 視覺報告生成失敗（不阻斷 LRIV 測試）：', (e as any)?.message);
-    }
+    // 不再在測試內觸發報告，避免副作用；改由流程腳本 test:lriv:full 統一處理
   });
 });
 

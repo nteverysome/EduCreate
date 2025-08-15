@@ -119,41 +119,103 @@ class TestVideoProcessor {
   }
 
   // 批量處理測試影片
-  async processVideosInDirectory(inputDir, testResultsDir = null) {
+  async processVideosInDirectory(inputDir, testResultsDir = null, overrides = null) {
     if (!fs.existsSync(inputDir)) {
       throw new Error(`輸入目錄不存在: ${inputDir}`);
     }
 
-    const videoFiles = fs.readdirSync(inputDir)
-      .filter(file => file.endsWith('.webm'))
-      .map(file => path.join(inputDir, file));
+    // 遞迴收集所有 .webm 影片
+    function walk(dir) {
+      const out = [];
+      const entries = fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true }) : [];
+      for (const e of entries) {
+        const fp = path.join(dir, e.name);
+        if (e.isDirectory()) out.push(...walk(fp));
+        else if (e.isFile() && fp.toLowerCase().endsWith('.webm')) out.push(fp);
+      }
+      return out;
+    }
+    const videoFiles = walk(inputDir);
 
     if (videoFiles.length === 0) {
       console.log('📁 沒有找到需要處理的影片文件');
       return [];
     }
 
+    // 構建 results.json 映射（video 路徑 → 狀態）
+    let resultsIndex = {};
+    try {
+      const aggregatedPath = path.join(testResultsDir || inputDir, 'results.json');
+      if (fs.existsSync(aggregatedPath)) {
+        const aggregated = JSON.parse(fs.readFileSync(aggregatedPath, 'utf8'));
+        const map = {};
+        const rootDir = path.resolve(testResultsDir || inputDir);
+        const collect = (suite) => {
+          if (!suite) return;
+          if (Array.isArray(suite.suites)) suite.suites.forEach(collect);
+          if (Array.isArray(suite.tests)) {
+            suite.tests.forEach(t => {
+              const status = t.outcome || t.status || (t.ok ? 'passed' : 'failed');
+              const projectName = t.projectName || t.project || 'chromium';
+              const title = t.title || (Array.isArray(t.titlePath) ? t.titlePath.join(' / ') : 'test');
+              const resultsArr = Array.isArray(t.results) ? t.results : [];
+              const atts = resultsArr.flatMap(r => Array.isArray(r.attachments) ? r.attachments : []);
+              let traceAbs = null;
+              let durationMs = 0;
+              resultsArr.forEach(r => { durationMs = Math.max(durationMs, r.duration || 0); });
+              atts.forEach(att => {
+                const p = att?.path;
+                if (!p) return;
+                const abs = path.isAbsolute(p) ? p : path.join(rootDir, p);
+                if (/trace\.zip$/i.test(p)) traceAbs = path.normalize(abs);
+              });
+              atts.forEach(att => {
+                const p = att?.path;
+                if (!p) return;
+                if (/video\.webm$/i.test(p)) {
+                  const abs = path.isAbsolute(p) ? p : path.join(rootDir, p);
+                  map[path.normalize(abs)] = { status, projectName, title, traceAbs, duration: durationMs };
+                }
+              });
+            });
+          }
+        };
+        if (Array.isArray(aggregated.suites)) aggregated.suites.forEach(collect);
+        resultsIndex = map;
+      }
+    } catch (e) {
+      console.warn('⚠️ 無法解析 results.json，將使用預設分類（success）');
+    }
+
     console.log(`📁 開始批量處理: ${videoFiles.length} 個影片文件`);
-    
+
     const results = [];
     const startTime = Date.now();
 
     for (const [index, videoPath] of videoFiles.entries()) {
       console.log(`\n[${index + 1}/${videoFiles.length}] 處理影片: ${path.basename(videoPath)}`);
-      
+
       try {
-        // 嘗試加載對應的測試結果
+        // 從 results.json 查詢狀態與測試上下文
         let testResults = null;
-        if (testResultsDir) {
+        const abs = path.normalize(path.resolve(videoPath));
+        const info = resultsIndex[abs];
+        if (info) {
+          testResults = info; // { status, title, projectName, attachments: { trace?: string } }
+        } else if (testResultsDir) {
+          // 向後相容：嘗試同名 json（簡化）
           const testResultPath = path.join(testResultsDir, path.basename(videoPath).replace('.webm', '.json'));
           if (fs.existsSync(testResultPath)) {
-            testResults = JSON.parse(fs.readFileSync(testResultPath, 'utf8'));
+            const jr = JSON.parse(fs.readFileSync(testResultPath, 'utf8'));
+            testResults = { status: jr.status };
           }
         }
-        
+
+        // 傳遞 overrides 到 metadata 生成
+        this._overrides = overrides;
         const result = await this.processVideo(videoPath, testResults);
         results.push(result);
-        
+
       } catch (error) {
         console.error(`跳過文件 ${path.basename(videoPath)}: ${error.message}`);
         results.push({
@@ -185,25 +247,47 @@ class TestVideoProcessor {
   async generateMetadata(videoPath, testResults = null) {
     const fileName = path.basename(videoPath);
     const fileStats = fs.statSync(videoPath);
-    
+    const now = new Date();
+    const ymd = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+    const hms = `${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+
     // 嘗試從文件名解析信息
     const parsedInfo = this.parseVideoFileName(fileName);
-    
-    // 如果有測試結果，使用測試結果中的信息
+
+    // 套用 overrides（環境變數或流程層傳入）
+    const overrides = this._overrides || {};
+    if (overrides.module) parsedInfo.module = overrides.module;
+    if (overrides.feature) parsedInfo.feature = overrides.feature;
+    if (overrides.version) parsedInfo.version = overrides.version;
+
+    // 由 testResults 強化上下文：標題、專案（瀏覽器）、追蹤檔案
     if (testResults) {
       parsedInfo.testStages = testResults.testStages || [];
-      parsedInfo.duration = testResults.duration || 0;
+      parsedInfo.duration = testResults.duration || testResults.durationMs || parsedInfo.duration || 0;
       parsedInfo.relatedScreenshots = testResults.screenshots || [];
+      parsedInfo.browser = testResults.projectName || parsedInfo.browser || 'chromium';
+      parsedInfo.title = testResults.title || parsedInfo.title || parsedInfo.feature || 'test';
+      parsedInfo.trace = testResults.traceAbs || parsedInfo.trace || null;
+      // 由 results.json 決定結果（更權威）
+      if (typeof testResults.status === 'string') {
+        parsedInfo.result = testResults.status === 'passed' ? 'success' : 'failure';
+      }
     }
-    
+
+    // fallback 規則：若未映射（或值為 unknown 等非標準）
+    let unmapped = false;
+    if (!['success','failure'].includes((parsedInfo.result||'').toLowerCase())) { parsedInfo.result = 'success'; unmapped = true; }
+    if (!parsedInfo.module) parsedInfo.module = 'games';
+    if (!parsedInfo.feature) parsedInfo.feature = 'AirplaneLRIV';
+
     const metadata = {
       videoId: fileName.replace('.webm', ''),
       originalFileName: fileName,
       module: parsedInfo.module,
       feature: parsedInfo.feature,
-      testName: `${parsedInfo.feature} 測試`,
+      testName: parsedInfo.title || `${parsedInfo.feature} 測試`,
       result: parsedInfo.result,
-      version: parsedInfo.version,
+      version: parsedInfo.version || 'v1.0.1',
       sequence: parsedInfo.sequence,
       testDate: new Date().toISOString(),
       originalSize: fileStats.size,
@@ -211,6 +295,11 @@ class TestVideoProcessor {
       testStages: parsedInfo.testStages,
       relatedScreenshots: parsedInfo.relatedScreenshots,
       processingStartTime: Date.now(),
+      browser: parsedInfo.browser,
+      trace: parsedInfo.trace,
+      unmapped,
+      yyyymmdd: ymd,
+      hhmmss: hms,
       metadata: {
         isMemoryScienceTest: parsedInfo.module === 'games',
         isGEPTTest: this.isGEPTRelated(parsedInfo.feature),
@@ -218,7 +307,7 @@ class TestVideoProcessor {
         priority: this.determinePriority(parsedInfo.module, parsedInfo.result)
       }
     };
-    
+
     return metadata;
   }
 
@@ -506,16 +595,33 @@ class TestVideoProcessor {
       fs.mkdirSync(targetDir, { recursive: true });
     }
     
-    // 生成標準化文件名
-    const standardFileName = this.generateStandardFileName(metadata);
-    const targetPath = path.join(targetDir, standardFileName);
-    
+    // 生成標準化文件名（新命名規則）：
+    // current/{success|failure}/<module>/<feature>/{<testName>}__{<browser>}__{YYYYMMDD-HHmmss}.webm
+    const safe = (s) => String(s || '').replace(/[^a-zA-Z0-9\-_一-龥]/g, '_').slice(0, 80);
+    const baseName = `${safe(metadata.testName)}__${safe(metadata.browser)}__${metadata.yyyymmdd}-${metadata.hhmmss}.webm`;
+    let targetPath = path.join(targetDir, baseName);
+    let seq = 2;
+    while (fs.existsSync(targetPath)) {
+      targetPath = path.join(targetDir, `${safe(metadata.testName)}__${safe(metadata.browser)}__${metadata.yyyymmdd}-${metadata.hhmmss}_${String(seq++).padStart(2,'0')}.webm`);
+    }
+
     // 移動文件
     if (videoPath !== targetPath) {
       fs.copyFileSync(videoPath, targetPath);
       console.log(`   📁 影片已組織到: ${path.relative('EduCreate-Test-Videos', targetPath)}`);
     }
-    
+
+    // 若存在 trace，複製到相同目錄，使用相同基名 .zip
+    if (metadata.trace && fs.existsSync(metadata.trace)) {
+      const traceTarget = path.join(targetDir, path.basename(targetPath, '.webm') + '.zip');
+      try {
+        fs.copyFileSync(metadata.trace, traceTarget);
+        console.log(`   🗜️ Trace 已複製: ${path.relative('EduCreate-Test-Videos', traceTarget)}`);
+      } catch (e) {
+        console.warn(`   ⚠️ 複製 trace 失敗: ${e.message}`);
+      }
+    }
+
     return targetPath;
   }
 

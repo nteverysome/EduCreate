@@ -1,5 +1,5 @@
-// Import Sentry for Next.js integration
-const { withSentryConfig } = require('@sentry/nextjs');
+// Sentry integration removed; pass-through wrapper
+const withSentryConfig = (cfg) => cfg;
 
 /** @type {import('next-pwa').PWAConfig} */
 const withPWA = require('next-pwa')({
@@ -94,28 +94,40 @@ const nextConfig = {
       {
         source: '/games/airplane-game/:path*',
         destination: '/games/airplane-game/:path*'
+      },
+      // Reports API mapping (HTML index + all assets)
+      {
+        source: '/_reports',
+        destination: '/api/_reports/index.html'
+      },
+      {
+        source: '/_reports/:path*',
+        destination: '/api/_reports/:path*'
+      },
+      // Back-compat: allow direct /current, /reports, /EduCreate-Test-Videos to resolve via the same API
+      {
+        source: '/current/:path*',
+        destination: '/api/_reports/current/:path*'
+      },
+      {
+        source: '/reports/:path*',
+        destination: '/api/_reports/:path*'
+      },
+      {
+        source: '/EduCreate-Test-Videos/:path*',
+        destination: '/api/_reports/:path*'
+      },
+      // Daily reports and dashboard direct access
+      {
+        source: '/daily/:path*',
+        destination: '/api/_reports/daily/:path*'
+      },
+      {
+        source: '/dashboard/:path*',
+        destination: '/api/_reports/dashboard/:path*'
       }
     ];
   },
 }
 
-// Sentry configuration options
-const sentryWebpackPluginOptions = {
-  // Additional config options for the Sentry Webpack plugin. Keep in mind that
-  // the following options are set automatically, and overriding them is not
-  // recommended:
-  //   release, url, org, project, authToken, configFile, stripPrefix,
-  //   urlPrefix, include, ignore
-
-  org: "educreate",
-  project: "javascript-nextjs",
-
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
-
-  // For all available options, see:
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-};
-
-// Make sure adding Sentry options is the last code to run before exporting
-module.exports = withSentryConfig(withPWA(nextConfig), sentryWebpackPluginOptions);
+module.exports = withPWA(nextConfig);

@@ -14,6 +14,7 @@ class BatchVideoProcessor {
     this.reportGenerator = new ReportGenerator();
     this.defaultInputDir = 'test-results';
     this.defaultTestResultsDir = 'test-results';
+    this.overrides = { module: process.env.MODULE, feature: process.env.FEATURE, version: process.env.VERSION };
   }
 
   // 主處理函數
@@ -42,9 +43,16 @@ class BatchVideoProcessor {
 
       // 2. 批量處理影片
       console.log('\n📁 開始批量處理測試影片...');
+      // 從當前環境變數計算 overrides（確保在解析 CLI 之後）
+      const envOverrides = {
+        module: process.env.MODULE,
+        feature: process.env.FEATURE,
+        version: process.env.VERSION,
+      };
       const processingResults = await this.processor.processVideosInDirectory(
-        inputDir, 
-        testResultsDir
+        inputDir,
+        testResultsDir,
+        envOverrides
       );
 
       // 3. 分析處理結果
@@ -425,6 +433,18 @@ async function main() {
       case '-t':
         options.testResultsDir = args[++i];
         break;
+      case '--module':
+        process.env.MODULE = args[++i];
+        break;
+      case '--feature':
+        process.env.FEATURE = args[++i];
+        break;
+      case '--version':
+        process.env.VERSION = args[++i];
+        break;
+      case '--mode':
+        mode = args[++i] || 'batch'; // 支援 archive/batch
+        break;
       case '--no-reports':
         options.generateReports = false;
         break;
@@ -451,6 +471,10 @@ EduCreate 測試影片批量處理工具
 選項:
   -i, --input <目錄>        輸入目錄 (默認: test-results)
   -t, --test-results <目錄>  測試結果目錄 (默認: test-results)
+  --module <name>           模組覆蓋（如 games）
+  --feature <name>          功能覆蓋（如 AirplaneLRIV）
+  --version <semver>        版本覆蓋（如 v1.0.1）
+  --mode <batch|archive>    模式（為相容保留 archive，行為等同 batch）
   --no-reports              不生成報告
   -c, --cleanup             處理後清理原始文件
   -q, --quiet               靜默模式
@@ -458,9 +482,9 @@ EduCreate 測試影片批量處理工具
   -h, --help                顯示幫助信息
 
 示例:
-  node process-test-videos.js                    # 批量處理 test-results 目錄
-  node process-test-videos.js -i ./videos -c     # 處理 videos 目錄並清理
-  node process-test-videos.js -m                 # 啟動監控模式
+  node process-test-videos.js                                    # 批量處理 test-results 目錄
+  node process-test-videos.js -i ./videos -c --module games       # 指定模組並清理
+  node process-test-videos.js --mode archive --feature AirplaneLRIV --version v1.0.1
         `);
         process.exit(0);
         break;

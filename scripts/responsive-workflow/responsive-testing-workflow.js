@@ -3,10 +3,10 @@
 /**
  * EduCreate 響應式佈局測試工作流
  * 自動化響應式測試、截圖收集、視覺對比報告生成
- * 
+ *
  * 使用方法：
  * node scripts/responsive-workflow/responsive-testing-workflow.js [功能名稱] [URL]
- * 
+ *
  * 範例：
  * node scripts/responsive-workflow/responsive-testing-workflow.js "手機版佈局優化" "http://localhost:3000/games/airplane"
  */
@@ -14,6 +14,24 @@
 const { chromium } = require('playwright');
 const fs = require('fs').promises;
 const path = require('path');
+
+
+// cross-platform open helper (file:// in default browser)
+const cp = require('child_process');
+function openInBrowser(absPath) {
+  try {
+    if (process.env.CI) return; // avoid in CI
+    if (process.platform === 'win32') {
+      cp.spawn('cmd', ['/c', 'start', absPath], { stdio: 'ignore', detached: true });
+    } else if (process.platform === 'darwin') {
+      cp.spawn('open', [absPath], { stdio: 'ignore', detached: true });
+    } else {
+      cp.spawn('xdg-open', [absPath], { stdio: 'ignore', detached: true });
+    }
+  } catch (e) {
+    console.warn('⚠️ 自動開啟報告失敗：', e.message);
+  }
+}
 
 // 設備配置
 const DEVICE_CONFIGS = [
@@ -79,7 +97,7 @@ class ResponsiveTestingWorkflow {
         // 確保目錄存在
         await fs.mkdir(this.reportDir, { recursive: true });
         await fs.mkdir(this.screenshotDir, { recursive: true });
-        
+
         console.log('🚀 啟動響應式佈局測試工作流');
         console.log(`📱 功能名稱: ${this.featureName}`);
         console.log(`🌐 測試URL: ${this.testUrl}`);
@@ -88,40 +106,40 @@ class ResponsiveTestingWorkflow {
 
     async runDeviceTests() {
         const browser = await chromium.launch({ headless: false });
-        
+
         try {
             for (const device of DEVICE_CONFIGS) {
                 console.log(`\n📱 測試設備: ${device.name} (${device.width}x${device.height})`);
-                
+
                 const context = await browser.newContext({
                     viewport: { width: device.width, height: device.height }
                 });
-                
+
                 const page = await context.newPage();
-                
+
                 try {
                     // 導航到測試頁面
                     await page.goto(this.testUrl, { waitUntil: 'networkidle' });
                     await page.waitForTimeout(2000); // 等待頁面穩定
-                    
+
                     // 截圖
                     const screenshotPath = path.join(
                         this.screenshotDir,
                         `${this.timestamp}_${this.featureName}_${device.code}_${device.width}x${device.height}.png`
                     );
-                    
+
                     await page.screenshot({
                         path: screenshotPath,
                         fullPage: false
                     });
-                    
+
                     // 記錄截圖信息
                     this.screenshots.push({
                         device: device,
                         path: screenshotPath,
                         filename: path.basename(screenshotPath)
                     });
-                    
+
                     // 記錄測試結果
                     this.testResults.push({
                         device: device.name,
@@ -129,9 +147,9 @@ class ResponsiveTestingWorkflow {
                         timestamp: new Date().toISOString(),
                         screenshot: path.basename(screenshotPath)
                     });
-                    
+
                     console.log(`✅ ${device.name} 測試完成`);
-                    
+
                 } catch (error) {
                     console.error(`❌ ${device.name} 測試失敗:`, error.message);
                     this.testResults.push({
@@ -141,7 +159,7 @@ class ResponsiveTestingWorkflow {
                         timestamp: new Date().toISOString()
                     });
                 }
-                
+
                 await context.close();
             }
         } finally {
@@ -151,23 +169,23 @@ class ResponsiveTestingWorkflow {
 
     async generateReport() {
         console.log('\n📊 生成視覺對比報告...');
-        
+
         const reportPath = path.join(
             this.reportDir,
             `${this.timestamp}_${this.featureName}_responsive-report.html`
         );
-        
+
         // 讀取模板
         const templatePath = path.join(process.cwd(), 'templates', 'responsive', 'visual-comparison-template.html');
         let template;
-        
+
         try {
             template = await fs.readFile(templatePath, 'utf8');
         } catch (error) {
             // 如果模板不存在，使用基本模板
             template = await this.createBasicTemplate();
         }
-        
+
         // 替換模板變量
         const reportContent = template
             .replace(/{{FEATURE_NAME}}/g, this.featureName)
@@ -176,9 +194,9 @@ class ResponsiveTestingWorkflow {
             .replace(/{{DEVICE_COMPARISONS}}/g, this.generateDeviceComparisons())
             .replace(/{{TEST_RESULTS}}/g, this.generateTestResults())
             .replace(/{{RESPONSIVE_ANALYSIS}}/g, this.generateResponsiveAnalysis());
-        
+
         await fs.writeFile(reportPath, reportContent, 'utf8');
-        
+
         console.log(`✅ 報告已生成: ${reportPath}`);
         return reportPath;
     }
@@ -188,7 +206,7 @@ class ResponsiveTestingWorkflow {
             <div class="layout-column">
                 <h4>📱 ${screenshot.device.name} (${screenshot.device.width}x${screenshot.device.height})</h4>
                 <div class="large-screenshot">
-                    <img src="screenshots/${screenshot.filename}" alt="${screenshot.device.name}佈局截圖" 
+                    <img src="screenshots/${screenshot.filename}" alt="${screenshot.device.name}佈局截圖"
                          style="width: 100%; height: auto; border: 3px solid ${screenshot.device.color}; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
                 </div>
                 <div class="layout-features">
@@ -205,7 +223,7 @@ class ResponsiveTestingWorkflow {
         const successCount = this.testResults.filter(r => r.status === 'success').length;
         const totalCount = this.testResults.length;
         const successRate = ((successCount / totalCount) * 100).toFixed(1);
-        
+
         return `
             <h3>🧪 測試驗證結果 (${successCount}/${totalCount} = ${successRate}% 成功率)</h3>
             <div class="test-results">
@@ -291,18 +309,21 @@ class ResponsiveTestingWorkflow {
             await this.init();
             await this.runDeviceTests();
             const reportPath = await this.generateReport();
-            
+
+            // 自動打開報告（file://），非 CI 時
+            try { openInBrowser(reportPath); } catch {}
+
             console.log('\n🎉 響應式測試工作流完成！');
             console.log(`📊 報告位置: ${reportPath}`);
             console.log(`📸 截圖目錄: ${this.screenshotDir}`);
-            
+
             return {
                 success: true,
                 reportPath,
                 screenshots: this.screenshots,
                 testResults: this.testResults
             };
-            
+
         } catch (error) {
             console.error('❌ 工作流執行失敗:', error);
             return {
@@ -317,7 +338,7 @@ class ResponsiveTestingWorkflow {
 if (require.main === module) {
     const featureName = process.argv[2] || '響應式佈局測試';
     const testUrl = process.argv[3] || 'http://localhost:3000';
-    
+
     const workflow = new ResponsiveTestingWorkflow(featureName, testUrl);
     workflow.run();
 }

@@ -33,14 +33,14 @@ const projects = [
 ];
 
 module.exports = {
-  testDir: './tests',
+  testDir: './tests/e2e',
   timeout: 60000,
   expect: { timeout: 10000 },
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [ ['html'], ['json', { outputFile: 'test-results/results.json' }] ],
+  reporter: [ ['html'], ['json', { outputFile: process.env.PW_OUTPUT_DIR ? `${process.env.PW_OUTPUT_DIR}/results.json` : 'test-results/results.json' }] ],
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',

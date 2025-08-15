@@ -49,7 +49,11 @@
     "workflow:phase3": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js phase3",
     "workflow:full": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js full-workflow",
     "workflow:core": "node EduCreate-Test-Videos/scripts/automation/core-workflow-principles.js",
-    "workflow:responsive": "node EduCreate-Test-Videos/scripts/automation/responsive-testing-automation.js"
+    "workflow:responsive": "node EduCreate-Test-Videos/scripts/automation/responsive-testing-automation.js",
+    "test:lriv:full": "npx playwright test tests/e2e/airplane.*.spec.ts --config=playwright.config.js && node EduCreate-Test-Videos/scripts/automation/process-test-videos.js --cleanup --module games --feature AirplaneLRIV --version v1.0.1 && node EduCreate-Test-Videos/scripts/automation/generate-reports.js all && npm run visual:run:airplane && npx playwright test tests/e2e/visual-report.file.spec.ts --config=playwright.config.js && npm run reports:home",
+    "reports:home": "node scripts/utils/open.js \"EduCreate-Test-Videos/reports/index.html\"",
+    "reports:visual:open": "node -e \"const fs=require('fs'),path=require('path');const dir=path.join(process.cwd(),'reports','visual-comparisons');if(!fs.existsSync(dir)){console.error('No visual reports');process.exit(1)}const files=fs.readdirSync(dir).filter(f=>f.endsWith('_responsive-report.html')).sort().reverse();if(!files.length){console.error('No reports');process.exit(1)}const p=path.join('reports','visual-comparisons',files[0]);require('child_process').spawn('node',['scripts/utils/open.js',p],{stdio:'ignore',detached:true});\"",
+    "visual:run:airplane": "node scripts/responsive-workflow/responsive-testing-workflow.js \"AirplaneLRIV\" \"http://localhost:3000/games/airplane-game\""
   },
   "dependencies": {
     "@babel/runtime": "^7.28.2",

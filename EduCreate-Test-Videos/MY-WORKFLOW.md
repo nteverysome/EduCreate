@@ -40,6 +40,67 @@
 - **必須查閱記憶**: 主動使用學習記憶系統
 - **必須記錄學習**: 將經驗記錄供未來參考
 
+
+### 🔄 實作現況補充（2025-08-14 更新）
+> 本節整合目前實際運行的一鍵工作流與報告/影片規範，對齊既有 Phase 流程，避免重複與遺漏。
+
+- 一鍵主流程（npm run test:lriv:full）
+  1) Playwright E2E（Airplane* 規格）→ 產出 video.webm + trace.zip（自動錄製）
+  2) 影片處理與分類（process-test-videos.js）
+     - 遞迴掃描 test-results 下所有 video.webm
+     - 利用 test-results/results.json 對映並分類 success/failure
+     - 缺 mapping → fallback: result=success + metadata.unmapped=true（日報單獨統計，不稀釋真實成功率）
+     - 命名與歸檔：current/{success|failure}/games/AirplaneLRIV/{testName}__{browser}__{YYYYMMDD-HHmmss}.webm，同名 trace.zip
+     - 寫入本地記憶：duration/size/unmapped/browser/trace
+  3) 報告生成（generate-reports.js all）
+     - daily/{YYYY-MM-DD}/index.html + artifacts.csv + summary.json
+     - reports/dashboard/dashboard-data.json
+     - reports/index.html（報告入口首頁，含今日快捷、最近7天、最新影片清單）
+  4) 響應式視覺報告（visual:run:airplane）
+     - reports/visual-comparisons/YYYYMMDD_AirplaneLRIV_responsive-report.html
+     - 5 設備截圖保存於 reports/visual-comparisons/screenshots/
+  5) 自動開啟（跨平台，Windows 使用 PowerShell Start-Process）
+     - 自動打開視覺報告（file://…visual-comparisons/…_responsive-report.html）
+     - 自動打開報告首頁（file://EduCreate-Test-Videos/reports/index.html）
+
+- 快速命令
+  - npm run visual:run:airplane：只跑視覺工作流並自動打開報告
+  - npm run reports:visual:open：打開最新視覺報告（保證開啟）
+  - npm run reports:home：打開報告首頁（保證開啟）
+  - HTTP 檢視：/_reports 與 /_reports/:path* 對應到 reports API，可在 http://localhost:3000/_reports 檢視報告
+
+- 與本文既有流程的差異與對齊策略
+  - 命名規範：本文示例偏 YYYYMMDD_模組_功能_結果_版本_序號；目前一鍵流程採用 {testName}__{browser}__YYYYMMDD-HHmmss 以利直觀檢索
+    - 對齊建議：保留現有命名，同步輸出 legacy_filenames.json（或副檔案別名）滿足舊規範檢索
+  - 初始化：本文建議 initialize-system；建議在 test:lriv:full 開頭加入守門檢查（不存在時自動初始化）
+  - Sentry MCP 錯誤分析：本文建議失敗時觸發；建議在 E2E 失敗或報告異常時自動執行 sentry:analyze / sentry:report
+  - 視覺報告健康測試：已提供 tests/e2e/visual-report.file.spec.ts，可併入 test:lriv:full 確保 file:// 報告可載入與顯示圖片
+
+> 維持本文 Phase 1/2/3 的基本順序與原則不變；此節為現況落地補充，確保「影片→報告→自動開啟→HTTP 檢視」全鏈路一致。
+
+
+#### 🧩 當前一鍵工程工作流（簡版）
+- 主命令：`npm run test:lriv:full`
+- 執行步驟：
+  1) Playwright E2E（Airplane 系列）→ 自動錄製 video.webm + trace.zip
+  2) 影片處理與分類（results.json 對映）：缺 mapping → result=success + unmapped:true（報表單獨統計）
+     - 命名/歸檔：`current/{success|failure}/games/AirplaneLRIV/{testName}__{browser}__{YYYYMMDD-HHmmss}.webm` + 同名 trace.zip
+     - 本地記憶：寫入 duration/size/unmapped/browser/trace
+  3) 報告：`reports/daily/{date}/index.html`、`artifacts.csv`、`summary.json`、`reports/index.html`、`reports/dashboard/dashboard-data.json`
+  4) 視覺報告：`reports/visual-comparisons/YYYYMMDD_AirplaneLRIV_responsive-report.html`（含 5 設備截圖）
+  5) 自動開啟（保證彈出）：視覺報告 + 報告首頁（Windows: PowerShell Start-Process；macOS: open；Linux: xdg-open）
+- 快速指令：
+  - `npm run visual:run:airplane`（只跑視覺工作流並自動打開報告）
+  - `npm run reports:visual:open`（打開最新視覺報告）
+  - `npm run reports:home`（打開報告首頁）
+  - HTTP 檢視：`/_reports` 與 `/_reports/:path*`（http://localhost:3000/_reports）
+- 品質/規則：
+  - 三層整合驗證：首頁可見 → 導航 → 功能互動
+  - 失敗一律進 failure/；fallback 僅在缺 mapping 時標記 unmapped:true 的 success
+  - 已全面移除 Sentry MCP；所有流程使用本地/內建工具
+- 視覺報告健康測試（可選）：
+  - `tests/e2e/visual-report.file.spec.ts` 可驗證 file:// 報表 HTML 能載入並顯示圖片（建議後續併入主流程）
+
 ## 🎯 完整工作流程
 
 ### Phase 1: 功能開發（基於核心工作原則）
@@ -96,24 +157,15 @@ fi
 
 # 4. 使用 codebase-retrieval 分析現有代碼
 
-# 4.1. Sentry MCP 錯誤預防檢查（如果是修復任務）
-npm run sentry:analyze "問題描述"
-# → 獲取 AI 修復建議和類似問題解決方案
-# → 查找歷史錯誤模式和成功修復案例
+# 4.1. 本地錯誤預防檢查（如果是修復任務）
+# 使用 diagnostics / codebase-retrieval / view 工具檢查與定位，避免直接跳解決方案
 
-# 4.2. Sentry MCP 智能錯誤分析（具體實現）
+# 4.2. 錯誤分析（可選）
 if [[ "$task" == *"修復"* || "$task" == *"錯誤"* ]]; then
-  echo "🤖 執行 Sentry MCP 智能錯誤分析"
-
-  # 分析歷史錯誤模式
-  echo "問題描述: $task" | npx @sentry/mcp-server --access-token=$SENTRY_AUTH_TOKEN
-
-  # 獲取 AI 修復建議
+  echo "🤖 執行錯誤分析：記錄問題描述、對照本地記憶、聚焦根因"
+  echo "問題描述: $task" >> EduCreate-Test-Videos/local-memory/error-analysis-log.txt
   echo "🧠 查詢本地記憶系統中的相似問題解決方案"
-  cat EduCreate-Test-Videos/local-memory/phaser3-error-patterns.json | grep -i "$error_type"
-
-  # 記錄分析開始時間（用於效率測量）
-  echo "$(date)" > /tmp/sentry_analysis_start_time
+  cat EduCreate-Test-Videos/local-memory/phaser3-error-patterns.json | grep -i "$error_type" || true
 fi
 
 # 5. 創建新組件和功能
@@ -293,20 +345,15 @@ update_tasks [{"task_id": "xxx", "state": "COMPLETE"}]
 3. 在驗證階段自動運行 Phaser 3 專門驗證工作流程
 4. 確保所有 Phaser 3 相關學習都被正確記錄
 
-### 工具整合檢查清單
+### 工具整合檢查清單（刪除外部 Sentry 要求，保留本地/內建工具）
 - [ ] Sequential Thinking 記錄已生成
-- [ ] Langfuse 追蹤已記錄
 - [ ] 本地記憶已更新
 - [ ] 測試影片已正確存檔
-- [ ] 報告已生成
+- [ ] 報告已生成（daily/index.html、artifacts.csv、summary.json、dashboard.json）
 - [ ] 反饋已收集
-- [ ] **Sentry MCP 錯誤監控已啟用**（新增 - 企業級監控）
-- [ ] **AI 錯誤分析已完成**（根本原因分析和修復建議）
 - [ ] **Phaser 3 錯誤預防檢查已完成**（StandardPhaserConfig、物理系統、精靈創建、Scale Manager）
 - [ ] **Phaser 3 測試通過率已驗證**（≥77.8% 基準線）
-- [ ] **本地記憶系統錯誤模式已更新**（16 個記憶檔案 + 2 個 Sentry 模式）
-- [ ] **Sentry MCP 效率提升已驗證**（錯誤解決時間減少 70%）
-- [ ] **AI 智能錯誤分析已完成**（歷史模式查詢 + 修復建議生成）
+- [ ] **本地記憶系統錯誤模式已更新**
 - [ ] **響應式測試已完成**（新增 - 強制執行）
 - [ ] **5種設備截圖已生成**（手機直向、手機橫向、平板直向、平板橫向、桌面版）
 - [ ] **響應式視覺對比報告已生成**（reports/visual-comparisons/）
@@ -376,7 +423,7 @@ C:\Users\Administrator\Desktop\EduCreate\EduCreate-Test-Videos\current\success\g
 #### 1. 功能開發階段
 ```
 ✅ 創建 BatchOperationPanel.tsx
-✅ 創建 BatchOperationManager.ts  
+✅ 創建 BatchOperationManager.ts
 ✅ 整合到 MyActivities.tsx
 ✅ 創建測試頁面 batch-operations/page.tsx
 ```
@@ -437,7 +484,7 @@ ls EduCreate-Test-Videos/mcp-integration/sequential-thinking/
 
 ### 問題 1: 忘記使用測試影片管理系統
 **症狀**: 測試完成但沒有影片存檔記錄
-**解決**: 
+**解決**:
 ```bash
 # 檢查 test-results 目錄
 ls test-results/

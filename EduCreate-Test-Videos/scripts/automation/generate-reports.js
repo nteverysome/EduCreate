@@ -30,10 +30,13 @@ class ReportGenerator {
     });
   }
 
-  // 生成每日報告
+  // 生成每日報告（擴充：每日資料夾 + index.html + artifacts.csv + 儀表板欄位）
   async generateDailyReport(date = null) {
     const reportDate = date || new Date().toISOString().slice(0, 10);
-    const reportPath = `${this.reportsDir}/daily/daily-report-${reportDate}.json`;
+    const dailyDir = `${this.reportsDir}/daily/${reportDate}`;
+    const jsonPath = `${dailyDir}/summary.json`;
+    const htmlPath = `${dailyDir}/index.html`;
+    const csvPath = `${dailyDir}/artifacts.csv`;
 
     console.log(`📊 生成每日報告: ${reportDate}`);
 
@@ -44,17 +47,37 @@ class ReportGenerator {
       const compressionData = this.compressionManager.getCompressionStats();
       const systemData = await this.collectSystemData();
 
+      // unmapped success 估算（從本地記憶）
+      const videoMemoriesPath = 'EduCreate-Test-Videos/local-memory/video-memories.json';
+      let unmappedSuccess = 0,
+          totalTests = testData.totalTests,
+          passed = testData.successfulTests,
+          failed = testData.failedTests;
+      if (fs.existsSync(videoMemoriesPath)) {
+        try {
+          const vm = JSON.parse(fs.readFileSync(videoMemoriesPath, 'utf8'));
+          const todays = vm.memories.filter(m => (m.timestamp||'').startsWith(reportDate));
+          unmappedSuccess = todays.filter(m => m.unmapped && m.result==='success').length;
+          totalTests = todays.length;
+          passed = todays.filter(m => m.result==='success').length;
+          failed = todays.filter(m => m.result!=='success').length;
+        } catch {}
+      }
+
       const report = {
         reportType: 'daily',
         reportDate,
         generatedAt: new Date().toISOString(),
         summary: {
-          totalTests: testData.totalTests,
-          successfulTests: testData.successfulTests,
-          failedTests: testData.failedTests,
-          successRate: testData.successRate,
+          totalTests,
+          successfulTests: passed,
+          failedTests: failed,
+          successRate: totalTests>0? (passed/totalTests*100).toFixed(1): 0,
           totalProcessingTime: testData.totalProcessingTime,
-          averageProcessingTime: testData.averageProcessingTime
+          averageProcessingTime: testData.averageProcessingTime,
+          unmappedSuccess,
+          avgDurationMs: 0,
+          largestArtifactMB: 0
         },
         moduleBreakdown: testData.moduleBreakdown,
         compressionStats: {
@@ -67,15 +90,58 @@ class ReportGenerator {
         recommendations: this.generateDailyRecommendations(testData, memoryData, compressionData)
       };
 
-      // 保存報告
-      fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+      // 從當日 memories 估算 avgDurationMs / largestArtifactMB
+      try {
+        const vm = JSON.parse(fs.readFileSync('EduCreate-Test-Videos/local-memory/video-memories.json','utf8'));
+        const todays = vm.memories.filter(m => (m.timestamp||'').startsWith(reportDate));
+        if (todays.length>0) {
+          const avgDur = todays.reduce((s,m)=> s + (m.performance?.duration||0), 0) / todays.length;
+          const largest = todays.reduce((mx,m)=> Math.max(mx, m.performance?.fileSize||0), 0);
+          report.summary.avgDurationMs = Math.round(avgDur || 0);
+          report.summary.largestArtifactMB = Number((largest/1024/1024).toFixed(2));
+        }
+      } catch {}
 
-      // 生成 Markdown 版本
-      const markdownReport = this.generateDailyMarkdown(report);
-      const markdownPath = reportPath.replace('.json', '.md');
-      fs.writeFileSync(markdownPath, markdownReport);
 
-      console.log(`✅ 每日報告已生成: ${reportPath}`);
+      fs.mkdirSync(dailyDir, { recursive: true });
+      fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2));
+
+      // 生成 artifacts.csv（掃描當日 current 目錄）
+      const currentRoot = 'EduCreate-Test-Videos/current';
+      const rows = ['path,bytes,durationMs,mappedGame,unmapped'];
+      let largest = 0;
+      const walk = (dir) => {
+        if (!fs.existsSync(dir)) return;
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const e of entries) {
+          const fp = path.join(dir, e.name);
+          if (e.isDirectory()) walk(fp);
+          else if (e.isFile() && fp.toLowerCase().endsWith('.webm')) {
+            const st = fs.statSync(fp);
+            largest = Math.max(largest, st.size);
+            rows.push([
+              path.relative('EduCreate-Test-Videos', fp).replace(/,/g,';'),
+              st.size,
+              0,
+              '',
+              fp.includes('/unknown/') ? 'true' : 'false'
+            ].join(','));
+          }
+        }
+      };
+      walk(currentRoot);
+      fs.writeFileSync(csvPath, rows.join('\n'));
+
+      // index.html（使用相對路徑，從 daily/<date>/ 指向專案根）
+      const baseFromDaily = path.relative(path.dirname(htmlPath), 'EduCreate-Test-Videos').replace(/\\/g,'/');
+      const htmlRows = rows.slice(1).map(line => {
+        const [p, bytes] = line.split(',');
+        return `<tr><td><a href='${baseFromDaily}/${p}'>${p}</a></td><td>${(bytes/1024/1024).toFixed(2)} MB</td></tr>`;
+      }).join('\n');
+      const html = `<!doctype html><html><head><meta charset='utf-8'><title>Daily ${reportDate}</title><style>table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:6px}</style></head><body><h1>Daily ${reportDate}</h1><ul><li>Total: ${totalTests}</li><li>Passed: ${passed}</li><li>Failed: ${failed}</li><li>Unmapped Success: ${unmappedSuccess}</li><li>Largest Artifact(MB): ${(largest/1024/1024).toFixed(2)}</li></ul><table><thead><tr><th>Artifact</th><th>Size</th></tr></thead><tbody>${htmlRows}</tbody></table></body></html>`;
+      fs.writeFileSync(htmlPath, html);
+
+      console.log(`✅ 每日報告已生成: ${htmlPath}`);
       return report;
 
     } catch (error) {
@@ -526,6 +592,117 @@ ${rec.message}
     // 檢查系統警報
     return [];
   }
+
+  // 生成報告入口首頁 reports/index.html
+  async generateReportsHome() {
+    const homePath = `${this.reportsDir}/index.html`;
+    const dailyRoot = `${this.reportsDir}/daily`;
+    const currentRoot = 'EduCreate-Test-Videos/current';
+    const homeDir = path.dirname(homePath);
+
+    // 最近 7 天的日報資料夾
+    let recentDays = [];
+    try {
+      if (fs.existsSync(dailyRoot)) {
+        const entries = fs.readdirSync(dailyRoot, { withFileTypes: true })
+          .filter(e => e.isDirectory())
+          .map(e => e.name)
+          .filter(n => /\d{4}-\d{2}-\d{2}/.test(n))
+          .sort((a,b) => a < b ? 1 : -1);
+        recentDays = entries.slice(0, 7);
+      }
+    } catch {}
+
+    // 今日快捷連結
+    const today = new Date().toISOString().slice(0,10);
+    const todayIndex = `${dailyRoot}/${today}/index.html`;
+    const todayCsv = `${dailyRoot}/${today}/artifacts.csv`;
+    const todaySummary = `${dailyRoot}/${today}/summary.json`;
+    const dashboardJson = `${this.reportsDir}/dashboard/dashboard-data.json`;
+
+    const toHref = (absPath) => path.relative(homeDir, absPath).replace(/\\/g,'/');
+    const link = (p, text) => fs.existsSync(p)
+      ? `<a href='${toHref(p)}'>${text}</a>`
+      : `<span style='color:#999'>${text}（尚未生成）</span>`;
+
+    // 最新 10 個影片與對應 trace
+    const artifacts = [];
+    const walk = (dir) => {
+      if (!fs.existsSync(dir)) return;
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const e of entries) {
+        const fp = path.join(dir, e.name);
+        if (e.isDirectory()) walk(fp);
+        else if (e.isFile() && fp.toLowerCase().endsWith('.webm')) {
+          const st = fs.statSync(fp);
+          artifacts.push({ path: fp, size: st.size, mtime: st.mtimeMs });
+        }
+      }
+    };
+    walk(currentRoot);
+    artifacts.sort((a,b) => b.mtime - a.mtime);
+    const latest = artifacts.slice(0, 10).map(a => {
+      const rel = path.relative('EduCreate-Test-Videos', a.path).replace(/\\/g,'/');
+      const targetAbs = path.join('EduCreate-Test-Videos', rel);
+      const artHref = path.relative(homeDir, targetAbs).replace(/\\/g,'/');
+      const zip = a.path.replace(/\.webm$/i, '.zip');
+      const zipRel = path.relative('EduCreate-Test-Videos', zip).replace(/\\/g,'/');
+      const zipAbs = path.join('EduCreate-Test-Videos', zipRel);
+      const zipHref = fs.existsSync(zip) ? path.relative(homeDir, zipAbs).replace(/\\/g,'/') : '';
+      const sizeMB = (a.size/1024/1024).toFixed(2);
+      const zipLink = zipHref ? `<a href='${zipHref}'>trace</a>` : '';
+      return `<tr><td><a href='${artHref}'>${rel}</a></td><td>${sizeMB} MB</td><td>${zipLink}</td></tr>`;
+    }).join('\n');
+
+    const recentList = recentDays.map(d => {
+      const p = `${dailyRoot}/${d}/index.html`;
+      return `<li>${link(p, d)}</li>`;
+    }).join('\n');
+
+    const html = `<!doctype html>
+<html><head><meta charset='utf-8'><title>EduCreate Reports Home</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+.card{border:1px solid #ddd;padding:12px;border-radius:8px;margin:10px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+ table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:6px}
+</style>
+</head>
+<body>
+<h1>EduCreate Reports Home</h1>
+<div class='grid'>
+  <div class='card'>
+    <h2>今日快捷</h2>
+    <ul>
+      <li>${link(todayIndex, '今日日報 index.html')}</li>
+      <li>${link(todayCsv, '今日 artifacts.csv')}</li>
+      <li>${link(todaySummary, '今日 summary.json')}</li>
+      <li>${link(dashboardJson, 'Dashboard JSON')}</li>
+    </ul>
+  </div>
+  <div class='card'>
+    <h2>最近 7 天</h2>
+    <ul>${recentList || '<li>尚無日報</li>'}</ul>
+  </div>
+</div>
+
+<div class='card'>
+  <h2>最新影片（10）</h2>
+  <table>
+    <thead><tr><th>Artifact</th><th>Size</th><th>Trace</th></tr></thead>
+    <tbody>${latest || ''}</tbody>
+  </table>
+</div>
+
+<p style='color:#777'>此頁面由 generate-reports.js 自動生成。若用 file:// 開啟，連結已改為相對路徑，亦可改用 VSCode Live Server 或 localhost 靜態伺服器。</p>
+</body></html>`;
+
+    fs.mkdirSync(this.reportsDir, { recursive: true });
+    fs.writeFileSync(homePath, html);
+    console.log(`✅ 報告首頁已生成: ${homePath}`);
+    return homePath;
+  }
+
 }
 
 // 主函數
@@ -551,6 +728,7 @@ async function main() {
         await generator.generateDailyReport();
         await generator.generateWeeklyReport();
         await generator.generateDashboardData();
+        await generator.generateReportsHome();
         break;
       default:
         console.log('使用方法: node generate-reports.js [daily|weekly|monthly|dashboard|all]');
