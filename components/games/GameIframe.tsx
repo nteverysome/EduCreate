@@ -6,6 +6,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { RefreshCw, Maximize2, Minimize2, Loader2, AlertCircle } from 'lucide-react';
 
 export interface GameMessage {
   type: 'GAME_READY' | 'GAME_SCORE_UPDATE' | 'GAME_STATE_CHANGE' | 'GAME_COMPLETE';
@@ -101,15 +102,15 @@ export default function GameIframe({
   const handleIframeLoad = useCallback(() => {
     console.log('📱 iframe 載入完成');
     
-    // 設置載入超時
+    // 設置載入超時 (增加到 30 秒，因為 Phaser 遊戲需要較長載入時間)
     const loadTimeout = setTimeout(() => {
       if (isLoading) {
         setHasError(true);
-        setErrorMessage('遊戲載入超時，請檢查網絡連接');
+        setErrorMessage('遊戲載入超時，請檢查網絡連接或嘗試重新載入');
         setIsLoading(false);
         onError?.('遊戲載入超時');
       }
-    }, 10000); // 10秒超時
+    }, 30000); // 30秒超時
 
     // 清理超時
     return () => clearTimeout(loadTimeout);
@@ -141,10 +142,44 @@ export default function GameIframe({
   }, [gameUrl]);
 
   /**
-   * 切換全螢幕模式
+   * 切換真正的全螢幕模式
    */
-  const toggleFullscreen = useCallback(() => {
-    setIsFullscreen(!isFullscreen);
+  const toggleFullscreen = useCallback(async () => {
+    if (!document.fullscreenElement) {
+      // 進入全螢幕
+      try {
+        const container = document.querySelector('.game-iframe-container') || iframeRef.current?.parentElement;
+        if (container && container.requestFullscreen) {
+          await container.requestFullscreen();
+        } else if (container && (container as any).webkitRequestFullscreen) {
+          await (container as any).webkitRequestFullscreen();
+        } else if (container && (container as any).msRequestFullscreen) {
+          await (container as any).msRequestFullscreen();
+        }
+        setIsFullscreen(true);
+        console.log('🎮 進入真正的全螢幕模式');
+      } catch (error) {
+        console.error('進入全螢幕失敗:', error);
+        // 降級到 CSS 全螢幕
+        setIsFullscreen(!isFullscreen);
+      }
+    } else {
+      // 退出全螢幕
+      try {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        } else if ((document as any).msExitFullscreen) {
+          await (document as any).msExitFullscreen();
+        }
+        setIsFullscreen(false);
+        console.log('🎮 退出全螢幕模式');
+      } catch (error) {
+        console.error('退出全螢幕失敗:', error);
+        setIsFullscreen(false);
+      }
+    }
   }, [isFullscreen]);
 
   // 設置消息監聽器
@@ -156,6 +191,45 @@ export default function GameIframe({
     };
   }, [handleGameMessage]);
 
+  // 監聽全螢幕狀態變化和鍵盤事件
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = !!document.fullscreenElement;
+      setIsFullscreen(isCurrentlyFullscreen);
+      console.log('🎮 全螢幕狀態變化:', isCurrentlyFullscreen ? '進入' : '退出');
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // F11 鍵切換全螢幕
+      if (event.key === 'F11') {
+        event.preventDefault();
+        toggleFullscreen();
+      }
+      // ESC 鍵退出全螢幕（雖然瀏覽器預設也會處理）
+      if (event.key === 'Escape' && isFullscreen) {
+        event.preventDefault();
+        toggleFullscreen();
+      }
+    };
+
+    // 監聽各種瀏覽器的全螢幕事件
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    
+    // 監聽鍵盤事件
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isFullscreen, toggleFullscreen]);
+
   // 組件樣式
   const containerStyle: React.CSSProperties = {
     width: isFullscreen ? '100vw' : width,
@@ -164,10 +238,11 @@ export default function GameIframe({
     top: isFullscreen ? 0 : 'auto',
     left: isFullscreen ? 0 : 'auto',
     zIndex: isFullscreen ? 9999 : 'auto',
-    backgroundColor: '#000033',
+    backgroundColor: isFullscreen ? '#000' : '#000033',
     borderRadius: isFullscreen ? 0 : '8px',
     overflow: 'hidden',
-    border: '2px solid #333'
+    border: isFullscreen ? 'none' : '2px solid #333',
+    margin: isFullscreen ? 0 : 'auto'
   };
 
   return (
@@ -176,58 +251,7 @@ export default function GameIframe({
       className={`game-iframe-container ${className}`}
       style={containerStyle}
     >
-      {/* 遊戲控制欄 */}
-      <div className="game-controls" style={{
-        position: 'absolute',
-        top: '8px',
-        right: '8px',
-        zIndex: 10,
-        display: 'flex',
-        gap: '8px'
-      }}>
-        {/* 遊戲統計 */}
-        <div style={{
-          background: 'rgba(0, 0, 0, 0.7)',
-          color: 'white',
-          padding: '4px 8px',
-          borderRadius: '4px',
-          fontSize: '12px'
-        }}>
-          分數: {gameStats.score} | 生命: {gameStats.health}
-        </div>
 
-        {/* 重新載入按鈕 */}
-        <button
-          onClick={reloadGame}
-          style={{
-            background: 'rgba(0, 0, 0, 0.7)',
-            color: 'white',
-            border: 'none',
-            padding: '4px',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-          title="重新載入遊戲"
-        >
-          <RefreshCw size={16} />
-        </button>
-
-        {/* 全螢幕按鈕 */}
-        <button
-          onClick={toggleFullscreen}
-          style={{
-            background: 'rgba(0, 0, 0, 0.7)',
-            color: 'white',
-            border: 'none',
-            padding: '4px',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-          title={isFullscreen ? '退出全螢幕' : '全螢幕模式'}
-        >
-          {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-        </button>
-      </div>
 
       {/* 載入狀態 */}
       {isLoading && (
@@ -305,7 +329,7 @@ export default function GameIframe({
           display: hasError ? 'none' : 'block',
           border: 'none'
         }}
-        sandbox="allow-scripts allow-same-origin allow-forms"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-top-navigation allow-popups allow-modals"
       />
     </div>
   );

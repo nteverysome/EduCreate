@@ -30,15 +30,15 @@ export class ResponsivePhaserConfig {
     baseWidth: 1274,
     baseHeight: 739,
     
-    // 縮放配置 - 使用 FIT 模式保持穩定性
+    // 縮放配置 - 使用 FIT 模式保持穩定性，支援動態切換到 RESIZE
     scaleMode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     
-    // 尺寸限制
+    // 尺寸限制 - 放寬以支援各種設備
     minWidth: 320,   // 最小支援手機尺寸
     minHeight: 240,
-    maxWidth: 1920,  // 最大支援 1080p
-    maxHeight: 1080,
+    maxWidth: 3840,  // 支援 4K 螢幕
+    maxHeight: 2160,
     
     // 響應式選項
     enableResponsive: true,
@@ -72,9 +72,13 @@ export class ResponsivePhaserConfig {
           height: config.minHeight
         },
         max: {
-          width: config.maxWidth,
-          height: config.maxHeight
+          width: config.maxWidth || window.innerWidth,
+          height: config.maxHeight || window.innerHeight
         },
+        
+        // 🎯 關鍵設置：支援全螢幕填滿
+        expandParent: true,  // 允許擴展父容器
+        fullscreenTarget: document.body, // 全螢幕目標設為 body
         
         // 響應式選項
         zoom: 1,
@@ -139,7 +143,12 @@ export class ResponsivePhaserConfig {
       scaleMode: Phaser.Scale.RESIZE, // 全螢幕時使用 RESIZE 模式
       autoCenter: Phaser.Scale.CENTER_BOTH,
       enableResponsive: true,
-      smoothScaling: true
+      smoothScaling: true,
+      // 全螢幕時移除尺寸限制，讓遊戲完全填滿螢幕
+      minWidth: 320,
+      minHeight: 240,
+      maxWidth: undefined, // 移除最大寬度限制
+      maxHeight: undefined // 移除最大高度限制
     });
   }
 

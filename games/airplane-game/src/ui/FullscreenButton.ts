@@ -967,26 +967,274 @@ export class FullscreenButton {
       }
     });
 
-    // 🔧 關鍵修復：觸發響應式管理器強制更新
+    // 🔧 關鍵修復：動態切換 Phaser Scale 模式並觸發響應式更新
     setTimeout(() => {
-      // 觸發 Phaser 的 resize 事件
+      // 🎯 使用 CSS 直接操作實現真正的全螢幕填滿
+      console.log(`🎮 切換全螢幕模式: ${this.isFullscreen ? '填滿整個螢幕' : '恢復原始尺寸'}`);
+      
+      const canvas = this.scene.game.canvas;
+      const gameContainer = canvas?.parentElement;
+      
+      if (this.isFullscreen) {
+        console.log('🔥 進入真正全螢幕模式 - CSS 直接操作');
+        
+        // 🔥 終極解決方案：精確計算 transform scale 填滿螢幕
+        if (canvas) {
+          // 🎯 強制使用遊戲的標準尺寸，不依賴當前顯示尺寸
+          const canvasWidth = 1274;  // 遊戲設計尺寸
+          const canvasHeight = 739;  // 遊戲設計尺寸
+          
+          // 記錄實際的畫布顯示尺寸用於 debug
+          const canvasRect = canvas.getBoundingClientRect();
+          console.log(`📐 畫布實際顯示尺寸: ${canvasRect.width} x ${canvasRect.height}`);
+          
+          // 計算需要的縮放比例
+          const scaleX = window.innerWidth / canvasWidth;
+          const scaleY = window.innerHeight / canvasHeight;
+          
+          // 🎯 精確計算：使用剛好覆蓋的縮放比例，不過度縮放
+          const scale = Math.max(scaleX, scaleY) * 1.05; // 只增加 5% 確保覆蓋，避免過度偏移
+          
+          console.log(`🎯 計算縮放詳細資訊:`);
+          console.log(`   畫布尺寸: ${canvasWidth} x ${canvasHeight}`);
+          console.log(`   螢幕尺寸: ${window.innerWidth} x ${window.innerHeight}`);
+          console.log(`   螢幕比例: ${(window.innerWidth / window.innerHeight).toFixed(3)}`);
+          console.log(`   遊戲比例: ${(canvasWidth / canvasHeight).toFixed(3)}`);
+          console.log(`   scaleX: ${scaleX.toFixed(3)}, scaleY: ${scaleY.toFixed(3)}`);
+          console.log(`   基礎scale: ${Math.max(scaleX, scaleY).toFixed(3)}`);
+          console.log(`   最終scale: ${scale.toFixed(3)} (增加5%)`);
+          
+          // 🎯 精確定位：直接計算像素位置，並補償已知的 margin 偏移
+          const scaledWidth = canvasWidth * scale;
+          const scaledHeight = canvasHeight * scale;
+          
+          // 基礎居中位置
+          let offsetX = (window.innerWidth - scaledWidth) / 2;
+          let offsetY = (window.innerHeight - scaledHeight) / 2;
+          
+          // 🔧 補償已知的負 margin 偏移 (-371px left, -216px top)
+          // 從診斷結果看，實際位置比設定位置多偏移了 371px (left) 和 216px (top)
+          offsetX += 371; // 補償左側負 margin
+          offsetY += 216; // 補償上方負 margin
+          
+          console.log(`🎯 精確定位計算:`);
+          console.log(`   縮放後尺寸: ${scaledWidth.toFixed(1)} x ${scaledHeight.toFixed(1)}`);
+          console.log(`   偏移量: x=${offsetX.toFixed(1)}, y=${offsetY.toFixed(1)}`);
+          
+          // 🔥 終極暴力修復：移除所有樣式，重新設置
+          canvas.removeAttribute('style');
+          
+          // 強制設置關鍵樣式 - 使用 cssText 一次性設置所有樣式
+          const cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            outline: none !important;
+            z-index: 9999 !important;
+            object-fit: fill !important;
+            display: block !important;
+            visibility: visible !important;
+            background: #000033 !important;
+          `;
+          
+          canvas.style.cssText = cssText;
+          
+          console.log(`🔥 強制設置樣式: top=${offsetY}px, left=${offsetX}px, width=${scaledWidth}px, height=${scaledHeight}px`);
+          
+          // 🚨 強制清除任何可能的負 margin，並使用觀察器持續監控
+          const fixMargin = () => {
+            const currentMargin = canvas.style.margin;
+            if (currentMargin !== '0px' && currentMargin !== '0' && currentMargin !== '') {
+              console.log(`🚨 檢測到錯誤 margin: ${currentMargin}，強制修正`);
+              canvas.style.setProperty('margin', '0', 'important');
+              canvas.style.setProperty('margin-top', '0', 'important');
+              canvas.style.setProperty('margin-left', '0', 'important');
+              canvas.style.setProperty('margin-right', '0', 'important');
+              canvas.style.setProperty('margin-bottom', '0', 'important');
+            }
+          };
+          
+          // 立即執行一次
+          fixMargin();
+          
+          // 每 100ms 檢查一次，持續 3 秒
+          const fixInterval = setInterval(fixMargin, 100);
+          setTimeout(() => {
+            clearInterval(fixInterval);
+            console.log(`🔥 margin 監控已停止`);
+          }, 3000);
+          
+          // 🔥 不使用 transform，直接設置尺寸
+          canvas.style.transform = 'none';
+          canvas.style.transformOrigin = 'center center';
+          
+          // 🔥 額外保險：設置 overflow hidden 確保沒有滾動條
+          canvas.style.overflow = 'hidden';
+          
+          // 確保顯示
+          canvas.style.display = 'block';
+          canvas.style.visibility = 'visible';
+          
+          // 設置背景色避免空隙
+          canvas.style.background = '#000033';
+          
+          console.log(`🔥 應用直接定位: top=${offsetY.toFixed(1)}px, left=${offsetX.toFixed(1)}px, size=${scaledWidth.toFixed(1)}x${scaledHeight.toFixed(1)}`);
+          
+          // 🔍 驗證最終覆蓋範圍
+          setTimeout(() => {
+            console.log(`🔍 最終覆蓋驗證:`);
+            console.log(`   畫布位置: (${offsetX.toFixed(1)}, ${offsetY.toFixed(1)})`);
+            console.log(`   畫布尺寸: ${scaledWidth.toFixed(1)} x ${scaledHeight.toFixed(1)}`);
+            console.log(`   螢幕尺寸: ${window.innerWidth} x ${window.innerHeight}`);
+            console.log(`   完全覆蓋: ${scaledWidth >= window.innerWidth && scaledHeight >= window.innerHeight ? '✅' : '❌'}`);
+            console.log(`   是否居中: ${Math.abs(offsetX) < 1 && Math.abs(offsetY) < 1 ? '✅' : '❌'}`);
+          }, 100);
+        }
+        
+        // 設置遊戲容器和所有父容器 - 使用 cssText 強制設置
+        let container = gameContainer;
+        while (container && container !== document.body) {
+          const containerCssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            overflow: hidden !important;
+            z-index: 9998 !important;
+            background: transparent !important;
+          `;
+          
+          container.style.cssText = containerCssText;
+          console.log(`🎯 設置容器: ${container.tagName}#${container.id}`);
+          
+          // 移動到父容器
+          container = container.parentElement as HTMLElement;
+        }
+        
+        // 🚀 設置 body 和 html 以避免滾動條和邊距
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        document.body.style.overflow = 'hidden';
+        document.body.style.background = '#000033'; // 設置背景色以防止空隙
+        document.documentElement.style.margin = '0';
+        document.documentElement.style.padding = '0';
+        document.documentElement.style.overflow = 'hidden';
+        document.documentElement.style.background = '#000033';
+        
+        // 🎯 讓 Phaser 保持原始尺寸，由 CSS 負責拉伸顯示
+        this.scene.scale.scaleMode = Phaser.Scale.NONE;
+        
+        // 不改變 Phaser 的內部遊戲尺寸，保持 1274x739
+        // 這樣遊戲邏輯保持不變，只是顯示被 CSS 拉伸
+        
+        console.log(`🎯 保持 Phaser 原始尺寸，CSS 負責顯示拉伸`);
+        
+      } else {
+        console.log('🔄 退出全螢幕模式 - 恢復原始樣式');
+        
+        // 🔄 恢復所有修改過的樣式
+        if (canvas) {
+          canvas.style.position = '';
+          canvas.style.top = '';
+          canvas.style.left = '';
+          canvas.style.width = '';
+          canvas.style.height = '';
+          canvas.style.zIndex = '';
+          canvas.style.margin = '';
+          canvas.style.padding = '';
+          canvas.style.border = '';
+          canvas.style.outline = '';
+          canvas.style.background = '';
+          canvas.style.transform = '';
+          canvas.style.transformOrigin = '';
+          canvas.style.overflow = '';
+          canvas.style.visibility = '';
+          canvas.style.display = '';
+          
+          console.log('🔄 恢復畫布原始樣式');
+        }
+        
+        // 恢復所有容器樣式
+        let container = gameContainer;
+        while (container) {
+          container.style.position = '';
+          container.style.top = '';
+          container.style.left = '';
+          container.style.width = '';
+          container.style.height = '';
+          container.style.zIndex = '';
+          container.style.margin = '';
+          container.style.padding = '';
+          container.style.overflow = '';
+          container.style.background = '';
+          
+          container = container.parentElement as HTMLElement;
+          if (container === document.body || container === document.documentElement) break;
+        }
+        
+        // 恢復 body 和 html 樣式
+        document.body.style.margin = '';
+        document.body.style.padding = '';
+        document.body.style.overflow = '';
+        document.body.style.background = '';
+        document.documentElement.style.margin = '';
+        document.documentElement.style.padding = '';
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.background = '';
+        
+        // 🔄 恢復原始遊戲尺寸和模式
+        this.scene.scale.scaleMode = Phaser.Scale.FIT;
+        this.scene.scale.setGameSize(1274, 739);
+        
+        console.log('🔄 恢復原始遊戲模式: FIT 1274 x 739');
+      }
+      
+      // 🚀 刷新 Phaser Scale Manager
       this.scene.scale.refresh();
 
-      // 🚀 強制更新響應式管理器，確保所有元素等比例自適應
+      // 🚀 多重強制更新響應式管理器，確保所有元素都正確調整
       const gameScene = this.scene as any;
       if (gameScene.responsiveManager) {
-        console.log('🔄 觸發響應式管理器強制更新...');
+        console.log('🔄 觸發響應式管理器多重強制更新...');
+        
+        // 第一次立即更新
         gameScene.responsiveManager.forceUpdate(true);
-        console.log('✅ 響應式管理器更新完成');
+        
+        // 延遲再次更新，確保所有元素都被重新計算
+        setTimeout(() => {
+          gameScene.responsiveManager.forceUpdate(true);
+          console.log('🔄 第二次響應式更新完成');
+        }, 100);
+        
+        // 最終更新
+        setTimeout(() => {
+          gameScene.responsiveManager.forceUpdate(true);
+          console.log('✅ 最終響應式管理器更新完成');
+        }, 300);
       } else {
         console.warn('⚠️ 響應式管理器不存在');
       }
 
-      // 更新按鈕位置
+      // 🎯 強制觸發 Phaser 的 resize 事件
+      this.scene.events.emit('resize', this.scene.scale.gameSize);
+      
+      // 更新按鈕位置（延遲以確保所有元素都已更新）
+      setTimeout(() => {
       this.updatePosition();
+        console.log('🎯 全螢幕按鈕位置更新完成');
+      }, 150);
 
-      console.log('🎯 全螢幕自適應處理完成');
-    }, 150); // 增加延遲確保 DOM 更新完成
+      console.log('🎯 Phaser 3 全螢幕自適應處理完成');
+    }, 200); // 增加延遲確保瀏覽器全螢幕切換完成
   }
   
   /**

@@ -1,0 +1,602 @@
+{
+  "summary": {
+    "total": 14,
+    "successful": 14,
+    "failed": 0,
+    "byType": {
+      "desktop": {
+        "total": 4,
+        "successful": 4
+      },
+      "tablet": {
+        "total": 3,
+        "successful": 3
+      },
+      "mobile": {
+        "total": 4,
+        "successful": 4
+      },
+      "mobile-landscape": {
+        "total": 3,
+        "successful": 3
+      }
+    }
+  },
+  "details": [
+    {
+      "device": "桌面-1920x1080",
+      "deviceType": "desktop",
+      "resolution": "1920x1080",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1920,
+          "height": 1080
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1920px",
+          "height": "1080px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 1920,
+        "height": 1080
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "桌面-1366x768",
+      "deviceType": "desktop",
+      "resolution": "1366x768",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1366,
+          "height": 768
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1366px",
+          "height": "768px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 1366,
+        "height": 768
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "桌面-2560x1440",
+      "deviceType": "desktop",
+      "resolution": "2560x1440",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 2560,
+          "height": 1440
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "2560px",
+          "height": "1440px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 2560,
+        "height": 1440
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "桌面-3840x2160-4K",
+      "deviceType": "desktop",
+      "resolution": "3840x2160",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 3840,
+          "height": 2160
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "3840px",
+          "height": "2160px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 3840,
+        "height": 2160
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "iPad-Pro-1024x1366",
+      "deviceType": "tablet",
+      "resolution": "1024x1366",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1024,
+          "height": 1366
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1024px",
+          "height": "1366px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 1024,
+        "height": 1366
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "iPad-768x1024",
+      "deviceType": "tablet",
+      "resolution": "768x1024",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 768,
+          "height": 1024
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "768px",
+          "height": "1024px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 768,
+        "height": 1024
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "Android平板-800x1280",
+      "deviceType": "tablet",
+      "resolution": "800x1280",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 800,
+          "height": 1280
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "800px",
+          "height": "1280px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 800,
+        "height": 1280
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "iPhone-12-390x844",
+      "deviceType": "mobile",
+      "resolution": "390x844",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 390,
+          "height": 844
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "390px",
+          "height": "844px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 390,
+        "height": 844
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "iPhone-SE-375x667",
+      "deviceType": "mobile",
+      "resolution": "375x667",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 375,
+          "height": 667
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "375px",
+          "height": "667px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "Android-360x640",
+      "deviceType": "mobile",
+      "resolution": "360x640",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 360,
+          "height": 640
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "360px",
+          "height": "640px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 360,
+        "height": 640
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "Samsung-Galaxy-412x915",
+      "deviceType": "mobile",
+      "resolution": "412x915",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 412,
+          "height": 915
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "412px",
+          "height": "915px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 412,
+        "height": 915
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "iPhone-12-橫向-844x390",
+      "deviceType": "mobile-landscape",
+      "resolution": "844x390",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 844,
+          "height": 390
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "844px",
+          "height": "390px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 844,
+        "height": 390
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "iPhone-SE-橫向-667x375",
+      "deviceType": "mobile-landscape",
+      "resolution": "667x375",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 667,
+          "height": 375
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "667px",
+          "height": "375px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 667,
+        "height": 375
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    },
+    {
+      "device": "Android-橫向-640x360",
+      "deviceType": "mobile-landscape",
+      "resolution": "640x360",
+      "success": true,
+      "canvas": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 640,
+          "height": 360
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "640px",
+          "height": "360px",
+          "margin": "0px"
+        }
+      },
+      "window": {
+        "width": 640,
+        "height": 360
+      },
+      "coverage": {
+        "leftGap": 0,
+        "topGap": 0,
+        "rightGap": 0,
+        "bottomGap": 0,
+        "widthRatio": 1,
+        "heightRatio": 1
+      },
+      "issues": {
+        "hasLeftGap": false,
+        "hasTopGap": false,
+        "hasRightGap": false,
+        "hasBottomGap": false,
+        "tooSmall": false
+      }
+    }
+  ],
+  "timestamp": "2025-08-25T16:11:49.429Z"
+}

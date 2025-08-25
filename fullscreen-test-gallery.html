@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduCreate 跨設備全螢幕測試結果</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .summary-card {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 5px solid #27ae60;
+        }
+
+        .summary-card h3 {
+            color: #27ae60;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .device-category {
+            margin-bottom: 50px;
+        }
+
+        .category-header {
+            background: #34495e;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .category-header h2 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        .device-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .device-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .device-header {
+            background: #3498db;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .device-header h3 {
+            font-size: 1.3em;
+            margin-bottom: 5px;
+        }
+
+        .device-resolution {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .screenshot-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .screenshot-section {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .screenshot-section.before {
+            border-right: 2px solid #ecf0f1;
+        }
+
+        .screenshot-section h4 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .screenshot-section.before h4 {
+            color: #e74c3c;
+        }
+
+        .screenshot-section.after h4 {
+            color: #27ae60;
+        }
+
+        .screenshot-container {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: #f8f9fa;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .screenshot-container img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot-container img:hover {
+            transform: scale(1.05);
+        }
+
+        .no-image {
+            color: #95a5a6;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .fullscreen-info {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #495057;
+        }
+
+        .fullscreen-info strong {
+            color: #27ae60;
+        }
+
+        /* 模態框樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .close:hover {
+            color: #ccc;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .footer h3 {
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .device-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .screenshot-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .screenshot-section.before {
+                border-right: none;
+                border-bottom: 2px solid #ecf0f1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 EduCreate 跨設備全螢幕測試結果</h1>
+            <p>完整的跨設備相容性測試報告 - 28 張截圖對比分析</p>
+            
+            <div class="summary">
+                <div class="summary-card">
+                    <h3>14</h3>
+                    <p>測試設備</p>
+                </div>
+                <div class="summary-card">
+                    <h3>100%</h3>
+                    <p>成功率</p>
+                </div>
+                <div class="summary-card">
+                    <h3>28</h3>
+                    <p>測試截圖</p>
+                </div>
+                <div class="summary-card">
+                    <h3>✅</h3>
+                    <p>完美相容</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 桌面設備 -->
+        <div class="device-category">
+            <div class="category-header">
+                <h2>🖥️ 桌面設備</h2>
+                <p>測試結果：4/4 設備成功 (100%)</p>
+            </div>
+            <div class="device-grid">
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>標準 FHD 顯示器</h3>
+                        <div class="device-resolution">1920 x 1080</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-桌面-1920x1080-before.png" alt="1920x1080 全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-桌面-1920x1080-after.png" alt="1920x1080 全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>筆記本常見解析度</h3>
+                        <div class="device-resolution">1366 x 768</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-桌面-1366x768-before.png" alt="1366x768 全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-桌面-1366x768-after.png" alt="1366x768 全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>2K 高解析度顯示器</h3>
+                        <div class="device-resolution">2560 x 1440</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-桌面-2560x1440-before.png" alt="2560x1440 全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-桌面-2560x1440-after.png" alt="2560x1440 全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>4K 超高解析度顯示器</h3>
+                        <div class="device-resolution">3840 x 2160</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-桌面-3840x2160-4K-before.png" alt="4K 全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-桌面-3840x2160-4K-after.png" alt="4K 全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 平板設備 -->
+        <div class="device-category">
+            <div class="category-header">
+                <h2>📱 平板設備</h2>
+                <p>測試結果：3/3 設備成功 (100%)</p>
+            </div>
+            <div class="device-grid">
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>iPad Pro</h3>
+                        <div class="device-resolution">1024 x 1366</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPad-Pro-1024x1366-before.png" alt="iPad Pro 全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPad-Pro-1024x1366-after.png" alt="iPad Pro 全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>標準 iPad</h3>
+                        <div class="device-resolution">768 x 1024</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPad-768x1024-before.png" alt="iPad 全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPad-768x1024-after.png" alt="iPad 全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>Android 平板</h3>
+                        <div class="device-resolution">800 x 1280</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-Android平板-800x1280-before.png" alt="Android 平板全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-Android平板-800x1280-after.png" alt="Android 平板全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 手機設備 - 直向 -->
+        <div class="device-category">
+            <div class="category-header">
+                <h2>📱 手機設備 (直向)</h2>
+                <p>測試結果：4/4 設備成功 (100%)</p>
+            </div>
+            <div class="device-grid">
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>iPhone 12</h3>
+                        <div class="device-resolution">390 x 844</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPhone-12-390x844-before.png" alt="iPhone 12 全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPhone-12-390x844-after.png" alt="iPhone 12 全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>iPhone SE</h3>
+                        <div class="device-resolution">375 x 667</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPhone-SE-375x667-before.png" alt="iPhone SE 全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPhone-SE-375x667-after.png" alt="iPhone SE 全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>Android 標準</h3>
+                        <div class="device-resolution">360 x 640</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-Android-360x640-before.png" alt="Android 全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-Android-360x640-after.png" alt="Android 全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>Samsung Galaxy</h3>
+                        <div class="device-resolution">412 x 915</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-Samsung-Galaxy-412x915-before.png" alt="Samsung Galaxy 全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-Samsung-Galaxy-412x915-after.png" alt="Samsung Galaxy 全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 手機設備 - 橫向 -->
+        <div class="device-category">
+            <div class="category-header">
+                <h2>📱 手機設備 (橫向)</h2>
+                <p>測試結果：3/3 設備成功 (100%)</p>
+            </div>
+            <div class="device-grid">
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>iPhone 12 橫向</h3>
+                        <div class="device-resolution">844 x 390</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPhone-12-橫向-844x390-before.png" alt="iPhone 12 橫向全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPhone-12-橫向-844x390-after.png" alt="iPhone 12 橫向全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>iPhone SE 橫向</h3>
+                        <div class="device-resolution">667 x 375</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPhone-SE-橫向-667x375-before.png" alt="iPhone SE 橫向全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-iPhone-SE-橫向-667x375-after.png" alt="iPhone SE 橫向全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+
+                <div class="device-card">
+                    <div class="device-header">
+                        <h3>Android 橫向</h3>
+                        <div class="device-resolution">640 x 360</div>
+                    </div>
+                    <div class="screenshot-comparison">
+                        <div class="screenshot-section before">
+                            <h4>🔴 全螢幕前</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-Android-橫向-640x360-before.png" alt="Android 橫向全螢幕前" onclick="openModal(this.src)">
+                                <div class="status-badge">測試中</div>
+                            </div>
+                        </div>
+                        <div class="screenshot-section after">
+                            <h4>🟢 全螢幕後</h4>
+                            <div class="screenshot-container">
+                                <img src="device-test-Android-橫向-640x360-after.png" alt="Android 橫向全螢幕後" onclick="openModal(this.src)">
+                                <div class="status-badge">成功</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fullscreen-info">
+                        <strong>覆蓋率：</strong>100.0% x 100.0%<br>
+                        <strong>空隙：</strong>L=0px T=0px R=0px B=0px
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>🎉 測試總結</h3>
+            <p>
+                <strong>EduCreate 跨設備全螢幕功能測試圓滿成功！</strong><br>
+                所有 14 種設備配置均完美支援全螢幕，覆蓋率 100%，無任何黑邊或空隙。<br>
+                從最小的手機螢幕 (360x640) 到 4K 顯示器 (3840x2160) 都能完美適應。
+            </p>
+            <div style="margin-top: 20px; color: #7f8c8d;">
+                <small>測試時間：2025年1月 | 技術支援：AI Assistant</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 圖片放大模態框 -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="">
+        </div>
+    </div>
+
+    <script>
+        function openModal(src) {
+            document.getElementById('imageModal').style.display = 'block';
+            document.getElementById('modalImage').src = src;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // 處理圖片載入錯誤
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.screenshot-container img');
+            images.forEach(img => {
+                img.onerror = function() {
+                    this.parentElement.innerHTML = '<div class="no-image">圖片載入中或不存在</div>';
+                };
+            });
+        });
+
+        // ESC 鍵關閉模態框
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDownIcon, PlayIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+import GameIframe from './GameIframe';
 
 // 遊戲配置類型定義
 interface GameConfig {
@@ -24,6 +25,9 @@ interface GameState {
   level: string;
   progress: number;
   timeSpent: number;
+  health?: number;
+  state?: string;
+  lastUpdated?: number;
 }
 
 // 組件 Props
@@ -140,11 +144,11 @@ const getGamesConfig = (): GameConfig[] => {
 const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
   switch (gameId) {
     case 'airplane-vite':
-      return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
+      return isLocalhost ? 'http://localhost:3006/' : '/games/airplane-game/';
     case 'airplane-main':
-      return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
+      return isLocalhost ? 'http://localhost:3003/games/airplane-game/' : '/games/airplane-game/';
     case 'airplane-iframe':
-      return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
+      return isLocalhost ? 'http://localhost:3004/' : '/games/airplane-game/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':
@@ -178,7 +182,6 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
   // Refs
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
@@ -301,19 +304,6 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     console.log(`🎮 切換到遊戲: ${game.displayName} (${game.type})`);
   }, [currentGameId, isLoading, simulateLoading, onGameChange]);
 
-  // iframe 載入完成處理
-  const handleIframeLoad = useCallback(() => {
-    if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
-    if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-    
-    setLoadingProgress(100);
-    setTimeout(() => {
-      setIsLoading(false);
-      setLoadingProgress(0);
-    }, 100);
-    
-    console.log(`✅ 遊戲載入完成: ${currentGame?.displayName}`);
-  }, [currentGame]);
 
   // iframe 消息處理
   const handleIframeMessage = useCallback((event: MessageEvent) => {
@@ -613,38 +603,63 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         </div>
       )}
 
-      {/* 遊戲 iframe 容器 - 響應式設計 */}
+      {/* 遊戲 iframe 容器 - 使用增強型 GameIframe 組件 */}
       <div
-        className="game-iframe-container relative bg-white overflow-hidden mx-auto w-full"
+        className="w-full"
         style={{
           aspectRatio: isMobile ? '812/375' : '1274/739',
           minHeight: '300px',
           maxHeight: isMobile ? '375px' : '739px',
-          width: '100%',
           height: isMobile ? '375px' : 'auto',
-          // 強制覆蓋CSS限制
           maxWidth: 'none !important' as any,
         }}
         data-testid="game-container"
       >
-        {isLoading && (
-          <div className="loading-overlay absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center z-10">
-            <div className="loading-content text-center">
-              <div className="spinner animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <div className="loading-text mt-4 text-gray-600">載入中...</div>
-              <div className="text-sm text-gray-500 mt-1">{currentGame?.displayName || '遊戲'}</div>
-            </div>
-          </div>
-        )}
-
-        <iframe
-          ref={iframeRef}
-          src={currentGame.url}
-          className="w-full h-full border-0"
+        <GameIframe
+          gameUrl={currentGame.url}
           title={currentGame.displayName}
-          onLoad={handleIframeLoad}
-          allow="fullscreen; autoplay; microphone; camera"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+          width="100%"
+          height={isMobile ? '375px' : '739px'}
+          className="w-full h-full"
+          onGameReady={() => {
+            console.log('🎮 遊戲準備完成:', currentGame.displayName);
+            setIsLoading(false);
+          }}
+          onScoreUpdate={(score, health) => {
+            console.log('📊 分數更新:', score, '血量:', health);
+            setGameStates(prev => ({
+              ...prev,
+              [currentGameId]: {
+                ...prev[currentGameId],
+                score: score,
+                health: health,
+                lastUpdated: Date.now()
+              }
+            }));
+          }}
+          onGameStateChange={(state) => {
+            console.log('🎯 遊戲狀態變更:', state);
+            const gameState: GameState = {
+              score: gameStates[currentGameId]?.score || 0,
+              level: gameStates[currentGameId]?.level || '1',
+              progress: gameStates[currentGameId]?.progress || 0,
+              timeSpent: gameStates[currentGameId]?.timeSpent || 0,
+              lastUpdated: Date.now(),
+              state: state
+            };
+            setGameStates(prev => ({
+              ...prev,
+              [currentGameId]: gameState
+            }));
+            onGameStateUpdate?.(currentGameId, gameState);
+          }}
+          onGameComplete={(result) => {
+            console.log('🏆 遊戲完成:', result);
+          }}
+          onError={(error) => {
+            console.error('❌ 遊戲錯誤:', error);
+            setIsLoading(false);
+          }}
         />
       </div>
 
