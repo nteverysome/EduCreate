@@ -1,0 +1,746 @@
+{
+  "summary": {
+    "total": 6,
+    "successful": 6,
+    "failed": 0,
+    "portraitDevices": [
+      {
+        "device": "iPad-Pro-1024x1366",
+        "deviceType": "tablet-portrait",
+        "resolution": "1024x1366",
+        "before": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 1024,
+            "height": 1366
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "1024px",
+            "height": "1366px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "after": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 1024,
+            "height": 1366
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "1024px",
+            "height": "1366px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "window": {
+          "width": 1024,
+          "height": 1366
+        },
+        "success": true,
+        "needsFix": false
+      },
+      {
+        "device": "iPad-768x1024",
+        "deviceType": "tablet-portrait",
+        "resolution": "768x1024",
+        "before": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 768,
+            "height": 1024
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "768px",
+            "height": "1024px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "after": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 768,
+            "height": 1024
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "768px",
+            "height": "1024px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "window": {
+          "width": 768,
+          "height": 1024
+        },
+        "success": true,
+        "needsFix": false
+      },
+      {
+        "device": "Android平板-800x1280",
+        "deviceType": "tablet-portrait",
+        "resolution": "800x1280",
+        "before": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 800,
+            "height": 1280
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "800px",
+            "height": "1280px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "after": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 800,
+            "height": 1280
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "800px",
+            "height": "1280px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "window": {
+          "width": 800,
+          "height": 1280
+        },
+        "success": true,
+        "needsFix": false
+      }
+    ],
+    "landscapeDevices": [
+      {
+        "device": "iPad-Pro-橫向-1366x1024",
+        "deviceType": "tablet-landscape",
+        "resolution": "1366x1024",
+        "before": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 1366,
+            "height": 1024
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "1366px",
+            "height": "1024px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "after": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 1366,
+            "height": 1024
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "1366px",
+            "height": "1024px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "window": {
+          "width": 1366,
+          "height": 1024
+        },
+        "success": true,
+        "needsFix": false
+      },
+      {
+        "device": "iPad-橫向-1024x768",
+        "deviceType": "tablet-landscape",
+        "resolution": "1024x768",
+        "before": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 1024,
+            "height": 768
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "1024px",
+            "height": "768px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "after": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 1024,
+            "height": 768
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "1024px",
+            "height": "768px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "window": {
+          "width": 1024,
+          "height": 768
+        },
+        "success": true,
+        "needsFix": false
+      },
+      {
+        "device": "Android平板-橫向-1280x800",
+        "deviceType": "tablet-landscape",
+        "resolution": "1280x800",
+        "before": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 1280,
+            "height": 800
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "1280px",
+            "height": "800px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "after": {
+          "position": {
+            "left": 0,
+            "top": 0
+          },
+          "size": {
+            "width": 1280,
+            "height": 800
+          },
+          "coverage": {
+            "leftGap": 0,
+            "topGap": 0,
+            "rightGap": 0,
+            "bottomGap": 0,
+            "widthRatio": 1,
+            "heightRatio": 1
+          },
+          "styles": {
+            "position": "fixed",
+            "width": "1280px",
+            "height": "800px",
+            "margin": "0px",
+            "transform": "none"
+          }
+        },
+        "window": {
+          "width": 1280,
+          "height": 800
+        },
+        "success": true,
+        "needsFix": false
+      }
+    ]
+  },
+  "details": [
+    {
+      "device": "iPad-Pro-1024x1366",
+      "deviceType": "tablet-portrait",
+      "resolution": "1024x1366",
+      "before": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1024,
+          "height": 1366
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1024px",
+          "height": "1366px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "after": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1024,
+          "height": 1366
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1024px",
+          "height": "1366px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "window": {
+        "width": 1024,
+        "height": 1366
+      },
+      "success": true,
+      "needsFix": false
+    },
+    {
+      "device": "iPad-768x1024",
+      "deviceType": "tablet-portrait",
+      "resolution": "768x1024",
+      "before": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 768,
+          "height": 1024
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "768px",
+          "height": "1024px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "after": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 768,
+          "height": 1024
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "768px",
+          "height": "1024px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "window": {
+        "width": 768,
+        "height": 1024
+      },
+      "success": true,
+      "needsFix": false
+    },
+    {
+      "device": "Android平板-800x1280",
+      "deviceType": "tablet-portrait",
+      "resolution": "800x1280",
+      "before": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 800,
+          "height": 1280
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "800px",
+          "height": "1280px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "after": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 800,
+          "height": 1280
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "800px",
+          "height": "1280px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "window": {
+        "width": 800,
+        "height": 1280
+      },
+      "success": true,
+      "needsFix": false
+    },
+    {
+      "device": "iPad-Pro-橫向-1366x1024",
+      "deviceType": "tablet-landscape",
+      "resolution": "1366x1024",
+      "before": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1366,
+          "height": 1024
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1366px",
+          "height": "1024px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "after": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1366,
+          "height": 1024
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1366px",
+          "height": "1024px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "window": {
+        "width": 1366,
+        "height": 1024
+      },
+      "success": true,
+      "needsFix": false
+    },
+    {
+      "device": "iPad-橫向-1024x768",
+      "deviceType": "tablet-landscape",
+      "resolution": "1024x768",
+      "before": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1024,
+          "height": 768
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1024px",
+          "height": "768px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "after": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1024,
+          "height": 768
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1024px",
+          "height": "768px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "window": {
+        "width": 1024,
+        "height": 768
+      },
+      "success": true,
+      "needsFix": false
+    },
+    {
+      "device": "Android平板-橫向-1280x800",
+      "deviceType": "tablet-landscape",
+      "resolution": "1280x800",
+      "before": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1280,
+          "height": 800
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1280px",
+          "height": "800px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "after": {
+        "position": {
+          "left": 0,
+          "top": 0
+        },
+        "size": {
+          "width": 1280,
+          "height": 800
+        },
+        "coverage": {
+          "leftGap": 0,
+          "topGap": 0,
+          "rightGap": 0,
+          "bottomGap": 0,
+          "widthRatio": 1,
+          "heightRatio": 1
+        },
+        "styles": {
+          "position": "fixed",
+          "width": "1280px",
+          "height": "800px",
+          "margin": "0px",
+          "transform": "none"
+        }
+      },
+      "window": {
+        "width": 1280,
+        "height": 800
+      },
+      "success": true,
+      "needsFix": false
+    }
+  ],
+  "timestamp": "2025-08-25T16:30:01.803Z"
+}

@@ -1024,6 +1024,11 @@ export class FullscreenButton {
           // 🔥 終極暴力修復：移除所有樣式，重新設置
           canvas.removeAttribute('style');
           
+          // 🎯 檢測設備類型以應用最適合的修復方案
+          const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1366 && 
+                          (window.innerWidth < window.innerHeight || // 直向平板
+                           (window.innerWidth > window.innerHeight && window.innerWidth <= 1366)); // 橫向平板
+          
           // 強制設置關鍵樣式 - 使用 cssText 一次性設置所有樣式
           const cssText = `
             position: fixed !important;
@@ -1035,14 +1040,53 @@ export class FullscreenButton {
             padding: 0 !important;
             border: none !important;
             outline: none !important;
-            z-index: 9999 !important;
-            object-fit: fill !important;
+            z-index: ${isTablet ? '10000' : '9999'} !important;
+            object-fit: ${isTablet ? 'cover' : 'fill'} !important;
+            object-position: center !important;
             display: block !important;
             visibility: visible !important;
             background: #000033 !important;
+            transform: none !important;
+            transform-origin: center center !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
           `;
           
           canvas.style.cssText = cssText;
+          
+          // 🎯 平板設備專用處理
+          if (isTablet) {
+            console.log('🎯 檢測到平板設備，應用專用優化');
+            
+            // 設置 viewport meta
+            let viewportMeta = document.querySelector('meta[name="viewport"]');
+            if (!viewportMeta) {
+              viewportMeta = document.createElement('meta');
+              viewportMeta.name = 'viewport';
+              document.head.appendChild(viewportMeta);
+            }
+            viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no';
+            
+            // 強化 body 和 html 設置
+            document.body.style.cssText = `
+              margin: 0 !important;
+              padding: 0 !important;
+              overflow: hidden !important;
+              width: 100vw !important;
+              height: 100vh !important;
+              position: fixed !important;
+              top: 0 !important;
+              left: 0 !important;
+            `;
+            
+            document.documentElement.style.cssText = `
+              margin: 0 !important;
+              padding: 0 !important;
+              overflow: hidden !important;
+              width: 100vw !important;
+              height: 100vh !important;
+            `;
+          }
           
           console.log(`🔥 強制設置樣式: top=${offsetY}px, left=${offsetX}px, width=${scaledWidth}px, height=${scaledHeight}px`);
           
@@ -1096,6 +1140,9 @@ export class FullscreenButton {
           }, 100);
         }
         
+        // 🎯 檢測設備類型並設置對應的容器樣式
+        const isTabletDevice = window.innerWidth >= 768 && window.innerWidth <= 1366;
+        
         // 設置遊戲容器和所有父容器 - 使用 cssText 強制設置
         let container = gameContainer;
         while (container && container !== document.body) {
@@ -1109,12 +1156,14 @@ export class FullscreenButton {
             padding: 0 !important;
             border: none !important;
             overflow: hidden !important;
-            z-index: 9998 !important;
+            z-index: ${isTabletDevice ? '9999' : '9998'} !important;
             background: transparent !important;
+            transform: none !important;
+            box-sizing: border-box !important;
           `;
           
           container.style.cssText = containerCssText;
-          console.log(`🎯 設置容器: ${container.tagName}#${container.id}`);
+          console.log(`🎯 設置容器: ${container.tagName}#${container.id} (${isTabletDevice ? '平板' : '桌面'}模式)`);
           
           // 移動到父容器
           container = container.parentElement as HTMLElement;
