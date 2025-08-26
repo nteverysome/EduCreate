@@ -144,11 +144,11 @@ const getGamesConfig = (): GameConfig[] => {
 const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
   switch (gameId) {
     case 'airplane-vite':
-      return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
+      return isLocalhost ? 'http://localhost:3005/' : '/games/airplane-game/';
     case 'airplane-main':
-      return isLocalhost ? 'http://localhost:3003/games/airplane-game/' : '/games/airplane-game/';
+      return isLocalhost ? 'http://localhost:3004/games/airplane-game/' : '/games/airplane-game/';
     case 'airplane-iframe':
-      return isLocalhost ? 'http://localhost:3004/' : '/games/airplane-game/';
+      return isLocalhost ? 'http://localhost:3006/' : '/games/airplane-game/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':

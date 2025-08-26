@@ -107,20 +107,33 @@ export default function GameIframe({
    * 處理 iframe 載入完成
    */
   const handleIframeLoad = useCallback(() => {
-    console.log('📱 iframe 載入完成');
+    console.log('📱 iframe 載入完成，等待遊戲初始化...');
+  }, []);
+
+  /**
+   * 設置遊戲載入超時機制
+   */
+  useEffect(() => {
+    if (!isLoading) return;
+
+    console.log('⏰ 開始遊戲載入超時計時 (45秒)...');
     
-    // 設置載入超時 (增加到 30 秒，因為 Phaser 遊戲需要較長載入時間)
+    // 設置載入超時 (增加到 45 秒，給遊戲充分的初始化時間)
     const loadTimeout = setTimeout(() => {
       if (isLoading) {
+        console.log('⏰ 遊戲載入超時觸發');
         setHasError(true);
         setErrorMessage('遊戲載入超時，請檢查網絡連接或嘗試重新載入');
         setIsLoading(false);
         onError?.('遊戲載入超時');
       }
-    }, 30000); // 30秒超時
+    }, 45000); // 45秒超時
 
     // 清理超時
-    return () => clearTimeout(loadTimeout);
+    return () => {
+      console.log('🗑️ 清理載入超時計時器');
+      clearTimeout(loadTimeout);
+    };
   }, [isLoading, onError]);
 
   /**
