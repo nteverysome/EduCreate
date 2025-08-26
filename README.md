@@ -145,6 +145,10 @@ npm run dev
 - **[📋 實施缺口分析](docs/cdn-implementation-gap-analysis.md)** - 可行性分析
 - **[📋 實施行動計劃](docs/cdn-implementation-action-plan.md)** - 分階段實施計劃
 
+### 🎯 **核心技術實現指南** ⭐ **新增**
+- **[🎮 全螢幕功能成功實現分析](FULLSCREEN_SUCCESS_ANALYSIS.md)** - 經過實戰驗證的技術指南
+- **[👨‍💻 開發者指南](docs/developer-guide.md)** - 包含最佳實踐和實現模式
+
 ## 🧪 測試
 
 ### 運行測試

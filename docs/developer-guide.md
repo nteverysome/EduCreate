@@ -7,10 +7,11 @@
 3. [開發環境設置](#開發環境設置)
 4. [開發工作流程](#開發工作流程)
 5. [代碼規範](#代碼規範)
-6. [API 參考](#api-參考)
-7. [測試](#測試)
-8. [部署](#部署)
-9. [貢獻指南](#貢獻指南)
+6. [🎯 核心技術實現指南](#核心技術實現指南)
+7. [API 參考](#api-參考)
+8. [測試](#測試)
+9. [部署](#部署)
+10. [貢獻指南](#貢獻指南)
 
 ## 介紹
 
@@ -279,6 +280,68 @@ yarn dev
 - `perf`：提高性能的代碼更改
 - `test`：添加或修正測試
 - `chore`：對構建過程或輔助工具的更改
+
+## 🎯 核心技術實現指南
+
+本節包含項目中關鍵技術實現的最佳實踐和成功模式，這些是經過實戰驗證的重要技術指南。
+
+### 🎮 全螢幕功能實現
+
+對於遊戲和互動組件的全螢幕功能實現，請參考我們的成功分析：
+
+**📋 必讀文檔**: [全螢幕功能成功實現分析](../FULLSCREEN_SUCCESS_ANALYSIS.md)
+
+#### 核心原則
+1. **"Less is More"** - 簡單的解決方案往往更可靠
+2. **"設備特化"** - 針對不同設備類型優化
+3. **"防禦優先"** - 主動對抗外部干擾
+4. **"視覺完美"** - 用戶體驗是最終目標
+
+#### 關鍵技術要點
+- 使用簡單的 CSS 拉伸 (`100vw/100vh` + `object-fit`) 而非複雜的 transform 計算
+- 實現智能設備檢測，桌面用 `object-fit: fill`，平板用 `object-fit: cover`
+- 建立持續監控機制，主動對抗框架的樣式干擾
+- 使用深色背景掩蓋可能的視覺空隙
+
+#### 實現模板
+```javascript
+// 設備檢測
+const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1366 && 
+                (window.innerWidth < window.innerHeight || 
+                 (window.innerWidth > window.innerHeight && window.innerWidth <= 1366));
+
+// 條件化樣式
+const cssText = `
+  position: fixed !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  object-fit: ${isTablet ? 'cover' : 'fill'} !important;
+  background: #000033 !important;
+`;
+
+// 持續監控
+const fixMargin = () => {
+  if (canvas.style.margin !== '0px') {
+    canvas.style.setProperty('margin', '0', 'important');
+  }
+};
+setInterval(fixMargin, 100);
+```
+
+#### 何時使用
+- Canvas 遊戲組件需要全螢幕顯示
+- 互動多媒體內容需要沈浸式體驗
+- 跨設備響應式全螢幕需求
+
+#### 避免的陷阱
+- ❌ 過度複雜的 transform 數學計算
+- ❌ 一刀切的通用方案
+- ❌ 忽略框架的樣式干擾
+- ❌ 透明背景可能暴露空隙
+
+---
+
+**💡 貢獻更多技術指南**: 當您成功解決複雜技術問題時，請按照上述格式為本指南添加新的技術實現模式。
 
 ## API 參考
 

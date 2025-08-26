@@ -77,18 +77,56 @@ async function initGame() {
       console.error('❌ Phaser 遊戲錯誤:', error);
     });
     
-    // 遊戲就緒回調
-    game.events.once('ready', () => {
-      console.log('✅ Airplane Collision Game 初始化完成');
+    // 防止重複發送的標記
+    let gameReadySent = false;
+    
+    // 增強的遊戲就緒檢測
+    const sendGameReadyMessage = () => {
+      if (gameReadySent) {
+        console.log('⚠️ GAME_READY 已發送，跳過重複發送');
+        return;
+      }
+      
+      gameReadySent = true;
+      console.log('📤 發送 GAME_READY 消息 (首次)');
+      
+      const message = {
+        type: 'GAME_READY',
+        timestamp: Date.now()
+      };
       
       // 向父頁面發送就緒消息
       if (window.parent !== window) {
-        window.parent.postMessage({
-          type: 'GAME_READY',
-          timestamp: Date.now()
-        }, '*');
+        console.log('📤 向父頁面發送消息:', message);
+        window.parent.postMessage(message, '*');
+      } else {
+        console.log('⚠️ 未檢測到父頁面，可能是直接訪問');
       }
+    };
+    
+    // 主要的遊戲就緒回調
+    game.events.once('ready', () => {
+      console.log('✅ Airplane Collision Game 初始化完成 (Phaser ready event)');
+      sendGameReadyMessage();
     });
+    
+    // 備用的載入完成檢測 (防止 ready 事件失效)
+    setTimeout(() => {
+      if (game && game.scene && !gameReadySent) {
+        console.log('⏰ 備用載入檢測觸發 (3秒後)');
+        sendGameReadyMessage();
+      }
+    }, 3000);
+    
+    // 第三重保障：監聽場景載入完成
+    let stepListener = () => {
+      if (game.scene.getScenes().length > 0 && game.scene.getScenes()[0].scene.isActive() && !gameReadySent) {
+        console.log('🎬 檢測到場景已激活');
+        game.events.off('step', stepListener); // 移除監聽器
+        sendGameReadyMessage();
+      }
+    };
+    game.events.on('step', stepListener);
     
     // 將遊戲實例暴露到全局（用於調試）
     if (typeof window !== 'undefined') {

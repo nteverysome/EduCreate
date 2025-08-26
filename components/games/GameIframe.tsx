@@ -55,14 +55,21 @@ export default function GameIframe({
    * 處理來自遊戲的消息
    */
   const handleGameMessage = useCallback((event: MessageEvent) => {
-    // 安全檢查：確保消息來自正確的源
-    if (!gameUrl.includes(event.origin) && event.origin !== window.location.origin) {
+    // 改進的安全檢查：支援多種 origin 格式
+    const isValidOrigin = 
+      event.origin === window.location.origin ||                    // 同源
+      gameUrl.includes(event.origin) ||                            // gameUrl 包含 origin
+      event.origin.includes('localhost:3002') ||                   // 遊戲服務器
+      (event.origin.includes('localhost') && gameUrl.includes('localhost')); // 本地開發
+
+    if (!isValidOrigin) {
+      console.log('🔒 消息被安全檢查攔截:', event.origin, 'gameUrl:', gameUrl);
       return;
     }
 
     const message: GameMessage = event.data;
     
-    console.log('🎮 收到遊戲消息:', message);
+    console.log('🎮 收到遊戲消息:', message, 'from:', event.origin);
 
     switch (message.type) {
       case 'GAME_READY':
