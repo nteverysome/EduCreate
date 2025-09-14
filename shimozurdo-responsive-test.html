@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 shimozurdo 響應式功能深度測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .test-section {
+            padding: 30px;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .test-panel {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .test-panel h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .iframe-container {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+        }
+        
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn.active {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+        }
+        
+        .info-panel {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .analysis-section {
+            background: #f0f8ff;
+            border: 1px solid #4facfe;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .analysis-section h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .feature-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .feature-item h5 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .feature-item p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-success { background: #4caf50; }
+        .status-warning { background: #ff9800; }
+        .status-error { background: #f44336; }
+        
+        @media (max-width: 768px) {
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="header">
+            <div class="title">🔍 shimozurdo 響應式功能深度測試</div>
+            <div class="subtitle">mobile-game-base-phaser3 實際效果驗證與分析</div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-grid">
+                <div class="test-panel">
+                    <h3>🎮 shimozurdo 原始專案</h3>
+                    <div class="controls">
+                        <button class="btn active" onclick="setSize('mobile')">📱 手機 (375×667)</button>
+                        <button class="btn" onclick="setSize('tablet')">📱 平板 (768×1024)</button>
+                        <button class="btn" onclick="setSize('desktop')">🖥️ 桌面 (1200×800)</button>
+                        <button class="btn" onclick="toggleFullscreen()">🔍 全螢幕</button>
+                    </div>
+                    <div class="iframe-container" id="gameContainer">
+                        <iframe src="http://localhost:8080" id="gameFrame" title="shimozurdo Game"></iframe>
+                    </div>
+                </div>
+                
+                <div class="test-panel">
+                    <h3>📊 即時響應式資訊</h3>
+                    <div class="info-panel">
+                        <h4>當前狀態監控</h4>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">容器尺寸</div>
+                                <div class="info-value" id="containerSize">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">視窗比例</div>
+                                <div class="info-value" id="aspectRatio">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">設備類型</div>
+                                <div class="info-value" id="deviceType">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">縮放模式</div>
+                                <div class="info-value" id="scaleMode">RESIZE</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">基準尺寸</div>
+                                <div class="info-value">540×960</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">相機算法</div>
+                                <div class="info-value">Math.max</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-panel" style="background: #fff3cd; border-color: #ffc107;">
+                        <h4>🔍 測試觀察要點</h4>
+                        <ul style="padding-left: 20px; color: #666;">
+                            <li>遊戲內容是否完全可見（無裁切）</li>
+                            <li>是否有黑邊或空白區域</li>
+                            <li>UI 元素位置是否正確調整</li>
+                            <li>縮放過渡是否流暢</li>
+                            <li>不同尺寸下的視覺效果</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="analysis-section">
+                <h4>🎯 shimozurdo 響應式核心特性分析</h4>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h5><span class="status-indicator status-success"></span>Portrait-First 設計</h5>
+                        <p>基準尺寸 540×960 (16:9 Portrait)，專為移動設備優化，確保在手機直向模式下有最佳體驗。</p>
+                    </div>
+                    <div class="feature-item">
+                        <h5><span class="status-indicator status-success"></span>RESIZE Scale Mode</h5>
+                        <p>使用 Phaser.Scale.RESIZE 模式，遊戲畫布動態調整到容器尺寸，無黑邊完全填滿。</p>
+                    </div>
+                    <div class="feature-item">
+                        <h5><span class="status-indicator status-success"></span>Math.max 相機算法</h5>
+                        <p>camera.setZoom(Math.max(scaleX, scaleY)) 確保遊戲內容完全可見，不會被裁切。</p>
+                    </div>
+                    <div class="feature-item">
+                        <h5><span class="status-indicator status-success"></span>統一 Handler 管理</h5>
+                        <p>Handler Scene 集中管理所有場景的響應式行為，確保一致性和可維護性。</p>
+                    </div>
+                    <div class="feature-item">
+                        <h5><span class="status-indicator status-success"></span>雙重 Size 系統</h5>
+                        <p>Parent 和 Sizer 分離關注點，使用 Phaser.Structs.Size 進行精確比例計算。</p>
+                    </div>
+                    <div class="feature-item">
+                        <h5><span class="status-indicator status-success"></span>動態 Resize 處理</h5>
+                        <p>即時響應窗口大小變化，自動重新計算相機縮放和居中位置。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentSize = 'mobile';
+        
+        const sizes = {
+            mobile: { width: 375, height: 667 },
+            tablet: { width: 768, height: 1024 },
+            desktop: { width: 1200, height: 800 }
+        };
+        
+        function setSize(sizeType) {
+            currentSize = sizeType;
+            const container = document.getElementById('gameContainer');
+            const size = sizes[sizeType];
+            
+            container.style.width = size.width + 'px';
+            container.style.height = size.height + 'px';
+            container.style.margin = '0 auto';
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            updateInfo();
+        }
+        
+        function toggleFullscreen() {
+            const container = document.getElementById('gameContainer');
+            if (container.style.width === '100%') {
+                setSize(currentSize);
+            } else {
+                container.style.width = '100%';
+                container.style.height = '80vh';
+                updateInfo();
+            }
+        }
+        
+        function updateInfo() {
+            const container = document.getElementById('gameContainer');
+            const rect = container.getBoundingClientRect();
+            
+            document.getElementById('containerSize').textContent = 
+                Math.round(rect.width) + '×' + Math.round(rect.height);
+            
+            const ratio = (rect.width / rect.height).toFixed(2);
+            document.getElementById('aspectRatio').textContent = ratio;
+            
+            let deviceType = 'Desktop';
+            if (rect.width < 500) deviceType = 'Mobile';
+            else if (rect.width < 900) deviceType = 'Tablet';
+            document.getElementById('deviceType').textContent = deviceType;
+        }
+        
+        // 初始化
+        window.addEventListener('load', function() {
+            updateInfo();
+            
+            // 定期更新資訊
+            setInterval(updateInfo, 1000);
+            
+            console.log('🎮 shimozurdo 響應式測試工具已載入');
+            console.log('📊 監控 shimozurdo 專案運行在 http://localhost:8080');
+            console.log('🔍 測試不同尺寸下的響應式表現');
+        });
+        
+        // 監聽窗口大小變化
+        window.addEventListener('resize', updateInfo);
+    </script>
+</body>
+</html>

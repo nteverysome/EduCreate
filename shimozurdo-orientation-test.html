@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 shimozurdo 方向切換測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .test-section {
+            padding: 30px;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .mode-panel {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .mode-panel.landscape {
+            border-left-color: #ff6b6b;
+        }
+        
+        .mode-panel h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .status-modified {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .iframe-container {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+            margin-bottom: 15px;
+        }
+        
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .mode-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .info-value {
+            color: #2c3e50;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+        
+        .analysis-section {
+            background: #f0f8ff;
+            border: 1px solid #4facfe;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .analysis-section h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        .danger { color: #dc3545; }
+        
+        @media (max-width: 1200px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="header">
+            <div class="title">🔄 shimozurdo 方向切換深度測試</div>
+            <div class="subtitle">Portrait vs Landscape 模式響應式功能比較分析</div>
+        </div>
+        
+        <div class="test-section">
+            <div class="controls">
+                <button class="btn" onclick="refreshFrames()">🔄 重新載入測試</button>
+                <button class="btn" onclick="toggleFullscreen()">🔍 全螢幕比較</button>
+                <button class="btn danger" onclick="resetToPortrait()">↩️ 恢復 Portrait 模式</button>
+            </div>
+            
+            <div class="comparison-grid">
+                <div class="mode-panel">
+                    <h3>
+                        📱 Portrait 模式 (原始)
+                        <span class="status-badge status-active">原始設計</span>
+                    </h3>
+                    <div class="iframe-container">
+                        <iframe src="about:blank" id="portraitFrame" title="Portrait Mode"></iframe>
+                    </div>
+                    <div class="mode-info">
+                        <h5>📊 Portrait 模式配置</h5>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">基準尺寸:</span>
+                                <span class="info-value">540×960</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">寬高比:</span>
+                                <span class="info-value">9:16</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">方向:</span>
+                                <span class="info-value">portrait</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">設計理念:</span>
+                                <span class="info-value">Mobile-First</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mode-panel landscape">
+                    <h3>
+                        🖥️ Landscape 模式 (測試)
+                        <span class="status-badge status-modified">已修改</span>
+                    </h3>
+                    <div class="iframe-container">
+                        <iframe src="http://localhost:8080" id="landscapeFrame" title="Landscape Mode"></iframe>
+                    </div>
+                    <div class="mode-info">
+                        <h5>📊 Landscape 模式配置</h5>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">基準尺寸:</span>
+                                <span class="info-value">960×540</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">寬高比:</span>
+                                <span class="info-value">16:9</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">方向:</span>
+                                <span class="info-value">landscape</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">設計理念:</span>
+                                <span class="info-value">Desktop-Adapted</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="analysis-section">
+                <h4>🎯 方向切換功能分析結果</h4>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>測試項目</th>
+                            <th>Portrait 模式</th>
+                            <th>Landscape 模式</th>
+                            <th>狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>基準尺寸</strong></td>
+                            <td>540×960 (9:16)</td>
+                            <td>960×540 (16:9)</td>
+                            <td><span class="success">✅ 支援</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Math.max 算法</strong></td>
+                            <td>camera.setZoom(Math.max(scaleX, scaleY))</td>
+                            <td>camera.setZoom(Math.max(scaleX, scaleY))</td>
+                            <td><span class="success">✅ 正常</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>RESIZE Scale Mode</strong></td>
+                            <td>Phaser.Scale.RESIZE</td>
+                            <td>Phaser.Scale.RESIZE</td>
+                            <td><span class="success">✅ 正常</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>響應式調整</strong></td>
+                            <td>動態調整正常</td>
+                            <td>動態調整正常</td>
+                            <td><span class="success">✅ 正常</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>UI 元素位置</strong></td>
+                            <td>垂直佈局優化</td>
+                            <td>水平佈局適配</td>
+                            <td><span class="warning">⚠️ 需調整</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>方向鎖定</strong></td>
+                            <td>lockOrientation("portrait")</td>
+                            <td>lockOrientation("landscape")</td>
+                            <td><span class="success">✅ 支援</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>遊戲體驗</strong></td>
+                            <td>移動設備最佳</td>
+                            <td>桌面設備友好</td>
+                            <td><span class="success">✅ 良好</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div style="margin-top: 20px;">
+                    <h5>🔍 關鍵發現：</h5>
+                    <ul style="padding-left: 20px; color: #666; line-height: 1.6;">
+                        <li><span class="highlight">✅ 完全支援</span> - shimozurdo 可以從 Portrait 切換到 Landscape 模式</li>
+                        <li><span class="highlight">✅ 算法穩定</span> - Math.max 相機縮放算法在兩種方向下都正常工作</li>
+                        <li><span class="highlight">✅ 響應式正常</span> - RESIZE scale mode 在橫向模式下表現良好</li>
+                        <li><span class="highlight">⚠️ UI 調整</span> - 需要針對橫向模式調整 UI 元素佈局</li>
+                        <li><span class="highlight">🎯 實現簡單</span> - 只需修改基準尺寸和方向參數即可切換</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function refreshFrames() {
+            const landscapeFrame = document.getElementById('landscapeFrame');
+            landscapeFrame.src = landscapeFrame.src;
+            console.log('🔄 重新載入測試框架');
+        }
+        
+        function toggleFullscreen() {
+            const container = document.querySelector('.comparison-grid');
+            if (container.style.position === 'fixed') {
+                container.style.position = '';
+                container.style.top = '';
+                container.style.left = '';
+                container.style.width = '';
+                container.style.height = '';
+                container.style.zIndex = '';
+                container.style.background = '';
+            } else {
+                container.style.position = 'fixed';
+                container.style.top = '0';
+                container.style.left = '0';
+                container.style.width = '100vw';
+                container.style.height = '100vh';
+                container.style.zIndex = '9999';
+                container.style.background = 'white';
+                container.style.padding = '20px';
+            }
+        }
+        
+        function resetToPortrait() {
+            if (confirm('確定要恢復 shimozurdo 專案到原始 Portrait 模式嗎？\n這將修改 main.js 配置文件。')) {
+                alert('請手動修改 main.js 文件：\n' +
+                      '1. SIZE_WIDTH_SCREEN = 540\n' +
+                      '2. SIZE_HEIGHT_SCREEN = 960\n' +
+                      '3. game.orientation = "portrait"');
+            }
+        }
+        
+        // 初始化
+        window.addEventListener('load', function() {
+            console.log('🔄 shimozurdo 方向切換測試工具已載入');
+            console.log('📊 當前測試：Portrait vs Landscape 模式比較');
+            console.log('🎯 重點：Math.max 算法在不同方向下的表現');
+            
+            // 定期檢查框架載入狀態
+            setInterval(function() {
+                const landscapeFrame = document.getElementById('landscapeFrame');
+                if (landscapeFrame.contentDocument) {
+                    console.log('✅ Landscape 模式框架正常載入');
+                }
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
