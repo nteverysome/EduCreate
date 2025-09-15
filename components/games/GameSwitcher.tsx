@@ -173,7 +173,7 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
 };
 
 const GameSwitcher: React.FC<GameSwitcherProps> = ({
-  defaultGame = 'airplane-vite',
+  defaultGame = 'shimozurdo-responsive',
   geptLevel = 'elementary',
   onGameChange,
   onGameStateUpdate,
