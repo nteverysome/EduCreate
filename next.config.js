@@ -95,6 +95,14 @@ const nextConfig = {
         source: '/games/airplane-game/:path*',
         destination: '/games/airplane-game/:path*'
       },
+      {
+        source: '/games/shimozurdo-game',
+        destination: '/games/shimozurdo-game/index.html'
+      },
+      {
+        source: '/games/shimozurdo-game/:path*',
+        destination: '/games/shimozurdo-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',
