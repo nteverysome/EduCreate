@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>視差背景測試資源生成器</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        canvas { border: 1px solid #ccc; margin: 10px; }
+        .layer { margin: 20px 0; }
+        button { padding: 10px 20px; margin: 5px; background: #4facfe; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #3d8bfe; }
+    </style>
+</head>
+<body>
+    <h1>🌙 shimozurdo 視差背景測試資源生成器</h1>
+    <p>這個工具會生成測試用的視差背景圖片，讓你立即看到效果。</p>
+    
+    <div class="layer">
+        <h3>第1層 - 星空背景</h3>
+        <canvas id="stars" width="1920" height="1080"></canvas>
+        <button onclick="generateStars()">生成星空</button>
+        <button onclick="downloadCanvas('stars', 'stars.png')">下載</button>
+    </div>
+    
+    <div class="layer">
+        <h3>第2層 - 月亮背景</h3>
+        <canvas id="moon" width="1920" height="1080"></canvas>
+        <button onclick="generateMoon()">生成月亮</button>
+        <button onclick="downloadCanvas('moon', 'moon.png')">下載</button>
+    </div>
+    
+    <div class="layer">
+        <h3>第3層 - 遠景雲層</h3>
+        <canvas id="clouds_far" width="1920" height="1080"></canvas>
+        <button onclick="generateCloudsFar()">生成遠景雲</button>
+        <button onclick="downloadCanvas('clouds_far', 'clouds_far.png')">下載</button>
+    </div>
+    
+    <div class="layer">
+        <h3>第4層 - 近景雲層</h3>
+        <canvas id="clouds_near" width="1920" height="1080"></canvas>
+        <button onclick="generateCloudsNear()">生成近景雲</button>
+        <button onclick="downloadCanvas('clouds_near', 'clouds_near.png')">下載</button>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <button onclick="generateAll()" style="background: #28a745; font-size: 16px; padding: 15px 30px;">🎨 生成所有背景</button>
+        <button onclick="downloadAll()" style="background: #dc3545; font-size: 16px; padding: 15px 30px;">📥 下載所有文件</button>
+    </div>
+
+    <script>
+        // 生成星空背景
+        function generateStars() {
+            const canvas = document.getElementById('stars');
+            const ctx = canvas.getContext('2d');
+            
+            // 清除畫布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 深藍色漸變背景
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#001122');
+            gradient.addColorStop(1, '#000511');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 生成隨機星星
+            for (let i = 0; i < 200; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const size = Math.random() * 3 + 1;
+                const alpha = Math.random() * 0.8 + 0.2;
+                
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // 生成月亮背景
+        function generateMoon() {
+            const canvas = document.getElementById('moon');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 月亮
+            const moonX = canvas.width * 0.8;
+            const moonY = canvas.height * 0.3;
+            const moonRadius = 120;
+            
+            // 月亮光暈
+            const moonGlow = ctx.createRadialGradient(moonX, moonY, 0, moonX, moonY, moonRadius * 3);
+            moonGlow.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+            moonGlow.addColorStop(1, 'rgba(255, 255, 200, 0)');
+            ctx.fillStyle = moonGlow;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 月亮本體
+            ctx.fillStyle = '#ffffcc';
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 月亮陰影
+            ctx.fillStyle = 'rgba(200, 200, 150, 0.3)';
+            ctx.beginPath();
+            ctx.arc(moonX - 20, moonY + 20, moonRadius * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // 生成遠景雲層
+        function generateCloudsFar() {
+            const canvas = document.getElementById('clouds_far');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 生成幾朵遠景雲
+            for (let i = 0; i < 5; i++) {
+                const x = (i / 4) * canvas.width;
+                const y = canvas.height * 0.6 + Math.random() * 200;
+                drawCloud(ctx, x, y, 150, 'rgba(255, 255, 255, 0.4)');
+            }
+        }
+        
+        // 生成近景雲層
+        function generateCloudsNear() {
+            const canvas = document.getElementById('clouds_near');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 生成幾朵近景雲
+            for (let i = 0; i < 3; i++) {
+                const x = (i / 2) * canvas.width;
+                const y = canvas.height * 0.7 + Math.random() * 150;
+                drawCloud(ctx, x, y, 200, 'rgba(255, 255, 255, 0.6)');
+            }
+        }
+        
+        // 繪製雲朵
+        function drawCloud(ctx, x, y, size, color) {
+            ctx.fillStyle = color;
+            
+            // 雲朵由多個圓形組成
+            const circles = [
+                { x: x, y: y, r: size },
+                { x: x - size * 0.5, y: y, r: size * 0.8 },
+                { x: x + size * 0.5, y: y, r: size * 0.8 },
+                { x: x - size * 0.3, y: y - size * 0.3, r: size * 0.6 },
+                { x: x + size * 0.3, y: y - size * 0.3, r: size * 0.6 }
+            ];
+            
+            circles.forEach(circle => {
+                ctx.beginPath();
+                ctx.arc(circle.x, circle.y, circle.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+        
+        // 下載畫布為圖片
+        function downloadCanvas(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // 生成所有背景
+        function generateAll() {
+            generateStars();
+            setTimeout(() => generateMoon(), 100);
+            setTimeout(() => generateCloudsFar(), 200);
+            setTimeout(() => generateCloudsNear(), 300);
+        }
+        
+        // 下載所有文件
+        function downloadAll() {
+            downloadCanvas('stars', 'stars.png');
+            setTimeout(() => downloadCanvas('moon', 'moon.png'), 500);
+            setTimeout(() => downloadCanvas('clouds_far', 'clouds_far.png'), 1000);
+            setTimeout(() => downloadCanvas('clouds_near', 'clouds_near.png'), 1500);
+        }
+        
+        // 頁面載入時自動生成
+        window.onload = function() {
+            generateAll();
+        };
+    </script>
+</body>
+</html>

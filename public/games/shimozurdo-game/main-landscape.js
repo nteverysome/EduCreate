@@ -1,0 +1,52 @@
+import Handler from './scenes/handler.js'
+import Title from './scenes/title.js'
+import Preload from './scenes/preload.js'
+import Hub from './scenes/hub.js'
+
+// Aspect Ratio 16:9 - Landscape (Modified for testing)
+const MAX_SIZE_WIDTH_SCREEN = 1920
+const MAX_SIZE_HEIGHT_SCREEN = 1080
+const MIN_SIZE_WIDTH_SCREEN = 480  // Swapped for landscape
+const MIN_SIZE_HEIGHT_SCREEN = 270  // Swapped for landscape
+const SIZE_WIDTH_SCREEN = 960      // Swapped for landscape
+const SIZE_HEIGHT_SCREEN = 540     // Swapped for landscape
+
+const config = {
+    type: Phaser.AUTO,
+    scale: {
+        mode: Phaser.Scale.RESIZE,
+        parent: 'game',
+        width: SIZE_WIDTH_SCREEN,
+        height: SIZE_HEIGHT_SCREEN,
+        min: {
+            width: MIN_SIZE_WIDTH_SCREEN,
+            height: MIN_SIZE_HEIGHT_SCREEN
+        },
+        max: {
+            width: MAX_SIZE_WIDTH_SCREEN,
+            height: MAX_SIZE_HEIGHT_SCREEN
+        }
+    },
+    dom: {
+        createContainer: true
+    },
+    scene: [Handler, Hub, Preload, Title]
+
+}
+
+const game = new Phaser.Game(config)
+
+// Global
+game.debugMode = true
+game.embedded = false // game is embedded into a html iframe/object
+
+game.screenBaseSize = {
+    maxWidth: MAX_SIZE_WIDTH_SCREEN,
+    maxHeight: MAX_SIZE_HEIGHT_SCREEN,
+    minWidth: MIN_SIZE_WIDTH_SCREEN,
+    minHeight: MIN_SIZE_HEIGHT_SCREEN,
+    width: SIZE_WIDTH_SCREEN,
+    height: SIZE_HEIGHT_SCREEN
+}
+
+game.orientation = "landscape"  // Changed to landscape for testing
