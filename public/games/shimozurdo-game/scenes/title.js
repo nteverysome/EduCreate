@@ -120,12 +120,16 @@ export default class Title extends Phaser.Scene {
                     repeat: -1
                 });
 
-                // 創建太空船精靈（先用簡單方式）
+                // 創建太空船精靈（先用簡單方式確保顯示）
                 this.player = this.add.sprite(width * 0.15, height * 0.5, 'player_spaceship');
                 this.player.setOrigin(0.5, 0.5);
                 this.player.setScale(0.4);
                 this.player.setDepth(-60); // 在視差背景前景，調整深度
                 this.player.play('spaceship_fly');
+
+                // 初始化移動相關變數
+                this.playerSpeed = 250;
+                this.playerTargetY = this.player.y;
 
                 console.log('✅ 太空船精靈創建成功，位置:', this.player.x, this.player.y);
 
@@ -141,8 +145,8 @@ export default class Title extends Phaser.Scene {
             this.createBackupSpaceship(width, height);
         }
 
-        // 暫時註解控制設置，先確保太空船顯示
-        // this.setupSpaceshipControls();
+        // 設置太空船控制
+        this.setupSpaceshipControls();
     }
 
     /**
@@ -171,21 +175,15 @@ export default class Title extends Phaser.Scene {
             graphics.generateTexture('backup_spaceship', 45, 40);
             graphics.destroy();
 
-            // 創建備用太空船（簡單方式）
+            // 創建備用太空船（簡單方式確保顯示）
             this.player = this.add.sprite(width * 0.15, height * 0.5, 'backup_spaceship');
             this.player.setOrigin(0.5, 0.5);
             this.player.setScale(1.2);
             this.player.setDepth(-60);
 
-            // 簡單的浮動動畫
-            this.tweens.add({
-                targets: this.player,
-                y: height * 0.5 + 20,
-                duration: 2000,
-                yoyo: true,
-                repeat: -1,
-                ease: 'Sine.easeInOut'
-            });
+            // 初始化移動相關變數
+            this.playerSpeed = 250;
+            this.playerTargetY = this.player.y;
 
             console.log('✅ 備用太空船創建成功，位置:', this.player.x, this.player.y);
 
@@ -197,51 +195,38 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 🎮 設置太空船控制
+     * 🎮 設置太空船控制（非物理方式）
      */
     setupSpaceshipControls() {
-        if (!this.player) return;
-
-        // const { width, height } = this; // 暫時不需要
+        if (!this.player) {
+            console.warn('⚠️ 太空船不存在，無法設置控制');
+            return;
+        }
 
         // 1. 鍵盤控制
         this.cursors = this.input.keyboard.createCursorKeys();
         this.wasd = this.input.keyboard.addKeys('W,S,A,D');
 
-        // 2. 點擊/觸控控制
+        // 2. 點擊/觸控控制 - 設置目標位置
         this.input.on('pointerdown', (pointer) => {
-            if (!this.player || !this.player.active) return;
+            if (!this.player) return;
 
             const clickY = pointer.y;
             const playerY = this.player.y;
-            const moveSpeed = 300;
 
-            if (clickY < playerY - 50) {
-                // 點擊上方，向上移動
-                this.player.setVelocityY(-moveSpeed);
+            if (clickY < playerY - 30) {
+                // 點擊上方，設置向上移動目標
+                this.playerTargetY = Math.max(80, playerY - 100);
                 console.log('🔼 太空船向上移動');
-            } else if (clickY > playerY + 50) {
-                // 點擊下方，向下移動
-                this.player.setVelocityY(moveSpeed);
+            } else if (clickY > playerY + 30) {
+                // 點擊下方，設置向下移動目標
+                const { height } = this;
+                this.playerTargetY = Math.min(height - 80, playerY + 100);
                 console.log('🔽 太空船向下移動');
             }
         });
 
-        // 3. 觸控移動控制（更精確）
-        this.input.on('pointermove', (pointer) => {
-            if (!this.player || !this.player.active || !pointer.isDown) return;
-
-            const targetY = pointer.y;
-            const currentY = this.player.y;
-            const difference = targetY - currentY;
-
-            if (Math.abs(difference) > 10) {
-                const moveSpeed = Math.min(Math.abs(difference) * 2, 400);
-                this.player.setVelocityY(difference > 0 ? moveSpeed : -moveSpeed);
-            }
-        });
-
-        console.log('🎮 太空船控制設置完成：方向鍵、WASD、點擊、觸控');
+        console.log('🎮 太空船控制設置完成：方向鍵、WASD、點擊');
     }
 
     /**
@@ -296,13 +281,37 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 🚀 更新太空船（簡化版本）
+     * 🚀 更新太空船（非物理移動）
      */
     updateSpaceship() {
-        if (this.player && this.player.active) {
-            // 暫時只檢查太空船是否存在和可見
-            // console.log('太空船狀態:', this.player.x, this.player.y, this.player.visible);
+        if (!this.player || !this.cursors) return;
+
+        const { height } = this;
+        const moveSpeed = 4; // 每幀移動像素
+
+        // 鍵盤控制邏輯
+        if (this.cursors.up.isDown || this.wasd.W.isDown) {
+            this.player.y -= moveSpeed;
+        } else if (this.cursors.down.isDown || this.wasd.S.isDown) {
+            this.player.y += moveSpeed;
         }
+
+        // 點擊移動到目標位置（平滑移動）
+        if (Math.abs(this.player.y - this.playerTargetY) > 2) {
+            const direction = this.playerTargetY > this.player.y ? 1 : -1;
+            this.player.y += direction * moveSpeed;
+        }
+
+        // 限制太空船在合理的垂直範圍內
+        if (this.player.y < 80) {
+            this.player.y = 80;
+        }
+        if (this.player.y > height - 80) {
+            this.player.y = height - 80;
+        }
+
+        // 更新目標位置以防超出邊界
+        this.playerTargetY = Math.max(80, Math.min(height - 80, this.playerTargetY));
     }
 
     /**
