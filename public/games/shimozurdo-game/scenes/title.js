@@ -35,6 +35,9 @@ export default class Title extends Phaser.Scene {
         // ☁️ 創建敵人系統
         this.createEnemySystem()
 
+        // ❤️ 創建生命值系統
+        this.createHealthSystem()
+
         // GAME OBJECTS
         // 初始化響應式元素數組
         this.testElements = [];
@@ -245,6 +248,124 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
+     * ❤️ 創建生命值系統
+     */
+    createHealthSystem() {
+        const { width, height } = this;
+
+        // 生命值設定
+        this.maxHealth = 100;
+        this.currentHealth = 100;
+
+        // 生命值條位置和尺寸（左下角）
+        const healthBarWidth = 200;
+        const healthBarHeight = 20;
+        const margin = 20;
+        const healthBarX = margin;
+        const healthBarY = height - margin - healthBarHeight;
+
+        // 創建生命值條背景（黑色邊框）
+        this.healthBarBg = this.add.rectangle(
+            healthBarX,
+            healthBarY,
+            healthBarWidth + 4,
+            healthBarHeight + 4,
+            0x000000
+        );
+        this.healthBarBg.setOrigin(0, 0);
+        this.healthBarBg.setDepth(100); // 確保在最前面
+
+        // 創建生命值條背景（深灰色）
+        this.healthBarBackground = this.add.rectangle(
+            healthBarX + 2,
+            healthBarY + 2,
+            healthBarWidth,
+            healthBarHeight,
+            0x333333
+        );
+        this.healthBarBackground.setOrigin(0, 0);
+        this.healthBarBackground.setDepth(101);
+
+        // 創建生命值條（綠色）
+        this.healthBar = this.add.rectangle(
+            healthBarX + 2,
+            healthBarY + 2,
+            healthBarWidth,
+            healthBarHeight,
+            0x00ff00
+        );
+        this.healthBar.setOrigin(0, 0);
+        this.healthBar.setDepth(102);
+
+        // 創建生命值文字
+        this.healthText = this.add.text(
+            healthBarX + healthBarWidth + 15,
+            healthBarY + healthBarHeight / 2,
+            `${this.currentHealth}/${this.maxHealth}`,
+            {
+                fontSize: '16px',
+                color: '#ffffff',
+                fontStyle: 'bold'
+            }
+        );
+        this.healthText.setOrigin(0, 0.5);
+        this.healthText.setDepth(103);
+
+        console.log('❤️ 生命值系統初始化完成');
+    }
+
+    /**
+     * ❤️ 更新生命值顯示
+     */
+    updateHealthDisplay() {
+        if (!this.healthBar || !this.healthText) return;
+
+        // 計算生命值百分比
+        const healthPercent = this.currentHealth / this.maxHealth;
+
+        // 更新生命值條寬度
+        const maxWidth = 200;
+        this.healthBar.displayWidth = maxWidth * healthPercent;
+
+        // 根據生命值改變顏色
+        let color = 0x00ff00; // 綠色
+        if (healthPercent <= 0.3) {
+            color = 0xff0000; // 紅色
+        } else if (healthPercent <= 0.6) {
+            color = 0xffff00; // 黃色
+        }
+        this.healthBar.setFillStyle(color);
+
+        // 更新文字
+        this.healthText.setText(`${this.currentHealth}/${this.maxHealth}`);
+    }
+
+    /**
+     * ❤️ 受到傷害
+     */
+    takeDamage(damage) {
+        this.currentHealth = Math.max(0, this.currentHealth - damage);
+        this.updateHealthDisplay();
+
+        if (this.currentHealth <= 0) {
+            console.log('💀 太空船被摧毀！');
+            // 這裡可以添加遊戲結束邏輯
+        }
+
+        console.log(`💥 受到 ${damage} 點傷害，剩餘生命值: ${this.currentHealth}`);
+    }
+
+    /**
+     * ❤️ 恢復生命值
+     */
+    heal(amount) {
+        this.currentHealth = Math.min(this.maxHealth, this.currentHealth + amount);
+        this.updateHealthDisplay();
+
+        console.log(`💚 恢復 ${amount} 點生命值，當前生命值: ${this.currentHealth}`);
+    }
+
+    /**
      * ☁️ 生成雲朵敵人
      */
     spawnCloudEnemy() {
@@ -305,6 +426,18 @@ export default class Title extends Phaser.Scene {
                 // 向左移動
                 enemy.x -= enemy.speed;
 
+                // 檢查與太空船的碰撞
+                if (this.player && this.checkCollision(this.player, enemy)) {
+                    // 太空船受到傷害
+                    this.takeDamage(10);
+
+                    // 銷毀敵人
+                    enemy.destroy();
+                    this.enemies.splice(i, 1);
+                    console.log('💥 太空船與雲朵碰撞！');
+                    continue;
+                }
+
                 // 移出螢幕左側時銷毀
                 if (enemy.x < -100) {
                     enemy.destroy();
@@ -316,6 +449,20 @@ export default class Title extends Phaser.Scene {
                 this.enemies.splice(i, 1);
             }
         }
+    }
+
+    /**
+     * 💥 檢查兩個物件的碰撞
+     */
+    checkCollision(obj1, obj2) {
+        if (!obj1 || !obj2 || !obj1.active || !obj2.active) return false;
+
+        // 獲取物件的邊界
+        const bounds1 = obj1.getBounds();
+        const bounds2 = obj2.getBounds();
+
+        // 檢查矩形碰撞
+        return Phaser.Geom.Rectangle.Overlaps(bounds1, bounds2);
     }
 
     /**

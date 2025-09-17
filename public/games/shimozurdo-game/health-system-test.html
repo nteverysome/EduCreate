@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>❤️ 生命值系統測試</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        #game {
+            border: 2px solid #4facfe;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .info {
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            background: #4facfe;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 120px;
+        }
+        .btn:hover {
+            background: #357abd;
+        }
+        .btn.danger {
+            background: #ff4757;
+        }
+        .btn.danger:hover {
+            background: #ff3742;
+        }
+        .btn.success {
+            background: #2ed573;
+        }
+        .btn.success:hover {
+            background: #26d065;
+        }
+        .health-demo {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>❤️ 生命值系統測試</h1>
+    
+    <div class="info">
+        <p><strong>測試功能</strong>: 左下角生命值條顯示和碰撞傷害系統</p>
+        <p><strong>碰撞機制</strong>: 太空船碰到雲朵會受到10點傷害</p>
+        <p><strong>視覺效果</strong>: 生命值條會根據血量變色（綠→黃→紅）</p>
+    </div>
+    
+    <div class="controls">
+        <button class="btn danger" onclick="takeDamage(10)">💥 受到10點傷害</button>
+        <button class="btn danger" onclick="takeDamage(25)">💥 受到25點傷害</button>
+        <button class="btn success" onclick="heal(20)">💚 恢復20點生命</button>
+        <button class="btn success" onclick="heal(50)">💚 恢復50點生命</button>
+        <button class="btn" onclick="resetHealth()">🔄 重置生命值</button>
+        <button class="btn" onclick="spawnEnemy()">☁️ 生成敵人</button>
+    </div>
+    
+    <div class="health-demo">
+        <h3>🎯 生命值條顏色說明：</h3>
+        <p>🟢 <strong>綠色</strong>: 61-100 生命值（健康）</p>
+        <p>🟡 <strong>黃色</strong>: 31-60 生命值（警告）</p>
+        <p>🔴 <strong>紅色</strong>: 1-30 生命值（危險）</p>
+    </div>
+    
+    <div id="game"></div>
+    
+    <div id="status" style="color: #4facfe; margin-top: 10px;">載入中...</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+    <script>
+        let gameScene;
+
+        class HealthSystemTestScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'HealthSystemTestScene' });
+            }
+
+            preload() {
+                // 載入太空船精靈圖
+                this.load.spritesheet('player_spaceship', 'assets/images/sprites/player_spaceship.png', {
+                    frameWidth: Math.floor(2450 / 7),
+                    frameHeight: 150
+                });
+                
+                // 載入雲朵敵人
+                this.load.image('cloud_enemy', 'assets/images/enemies/cloud_shape3_1.png');
+                
+                console.log('❤️ 載入生命值系統測試資源...');
+            }
+
+            create() {
+                gameScene = this;
+                const { width, height } = this.cameras.main;
+                
+                // 創建深色背景
+                this.add.rectangle(width/2, height/2, width, height, 0x1a1a2e);
+                
+                // 標題
+                this.add.text(width/2, 50, '❤️ 生命值系統測試', {
+                    fontSize: '24px',
+                    color: '#4facfe',
+                    fontStyle: 'bold'
+                }).setOrigin(0.5);
+                
+                // 創建太空船
+                this.createSpaceship();
+                
+                // 創建生命值系統
+                this.createHealthSystem();
+                
+                // 創建敵人系統
+                this.createEnemySystem();
+                
+                // 更新頁面狀態
+                document.getElementById('status').textContent = '✅ 生命值系統已啟動 - 使用按鈕測試或讓太空船碰撞雲朵';
+            }
+
+            createSpaceship() {
+                const { width, height } = this.cameras.main;
+                
+                if (this.textures.exists('player_spaceship')) {
+                    // 創建動畫
+                    this.anims.create({
+                        key: 'spaceship_fly',
+                        frames: this.anims.generateFrameNumbers('player_spaceship', {
+                            start: 0, end: 6
+                        }),
+                        frameRate: 10,
+                        repeat: -1
+                    });
+                    
+                    this.player = this.add.sprite(width * 0.2, height * 0.5, 'player_spaceship');
+                    this.player.setScale(0.4);
+                    this.player.play('spaceship_fly');
+                } else {
+                    // 備用太空船
+                    const graphics = this.add.graphics();
+                    graphics.fillStyle(0x4facfe);
+                    graphics.fillTriangle(30, 0, 0, 20, 0, -20);
+                    graphics.generateTexture('backup_spaceship', 40, 40);
+                    graphics.destroy();
+                    
+                    this.player = this.add.sprite(width * 0.2, height * 0.5, 'backup_spaceship');
+                    this.player.setScale(1.5);
+                }
+                
+                this.player.setOrigin(0.5, 0.5);
+                console.log('🚀 太空船創建完成');
+            }
+
+            createHealthSystem() {
+                const { width, height } = this.cameras.main;
+                
+                // 生命值設定
+                this.maxHealth = 100;
+                this.currentHealth = 100;
+                
+                // 生命值條位置和尺寸（左下角）
+                const healthBarWidth = 200;
+                const healthBarHeight = 20;
+                const margin = 20;
+                const healthBarX = margin;
+                const healthBarY = height - margin - healthBarHeight;
+                
+                // 創建生命值條背景（黑色邊框）
+                this.healthBarBg = this.add.rectangle(
+                    healthBarX, healthBarY, 
+                    healthBarWidth + 4, healthBarHeight + 4, 
+                    0x000000
+                );
+                this.healthBarBg.setOrigin(0, 0);
+                this.healthBarBg.setDepth(100);
+                
+                // 創建生命值條背景（深灰色）
+                this.healthBarBackground = this.add.rectangle(
+                    healthBarX + 2, healthBarY + 2, 
+                    healthBarWidth, healthBarHeight, 
+                    0x333333
+                );
+                this.healthBarBackground.setOrigin(0, 0);
+                this.healthBarBackground.setDepth(101);
+                
+                // 創建生命值條（綠色）
+                this.healthBar = this.add.rectangle(
+                    healthBarX + 2, healthBarY + 2, 
+                    healthBarWidth, healthBarHeight, 
+                    0x00ff00
+                );
+                this.healthBar.setOrigin(0, 0);
+                this.healthBar.setDepth(102);
+                
+                // 創建生命值文字
+                this.healthText = this.add.text(
+                    healthBarX + healthBarWidth + 15, 
+                    healthBarY + healthBarHeight / 2, 
+                    `${this.currentHealth}/${this.maxHealth}`, 
+                    {
+                        fontSize: '16px',
+                        color: '#ffffff',
+                        fontStyle: 'bold'
+                    }
+                );
+                this.healthText.setOrigin(0, 0.5);
+                this.healthText.setDepth(103);
+                
+                console.log('❤️ 生命值系統創建完成');
+            }
+
+            createEnemySystem() {
+                this.enemies = [];
+                this.enemySpawnTimer = 0;
+                this.enemySpawnDelay = 4000; // 4秒生成一個敵人
+            }
+
+            spawnCloudEnemy() {
+                const { width, height } = this.cameras.main;
+                
+                if (!this.textures.exists('cloud_enemy')) return;
+                
+                const enemy = this.add.sprite(width + 100, Phaser.Math.Between(100, height - 100), 'cloud_enemy');
+                enemy.setOrigin(0.5, 0.5);
+                enemy.setScale(0.4);
+                enemy.setAlpha(0.8);
+                enemy.speed = 2;
+                
+                this.enemies.push(enemy);
+                console.log('☁️ 生成雲朵敵人');
+            }
+
+            updateHealthDisplay() {
+                if (!this.healthBar || !this.healthText) return;
+                
+                const healthPercent = this.currentHealth / this.maxHealth;
+                const maxWidth = 200;
+                this.healthBar.displayWidth = maxWidth * healthPercent;
+                
+                // 根據生命值改變顏色
+                let color = 0x00ff00; // 綠色
+                if (healthPercent <= 0.3) {
+                    color = 0xff0000; // 紅色
+                } else if (healthPercent <= 0.6) {
+                    color = 0xffff00; // 黃色
+                }
+                this.healthBar.setFillStyle(color);
+                
+                this.healthText.setText(`${this.currentHealth}/${this.maxHealth}`);
+            }
+
+            takeDamage(damage) {
+                this.currentHealth = Math.max(0, this.currentHealth - damage);
+                this.updateHealthDisplay();
+                
+                if (this.currentHealth <= 0) {
+                    console.log('💀 太空船被摧毀！');
+                }
+                
+                console.log(`💥 受到 ${damage} 點傷害，剩餘生命值: ${this.currentHealth}`);
+            }
+
+            heal(amount) {
+                this.currentHealth = Math.min(this.maxHealth, this.currentHealth + amount);
+                this.updateHealthDisplay();
+                console.log(`💚 恢復 ${amount} 點生命值，當前生命值: ${this.currentHealth}`);
+            }
+
+            checkCollision(obj1, obj2) {
+                if (!obj1 || !obj2 || !obj1.active || !obj2.active) return false;
+                const bounds1 = obj1.getBounds();
+                const bounds2 = obj2.getBounds();
+                return Phaser.Geom.Rectangle.Overlaps(bounds1, bounds2);
+            }
+
+            update() {
+                const currentTime = this.time.now;
+                
+                // 自動生成敵人
+                if (currentTime - this.enemySpawnTimer > this.enemySpawnDelay) {
+                    this.spawnCloudEnemy();
+                    this.enemySpawnTimer = currentTime;
+                    this.enemySpawnDelay = Phaser.Math.Between(3000, 6000);
+                }
+                
+                // 更新敵人
+                for (let i = this.enemies.length - 1; i >= 0; i--) {
+                    const enemy = this.enemies[i];
+                    
+                    if (enemy && enemy.active) {
+                        enemy.x -= enemy.speed;
+                        
+                        // 檢查碰撞
+                        if (this.player && this.checkCollision(this.player, enemy)) {
+                            this.takeDamage(10);
+                            enemy.destroy();
+                            this.enemies.splice(i, 1);
+                            console.log('💥 太空船與雲朵碰撞！');
+                            continue;
+                        }
+                        
+                        if (enemy.x < -100) {
+                            enemy.destroy();
+                            this.enemies.splice(i, 1);
+                        }
+                    } else {
+                        this.enemies.splice(i, 1);
+                    }
+                }
+            }
+        }
+
+        // 控制函數
+        function takeDamage(amount) {
+            if (gameScene) gameScene.takeDamage(amount);
+        }
+
+        function heal(amount) {
+            if (gameScene) gameScene.heal(amount);
+        }
+
+        function resetHealth() {
+            if (gameScene) {
+                gameScene.currentHealth = gameScene.maxHealth;
+                gameScene.updateHealthDisplay();
+                console.log('🔄 生命值已重置');
+            }
+        }
+
+        function spawnEnemy() {
+            if (gameScene) gameScene.spawnCloudEnemy();
+        }
+
+        // Phaser 配置
+        const config = {
+            type: Phaser.AUTO,
+            width: 900,
+            height: 600,
+            parent: 'game',
+            backgroundColor: '#1a1a2e',
+            scene: HealthSystemTestScene
+        };
+
+        const game = new Phaser.Game(config);
+        console.log('❤️ 生命值系統測試啟動');
+    </script>
+</body>
+</html>
