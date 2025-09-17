@@ -32,6 +32,9 @@ export default class Title extends Phaser.Scene {
         // 🚀 創建太空船（防禦性編程）
         this.createSpaceship()
 
+        // ☁️ 創建敵人系統
+        this.createEnemySystem()
+
         // GAME OBJECTS
         // 初始化響應式元素數組
         this.testElements = [];
@@ -230,6 +233,92 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
+     * ☁️ 創建敵人系統
+     */
+    createEnemySystem() {
+        // 初始化敵人群組
+        this.enemies = [];
+        this.enemySpawnTimer = 0;
+        this.enemySpawnDelay = 3000; // 3秒生成一個敵人
+
+        console.log('☁️ 敵人系統初始化完成');
+    }
+
+    /**
+     * ☁️ 生成雲朵敵人
+     */
+    spawnCloudEnemy() {
+        const { width, height } = this;
+
+        // 檢查資源是否存在
+        if (!this.textures.exists('cloud_enemy')) {
+            console.warn('⚠️ 雲朵敵人資源不存在');
+            return;
+        }
+
+        // 創建敵人（從右側螢幕外開始）
+        const enemy = this.add.sprite(width + 100, Phaser.Math.Between(100, height - 100), 'cloud_enemy');
+        enemy.setOrigin(0.5, 0.5);
+        enemy.setScale(0.4); // 與太空船相同大小
+        enemy.setDepth(-65); // 在太空船後面，視差背景前面
+        enemy.setAlpha(0.8); // 稍微透明，更像雲朵
+
+        // 設置敵人屬性
+        enemy.speed = Phaser.Math.Between(1, 3); // 隨機速度
+
+        // 添加浮動動畫
+        this.tweens.add({
+            targets: enemy,
+            y: enemy.y + Phaser.Math.Between(-30, 30),
+            duration: Phaser.Math.Between(2000, 4000),
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+
+        // 添加到敵人群組
+        this.enemies.push(enemy);
+
+        console.log(`☁️ 生成雲朵敵人在位置 (${enemy.x}, ${enemy.y})`);
+    }
+
+    /**
+     * ☁️ 更新敵人系統
+     */
+    updateEnemies() {
+        const currentTime = this.time.now;
+
+        // 生成新敵人
+        if (currentTime - this.enemySpawnTimer > this.enemySpawnDelay) {
+            this.spawnCloudEnemy();
+            this.enemySpawnTimer = currentTime;
+
+            // 隨機化下次生成時間 (2-4秒)
+            this.enemySpawnDelay = Phaser.Math.Between(2000, 4000);
+        }
+
+        // 更新現有敵人
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+            const enemy = this.enemies[i];
+
+            if (enemy && enemy.active) {
+                // 向左移動
+                enemy.x -= enemy.speed;
+
+                // 移出螢幕左側時銷毀
+                if (enemy.x < -100) {
+                    enemy.destroy();
+                    this.enemies.splice(i, 1);
+                    console.log('☁️ 雲朵敵人移出螢幕，已銷毀');
+                }
+            } else {
+                // 清理無效敵人
+                this.enemies.splice(i, 1);
+            }
+        }
+    }
+
+    /**
      * 更新視差背景
      */
     updateParallaxBackground() {
@@ -321,6 +410,7 @@ export default class Title extends Phaser.Scene {
         if (!this.sceneStopped) {
             this.updateParallaxBackground();
             this.updateSpaceship();
+            this.updateEnemies();
         }
     }
 }

@@ -43,6 +43,11 @@ export default class Preload extends Phaser.Scene {
                 this.spaceshipLoaded = false
             }
         })
+
+        // ☁️ 載入雲朵敵人圖片
+        this.load.image('cloud_enemy', 'assets/images/enemies/cloud_shape3_1.png')
+
+        console.log('☁️ 雲朵敵人資源載入配置完成')
         //---------------------------------------------------------------------->
         this.canvasWidth = this.sys.game.canvas.width
         this.canvasHeight = this.sys.game.canvas.height
