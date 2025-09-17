@@ -23,6 +23,26 @@ export default class Preload extends Phaser.Scene {
         this.load.image('bg_layer_4', 'assets/images/parallax/layer_4.png') // 中景雲層
         this.load.image('bg_layer_5', 'assets/images/parallax/layer_5.png') // 近景雲層
         this.load.image('bg_layer_6', 'assets/images/parallax/layer_6.png') // 最前景 - 雲霧
+
+        // 🚀 載入太空船精靈圖（採用防禦性編程）
+        // 精靈圖規格：2450x150，7幀橫向排列，每幀350x150
+        this.load.spritesheet('player_spaceship', 'assets/images/sprites/player_spaceship.png', {
+            frameWidth: Math.floor(2450 / 7),  // 350px per frame
+            frameHeight: 150
+        })
+
+        // 載入事件監聽（防禦性處理）
+        this.load.on('filecomplete-spritesheet-player_spaceship', () => {
+            console.log('✅ 太空船精靈圖載入成功')
+            this.spaceshipLoaded = true
+        })
+
+        this.load.on('loaderror', (file) => {
+            if (file.key === 'player_spaceship') {
+                console.warn('⚠️ 太空船精靈圖載入失敗，將使用備用方案')
+                this.spaceshipLoaded = false
+            }
+        })
         //---------------------------------------------------------------------->
         this.canvasWidth = this.sys.game.canvas.width
         this.canvasHeight = this.sys.game.canvas.height

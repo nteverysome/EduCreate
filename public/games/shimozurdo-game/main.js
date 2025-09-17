@@ -38,7 +38,14 @@ const config = {
         Preload,
         Title,
         Hub
-    ]
+    ],
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 0 },
+            debug: false
+        }
+    }
 }
 
 const game = new Phaser.Game(config)
