@@ -35,6 +35,23 @@ node_modules/
 .pnp
 .pnp.js
 
+# Next.js 編譯器和大型二進制文件（不需要部署）
+node_modules/@next/swc-*
+node_modules/@next/*/next-swc.*.node
+node_modules/@swc/
+node_modules/esbuild/
+node_modules/webpack/
+node_modules/@babel/core/
+node_modules/@babel/parser/
+node_modules/@babel/traverse/
+
+# Prisma 引擎二進制文件（Vercel 會提供自己的引擎）
+node_modules/@prisma/engines/
+node_modules/.prisma/
+node_modules/prisma/engines/
+*.dll.node
+*.exe
+
 # 構建輸出
 .next/
 out/
