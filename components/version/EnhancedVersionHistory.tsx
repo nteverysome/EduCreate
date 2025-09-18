@@ -1,7 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityVersion, ChangeDetail } from '../../models/activityVersion';
-import { formatDistanceToNow } from 'date-fns';
-import { zhTW } from 'date-fns/locale';
+
+// 替代 date-fns 的輕量級日期工具函數
+const formatDate = (date: Date, formatStr?: string): string => {
+  if (formatStr === 'PPP') {
+    return new Intl.DateTimeFormat('zh-TW', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(date);
+  }
+  
+  return new Intl.DateTimeFormat('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+};
+
+const formatDistanceToNow = (date: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.round(diffMs / 1000);
+  const diffMin = Math.round(diffSec / 60);
+  const diffHour = Math.round(diffMin / 60);
+  const diffDay = Math.round(diffHour / 24);
+  const diffMonth = Math.round(diffDay / 30);
+  
+  if (diffSec < 60) {
+    return '剛剛';
+  } else if (diffMin < 60) {
+    return `${diffMin} 分鐘前`;
+  } else if (diffHour < 24) {
+    return `${diffHour} 小時前`;
+  } else if (diffDay < 30) {
+    return `${diffDay} 天前`;
+  } else if (diffMonth < 12) {
+    return `${diffMonth} 個月前`;
+  } else {
+    const diffYear = Math.round(diffDay / 365);
+    return `${diffYear} 年前`;
+  }
+};
+
 interface EnhancedVersionHistoryProps {
   activityId: string;
   onVersionSelect?: (version: ActivityVersion) => void;

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, RotateCcw, Volume2, VolumeX } from 'lucide-react';
-
+import { PlayIcon, PauseIcon, ArrowPathIcon, SpeakerWaveIcon, SpeakerXMarkIcon } from '@heroicons/react/24/outline';
 interface GodotGameProps {
   gameUrl: string;
   title?: string;
@@ -96,7 +95,7 @@ export default function GodotGameEmbed({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Play className="w-5 h-5" />
+            <PlayIcon className="w-5 h-5" />
             {title}
           </CardTitle>
           
@@ -107,7 +106,7 @@ export default function GodotGameEmbed({
               onClick={toggleMute}
               className="flex items-center gap-1"
             >
-              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              {isMuted ? <SpeakerXMarkIcon className="w-4 h-4" /> : <SpeakerWaveIcon className="w-4 h-4" />}
               {isMuted ? '取消靜音' : '靜音'}
             </Button>
             
@@ -117,7 +116,7 @@ export default function GodotGameEmbed({
               onClick={handleRestart}
               className="flex items-center gap-1"
             >
-              <RotateCcw className="w-4 h-4" />
+              <ArrowPathIcon className="w-4 h-4" />
               重新開始
             </Button>
           </div>
@@ -133,7 +132,7 @@ export default function GodotGameEmbed({
               </div>
               <div className="text-gray-600 mb-4">{gameError}</div>
               <Button onClick={handleRestart} className="flex items-center gap-2">
-                <RotateCcw className="w-4 h-4" />
+                <ArrowPathIcon className="w-4 h-4" />
                 重試
               </Button>
             </div>

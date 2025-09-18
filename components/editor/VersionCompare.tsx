@@ -1,8 +1,51 @@
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
-import { zhTW } from 'date-fns/locale';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
+
+// 替代 date-fns 的輕量級日期工具函數
+const formatDate = (date: Date, formatStr?: string): string => {
+  if (formatStr === 'PPP') {
+    return new Intl.DateTimeFormat('zh-TW', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(date);
+  }
+  
+  return new Intl.DateTimeFormat('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+};
+
+const formatDistanceToNow = (date: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.round(diffMs / 1000);
+  const diffMin = Math.round(diffSec / 60);
+  const diffHour = Math.round(diffMin / 60);
+  const diffDay = Math.round(diffHour / 24);
+  const diffMonth = Math.round(diffDay / 30);
+  
+  if (diffSec < 60) {
+    return '剛剛';
+  } else if (diffMin < 60) {
+    return `${diffMin} 分鐘前`;
+  } else if (diffHour < 24) {
+    return `${diffHour} 小時前`;
+  } else if (diffDay < 30) {
+    return `${diffDay} 天前`;
+  } else if (diffMonth < 12) {
+    return `${diffMonth} 個月前`;
+  } else {
+    const diffYear = Math.round(diffDay / 365);
+    return `${diffYear} 年前`;
+  }
+};
+
 // framer-motion 已移除，使用 CSS 動畫替代
 // Simple diff viewer component to replace react-diff-viewer-2
 const SimpleDiffViewer = ({ oldValue, newValue }: { oldValue: string; newValue: string }) => {
@@ -63,7 +106,7 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
 
   // 格式化日期
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'yyyy年MM月dd日 HH:mm', { locale: zhTW });
+    return formatDate(new Date(dateString), 'yyyy年MM月dd日 HH:mm', { locale: zhTW });
   };
 
   // 獲取差異類型的顯示名稱
@@ -163,7 +206,7 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
           Object.entries(groupedDifferences).map(([category, diffs]) => (
             <div
               key={category}
-              className="bg-white shadow overflow-hidden sm:rounded-md animate-fade-in"
+              className="bg-white shadow overflow-hidden sm:rounded-md transition-all duration-300 animate-fade-in"
             >
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">{getDiffTypeName(category)} 變更</h3>
@@ -176,7 +219,7 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
                     return (
                       <li
                         key={index}
-                        className={`border-b border-gray-200 pb-4 last:border-b-0 last:pb-0 cursor-pointer hover:scale-105 transition-transform ${isSelected ? 'ring-2 ring-indigo-500 rounded-md' : ''}`}
+                        className={`border-b border-gray-200 pb-4 last:border-b-0 last:pb-0 cursor-pointer transition-all duration-200 hover:scale-105 ${isSelected ? 'ring-2 ring-indigo-500 rounded-md' : ''}`}
                         onClick={() => setSelectedDiff(isSelected ? null : `${category}-${index}`)}
                       >
                         <div className="flex justify-between items-center mb-2">
@@ -194,7 +237,7 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
                         
                         {isSelected && (
                           <div
-                            className="grid grid-cols-2 gap-4 animate-slide-down"
+                            className="grid grid-cols-2 gap-4 transition-all duration-300"
                           >
                               <div className="bg-red-50 p-3 rounded-md">
                                 <h5 className="text-sm font-medium text-red-800 mb-1">版本 {versionA.versionName}</h5>
@@ -254,7 +297,7 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
         {Object.entries(groupedDifferences).map(([category, diffs]) => (
           <div
             key={category}
-            className="bg-white shadow overflow-hidden sm:rounded-md animate-fade-in"
+            className="bg-white shadow overflow-hidden sm:rounded-md transition-all duration-300 animate-fade-in"
           >
             <div className="px-4 py-5 sm:p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">{getDiffTypeName(category)} 變更</h3>
