@@ -1,17 +1,30 @@
 /**
  * ParallaxBackground - shimozurdo 遊戲視差背景管理系統
- * 支援多層背景、響應式適配、性能優化
+ * 支援多層背景、響應式適配、性能優化和自動滾動效果
+ * 提供完整的視差背景解決方案，包含 6 層月亮主題背景配置
  */
 export default class ParallaxBackground {
+    /**
+     * 建構函數 - 初始化視差背景系統
+     * @param {Phaser.Scene} scene - Phaser 場景實例
+     * @param {Object} config - 配置物件，包含滾動速度和自動滾動設定
+     */
     constructor(scene, config = {}) {
+        // 儲存場景引用，用於創建遊戲物件
         this.scene = scene;
+        // 初始化背景層陣列，儲存所有視差背景層
         this.layers = [];
+        // 滾動狀態標記，追蹤是否正在滾動
         this.isScrolling = false;
+        // 滾動速度設定，預設為 1，可透過 config 自訂
         this.scrollSpeed = config.scrollSpeed || 1;
-        this.autoScroll = config.autoScroll !== false; // 預設開啟自動滾動
-        
-        // 響應式配置
+        // 自動滾動開關，預設開啟，可透過 config.autoScroll = false 關閉
+        this.autoScroll = config.autoScroll !== false;
+
+        // 響應式配置 - 從遊戲基準尺寸獲取寬高參考值
+        // 基準寬度，用於響應式縮放計算
         this.baseWidth = scene.game.screenBaseSize.width;
+        // 基準高度，用於響應式縮放計算
         this.baseHeight = scene.game.screenBaseSize.height;
         
         // 預設層級配置（6層月亮主題視差背景）
