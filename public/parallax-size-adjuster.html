@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 視差背景尺寸調整工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .control-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+        .layer-control {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .layer-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .layer-item h4 {
+            margin: 0 0 15px 0;
+            color: #4facfe;
+        }
+        .slider-group {
+            margin: 10px 0;
+        }
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4facfe;
+            cursor: pointer;
+        }
+        .value-display {
+            display: inline-block;
+            background: rgba(74, 172, 254, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn.success { background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%); }
+        .btn.warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        
+        .preview-container {
+            width: 100%;
+            height: 500px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            position: relative;
+        }
+        .preview-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .code-output {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .info-panel {
+            background: rgba(33, 150, 243, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .file-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .file-item h5 {
+            margin: 0 0 10px 0;
+            color: #4facfe;
+        }
+        
+        .file-item .size {
+            color: #ffa726;
+            font-weight: bold;
+        }
+        
+        .file-item .path {
+            color: #81c784;
+            font-size: 12px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 shimozurdo 視差背景尺寸調整工具</h1>
+        <p>實時調整6層視差背景的尺寸、透明度和滾動速度</p>
+        
+        <div class="info-panel">
+            <h3>📁 當前 PNG 文件信息</h3>
+            <div class="file-info">
+                <div class="file-item">
+                    <h5>🌌 Layer 1 - 天空層</h5>
+                    <div class="size">10,496 bytes</div>
+                    <div class="path">public/games/shimozurdo-game/assets/images/parallax/layer_1.png</div>
+                    <div>對應: moon_sky.png (最遠背景)</div>
+                </div>
+                <div class="file-item">
+                    <h5>🌍 Layer 2 - 地球層</h5>
+                    <div class="size">37,491 bytes</div>
+                    <div class="path">public/games/shimozurdo-game/assets/images/parallax/layer_2.png</div>
+                    <div>對應: moon_earth.png (地球層)</div>
+                </div>
+                <div class="file-item">
+                    <h5>🏔️ Layer 3 - 後景層</h5>
+                    <div class="size">31,443 bytes</div>
+                    <div class="path">public/games/shimozurdo-game/assets/images/parallax/layer_3.png</div>
+                    <div>對應: moon_back.png (後景層)</div>
+                </div>
+                <div class="file-item">
+                    <h5>🌄 Layer 4 - 中景層</h5>
+                    <div class="size">26,788 bytes</div>
+                    <div class="path">public/games/shimozurdo-game/assets/images/parallax/layer_4.png</div>
+                    <div>對應: moon_mid.png (中景層)</div>
+                </div>
+                <div class="file-item">
+                    <h5>🌲 Layer 5 - 前景層</h5>
+                    <div class="size">9,296 bytes</div>
+                    <div class="path">public/games/shimozurdo-game/assets/images/parallax/layer_5.png</div>
+                    <div>對應: moon_front.png (前景層)</div>
+                </div>
+                <div class="file-item">
+                    <h5>🌿 Layer 6 - 地面層</h5>
+                    <div class="size">50,940 bytes</div>
+                    <div class="path">public/games/shimozurdo-game/assets/images/parallax/layer_6.png</div>
+                    <div>對應: moon_floor.png (最近地面)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <h2>🎛️ 尺寸調整控制面板</h2>
+            <div class="layer-control">
+                <div class="layer-item">
+                    <h4>🌌 天空層 (Layer 1)</h4>
+                    <div class="slider-group">
+                        <label>縮放比例 <span class="value-display" id="scale1-value">1.0</span></label>
+                        <input type="range" class="slider" id="scale1" min="0.1" max="3.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <label>透明度 <span class="value-display" id="alpha1-value">1.0</span></label>
+                        <input type="range" class="slider" id="alpha1" min="0.0" max="1.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <label>滾動速度 <span class="value-display" id="speed1-value">0.05</span></label>
+                        <input type="range" class="slider" id="speed1" min="0.01" max="2.0" step="0.01" value="0.05">
+                    </div>
+                </div>
+                
+                <div class="layer-item">
+                    <h4>🌍 地球層 (Layer 2)</h4>
+                    <div class="slider-group">
+                        <label>縮放比例 <span class="value-display" id="scale2-value">1.0</span></label>
+                        <input type="range" class="slider" id="scale2" min="0.1" max="3.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <label>透明度 <span class="value-display" id="alpha2-value">1.0</span></label>
+                        <input type="range" class="slider" id="alpha2" min="0.0" max="1.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <label>滾動速度 <span class="value-display" id="speed2-value">0.2</span></label>
+                        <input type="range" class="slider" id="speed2" min="0.01" max="2.0" step="0.01" value="0.2">
+                    </div>
+                </div>
+                
+                <div class="layer-item">
+                    <h4>🏔️ 後景層 (Layer 3)</h4>
+                    <div class="slider-group">
+                        <label>縮放比例 <span class="value-display" id="scale3-value">1.0</span></label>
+                        <input type="range" class="slider" id="scale3" min="0.1" max="3.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <label>透明度 <span class="value-display" id="alpha3-value">0.9</span></label>
+                        <input type="range" class="slider" id="alpha3" min="0.0" max="1.0" step="0.1" value="0.9">
+                    </div>
+                    <div class="slider-group">
+                        <label>滾動速度 <span class="value-display" id="speed3-value">0.3</span></label>
+                        <input type="range" class="slider" id="speed3" min="0.01" max="2.0" step="0.01" value="0.3">
+                    </div>
+                </div>
+                
+                <div class="layer-item">
+                    <h4>🌄 中景層 (Layer 4)</h4>
+                    <div class="slider-group">
+                        <label>縮放比例 <span class="value-display" id="scale4-value">1.0</span></label>
+                        <input type="range" class="slider" id="scale4" min="0.1" max="3.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <label>透明度 <span class="value-display" id="alpha4-value">0.9</span></label>
+                        <input type="range" class="slider" id="alpha4" min="0.0" max="1.0" step="0.1" value="0.9">
+                    </div>
+                    <div class="slider-group">
+                        <label>滾動速度 <span class="value-display" id="speed4-value">0.5</span></label>
+                        <input type="range" class="slider" id="speed4" min="0.01" max="2.0" step="0.01" value="0.5">
+                    </div>
+                </div>
+                
+                <div class="layer-item">
+                    <h4>🌲 前景層 (Layer 5)</h4>
+                    <div class="slider-group">
+                        <label>縮放比例 <span class="value-display" id="scale5-value">1.0</span></label>
+                        <input type="range" class="slider" id="scale5" min="0.1" max="3.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <label>透明度 <span class="value-display" id="alpha5-value">0.9</span></label>
+                        <input type="range" class="slider" id="alpha5" min="0.0" max="1.0" step="0.1" value="0.9">
+                    </div>
+                    <div class="slider-group">
+                        <label>滾動速度 <span class="value-display" id="speed5-value">0.7</span></label>
+                        <input type="range" class="slider" id="speed5" min="0.01" max="2.0" step="0.01" value="0.7">
+                    </div>
+                </div>
+                
+                <div class="layer-item">
+                    <h4>🌿 地面層 (Layer 6)</h4>
+                    <div class="slider-group">
+                        <label>縮放比例 <span class="value-display" id="scale6-value">1.0</span></label>
+                        <input type="range" class="slider" id="scale6" min="0.1" max="3.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group">
+                        <label>透明度 <span class="value-display" id="alpha6-value">0.8</span></label>
+                        <input type="range" class="slider" id="alpha6" min="0.0" max="1.0" step="0.1" value="0.8">
+                    </div>
+                    <div class="slider-group">
+                        <label>滾動速度 <span class="value-display" id="speed6-value">1.0</span></label>
+                        <input type="range" class="slider" id="speed6" min="0.01" max="2.0" step="0.01" value="1.0">
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <button class="btn success" onclick="generateCode()">🔧 生成代碼</button>
+                <button class="btn" onclick="resetToDefault()">🔄 重置預設</button>
+                <button class="btn" onclick="applyPreset('large')">📏 放大預設</button>
+                <button class="btn" onclick="applyPreset('small')">📐 縮小預設</button>
+                <button class="btn warning" onclick="openPreview()">👁️ 預覽效果</button>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <h2>📋 生成的代碼</h2>
+            <p>複製以下代碼到 <code>public/games/shimozurdo-game/scenes/title.js</code> 的 layerConfigs 部分：</p>
+            <div class="code-output" id="codeOutput">
+                <div style="color: #4facfe;">// 點擊「生成代碼」按鈕來生成配置</div>
+            </div>
+            <button class="btn" onclick="copyCode()">📋 複製代碼</button>
+        </div>
+        
+        <div class="control-panel">
+            <h2>🎮 預覽區域</h2>
+            <div class="preview-container" id="previewContainer">
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+                    點擊「預覽效果」載入遊戲預覽
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化滑桿事件監聽
+        function initializeSliders() {
+            for (let i = 1; i <= 6; i++) {
+                // 縮放滑桿
+                const scaleSlider = document.getElementById(`scale${i}`);
+                const scaleValue = document.getElementById(`scale${i}-value`);
+                scaleSlider.addEventListener('input', function() {
+                    scaleValue.textContent = this.value;
+                });
+                
+                // 透明度滑桿
+                const alphaSlider = document.getElementById(`alpha${i}`);
+                const alphaValue = document.getElementById(`alpha${i}-value`);
+                alphaSlider.addEventListener('input', function() {
+                    alphaValue.textContent = this.value;
+                });
+                
+                // 速度滑桿
+                const speedSlider = document.getElementById(`speed${i}`);
+                const speedValue = document.getElementById(`speed${i}-value`);
+                speedSlider.addEventListener('input', function() {
+                    speedValue.textContent = this.value;
+                });
+            }
+        }
+        
+        // 生成代碼
+        function generateCode() {
+            const layerNames = ['sky', 'moon', 'back', 'mid', 'front', 'floor'];
+            const depths = [-100, -95, -90, -85, -80, -75];
+            
+            let code = `// 背景層配置 - 可調整 scale 參數來控制圖片尺寸\nconst layerConfigs = [\n`;
+            
+            for (let i = 1; i <= 6; i++) {
+                const scale = document.getElementById(`scale${i}`).value;
+                const alpha = document.getElementById(`alpha${i}`).value;
+                const speed = document.getElementById(`speed${i}`).value;
+                
+                code += `    { key: 'bg_layer_${i}', name: '${layerNames[i-1]}', depth: ${depths[i-1]}, alpha: ${alpha}, scale: ${scale} },\n`;
+            }
+            
+            code += `];\n\n// 滾動速度配置\nconst speeds = {\n`;
+            
+            for (let i = 1; i <= 6; i++) {
+                const speed = document.getElementById(`speed${i}`).value;
+                code += `    ${layerNames[i-1]}: ${speed},\n`;
+            }
+            
+            code += `};`;
+            
+            document.getElementById('codeOutput').innerHTML = `<pre style="color: #e8f5e8; margin: 0;">${code}</pre>`;
+        }
+        
+        // 複製代碼
+        function copyCode() {
+            const codeOutput = document.getElementById('codeOutput');
+            const text = codeOutput.textContent;
+            
+            navigator.clipboard.writeText(text).then(function() {
+                alert('✅ 代碼已複製到剪貼板！');
+            }, function(err) {
+                console.error('複製失敗: ', err);
+                alert('❌ 複製失敗，請手動複製');
+            });
+        }
+        
+        // 重置為預設值
+        function resetToDefault() {
+            const defaults = [
+                { scale: 1.0, alpha: 1.0, speed: 0.05 },
+                { scale: 1.0, alpha: 1.0, speed: 0.2 },
+                { scale: 1.0, alpha: 0.9, speed: 0.3 },
+                { scale: 1.0, alpha: 0.9, speed: 0.5 },
+                { scale: 1.0, alpha: 0.9, speed: 0.7 },
+                { scale: 1.0, alpha: 0.8, speed: 1.0 }
+            ];
+            
+            for (let i = 1; i <= 6; i++) {
+                const def = defaults[i-1];
+                document.getElementById(`scale${i}`).value = def.scale;
+                document.getElementById(`scale${i}-value`).textContent = def.scale;
+                document.getElementById(`alpha${i}`).value = def.alpha;
+                document.getElementById(`alpha${i}-value`).textContent = def.alpha;
+                document.getElementById(`speed${i}`).value = def.speed;
+                document.getElementById(`speed${i}-value`).textContent = def.speed;
+            }
+        }
+        
+        // 應用預設配置
+        function applyPreset(preset) {
+            let configs;
+            
+            if (preset === 'large') {
+                // 放大預設
+                configs = [
+                    { scale: 1.5, alpha: 1.0, speed: 0.05 },
+                    { scale: 1.3, alpha: 1.0, speed: 0.2 },
+                    { scale: 1.2, alpha: 0.9, speed: 0.3 },
+                    { scale: 1.1, alpha: 0.9, speed: 0.5 },
+                    { scale: 1.2, alpha: 0.9, speed: 0.7 },
+                    { scale: 1.4, alpha: 0.8, speed: 1.0 }
+                ];
+            } else if (preset === 'small') {
+                // 縮小預設
+                configs = [
+                    { scale: 0.8, alpha: 1.0, speed: 0.05 },
+                    { scale: 0.7, alpha: 1.0, speed: 0.2 },
+                    { scale: 0.8, alpha: 0.9, speed: 0.3 },
+                    { scale: 0.9, alpha: 0.9, speed: 0.5 },
+                    { scale: 0.8, alpha: 0.9, speed: 0.7 },
+                    { scale: 0.6, alpha: 0.8, speed: 1.0 }
+                ];
+            }
+            
+            for (let i = 1; i <= 6; i++) {
+                const config = configs[i-1];
+                document.getElementById(`scale${i}`).value = config.scale;
+                document.getElementById(`scale${i}-value`).textContent = config.scale;
+                document.getElementById(`alpha${i}`).value = config.alpha;
+                document.getElementById(`alpha${i}-value`).textContent = config.alpha;
+                document.getElementById(`speed${i}`).value = config.speed;
+                document.getElementById(`speed${i}-value`).textContent = config.speed;
+            }
+        }
+        
+        // 開啟預覽
+        function openPreview() {
+            const container = document.getElementById('previewContainer');
+            container.innerHTML = '<iframe src="/games/shimozurdo-game/" title="shimozurdo Game Preview"></iframe>';
+        }
+        
+        // 頁面載入完成後初始化
+        window.addEventListener('load', function() {
+            initializeSliders();
+            console.log('🎨 視差背景尺寸調整工具已載入');
+        });
+    </script>
+</body>
+</html>

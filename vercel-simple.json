@@ -1,0 +1,47 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "SKIP_ENV_VALIDATION=true npm run build",
+  "build": {
+    "env": {
+      "NODE_ENV": "production",
+      "SKIP_ENV_VALIDATION": "true"
+    }
+  },
+  "functions": {
+    "pages/api/**/*.js": {
+      "maxDuration": 30
+    },
+    "pages/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/dashboard",
+      "destination": "/dashboards",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/games/airplane-game",
+      "destination": "/games/airplane-game/index.html"
+    },
+    {
+      "source": "/games/shimozurdo-game",
+      "destination": "/games/shimozurdo-game/index.html"
+    }
+  ]
+}
