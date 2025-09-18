@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { ArrowLeftIcon, ShareIcon, HeartIcon, EyeIcon, UserGroupIcon, ClockIcon, TagIcon, ArrowDownTrayIcon, PlayIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { useSession } from 'next-auth/react';
-import { motion } from 'framer-motion';
+// framer-motion 已移除，使用 CSS 動畫替代
 
 interface Activity {
   id: string;
@@ -351,12 +351,13 @@ export default function ActivityDetail() {
           </div>
           
           {/* 卡片 */}
-          <motion.div 
-            className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer max-w-md mx-auto"
+          <div
+            className="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer max-w-md mx-auto transition-transform duration-500"
             onClick={handleCardFlip}
-            animate={{ rotateY: isFlipped ? 180 : 0 }}
-            transition={{ duration: 0.5 }}
-            style={{ perspective: 1000 }}
+            style={{
+              perspective: 1000,
+              transform: `rotateY(${isFlipped ? 180 : 0}deg)`
+            }}
           >
             <div className="relative" style={{ transformStyle: 'preserve-3d', minHeight: '200px' }}>
               <div 
@@ -376,7 +377,7 @@ export default function ActivityDetail() {
                 )}
               </div>
             </div>
-          </motion.div>
+          </div>
           
           {/* 控制按鈕 */}
           <div className="flex justify-center space-x-4 mt-8">
@@ -419,11 +420,9 @@ export default function ActivityDetail() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {activity.content.cards.map((card: any, index: number) => (
-            <motion.div 
-              key={index} 
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.2 }}
+            <div
+              key={index}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105"
             >
               <div className="p-4 border-b border-gray-100">
                 <h3 className="text-xl font-bold text-center">{card.front}</h3>
@@ -434,7 +433,7 @@ export default function ActivityDetail() {
                   <p className="text-gray-500 text-sm mt-2 italic">例句: {card.example}</p>
                 )}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

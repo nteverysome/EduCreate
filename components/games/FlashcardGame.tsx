@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// framer-motion 已移除，使用 CSS 動畫替代
 
 interface Flashcard {
   id: string;
@@ -135,16 +135,11 @@ const FlashcardGame = ({ cards = [], onComplete, showProgress = true }: Flashcar
       ) : (
         <>
           <div className="relative h-64 w-full mb-6">
-            <AnimatePresence>
-              <motion.div
-                key={currentCard.id + (flipped ? '-back' : '-front')}
-                initial={{ rotateY: flipped ? -90 : 90, opacity: 0 }}
-                animate={{ rotateY: 0, opacity: 1 }}
-                exit={{ rotateY: flipped ? 90 : -90, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 flex items-center justify-center bg-white rounded-lg shadow-md p-6 cursor-pointer"
-                onClick={handleFlip}
-              >
+            <div
+              key={currentCard.id + (flipped ? '-back' : '-front')}
+              className="absolute inset-0 flex items-center justify-center bg-white rounded-lg shadow-md p-6 cursor-pointer transition-all duration-300 hover:scale-105"
+              onClick={handleFlip}
+            >
                 <div className="text-center">
                   <div className="text-xl font-medium">
                     {flipped ? currentCard.back : currentCard.front}
@@ -162,8 +157,7 @@ const FlashcardGame = ({ cards = [], onComplete, showProgress = true }: Flashcar
                     {flipped ? '點擊查看正面' : '點擊查看背面'}
                   </div>
                 </div>
-              </motion.div>
-            </AnimatePresence>
+            </div>
           </div>
 
           <div className="flex justify-between">
