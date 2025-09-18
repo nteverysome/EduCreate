@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+// framer-motion 已移除，使用 CSS 動畫替代
 // Simple diff viewer component to replace react-diff-viewer-2
 const SimpleDiffViewer = ({ oldValue, newValue }: { oldValue: string; newValue: string }) => {
   return (
@@ -196,15 +196,10 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
                           </button>
                         </div>
                         
-                        <AnimatePresence>
-                          {isSelected && (
-                            <motion.div 
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.3 }}
-                              className="grid grid-cols-2 gap-4"
-                            >
+                        {isSelected && (
+                          <div
+                            className="grid grid-cols-2 gap-4 transition-all duration-300"
+                          >
                               <div className="bg-red-50 p-3 rounded-md">
                                 <h5 className="text-sm font-medium text-red-800 mb-1">版本 {versionA.versionName}</h5>
                                 <pre className="text-sm text-red-700 whitespace-pre-wrap overflow-auto max-h-60">
@@ -218,9 +213,8 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
                                   {JSON.stringify(diff.valueB, null, 2)}
                                 </pre>
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                          </div>
+                        )}
                         
                         {!isSelected && (
                           <div className="text-sm text-gray-500">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// framer-motion 已移除，使用 CSS 動畫替代
 
 interface Flashcard {
   id: string;
@@ -135,35 +135,32 @@ const FlashcardGame = ({ cards = [], onComplete, showProgress = true }: Flashcar
       ) : (
         <>
           <div className="relative h-64 w-full mb-6">
-            <AnimatePresence>
-              <motion.div
-                key={currentCard.id + (flipped ? '-back' : '-front')}
-                initial={{ rotateY: flipped ? -90 : 90, opacity: 0 }}
-                animate={{ rotateY: 0, opacity: 1 }}
-                exit={{ rotateY: flipped ? 90 : -90, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0 flex items-center justify-center bg-white rounded-lg shadow-md p-6 cursor-pointer"
-                onClick={handleFlip}
-              >
-                <div className="text-center">
-                  <div className="text-xl font-medium">
-                    {flipped ? currentCard.back : currentCard.front}
-                  </div>
-                  {currentCard.tags && currentCard.tags.length > 0 && (
-                    <div className="mt-4 flex flex-wrap justify-center gap-2">
-                      {currentCard.tags.map((tag, index) => (
-                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="mt-4 text-sm text-gray-500">
-                    {flipped ? '點擊查看正面' : '點擊查看背面'}
-                  </div>
+            <div
+              className="absolute inset-0 flex items-center justify-center bg-white rounded-lg shadow-md p-6 cursor-pointer transition-all duration-300 hover:shadow-lg"
+              onClick={handleFlip}
+              style={{
+                transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                transformStyle: 'preserve-3d'
+              }}
+            >
+              <div className="text-center">
+                <div className="text-xl font-medium">
+                  {flipped ? currentCard.back : currentCard.front}
                 </div>
-              </motion.div>
-            </AnimatePresence>
+                {currentCard.tags && currentCard.tags.length > 0 && (
+                  <div className="mt-4 flex flex-wrap justify-center gap-2">
+                    {currentCard.tags.map((tag, index) => (
+                      <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-4 text-sm text-gray-500">
+                  {flipped ? '點擊查看正面' : '點擊查看背面'}
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-between">
