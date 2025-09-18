@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { ArrowLeftIcon, ShareIcon, HeartIcon, EyeIcon, UserGroupIcon, ClockIcon, TagIcon, ArrowDownTrayIcon, PlayIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { useSession } from 'next-auth/react';
-// framer-motion 已移除，使用 CSS 動畫替代
+import { motion } from 'framer-motion';
 
 interface Activity {
   id: string;
