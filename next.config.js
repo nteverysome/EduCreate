@@ -27,6 +27,20 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
 
+  // Webpack 配置 - 外部化大型依賴到 CDN
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // 只在客戶端構建時外部化這些依賴
+      config.externals = {
+        ...config.externals,
+        // 注意：React 和 React-DOM 由 Next.js 管理，不建議外部化
+        // 'react': 'React',
+        // 'react-dom': 'ReactDOM',
+      };
+    }
+    return config;
+  },
+
   // HTTP 頭配置 - 允許 iframe 嵌入
   async headers() {
     return [
