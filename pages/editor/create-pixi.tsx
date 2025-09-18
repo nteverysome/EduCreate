@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
+import Script from 'next/script';
 import { PlusIcon, TrashIcon, DocumentArrowDownIcon as SaveIcon, EyeIcon, PencilIcon } from '@heroicons/react/24/outline';
 import PixiGame from '../../components/PixiGame';
 import ProtectedRoute from '../../components/ProtectedRoute';
@@ -184,6 +185,11 @@ export default function CreatePixiGame() {
         <title>{id ? '編輯 PixiJS 遊戲' : '創建 PixiJS 遊戲'} | EduCreate</title>
         <meta name="description" content="使用 PixiJS 創建互動式教學遊戲" />
       </Head>
+
+      <Script
+        src="https://cdn.jsdelivr.net/npm/pixi.js@7.3.2/dist/pixi.min.js"
+        strategy="beforeInteractive"
+      />
 
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">

@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import * as PIXI from 'pixi.js';
+
+// 使用全域 PIXI (從 CDN 載入)
+declare global {
+  interface Window {
+    PIXI: any;
+  }
+}
 
 interface PixiGameProps {
   width?: number;
@@ -25,8 +31,8 @@ export default function PixiGame({
   onComplete
 }: PixiGameProps) {
   const pixiContainer = useRef<HTMLDivElement>(null);
-  const app = useRef<PIXI.Application | null>(null);
-  const gameObjects = useRef<Map<string, PIXI.Container>>(new Map());
+  const app = useRef<any>(null);
+  const gameObjects = useRef<Map<string, any>>(new Map());
   const [score, setScore] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
 
@@ -95,20 +101,20 @@ export default function PixiGame({
     if (gameData.items && gameData.items.length > 0) {
       gameData.items.forEach((item) => {
         // 創建遊戲對象
-        const container = new PIXI.Container();
+        const container = new window.PIXI.Container();
         container.x = item.x || Math.random() * (width - 100);
         container.y = item.y || Math.random() * (height - 50);
         container.interactive = true;
         (container as any).buttonMode = true;
 
         // 創建背景
-        const background = new PIXI.Graphics();
+        const background = new window.PIXI.Graphics();
         background.beginFill(item.color || 0x3498db);
         background.drawRoundedRect(0, 0, 100, 50, 10);
         background.endFill();
 
         // 創建文本
-        const text = new PIXI.Text(item.text, {
+        const text = new window.PIXI.Text(item.text, {
           fontFamily: 'Arial',
           fontSize: 16,
           fill: 0xffffff,
@@ -141,7 +147,7 @@ export default function PixiGame({
     if (!app.current || !app.current.stage || !app.current.ticker) return;
 
     // 創建遊戲容器
-    const gameContainer = new PIXI.Container();
+    const gameContainer = new window.PIXI.Container();
     app.current.stage.addChild(gameContainer);
 
     // 添加遊戲元素
@@ -156,13 +162,13 @@ export default function PixiGame({
 
   // 初始化 PixiJS 應用
   useEffect(() => {
-    if (!pixiContainer.current) return;
+    if (!pixiContainer.current || !window.PIXI) return;
 
     // 在 effect 开始时复制 ref 值
     const currentGameObjects = gameObjects.current;
 
     // 創建 PIXI 應用
-    app.current = new PIXI.Application({
+    app.current = new window.PIXI.Application({
       width,
       height,
       backgroundColor,
