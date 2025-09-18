@@ -268,12 +268,9 @@ export default function ActivitiesBrowse() {
     const templateInfo = getTemplateInfo(activity.templateType);
 
     return (
-      <motion.div 
-        key={activity.id} 
-        className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+      <div
+        key={activity.id}
+        className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-in"
       >
         <Link href={`/activities/${activity.id}`} className="block">
           <div className="relative h-48 overflow-hidden">
@@ -322,7 +319,7 @@ export default function ActivitiesBrowse() {
             </div>
           </div>
         </Link>
-      </motion.div>
+      </div>
     );
   };
 
@@ -396,7 +393,7 @@ export default function ActivitiesBrowse() {
             </div>
           </div>
         </Link>
-      </motion.div>
+      </div>
     );
   };
 

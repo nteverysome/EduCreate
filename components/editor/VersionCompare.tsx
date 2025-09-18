@@ -161,12 +161,9 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
           </div>
         ) : (
           Object.entries(groupedDifferences).map(([category, diffs]) => (
-            <motion.div 
-              key={category} 
-              className="bg-white shadow overflow-hidden sm:rounded-md"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+            <div
+              key={category}
+              className="bg-white shadow overflow-hidden sm:rounded-md transition-all duration-300 animate-fade-in"
             >
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">{getDiffTypeName(category)} 變更</h3>
@@ -177,10 +174,9 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
                     const isSelected = selectedDiff === `${category}-${index}`;
                     
                     return (
-                      <motion.li 
-                        key={index} 
-                        className={`border-b border-gray-200 pb-4 last:border-b-0 last:pb-0 ${isSelected ? 'ring-2 ring-indigo-500 rounded-md' : ''}`}
-                        whileHover={{ scale: 1.01 }}
+                      <li
+                        key={index}
+                        className={`border-b border-gray-200 pb-4 last:border-b-0 last:pb-0 cursor-pointer transition-all duration-200 hover:scale-105 ${isSelected ? 'ring-2 ring-indigo-500 rounded-md' : ''}`}
                         onClick={() => setSelectedDiff(isSelected ? null : `${category}-${index}`)}
                       >
                         <div className="flex justify-between items-center mb-2">
@@ -229,12 +225,12 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
                             )}
                           </div>
                         )}
-                      </motion.li>
+                      </li>
                     );
                   })}
                 </ul>
               </div>
-            </motion.div>
+            </div>
           ))
         )}
       </div>
@@ -256,12 +252,9 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
     return (
       <div className="space-y-6">
         {Object.entries(groupedDifferences).map(([category, diffs]) => (
-          <motion.div 
-            key={category} 
-            className="bg-white shadow overflow-hidden sm:rounded-md"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+          <div
+            key={category}
+            className="bg-white shadow overflow-hidden sm:rounded-md transition-all duration-300 animate-fade-in"
           >
             <div className="px-4 py-5 sm:p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">{getDiffTypeName(category)} 變更</h3>
@@ -285,7 +278,7 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
                 })}
               </ul>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     );

@@ -377,7 +377,7 @@ export default function ActivityDetail() {
                 )}
               </div>
             </div>
-          </motion.div>
+          </div>
           
           {/* 控制按鈕 */}
           <div className="flex justify-center space-x-4 mt-8">
@@ -433,7 +433,7 @@ export default function ActivityDetail() {
                   <p className="text-gray-500 text-sm mt-2 italic">例句: {card.example}</p>
                 )}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

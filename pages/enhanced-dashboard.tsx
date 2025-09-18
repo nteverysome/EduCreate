@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { PlusIcon, MagnifyingGlassIcon, AdjustmentsVerticalIcon, ClockIcon, ChartBarIcon, DocumentTextIcon, TagIcon, EyeIcon, UserGroupIcon, BoltIcon } from '@heroicons/react/24/outline';
-import { motion } from 'framer-motion';
+// framer-motion 已移除，使用 CSS 動畫替代
 import BatchOperations from '../components/dashboard/BatchOperations';
 import SelectableActivityCard from '../components/dashboard/SelectableActivityCard';
 
@@ -368,11 +368,8 @@ export default function EnhancedDashboard() {
   // 渲染統計卡片
   const renderStatCard = (icon: React.ReactNode, title: string, value: string | number, description: string, color: string) => {
     return (
-      <motion.div 
-        className="bg-white rounded-lg shadow-md p-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+      <div
+        className="bg-white rounded-lg shadow-md p-6 transition-all duration-300 animate-fade-in"
       >
         <div className={`w-12 h-12 rounded-full ${color} flex items-center justify-center mb-4`}>
           {icon}
@@ -380,7 +377,7 @@ export default function EnhancedDashboard() {
         <h3 className="text-2xl font-bold mb-1">{value}</h3>
         <p className="text-lg font-medium mb-2">{title}</p>
         <p className="text-gray-500 text-sm">{description}</p>
-      </motion.div>
+      </div>
     );
   };
 
