@@ -26,7 +26,7 @@ interface GameState {
 }
 
 const GameSwitcherPage: React.FC = () => {
-  const [currentGameId, setCurrentGameId] = useState<string>('airplane-vite');
+  const [currentGameId, setCurrentGameId] = useState<string>('shimozurdo-responsive');
   const [showStats, setShowStats] = useState<boolean>(false);
   const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
   const [showMobileGeptMenu, setShowMobileGeptMenu] = useState<boolean>(false);
@@ -336,7 +336,7 @@ const GameSwitcherPage: React.FC = () => {
         {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
         <div className="mb-1 sm:mb-2" data-testid="game-container">
           <GameSwitcher
-            defaultGame="airplane-vite"
+            defaultGame="shimozurdo-responsive"
             geptLevel={currentGeptLevel}
             onGameChange={handleGameChange}
             onGameStateUpdate={handleGameStateUpdate}

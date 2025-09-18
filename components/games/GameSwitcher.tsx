@@ -75,6 +75,18 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '🎮',
     estimatedLoadTime: 1000
   },
+  {
+    id: 'shimozurdo-responsive',
+    name: 'shimozurdo',
+    displayName: 'shimozurdo 響應式遊戲',
+    description: 'Phaser 3 響應式遊戲，支援全螢幕和方向切換，記憶科學驅動學習',
+    type: 'iframe',
+    memoryType: '空間視覺記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🎯',
+    estimatedLoadTime: 800
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -145,6 +157,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
     case 'airplane-iframe':
       return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
+    case 'shimozurdo-responsive':
+      return '/games/shimozurdo-game/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':
@@ -159,7 +173,7 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
 };
 
 const GameSwitcher: React.FC<GameSwitcherProps> = ({
-  defaultGame = 'airplane-vite',
+  defaultGame = 'shimozurdo-responsive',
   geptLevel = 'elementary',
   onGameChange,
   onGameStateUpdate,
@@ -280,10 +294,19 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
   // 切換遊戲
   const switchGame = useCallback((gameId: string) => {
-    if (gameId === currentGameId || isLoading) return;
+    console.log(`[GameSwitcher] 嘗試切換遊戲: ${gameId}, 當前: ${currentGameId}`);
+    if (gameId === currentGameId || isLoading) {
+      console.log(`[GameSwitcher] 切換被阻止: 相同遊戲或正在載入`);
+      return;
+    }
 
     const game = gamesConfig.find(g => g.id === gameId);
-    if (!game || game.status !== 'completed') return;
+    if (!game || game.status !== 'completed') {
+      console.log(`[GameSwitcher] 遊戲不可用: ${gameId}, 找到: ${!!game}, 狀態: ${game?.status}`);
+      return;
+    }
+
+    console.log(`[GameSwitcher] 開始切換到: ${game.displayName} (${game.url})`);
 
     // 清理之前的計時器
     if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
@@ -291,9 +314,11 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
     // 開始載入新遊戲
     simulateLoading(game.estimatedLoadTime);
-    
+
     setCurrentGameId(gameId);
     setIsDropdownOpen(false);
+
+    console.log(`[GameSwitcher] 狀態已更新: currentGameId -> ${gameId}`);
     
     // 通知父組件
     onGameChange?.(gameId);
@@ -531,19 +556,17 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
               <ChevronDownIcon className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
           </div>
-        </div>
-      )}
 
-      {/* 下拉選單 - 響應式設計 */}
-      {isDropdownOpen && (
-        <div className="dropdown-overlay fixed inset-0 z-40">
-          {/* 手機版遮罩 */}
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 sm:hidden"
-            onClick={() => setIsDropdownOpen(false)}
-          />
+          {/* 下拉選單 - 直接在按鈕容器內 */}
+          {isDropdownOpen && (
+            <>
+              {/* 手機版遮罩 */}
+              <div
+                className="fixed inset-0 bg-black bg-opacity-50 sm:hidden z-40"
+                onClick={() => setIsDropdownOpen(false)}
+              />
 
-          <div className="dropdown-menu absolute top-full left-0 right-0 sm:left-auto sm:right-0 mt-2 w-full sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
+              <div className="dropdown-menu absolute top-full left-0 right-0 sm:left-auto sm:right-0 mt-2 w-full sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
             <div className="p-2">
               <div className="text-sm font-medium text-gray-700 px-3 py-2 border-b border-gray-100">
                 可用遊戲 ({availableGames.length})
@@ -592,6 +615,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
               )}
             </div>
           </div>
+        </>
+      )}
         </div>
       )}
 
