@@ -369,16 +369,22 @@ export default class Title extends Phaser.Scene {
      * ☁️ 生成雲朵敵人 - 創建新的雲朵敵人並設置其屬性和動畫
      */
     spawnCloudEnemy() {
-        const { width, height } = this;                  // 獲取場景尺寸
-
         // 檢查資源是否存在 - 防禦性編程
         if (!this.textures.exists('cloud_enemy')) {
             console.warn('⚠️ 雲朵敵人資源不存在');
             return;
         }
 
-        // 創建敵人（從右側螢幕外開始） - 從右側進入螢幕
-        const enemy = this.add.sprite(width + 100, Phaser.Math.Between(100, height - 100), 'cloud_enemy');  // X座標在螢幕外，Y座標隨機
+        // 🎯 使用攝影機 worldView 獲取真正的 FIT 後遊戲可見區域
+        const cam = this.cameras.main;
+        const worldView = cam.worldView;  // 經過 FIT 縮放後的實際遊戲區域
+
+        // 計算生成位置 - 在 FIT 後的遊戲區域右邊界外
+        const spawnX = worldView.right + Phaser.Math.Between(100, 300);  // 右邊界外 100-300 像素
+        const spawnY = Phaser.Math.Between(worldView.top + 100, worldView.bottom - 100);  // Y 在遊戲區域內
+
+        // 創建敵人（從 FIT 後遊戲區域外開始） - 確保在真正的遊戲區域外生成
+        const enemy = this.add.sprite(spawnX, spawnY, 'cloud_enemy');
         enemy.setOrigin(0.5, 0.5);                       // 設置中心點
         enemy.setScale(0.4);                             // 與太空船相同大小
         enemy.setDepth(-65);                             // 在太空船後面，視差背景前面
@@ -401,6 +407,7 @@ export default class Title extends Phaser.Scene {
         this.enemies.push(enemy);
 
         console.log(`☁️ 生成雲朵敵人在位置 (${enemy.x}, ${enemy.y})`);
+        console.log(`📐 攝影機 worldView: left=${worldView.left}, right=${worldView.right}, top=${worldView.top}, bottom=${worldView.bottom}`);
     }
 
     /**
@@ -438,11 +445,15 @@ export default class Title extends Phaser.Scene {
                     continue;                            // 跳過後續檢查
                 }
 
-                // 移出螢幕左側時銷毀 - 清理離開螢幕的敵人
-                if (enemy.x < -100) {                    // 檢查是否移出螢幕左側
+                // 🎯 使用攝影機 worldView 判斷是否飛出 FIT 後的遊戲區域
+                const cam = this.cameras.main;
+                const worldView = cam.worldView;
+
+                // 完全飛出 FIT 後遊戲區域左邊界時銷毀
+                if (enemy.x < worldView.left - 100) {    // 檢查是否移出 FIT 後遊戲區域左側
                     enemy.destroy();                     // 銷毀精靈物件
                     this.enemies.splice(i, 1);          // 從陣列中移除
-                    console.log('☁️ 雲朵敵人移出螢幕，已銷毀');
+                    console.log('☁️ 雲朵敵人飛出 FIT 遊戲區域，已銷毀');
                 }
             } else {
                 // 清理無效敵人 - 移除已被銷毀或無效的敵人引用
