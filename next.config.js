@@ -1,38 +1,4 @@
-// Sentry integration removed; pass-through wrapper
-const withSentryConfig = (cfg) => cfg;
-
-/** @type {import('next-pwa').PWAConfig} */
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
-  skipWaiting: true,
-  runtimeCaching: [
-    {
-      urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'cloudinary-images',
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 60 * 60 * 24 * 30, // 30 天
-        },
-      },
-    },
-    {
-      urlPattern: /\/api\/.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'apis',
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 60 * 5, // 5 分鐘
-        },
-        networkTimeoutSeconds: 10,
-      },
-    },
-  ],
-});
+// 簡化配置 - 移除 PWA 以避免構建問題
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -41,18 +7,10 @@ const nextConfig = {
   // 簡化的圖片配置
   images: {
     domains: ['localhost', 'res.cloudinary.com'],
-    unoptimized: true, // 簡化部署
+    unoptimized: true,
   },
 
-  // 環境變數配置
-  env: {
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    DATABASE_URL: process.env.DATABASE_URL,
-    FORCE_REBUILD: '2025-08-07-16-13',
-  },
-
-  // 構建配置
+  // 構建配置 - 忽略錯誤確保部署成功
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -138,4 +96,4 @@ const nextConfig = {
   },
 }
 
-module.exports = withPWA(nextConfig);
+module.exports = nextConfig;

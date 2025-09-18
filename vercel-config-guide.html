@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vercel 環境變數配置指南 - EduCreate</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fafafa;
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, #000, #333);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .step {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #0070f3;
+        }
+        .env-var {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 6px;
+            border: 1px solid #e1e8ed;
+        }
+        .env-name {
+            font-weight: bold;
+            color: #0070f3;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .env-value {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            margin: 10px 0;
+            position: relative;
+        }
+        .env-environments {
+            color: #666;
+            font-style: italic;
+        }
+        .copy-btn {
+            background: #0070f3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background 0.3s;
+        }
+        .copy-btn:hover {
+            background: #0051cc;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .test-links {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .test-links a {
+            display: block;
+            color: #0070f3;
+            text-decoration: none;
+            padding: 8px 0;
+            border-bottom: 1px solid #e1e8ed;
+            transition: all 0.3s;
+        }
+        .test-links a:hover {
+            background: #f0f8ff;
+            padding-left: 10px;
+        }
+        .quick-links {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .quick-links a {
+            display: inline-block;
+            background: #0070f3;
+            color: white;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .quick-links a:hover {
+            background: #0051cc;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-pending { background: #ffc107; }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 Vercel 環境變數配置指南</h1>
+        <p>EduCreate 項目部署配置</p>
+        <p><strong>部署 URL:</strong> https://edu-create-57xh685mp-minamisums-projects.vercel.app</p>
+    </div>
+
+    <div class="quick-links">
+        <h3>🔗 快速連結</h3>
+        <a href="https://vercel.com/minamisums-projects/edu-create" target="_blank">📱 Vercel 項目頁面</a>
+        <a href="https://vercel.com/minamisums-projects/edu-create/settings/environment-variables" target="_blank">⚙️ 環境變數設置</a>
+        <a href="https://vercel.com/minamisums-projects/edu-create/deployments" target="_blank">🚀 部署頁面</a>
+    </div>
+
+    <div class="step">
+        <h2>📋 步驟 1: 導航到環境變數設置</h2>
+        <p>點擊上方的 <strong>"環境變數設置"</strong> 連結，或手動導航：</p>
+        <ol>
+            <li>前往 <a href="https://vercel.com/minamisums-projects/edu-create" target="_blank">Vercel 項目頁面</a></li>
+            <li>點擊 <strong>Settings</strong> 標籤</li>
+            <li>在左側菜單點擊 <strong>Environment Variables</strong></li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h2>🔧 步驟 2: 添加環境變數</h2>
+        <p>點擊 <strong>Add New</strong> 按鈕，然後逐一添加以下環境變數：</p>
+
+        <div class="env-var">
+            <div class="env-name">1️⃣ DATABASE_URL</div>
+            <div class="env-value" id="db-url">postgresql://neondb_owner:npg_JiVYrWK7L6Ff@ep-curly-salad-a85exs3f-pooler.eastus2.azure.neon.tech/neondb?sslmode=require</div>
+            <div class="env-environments">環境: ✅ Production ✅ Preview ✅ Development</div>
+            <button class="copy-btn" onclick="copyToClipboard('db-url')">📋 複製值</button>
+        </div>
+
+        <div class="env-var">
+            <div class="env-name">2️⃣ NEXTAUTH_URL</div>
+            <div class="env-value" id="auth-url">https://edu-create-57xh685mp-minamisums-projects.vercel.app</div>
+            <div class="env-environments">環境: ✅ Production</div>
+            <button class="copy-btn" onclick="copyToClipboard('auth-url')">📋 複製值</button>
+        </div>
+
+        <div class="env-var">
+            <div class="env-name">3️⃣ NEXTAUTH_SECRET</div>
+            <div class="env-value" id="auth-secret">662c86e428aa5363751a9fa3edd0ec3bff135c8d64a75bd81449e9ae5a4e267e</div>
+            <div class="env-environments">環境: ✅ Production ✅ Preview ✅ Development</div>
+            <button class="copy-btn" onclick="copyToClipboard('auth-secret')">📋 複製值</button>
+        </div>
+    </div>
+
+    <div class="step">
+        <h2>🔄 步驟 3: 重新部署</h2>
+        <p>配置完所有環境變數後：</p>
+        <ol>
+            <li>點擊上方的 <strong>"部署頁面"</strong> 連結</li>
+            <li>找到最新的部署記錄</li>
+            <li>點擊右側的 <strong>⋯</strong> (三點) 按鈕</li>
+            <li>選擇 <strong>Redeploy</strong></li>
+            <li>確認重新部署</li>
+        </ol>
+    </div>
+
+    <div class="success">
+        <h3>✅ 部署信息</h3>
+        <p><strong>生產 URL:</strong> https://edu-create-57xh685mp-minamisums-projects.vercel.app</p>
+        <p><strong>項目頁面:</strong> https://vercel.com/minamisums-projects/edu-create</p>
+        <p><strong>部署狀態:</strong> <span class="status-indicator status-pending"></span>等待重新部署</p>
+    </div>
+
+    <div class="test-links">
+        <h3>🧪 部署後測試連結</h3>
+        <a href="https://edu-create-57xh685mp-minamisums-projects.vercel.app" target="_blank">
+            🏠 主頁 - 檢查網站是否正常載入
+        </a>
+        <a href="https://edu-create-57xh685mp-minamisums-projects.vercel.app/api/health" target="_blank">
+            💚 API 健康檢查 - 驗證後端服務
+        </a>
+        <a href="https://edu-create-57xh685mp-minamisums-projects.vercel.app/games" target="_blank">
+            🎮 遊戲頁面 - 測試遊戲功能
+        </a>
+        <a href="https://edu-create-57xh685mp-minamisums-projects.vercel.app/games/shimozurdo-game" target="_blank">
+            🚀 Shimozurdo 遊戲 - 測試最新的雲朵生成修復
+        </a>
+    </div>
+
+    <div class="warning">
+        <h3>⚠️ 重要提醒</h3>
+        <ul>
+            <li><strong>重新部署時間:</strong> 通常需要 2-5 分鐘</li>
+            <li><strong>環境變數檢查:</strong> 確保所有三個變數都正確保存</li>
+            <li><strong>環境選擇:</strong> 注意每個變數需要選擇的環境</li>
+            <li><strong>錯誤排查:</strong> 如果遇到問題，檢查 Vercel 部署日誌</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h2>🎯 配置檢查清單</h2>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
+            <label><input type="checkbox"> DATABASE_URL 已添加到 Production, Preview, Development</label><br>
+            <label><input type="checkbox"> NEXTAUTH_URL 已添加到 Production</label><br>
+            <label><input type="checkbox"> NEXTAUTH_SECRET 已添加到 Production, Preview, Development</label><br>
+            <label><input type="checkbox"> 已觸發重新部署</label><br>
+            <label><input type="checkbox"> 部署狀態顯示為 "Ready"</label><br>
+            <label><input type="checkbox"> 主頁可以正常訪問</label><br>
+            <label><input type="checkbox"> API 健康檢查返回正常</label><br>
+            <label><input type="checkbox"> 遊戲功能正常工作</label><br>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // 找到對應的複製按鈕
+                const copyBtn = element.parentNode.querySelector('.copy-btn');
+                const originalText = copyBtn.textContent;
+                
+                // 顯示成功狀態
+                copyBtn.textContent = '✅ 已複製!';
+                copyBtn.style.background = '#28a745';
+                
+                // 2秒後恢復原狀
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.style.background = '#0070f3';
+                }, 2000);
+            }).catch(err => {
+                console.error('複製失敗:', err);
+                alert('複製失敗，請手動選擇文字複製');
+            });
+        }
+
+        // 頁面載入完成後的提示
+        window.addEventListener('load', () => {
+            console.log('🚀 Vercel 配置指南已載入');
+            console.log('💡 點擊任何環境變數旁的 "複製值" 按鈕來快速複製');
+        });
+    </script>
+</body>
+</html>
