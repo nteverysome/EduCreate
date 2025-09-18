@@ -131,6 +131,57 @@ EduCreate/wordwall-clone/
 **/gatsby-config.js
 gatsby-*
 
+# 大型文件和目錄
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webm
+*.mp4
+*.mov
+*.pdf
+
+# MCP 工具目錄
+mcp-*/
+python-sequential-thinking-mcp/
+Windows-MCP/
+autogen-microsoft/
+langfuse/
+guardrails-ai/
+awesome-mcp-servers/
+aws-mcp-servers/
+
+# 測試和分析文件
+*-analysis.html
+*-debug.html
+*-test.html
+*-screenshots/
+collision-analysis-screenshots/
+flicker-fix-test-screenshots/
+white-flash-*-screenshots/
+shimozurdo-*/
+
+# 開發腳本和工具
+scripts/
+fix-*.js
+test-*.js
+debug-*.js
+*-automation.js
+*-helper.js
+deploy-*.bat
+vercel-*.js
+vercel-*.html
+vercel-*.md
+
+# 遊戲開發文件
+phaser-*/
+wordwall-clone/
+examples/
+templates/responsive/
+
 # 其他
 *.tgz
 *.tar.gz
+*.backup
+*.bak
+*.old
