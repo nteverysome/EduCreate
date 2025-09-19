@@ -30,8 +30,32 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# 編譯器和大型二進制文件排除（保留核心功能）
-# 排除編譯器中的大型二進制文件，但保留必要的運行時文件
+# 激進的依賴排除策略 - 解決 Vercel 250MB 限制
+
+# 完全排除大型開發依賴（運行時不需要）
+node_modules/typescript/                    # 21.81 MB - 編譯器
+node_modules/.cache/                        # 20.15 MB - 緩存文件
+node_modules/chromium-bidi/                 # 11.92 MB - 瀏覽器控制
+node_modules/@testing-library/              # 11.65 MB - 測試庫
+node_modules/@babel/                        # 10.82 MB - Babel 編譯器
+node_modules/puppeteer-core/                # 7.9 MB - 瀏覽器自動化
+node_modules/playwright-core/               # 7.66 MB - E2E 測試
+node_modules/webpack/                       # 6.8 MB - 打包工具
+node_modules/rollup/                        # 6.15 MB - 打包工具
+node_modules/tailwindcss/                   # 5.52 MB - CSS 框架
+node_modules/stripe/                        # 4.31 MB - 支付 SDK
+node_modules/moment/                        # 4.15 MB - 日期庫
+
+# 測試和開發工具
+node_modules/jest/
+node_modules/cypress/
+node_modules/eslint/
+node_modules/puppeteer/
+node_modules/playwright/
+node_modules/@playwright/
+node_modules/electron/
+node_modules/sharp/
+node_modules/canvas/
 
 # Next.js 編譯器二進制文件
 node_modules/@next/swc-win32-x64-msvc/
@@ -42,35 +66,17 @@ node_modules/@next/swc-linux-x64-musl/
 node_modules/@next/swc-linux-arm64-gnu/
 node_modules/@next/swc-linux-arm64-musl/
 
-# Prisma 引擎二進制文件（保留必要的查詢引擎）
+# Prisma 引擎二進制文件（保留查詢引擎）
 node_modules/@prisma/engines/migration-engine-*
 node_modules/@prisma/engines/introspection-engine-*
 node_modules/@prisma/engines/prisma-fmt-*
-node_modules/.prisma/client/libquery_engine-*
-
-# TypeScript 編譯器大型文件
-node_modules/typescript/lib/tsc.js
-node_modules/typescript/lib/tsserver.js
-node_modules/typescript/lib/typescript.js
-
-# 測試工具二進制文件
-node_modules/puppeteer/.local-chromium/
-node_modules/playwright/browsers/
-node_modules/@playwright/test/browsers/
-node_modules/chromium-bidi/
-
-# 開發工具
-node_modules/@testing-library/
-node_modules/jest/
-node_modules/cypress/
-node_modules/eslint/
 
 # 大型圖標和字體文件
-node_modules/lucide-react/icons/
-node_modules/@heroicons/react/24/
+node_modules/@heroicons/react/24/outline/
+node_modules/@heroicons/react/24/solid/
+node_modules/@heroicons/react/20/
 
 # 緩存和臨時文件
-node_modules/.cache/
 .pnp
 .pnp.js
 
