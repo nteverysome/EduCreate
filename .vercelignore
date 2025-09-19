@@ -114,7 +114,7 @@ LICENSE
 playwright-report/
 test-results/
 
-# 測試影片和 MCP 工具
+# 測試影片和 MCP 工具 (完全排除 - 約 334MB)
 EduCreate-Test-Videos/
 public/games/*/node_modules/
 public/games/*/dist/
