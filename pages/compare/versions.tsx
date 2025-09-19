@@ -3,8 +3,16 @@ import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { format } from 'date-fns';
-import { zhTW } from 'date-fns/locale';
+// 使用原生 Date API 替代 date-fns
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
@@ -179,7 +187,7 @@ export default function CompareVersions() {
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <h2 className="text-lg font-medium text-blue-800">版本 {versionA.versionName}</h2>
                   <p className="text-sm text-gray-500">
-                    創建於 {format(new Date(versionA.createdAt), 'yyyy-MM-dd HH:mm:ss', { locale: zhTW })}
+                    創建於 {formatDate(new Date(versionA.createdAt))}
                   </p>
                   <p className="text-sm text-gray-500">
                     創建者: {versionA.createdByUser?.name || '未知用戶'}
@@ -192,7 +200,7 @@ export default function CompareVersions() {
                 <div className="bg-green-50 p-4 rounded-lg">
                   <h2 className="text-lg font-medium text-green-800">版本 {versionB.versionName}</h2>
                   <p className="text-sm text-gray-500">
-                    創建於 {format(new Date(versionB.createdAt), 'yyyy-MM-dd HH:mm:ss', { locale: zhTW })}
+                    創建於 {formatDate(new Date(versionB.createdAt))}
                   </p>
                   <p className="text-sm text-gray-500">
                     創建者: {versionB.createdByUser?.name || '未知用戶'}
