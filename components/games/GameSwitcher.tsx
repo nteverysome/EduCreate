@@ -76,6 +76,18 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     estimatedLoadTime: 1000
   },
   {
+    id: 'shimozurdo-game',
+    name: 'shimozurdo',
+    displayName: 'Shimozurdo 雲朵遊戲',
+    description: 'Phaser 3 雲朵碰撞遊戲，支援全螢幕和響應式設計，記憶科學驅動的英語學習',
+    type: 'iframe',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '☁️',
+    estimatedLoadTime: 800
+  },
+  {
     id: 'shimozurdo-responsive',
     name: 'shimozurdo',
     displayName: 'shimozurdo 響應式遊戲',
@@ -157,6 +169,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
     case 'airplane-iframe':
       return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
+    case 'shimozurdo-game':
+      return '/games/shimozurdo-game/';
     case 'shimozurdo-responsive':
       return '/games/shimozurdo-game/';
     case 'matching-pairs':
@@ -173,7 +187,7 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
 };
 
 const GameSwitcher: React.FC<GameSwitcherProps> = ({
-  defaultGame = 'shimozurdo-responsive',
+  defaultGame = 'shimozurdo-game',
   geptLevel = 'elementary',
   onGameChange,
   onGameStateUpdate,
@@ -535,6 +549,77 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
                 {level === 'elementary' ? '初級' : level === 'intermediate' ? '中級' : '高級'}
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* 手機版下拉選單 */}
+      {isMobile && isDropdownOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50" onClick={() => setIsDropdownOpen(false)}>
+          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-lg max-h-96 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">選擇遊戲</h3>
+                <button
+                  onClick={() => setIsDropdownOpen(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600"
+                  style={{ minHeight: '44px', minWidth: '44px' }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-gray-700 px-2 py-1">
+                  可用遊戲 ({availableGames.length})
+                </div>
+                {availableGames.map((game) => (
+                  <button
+                    key={game.id}
+                    onClick={() => switchGame(game.id)}
+                    className={`w-full text-left px-3 py-4 rounded-lg transition-colors ${
+                      game.id === currentGameId ? 'bg-blue-50 border-2 border-blue-500' : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                    }`}
+                    style={{ minHeight: '60px' }}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl flex-shrink-0">{game.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-900">{game.displayName}</div>
+                        <div className="text-sm text-gray-500 mt-1">{game.memoryType}</div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          載入時間: ~{game.estimatedLoadTime}ms
+                        </div>
+                      </div>
+                      {game.id === currentGameId && (
+                        <div className="text-blue-600 flex-shrink-0">✓</div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+
+                {developmentGames.length > 0 && (
+                  <>
+                    <div className="text-sm font-medium text-gray-700 px-2 py-1 mt-4 border-t pt-4">開發中遊戲</div>
+                    {developmentGames.map((game) => (
+                      <div
+                        key={game.id}
+                        className="w-full text-left px-3 py-4 rounded-lg opacity-60 cursor-not-allowed bg-gray-50"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <span className="text-2xl flex-shrink-0">{game.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900">{game.displayName}</div>
+                            <div className="text-sm text-gray-500 mt-1">{game.memoryType}</div>
+                            <div className="text-xs text-yellow-600 mt-1">🚧 開發中...</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

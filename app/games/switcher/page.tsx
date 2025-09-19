@@ -26,7 +26,7 @@ interface GameState {
 }
 
 const GameSwitcherPage: React.FC = () => {
-  const [currentGameId, setCurrentGameId] = useState<string>('shimozurdo-responsive');
+  const [currentGameId, setCurrentGameId] = useState<string>('shimozurdo-game');
   const [showStats, setShowStats] = useState<boolean>(false);
   const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
   const [showMobileGeptMenu, setShowMobileGeptMenu] = useState<boolean>(false);
@@ -161,6 +161,8 @@ const GameSwitcherPage: React.FC = () => {
   // 獲取遊戲名稱
   const getGameName = (gameId: string): string => {
     const gameNames: Record<string, string> = {
+      'shimozurdo-game': 'Shimozurdo 雲朵遊戲',
+      'shimozurdo-responsive': 'shimozurdo 響應式遊戲',
       'airplane-vite': '飛機遊戲 (Vite版)',
       'airplane-main': '飛機碰撞遊戲',
       'airplane-iframe': '飛機遊戲 (iframe)',
@@ -336,7 +338,7 @@ const GameSwitcherPage: React.FC = () => {
         {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
         <div className="mb-1 sm:mb-2" data-testid="game-container">
           <GameSwitcher
-            defaultGame="shimozurdo-responsive"
+            defaultGame="shimozurdo-game"
             geptLevel={currentGeptLevel}
             onGameChange={handleGameChange}
             onGameStateUpdate={handleGameStateUpdate}
