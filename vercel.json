@@ -1,7 +1,7 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "npx prisma generate && SKIP_ENV_VALIDATION=true next build --no-lint",
+  "buildCommand": "SKIP_ENV_VALIDATION=true next build --no-lint",
   "build": {
     "env": {
       "NODE_ENV": "production",
@@ -111,6 +111,14 @@
     {
       "source": "/api/status",
       "destination": "/api/monitoring/performance"
+    },
+    {
+      "source": "/games/shimozurdo-game",
+      "destination": "/games/shimozurdo-game/index.html"
+    },
+    {
+      "source": "/games/shimozurdo-game/(.*)",
+      "destination": "/games/shimozurdo-game/$1"
     },
     {
       "source": "/games/airplane-game",
