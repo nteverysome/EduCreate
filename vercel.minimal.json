@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/games/shimozurdo-game",
+      "destination": "/games/shimozurdo-game/index.html"
+    },
+    {
+      "source": "/games/shimozurdo-game/(.*)",
+      "destination": "/games/shimozurdo-game/$1"
+    }
+  ]
+}
