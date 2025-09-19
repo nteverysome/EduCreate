@@ -320,7 +320,7 @@ const GameSwitcherPage: React.FC = () => {
         {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
         <div className="mb-1 sm:mb-2" data-testid="game-container">
           <GameSwitcher
-            defaultGame="airplane-vite"
+            defaultGame="shimozurdo-game"
             geptLevel={currentGeptLevel}
             onGameChange={handleGameChange}
             onGameStateUpdate={handleGameStateUpdate}
