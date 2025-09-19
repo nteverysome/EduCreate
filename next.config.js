@@ -88,6 +88,14 @@ const nextConfig = {
         destination: '/unified-content-manager.html'
       },
       {
+        source: '/games/shimozurdo-game',
+        destination: '/games/shimozurdo-game/index.html'
+      },
+      {
+        source: '/games/shimozurdo-game/:path*',
+        destination: '/games/shimozurdo-game/:path*'
+      },
+      {
         source: '/games/airplane-game',
         destination: '/games/airplane-game/index.html'
       },

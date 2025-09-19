@@ -151,6 +151,8 @@ const getGamesConfig = (): GameConfig[] => {
 // 獲取遊戲 URL 的輔助函數
 const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
   switch (gameId) {
+    case 'shimozurdo-game':
+      return '/games/shimozurdo-game/';
     case 'airplane-vite':
       return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
     case 'airplane-main':
