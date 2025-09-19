@@ -1,5 +1,52 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import * as PIXI from 'pixi.js';
+// PIXI.js 通過 CDN 載入，在運行時動態獲取
+declare global {
+  interface Window {
+    PIXI: any;
+  }
+}
+
+// 動態載入 PIXI.js 的 Hook
+const usePixi = () => {
+  const [PIXI, setPIXI] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.PIXI) {
+      setPIXI(window.PIXI);
+      setLoading(false);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/pixi.js@7.3.2/dist/pixi.min.js';
+    script.async = true;
+
+    script.onload = () => {
+      if (window.PIXI) {
+        setPIXI(window.PIXI);
+        setLoading(false);
+      } else {
+        setError(new Error('PIXI.js failed to load'));
+        setLoading(false);
+      }
+    };
+
+    script.onerror = () => {
+      setError(new Error('Failed to load PIXI.js from CDN'));
+      setLoading(false);
+    };
+
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  return { PIXI, loading, error };
+};
 
 interface PixiGameProps {
   width?: number;
@@ -24,11 +71,37 @@ export default function PixiGame({
   gameData = { items: [] },
   onComplete
 }: PixiGameProps) {
+  const { PIXI, loading, error } = usePixi();
   const pixiContainer = useRef<HTMLDivElement>(null);
-  const app = useRef<PIXI.Application | null>(null);
-  const gameObjects = useRef<Map<string, PIXI.Container>>(new Map());
+  const app = useRef<any>(null);
+  const gameObjects = useRef<Map<string, any>>(new Map());
   const [score, setScore] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
+
+  // 如果 PIXI 還在載入中，顯示載入狀態
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center" style={{ width, height }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">載入 PIXI.js 遊戲引擎...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 如果載入失敗，顯示錯誤狀態
+  if (error) {
+    return (
+      <div className="flex items-center justify-center" style={{ width, height }}>
+        <div className="text-center">
+          <div className="text-red-500 text-4xl mb-4">⚠️</div>
+          <p className="text-red-600">載入遊戲引擎失敗</p>
+          <p className="text-gray-500 text-sm mt-2">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
 
   // 動畫遊戲對象
   const animateGameObjects = useCallback(() => {

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
-import { zhTW } from 'date-fns/locale';
+
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -61,9 +60,15 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
     setGroupedDifferences(grouped);
   }, [differences]);
 
-  // 格式化日期
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'yyyy年MM月dd日 HH:mm', { locale: zhTW });
+  // 格式化日期 - 使用原生 Date API
+  const formatVersionDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('zh-TW', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   // 獲取差異類型的顯示名稱
@@ -89,14 +94,14 @@ const VersionCompare = ({ versionA, versionB, differences, onClose, onRestore }:
         <div className="grid grid-cols-2 gap-6">
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="text-lg font-medium text-gray-900 mb-2">版本 {versionA.versionName}</h3>
-            <p className="text-sm text-gray-500 mb-1">創建於: {formatDate(versionA.createdAt)}</p>
+            <p className="text-sm text-gray-500 mb-1">創建於: {formatVersionDate(versionA.createdAt)}</p>
             <p className="text-sm text-gray-500 mb-1">創建者: {versionA.createdByUser?.name || '未知'}</p>
             <p className="text-sm text-gray-500">描述: {versionA.description || '無描述'}</p>
           </div>
           
           <div className="bg-gray-50 p-4 rounded-lg">
             <h3 className="text-lg font-medium text-gray-900 mb-2">版本 {versionB.versionName}</h3>
-            <p className="text-sm text-gray-500 mb-1">創建於: {formatDate(versionB.createdAt)}</p>
+            <p className="text-sm text-gray-500 mb-1">創建於: {formatVersionDate(versionB.createdAt)}</p>
             <p className="text-sm text-gray-500 mb-1">創建者: {versionB.createdByUser?.name || '未知'}</p>
             <p className="text-sm text-gray-500">描述: {versionB.description || '無描述'}</p>
           </div>

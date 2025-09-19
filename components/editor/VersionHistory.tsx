@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { format } from 'date-fns';
+// 使用原生 Date API 替代 date-fns
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 import { Dialog } from '@headlessui/react';
 import { ClockIcon, ArrowPathIcon as RestoreIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
@@ -148,7 +157,7 @@ const VersionHistory = ({ activityId, onVersionRestore, isOpen, onClose }: Versi
                           {version.userId || '未知用戶'}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {format(new Date(version.createdAt), 'yyyy-MM-dd HH:mm:ss')}
+                          {formatDate(new Date(version.createdAt))}
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button

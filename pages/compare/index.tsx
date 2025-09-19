@@ -4,7 +4,16 @@ import { getSession } from 'next-auth/react';
 import { ActivityVersion } from '@/models/activityVersion';
 import prisma from '../../lib/prisma'; // 使用統一的 Prisma 實例
 import Link from 'next/link';
-import { format } from 'date-fns';
+// 使用原生 Date API 替代 date-fns
+const formatDate = (date: Date): string => {
+  return date.toLocaleDateString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import { useOptimisticUpdate } from '../../hooks/useOptimisticUpdate';
@@ -151,7 +160,7 @@ export default function CompareVersions({ versions, activityId }: CompareVersion
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {format(new Date(version.createdAt), 'yyyy-MM-dd HH:mm:ss')}
+                  {formatDate(new Date(version.createdAt))}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {version.user?.name || '未知用戶'}
