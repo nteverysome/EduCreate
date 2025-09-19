@@ -40,6 +40,18 @@ interface GameSwitcherProps {
 // 基礎遊戲配置數據 (不包含動態 URL)
 const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
   {
+    id: 'shimozurdo-game',
+    name: 'shimozurdo',
+    displayName: 'Shimozurdo 雲朵遊戲',
+    description: 'Phaser 3 雲朵碰撞遊戲，支援全螢幕和響應式設計，記憶科學驅動的英語學習',
+    type: 'iframe',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '☁️',
+    estimatedLoadTime: 800
+  },
+  {
     id: 'airplane-vite',
     name: 'airplane',
     displayName: '飛機遊戲 (Vite版)',
@@ -139,6 +151,8 @@ const getGamesConfig = (): GameConfig[] => {
 // 獲取遊戲 URL 的輔助函數
 const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
   switch (gameId) {
+    case 'shimozurdo-game':
+      return '/games/shimozurdo-game/';
     case 'airplane-vite':
       return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
     case 'airplane-main':
@@ -159,7 +173,7 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
 };
 
 const GameSwitcher: React.FC<GameSwitcherProps> = ({
-  defaultGame = 'airplane-vite',
+  defaultGame = 'shimozurdo-game',
   geptLevel = 'elementary',
   onGameChange,
   onGameStateUpdate,

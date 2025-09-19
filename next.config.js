@@ -1,38 +1,4 @@
-// Sentry integration removed; pass-through wrapper
-const withSentryConfig = (cfg) => cfg;
-
-/** @type {import('next-pwa').PWAConfig} */
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
-  skipWaiting: true,
-  runtimeCaching: [
-    {
-      urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'cloudinary-images',
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 60 * 60 * 24 * 30, // 30 天
-        },
-      },
-    },
-    {
-      urlPattern: /\/api\/.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'apis',
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 60 * 5, // 5 分鐘
-        },
-        networkTimeoutSeconds: 10,
-      },
-    },
-  ],
-});
+// Simplified config without PWA for stable deployment
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -130,4 +96,4 @@ const nextConfig = {
   },
 }
 
-module.exports = withPWA(nextConfig);
+module.exports = nextConfig;
