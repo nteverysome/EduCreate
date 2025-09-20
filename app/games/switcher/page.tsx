@@ -135,6 +135,8 @@ const GameSwitcherPage: React.FC = () => {
               sendFullscreenResult(true, '父頁面全螢幕成功');
             }).catch(err => {
               console.warn('⚠️ 父頁面全螢幕失敗:', err);
+              // iOS/Safari 或權限被拒：套用父頁面近全螢幕樣式作為退路
+              applyParentFullscreenStyles();
               sendFullscreenResult(false, '父頁面全螢幕失敗: ' + err.message);
             });
           } else if ((element as any).webkitRequestFullscreen) {
@@ -145,6 +147,7 @@ const GameSwitcherPage: React.FC = () => {
               sendFullscreenResult(true, '父頁面全螢幕成功 (webkit)');
             } catch (err: any) {
               console.warn('⚠️ 父頁面全螢幕失敗 (webkit):', err);
+              applyParentFullscreenStyles();
               sendFullscreenResult(false, '父頁面全螢幕失敗 (webkit): ' + err.message);
             }
           } else if ((element as any).mozRequestFullScreen) {
@@ -155,6 +158,7 @@ const GameSwitcherPage: React.FC = () => {
               sendFullscreenResult(true, '父頁面全螢幕成功 (moz)');
             } catch (err: any) {
               console.warn('⚠️ 父頁面全螢幕失敗 (moz):', err);
+              applyParentFullscreenStyles();
               sendFullscreenResult(false, '父頁面全螢幕失敗 (moz): ' + err.message);
             }
           } else if ((element as any).msRequestFullscreen) {
@@ -165,10 +169,13 @@ const GameSwitcherPage: React.FC = () => {
               sendFullscreenResult(true, '父頁面全螢幕成功 (ms)');
             } catch (err: any) {
               console.warn('⚠️ 父頁面全螢幕失敗 (ms):', err);
+              applyParentFullscreenStyles();
               sendFullscreenResult(false, '父頁面全螢幕失敗 (ms): ' + err.message);
             }
           } else {
             console.warn('⚠️ 父頁面不支援全螢幕 API');
+            // 退路：仍然套用父頁面近全螢幕樣式
+            applyParentFullscreenStyles();
             sendFullscreenResult(false, '父頁面不支援全螢幕 API');
           }
         };
@@ -209,7 +216,7 @@ const GameSwitcherPage: React.FC = () => {
             top: 0 !important;
             left: 0 !important;
             width: 100vw !important;
-            height: 100vh !important;
+            height: 100dvh !important;
             z-index: 999999 !important;
             background: black !important;
           }
@@ -220,7 +227,7 @@ const GameSwitcherPage: React.FC = () => {
             top: 0 !important;
             left: 0 !important;
             width: 100vw !important;
-            height: 100vh !important;
+            height: 100dvh !important;
             z-index: 999999 !important;
           }
 
