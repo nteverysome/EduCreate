@@ -119,6 +119,9 @@ export default class Hub extends Phaser.Scene {
             .setOrigin(.5)
             .setDepth(1)
             .setInteractive({ cursor: "pointer" })
+        // 啟動時查詢父頁目前的全螢幕狀態（以利後續按鈕決策）
+        try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'QUERY_FULLSCREEN_STATE', source: 'shimozurdo-game' }, '*'); } catch {}
+
 
         this.fullscreenBtn.on("pointerup", () => {
             const inIframe = !!(window.parent && window.parent !== window);
@@ -127,13 +130,9 @@ export default class Hub extends Phaser.Scene {
                 this.fullscreenBtn.setFrame(0);
                 this.scale.stopFullscreen();
             } else if (inIframe) {
-                // 內嵌情境：依據父頁面全螢幕狀態決定「退出或進入」
+                // 內嵌情境：統一交給父頁面切換（可退出或進入近/真全螢幕）
                 try {
-                    if (this._parentFSActive) {
-                        window.parent.postMessage({ type: 'REQUEST_EXIT_FULLSCREEN', source: 'shimozurdo-game' }, '*');
-                    } else {
-                        window.parent.postMessage({ type: 'REQUEST_FULLSCREEN', source: 'shimozurdo-game' }, '*');
-                    }
+                    window.parent.postMessage({ type: 'REQUEST_TOGGLE_FULLSCREEN', source: 'shimozurdo-game' }, '*');
                 } catch (e) {
                     // 後備：嘗試切換 Phaser 全螢幕
                     this.fullscreenBtn.setFrame(1);

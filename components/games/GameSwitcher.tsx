@@ -435,6 +435,15 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   }, [currentGame]);
 
   // iframe 消息處理
+  const isParentFSActive = () => !!(document.fullscreenElement || (document as any).webkitFullscreenElement || document.body.classList.contains('parent-fullscreen-game'));
+
+  const enterParentNearFullscreen = () => {
+    ensureParentFullscreenStyles();
+    document.body.classList.add('parent-fullscreen-game');
+    // 通知子頁面（近全螢幕）
+    iframeRef.current?.contentWindow?.postMessage({ source: 'parent-page', type: 'FULLSCREEN_FAILED' }, '*');
+  };
+
   const handleIframeMessage = useCallback((event: MessageEvent) => {
     if (!currentGame) return;
 
@@ -445,6 +454,15 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
       if (data.type === 'REQUEST_EXIT_FULLSCREEN') {
         exitParentFullscreen();
+      } else if (data.type === 'REQUEST_TOGGLE_FULLSCREEN') {
+        if (isParentFSActive()) {
+          exitParentFullscreen();
+        } else {
+          enterParentNearFullscreen();
+        }
+      } else if (data.type === 'QUERY_FULLSCREEN_STATE') {
+        const active = isParentFSActive();
+        iframeRef.current?.contentWindow?.postMessage({ source: 'parent-page', type: 'FULLSCREEN_STATE', active }, '*');
       } else if (data.type === 'GAME_STATE_UPDATE') {
         const newState: GameState = {
           score: data.score || 0,

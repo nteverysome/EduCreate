@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
   <title>🛩️ Airplane Collision Game - EduCreate</title>
   <meta name="description" content="記憶科學驅動的英語詞彙學習遊戲 - 飛機碰撞模式" />
-  
+
   <!-- 預載入關鍵資源 -->
   <link rel="preload" href="./assets/main-CLUSOIqT.ts" as="script" type="module" />
-  
+
   <!-- 遊戲樣式 -->
   <style>
     * {
@@ -16,7 +16,7 @@
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       background: #ffffff;  /* 白色背景與切換器一致 */
       font-family: 'Arial', sans-serif;
@@ -24,7 +24,7 @@
       margin: 0;
       padding: 0;
     }
-    
+
     #game-container {
       width: 1274px;
       height: 739px;
@@ -36,7 +36,7 @@
       margin: 0;
       padding: 0;
     }
-    
+
     #loading {
       position: absolute;
       top: 50%;
@@ -46,7 +46,7 @@
       text-align: center;
       z-index: 1000;
     }
-    
+
     .loading-spinner {
       width: 40px;
       height: 40px;
@@ -56,22 +56,22 @@
       animation: spin 1s linear infinite;
       margin: 0 auto 16px;
     }
-    
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    
+
     .loading-text {
       font-size: 18px;
       margin-bottom: 8px;
     }
-    
+
     .loading-subtitle {
       font-size: 14px;
       opacity: 0.7;
     }
-    
+
     /* 響應式設計 */
     /* iOS 0 Safari 0 touch
  00 */
@@ -125,3 +125,71 @@
 
 </body>
 </html>
+  <!-- 手機長按上/下飛行控制覆蓋層（不改動遊戲原碼） -->
+  <script>
+    (function(){
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (!isMobile) return;
+
+      const container = document.getElementById('game-container');
+      // 建立透明覆蓋層接管觸控，並向 canvas 注入 Pointer 事件
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:absolute;inset:0;z-index:999999;background:transparent;touch-action:none;';
+      container.style.position = 'relative';
+      container.appendChild(overlay);
+
+      let rafId = 0, pressing = false, dir = null, canvas = null;
+
+      const ensureCanvas = () => {
+        if (canvas && document.body.contains(canvas)) return true;
+        canvas = container.querySelector('canvas');
+        return !!canvas;
+      };
+
+      const dispatchPointer = (type, x, y) => {
+        if (!ensureCanvas()) return;
+        const evt = new PointerEvent(type, {bubbles:true,cancelable:true,clientX:x,clientY:y,pointerType:'touch'});
+        canvas.dispatchEvent(evt);
+      };
+
+      const loop = () => {
+        if (!pressing || !ensureCanvas()) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = rect.left + rect.width * 0.5;
+        const y = dir === 'up' ? (rect.top + rect.height * 0.2) : (rect.top + rect.height * 0.8);
+        dispatchPointer('pointermove', x, y);
+        rafId = requestAnimationFrame(loop);
+      };
+
+      const startPress = (direction, touch) => {
+        pressing = true; dir = direction;
+        const rect = (ensureCanvas(), canvas.getBoundingClientRect());
+        const x = rect.left + rect.width * 0.5;
+        const y = direction === 'up' ? (rect.top + rect.height * 0.2) : (rect.top + rect.height * 0.8);
+        dispatchPointer('pointerdown', x, y);
+        rafId = requestAnimationFrame(loop);
+      };
+
+      const endPress = () => {
+        if (!pressing) return; pressing = false; cancelAnimationFrame(rafId);
+        if (!ensureCanvas()) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = rect.left + rect.width * 0.5;
+        const y = rect.top + rect.height * 0.5;
+        dispatchPointer('pointerup', x, y);
+      };
+
+      overlay.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (!ensureCanvas()) return;
+        const t = e.changedTouches[0];
+        const rect = overlay.getBoundingClientRect();
+        const direction = (t.clientY - rect.top) < rect.height/2 ? 'up' : 'down';
+        startPress(direction, t);
+      }, {passive:false});
+
+      overlay.addEventListener('touchend', (e) => { e.preventDefault(); endPress(); }, {passive:false});
+      overlay.addEventListener('touchcancel', (e) => { e.preventDefault(); endPress(); }, {passive:false});
+    })();
+  </script>
+
