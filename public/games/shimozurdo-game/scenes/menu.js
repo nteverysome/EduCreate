@@ -66,14 +66,14 @@ export default class Menu extends Phaser.Scene {
     createParallaxBackground() {
         const { width, height } = this;
 
-        // 背景層配置 - 6層視差背景，從遠到近
+        // 背景層配置 - 6層視差背景，從遠到近（使用正確的紋理名稱）
         const backgroundConfig = [
-            { key: 'sky', depth: -100, scrollFactor: 0.1 },      // 天空層 - 最遠，幾乎不動
-            { key: 'moon', depth: -90, scrollFactor: 0.2 },      // 月亮層 - 很遠，輕微移動
-            { key: 'back', depth: -80, scrollFactor: 0.3 },      // 後景層 - 遠景山脈
-            { key: 'mid', depth: -70, scrollFactor: 0.5 },       // 中景層 - 中距離物體
-            { key: 'front', depth: -65, scrollFactor: 0.7 },     // 前景層 - 近距離物體
-            { key: 'floor', depth: -60, scrollFactor: 1.0 }      // 地面層 - 最近，完全跟隨
+            { key: 'bg_layer_1', depth: -100, scrollFactor: 0.1 },   // 天空層 - 最遠，幾乎不動
+            { key: 'bg_layer_2', depth: -90, scrollFactor: 0.2 },    // 月亮層 - 很遠，輕微移動
+            { key: 'bg_layer_3', depth: -80, scrollFactor: 0.3 },    // 後景層 - 遠景山脈
+            { key: 'bg_layer_4', depth: -70, scrollFactor: 0.5 },    // 中景層 - 中距離物體
+            { key: 'bg_layer_5', depth: -65, scrollFactor: 0.7 },    // 前景層 - 近距離物體
+            { key: 'bg_layer_6', depth: -60, scrollFactor: 1.0 }     // 地面層 - 最近，完全跟隨
         ];
 
         // 初始化背景層容器和滾動位置記錄
