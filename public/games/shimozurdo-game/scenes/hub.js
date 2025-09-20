@@ -121,6 +121,17 @@ export default class Hub extends Phaser.Scene {
             .setInteractive({ cursor: "pointer" })
         // 啟動時查詢父頁目前的全螢幕狀態（以利後續按鈕決策）
         try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'QUERY_FULLSCREEN_STATE', source: 'shimozurdo-game' }, '*'); } catch {}
+        // 擴大可點擊範圍（透明命中區），提高手機可點性
+        const HIT_SIZE = 88;
+        this.fullscreenHit = this.add.zone(this.fullscreenBtn.x, this.fullscreenBtn.y, HIT_SIZE, HIT_SIZE)
+            .setOrigin(.5)
+            .setDepth(2)
+            .setInteractive({ cursor: 'pointer' });
+        // 命中區點擊時，轉送事件給原按鈕邏輯
+        this.fullscreenHit.on('pointerup', () => {
+            this.fullscreenBtn.emit('pointerup');
+        });
+
 
 
         this.fullscreenBtn.on("pointerup", () => {
@@ -193,6 +204,13 @@ export default class Hub extends Phaser.Scene {
         this.handlerScene.cameras.main.setBackgroundColor(bgColorScene)
         // 啟動目標場景
         this.handlerScene.launchScene(gotoScene)
+        //                                        
+        //                
+        if (this.fullscreenHit) {
+            this.fullscreenHit.x = this.scale.gameSize.width - 30;
+            this.fullscreenHit.y = this.fullscreenBtn ? this.fullscreenBtn.y : 32;
+        }
+
     }
 
     /**
