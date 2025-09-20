@@ -79,7 +79,7 @@ export default class Preload extends Phaser.Scene {
                     this.sceneStopped = true               // 標記場景已停止
                     this.scene.stop('preload')            // 停止預載場景
                     this.handlerScene.cameras.main.setBackgroundColor("#1a1a2e")  // 設置深太空背景色
-                    this.handlerScene.launchScene('title') // 啟動標題場景（遊戲主場景）
+                    this.handlerScene.launchScene('menu')  // 啟動菜單場景（顯示 Play 按鈕）
                 },
                 loop: false                               // 只執行一次，不循環
             })

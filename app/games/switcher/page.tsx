@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import GameSwitcher from '@/components/games/GameSwitcher';
+import ShimozurdoGameContainer from '@/components/games/ShimozurdoGameContainer';
 import { BookOpenIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
 
@@ -106,23 +107,27 @@ const GameSwitcherPage: React.FC = () => {
     };
 
     const autoScrollToGame = () => {
-      // 檢查是否為手機模式
-      const isMobileDevice = window.innerWidth <= 768;
-
       // 檢查用戶是否偏好減少動畫
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      if (isMobileDevice && !hasUserScrolled && !prefersReducedMotion) {
+      // 對所有設備都執行自動滾動，不只是手機
+      if (!hasUserScrolled && !prefersReducedMotion) {
+        // 優先尋找 iframe 容器，如果找不到則使用遊戲容器
+        const iframeContainer = document.querySelector('.game-iframe-container');
         const gameContainer = document.querySelector('[data-testid="game-container"]');
-        if (gameContainer) {
-          // 延遲執行，確保頁面完全載入
+        const targetElement = iframeContainer || gameContainer;
+
+        if (targetElement) {
+          // 縮短延遲時間，更快滾動到遊戲容器
           setTimeout(() => {
-            gameContainer.scrollIntoView({
+            // 使用 center 讓遊戲容器在視窗中央顯示
+            targetElement.scrollIntoView({
               behavior: 'smooth',
-              block: 'start',
+              block: 'center', // 改為 center，讓遊戲容器在視窗中央
               inline: 'nearest'
             });
-          }, 1000);
+            console.log('🎯 自動滾動到遊戲 iframe 容器 (居中顯示)');
+          }, 500);
         }
       }
     };
@@ -134,8 +139,12 @@ const GameSwitcherPage: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', checkScreenSize);
 
-    // 執行自動滾動
+    // 執行自動滾動 - 多次嘗試確保成功
     autoScrollToGame();
+
+    // 額外的滾動嘗試，確保在所有內容載入後也能滾動
+    setTimeout(autoScrollToGame, 1500);
+    setTimeout(autoScrollToGame, 3000);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -339,7 +348,7 @@ const GameSwitcherPage: React.FC = () => {
         <div className="mb-1 sm:mb-2" data-testid="game-container">
           <GameSwitcher
             defaultGame="shimozurdo-game"
-            geptLevel={currentGeptLevel}
+            geptLevel={currentGeptLevel as 'elementary' | 'intermediate' | 'advanced'}
             onGameChange={handleGameChange}
             onGameStateUpdate={handleGameStateUpdate}
             className="w-full"

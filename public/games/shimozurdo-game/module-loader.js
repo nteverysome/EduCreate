@@ -9,6 +9,7 @@ console.log('🔧 模組載入器啟動');
 const moduleLoadStatus = {
   handler: false,  // Handler 場景載入狀態
   preload: false,  // Preload 場景載入狀態
+  menu: false,     // Menu 場景載入狀態 (新增)
   title: false,    // Title 場景載入狀態
   hub: false,      // Hub 場景載入狀態
   main: false      // 主模組載入狀態
@@ -33,8 +34,11 @@ function updateLoadProgress(moduleName) {
   // 檢查是否所有模組都已載入完成
   if (loadedModules === totalModules) {
     // 所有模組載入完成，開始初始化遊戲
-    console.log('🎉 所有模組載入完成，啟動遊戲');
-    initializeGame();
+    console.log('🎉 所有模組載入完成，等待場景類別載入...');
+    // 延遲一下確保所有場景類別都已設置到 window 物件
+    setTimeout(() => {
+      initializeGame();
+    }, 100);
   }
 }
 
@@ -104,6 +108,17 @@ async function loadModule(moduleName) {
         updateLoadProgress('preload');
         break;
       }
+      case 'menu': {
+        // 解析 Menu 場景的檔案路徑
+        const url = resolveGamePath('scenes/menu.js');
+        // 記錄即將載入的模組 URL
+        console.log('📦 import', url);
+        // 動態載入 Menu 場景類別並存儲到全域變數
+        window.MenuScene = (await import(url)).default;
+        // 更新載入進度
+        updateLoadProgress('menu');
+        break;
+      }
       case 'title': {
         // 解析 Title 場景的檔案路徑
         const url = resolveGamePath('scenes/title.js');
@@ -169,7 +184,14 @@ function initializeGame() {
     }
 
     // 驗證所有必要的場景類別是否已載入到全域變數
-    if (!window.HandlerScene || !window.PreloadScene || !window.TitleScene || !window.HubScene) {
+    console.log('🔍 檢查場景類別載入狀態:');
+    console.log('  HandlerScene:', !!window.HandlerScene);
+    console.log('  PreloadScene:', !!window.PreloadScene);
+    console.log('  MenuScene:', !!window.MenuScene);
+    console.log('  TitleScene:', !!window.TitleScene);
+    console.log('  HubScene:', !!window.HubScene);
+
+    if (!window.HandlerScene || !window.PreloadScene || !window.MenuScene || !window.TitleScene || !window.HubScene) {
       console.error('❌ 場景類別未完全載入');
       return;
     }
@@ -178,20 +200,20 @@ function initializeGame() {
     const config = {
       // 渲染器類型，自動選擇最佳渲染方式
       type: Phaser.AUTO,
-      // 縮放和響應式配置 - 手機優先設計
+      // 縮放和響應式配置
       scale: {
-        // 使用 FIT 模式確保遊戲完整顯示在螢幕內
-        mode: Phaser.Scale.FIT,
+        // 使用 RESIZE 模式支援動態尺寸調整
+        mode: Phaser.Scale.RESIZE,
         // 指定遊戲掛載的 DOM 容器
         parent: 'game',
-        // 遊戲的預設寬度 - 手機優先 (iPhone 標準尺寸)
-        width: 375,
-        // 遊戲的預設高度 - 手機優先 (iPhone 標準尺寸)
-        height: 667,
-        // 最小尺寸限制 - 支援小手機螢幕
+        // 遊戲的預設寬度
+        width: 960,
+        // 遊戲的預設高度
+        height: 540,
+        // 最小尺寸限制
         min: {
-          width: 320,   // 最小寬度 (iPhone SE)
-          height: 568   // 最小高度 (iPhone SE)
+          width: 480,   // 最小寬度
+          height: 270   // 最小高度
         },
         // 最大尺寸限制
         max: {
@@ -214,7 +236,8 @@ function initializeGame() {
       scene: [
         window.HandlerScene,  // Handler 場景 - 場景管理器
         window.PreloadScene,  // Preload 場景 - 資源載入器
-        window.TitleScene,    // Title 場景 - 標題畫面
+        window.MenuScene,     // Menu 場景 - 主菜單 (新增)
+        window.TitleScene,    // Title 場景 - 遊戲主場景
         window.HubScene       // Hub 場景 - UI 控制介面
       ],
       // 遊戲生命週期回調函數
@@ -224,14 +247,14 @@ function initializeGame() {
           // 記錄 Phaser 引擎啟動成功
           console.log('🎉 Phaser 遊戲啟動成功');
 
-          // 設置遊戲實例的基準螢幕尺寸屬性 - 手機優先配置
+          // 設置遊戲實例的基準螢幕尺寸屬性
           game.screenBaseSize = {
             maxWidth: 1920,   // 最大寬度參考值
             maxHeight: 1080,  // 最大高度參考值
-            minWidth: 320,    // 最小寬度參考值 (iPhone SE)
-            minHeight: 568,   // 最小高度參考值 (iPhone SE)
-            width: 375,       // 基準寬度 (iPhone 標準尺寸)
-            height: 667       // 基準高度 (iPhone 標準尺寸)
+            minWidth: 480,    // 最小寬度參考值
+            minHeight: 270,   // 最小高度參考值
+            width: 960,       // 基準寬度
+            height: 540       // 基準高度
           };
 
           // 將遊戲實例設為全域變數，供其他模組存取
@@ -302,7 +325,7 @@ async function startModuleLoading() {
  */
 async function loadAllModules() {
   // 定義需要載入的模組列表
-  const modules = ['handler', 'preload', 'title', 'hub', 'main'];
+  const modules = ['handler', 'preload', 'menu', 'title', 'hub', 'main'];
 
   // 為每個模組創建載入 Promise，實現並行載入
   const loadPromises = modules.map(module => loadModule(module));

@@ -10,10 +10,10 @@ import Hub from './scenes/hub.js'           // Hub 場景，提供遊戲的 UI �
 // 螢幕尺寸常數定義 - 響應式配置，優化手機適配
 const MAX_SIZE_WIDTH_SCREEN = 1920  // 最大螢幕寬度，支援到 Full HD 解析度
 const MAX_SIZE_HEIGHT_SCREEN = 1080 // 最大螢幕高度，支援到 Full HD 解析度
-const MIN_SIZE_WIDTH_SCREEN = 320   // 最小螢幕寬度，支援小手機螢幕
-const MIN_SIZE_HEIGHT_SCREEN = 568  // 最小螢幕高度，支援 iPhone SE 等小螢幕
-const SIZE_WIDTH_SCREEN = 375       // 預設螢幕寬度，基於手機常見尺寸
-const SIZE_HEIGHT_SCREEN = 667      // 預設螢幕高度，基於手機常見尺寸
+const MIN_SIZE_WIDTH_SCREEN = 480   // 最小螢幕寬度，支援小螢幕
+const MIN_SIZE_HEIGHT_SCREEN = 270  // 最小螢幕高度，支援小螢幕
+const SIZE_WIDTH_SCREEN = 960       // 預設螢幕寬度，基於桌面常見尺寸
+const SIZE_HEIGHT_SCREEN = 540      // 預設螢幕高度，基於桌面常見尺寸
 
 // Phaser 遊戲引擎配置物件
 const config = {
@@ -21,8 +21,8 @@ const config = {
     type: Phaser.AUTO,
     // 縮放和響應式配置 - 優化手機適配
     scale: {
-        // 使用 FIT 模式，確保遊戲完整顯示在螢幕內
-        mode: Phaser.Scale.FIT,
+        // 使用 RESIZE 模式，支援動態尺寸調整
+        mode: Phaser.Scale.RESIZE,
         // 指定遊戲掛載的 DOM 元素 ID
         parent: 'game',
         // 遊戲的初始寬度

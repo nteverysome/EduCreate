@@ -473,24 +473,24 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       {/* 緊湊標頭設計 - 手機優化，使用 JavaScript 控制顯示 */}
       {isMobile && (
         <div className="game-header bg-white rounded-lg shadow-sm border border-gray-200 mb-1" data-testid="game-header">
-          <div className="flex justify-between items-center p-2 flex-wrap gap-2">
-            {/* 左側資訊 */}
-            <div className="left-info flex items-center gap-2 flex-1 min-w-0">
-              <span className="text-lg flex-shrink-0">{currentGame.icon}</span>
-              <strong className="font-semibold text-gray-900 text-sm truncate">{currentGame.displayName}</strong>
-              <span className="status px-2 py-1 text-xs bg-green-100 text-green-800 rounded flex-shrink-0">✅ 已完成</span>
+          <div className="flex justify-between items-center p-1 flex-wrap gap-1">
+            {/* 左側資訊 - 緊湊設計 */}
+            <div className="left-info flex items-center gap-1 flex-1 min-w-0">
+              <span className="text-base flex-shrink-0">{currentGame.icon}</span>
+              <strong className="font-medium text-gray-900 text-xs truncate">{currentGame.displayName}</strong>
+              <span className="status px-1 py-0.5 text-xs bg-green-100 text-green-800 rounded flex-shrink-0">✅ 已完成</span>
             </div>
 
-            {/* 右側控制 */}
-            <div className="right-controls flex items-center gap-2 flex-shrink-0">
-              <span className="gept text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded">
+            {/* 右側控制 - 緊湊設計 */}
+            <div className="right-controls flex items-center gap-1 flex-shrink-0">
+              <span className="gept text-xs text-blue-700 bg-blue-50 px-1 py-0.5 rounded">
                 GEPT：{propGeptLevel === 'elementary' ? '初級' : propGeptLevel === 'intermediate' ? '中級' : '高級'}
               </span>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="switch-button px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
+                className="switch-button px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
                 disabled={isLoading}
-                style={{ minHeight: '36px' }}
+                style={{ minHeight: '28px' }}
               >
                 切換遊戲
               </button>
@@ -723,15 +723,15 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         </div>
       )}
 
-      {/* 遊戲 iframe 容器 - 響應式設計 */}
+      {/* 遊戲 iframe 容器 - 響應式設計，增加高度顯示更多內容 */}
       <div
         className="game-iframe-container relative bg-white overflow-hidden mx-auto w-full"
         style={{
           aspectRatio: isMobile ? '812/375' : '1274/739',
-          minHeight: '300px',
-          maxHeight: isMobile ? '375px' : '739px',
+          minHeight: isMobile ? '400px' : '500px', // 增加最小高度
+          maxHeight: isMobile ? '500px' : '800px', // 增加最大高度
           width: '100%',
-          height: isMobile ? '375px' : 'auto',
+          height: isMobile ? '450px' : '600px', // 增加實際高度
           // 強制覆蓋CSS限制
           maxWidth: 'none !important' as any,
         }}
