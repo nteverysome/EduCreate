@@ -140,9 +140,15 @@ export default class Hub extends Phaser.Scene {
                 this.fullscreenBtn.setFrame(0);
                 this.scale.stopFullscreen();
             } else if (inIframe) {
-                // 內嵌情境：統一交給父頁面切換（可退出或進入近/真全螢幕）
+                // 內嵌情境：根據父頁面狀態決定進入或退出
                 try {
-                    window.parent.postMessage({ type: 'REQUEST_TOGGLE_FULLSCREEN', source: 'shimozurdo-game' }, '*');
+                    if (this._parentFSActive) {
+                        // 父頁面已全螢幕，請求退出
+                        window.parent.postMessage({ type: 'REQUEST_EXIT_FULLSCREEN', source: 'shimozurdo-game' }, '*');
+                    } else {
+                        // 父頁面未全螢幕，請求進入
+                        window.parent.postMessage({ type: 'REQUEST_FULLSCREEN', source: 'shimozurdo-game' }, '*');
+                    }
                 } catch (e) {
                     // 後備：嘗試切換 Phaser 全螢幕
                     this.fullscreenBtn.setFrame(1);
@@ -156,6 +162,21 @@ export default class Hub extends Phaser.Scene {
         })
         // 監聽視窗大小調整事件，當視窗大小改變時調用 resize 方法
         this.scale.on("resize", this.resize, this)
+
+        // 監聽父頁面的全螢幕狀態變化消息
+        this._parentFSActive = false; // 追蹤父頁面全螢幕狀態
+        window.addEventListener('message', (event) => {
+            const data = event.data;
+            if (data.source === 'parent-page') {
+                if (data.type === 'FULLSCREEN_SUCCESS' || data.type === 'FULLSCREEN_FAILED') {
+                    this._parentFSActive = true;
+                } else if (data.type === 'FULLSCREEN_EXITED') {
+                    this._parentFSActive = false;
+                } else if (data.type === 'FULLSCREEN_STATE') {
+                    this._parentFSActive = data.active || false;
+                }
+            }
+        });
     }
 
 
@@ -219,10 +240,10 @@ export default class Hub extends Phaser.Scene {
         this.creditsTxt.x = this.scale.gameSize.width / 2
         // 調整版權文字的垂直位置，保持距離底部 30 像素
         this.creditsTxt.y = this.scale.gameSize.height - 30
-        // 同步調整透明命中區位置
+        // 同步調整透明命中區位置（關鍵修正）
         if (this.fullscreenHit) {
             this.fullscreenHit.x = this.scale.gameSize.width - 30;
-            this.fullscreenHit.y = this.fullscreenBtn ? this.fullscreenBtn.y : 32;
+            this.fullscreenHit.y = this.fullscreenBtn.y; // 直接使用按鈕的 Y 位置
         }
     }
 }
