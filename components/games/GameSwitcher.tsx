@@ -452,9 +452,14 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
       console.log('🎮 GameSwitcher 收到消息:', data);
 
-      if (data.type === 'REQUEST_EXIT_FULLSCREEN') {
+      if (data.type === 'REQUEST_FULLSCREEN') {
+        console.log('🔄 處理 REQUEST_FULLSCREEN');
+        enterParentNearFullscreen();
+      } else if (data.type === 'REQUEST_EXIT_FULLSCREEN') {
+        console.log('🔄 處理 REQUEST_EXIT_FULLSCREEN');
         exitParentFullscreen();
       } else if (data.type === 'REQUEST_TOGGLE_FULLSCREEN') {
+        console.log('🔄 處理 REQUEST_TOGGLE_FULLSCREEN');
         if (isParentFSActive()) {
           exitParentFullscreen();
         } else {
