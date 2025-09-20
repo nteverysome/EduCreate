@@ -62,7 +62,8 @@ const plans: PlanType[] = [
 
 export default function Pricing() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const [selectedInterval, setSelectedInterval] = useState<'MONTHLY' | 'YEARLY'>('MONTHLY');
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
