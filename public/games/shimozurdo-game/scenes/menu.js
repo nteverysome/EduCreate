@@ -382,14 +382,21 @@ export default class Menu extends Phaser.Scene {
         const isInIframe = (window !== window.top);
         console.log('🔍 iframe 檢測:', { isInIframe });
 
-        if (isInIframe) {
-            // 在 iframe 中，嘗試對父頁面進行全螢幕
-            console.log('📱 檢測到 iframe 環境，使用父頁面全螢幕策略');
-            this.iframeFullscreenStrategy();
-        } else {
-            // 不在 iframe 中，使用標準全螢幕
-            this.standardFullscreenStrategy();
-        }
+        // 先嘗試標準策略（內部先走 Phaser，再走原生 API）
+        this.standardFullscreenStrategy();
+
+        // 短暫延遲後驗證是否已進入全螢幕；若仍未成功且在 iframe 中，改走父頁面策略
+        setTimeout(() => {
+            const isFs = !!(
+                document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                (this.scale && this.scale.isFullscreen)
+            );
+            if (!isFs && isInIframe) {
+                console.log('🔁 標準策略未生效，切換父頁面全螢幕策略');
+                this.iframeFullscreenStrategy();
+            }
+        }, 120);
     }
 
     /**
