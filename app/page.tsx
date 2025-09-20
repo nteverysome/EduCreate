@@ -49,6 +49,16 @@ export default function HomePage() {
               探索所有功能
             </Link>
             <Link
+              href="/simple-dashboard"
+              className="inline-flex items-center px-8 py-4 bg-green-600 text-white text-lg font-medium rounded-lg hover:bg-green-700 transition-colors shadow-lg"
+              data-testid="simple-dashboard-button"
+            >
+              <svg className="mr-3 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              簡化版入口
+            </Link>
+            <Link
               href="/demo/smart-sorting"
               className="inline-flex items-center px-8 py-4 bg-white text-blue-600 text-lg font-medium rounded-lg border-2 border-blue-600 hover:bg-blue-50 transition-colors"
               data-testid="demo-button"
