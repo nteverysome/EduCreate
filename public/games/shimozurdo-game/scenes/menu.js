@@ -267,8 +267,16 @@ export default class Menu extends Phaser.Scene {
     startGame() {
         console.log('🚀 開始遊戲，嘗試進入全螢幕模式');
 
-        // 只請求全螢幕模式，場景切換由 onFullscreenEnter 處理
+        // 只請求全螢幕模式，場景切換優先由 onFullscreenEnter 處理
         this.requestFullscreen();
+
+        // ⏱️ 快速保險：若短時間內未進入全螢幕流程，直接啟動場景（避免行動端點擊無反應）
+        setTimeout(() => {
+            if (!this._sceneStarted) {
+                console.log('⏱️ 未收到全螢幕回應，直接啟動遊戲場景（fallback）');
+                this.startGameScene();
+            }
+        }, 150);
 
         // 注意：不在這裡立即切換場景，而是等待全螢幕處理完成
         // 場景切換將在 onFullscreenEnter() -> startGameScene() 中進行
