@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import { useSession } from 'next-auth/react';
@@ -26,6 +26,11 @@ const AIFeaturesPage: NextPage = () => {
   const session = sessionResult?.data;
   const status = sessionResult?.status;
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<AIGeneratedContent | null>(null);
   const [request, setRequest] = useState<AIGenerationRequest>({
@@ -67,19 +72,21 @@ const AIFeaturesPage: NextPage = () => {
   };
 
   const handleCreateActivity = () => {
-    if (generatedContent) {
+    if (generatedContent && isClient) {
       // 將生成的內容傳遞到創建頁面
       const contentData = encodeURIComponent(JSON.stringify(generatedContent));
       router.push(`/create?aiContent=${contentData}`);
     }
   };
 
-  if (status === 'loading') {
+  if (status === 'loading' || !isClient) {
     return <div className="flex justify-center items-center min-h-screen">載入中...</div>;
   }
 
   if (!session) {
-    router.push('/login');
+    if (isClient) {
+      router.push('/login');
+    }
     return null;
   }
 
