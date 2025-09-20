@@ -113,28 +113,35 @@ export default class Hub extends Phaser.Scene {
             }
         })
 
-        // 全螢幕按鈕設定（僅在非嵌入模式下顯示）
-        if (!this.game.embedded) {
-            // 重新計算全螢幕按鈕的垂直位置
-            multiplePosY = this.game.embedded ? 3 : 1
-            // 創建全螢幕按鈕，初始幀為 0（非全螢幕狀態）
-            this.fullscreenBtn = this.add.image(this.canvasWidth - posItemHubBase, posItemHubBase * multiplePosY, "fullscreen", 0).setOrigin(.5).setDepth(1).setInteractive({ cursor: "pointer" })
+        // 全螢幕按鈕設定（嵌入與非嵌入皆顯示；在嵌入/行動裝置時作為父頁面退出控制）
+        multiplePosY = this.game.embedded ? 1 : 1
+        this.fullscreenBtn = this.add.image(this.canvasWidth - posItemHubBase, posItemHubBase * multiplePosY, "fullscreen", 0)
+            .setOrigin(.5)
+            .setDepth(1)
+            .setInteractive({ cursor: "pointer" })
 
-            // 為全螢幕按鈕添加點擊事件監聽器
-            this.fullscreenBtn.on("pointerup", () => {
-                // 檢查當前是否處於全螢幕狀態
-                if (this.scale.isFullscreen) {
-                    // 如果已在全螢幕，設定按鈕為非全螢幕圖示並退出全螢幕
-                    this.fullscreenBtn.setFrame(0)
-                    this.scale.stopFullscreen()
-                }
-                else {
-                    // 如果不在全螢幕，設定按鈕為全螢幕圖示並進入全螢幕
+        this.fullscreenBtn.on("pointerup", () => {
+            if (this.scale.isFullscreen) {
+                // 已在（Phaser）全螢幕：退出 Phaser 全螢幕
+                this.fullscreenBtn.setFrame(0)
+                this.scale.stopFullscreen()
+            } else {
+                // 非 Phaser 全螢幕：請求父頁面退出（處理 iOS 近全螢幕與真全螢幕）
+                try {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'REQUEST_EXIT_FULLSCREEN', source: 'shimozurdo-game' }, '*');
+                    } else {
+                        // 非嵌入情境下，切換 Phaser 全螢幕
+                        this.fullscreenBtn.setFrame(1)
+                        this.scale.startFullscreen()
+                    }
+                } catch (e) {
+                    // 後備：嘗試切換 Phaser 全螢幕
                     this.fullscreenBtn.setFrame(1)
                     this.scale.startFullscreen()
                 }
-            })
-        }
+            }
+        })
         // 監聽視窗大小調整事件，當視窗大小改變時調用 resize 方法
         this.scale.on("resize", this.resize, this)
     }
