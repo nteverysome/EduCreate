@@ -115,27 +115,61 @@ const GameSwitcherPage: React.FC = () => {
         const requestFullscreen = () => {
           const element = document.documentElement;
 
+          // 發送全螢幕結果給 iframe
+          const sendFullscreenResult = (success: boolean, message: string) => {
+            const iframe = document.querySelector('iframe[title="Shimozurdo 雲朵遊戲"]') as HTMLIFrameElement;
+            if (iframe && iframe.contentWindow) {
+              iframe.contentWindow.postMessage({
+                type: success ? 'FULLSCREEN_SUCCESS' : 'FULLSCREEN_FAILED',
+                source: 'parent-page',
+                message: message
+              }, '*');
+              console.log(`📤 發送全螢幕結果給遊戲: ${success ? '成功' : '失敗'} - ${message}`);
+            }
+          };
+
           if (element.requestFullscreen) {
             element.requestFullscreen().then(() => {
               console.log('✅ 父頁面全螢幕成功 (requestFullscreen)');
               applyParentFullscreenStyles();
+              sendFullscreenResult(true, '父頁面全螢幕成功');
             }).catch(err => {
               console.warn('⚠️ 父頁面全螢幕失敗:', err);
+              sendFullscreenResult(false, '父頁面全螢幕失敗: ' + err.message);
             });
           } else if ((element as any).webkitRequestFullscreen) {
-            (element as any).webkitRequestFullscreen();
-            console.log('✅ 父頁面全螢幕成功 (webkit)');
-            applyParentFullscreenStyles();
+            try {
+              (element as any).webkitRequestFullscreen();
+              console.log('✅ 父頁面全螢幕成功 (webkit)');
+              applyParentFullscreenStyles();
+              sendFullscreenResult(true, '父頁面全螢幕成功 (webkit)');
+            } catch (err: any) {
+              console.warn('⚠️ 父頁面全螢幕失敗 (webkit):', err);
+              sendFullscreenResult(false, '父頁面全螢幕失敗 (webkit): ' + err.message);
+            }
           } else if ((element as any).mozRequestFullScreen) {
-            (element as any).mozRequestFullScreen();
-            console.log('✅ 父頁面全螢幕成功 (moz)');
-            applyParentFullscreenStyles();
+            try {
+              (element as any).mozRequestFullScreen();
+              console.log('✅ 父頁面全螢幕成功 (moz)');
+              applyParentFullscreenStyles();
+              sendFullscreenResult(true, '父頁面全螢幕成功 (moz)');
+            } catch (err: any) {
+              console.warn('⚠️ 父頁面全螢幕失敗 (moz):', err);
+              sendFullscreenResult(false, '父頁面全螢幕失敗 (moz): ' + err.message);
+            }
           } else if ((element as any).msRequestFullscreen) {
-            (element as any).msRequestFullscreen();
-            console.log('✅ 父頁面全螢幕成功 (ms)');
-            applyParentFullscreenStyles();
+            try {
+              (element as any).msRequestFullscreen();
+              console.log('✅ 父頁面全螢幕成功 (ms)');
+              applyParentFullscreenStyles();
+              sendFullscreenResult(true, '父頁面全螢幕成功 (ms)');
+            } catch (err: any) {
+              console.warn('⚠️ 父頁面全螢幕失敗 (ms):', err);
+              sendFullscreenResult(false, '父頁面全螢幕失敗 (ms): ' + err.message);
+            }
           } else {
             console.warn('⚠️ 父頁面不支援全螢幕 API');
+            sendFullscreenResult(false, '父頁面不支援全螢幕 API');
           }
         };
 

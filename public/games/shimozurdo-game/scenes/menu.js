@@ -418,6 +418,9 @@ export default class Menu extends Phaser.Scene {
         try {
             console.log('🖼️ 執行 iframe 全螢幕策略');
 
+            // 設置全螢幕回應監聽器
+            this.setupFullscreenResponseListener();
+
             // 嘗試通知父頁面進行全螢幕
             if (window.parent && window.parent !== window) {
                 // 發送消息給父頁面
@@ -426,18 +429,54 @@ export default class Menu extends Phaser.Scene {
                     source: 'shimozurdo-game'
                 }, '*');
 
-                console.log('📤 已發送全螢幕請求給父頁面');
+                console.log('📤 已發送全螢幕請求給父頁面，等待回應...');
             }
 
-            // 同時執行遊戲內的全螢幕處理
-            setTimeout(() => {
-                this.onFullscreenEnter();
-            }, 100);
+            // 設置超時，如果 3 秒內沒有回應就直接啟動遊戲
+            this.fullscreenTimeout = setTimeout(() => {
+                console.warn('⏰ 全螢幕請求超時，直接啟動遊戲');
+                this.startGameScene();
+            }, 3000);
 
         } catch (error) {
             console.warn('⚠️ iframe 全螢幕策略失敗:', error);
             this.fallbackFullscreenStrategy();
         }
+    }
+
+    /**
+     * 設置全螢幕回應監聽器
+     */
+    setupFullscreenResponseListener() {
+        if (this.fullscreenResponseListener) {
+            window.removeEventListener('message', this.fullscreenResponseListener);
+        }
+
+        this.fullscreenResponseListener = (event) => {
+            if (event.data && event.data.source === 'parent-page') {
+                if (event.data.type === 'FULLSCREEN_SUCCESS') {
+                    console.log('✅ 收到父頁面全螢幕成功回應:', event.data.message);
+                    // 清除超時
+                    if (this.fullscreenTimeout) {
+                        clearTimeout(this.fullscreenTimeout);
+                        this.fullscreenTimeout = null;
+                    }
+                    // 應用全螢幕樣式並啟動遊戲
+                    this.onFullscreenEnter();
+                } else if (event.data.type === 'FULLSCREEN_FAILED') {
+                    console.warn('⚠️ 收到父頁面全螢幕失敗回應:', event.data.message);
+                    // 清除超時
+                    if (this.fullscreenTimeout) {
+                        clearTimeout(this.fullscreenTimeout);
+                        this.fullscreenTimeout = null;
+                    }
+                    // 直接啟動遊戲，不應用全螢幕樣式
+                    this.startGameScene();
+                }
+            }
+        };
+
+        window.addEventListener('message', this.fullscreenResponseListener);
     }
 
     /**
