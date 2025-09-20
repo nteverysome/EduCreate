@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 import { hasPermission } from '../permissions';
 import { performanceMonitor } from '../utils/performanceMonitor';
-import { globalCache } from '../cache/CacheManager';
+import globalCache from '../cache/CacheManager';
 
 interface ApiError extends Error {
   statusCode?: number;
