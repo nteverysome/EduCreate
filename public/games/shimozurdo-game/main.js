@@ -7,22 +7,22 @@ import Preload from './scenes/preload.js'   // 預載場景，負責載入所有
 import Title from './scenes/title.js'       // 標題場景，遊戲的主選單和開始畫面
 import Hub from './scenes/hub.js'           // Hub 場景，提供遊戲的 UI 控制介面
 
-// 螢幕尺寸常數定義 - 16:9 寬高比橫向配置（為測試而修改）
+// 螢幕尺寸常數定義 - 響應式配置，優化手機適配
 const MAX_SIZE_WIDTH_SCREEN = 1920  // 最大螢幕寬度，支援到 Full HD 解析度
 const MAX_SIZE_HEIGHT_SCREEN = 1080 // 最大螢幕高度，支援到 Full HD 解析度
-const MIN_SIZE_WIDTH_SCREEN = 480   // 最小螢幕寬度，確保在小螢幕上仍可使用
-const MIN_SIZE_HEIGHT_SCREEN = 270  // 最小螢幕高度，確保在小螢幕上仍可使用
-const SIZE_WIDTH_SCREEN = 960       // 預設螢幕寬度，作為基準解析度
-const SIZE_HEIGHT_SCREEN = 540      // 預設螢幕高度，作為基準解析度
+const MIN_SIZE_WIDTH_SCREEN = 320   // 最小螢幕寬度，支援小手機螢幕
+const MIN_SIZE_HEIGHT_SCREEN = 568  // 最小螢幕高度，支援 iPhone SE 等小螢幕
+const SIZE_WIDTH_SCREEN = 375       // 預設螢幕寬度，基於手機常見尺寸
+const SIZE_HEIGHT_SCREEN = 667      // 預設螢幕高度，基於手機常見尺寸
 
 // Phaser 遊戲引擎配置物件
 const config = {
     // 渲染器類型，AUTO 會自動選擇最佳的渲染方式（WebGL 或 Canvas）
     type: Phaser.AUTO,
-    // 縮放和響應式配置
+    // 縮放和響應式配置 - 優化手機適配
     scale: {
-        // 使用 RESIZE 模式，允許遊戲根據容器大小動態調整
-        mode: Phaser.Scale.RESIZE,
+        // 使用 FIT 模式，確保遊戲完整顯示在螢幕內
+        mode: Phaser.Scale.FIT,
         // 指定遊戲掛載的 DOM 元素 ID
         parent: 'game',
         // 遊戲的初始寬度
