@@ -258,15 +258,11 @@ export default class Menu extends Phaser.Scene {
     startGame() {
         console.log('🚀 開始遊戲，嘗試進入全螢幕模式');
 
-        // 嘗試進入全螢幕模式
+        // 只請求全螢幕模式，場景切換由 onFullscreenEnter 處理
         this.requestFullscreen();
 
-        // 停止當前場景
-        this.sceneStopped = true;
-        this.scene.stop('menu');
-
-        // 啟動遊戲場景
-        this.handlerScene.launchScene('title');
+        // 注意：不在這裡立即切換場景，而是等待全螢幕處理完成
+        // 場景切換將在 onFullscreenEnter() -> startGameScene() 中進行
     }
 
     /**
@@ -538,6 +534,37 @@ export default class Menu extends Phaser.Scene {
 
         // 隱藏可能的 UI 元素
         this.hideUIElements();
+
+        // 啟動遊戲場景
+        setTimeout(() => {
+            this.startGameScene();
+        }, 100);
+    }
+
+    /**
+     * 啟動遊戲場景
+     */
+    startGameScene() {
+        try {
+            console.log('🚀 啟動遊戲場景');
+
+            // 停止菜單場景
+            if (!this.sceneStopped) {
+                this.sceneStopped = true;
+                this.scene.stop('menu');
+            }
+
+            // 啟動遊戲場景
+            if (this.handlerScene && this.handlerScene.launchScene) {
+                this.handlerScene.launchScene('title');
+                console.log('✅ 遊戲場景已啟動');
+            } else {
+                console.warn('⚠️ handlerScene 不可用，嘗試直接啟動場景');
+                this.scene.start('title');
+            }
+        } catch (error) {
+            console.error('❌ 啟動遊戲場景失敗:', error);
+        }
     }
 
     /**
@@ -554,48 +581,54 @@ export default class Menu extends Phaser.Scene {
             }
 
             fullscreenStyle.textContent = `
-                /* 全螢幕遊戲樣式 */
+                /* 桌面全螢幕遊戲樣式 */
                 body.fullscreen-game {
                     margin: 0 !important;
                     padding: 0 !important;
                     overflow: hidden !important;
-                    height: 100vh !important;
-                    width: 100vw !important;
+                    background: black !important;
                 }
 
-                /* 隱藏可能的 UI 元素 */
-                body.fullscreen-game .game-header,
-                body.fullscreen-game .navigation,
-                body.fullscreen-game .footer {
+                /* 隱藏頁面其他元素，但保留遊戲容器 */
+                body.fullscreen-game > *:not(.game-iframe-container) {
                     display: none !important;
                 }
 
-                /* 遊戲容器全螢幕 */
+                /* 確保遊戲容器和 iframe 正確顯示 */
                 body.fullscreen-game .game-iframe-container {
+                    display: block !important;
                     position: fixed !important;
                     top: 0 !important;
                     left: 0 !important;
                     width: 100vw !important;
                     height: 100vh !important;
-                    z-index: 9999 !important;
+                    z-index: 999999 !important;
+                    background: transparent !important;
+                    border: none !important;
                 }
 
-                /* 手機橫向優化 */
-                @media screen and (orientation: landscape) and (max-height: 500px) {
-                    body.fullscreen-game {
-                        height: 100vh !important;
-                    }
+                /* 確保 iframe 正確顯示 */
+                body.fullscreen-game .game-iframe-container iframe {
+                    display: block !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    border: none !important;
+                    background: transparent !important;
+                }
 
-                    body.fullscreen-game .game-iframe-container {
-                        height: 100vh !important;
-                    }
+                /* 確保遊戲 canvas 正確顯示 */
+                body.fullscreen-game canvas {
+                    display: block !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    object-fit: contain !important;
                 }
             `;
 
             // 添加 body class
             document.body.classList.add('fullscreen-game');
 
-            console.log('✅ 全螢幕樣式已添加');
+            console.log('✅ 桌面全螢幕樣式已添加');
         } catch (error) {
             console.warn('⚠️ 添加全螢幕樣式失敗:', error);
         }
