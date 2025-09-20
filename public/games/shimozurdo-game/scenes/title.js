@@ -233,6 +233,78 @@ export default class Title extends Phaser.Scene {
         });
 
         console.log('🎮 太空船控制設置完成：方向鍵、WASD、點擊');
+        // 🎮 長按上/下控制（手機專用）- 透明覆蓋層實現長按連續移動
+        this.setupMobileLongPressControls();
+    }
+    /**
+     * 🎮 設置手機長按上/下控制 - 透明覆蓋層實現長按連續移動
+     */
+    setupMobileLongPressControls() {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (!isMobile) return;
+
+        // 創建透明覆蓋層接管觸控
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:absolute;inset:0;z-index:999999;background:transparent;touch-action:none;pointer-events:auto;';
+
+        // 確保遊戲容器有相對定位
+        const gameContainer = document.getElementById('game-container') || document.body;
+        if (gameContainer.style.position !== 'relative') {
+            gameContainer.style.position = 'relative';
+        }
+        gameContainer.appendChild(overlay);
+
+        let rafId = 0, pressing = false, direction = null;
+
+        const startLongPress = (dir) => {
+            if (!this.player) return;
+            pressing = true;
+            direction = dir;
+
+            const loop = () => {
+                if (!pressing || !this.player) return;
+
+                const moveSpeed = 6; // 比鍵盤稍快的移動速度
+                const { height } = this;
+
+                if (direction === 'up') {
+                    this.player.y = Math.max(80, this.player.y - moveSpeed);
+                } else if (direction === 'down') {
+                    this.player.y = Math.min(height - 80, this.player.y + moveSpeed);
+                }
+
+                rafId = requestAnimationFrame(loop);
+            };
+
+            rafId = requestAnimationFrame(loop);
+        };
+
+        const endLongPress = () => {
+            pressing = false;
+            direction = null;
+            cancelAnimationFrame(rafId);
+        };
+
+        overlay.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.changedTouches[0];
+            const rect = overlay.getBoundingClientRect();
+            const touchY = touch.clientY - rect.top;
+            const dir = touchY < rect.height / 2 ? 'up' : 'down';
+            startLongPress(dir);
+        }, { passive: false });
+
+        overlay.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            endLongPress();
+        }, { passive: false });
+
+        overlay.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            endLongPress();
+        }, { passive: false });
+
+        console.log('📱 手機長按上/下控制已設置');
     }
 
     /**
@@ -257,11 +329,11 @@ export default class Title extends Phaser.Scene {
         this.maxHealth = 100;                            // 最大生命值
         this.currentHealth = 100;                        // 當前生命值
 
-        // 生命值條位置和尺寸（左下角） - 計算UI元素位置
+        // 生命值條位置和尺寸（右下角） - 計算UI元素位置
         const healthBarWidth = 200;                      // 生命值條寬度
         const healthBarHeight = 20;                      // 生命值條高度
         const margin = 20;                               // 邊距
-        const healthBarX = margin;                       // X座標（左邊距）
+        const healthBarX = width - margin - healthBarWidth;  // X座標（右邊距）
         const healthBarY = height - margin - healthBarHeight;  // Y座標（底部邊距）
 
         // 創建生命值條背景（黑色邊框） - 最外層邊框
@@ -297,9 +369,9 @@ export default class Title extends Phaser.Scene {
         this.healthBar.setOrigin(0, 0);                  // 設置原點為左上角
         this.healthBar.setDepth(102);                    // 在背景之上
 
-        // 創建生命值文字 - 顯示數值
+        // 創建生命值文字 - 顯示數值（右下角，文字在血條左側）
         this.healthText = this.add.text(
-            healthBarX + healthBarWidth + 15,            // X座標（生命值條右側15像素）
+            healthBarX - 15,                             // X座標（生命值條左側15像素）
             healthBarY + healthBarHeight / 2,            // Y座標（生命值條垂直中央）
             `${this.currentHealth}/${this.maxHealth}`,   // 顯示當前/最大生命值
             {
@@ -308,7 +380,7 @@ export default class Title extends Phaser.Scene {
                 fontStyle: 'bold'                        // 粗體
             }
         );
-        this.healthText.setOrigin(0, 0.5);               // 設置原點為左側中央
+        this.healthText.setOrigin(1, 0.5);               // 設置原點為右側中央
         this.healthText.setDepth(103);                   // 在所有元素之上
 
         console.log('❤️ 生命值系統初始化完成');
