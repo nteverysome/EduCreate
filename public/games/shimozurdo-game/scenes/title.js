@@ -288,7 +288,10 @@ export default class Title extends Phaser.Scene {
             direction = null;
             this.isLongPressing = false; // 清除長按狀態
             cancelAnimationFrame(rafId);
-            // 長按放開時不回到原點，保持當前位置
+            // 長按放開時不回到原點，將目標位置設為當前位置
+            if (this.player) {
+                this.playerTargetY = this.player.y;
+            }
         };
 
         overlay.addEventListener('touchstart', (e) => {

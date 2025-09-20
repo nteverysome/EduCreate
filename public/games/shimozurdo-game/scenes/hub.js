@@ -114,10 +114,8 @@ export default class Hub extends Phaser.Scene {
         })
 
         // 全螢幕按鈕設定（嵌入與非嵌入皆顯示；在嵌入/行動裝置時作為父頁面退出控制）
-        // 手機直立模式調整：先試 1.8，若仍點不到再微調
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        const isPortrait = window.innerHeight > window.innerWidth;
-        multiplePosY = this.game.embedded ? (isMobile && isPortrait ? 1.8 : 1) : 1;
+        // 回到之前能點到的版本：手機直立時不特別調整位置
+        multiplePosY = this.game.embedded ? 1 : 1;
         this.fullscreenBtn = this.add.image(this.canvasWidth - posItemHubBase, posItemHubBase * multiplePosY, "fullscreen", 0)
             .setOrigin(.5)
             .setDepth(1)
