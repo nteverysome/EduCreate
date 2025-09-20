@@ -250,17 +250,69 @@ export default class Menu extends Phaser.Scene {
     }
 
     /**
-     * 開始遊戲 - 切換到 title 場景
+     * 開始遊戲 - 進入全螢幕並切換到 title 場景
      */
     startGame() {
-        console.log('🚀 開始遊戲，切換到 title 場景');
-        
+        console.log('🚀 開始遊戲，嘗試進入全螢幕模式');
+
+        // 嘗試進入全螢幕模式
+        this.requestFullscreen();
+
         // 停止當前場景
         this.sceneStopped = true;
         this.scene.stop('menu');
-        
+
         // 啟動遊戲場景
         this.handlerScene.launchScene('title');
+    }
+
+    /**
+     * 請求全螢幕模式
+     */
+    requestFullscreen() {
+        try {
+            // 獲取遊戲畫布元素或其容器
+            const canvas = this.game.canvas;
+            const container = canvas.parentElement || canvas;
+
+            console.log('🖥️ 嘗試進入全螢幕模式，目標元素:', container);
+
+            // 嘗試不同的全螢幕 API（按優先級順序）
+            if (container.requestFullscreen) {
+                container.requestFullscreen().then(() => {
+                    console.log('✅ 成功進入全螢幕模式 (requestFullscreen)');
+                    this.onFullscreenEnter();
+                }).catch(err => {
+                    console.warn('⚠️ 全螢幕請求失敗:', err);
+                });
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+                console.log('✅ 成功進入全螢幕模式 (webkit)');
+                this.onFullscreenEnter();
+            } else if (container.mozRequestFullScreen) {
+                container.mozRequestFullScreen();
+                console.log('✅ 成功進入全螢幕模式 (moz)');
+                this.onFullscreenEnter();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+                console.log('✅ 成功進入全螢幕模式 (ms)');
+                this.onFullscreenEnter();
+            } else {
+                console.warn('⚠️ 瀏覽器不支援全螢幕 API');
+            }
+        } catch (error) {
+            console.error('❌ 全螢幕請求錯誤:', error);
+        }
+    }
+
+    /**
+     * 全螢幕進入後的處理
+     */
+    onFullscreenEnter() {
+        console.log('🎮 已進入全螢幕模式，調整遊戲顯示');
+
+        // 可以在這裡添加全螢幕模式下的特殊處理
+        // 例如調整 UI 元素位置、隱藏某些控制項等
     }
 
     /**
