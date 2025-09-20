@@ -401,7 +401,27 @@ export default class Menu extends Phaser.Scene {
 
         console.log('🖥️ 執行標準全螢幕策略');
 
-        // 嘗試不同的全螢幕 API（按優先級順序）
+        // 1) 優先使用 Phaser 的全螢幕（桌面穩定且會自動協同縮放）
+        try {
+            if (this.scale && typeof this.scale.startFullscreen === 'function') {
+                this.scale.fullscreenTarget = document.getElementById('game') || container;
+                this.scale.startFullscreen();
+            }
+        } catch (e) {
+            console.warn('⚠️ Phaser startFullscreen 失敗，改用原生 API：', e);
+        }
+
+        // 若已進入全螢幕，直接結束（交由 fullscreenchange / onFullscreenEnter 後續流程）
+        if (
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            (this.scale && this.scale.isFullscreen)
+        ) {
+            this.onFullscreenEnter();
+            return;
+        }
+
+        // 2) 原生 DOM API（按優先順序）
         if (container.requestFullscreen) {
             container.requestFullscreen().then(() => {
                 console.log('✅ 成功進入全螢幕模式 (requestFullscreen)');
