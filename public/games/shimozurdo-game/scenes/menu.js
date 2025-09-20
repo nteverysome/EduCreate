@@ -31,7 +31,7 @@ export default class Menu extends Phaser.Scene {
 
     create() {
         const { width, height } = this                   // 解構賦值獲取寬高
-        
+
         // CONFIG SCENE - 場景配置區塊
         this.handlerScene.updateResize(this)             // 更新響應式配置
         if (this.game.debugMode)                         // 如果是調試模式
@@ -556,7 +556,7 @@ export default class Menu extends Phaser.Scene {
                     top: 0 !important;
                     left: 0 !important;
                     width: 100vw !important;
-                    height: 100vh !important;
+                    height: 100dvh !important;
                     background: black !important;
                     -webkit-user-select: none !important;
                     -moz-user-select: none !important;
@@ -570,7 +570,7 @@ export default class Menu extends Phaser.Scene {
                     top: 0 !important;
                     left: 0 !important;
                     width: 100vw !important;
-                    height: 100vh !important;
+                    height: 100dvh !important;
                     background: black !important;
                     border: none !important;
                 }
@@ -586,7 +586,7 @@ export default class Menu extends Phaser.Scene {
                 /* iOS Safari 特殊處理 */
                 @supports (-webkit-touch-callout: none) {
                     body.mobile-fullscreen {
-                        height: 100vh !important;
+                        height: 100dvh !important;
                         height: -webkit-fill-available !important;
                     }
                 }
@@ -627,7 +627,7 @@ export default class Menu extends Phaser.Scene {
                 document.documentElement.style.setProperty('--vh', `${vh}px`);
 
                 if (window.innerHeight < screen.height) {
-                    document.body.style.height = '100vh';
+                    document.body.style.height = '100dvh';
                     document.body.style.height = 'calc(var(--vh, 1vh) * 100)';
                 }
             }, 200);
@@ -657,6 +657,19 @@ export default class Menu extends Phaser.Scene {
 
         // 確保遊戲畫布填滿整個螢幕
         this.adjustGameCanvas();
+
+        // 強制觸發 Phaser 尺寸重算（修正 iOS 直向初始裁切，需要旋轉才正確的問題）
+        this.scale.resize(window.innerWidth, window.innerHeight);
+        this.scale.refresh();
+        setTimeout(() => { this.scale.resize(window.innerWidth, window.innerHeight); this.scale.refresh(); }, 250);
+        setTimeout(() => { this.scale.resize(window.innerWidth, window.innerHeight); this.scale.refresh(); }, 800);
+
+        // 監聽 resize / orientationchange，持續校正
+        if (!this._boundForceResize) {
+            this._boundForceResize = () => { this.scale.resize(window.innerWidth, window.innerHeight); this.scale.refresh(); };
+            window.addEventListener('resize', this._boundForceResize, { passive: true });
+            window.addEventListener('orientationchange', this._boundForceResize);
+        }
 
         // 隱藏可能的 UI 元素
         this.hideUIElements();
@@ -723,7 +736,7 @@ export default class Menu extends Phaser.Scene {
                     top: 0 !important;
                     left: 0 !important;
                     width: 100vw !important;
-                    height: 100vh !important;
+                    height: 100dvh !important;
                     background: black !important;
                 }
 
@@ -750,11 +763,12 @@ export default class Menu extends Phaser.Scene {
      * 調整遊戲畫布
      */
     adjustGameCanvas() {
+
         try {
             const canvas = this.game.canvas;
             if (canvas) {
                 canvas.style.width = '100vw';
-                canvas.style.height = '100vh';
+                canvas.style.height = '100dvh';
                 canvas.style.objectFit = 'contain';
                 console.log('✅ 遊戲畫布已調整為全螢幕');
             }
@@ -796,6 +810,8 @@ export default class Menu extends Phaser.Scene {
     exitFullscreen() {
         try {
             console.log('🚪 退出全螢幕模式');
+
+
 
             // 移除所有全螢幕樣式
             document.body.classList.remove('fullscreen-game', 'mobile-fullscreen');
@@ -866,6 +882,8 @@ export default class Menu extends Phaser.Scene {
                         if (mobileStyle) {
                             mobileStyle.remove();
                         }
+
+
                         console.log('📱 用戶退出全螢幕，已清理樣式');
                     }
                 });
