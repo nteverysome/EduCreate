@@ -65,7 +65,9 @@ interface Version {
 
 export default function VersionPreview() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const { id } = router.query;
   
   const [version, setVersion] = useState<Version | null>(null);

@@ -39,7 +39,9 @@ export default function useSubscription(): SubscriptionStatus & {
   refreshSubscription: () => Promise<void>;
   clearCache: () => void;
 } {
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const { executeWithErrorHandling, error, isLoading } = useErrorHandler();
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus>({
     hasSubscription: false,

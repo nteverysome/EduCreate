@@ -30,7 +30,9 @@ export default function ProtectedRoute({
 }: ProtectedRouteProps) {
   // Use permission prop as fallback for requiredPermission
   const effectivePermission = requiredPermission || permission;
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const router = useRouter();
   const { 
     checkPermission, 

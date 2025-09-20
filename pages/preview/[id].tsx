@@ -21,7 +21,9 @@ interface Activity {
 export default function ActivityPreview() {
   const router = useRouter();
   const { id } = router.query;
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const [activity, setActivity] = useState<Activity | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
