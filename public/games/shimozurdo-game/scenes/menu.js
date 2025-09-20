@@ -18,6 +18,7 @@ export default class Menu extends Phaser.Scene {
      */
     constructor() {
         super({ key: 'menu' })  // 註冊場景名稱為 'menu'
+        this._sceneStarted = false;          // 防止重複啟動場景
     }
 
     preload() {
@@ -436,7 +437,7 @@ export default class Menu extends Phaser.Scene {
             this.fullscreenTimeout = setTimeout(() => {
                 console.warn('⏰ 全螢幕請求超時，直接啟動遊戲');
                 this.startGameScene();
-            }, 3000);
+            }, 800);
 
         } catch (error) {
             console.warn('⚠️ iframe 全螢幕策略失敗:', error);
@@ -657,6 +658,8 @@ export default class Menu extends Phaser.Scene {
      */
     startGameScene() {
         try {
+            if (this._sceneStarted) { return; }
+            this._sceneStarted = true;
             console.log('🚀 啟動遊戲場景');
 
             // 停止菜單場景
