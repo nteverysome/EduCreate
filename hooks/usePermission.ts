@@ -27,7 +27,8 @@ const cacheSet = (key: string, value: any) => {
  * 使用緩存和 memoization 提高性能
  */
 export function usePermission() {
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const userRole = session?.user?.role || 'USER';
   const userId = session?.user?.id;
 

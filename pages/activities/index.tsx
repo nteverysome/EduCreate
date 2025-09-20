@@ -3,7 +3,6 @@ import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useSession } from 'next-auth/react';
 import { MagnifyingGlassIcon, FunnelIcon, Squares2X2Icon, ListBulletIcon, ChevronDownIcon, EyeIcon, UserGroupIcon, ClockIcon } from '@heroicons/react/24/outline';
 // framer-motion 已移除，使用 CSS 動畫替代
 

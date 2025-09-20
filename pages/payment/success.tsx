@@ -7,7 +7,8 @@ import Stripe from 'stripe';
 
 export default function PaymentSuccess() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [subscription, setSubscription] = useState<any>(null);
   const [error, setError] = useState('');

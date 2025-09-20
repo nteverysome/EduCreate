@@ -31,7 +31,8 @@ interface Activity {
 export default function ActivityDetail() {
   const router = useRouter();
   const { id } = router.query;
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const [activity, setActivity] = useState<Activity | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);

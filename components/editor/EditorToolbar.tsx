@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useEditorStore } from '../../store/editorStore';
-import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import VersionControl from './VersionControl';
 interface EditorToolbarProps {

@@ -67,7 +67,8 @@ interface VersionHistoryProps {
 }
 
 const VersionHistory = ({ activityId, onVersionRestore, isOpen, onClose }: VersionHistoryProps) => {
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const [versions, setVersions] = useState<Version[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

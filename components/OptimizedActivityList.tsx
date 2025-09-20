@@ -26,12 +26,13 @@ interface ActivityListProps {
  * 優化的活動列表組件
  * 展示如何使用優化的 hooks 和狀態管理
  */
-export function OptimizedActivityList({ 
-  userId, 
-  searchQuery = '', 
-  pageSize = 10 
+export function OptimizedActivityList({
+  userId,
+  searchQuery = '',
+  pageSize = 10
 }: ActivityListProps) {
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const { activities, setActivities } = useAppStore();
   const { executeWithErrorHandling, error, isLoading } = useErrorHandler();
   const { updateOptimistically } = useOptimisticUpdate(activities);

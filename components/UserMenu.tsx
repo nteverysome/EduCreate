@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { usePermission } from '../hooks/usePermission';
 
 export default function UserMenu() {
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const { isAdmin } = usePermission();
 
   if (!session) {

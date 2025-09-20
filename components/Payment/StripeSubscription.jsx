@@ -46,7 +46,8 @@ const PlanCard = ({ plan, onSelectPlan, isSelected }) => {
 const PaymentForm = ({ selectedPlan, onSuccess, onCancel }) => {
   const stripe = useStripe();
   const elements = useElements();
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentError, setPaymentError] = useState(null);
   
@@ -199,7 +200,8 @@ const StripeSubscription = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [step, setStep] = useState('select-plan'); // 'select-plan', 'payment', 'success'
   const [subscription, setSubscription] = useState(null);
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const [plans, setPlans] = useState([]);
   
   useEffect(() => {

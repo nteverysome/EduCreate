@@ -14,7 +14,8 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const router = useRouter();
-  const { data: session } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navigation = [
