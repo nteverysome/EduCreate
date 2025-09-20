@@ -224,14 +224,14 @@ function initializeGame() {
           // 記錄 Phaser 引擎啟動成功
           console.log('🎉 Phaser 遊戲啟動成功');
 
-          // 設置遊戲實例的基準螢幕尺寸屬性
+          // 設置遊戲實例的基準螢幕尺寸屬性 - 手機優先配置
           game.screenBaseSize = {
             maxWidth: 1920,   // 最大寬度參考值
             maxHeight: 1080,  // 最大高度參考值
-            minWidth: 480,    // 最小寬度參考值
-            minHeight: 270,   // 最小高度參考值
-            width: 960,       // 基準寬度
-            height: 540       // 基準高度
+            minWidth: 320,    // 最小寬度參考值 (iPhone SE)
+            minHeight: 568,   // 最小高度參考值 (iPhone SE)
+            width: 375,       // 基準寬度 (iPhone 標準尺寸)
+            height: 667       // 基準高度 (iPhone 標準尺寸)
           };
 
           // 將遊戲實例設為全域變數，供其他模組存取
