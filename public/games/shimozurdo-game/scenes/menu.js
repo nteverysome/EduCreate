@@ -274,46 +274,208 @@ export default class Menu extends Phaser.Scene {
      */
     requestFullscreen() {
         try {
-            // 獲取遊戲畫布元素或其容器
-            const canvas = this.game.canvas;
-            const container = canvas.parentElement || canvas;
+            // 檢測設備類型
+            const isMobile = this.detectMobileDevice();
+            const isIOS = this.detectIOSDevice();
 
-            console.log('🖥️ 嘗試進入全螢幕模式，目標元素:', container);
+            console.log('🖥️ 設備檢測:', { isMobile, isIOS });
 
-            // 先嘗試隱藏網址列（適用於手機瀏覽器）
-            this.hideAddressBar();
-
-            // 嘗試不同的全螢幕 API（按優先級順序）
-            if (container.requestFullscreen) {
-                container.requestFullscreen().then(() => {
-                    console.log('✅ 成功進入全螢幕模式 (requestFullscreen)');
-                    this.onFullscreenEnter();
-                }).catch(err => {
-                    console.warn('⚠️ 全螢幕請求失敗，嘗試其他方法:', err);
-                    // 如果全螢幕失敗，至少確保網址列隱藏
-                    this.hideAddressBar();
-                });
-            } else if (container.webkitRequestFullscreen) {
-                container.webkitRequestFullscreen();
-                console.log('✅ 成功進入全螢幕模式 (webkit)');
-                this.onFullscreenEnter();
-            } else if (container.mozRequestFullScreen) {
-                container.mozRequestFullScreen();
-                console.log('✅ 成功進入全螢幕模式 (moz)');
-                this.onFullscreenEnter();
-            } else if (container.msRequestFullscreen) {
-                container.msRequestFullscreen();
-                console.log('✅ 成功進入全螢幕模式 (ms)');
-                this.onFullscreenEnter();
+            if (isMobile) {
+                // 手機設備：優先使用網址列隱藏和偽全螢幕
+                console.log('📱 手機設備：使用手機專用全螢幕策略');
+                this.mobileFullscreenStrategy();
             } else {
-                console.warn('⚠️ 瀏覽器不支援全螢幕 API，使用網址列隱藏');
-                // 如果不支援全螢幕，至少隱藏網址列
-                this.hideAddressBar();
+                // 桌面設備：使用標準全螢幕 API
+                console.log('🖥️ 桌面設備：使用標準全螢幕 API');
+                this.desktopFullscreenStrategy();
             }
         } catch (error) {
             console.error('❌ 全螢幕請求錯誤:', error);
-            // 出錯時也嘗試隱藏網址列
-            this.hideAddressBar();
+            // 出錯時使用備用方案
+            this.fallbackFullscreenStrategy();
+        }
+    }
+
+    /**
+     * 檢測手機設備
+     */
+    detectMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               (window.innerWidth <= 768) ||
+               ('ontouchstart' in window);
+    }
+
+    /**
+     * 檢測 iOS 設備
+     */
+    detectIOSDevice() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    /**
+     * 手機專用全螢幕策略
+     */
+    mobileFullscreenStrategy() {
+        console.log('📱 執行手機全螢幕策略');
+
+        // 1. 立即隱藏網址列
+        this.hideAddressBar();
+
+        // 2. 設置偽全螢幕樣式
+        this.setMobileFullscreenStyles();
+
+        // 3. 嘗試進入全螢幕（如果支援）
+        setTimeout(() => {
+            this.tryMobileFullscreen();
+        }, 100);
+
+        // 4. 強制觸發全螢幕處理
+        setTimeout(() => {
+            this.onFullscreenEnter();
+        }, 200);
+    }
+
+    /**
+     * 桌面專用全螢幕策略
+     */
+    desktopFullscreenStrategy() {
+        const canvas = this.game.canvas;
+        const container = canvas.parentElement || canvas;
+
+        console.log('🖥️ 執行桌面全螢幕策略');
+
+        // 嘗試不同的全螢幕 API（按優先級順序）
+        if (container.requestFullscreen) {
+            container.requestFullscreen().then(() => {
+                console.log('✅ 成功進入全螢幕模式 (requestFullscreen)');
+                this.onFullscreenEnter();
+            }).catch(err => {
+                console.warn('⚠️ 全螢幕請求失敗:', err);
+                this.fallbackFullscreenStrategy();
+            });
+        } else if (container.webkitRequestFullscreen) {
+            container.webkitRequestFullscreen();
+            console.log('✅ 成功進入全螢幕模式 (webkit)');
+            this.onFullscreenEnter();
+        } else if (container.mozRequestFullScreen) {
+            container.mozRequestFullScreen();
+            console.log('✅ 成功進入全螢幕模式 (moz)');
+            this.onFullscreenEnter();
+        } else if (container.msRequestFullscreen) {
+            container.msRequestFullscreen();
+            console.log('✅ 成功進入全螢幕模式 (ms)');
+            this.onFullscreenEnter();
+        } else {
+            console.warn('⚠️ 瀏覽器不支援全螢幕 API');
+            this.fallbackFullscreenStrategy();
+        }
+    }
+
+    /**
+     * 嘗試手機全螢幕
+     */
+    tryMobileFullscreen() {
+        try {
+            // 對於手機，嘗試對整個文檔進行全螢幕
+            const target = document.documentElement;
+
+            if (target.requestFullscreen) {
+                target.requestFullscreen().then(() => {
+                    console.log('✅ 手機全螢幕成功 (requestFullscreen)');
+                }).catch(err => {
+                    console.log('📱 手機全螢幕失敗，使用偽全螢幕:', err.message);
+                });
+            } else if (target.webkitRequestFullscreen) {
+                target.webkitRequestFullscreen();
+                console.log('✅ 手機全螢幕成功 (webkit)');
+            } else {
+                console.log('📱 不支援全螢幕 API，使用偽全螢幕');
+            }
+        } catch (error) {
+            console.log('📱 手機全螢幕嘗試失敗，使用偽全螢幕:', error.message);
+        }
+    }
+
+    /**
+     * 備用全螢幕策略
+     */
+    fallbackFullscreenStrategy() {
+        console.log('🔄 使用備用全螢幕策略');
+        this.hideAddressBar();
+        this.setMobileFullscreenStyles();
+        this.onFullscreenEnter();
+    }
+
+    /**
+     * 設置手機專用全螢幕樣式
+     */
+    setMobileFullscreenStyles() {
+        try {
+            console.log('📱 設置手機專用全螢幕樣式');
+
+            // 創建手機專用樣式
+            let mobileStyle = document.getElementById('mobile-fullscreen-style');
+            if (!mobileStyle) {
+                mobileStyle = document.createElement('style');
+                mobileStyle.id = 'mobile-fullscreen-style';
+                document.head.appendChild(mobileStyle);
+            }
+
+            mobileStyle.textContent = `
+                /* 手機專用全螢幕樣式 */
+                body.mobile-fullscreen {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    overflow: hidden !important;
+                    position: fixed !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    background: black !important;
+                }
+
+                /* 隱藏所有可能的 UI 元素 */
+                body.mobile-fullscreen * {
+                    -webkit-user-select: none !important;
+                    -moz-user-select: none !important;
+                    -ms-user-select: none !important;
+                    user-select: none !important;
+                }
+
+                /* 遊戲容器手機全螢幕 */
+                body.mobile-fullscreen .game-iframe-container,
+                body.mobile-fullscreen iframe {
+                    position: fixed !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    border: none !important;
+                    z-index: 999999 !important;
+                }
+
+                /* 隱藏其他所有元素 */
+                body.mobile-fullscreen > *:not(.game-iframe-container) {
+                    display: none !important;
+                }
+
+                /* iOS Safari 特殊處理 */
+                @supports (-webkit-touch-callout: none) {
+                    body.mobile-fullscreen {
+                        height: 100vh !important;
+                        height: -webkit-fill-available !important;
+                    }
+                }
+            `;
+
+            // 添加 body class
+            document.body.classList.add('mobile-fullscreen');
+
+            console.log('✅ 手機專用全螢幕樣式已設置');
+        } catch (error) {
+            console.warn('⚠️ 設置手機全螢幕樣式失敗:', error);
         }
     }
 
@@ -333,21 +495,27 @@ export default class Menu extends Phaser.Scene {
             // 方法 2: 使用 viewport meta 標籤動態調整
             const viewport = document.querySelector('meta[name=viewport]');
             if (viewport) {
-                const originalContent = viewport.content;
-                viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui';
-
-                // 恢復原始設定（可選）
-                setTimeout(() => {
-                    viewport.content = originalContent;
-                }, 1000);
+                viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui, viewport-fit=cover';
+                console.log('📱 已更新 viewport 設定');
             }
 
             // 方法 3: 強制重新計算視窗高度
-            if (window.innerHeight < screen.height) {
-                document.body.style.height = screen.height + 'px';
-                setTimeout(() => {
+            setTimeout(() => {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+                if (window.innerHeight < screen.height) {
                     document.body.style.height = '100vh';
-                }, 500);
+                    document.body.style.height = 'calc(var(--vh, 1vh) * 100)';
+                }
+            }, 200);
+
+            // 方法 4: 強制進入全螢幕模式（iOS Safari）
+            if (this.detectIOSDevice()) {
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    document.body.scrollTop = 0;
+                }, 300);
             }
 
             console.log('✅ 網址列隱藏處理完成');
@@ -484,13 +652,18 @@ export default class Menu extends Phaser.Scene {
         try {
             console.log('🚪 退出全螢幕模式');
 
-            // 移除全螢幕樣式
-            document.body.classList.remove('fullscreen-game');
+            // 移除所有全螢幕樣式
+            document.body.classList.remove('fullscreen-game', 'mobile-fullscreen');
 
             // 移除全螢幕樣式表
             const fullscreenStyle = document.getElementById('fullscreen-game-style');
             if (fullscreenStyle) {
                 fullscreenStyle.remove();
+            }
+
+            const mobileStyle = document.getElementById('mobile-fullscreen-style');
+            if (mobileStyle) {
+                mobileStyle.remove();
             }
 
             // 退出瀏覽器全螢幕
@@ -503,6 +676,11 @@ export default class Menu extends Phaser.Scene {
             } else if (document.msExitFullscreen) {
                 document.msExitFullscreen();
             }
+
+            // 恢復正常樣式
+            document.body.style.height = '';
+            document.body.style.position = '';
+            document.body.style.overflow = '';
 
             console.log('✅ 已退出全螢幕模式');
         } catch (error) {
@@ -534,10 +712,14 @@ export default class Menu extends Phaser.Scene {
 
                     if (!isFullscreen) {
                         // 用戶退出了全螢幕，清理樣式
-                        document.body.classList.remove('fullscreen-game');
+                        document.body.classList.remove('fullscreen-game', 'mobile-fullscreen');
                         const fullscreenStyle = document.getElementById('fullscreen-game-style');
                         if (fullscreenStyle) {
                             fullscreenStyle.remove();
+                        }
+                        const mobileStyle = document.getElementById('mobile-fullscreen-style');
+                        if (mobileStyle) {
+                            mobileStyle.remove();
                         }
                         console.log('📱 用戶退出全螢幕，已清理樣式');
                     }
