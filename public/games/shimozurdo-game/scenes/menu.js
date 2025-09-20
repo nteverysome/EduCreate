@@ -531,7 +531,7 @@ export default class Menu extends Phaser.Scene {
             }
 
             mobileStyle.textContent = `
-                /* 手機專用全螢幕樣式 */
+                /* 手機專用全螢幕樣式（iframe 內部安全版） */
                 body.mobile-fullscreen {
                     margin: 0 !important;
                     padding: 0 !important;
@@ -542,31 +542,29 @@ export default class Menu extends Phaser.Scene {
                     width: 100vw !important;
                     height: 100vh !important;
                     background: black !important;
-                }
-
-                /* 隱藏所有可能的 UI 元素 */
-                body.mobile-fullscreen * {
                     -webkit-user-select: none !important;
                     -moz-user-select: none !important;
                     -ms-user-select: none !important;
                     user-select: none !important;
                 }
 
-                /* 遊戲容器手機全螢幕 */
-                body.mobile-fullscreen .game-iframe-container,
-                body.mobile-fullscreen iframe {
+                /* 只調整 #game 與 canvas，不隱藏任何元素 */
+                body.mobile-fullscreen #game {
                     position: fixed !important;
                     top: 0 !important;
                     left: 0 !important;
                     width: 100vw !important;
                     height: 100vh !important;
+                    background: black !important;
                     border: none !important;
-                    z-index: 999999 !important;
                 }
 
-                /* 隱藏其他所有元素 */
-                body.mobile-fullscreen > *:not(.game-iframe-container) {
-                    display: none !important;
+                body.mobile-fullscreen canvas {
+                    display: block !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    object-fit: contain !important;
+                    background: transparent !important;
                 }
 
                 /* iOS Safari 特殊處理 */
