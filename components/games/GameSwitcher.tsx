@@ -239,6 +239,25 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   };
 
   // 使用者在父頁面觸發：嘗試全螢幕，若失敗則套用近全螢幕，並通知遊戲開始
+  const [showExitOverlay, setShowExitOverlay] = useState(false);
+
+  const exitParentFullscreen = async () => {
+    try {
+      // 退出瀏覽器級全螢幕
+      const d: any = document;
+      if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+      else if (d.webkitFullscreenElement && d.webkitExitFullscreen) await d.webkitExitFullscreen();
+      else if (d.mozFullScreenElement && d.mozCancelFullScreen) await d.mozCancelFullScreen();
+      else if (d.msFullscreenElement && d.msExitFullscreen) await d.msExitFullscreen();
+    } catch {}
+
+    // 清除父頁面近全螢幕樣式
+    document.body.classList.remove('parent-fullscreen-game');
+    setShowExitOverlay(false);
+    // 通知子頁面
+    iframeRef.current?.contentWindow?.postMessage({ type: 'FULLSCREEN_EXITED' }, '*');
+  };
+
   const handleTapToStart = async () => {
     try {
       setShowTapOverlay(false);
@@ -261,12 +280,14 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       }
 
       document.body.classList.add('parent-fullscreen-game');
+      setShowExitOverlay(true);
       // 通知 iframe（遊戲）當前狀態
       iframeRef.current?.contentWindow?.postMessage({ type: success ? 'FULLSCREEN_SUCCESS' : 'FULLSCREEN_FAILED' }, '*');
     } catch (e) {
       // 失敗：套用近全螢幕並通知開始
       ensureParentFullscreenStyles();
       document.body.classList.add('parent-fullscreen-game');
+      setShowExitOverlay(true);
       iframeRef.current?.contentWindow?.postMessage({ type: 'FULLSCREEN_FAILED' }, '*');
     }
   };
@@ -424,7 +445,9 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
       console.log('🎮 GameSwitcher 收到消息:', data);
 
-      if (data.type === 'GAME_STATE_UPDATE') {
+      if (data.type === 'REQUEST_EXIT_FULLSCREEN') {
+        exitParentFullscreen();
+      } else if (data.type === 'GAME_STATE_UPDATE') {
         const newState: GameState = {
           score: data.score || 0,
           level: data.level || currentGeptLevel,
@@ -831,6 +854,18 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
           allowFullScreen
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
         />
+
+        {/* 手機全螢幕退出按鈕（父頁面控制） */}
+        {isMobile && showExitOverlay && (
+          <button
+            type="button"
+            onClick={exitParentFullscreen}
+            className="absolute top-3 right-3 z-[1000000] bg-black/60 text-white px-3 py-2 rounded-md text-sm"
+            aria-label="退出全螢幕"
+          >
+            退出全螢幕
+          </button>
+        )}
       </div>
 
       {/* 遊戲狀態顯示 - 響應式設計 */}

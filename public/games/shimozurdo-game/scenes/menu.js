@@ -859,7 +859,14 @@ export default class Menu extends Phaser.Scene {
         try {
             console.log('🚪 退出全螢幕模式');
 
-
+            // 通知父頁面退出全螢幕（處理 parent-fullscreen-game 樣式與真正全螢幕）
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'REQUEST_EXIT_FULLSCREEN', source: 'shimozurdo-game' }, '*');
+                }
+            } catch (e) {
+                console.warn('⚠️ 無法通知父頁面退出全螢幕：', e);
+            }
 
             // 移除所有全螢幕樣式
             document.body.classList.remove('fullscreen-game', 'mobile-fullscreen');

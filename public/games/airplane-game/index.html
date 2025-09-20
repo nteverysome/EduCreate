@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
   <title>🛩️ Airplane Collision Game - EduCreate</title>
   <meta name="description" content="記憶科學驅動的英語詞彙學習遊戲 - 飛機碰撞模式" />
   
@@ -73,10 +73,19 @@
     }
     
     /* 響應式設計 */
+    /* iOS 0 Safari 0 touch
+ 00 */
+    html, body, #game-container, canvas {
+      touch-action: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      overscroll-behavior: none;
+    }
+
     @media (max-width: 1024px) {
       #game-container {
         width: 100vw;
-        height: 100vh;
+        height: 100dvh;
         border: none;
         border-radius: 0;
       }
@@ -96,7 +105,22 @@
       <div class="loading-subtitle">記憶科學 × 英語學習</div>
     </div>
   </div>
-  
+
+  <!-- iOS Safari 0 touch 0 0 0 -->
+  <script>
+    // 0 0 passive 0 0 0 0 
+    (function(){
+      const opts = { passive: false };
+      const prevent = (e) => { try { e.preventDefault(); } catch(_){} };
+      ['touchstart','touchmove','gesturestart'].forEach(type => {
+        document.addEventListener(type, prevent, opts);
+      });
+      //  Safari 0 0 0 
+      document.documentElement.style.setProperty('overscroll-behavior', 'none');
+      document.body.style.touchAction = 'none';
+    })();
+  </script>
+
   <!-- Vite 入口點 -->
 
 </body>
