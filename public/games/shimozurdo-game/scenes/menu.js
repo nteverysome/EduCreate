@@ -695,7 +695,7 @@ export default class Menu extends Phaser.Scene {
             }
 
             fullscreenStyle.textContent = `
-                /* 桌面全螢幕遊戲樣式 */
+                /* 桌面全螢幕遊戲樣式（iframe 內部安全版） */
                 body.fullscreen-game {
                     margin: 0 !important;
                     padding: 0 !important;
@@ -703,31 +703,14 @@ export default class Menu extends Phaser.Scene {
                     background: black !important;
                 }
 
-                /* 隱藏頁面其他元素，但保留遊戲容器 */
-                body.fullscreen-game > *:not(.game-iframe-container) {
-                    display: none !important;
-                }
-
-                /* 確保遊戲容器和 iframe 正確顯示 */
-                body.fullscreen-game .game-iframe-container {
-                    display: block !important;
+                /* 只調整遊戲容器與畫布，不隱藏任意元素，避免黑屏 */
+                body.fullscreen-game #game {
                     position: fixed !important;
                     top: 0 !important;
                     left: 0 !important;
                     width: 100vw !important;
                     height: 100vh !important;
-                    z-index: 999999 !important;
-                    background: transparent !important;
-                    border: none !important;
-                }
-
-                /* 確保 iframe 正確顯示 */
-                body.fullscreen-game .game-iframe-container iframe {
-                    display: block !important;
-                    width: 100% !important;
-                    height: 100% !important;
-                    border: none !important;
-                    background: transparent !important;
+                    background: black !important;
                 }
 
                 /* 確保遊戲 canvas 正確顯示 */
@@ -736,6 +719,7 @@ export default class Menu extends Phaser.Scene {
                     width: 100% !important;
                     height: 100% !important;
                     object-fit: contain !important;
+                    background: transparent !important;
                 }
             `;
 
