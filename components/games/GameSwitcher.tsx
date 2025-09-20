@@ -754,6 +754,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
           title={currentGame.displayName}
           onLoad={handleIframeLoad}
           allow="fullscreen; autoplay; microphone; camera"
+          allowFullScreen
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
         />
       </div>

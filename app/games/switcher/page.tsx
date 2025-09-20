@@ -202,11 +202,7 @@ const GameSwitcherPage: React.FC = () => {
             background: black !important;
           }
 
-          /* 隱藏除了遊戲容器外的所有元素 */
-          body.parent-fullscreen-game > *:not([data-testid="game-container"]) {
-            display: none !important;
-          }
-
+          /* 僅固定並鋪滿遊戲容器，不隱藏其他元素，避免誤傷主層 */
           /* 確保遊戲容器填滿整個螢幕 */
           body.parent-fullscreen-game [data-testid="game-container"] {
             position: fixed !important;
