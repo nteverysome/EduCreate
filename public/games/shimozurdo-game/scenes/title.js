@@ -213,9 +213,12 @@ export default class Title extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();  // 創建方向鍵監聽器
         this.wasd = this.input.keyboard.addKeys('W,S,A,D');     // 創建WASD鍵監聽器
 
-        // 2. 點擊/觸控控制 - 設置目標位置實現平滑移動
+        // 2. 點擊/觸控控制 - 設置目標位置實現平滑移動（長按時不觸發）
         this.input.on('pointerdown', (pointer) => {     // 監聽滑鼠點擊或觸控事件
             if (!this.player) return;                   // 確保太空船存在
+
+            // 如果是長按控制中，不執行點擊移動
+            if (this.isLongPressing) return;
 
             const clickY = pointer.y;                    // 獲取點擊的Y座標
             const playerY = this.player.y;               // 獲取太空船當前Y座標
@@ -260,6 +263,7 @@ export default class Title extends Phaser.Scene {
             if (!this.player) return;
             pressing = true;
             direction = dir;
+            this.isLongPressing = true; // 標記長按狀態，避免與點擊衝突
 
             const loop = () => {
                 if (!pressing || !this.player) return;
@@ -282,7 +286,9 @@ export default class Title extends Phaser.Scene {
         const endLongPress = () => {
             pressing = false;
             direction = null;
+            this.isLongPressing = false; // 清除長按狀態
             cancelAnimationFrame(rafId);
+            // 長按放開時不回到原點，保持當前位置
         };
 
         overlay.addEventListener('touchstart', (e) => {
@@ -615,8 +621,8 @@ export default class Title extends Phaser.Scene {
             this.player.y += moveSpeed;                  // 向下移動
         }
 
-        // 點擊移動到目標位置（平滑移動） - 實現平滑的點擊移動效果
-        if (Math.abs(this.player.y - this.playerTargetY) > 2) {  // 檢查是否需要移動到目標位置
+        // 點擊移動到目標位置（平滑移動） - 實現平滑的點擊移動效果（長按時不執行）
+        if (!this.isLongPressing && Math.abs(this.player.y - this.playerTargetY) > 2) {  // 檢查是否需要移動到目標位置
             const direction = this.playerTargetY > this.player.y ? 1 : -1;  // 計算移動方向
             this.player.y += direction * moveSpeed;      // 向目標位置移動
         }
