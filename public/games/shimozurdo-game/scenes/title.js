@@ -544,7 +544,7 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 💥 檢查兩個物件的碰撞 - 使用矩形邊界檢測碰撞
+     * 💥 檢查兩個物件的碰撞 - 使用縮小的矩形邊界檢測碰撞（範圍小一半）
      */
     checkCollision(obj1, obj2) {
         if (!obj1 || !obj2 || !obj1.active || !obj2.active) return false;  // 防禦性檢查
@@ -553,8 +553,27 @@ export default class Title extends Phaser.Scene {
         const bounds1 = obj1.getBounds();               // 第一個物件的邊界矩形
         const bounds2 = obj2.getBounds();               // 第二個物件的邊界矩形
 
-        // 檢查矩形碰撞 - 使用Phaser內建的矩形重疊檢測
-        return Phaser.Geom.Rectangle.Overlaps(bounds1, bounds2);
+        // 縮小碰撞範圍到一半 - 從中心向內縮小25%（總體縮小50%）
+        const shrinkFactor = 0.25; // 每邊縮小25%，總體縮小50%
+
+        // 縮小第一個物件的邊界（太空船）
+        const shrunk1 = new Phaser.Geom.Rectangle(
+            bounds1.x + bounds1.width * shrinkFactor,
+            bounds1.y + bounds1.height * shrinkFactor,
+            bounds1.width * (1 - shrinkFactor * 2),
+            bounds1.height * (1 - shrinkFactor * 2)
+        );
+
+        // 縮小第二個物件的邊界（雲朵）
+        const shrunk2 = new Phaser.Geom.Rectangle(
+            bounds2.x + bounds2.width * shrinkFactor,
+            bounds2.y + bounds2.height * shrinkFactor,
+            bounds2.width * (1 - shrinkFactor * 2),
+            bounds2.height * (1 - shrinkFactor * 2)
+        );
+
+        // 檢查縮小後的矩形碰撞 - 使用Phaser內建的矩形重疊檢測
+        return Phaser.Geom.Rectangle.Overlaps(shrunk1, shrunk2);
     }
 
     /**
