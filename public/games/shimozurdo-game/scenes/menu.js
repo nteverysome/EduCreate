@@ -355,6 +355,27 @@ export default class Menu extends Phaser.Scene {
     mobileFullscreenStrategy() {
         console.log('📱 執行手機全螢幕策略');
 
+        // 0. ANDROID/非 iOS：先嘗試與桌面相同的 in-iframe 全螢幕（Phaser → 原生）
+        const isIOS = this.detectIOSDevice();
+        if (!isIOS) {
+            try {
+                if (this.scale && typeof this.scale.startFullscreen === 'function') {
+                    this.scale.fullscreenTarget = document.getElementById('game') || this.game.canvas;
+                    this.scale.startFullscreen();
+                    // 小延遲檢查是否已進入全螢幕
+                    setTimeout(() => {
+                        if (this.scale.isFullscreen || document.fullscreenElement || document.webkitFullscreenElement) {
+                            console.log('✅ Android/非 iOS：已以 Phaser 方式進入全螢幕');
+                            this.onFullscreenEnter();
+                            return;
+                        }
+                    }, 80);
+                }
+            } catch (e) {
+                console.warn('⚠️ Android/非 iOS：Phaser 全螢幕嘗試失敗，稍後走原生/父頁面策略', e);
+            }
+        }
+
         // 1. 立即隱藏網址列
         this.hideAddressBar();
 
