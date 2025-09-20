@@ -121,25 +121,28 @@ export default class Hub extends Phaser.Scene {
             .setInteractive({ cursor: "pointer" })
 
         this.fullscreenBtn.on("pointerup", () => {
+            const inIframe = !!(window.parent && window.parent !== window);
             if (this.scale.isFullscreen) {
                 // 已在（Phaser）全螢幕：退出 Phaser 全螢幕
-                this.fullscreenBtn.setFrame(0)
-                this.scale.stopFullscreen()
-            } else {
-                // 非 Phaser 全螢幕：請求父頁面退出（處理 iOS 近全螢幕與真全螢幕）
+                this.fullscreenBtn.setFrame(0);
+                this.scale.stopFullscreen();
+            } else if (inIframe) {
+                // 內嵌情境：依據父頁面全螢幕狀態決定「退出或進入」
                 try {
-                    if (window.parent && window.parent !== window) {
+                    if (this._parentFSActive) {
                         window.parent.postMessage({ type: 'REQUEST_EXIT_FULLSCREEN', source: 'shimozurdo-game' }, '*');
                     } else {
-                        // 非嵌入情境下，切換 Phaser 全螢幕
-                        this.fullscreenBtn.setFrame(1)
-                        this.scale.startFullscreen()
+                        window.parent.postMessage({ type: 'REQUEST_FULLSCREEN', source: 'shimozurdo-game' }, '*');
                     }
                 } catch (e) {
                     // 後備：嘗試切換 Phaser 全螢幕
-                    this.fullscreenBtn.setFrame(1)
-                    this.scale.startFullscreen()
+                    this.fullscreenBtn.setFrame(1);
+                    this.scale.startFullscreen();
                 }
+            } else {
+                // 非內嵌（桌面）情境：切換 Phaser 全螢幕
+                this.fullscreenBtn.setFrame(1);
+                this.scale.startFullscreen();
             }
         })
         // 監聽視窗大小調整事件，當視窗大小改變時調用 resize 方法

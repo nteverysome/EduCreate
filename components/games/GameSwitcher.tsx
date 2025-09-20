@@ -255,7 +255,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     document.body.classList.remove('parent-fullscreen-game');
     setShowExitOverlay(false);
     // 通知子頁面
-    iframeRef.current?.contentWindow?.postMessage({ type: 'FULLSCREEN_EXITED' }, '*');
+    iframeRef.current?.contentWindow?.postMessage({ source: 'parent-page', type: 'FULLSCREEN_EXITED' }, '*');
   };
 
   const handleTapToStart = async () => {
@@ -280,15 +280,13 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       }
 
       document.body.classList.add('parent-fullscreen-game');
-      setShowExitOverlay(true);
-      // 通知 iframe（遊戲）當前狀態
-      iframeRef.current?.contentWindow?.postMessage({ type: success ? 'FULLSCREEN_SUCCESS' : 'FULLSCREEN_FAILED' }, '*');
+      // 通知 iframe（遊戲）當前狀態（標記來源）
+      iframeRef.current?.contentWindow?.postMessage({ source: 'parent-page', type: success ? 'FULLSCREEN_SUCCESS' : 'FULLSCREEN_FAILED' }, '*');
     } catch (e) {
       // 失敗：套用近全螢幕並通知開始
       ensureParentFullscreenStyles();
       document.body.classList.add('parent-fullscreen-game');
-      setShowExitOverlay(true);
-      iframeRef.current?.contentWindow?.postMessage({ type: 'FULLSCREEN_FAILED' }, '*');
+      iframeRef.current?.contentWindow?.postMessage({ source: 'parent-page', type: 'FULLSCREEN_FAILED' }, '*');
     }
   };
 

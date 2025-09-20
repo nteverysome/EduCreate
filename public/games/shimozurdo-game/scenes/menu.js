@@ -517,26 +517,22 @@ export default class Menu extends Phaser.Scene {
             window.removeEventListener('message', this.fullscreenResponseListener);
         }
 
+        this._parentFSActive = this._parentFSActive || false;
         this.fullscreenResponseListener = (event) => {
             if (event.data && event.data.source === 'parent-page') {
                 if (event.data.type === 'FULLSCREEN_SUCCESS') {
                     console.log('✅ 收到父頁面全螢幕成功回應:', event.data.message);
-                    // 清除超時
-                    if (this.fullscreenTimeout) {
-                        clearTimeout(this.fullscreenTimeout);
-                        this.fullscreenTimeout = null;
-                    }
-                    // 應用全螢幕樣式並啟動遊戲
+                    this._parentFSActive = true;
+                    if (this.fullscreenTimeout) { clearTimeout(this.fullscreenTimeout); this.fullscreenTimeout = null; }
                     this.onFullscreenEnter();
                 } else if (event.data.type === 'FULLSCREEN_FAILED') {
                     console.warn('⚠️ 收到父頁面全螢幕失敗回應:', event.data.message);
-                    // 清除超時
-                    if (this.fullscreenTimeout) {
-                        clearTimeout(this.fullscreenTimeout);
-                        this.fullscreenTimeout = null;
-                    }
-                    // 直接啟動遊戲，不應用全螢幕樣式
+                    this._parentFSActive = true; // 父頁面已套用近全螢幕樣式
+                    if (this.fullscreenTimeout) { clearTimeout(this.fullscreenTimeout); this.fullscreenTimeout = null; }
                     this.startGameScene();
+                } else if (event.data.type === 'FULLSCREEN_EXITED') {
+                    console.log('🚪 收到父頁面退出全螢幕通知');
+                    this._parentFSActive = false;
                 }
             }
         };
