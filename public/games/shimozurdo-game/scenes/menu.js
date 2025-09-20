@@ -296,9 +296,32 @@ export default class Menu extends Phaser.Scene {
      * 檢測手機設備
      */
     detectMobileDevice() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-               (window.innerWidth <= 768) ||
-               ('ontouchstart' in window);
+        // 優先檢查 User Agent 中的手機標識
+        const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // 檢查是否為真正的觸控設備（排除桌面觸控螢幕）
+        const isTouchDevice = ('ontouchstart' in window) && (navigator.maxTouchPoints > 0);
+
+        // 檢查螢幕尺寸（更嚴格的條件）
+        const isSmallScreen = (window.innerWidth <= 480) && (window.innerHeight <= 800);
+
+        // 檢查設備方向 API（手機特有）
+        const hasOrientationAPI = (typeof window.orientation !== 'undefined');
+
+        // 綜合判斷：必須滿足 User Agent 或者同時滿足多個條件
+        const isMobile = mobileUserAgent || (isTouchDevice && isSmallScreen && hasOrientationAPI);
+
+        console.log('📱 設備檢測詳情:', {
+            userAgent: navigator.userAgent,
+            mobileUserAgent,
+            isTouchDevice,
+            isSmallScreen,
+            hasOrientationAPI,
+            windowSize: `${window.innerWidth}x${window.innerHeight}`,
+            finalResult: isMobile
+        });
+
+        return isMobile;
     }
 
     /**
@@ -336,10 +359,30 @@ export default class Menu extends Phaser.Scene {
      * 桌面專用全螢幕策略
      */
     desktopFullscreenStrategy() {
+        console.log('🖥️ 執行桌面全螢幕策略');
+
+        // 檢查是否在 iframe 中
+        const isInIframe = (window !== window.top);
+        console.log('🔍 iframe 檢測:', { isInIframe });
+
+        if (isInIframe) {
+            // 在 iframe 中，嘗試對父頁面進行全螢幕
+            console.log('📱 檢測到 iframe 環境，使用父頁面全螢幕策略');
+            this.iframeFullscreenStrategy();
+        } else {
+            // 不在 iframe 中，使用標準全螢幕
+            this.standardFullscreenStrategy();
+        }
+    }
+
+    /**
+     * 標準全螢幕策略（非 iframe 環境）
+     */
+    standardFullscreenStrategy() {
         const canvas = this.game.canvas;
         const container = canvas.parentElement || canvas;
 
-        console.log('🖥️ 執行桌面全螢幕策略');
+        console.log('🖥️ 執行標準全螢幕策略');
 
         // 嘗試不同的全螢幕 API（按優先級順序）
         if (container.requestFullscreen) {
@@ -364,6 +407,35 @@ export default class Menu extends Phaser.Scene {
             this.onFullscreenEnter();
         } else {
             console.warn('⚠️ 瀏覽器不支援全螢幕 API');
+            this.fallbackFullscreenStrategy();
+        }
+    }
+
+    /**
+     * iframe 全螢幕策略
+     */
+    iframeFullscreenStrategy() {
+        try {
+            console.log('🖼️ 執行 iframe 全螢幕策略');
+
+            // 嘗試通知父頁面進行全螢幕
+            if (window.parent && window.parent !== window) {
+                // 發送消息給父頁面
+                window.parent.postMessage({
+                    type: 'REQUEST_FULLSCREEN',
+                    source: 'shimozurdo-game'
+                }, '*');
+
+                console.log('📤 已發送全螢幕請求給父頁面');
+            }
+
+            // 同時執行遊戲內的全螢幕處理
+            setTimeout(() => {
+                this.onFullscreenEnter();
+            }, 100);
+
+        } catch (error) {
+            console.warn('⚠️ iframe 全螢幕策略失敗:', error);
             this.fallbackFullscreenStrategy();
         }
     }

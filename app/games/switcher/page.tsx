@@ -106,6 +106,39 @@ const GameSwitcherPage: React.FC = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
+    // 監聽來自 iframe 的全螢幕請求
+    const handleFullscreenMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'REQUEST_FULLSCREEN' && event.data.source === 'shimozurdo-game') {
+        console.log('📨 收到來自遊戲的全螢幕請求');
+
+        // 嘗試對整個文檔進行全螢幕
+        const requestFullscreen = () => {
+          const element = document.documentElement;
+
+          if (element.requestFullscreen) {
+            element.requestFullscreen().then(() => {
+              console.log('✅ 父頁面全螢幕成功 (requestFullscreen)');
+            }).catch(err => {
+              console.warn('⚠️ 父頁面全螢幕失敗:', err);
+            });
+          } else if ((element as any).webkitRequestFullscreen) {
+            (element as any).webkitRequestFullscreen();
+            console.log('✅ 父頁面全螢幕成功 (webkit)');
+          } else if ((element as any).mozRequestFullScreen) {
+            (element as any).mozRequestFullScreen();
+            console.log('✅ 父頁面全螢幕成功 (moz)');
+          } else if ((element as any).msRequestFullscreen) {
+            (element as any).msRequestFullscreen();
+            console.log('✅ 父頁面全螢幕成功 (ms)');
+          } else {
+            console.warn('⚠️ 父頁面不支援全螢幕 API');
+          }
+        };
+
+        requestFullscreen();
+      }
+    };
+
     const autoScrollToGame = () => {
       // 檢查用戶是否偏好減少動畫
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -140,9 +173,10 @@ const GameSwitcherPage: React.FC = () => {
     // 初始檢查螢幕尺寸
     checkScreenSize();
 
-    // 監聽滾動事件和尺寸變化
+    // 監聽滾動事件、尺寸變化和全螢幕消息
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', checkScreenSize);
+    window.addEventListener('message', handleFullscreenMessage);
 
     // 執行自動滾動 - 多次嘗試確保成功
     autoScrollToGame();
@@ -154,6 +188,7 @@ const GameSwitcherPage: React.FC = () => {
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', checkScreenSize);
+      window.removeEventListener('message', handleFullscreenMessage);
     };
   }, [hasUserScrolled]);
 
