@@ -2,7 +2,26 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 import { hasPermission } from '../permissions';
 import { performanceMonitor } from '../utils/performanceMonitor';
-import globalCache from '../cache/CacheManager';
+
+// 簡單的內存緩存實現
+const globalCache = new Map<string, { value: any; expiry: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5分鐘
+
+const cacheGet = (key: string) => {
+  const item = globalCache.get(key);
+  if (!item || Date.now() > item.expiry) {
+    globalCache.delete(key);
+    return null;
+  }
+  return item.value;
+};
+
+const cacheSet = (key: string, value: any, ttl = CACHE_TTL) => {
+  globalCache.set(key, {
+    value,
+    expiry: Date.now() + ttl
+  });
+};
 
 interface ApiError extends Error {
   statusCode?: number;
@@ -105,7 +124,7 @@ export function withMiddleware(
           ? options.cache.key(req)
           : `${endpoint}:${JSON.stringify(req.query)}`;
         
-        const cached = globalCache.get(cacheKey);
+        const cached = cacheGet(cacheKey);
         if (cached) {
           performanceMonitor.increment('cache_hit', 1, { endpoint });
           res.status(200).json(cached);
@@ -186,12 +205,12 @@ async function checkRateLimit(
   const window = Math.floor(Date.now() / rateLimit.windowMs);
   const key = `rate_limit:${identifier}:${window}`;
 
-  const current = globalCache.get<number>(key) || 0;
+  const current = cacheGet(key) || 0;
   const remaining = Math.max(0, rateLimit.maxRequests - current - 1);
   const allowed = current < rateLimit.maxRequests;
 
   if (allowed) {
-    globalCache.set(key, current + 1, rateLimit.windowMs);
+    cacheSet(key, current + 1, rateLimit.windowMs);
   }
 
   return {

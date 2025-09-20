@@ -1,7 +1,26 @@
 import { useSession } from 'next-auth/react';
 import { useMemo } from 'react';
 import { PERMISSIONS, hasPermission, hasAnyPermission, hasAllPermissions } from '../lib/permissions';
-import { permissionCache } from '../lib/cache/CacheManager';
+
+// 簡單的內存緩存實現
+const permissionCache = new Map<string, { value: any; expiry: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5分鐘
+
+const cacheGet = (key: string) => {
+  const item = permissionCache.get(key);
+  if (!item || Date.now() > item.expiry) {
+    permissionCache.delete(key);
+    return null;
+  }
+  return item.value;
+};
+
+const cacheSet = (key: string, value: any) => {
+  permissionCache.set(key, {
+    value,
+    expiry: Date.now() + CACHE_TTL
+  });
+};
 
 /**
  * 優化的權限檢查 Hook
@@ -23,11 +42,16 @@ export function usePermission() {
       checkPermission: (permission: string): boolean => {
         const permissionCacheKey = `${cacheKey}:${permission}`;
 
-        return permissionCache.getOrSet(
-          permissionCacheKey,
-          async () => hasPermission(userRole, permission),
-          2 * 60 * 1000 // 2 分鐘緩存
-        ) as boolean;
+        // 檢查緩存
+        const cached = cacheGet(permissionCacheKey);
+        if (cached !== null) {
+          return cached;
+        }
+
+        // 計算權限並緩存
+        const result = hasPermission(userRole, permission);
+        cacheSet(permissionCacheKey, result);
+        return result;
       },
 
       /**
@@ -36,11 +60,16 @@ export function usePermission() {
       checkAnyPermission: (permissions: string[]): boolean => {
         const permissionCacheKey = `${cacheKey}:any:${permissions.join(',')}`;
 
-        return permissionCache.getOrSet(
-          permissionCacheKey,
-          async () => hasAnyPermission(userRole, permissions),
-          2 * 60 * 1000
-        ) as boolean;
+        // 檢查緩存
+        const cached = cacheGet(permissionCacheKey);
+        if (cached !== null) {
+          return cached;
+        }
+
+        // 計算權限並緩存
+        const result = hasAnyPermission(userRole, permissions);
+        cacheSet(permissionCacheKey, result);
+        return result;
       },
 
       /**
@@ -49,11 +78,16 @@ export function usePermission() {
       checkAllPermissions: (permissions: string[]): boolean => {
         const permissionCacheKey = `${cacheKey}:all:${permissions.join(',')}`;
 
-        return permissionCache.getOrSet(
-          permissionCacheKey,
-          async () => hasAllPermissions(userRole, permissions),
-          2 * 60 * 1000
-        ) as boolean;
+        // 檢查緩存
+        const cached = cacheGet(permissionCacheKey);
+        if (cached !== null) {
+          return cached;
+        }
+
+        // 計算權限並緩存
+        const result = hasAllPermissions(userRole, permissions);
+        cacheSet(permissionCacheKey, result);
+        return result;
       },
     };
   }, [userRole, userId]);
