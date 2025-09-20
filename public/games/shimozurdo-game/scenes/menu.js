@@ -58,6 +58,14 @@ export default class Menu extends Phaser.Scene {
         // 設置全螢幕監聽器
         this.setupFullscreenListeners();
 
+        // 📱 手機保險機制：任意點一下畫面也能啟動（防止互動區域命中偏差）
+        this.input.once('pointerdown', () => {
+            if (!this._sceneStarted) {
+                console.log('📱 全畫面點擊觸發開始（fallback）');
+                this.startGame();
+            }
+        });
+
         console.log('🎮 菜單場景創建完成');
     }
 
