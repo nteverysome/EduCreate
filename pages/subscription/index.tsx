@@ -30,7 +30,9 @@ interface SubscriptionPageProps {
 }
 
 export default function SubscriptionPage({ subscription }: SubscriptionPageProps) {
-  const { data: session, status: sessionStatus } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const sessionStatus = sessionResult?.status;
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');

@@ -19,7 +19,9 @@ interface GameItem {
 
 export default function CreatePixiGame() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const { id } = router.query; // 如果是編輯現有遊戲
   
   const [gameTitle, setGameTitle] = useState('');

@@ -8,7 +8,9 @@ import { PERMISSIONS } from '../../lib/permissions';
 
 export default function EditorPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const { id, template, type } = router.query;
 
   // 檢查用戶是否已登入

@@ -22,7 +22,9 @@ interface AIGeneratedContent {
 }
 
 const AIFeaturesPage: NextPage = () => {
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<AIGeneratedContent | null>(null);

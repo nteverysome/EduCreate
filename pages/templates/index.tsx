@@ -6,7 +6,9 @@ import { useSession } from 'next-auth/react';
 
 export default function TemplatesPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
 
   return (
     <>

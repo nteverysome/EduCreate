@@ -18,7 +18,9 @@ interface TemplateOption {
 
 export default function CreateActivity() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const { hasSubscription, isLoading: isSubscriptionLoading, requiresUpgrade, activityCount, activityLimit, canCreateMore } = useSubscription();
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [activityTitle, setActivityTitle] = useState('');

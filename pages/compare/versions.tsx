@@ -65,7 +65,9 @@ interface Version {
 
 export default function CompareVersions() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const { a: versionAId, b: versionBId } = router.query;
   
   const [versionA, setVersionA] = useState<Version | null>(null);

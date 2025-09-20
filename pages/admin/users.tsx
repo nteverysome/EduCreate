@@ -19,7 +19,9 @@ interface UsersPageProps {
 }
 
 export default function UsersPage({ users: initialUsers }: UsersPageProps) {
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers);
   const [message, setMessage] = useState('');

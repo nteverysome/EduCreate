@@ -19,7 +19,9 @@ interface CreateStep {
 
 export default function CreateEnhancedActivity() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedTemplate, setSelectedTemplate] = useState<GameTemplateInfo | null>(null);
   const [activityData, setActivityData] = useState({

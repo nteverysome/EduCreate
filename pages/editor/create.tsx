@@ -6,7 +6,9 @@ import Link from 'next/link';
 
 export default function CreateActivityPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const { template, type } = router.query;
   
   const [isLoading, setIsLoading] = useState(true);

@@ -33,7 +33,9 @@ interface ProfileProps {
 }
 
 export default function Profile({ userProfile }: ProfileProps) {
-  const { data: session, status } = useSession();
+  const sessionResult = useSession();
+  const session = sessionResult?.data;
+  const status = sessionResult?.status;
   const router = useRouter();
   const [name, setName] = useState(userProfile.name || '');
   const [image, setImage] = useState(userProfile.image || '');
