@@ -1,6 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { performanceMonitor, perf } from '../lib/utils/performanceMonitor';
-import { globalCache, sessionCache, permissionCache } from '../lib/cache/CacheManager';
+
+// 內聯緩存實現 - 替代外部 CacheManager 依賴
+const createMockCache = (name: string, maxSize: number = 100) => {
+  const cache = new Map<string, { value: any; expiry: number }>();
+
+  return {
+    getStats: () => ({ size: cache.size, maxSize }),
+    clear: () => cache.clear(),
+    get: (key: string) => {
+      const item = cache.get(key);
+      if (!item || Date.now() > item.expiry) {
+        cache.delete(key);
+        return null;
+      }
+      return item.value;
+    },
+    set: (key: string, value: any, ttl: number = 5 * 60 * 1000) => {
+      cache.set(key, { value, expiry: Date.now() + ttl });
+    }
+  };
+};
+
+const globalCache = createMockCache('global', 200);
+const sessionCache = createMockCache('session', 100);
+const permissionCache = createMockCache('permission', 50);
 interface PerformanceStats {
   totalMetrics: number;
   averageResponseTime: number;
