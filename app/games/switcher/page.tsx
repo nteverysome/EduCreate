@@ -118,24 +118,93 @@ const GameSwitcherPage: React.FC = () => {
           if (element.requestFullscreen) {
             element.requestFullscreen().then(() => {
               console.log('✅ 父頁面全螢幕成功 (requestFullscreen)');
+              applyParentFullscreenStyles();
             }).catch(err => {
               console.warn('⚠️ 父頁面全螢幕失敗:', err);
             });
           } else if ((element as any).webkitRequestFullscreen) {
             (element as any).webkitRequestFullscreen();
             console.log('✅ 父頁面全螢幕成功 (webkit)');
+            applyParentFullscreenStyles();
           } else if ((element as any).mozRequestFullScreen) {
             (element as any).mozRequestFullScreen();
             console.log('✅ 父頁面全螢幕成功 (moz)');
+            applyParentFullscreenStyles();
           } else if ((element as any).msRequestFullscreen) {
             (element as any).msRequestFullscreen();
             console.log('✅ 父頁面全螢幕成功 (ms)');
+            applyParentFullscreenStyles();
           } else {
             console.warn('⚠️ 父頁面不支援全螢幕 API');
           }
         };
 
         requestFullscreen();
+      }
+    };
+
+    // 應用父頁面全螢幕樣式
+    const applyParentFullscreenStyles = () => {
+      try {
+        console.log('🎨 應用父頁面全螢幕樣式');
+
+        // 添加全螢幕樣式類
+        document.body.classList.add('parent-fullscreen-game');
+
+        // 創建或更新全螢幕樣式
+        let fullscreenStyle = document.getElementById('parent-fullscreen-style');
+        if (!fullscreenStyle) {
+          fullscreenStyle = document.createElement('style');
+          fullscreenStyle.id = 'parent-fullscreen-style';
+          document.head.appendChild(fullscreenStyle);
+        }
+
+        fullscreenStyle.textContent = `
+          /* 父頁面全螢幕樣式 */
+          body.parent-fullscreen-game {
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            background: black !important;
+          }
+
+          /* 隱藏除了遊戲容器外的所有元素 */
+          body.parent-fullscreen-game > *:not([data-testid="game-container"]) {
+            display: none !important;
+          }
+
+          /* 確保遊戲容器填滿整個螢幕 */
+          body.parent-fullscreen-game [data-testid="game-container"] {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+            background: black !important;
+          }
+
+          /* 確保 iframe 容器填滿整個螢幕 */
+          body.parent-fullscreen-game .game-iframe-container {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+          }
+
+          /* 確保 iframe 填滿整個螢幕 */
+          body.parent-fullscreen-game .game-iframe-container iframe {
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+          }
+        `;
+
+        console.log('✅ 父頁面全螢幕樣式已應用');
+      } catch (error) {
+        console.warn('⚠️ 應用父頁面全螢幕樣式失敗:', error);
       }
     };
 
@@ -174,9 +243,35 @@ const GameSwitcherPage: React.FC = () => {
     checkScreenSize();
 
     // 監聽滾動事件、尺寸變化和全螢幕消息
+    // 監聽全螢幕狀態變化
+    const handleFullscreenChange = () => {
+      const isFullscreen = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+      );
+
+      if (!isFullscreen) {
+        // 退出全螢幕時清理樣式
+        console.log('🚪 退出全螢幕，清理父頁面樣式');
+        document.body.classList.remove('parent-fullscreen-game');
+        const fullscreenStyle = document.getElementById('parent-fullscreen-style');
+        if (fullscreenStyle) {
+          fullscreenStyle.remove();
+        }
+      }
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', checkScreenSize);
     window.addEventListener('message', handleFullscreenMessage);
+
+    // 監聽全螢幕狀態變化
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    (document as any).addEventListener('MSFullscreenChange', handleFullscreenChange);
 
     // 執行自動滾動 - 多次嘗試確保成功
     autoScrollToGame();
@@ -189,6 +284,12 @@ const GameSwitcherPage: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', checkScreenSize);
       window.removeEventListener('message', handleFullscreenMessage);
+
+      // 清理全螢幕監聽器
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      (document as any).removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
   }, [hasUserScrolled]);
 
