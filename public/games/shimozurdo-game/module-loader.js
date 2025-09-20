@@ -174,24 +174,24 @@ function initializeGame() {
       return;
     }
 
-    // 創建完整的 Phaser 遊戲配置物件
+    // 創建完整的 Phaser 遊戲配置物件 - 使用手機優先配置
     const config = {
       // 渲染器類型，自動選擇最佳渲染方式
       type: Phaser.AUTO,
-      // 縮放和響應式配置
+      // 縮放和響應式配置 - 手機優先設計
       scale: {
-        // 使用 RESIZE 模式支援動態尺寸調整
-        mode: Phaser.Scale.RESIZE,
+        // 使用 FIT 模式確保遊戲完整顯示在螢幕內
+        mode: Phaser.Scale.FIT,
         // 指定遊戲掛載的 DOM 容器
         parent: 'game',
-        // 遊戲的預設寬度
-        width: 960,
-        // 遊戲的預設高度
-        height: 540,
-        // 最小尺寸限制
+        // 遊戲的預設寬度 - 手機優先 (iPhone 標準尺寸)
+        width: 375,
+        // 遊戲的預設高度 - 手機優先 (iPhone 標準尺寸)
+        height: 667,
+        // 最小尺寸限制 - 支援小手機螢幕
         min: {
-          width: 480,   // 最小寬度
-          height: 270   // 最小高度
+          width: 320,   // 最小寬度 (iPhone SE)
+          height: 568   // 最小高度 (iPhone SE)
         },
         // 最大尺寸限制
         max: {
