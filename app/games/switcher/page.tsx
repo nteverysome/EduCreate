@@ -120,13 +120,18 @@ const GameSwitcherPage: React.FC = () => {
         if (targetElement) {
           // 縮短延遲時間，更快滾動到遊戲容器
           setTimeout(() => {
-            // 使用 center 讓遊戲容器在視窗中央顯示
-            targetElement.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center', // 改為 center，讓遊戲容器在視窗中央
-              inline: 'nearest'
+            // 計算滾動位置，讓遊戲容器頂部對齊視窗頂部
+            const elementRect = targetElement.getBoundingClientRect();
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const targetScrollPosition = scrollTop + elementRect.top;
+
+            // 平滑滾動到目標位置
+            window.scrollTo({
+              top: targetScrollPosition,
+              behavior: 'smooth'
             });
-            console.log('🎯 自動滾動到遊戲 iframe 容器 (居中顯示)');
+
+            console.log('🎯 自動滾動到遊戲容器頂部 (隱藏標題區域)');
           }, 500);
         }
       }
