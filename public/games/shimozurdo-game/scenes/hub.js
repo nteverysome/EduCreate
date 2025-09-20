@@ -114,8 +114,7 @@ export default class Hub extends Phaser.Scene {
         })
 
         // 全螢幕按鈕設定（嵌入與非嵌入皆顯示；在嵌入/行動裝置時作為父頁面退出控制）
-        // 回到之前能點到的版本：手機直立時不特別調整位置
-        multiplePosY = this.game.embedded ? 1 : 1;
+        multiplePosY = this.game.embedded ? 1 : 1
         this.fullscreenBtn = this.add.image(this.canvasWidth - posItemHubBase, posItemHubBase * multiplePosY, "fullscreen", 0)
             .setOrigin(.5)
             .setDepth(1)
@@ -132,7 +131,6 @@ export default class Hub extends Phaser.Scene {
         this.fullscreenHit.on('pointerup', () => {
             this.fullscreenBtn.emit('pointerup');
         });
-
 
 
         this.fullscreenBtn.on("pointerup", () => {
@@ -205,13 +203,6 @@ export default class Hub extends Phaser.Scene {
         this.handlerScene.cameras.main.setBackgroundColor(bgColorScene)
         // 啟動目標場景
         this.handlerScene.launchScene(gotoScene)
-        //                                        
-        //                
-        if (this.fullscreenHit) {
-            this.fullscreenHit.x = this.scale.gameSize.width - 30;
-            this.fullscreenHit.y = this.fullscreenBtn ? this.fullscreenBtn.y : 32;
-        }
-
     }
 
     /**
@@ -228,5 +219,10 @@ export default class Hub extends Phaser.Scene {
         this.creditsTxt.x = this.scale.gameSize.width / 2
         // 調整版權文字的垂直位置，保持距離底部 30 像素
         this.creditsTxt.y = this.scale.gameSize.height - 30
+        // 同步調整透明命中區位置
+        if (this.fullscreenHit) {
+            this.fullscreenHit.x = this.scale.gameSize.width - 30;
+            this.fullscreenHit.y = this.fullscreenBtn ? this.fullscreenBtn.y : 32;
+        }
     }
 }
