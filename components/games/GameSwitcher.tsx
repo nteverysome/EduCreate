@@ -210,6 +210,67 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showTapOverlay, setShowTapOverlay] = useState<boolean>(false);
+
+  // 在行動裝置顯示「一鍵全螢幕開始」覆蓋層
+  useEffect(() => {
+    if (mounted && isMobile) {
+      setShowTapOverlay(true);
+    } else {
+      setShowTapOverlay(false);
+    }
+  }, [mounted, isMobile]);
+
+  // 確保父頁面全螢幕樣式存在（避免重複注入）
+  const ensureParentFullscreenStyles = () => {
+    let style = document.getElementById('parent-fullscreen-style');
+    if (!style) {
+      style = document.createElement('style');
+      style.id = 'parent-fullscreen-style';
+      style.textContent = `
+        body.parent-fullscreen-game { margin:0 !important; padding:0 !important; overflow:hidden !important; background:black !important; }
+        body.parent-fullscreen-game [data-testid="game-container"],
+        body.parent-fullscreen-game .game-iframe-container { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100dvh !important; z-index: 999999 !important; background: black !important; }
+        body.parent-fullscreen-game .game-iframe-container iframe { width:100% !important; height:100% !important; border:0 !important; }
+      `;
+      document.head.appendChild(style);
+    }
+  };
+
+  // 使用者在父頁面觸發：嘗試全螢幕，若失敗則套用近全螢幕，並通知遊戲開始
+  const handleTapToStart = async () => {
+    try {
+      setShowTapOverlay(false);
+      ensureParentFullscreenStyles();
+
+      const el = containerRef.current || document.documentElement;
+      let success = false;
+      if ((el as any).requestFullscreen) {
+        await (el as any).requestFullscreen();
+        success = true;
+      } else if ((el as any).webkitRequestFullscreen) {
+        (el as any).webkitRequestFullscreen();
+        success = true;
+      } else if ((el as any).mozRequestFullScreen) {
+        (el as any).mozRequestFullScreen();
+        success = true;
+      } else if ((el as any).msRequestFullscreen) {
+        (el as any).msRequestFullscreen();
+        success = true;
+      }
+
+      document.body.classList.add('parent-fullscreen-game');
+      // 通知 iframe（遊戲）當前狀態
+      iframeRef.current?.contentWindow?.postMessage({ type: success ? 'FULLSCREEN_SUCCESS' : 'FULLSCREEN_FAILED' }, '*');
+    } catch (e) {
+      // 失敗：套用近全螢幕並通知開始
+      ensureParentFullscreenStyles();
+      document.body.classList.add('parent-fullscreen-game');
+      iframeRef.current?.contentWindow?.postMessage({ type: 'FULLSCREEN_FAILED' }, '*');
+    }
+  };
+
   // 客戶端掛載狀態
   useEffect(() => {
     setMounted(true);
@@ -287,9 +348,9 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const simulateLoading = useCallback((estimatedTime: number) => {
     setIsLoading(true);
     setLoadingProgress(0);
-    
+
     const progressStep = 100 / (estimatedTime / 50); // 每50ms更新一次
-    
+
     progressIntervalRef.current = setInterval(() => {
       setLoadingProgress(prev => {
         const next = prev + progressStep + Math.random() * 5; // 添加隨機性
@@ -333,10 +394,10 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     setIsDropdownOpen(false);
 
     console.log(`[GameSwitcher] 狀態已更新: currentGameId -> ${gameId}`);
-    
+
     // 通知父組件
     onGameChange?.(gameId);
-    
+
     console.log(`🎮 切換到遊戲: ${game.displayName} (${game.type})`);
   }, [currentGameId, isLoading, simulateLoading, onGameChange]);
 
@@ -344,13 +405,13 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const handleIframeLoad = useCallback(() => {
     if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-    
+
     setLoadingProgress(100);
     setTimeout(() => {
       setIsLoading(false);
       setLoadingProgress(0);
     }, 100);
-    
+
     console.log(`✅ 遊戲載入完成: ${currentGame?.displayName}`);
   }, [currentGame]);
 
@@ -725,6 +786,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
       {/* 遊戲 iframe 容器 - 響應式設計，增加高度顯示更多內容 */}
       <div
+        ref={containerRef}
         className="game-iframe-container relative bg-white overflow-hidden mx-auto w-full"
         style={{
           aspectRatio: isMobile ? '812/375' : '1274/739',
@@ -737,6 +799,18 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         }}
         data-testid="game-container"
       >
+        {/* 手機一鍵全螢幕開始覆蓋層（確保父頁面手勢上下文）*/}
+        {isMobile && showTapOverlay && (
+          <button
+            type="button"
+            onClick={handleTapToStart}
+            className="absolute inset-0 z-20 bg-black/50 text-white flex flex-col items-center justify-center gap-2"
+            aria-label="全螢幕開始遊戲"
+          >
+            <span className="text-lg font-semibold">點一下進入全螢幕並開始</span>
+            <span className="text-xs opacity-80">若瀏覽器不支援，將以近全螢幕顯示</span>
+          </button>
+        )}
         {isLoading && (
           <div className="loading-overlay absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center z-10">
             <div className="loading-content text-center">
