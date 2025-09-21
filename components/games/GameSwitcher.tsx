@@ -998,19 +998,19 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
         {/* 父頁面全螢幕退出按鈕（原生 API + CSS 近全螢幕） */}
         {showExitOverlay && (
-          <div className="absolute top-0 left-0 right-0 z-[1000000] bg-gradient-to-b from-black/80 to-transparent p-4">
-            <div className="flex items-center justify-between">
-              <div className="text-white text-sm opacity-80">
-               
-              </div>
+          <div className="absolute top-0 left-0 right-0 z-[1000000] bg-gradient-to-b from-black/60 to-transparent p-4">
+            <div className="flex items-center justify-end">
               <button
                 type="button"
                 onClick={exitParentFullscreen}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 shadow-lg"
+                className="bg-black/60 hover:bg-black/80 text-white p-3 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-lg"
                 aria-label="退出父頁面全螢幕"
               >
-                <span>❌</span>
-                <span>退出全螢幕</span>
+                <img
+                  src="/games/shimozurdo-game/assets/images/fullscreen.png"
+                  alt="退出全螢幕"
+                  className="w-6 h-6 filter invert"
+                />
               </button>
             </div>
           </div>
