@@ -140,15 +140,21 @@ export default class Hub extends Phaser.Scene {
                 console.log('📱 檢測到手機設備，使用手機全螢幕處理');
                 this.handleMobileFullscreen();
             } else {
-                // 桌面設備：使用簡單的原生 Phaser3 實現
-                console.log('🖥️ 檢測到桌面設備，使用 Phaser3 原生全螢幕');
+                // 桌面設備：使用簡單的原生 Phaser3 實現 + 父頁面連接
+                console.log('🖥️ 檢測到桌面設備，使用 Phaser3 原生全螢幕 + 父頁面連接');
                 if (this.scale.isFullscreen) {
+                    // 退出全螢幕
                     this.fullscreenBtn.setFrame(0)
                     this.scale.stopFullscreen()
+                    // 🔗 同時通知父頁面退出全螢幕
+                    this.requestParentExitFullscreen()
                 }
                 else {
+                    // 進入全螢幕
                     this.fullscreenBtn.setFrame(1)
                     this.scale.startFullscreen()
+                    // 🔗 同時通知父頁面進入全螢幕
+                    this.requestParentFullscreen()
                 }
             }
         };
@@ -281,7 +287,10 @@ export default class Hub extends Phaser.Scene {
         this.fullscreenBtn.setFrame(1);
         this._mobileFullscreenActive = true;
 
-        // 調用 menu 場景的手機全螢幕策略（CSS 方式）
+        // 🔗 第一步：通知父頁面進入全螢幕（連接第一層）
+        this.requestParentFullscreen();
+
+        // 🎮 第二步：處理遊戲內部全螢幕（第二層）
         const menuScene = this.scene.get('menu');
         if (menuScene) {
             // 檢測真實手機設備
@@ -321,6 +330,10 @@ export default class Hub extends Phaser.Scene {
         this.fullscreenBtn.setFrame(0);
         this._mobileFullscreenActive = false;
 
+        // 🔗 第一步：通知父頁面退出全螢幕（連接第一層）
+        this.requestParentExitFullscreen();
+
+        // 🧹 第二步：清理遊戲內部全螢幕（第二層）
         // 1. 移除所有 CSS 全螢幕樣式（這是關鍵！）
         console.log('🧹 移除父頁面 CSS 全螢幕樣式');
         document.body.classList.remove('mobile-fullscreen', 'real-mobile-fullscreen', 'fullscreen-game');
@@ -373,6 +386,46 @@ export default class Hub extends Phaser.Scene {
         document.body.style.height = '';
         document.body.style.overflow = '';
         console.log('🔄 重置 body 樣式');
+    }
+
+    /**
+     * 🔗 請求父頁面進入全螢幕（連接第一層全螢幕）
+     */
+    requestParentFullscreen() {
+        try {
+            if (window.parent && window.parent !== window) {
+                console.log('🔗 通知父頁面進入全螢幕');
+                window.parent.postMessage({
+                    type: 'REQUEST_FULLSCREEN',
+                    source: 'shimozurdo-game-hub',
+                    from: 'hub-fullscreen-button'
+                }, '*');
+            } else {
+                console.log('⚠️ 無法找到父頁面，跳過父頁面全螢幕請求');
+            }
+        } catch (error) {
+            console.warn('⚠️ 請求父頁面全螢幕失敗:', error);
+        }
+    }
+
+    /**
+     * 🔗 請求父頁面退出全螢幕（連接第一層全螢幕）
+     */
+    requestParentExitFullscreen() {
+        try {
+            if (window.parent && window.parent !== window) {
+                console.log('🔗 通知父頁面退出全螢幕');
+                window.parent.postMessage({
+                    type: 'REQUEST_EXIT_FULLSCREEN',
+                    source: 'shimozurdo-game-hub',
+                    from: 'hub-fullscreen-button'
+                }, '*');
+            } else {
+                console.log('⚠️ 無法找到父頁面，跳過父頁面退出全螢幕請求');
+            }
+        } catch (error) {
+            console.warn('⚠️ 請求父頁面退出全螢幕失敗:', error);
+        }
     }
 
 
