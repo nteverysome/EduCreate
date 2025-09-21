@@ -233,13 +233,172 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     }
   };
 
+  // 🔒 確保鎖定全螢幕樣式存在
+  const ensureLockedFullscreenStyles = () => {
+    let style = document.getElementById('locked-fullscreen-style');
+    if (!style) {
+      style = document.createElement('style');
+      style.id = 'locked-fullscreen-style';
+      style.textContent = `
+        body.locked-fullscreen {
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+          background: black !important;
+          user-select: none !important;
+          -webkit-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          touch-action: none !important;
+          -webkit-touch-callout: none !important;
+          -webkit-tap-highlight-color: transparent !important;
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          height: 100dvh !important;
+          z-index: 2147483647 !important;
+        }
+
+        body.locked-fullscreen [data-testid="game-container"],
+        body.locked-fullscreen .game-iframe-container {
+          position: fixed !important;
+          inset: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          height: 100dvh !important;
+          z-index: 2147483647 !important;
+          background: black !important;
+          overflow: hidden !important;
+        }
+
+        body.locked-fullscreen .game-iframe-container iframe {
+          width: 100% !important;
+          height: 100% !important;
+          border: 0 !important;
+        }
+
+        /* 隱藏滾動條 */
+        body.locked-fullscreen::-webkit-scrollbar {
+          display: none !important;
+        }
+
+        /* 移動設備特殊處理 */
+        @media screen and (max-width: 768px) {
+          body.locked-fullscreen {
+            height: calc(100vh + env(keyboard-inset-height, 0px)) !important;
+            padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+          }
+        }
+
+        /* iOS Safari 特殊處理 */
+        @supports (-webkit-touch-callout: none) {
+          body.locked-fullscreen {
+            height: -webkit-fill-available !important;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  };
+
+  // 🔒 鎖定全螢幕輔助函數
+  const preventDefaultEvent = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  };
+
+  const handleFullscreenLockKeys = (e: KeyboardEvent) => {
+    // 禁用可能退出全螢幕的快捷鍵
+    const blockedKeys = ['F11', 'F5', 'F12', 'Tab'];
+    const blockedCombos = [
+      { ctrl: true, key: 'r' }, // Ctrl+R 刷新
+      { ctrl: true, key: 'w' }, // Ctrl+W 關閉
+      { ctrl: true, key: 't' }, // Ctrl+T 新分頁
+      { alt: true, key: 'F4' },  // Alt+F4 關閉
+      { cmd: true, key: 'r' },   // Cmd+R 刷新 (Mac)
+      { cmd: true, key: 'w' },   // Cmd+W 關閉 (Mac)
+    ];
+
+    if (blockedKeys.includes(e.key)) {
+      console.log('🔒 阻止快捷鍵:', e.key);
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+
+    for (const combo of blockedCombos) {
+      if ((combo.ctrl && e.ctrlKey) || (combo.cmd && e.metaKey) || (combo.alt && e.altKey)) {
+        if (e.key.toLowerCase() === combo.key.toLowerCase()) {
+          console.log('🔒 阻止組合鍵:', combo);
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      }
+    }
+  };
+
+  const enableFullscreenLock = () => {
+    console.log('🔒 啟用全螢幕鎖定功能');
+
+    // 禁用右鍵選單
+    document.addEventListener('contextmenu', preventDefaultEvent, { passive: false });
+
+    // 禁用文字選取
+    document.addEventListener('selectstart', preventDefaultEvent, { passive: false });
+
+    // 禁用拖拽
+    document.addEventListener('dragstart', preventDefaultEvent, { passive: false });
+
+    // 禁用常見的退出全螢幕快捷鍵
+    document.addEventListener('keydown', handleFullscreenLockKeys, { passive: false });
+
+    // 防止滾動
+    document.addEventListener('touchmove', preventDefaultEvent, { passive: false });
+    document.addEventListener('wheel', preventDefaultEvent, { passive: false });
+  };
+
+  const disableFullscreenLock = () => {
+    console.log('🔓 停用全螢幕鎖定功能');
+
+    document.removeEventListener('contextmenu', preventDefaultEvent);
+    document.removeEventListener('selectstart', preventDefaultEvent);
+    document.removeEventListener('dragstart', preventDefaultEvent);
+    document.removeEventListener('keydown', handleFullscreenLockKeys);
+    document.removeEventListener('touchmove', preventDefaultEvent);
+    document.removeEventListener('wheel', preventDefaultEvent);
+  };
+
+  // 隱藏地址欄（移動設備）
+  const hideAddressBar = () => {
+    console.log('📱 嘗試隱藏地址欄');
+
+    // 方法1：滾動隱藏地址欄
+    setTimeout(() => {
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 100);
+    }, 100);
+
+    // 方法2：改變視窗高度觸發地址欄隱藏
+    setTimeout(() => {
+      document.documentElement.style.height = `${window.screen.height}px`;
+      document.body.style.height = `${window.screen.height}px`;
+    }, 200);
+  };
+
   // 檢查父頁面全螢幕狀態
   const checkParentFullscreenState = () => {
     const hasFullscreenElement = !!(document.fullscreenElement ||
       (document as any).webkitFullscreenElement ||
       (document as any).mozFullScreenElement ||
       (document as any).msFullscreenElement);
-    const hasFullscreenClass = document.body.classList.contains('parent-fullscreen-game');
+    const hasFullscreenClass = document.body.classList.contains('parent-fullscreen-game') ||
+                               document.body.classList.contains('locked-fullscreen');
     return hasFullscreenElement || hasFullscreenClass;
   };
 
@@ -288,69 +447,93 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       console.warn('⚠️ 退出原生全螢幕失敗:', error);
     }
 
-    // 2. 移除 CSS 近全螢幕樣式
-    document.body.classList.remove('parent-fullscreen-game');
-    console.log('🧹 移除 CSS 近全螢幕樣式');
+    // 🔓 第一步：停用全螢幕鎖定功能
+    disableFullscreenLock();
 
-    // 3. 移除父頁面全螢幕樣式表
+    // 🔓 第二步：移除所有全螢幕樣式
+    document.body.classList.remove('parent-fullscreen-game', 'locked-fullscreen');
+    console.log('🧹 移除鎖定全螢幕樣式');
+
+    // 🔓 第三步：移除全螢幕樣式表
     const parentStyle = document.getElementById('parent-fullscreen-style');
     if (parentStyle) {
       parentStyle.remove();
       console.log('🧹 移除父頁面全螢幕樣式表');
     }
 
-    // 4. 更新狀態
+    const lockedStyle = document.getElementById('locked-fullscreen-style');
+    if (lockedStyle) {
+      lockedStyle.remove();
+      console.log('🧹 移除鎖定全螢幕樣式表');
+    }
+
+    // 🔓 第四步：恢復正常樣式
+    if (isMobile) {
+      document.documentElement.style.height = '';
+      document.body.style.height = '';
+    }
+
+    // 🔓 第五步：更新狀態
     setShowExitOverlay(false);
     setIsParentFullscreenActive(false);
 
-    // 5. 在手機設備上顯示「全螢幕並開始」覆蓋層
+    // 🔓 第六步：在手機設備上顯示「全螢幕並開始」覆蓋層
     if (isMobile) {
       setShowTapOverlay(true);
       console.log('📱 顯示全螢幕並開始覆蓋層');
     }
 
-    // 5. 通知子頁面（遊戲）
+    // 🔓 第七步：通知子頁面（遊戲）
     iframeRef.current?.contentWindow?.postMessage({
       source: 'parent-page',
-      type: 'FULLSCREEN_EXITED'
+      type: 'LOCKED_FULLSCREEN_EXITED'
     }, '*');
 
-    console.log('✅ 父頁面全螢幕退出完成');
+    console.log('✅ 鎖定全螢幕退出完成');
   };
 
+  // 🔒 鎖定全螢幕開始函數
   const handleTapToStart = async () => {
     try {
-      console.log('🚀 開始父頁面全螢幕流程');
+      console.log('🔒 開始鎖定全螢幕流程');
       setShowTapOverlay(false);
-      ensureParentFullscreenStyles();
+      ensureLockedFullscreenStyles();
 
       const el = containerRef.current || document.documentElement;
       let success = false;
 
-      // 嘗試原生全螢幕 API
+      // 🔒 第一步：嘗試原生全螢幕 API（隱藏所有瀏覽器UI）
       if ((el as any).requestFullscreen) {
-        await (el as any).requestFullscreen();
+        await (el as any).requestFullscreen({ navigationUI: 'hide' });
         success = true;
-        console.log('✅ 原生全螢幕成功 (requestFullscreen)');
+        console.log('✅ 鎖定全螢幕成功 (requestFullscreen with navigationUI: hide)');
       } else if ((el as any).webkitRequestFullscreen) {
         (el as any).webkitRequestFullscreen();
         success = true;
-        console.log('✅ WebKit 全螢幕成功');
+        console.log('✅ WebKit 鎖定全螢幕成功');
       } else if ((el as any).mozRequestFullScreen) {
         (el as any).mozRequestFullScreen();
         success = true;
-        console.log('✅ Firefox 全螢幕成功');
+        console.log('✅ Firefox 鎖定全螢幕成功');
       } else if ((el as any).msRequestFullscreen) {
         (el as any).msRequestFullscreen();
         success = true;
-        console.log('✅ IE/Edge 全螢幕成功');
+        console.log('✅ IE/Edge 鎖定全螢幕成功');
       } else {
-        console.log('ℹ️ 瀏覽器不支援原生全螢幕 API，使用 CSS 近全螢幕');
+        console.log('ℹ️ 瀏覽器不支援原生全螢幕 API，使用鎖定 CSS 全螢幕');
       }
 
-      // 應用 CSS 近全螢幕樣式
-      document.body.classList.add('parent-fullscreen-game');
-      console.log('✅ 應用 CSS 近全螢幕樣式');
+      // 🔒 第二步：應用鎖定全螢幕樣式（強制隱藏所有UI元素）
+      document.body.classList.add('parent-fullscreen-game', 'locked-fullscreen');
+      console.log('✅ 應用鎖定全螢幕樣式');
+
+      // 🔒 第三步：啟用全螢幕鎖定功能
+      enableFullscreenLock();
+
+      // 🔒 第四步：強制隱藏地址欄（移動設備）
+      if (isMobile) {
+        hideAddressBar();
+      }
 
       // 顯示退出按鈕
       updateParentFullscreenState();
@@ -358,19 +541,21 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       // 通知 iframe（遊戲）當前狀態
       iframeRef.current?.contentWindow?.postMessage({
         source: 'parent-page',
-        type: success ? 'FULLSCREEN_SUCCESS' : 'FULLSCREEN_FAILED'
+        type: success ? 'LOCKED_FULLSCREEN_SUCCESS' : 'LOCKED_FULLSCREEN_FAILED'
       }, '*');
 
-      console.log('📤 通知遊戲全螢幕狀態:', success ? 'SUCCESS' : 'FAILED');
+      console.log('📤 通知遊戲鎖定全螢幕狀態:', success ? 'SUCCESS' : 'FAILED');
     } catch (e) {
-      console.warn('⚠️ 父頁面全螢幕失敗:', e);
-      // 失敗：套用近全螢幕並通知開始
-      ensureParentFullscreenStyles();
-      document.body.classList.add('parent-fullscreen-game');
+      console.warn('⚠️ 鎖定全螢幕失敗:', e);
+      // 失敗：套用鎖定近全螢幕並通知開始
+      ensureLockedFullscreenStyles();
+      document.body.classList.add('parent-fullscreen-game', 'locked-fullscreen');
+      enableFullscreenLock();
+      if (isMobile) hideAddressBar();
       updateParentFullscreenState();
       iframeRef.current?.contentWindow?.postMessage({
         source: 'parent-page',
-        type: 'FULLSCREEN_FAILED'
+        type: 'LOCKED_FULLSCREEN_FAILED'
       }, '*');
     }
   };
@@ -971,8 +1156,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
             className="absolute inset-0 z-20 bg-black/50 text-white flex flex-col items-center justify-center gap-2"
             aria-label="全螢幕開始遊戲"
           >
-            <span className="text-lg font-semibold">全螢幕並開始</span>
-            <span className="text-xs opacity-80">若瀏覽器不支援，將以近全螢幕顯示</span>
+            <span className="text-lg font-semibold">🔒 鎖定全螢幕並開始</span>
+            <span className="text-xs opacity-80">隱藏網址列和所有瀏覽器UI，防止意外退出</span>
           </button>
         )}
         {isLoading && (
