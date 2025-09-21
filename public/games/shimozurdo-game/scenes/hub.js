@@ -121,19 +121,7 @@ export default class Hub extends Phaser.Scene {
             .setInteractive({ cursor: "pointer" })
         // 啟動時查詢父頁目前的全螢幕狀態（以利後續按鈕決策）
         try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'QUERY_FULLSCREEN_STATE', source: 'shimozurdo-game' }, '*'); } catch {}
-        // 擴大可點擊範圍（透明命中區），提高手機可點性
-        const HIT_SIZE = 88;
-        this.fullscreenHit = this.add.zone(this.fullscreenBtn.x, this.fullscreenBtn.y, HIT_SIZE, HIT_SIZE)
-            .setOrigin(.5)
-            .setDepth(2)
-            .setInteractive({ cursor: 'pointer' });
-
-        // 移除調試用的紅色邊框標記，保持透明命中區功能
-
-        // 命中區點擊時，轉送事件給原按鈕邏輯
-        this.fullscreenHit.on('pointerup', () => {
-            this.fullscreenBtn.emit('pointerup');
-        });
+        // 移除透明命中區，使用原始按鈕點擊區域
 
 
         this.fullscreenBtn.on("pointerup", () => {
@@ -243,12 +231,6 @@ export default class Hub extends Phaser.Scene {
         this.creditsTxt.x = this.scale.gameSize.width / 2
         // 調整版權文字的垂直位置，保持距離底部 30 像素
         this.creditsTxt.y = this.scale.gameSize.height - 30
-        // 同步調整透明命中區位置（關鍵修正）
-        if (this.fullscreenHit) {
-            this.fullscreenHit.x = this.scale.gameSize.width - 30;
-            this.fullscreenHit.y = this.fullscreenBtn.y; // 直接使用按鈕的 Y 位置
-
-            // 移除調試用的紅色標記更新代碼
-        }
+        // 透明命中區已移除，無需位置同步
     }
 }

@@ -7,6 +7,17 @@
     <meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1'>
     <meta name='apple-mobile-web-app-capable' content='yes'>
     <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-title" content="Shimozurdo Game">
+
+    <!-- PWA Icons for iOS -->
+    <link rel="apple-touch-icon" href="./assets/icon-192.svg">
+    <link rel="apple-touch-icon" sizes="192x192" href="./assets/icon-192.svg">
+    <link rel="apple-touch-icon" sizes="512x512" href="./assets/icon-512.svg">
+
     <!-- Base href to ensure relative asset URLs resolve under /games/shimozurdo-game even without trailing slash -->
     <base href="/games/shimozurdo-game/">
     <link rel='icon' href='favicon.ico' />
@@ -105,6 +116,97 @@
                 }
             }
         }, 15000);
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(function(registration) {
+                        console.log('✅ PWA: Service Worker registered successfully', registration.scope);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', function() {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', function() {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('🔄 PWA: New version available');
+                                    // Optionally show update notification
+                                }
+                            });
+                        });
+                    })
+                    .catch(function(error) {
+                        console.log('❌ PWA: Service Worker registration failed', error);
+                    });
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            console.log('📱 PWA: Install prompt available');
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // Show install button or notification
+            showInstallPrompt();
+        });
+
+        function showInstallPrompt() {
+            // Create install button if not exists
+            if (!document.getElementById('pwa-install-btn')) {
+                const installBtn = document.createElement('button');
+                installBtn.id = 'pwa-install-btn';
+                installBtn.innerHTML = '📱 安裝應用';
+                installBtn.style.cssText = `
+                    position: fixed;
+                    top: 10px;
+                    right: 10px;
+                    z-index: 9999;
+                    background: #4CAF50;
+                    color: white;
+                    border: none;
+                    padding: 8px 12px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                `;
+
+                installBtn.addEventListener('click', function() {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(function(choiceResult) {
+                            if (choiceResult.outcome === 'accepted') {
+                                console.log('🎉 PWA: User accepted install prompt');
+                            } else {
+                                console.log('❌ PWA: User dismissed install prompt');
+                            }
+                            deferredPrompt = null;
+                            installBtn.remove();
+                        });
+                    }
+                });
+
+                document.body.appendChild(installBtn);
+
+                // Auto-hide after 10 seconds
+                setTimeout(function() {
+                    if (installBtn.parentNode) {
+                        installBtn.remove();
+                    }
+                }, 10000);
+            }
+        }
+
+        // PWA App Installed
+        window.addEventListener('appinstalled', function(evt) {
+            console.log('🎉 PWA: App installed successfully');
+            const installBtn = document.getElementById('pwa-install-btn');
+            if (installBtn) {
+                installBtn.remove();
+            }
+        });
     </script>
 </body>
 

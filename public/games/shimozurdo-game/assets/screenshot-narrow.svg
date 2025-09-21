@@ -1,0 +1,7 @@
+<svg width="720" height="1280" xmlns="http://www.w3.org/2000/svg">
+  <rect width="720" height="1280" fill="#000"/>
+  <rect x="10%" y="10%" width="80%" height="80%" fill="#4CAF50" rx="20"/>
+  <text x="50%" y="30%" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle">Shimozurdo Game</text>
+  <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="18" fill="white" text-anchor="middle">🎮 Educational Memory Game</text>
+  <text x="50%" y="70%" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="middle">Narrow Screenshot</text>
+</svg>

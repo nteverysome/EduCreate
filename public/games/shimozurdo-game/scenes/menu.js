@@ -308,7 +308,8 @@ export default class Menu extends Phaser.Scene {
                 this.desktopFullscreenStrategy();
             }
         } catch (error) {
-            console.error('❌ 全螢幕請求錯誤:', error);
+            // 移除紅色錯誤提示，靜默處理
+            console.log('📱 使用替代全螢幕方案 (系統限制)');
             // 出錯時使用備用方案
             this.fallbackFullscreenStrategy();
         }
@@ -507,8 +508,9 @@ export default class Menu extends Phaser.Scene {
             container.requestFullscreen().then(() => {
                 console.log('✅ 成功進入全螢幕模式 (requestFullscreen)');
                 this.onFullscreenEnter();
-            }).catch(err => {
-                console.warn('⚠️ 全螢幕請求失敗:', err);
+            }).catch(() => {
+                // 移除紅色錯誤提示，靜默處理
+                console.log('📱 使用替代全螢幕方案');
                 this.fallbackFullscreenStrategy();
             });
         } else if (container.webkitRequestFullscreen) {
@@ -604,14 +606,15 @@ export default class Menu extends Phaser.Scene {
             if (target.requestFullscreen) {
                 target.requestFullscreen().then(() => {
                     console.log('✅ 手機全螢幕成功 (requestFullscreen)');
-                }).catch(err => {
-                    console.log('📱 手機全螢幕失敗，使用偽全螢幕:', err.message);
+                }).catch(() => {
+                    // 移除紅色錯誤提示，改為友好的資訊訊息
+                    console.log('📱 使用替代全螢幕方案 (瀏覽器限制)');
                 });
             } else if (target.webkitRequestFullscreen) {
                 target.webkitRequestFullscreen();
                 console.log('✅ 手機全螢幕成功 (webkit)');
             } else {
-                console.log('📱 不支援全螢幕 API，使用偽全螢幕');
+                console.log('📱 使用替代全螢幕方案 (API 不支援)');
             }
         } catch (error) {
             console.log('📱 手機全螢幕嘗試失敗，使用偽全螢幕:', error.message);
@@ -930,24 +933,61 @@ export default class Menu extends Phaser.Scene {
                 document.documentElement.style.setProperty('--safe-area-inset-top', 'env(safe-area-inset-top)');
                 document.documentElement.style.setProperty('--safe-area-inset-bottom', 'env(safe-area-inset-bottom)');
 
-                // 橫向模式的 Android 處理
+                // 橫向模式的 Android Chrome 專門處理
                 if (isLandscape) {
-                    console.log('🔄 Android 橫向模式處理');
+                    console.log('🔄 Android Chrome 橫向模式強化處理');
 
-                    // 多次滾動
-                    for (let i = 0; i < 5; i++) {
+                    // 第一階段：立即設置基礎樣式
+                    document.documentElement.style.height = '100vh';
+                    document.body.style.height = '100vh';
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.position = 'fixed';
+                    document.body.style.width = '100%';
+                    document.body.style.top = '0';
+                    document.body.style.left = '0';
+
+                    // 第二階段：密集滾動循環（Chrome 橫向需要更多次）
+                    for (let i = 0; i < 8; i++) {
                         setTimeout(() => {
                             window.scrollTo(0, 1);
-                            setTimeout(() => window.scrollTo(0, 0), 30);
-                        }, i * 80);
+                            setTimeout(() => {
+                                window.scrollTo(0, 0);
+                                // 每次滾動後強制重新設置樣式
+                                document.body.style.height = '100vh';
+                                document.documentElement.style.height = '100vh';
+                            }, 20);
+                        }, i * 60);
                     }
 
-                    // 強制全螢幕樣式
+                    // 第三階段：延遲強化處理
                     setTimeout(() => {
-                        document.documentElement.style.height = '100vh';
-                        document.body.style.height = '100vh';
-                        document.body.style.overflow = 'hidden';
-                    }, 400);
+                        // 強制觸發重排
+                        document.body.style.display = 'none';
+                        document.body.offsetHeight; // 觸發重排
+                        document.body.style.display = '';
+
+                        // 再次確保樣式
+                        document.documentElement.style.height = '100vh !important';
+                        document.body.style.height = '100vh !important';
+                        document.body.style.overflow = 'hidden !important';
+
+                        // 觸發視窗事件
+                        window.dispatchEvent(new Event('resize'));
+                        window.dispatchEvent(new Event('orientationchange'));
+                    }, 600);
+
+                    // 第四階段：持續監控和修正
+                    const landscapeInterval = setInterval(() => {
+                        if (window.innerWidth > window.innerHeight) {
+                            document.body.style.height = '100vh';
+                            document.documentElement.style.height = '100vh';
+                        } else {
+                            clearInterval(landscapeInterval);
+                        }
+                    }, 200);
+
+                    // 5秒後停止監控
+                    setTimeout(() => clearInterval(landscapeInterval), 5000);
                 } else {
                     // 直向模式標準處理
                     window.scrollTo(0, 1);
