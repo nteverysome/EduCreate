@@ -281,10 +281,31 @@ export default class Hub extends Phaser.Scene {
         this.fullscreenBtn.setFrame(1);
         this._mobileFullscreenActive = true;
 
-        // 調用 menu 場景的手機全螢幕策略
+        // 調用 menu 場景的手機全螢幕策略（CSS 方式）
         const menuScene = this.scene.get('menu');
-        if (menuScene && menuScene.requestFullscreen) {
-            menuScene.requestFullscreen();
+        if (menuScene) {
+            // 檢測真實手機設備
+            const isRealMobile = menuScene.detectRealMobileDevice ? menuScene.detectRealMobileDevice() : false;
+
+            if (isRealMobile && menuScene.setRealMobileFullscreenStyles) {
+                // 真實手機：使用 CSS 全螢幕
+                console.log('📱 使用 menu 場景的 CSS 全螢幕方法');
+                menuScene.setRealMobileFullscreenStyles();
+                document.body.classList.add('real-mobile-fullscreen');
+
+                // 處理地址欄隱藏
+                if (menuScene.handleAddressBarHiding) {
+                    menuScene.handleAddressBarHiding();
+                }
+            } else if (menuScene.requestFullscreen) {
+                // 其他情況：使用完整的全螢幕策略
+                console.log('📱 使用 menu 場景的完整全螢幕策略');
+                menuScene.requestFullscreen();
+            } else {
+                // 後備方案：嘗試 Phaser 全螢幕
+                console.log('⚠️ 無法找到 menu 場景方法，使用 Phaser 全螢幕後備方案');
+                this.scale.startFullscreen();
+            }
         } else {
             // 後備方案：嘗試 Phaser 全螢幕
             console.log('⚠️ 無法找到 menu 場景，使用 Phaser 全螢幕後備方案');
@@ -300,25 +321,58 @@ export default class Hub extends Phaser.Scene {
         this.fullscreenBtn.setFrame(0);
         this._mobileFullscreenActive = false;
 
-        // 嘗試退出各種全螢幕模式
+        // 1. 移除所有 CSS 全螢幕樣式（這是關鍵！）
+        console.log('🧹 移除父頁面 CSS 全螢幕樣式');
+        document.body.classList.remove('mobile-fullscreen', 'real-mobile-fullscreen', 'fullscreen-game');
+
+        // 2. 移除 CSS 樣式標籤
+        const realMobileStyle = document.getElementById('real-mobile-fullscreen-style');
+        if (realMobileStyle) {
+            realMobileStyle.remove();
+            console.log('🧹 移除真實手機全螢幕樣式標籤');
+        }
+
+        const mobileStyle = document.getElementById('mobile-fullscreen-style');
+        if (mobileStyle) {
+            mobileStyle.remove();
+            console.log('🧹 移除手機全螢幕樣式標籤');
+        }
+
+        const fullscreenStyle = document.getElementById('fullscreen-game-style');
+        if (fullscreenStyle) {
+            fullscreenStyle.remove();
+            console.log('🧹 移除桌面全螢幕樣式標籤');
+        }
+
+        // 3. 嘗試退出各種 API 全螢幕模式
         if (this.scale.isFullscreen) {
             this.scale.stopFullscreen();
+            console.log('🚪 退出 Phaser 全螢幕');
         }
         if (document.fullscreenElement) {
             document.exitFullscreen();
+            console.log('🚪 退出原生全螢幕');
         }
         if (document.webkitFullscreenElement) {
             document.webkitExitFullscreen();
+            console.log('🚪 退出 WebKit 全螢幕');
         }
 
-        // 調用 menu 場景的退出全螢幕處理
+        // 4. 調用 menu 場景的退出全螢幕處理
         const menuScene = this.scene.get('menu');
         if (menuScene && menuScene.onFullscreenExit) {
             menuScene.onFullscreenExit();
+            console.log('📞 調用 menu 場景退出處理');
         }
 
-        // 移除手機全螢幕樣式
-        document.body.classList.remove('mobile-fullscreen', 'real-mobile-fullscreen', 'fullscreen-game');
+        // 5. 重置 body 樣式
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.overflow = '';
+        console.log('🔄 重置 body 樣式');
     }
 
 
