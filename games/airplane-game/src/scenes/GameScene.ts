@@ -888,8 +888,8 @@ export default class GameScene extends Phaser.Scene {
     try {
       // 錨點已在創建時設置為中心 (0.5, 0.5)
 
-      // 🔧 用戶要求縮小50%：0.8 × 0.5 = 0.4
-      this.player.setScale(0.4);
+      // 🔧 用戶要求飛機小一半：0.4 × 0.5 = 0.2
+      this.player.setScale(0.2);
 
       // 保持原始方向，不進行旋轉和翻轉
 
@@ -1271,8 +1271,8 @@ export default class GameScene extends Phaser.Scene {
 
     console.log('☁️ 使用雲朵紋理:', cloudTexture, '位置:', x, y);
 
-    // 🔧 設定雲朵大小 (增加 44% = 1.2 * 1.2)
-    cloud.setScale(1.44);
+    // 🔧 設定雲朵大小 (用戶要求大三分之一：1.44 × 4/3 = 1.92)
+    cloud.setScale(1.92);
 
     // 🔧 強制確保物理體正確設定
     if (!cloud.body) {

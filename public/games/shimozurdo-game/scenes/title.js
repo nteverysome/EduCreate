@@ -129,7 +129,7 @@ export default class Title extends Phaser.Scene {
                 // 創建太空船精靈（先用簡單方式確保顯示）
                 this.player = this.add.sprite(width * 0.15, height * 0.5, 'player_spaceship');  // 位置在左側15%，垂直中央
                 this.player.setOrigin(0.5, 0.5);        // 設置中心點為精靈中央
-                this.player.setScale(0.4);               // 縮放到40%大小
+                this.player.setScale(0.2);               // 用戶要求飛機小一半：40% × 0.5 = 20%
                 this.player.setDepth(-60);               // 在視差背景前景，調整深度層級
                 this.player.play('spaceship_fly');       // 播放飛行動畫
 
@@ -184,7 +184,7 @@ export default class Title extends Phaser.Scene {
             // 創建備用太空船（簡單方式確保顯示）
             this.player = this.add.sprite(width * 0.15, height * 0.5, 'backup_spaceship');  // 使用生成的紋理創建精靈
             this.player.setOrigin(0.5, 0.5);            // 設置中心點
-            this.player.setScale(1.2);                   // 稍微放大以匹配原始太空船大小
+            this.player.setScale(0.6);                   // 用戶要求飛機小一半：1.2 × 0.5 = 0.6
             this.player.setDepth(-60);                   // 設置深度層級
 
             // 初始化移動相關變數 - 與原始太空船相同的移動參數
@@ -494,7 +494,7 @@ export default class Title extends Phaser.Scene {
         // 創建敵人（從 FIT 後遊戲區域外開始） - 確保在真正的遊戲區域外生成
         const enemy = this.add.sprite(spawnX, spawnY, 'cloud_enemy');
         enemy.setOrigin(0.5, 0.5);                       // 設置中心點
-        enemy.setScale(0.4);                             // 與太空船相同大小
+        enemy.setScale(0.533);                           // 用戶要求雲大三分之一：0.4 × 4/3 ≈ 0.533
         enemy.setDepth(-65);                             // 在太空船後面，視差背景前面
         enemy.setAlpha(0.8);                             // 稍微透明，更像雲朵
 
