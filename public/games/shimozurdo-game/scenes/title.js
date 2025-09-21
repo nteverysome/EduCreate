@@ -248,7 +248,7 @@ export default class Title extends Phaser.Scene {
 
         // 創建透明覆蓋層接管觸控
         const overlay = document.createElement('div');
-        overlay.style.cssText = 'position:absolute;inset:0;z-index:999999;background:transparent;touch-action:none;pointer-events:auto;';
+        overlay.style.cssText = 'position:absolute;inset:0;z-index:999999;background:transparent;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;pointer-events:auto;';
 
         // 確保遊戲容器有相對定位
         const gameContainer = document.getElementById('game-container') || document.body;
@@ -294,8 +294,16 @@ export default class Title extends Phaser.Scene {
             }
         };
 
-        overlay.addEventListener('touchstart', (e) => {
+        // 防止所有可能的瀏覽器默認行為
+        const preventDefaults = (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            return false;
+        };
+
+        // 觸控事件
+        overlay.addEventListener('touchstart', (e) => {
+            preventDefaults(e);
             const touch = e.changedTouches[0];
             const rect = overlay.getBoundingClientRect();
             const touchY = touch.clientY - rect.top;
@@ -304,14 +312,33 @@ export default class Title extends Phaser.Scene {
         }, { passive: false });
 
         overlay.addEventListener('touchend', (e) => {
-            e.preventDefault();
+            preventDefaults(e);
             endLongPress();
         }, { passive: false });
 
         overlay.addEventListener('touchcancel', (e) => {
-            e.preventDefault();
+            preventDefaults(e);
             endLongPress();
         }, { passive: false });
+
+        overlay.addEventListener('touchmove', preventDefaults, { passive: false });
+
+        // 防止右鍵選單
+        overlay.addEventListener('contextmenu', preventDefaults, { passive: false });
+
+        // 防止文字選取
+        overlay.addEventListener('selectstart', preventDefaults, { passive: false });
+        overlay.addEventListener('dragstart', preventDefaults, { passive: false });
+
+        // 防止iOS Safari手勢
+        overlay.addEventListener('gesturestart', preventDefaults, { passive: false });
+        overlay.addEventListener('gesturechange', preventDefaults, { passive: false });
+        overlay.addEventListener('gestureend', preventDefaults, { passive: false });
+
+        // 防止滑鼠事件干擾
+        overlay.addEventListener('mousedown', preventDefaults, { passive: false });
+        overlay.addEventListener('mouseup', preventDefaults, { passive: false });
+        overlay.addEventListener('mousemove', preventDefaults, { passive: false });
 
         console.log('📱 手機長按上/下控制已設置');
     }

@@ -1003,7 +1003,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
               <button
                 type="button"
                 onClick={exitParentFullscreen}
-                className="bg-black/60 hover:bg-black/80 text-white p-3 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-lg relative overflow-hidden"
+                className="bg-transparent hover:bg-black/20 text-white p-3 rounded-lg transition-colors duration-200 flex items-center justify-center relative overflow-hidden"
                 aria-label="退出父頁面全螢幕"
               >
                 <div

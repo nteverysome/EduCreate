@@ -1,0 +1,43 @@
+{
+  "reportType": "daily",
+  "reportDate": "2025-09-21",
+  "generatedAt": "2025-09-21T10:05:48.516Z",
+  "summary": {
+    "totalTests": 0,
+    "successfulTests": 0,
+    "failedTests": 0,
+    "successRate": 0,
+    "totalProcessingTime": 0,
+    "averageProcessingTime": 0,
+    "unmappedSuccess": 0,
+    "avgDurationMs": 0,
+    "largestArtifactMB": 0
+  },
+  "moduleBreakdown": {},
+  "compressionStats": {
+    "totalCompressions": 0,
+    "spaceSavedMB": 0,
+    "averageCompressionRatio": 0
+  },
+  "memoryInsights": [
+    "總共儲存了 0 個測試記憶",
+    "整體成功率為 0%"
+  ],
+  "systemHealth": {
+    "status": "healthy",
+    "issues": [],
+    "metrics": {}
+  },
+  "recommendations": [
+    {
+      "type": "quality",
+      "priority": "high",
+      "message": "測試成功率 0% 偏低，建議檢查失敗測試並改進"
+    },
+    {
+      "type": "activity",
+      "priority": "medium",
+      "message": "今日沒有測試活動，建議檢查測試流程是否正常"
+    }
+  ]
+}

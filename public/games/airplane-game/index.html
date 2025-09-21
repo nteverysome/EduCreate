@@ -134,7 +134,7 @@
       const container = document.getElementById('game-container');
       // 建立透明覆蓋層接管觸控，並向 canvas 注入 Pointer 事件
       const overlay = document.createElement('div');
-      overlay.style.cssText = 'position:absolute;inset:0;z-index:999999;background:transparent;touch-action:none;';
+      overlay.style.cssText = 'position:absolute;inset:0;z-index:999999;background:transparent;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;pointer-events:auto;';
       container.style.position = 'relative';
       container.appendChild(overlay);
 
@@ -179,8 +179,16 @@
         dispatchPointer('pointerup', x, y);
       };
 
-      overlay.addEventListener('touchstart', (e) => {
+      // 防止所有可能的瀏覽器默認行為
+      const preventDefaults = (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        return false;
+      };
+
+      // 觸控事件
+      overlay.addEventListener('touchstart', (e) => {
+        preventDefaults(e);
         if (!ensureCanvas()) return;
         const t = e.changedTouches[0];
         const rect = overlay.getBoundingClientRect();
@@ -188,8 +196,26 @@
         startPress(direction, t);
       }, {passive:false});
 
-      overlay.addEventListener('touchend', (e) => { e.preventDefault(); endPress(); }, {passive:false});
-      overlay.addEventListener('touchcancel', (e) => { e.preventDefault(); endPress(); }, {passive:false});
+      overlay.addEventListener('touchend', (e) => { preventDefaults(e); endPress(); }, {passive:false});
+      overlay.addEventListener('touchcancel', (e) => { preventDefaults(e); endPress(); }, {passive:false});
+      overlay.addEventListener('touchmove', preventDefaults, {passive:false});
+
+      // 防止右鍵選單
+      overlay.addEventListener('contextmenu', preventDefaults, {passive:false});
+
+      // 防止文字選取
+      overlay.addEventListener('selectstart', preventDefaults, {passive:false});
+      overlay.addEventListener('dragstart', preventDefaults, {passive:false});
+
+      // 防止iOS Safari手勢
+      overlay.addEventListener('gesturestart', preventDefaults, {passive:false});
+      overlay.addEventListener('gesturechange', preventDefaults, {passive:false});
+      overlay.addEventListener('gestureend', preventDefaults, {passive:false});
+
+      // 防止滑鼠事件干擾
+      overlay.addEventListener('mousedown', preventDefaults, {passive:false});
+      overlay.addEventListener('mouseup', preventDefaults, {passive:false});
+      overlay.addEventListener('mousemove', preventDefaults, {passive:false});
     })();
   </script>
 

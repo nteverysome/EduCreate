@@ -1,0 +1,37 @@
+<!doctype html>
+<html><head><meta charset='utf-8'><title>EduCreate Reports Home</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+.card{border:1px solid #ddd;padding:12px;border-radius:8px;margin:10px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+ table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:6px}
+</style>
+</head>
+<body>
+<h1>EduCreate Reports Home</h1>
+<div class='grid'>
+  <div class='card'>
+    <h2>今日快捷</h2>
+    <ul>
+      <li><a href='daily/2025-09-21/index.html'>今日日報 index.html</a></li>
+      <li><a href='daily/2025-09-21/artifacts.csv'>今日 artifacts.csv</a></li>
+      <li><a href='daily/2025-09-21/summary.json'>今日 summary.json</a></li>
+      <li><a href='dashboard/dashboard-data.json'>Dashboard JSON</a></li>
+    </ul>
+  </div>
+  <div class='card'>
+    <h2>最近 7 天</h2>
+    <ul><li><a href='daily/2025-09-21/index.html'>2025-09-21</a></li></ul>
+  </div>
+</div>
+
+<div class='card'>
+  <h2>最新影片（10）</h2>
+  <table>
+    <thead><tr><th>Artifact</th><th>Size</th><th>Trace</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<p style='color:#777'>此頁面由 generate-reports.js 自動生成。若用 file:// 開啟，連結已改為相對路徑，亦可改用 VSCode Live Server 或 localhost 靜態伺服器。</p>
+</body></html>
