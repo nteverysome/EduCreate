@@ -568,17 +568,8 @@ export default class GameScene extends Phaser.Scene {
     playButtonBg.on('pointerdown', startGameHandler);
     playText.on('pointerdown', startGameHandler);
 
-    // 添加全畫面點擊監聽器作為備用
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      console.log('🖱️ 檢測到點擊事件，showStartScreen:', this.showStartScreen);
-      if (this.showStartScreen) {
-        console.log('🎮 全畫面點擊檢測，開始遊戲');
-        this.hideStartScreen();
-        this.startGame();
-      } else {
-        console.log('⚠️ 開始畫面已隱藏，忽略點擊');
-      }
-    });
+    // 🚫 移除重複的全畫面點擊監聽器，避免與飛機控制衝突
+    // 開始遊戲的功能已經由 Play 按鈕和遮罩點擊處理
 
     // 按鈕懸停效果
     playButtonBg.on('pointerover', () => {
@@ -1127,11 +1118,21 @@ export default class GameScene extends Phaser.Scene {
       moveDown: false
     };
 
-    // 🎯 以飛機水平線為基準的觸控處理
+    // 🎯 優化的飛機水平線基準觸控處理
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      // 只在遊戲進行中響應控制
-      if (!this.gameState.isPlaying || this.gameState.isPaused || this.showStartScreen) {
-        console.log('⚠️ 遊戲未進行中，忽略觸控');
+      console.log(`🎯 [觸控檢測] 遊戲狀態 - isPlaying: ${this.gameState.isPlaying}, isPaused: ${this.gameState.isPaused}, showStartScreen: ${this.showStartScreen}`);
+
+      // 🎮 如果是開始畫面，處理開始遊戲
+      if (this.showStartScreen) {
+        console.log('🎮 開始畫面點擊，開始遊戲');
+        this.hideStartScreen();
+        this.startGame();
+        return;
+      }
+
+      // 🎯 只在遊戲進行中響應飛機控制
+      if (!this.gameState.isPlaying || this.gameState.isPaused) {
+        console.log('⚠️ 遊戲未進行中，忽略飛機控制');
         return;
       }
 
@@ -1142,7 +1143,7 @@ export default class GameScene extends Phaser.Scene {
       const clickY = pointer.y;
       const planeY = this.player.y; // 飛機當前的Y座標
 
-      console.log(`🎯 [飛機基準線] 觸控檢測 - 點擊Y: ${clickY}, 飛機Y: ${planeY}`);
+      console.log(`🎯 [飛機基準線] 觸控檢測 - 點擊Y: ${clickY}, 飛機Y: ${planeY}, 差值: ${clickY - planeY}`);
 
       if (clickY < planeY) {
         // 點擊飛機上方 - 向上移動
@@ -1152,7 +1153,7 @@ export default class GameScene extends Phaser.Scene {
 
         // 🎯 綠色閃爍表示向上
         this.player.setTint(0x00ff00);
-        this.time.delayedCall(100, () => {
+        this.time.delayedCall(150, () => {
           this.player.clearTint();
         });
       } else {
@@ -1163,21 +1164,23 @@ export default class GameScene extends Phaser.Scene {
 
         // 🎯 紅色閃爍表示向下
         this.player.setTint(0xff0000);
-        this.time.delayedCall(100, () => {
+        this.time.delayedCall(150, () => {
           this.player.clearTint();
         });
       }
     });
 
-    // 🔧 簡化指針釋放事件
+    // 🔧 優化指針釋放事件
     this.input.on('pointerup', () => {
       const touchControl = (this as any).touchControl;
-      touchControl.isPressed = false;
-      touchControl.moveUp = false;
-      touchControl.moveDown = false;
-      console.log('✋ [簡化版] 觸控停止');
+      if (touchControl) {
+        touchControl.isPressed = false;
+        touchControl.moveUp = false;
+        touchControl.moveDown = false;
+        console.log('✋ [觸控停止] 清除所有移動狀態');
+      }
 
-      // 清除飛機顏色提示
+      // 立即清除飛機顏色提示
       this.player.clearTint();
     });
 
