@@ -927,8 +927,8 @@ export default class Menu extends Phaser.Scene {
                     // 橫向模式額外處理
                     if (isLandscape) {
                         // 強制重新計算視窗高度
-                        document.documentElement.style.height = '100vh';
-                        document.body.style.height = '100vh';
+                        document.documentElement.style.height = '100dvh';
+                        document.body.style.height = '100dvh';
 
                         // 觸發視窗調整
                         setTimeout(() => {
@@ -950,8 +950,8 @@ export default class Menu extends Phaser.Scene {
                     console.log('🔄 Android Chrome 橫向模式強化處理');
 
                     // 第一階段：立即設置基礎樣式
-                    document.documentElement.style.height = '100vh';
-                    document.body.style.height = '100vh';
+                    document.documentElement.style.height = '100dvh';
+                    document.body.style.height = '100dvh';
                     document.body.style.overflow = 'hidden';
                     document.body.style.position = 'fixed';
                     document.body.style.width = '100%';
@@ -965,8 +965,8 @@ export default class Menu extends Phaser.Scene {
                             setTimeout(() => {
                                 window.scrollTo(0, 0);
                                 // 每次滾動後強制重新設置樣式
-                                document.body.style.height = '100vh';
-                                document.documentElement.style.height = '100vh';
+                                document.body.style.height = '100dvh';
+                                document.documentElement.style.height = '100dvh';
                             }, 20);
                         }, i * 60);
                     }
@@ -979,8 +979,8 @@ export default class Menu extends Phaser.Scene {
                         document.body.style.display = '';
 
                         // 再次確保樣式
-                        document.documentElement.style.height = '100vh !important';
-                        document.body.style.height = '100vh !important';
+                        document.documentElement.style.height = '100dvh !important';
+                        document.body.style.height = '100dvh !important';
                         document.body.style.overflow = 'hidden !important';
 
                         // 觸發視窗事件
@@ -991,8 +991,8 @@ export default class Menu extends Phaser.Scene {
                     // 第四階段：持續監控和修正
                     const landscapeInterval = setInterval(() => {
                         if (window.innerWidth > window.innerHeight) {
-                            document.body.style.height = '100vh';
-                            document.documentElement.style.height = '100vh';
+                            document.body.style.height = '100dvh';
+                            document.documentElement.style.height = '100dvh';
                         } else {
                             clearInterval(landscapeInterval);
                         }
@@ -1248,6 +1248,17 @@ export default class Menu extends Phaser.Scene {
         this.scale.resize(window.innerWidth, window.innerHeight);
         this.scale.refresh();
         setTimeout(() => { this.scale.resize(window.innerWidth, window.innerHeight); this.scale.refresh(); }, 250);
+        setTimeout(() => { this.scale.resize(window.innerWidth, window.innerHeight); this.scale.refresh(); }, 800);
+
+        // 監聽 resize / orientationchange，持續校正
+        if (!this._boundForceResize) {
+            this._boundForceResize = () => {
+                this.scale.resize(window.innerWidth, window.innerHeight);
+                this.scale.refresh();
+            };
+            window.addEventListener('resize', this._boundForceResize, { passive: true });
+            window.addEventListener('orientationchange', this._boundForceResize);
+        }
         setTimeout(() => { this.scale.resize(window.innerWidth, window.innerHeight); this.scale.refresh(); }, 800);
 
         // 監聽 resize / orientationchange，持續校正
