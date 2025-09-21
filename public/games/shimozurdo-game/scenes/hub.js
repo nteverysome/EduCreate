@@ -118,20 +118,30 @@ export default class Hub extends Phaser.Scene {
         this.fullscreenBtn = this.add.image(this.canvasWidth - posItemHubBase, posItemHubBase * multiplePosY, "fullscreen", 0)
             .setOrigin(.5)
             .setDepth(1)
-            .setInteractive({ cursor: "pointer" })
+            .setInteractive({
+                cursor: "pointer",
+                // 增大手機觸碰區域
+                hitArea: new Phaser.Geom.Rectangle(-30, -30, 60, 60),
+                hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+                useHandCursor: true
+            })
         // 移除透明命中區，使用原始按鈕點擊區域
 
 
-        // 為全螢幕按鈕添加點擊事件監聽器
-        this.fullscreenBtn.on("pointerup", () => {
+        // 為全螢幕按鈕添加多種事件監聽器，確保手機觸碰響應
+        const handleFullscreenClick = () => {
+            console.log('🎯 全螢幕按鈕被點擊');
+
             // 檢測設備類型
             const isMobile = this.detectMobileDevice();
 
             if (isMobile) {
                 // 手機設備：使用複雜的全螢幕處理
+                console.log('📱 檢測到手機設備，使用手機全螢幕處理');
                 this.handleMobileFullscreen();
             } else {
                 // 桌面設備：使用簡單的原生 Phaser3 實現
+                console.log('🖥️ 檢測到桌面設備，使用 Phaser3 原生全螢幕');
                 if (this.scale.isFullscreen) {
                     this.fullscreenBtn.setFrame(0)
                     this.scale.stopFullscreen()
@@ -141,17 +151,31 @@ export default class Hub extends Phaser.Scene {
                     this.scale.startFullscreen()
                 }
             }
-        })
+        };
+
+        // 添加多種事件監聽器，確保手機觸碰響應
+        this.fullscreenBtn.on("pointerup", handleFullscreenClick);
+        this.fullscreenBtn.on("pointerdown", () => {
+            // 視覺反饋：按下時稍微縮小
+            this.tweens.add({
+                targets: this.fullscreenBtn,
+                scaleX: 0.9,
+                scaleY: 0.9,
+                duration: 100,
+                yoyo: true
+            });
+        });
+
+        // 為手機設備添加額外的觸碰事件
+        if (this.detectMobileDevice()) {
+            this.fullscreenBtn.on("touchstart", handleFullscreenClick);
+            this.fullscreenBtn.on("touchend", handleFullscreenClick);
+        }
         // 監聽視窗大小調整事件，當視窗大小改變時調用 resize 方法
         this.scale.on("resize", this.resize, this)
 
         // 手機全螢幕狀態追蹤
         this._mobileFullscreenActive = false
-
-        // 為手機設備添加雙擊退出全螢幕功能
-        if (this.detectMobileDevice()) {
-            this.setupMobileExitGestures();
-        }
 
 
     }
@@ -276,12 +300,6 @@ export default class Hub extends Phaser.Scene {
         this.fullscreenBtn.setFrame(0);
         this._mobileFullscreenActive = false;
 
-        // 調用 menu 場景的退出全螢幕處理
-        const menuScene = this.scene.get('menu');
-        if (menuScene && menuScene.onFullscreenExit) {
-            menuScene.onFullscreenExit();
-        }
-
         // 嘗試退出各種全螢幕模式
         if (this.scale.isFullscreen) {
             this.scale.stopFullscreen();
@@ -293,97 +311,15 @@ export default class Hub extends Phaser.Scene {
             document.webkitExitFullscreen();
         }
 
+        // 調用 menu 場景的退出全螢幕處理
+        const menuScene = this.scene.get('menu');
+        if (menuScene && menuScene.onFullscreenExit) {
+            menuScene.onFullscreenExit();
+        }
+
         // 移除手機全螢幕樣式
         document.body.classList.remove('mobile-fullscreen', 'real-mobile-fullscreen', 'fullscreen-game');
     }
 
-    /**
-     * 設置手機退出全螢幕手勢
-     */
-    setupMobileExitGestures() {
-        // 雙擊退出全螢幕
-        let lastTap = 0;
-        this.input.on('pointerdown', () => {
-            const currentTime = Date.now();
-            const tapLength = currentTime - lastTap;
 
-            if (tapLength < 500 && tapLength > 0) {
-                // 雙擊檢測到
-                if (this._mobileFullscreenActive) {
-                    console.log('📱 雙擊檢測到，退出手機全螢幕');
-                    this.exitMobileFullscreen();
-                }
-            }
-            lastTap = currentTime;
-        });
-
-        // 長按退出全螢幕（3秒）
-        let longPressTimer = null;
-        this.input.on('pointerdown', () => {
-            if (this._mobileFullscreenActive) {
-                longPressTimer = setTimeout(() => {
-                    console.log('📱 長按檢測到，退出手機全螢幕');
-                    this.exitMobileFullscreen();
-                }, 3000);
-            }
-        });
-
-        this.input.on('pointerup', () => {
-            if (longPressTimer) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-            }
-        });
-
-        // 添加視覺提示
-        this.createMobileExitHint();
-    }
-
-    /**
-     * 創建手機退出全螢幕提示
-     */
-    createMobileExitHint() {
-        // 創建提示文字（初始隱藏）
-        this.mobileExitHint = this.add.text(
-            this.scale.gameSize.width / 2,
-            50,
-            '雙擊或長按 3 秒退出全螢幕',
-            {
-                fontSize: '16px',
-                fill: '#ffffff',
-                backgroundColor: '#000000',
-                padding: { x: 10, y: 5 },
-                alpha: 0
-            }
-        ).setOrigin(0.5).setDepth(1000);
-
-        // 監聽全螢幕狀態變化，顯示/隱藏提示
-        this.scale.on('enterfullscreen', () => {
-            if (this.detectMobileDevice() && this.mobileExitHint) {
-                // 顯示提示 3 秒後自動隱藏
-                this.tweens.add({
-                    targets: this.mobileExitHint,
-                    alpha: 0.8,
-                    duration: 500,
-                    onComplete: () => {
-                        setTimeout(() => {
-                            if (this.mobileExitHint) {
-                                this.tweens.add({
-                                    targets: this.mobileExitHint,
-                                    alpha: 0,
-                                    duration: 500
-                                });
-                            }
-                        }, 3000);
-                    }
-                });
-            }
-        });
-
-        this.scale.on('leavefullscreen', () => {
-            if (this.mobileExitHint) {
-                this.mobileExitHint.setAlpha(0);
-            }
-        });
-    }
 }
