@@ -131,10 +131,27 @@ export default class Hub extends Phaser.Scene {
             }
 
             const inIframe = !!(window.parent && window.parent !== window);
-            if (this.scale.isFullscreen) {
-                // 已在（Phaser）全螢幕：退出 Phaser 全螢幕
+            if (this.scale.isFullscreen || document.fullscreenElement || document.webkitFullscreenElement) {
+                // 已在全螢幕：退出全螢幕
+                console.log('🚪 退出全螢幕模式');
                 this.fullscreenBtn.setFrame(0);
-                this.scale.stopFullscreen();
+
+                // 嘗試退出各種全螢幕模式
+                if (this.scale.isFullscreen) {
+                    this.scale.stopFullscreen();
+                }
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+                if (document.webkitFullscreenElement) {
+                    document.webkitExitFullscreen();
+                }
+
+                // 調用 menu 場景的退出全螢幕處理
+                const menuScene = this.scene.get('menu');
+                if (menuScene && menuScene.onFullscreenExit) {
+                    menuScene.onFullscreenExit();
+                }
             } else if (inIframe) {
                 // 內嵌情境：根據父頁面狀態決定進入或退出
                 try {
@@ -151,9 +168,19 @@ export default class Hub extends Phaser.Scene {
                     this.scale.startFullscreen();
                 }
             } else {
-                // 非內嵌（桌面）情境：切換 Phaser 全螢幕
+                // 非內嵌（桌面）情境：使用完整的桌面全螢幕策略
+                console.log('🖥️ 桌面全螢幕按鈕點擊，調用完整桌面策略');
                 this.fullscreenBtn.setFrame(1);
-                this.scale.startFullscreen();
+
+                // 調用 menu 場景的完整桌面全螢幕策略
+                const menuScene = this.scene.get('menu');
+                if (menuScene && menuScene.desktopFullscreenStrategy) {
+                    menuScene.desktopFullscreenStrategy();
+                } else {
+                    // 後備方案：使用 Phaser 全螢幕
+                    console.log('⚠️ 無法找到 menu 場景，使用 Phaser 全螢幕後備方案');
+                    this.scale.startFullscreen();
+                }
             }
         })
         // 監聽視窗大小調整事件，當視窗大小改變時調用 resize 方法
