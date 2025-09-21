@@ -1137,20 +1137,26 @@ export default class GameScene extends Phaser.Scene {
       const touchControl = (this as any).touchControl;
       touchControl.isPressed = true;
 
-      // 根據點擊位置決定移動方向
-      const gameHeight = 739; // 遊戲容器高度
+      // 🔧 優化：使用實際遊戲區域高度而非固定值
+      const camera = this.cameras.main;
+      const gameHeight = camera.height;
       const centerY = gameHeight / 2;
 
-      if (pointer.y < centerY) {
+      // 🔧 優化：使用相對於遊戲區域的座標
+      const relativeY = pointer.y - camera.scrollY;
+
+      console.log(`🎯 觸控檢測 - 遊戲高度: ${gameHeight}, 中心Y: ${centerY}, 點擊Y: ${relativeY}`);
+
+      if (relativeY < centerY) {
         // 點擊上半部分 - 向上移動
         touchControl.moveUp = true;
         touchControl.moveDown = false;
-        console.log('👆 觸碰控制：向上移動');
+        console.log('👆 觸碰控制：向上移動 (優化版)');
       } else {
         // 點擊下半部分 - 向下移動
         touchControl.moveUp = false;
         touchControl.moveDown = true;
-        console.log('👇 觸碰控制：向下移動');
+        console.log('👇 觸碰控制：向下移動 (優化版)');
       }
     });
 
@@ -1170,6 +1176,32 @@ export default class GameScene extends Phaser.Scene {
       touchControl.moveUp = false;
       touchControl.moveDown = false;
       console.log('🚫 觸碰控制：指針移出，停止移動');
+    });
+
+    // 🔧 新增：監聽指針移動事件，支援拖拽控制
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      // 只在按下狀態且遊戲進行中響應
+      if (!pointer.isDown || !this.gameState.isPlaying || this.gameState.isPaused || this.showStartScreen) {
+        return;
+      }
+
+      const touchControl = (this as any).touchControl;
+      if (!touchControl.isPressed) return;
+
+      // 使用實際遊戲區域高度
+      const camera = this.cameras.main;
+      const gameHeight = camera.height;
+      const centerY = gameHeight / 2;
+      const relativeY = pointer.y - camera.scrollY;
+
+      // 根據當前指針位置更新移動方向
+      if (relativeY < centerY) {
+        touchControl.moveUp = true;
+        touchControl.moveDown = false;
+      } else {
+        touchControl.moveUp = false;
+        touchControl.moveDown = true;
+      }
     });
 
     console.log('✅ 觸碰和滑鼠控制設置完成');
