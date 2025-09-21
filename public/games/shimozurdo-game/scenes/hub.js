@@ -128,33 +128,15 @@ export default class Hub extends Phaser.Scene {
             .setDepth(2)
             .setInteractive({ cursor: 'pointer' });
 
-        // 🔍 DEBUG: 添加可見的命中區標記（半透明紅色邊框）
-        this.fullscreenHitDebug = this.add.graphics();
-        this.fullscreenHitDebug.lineStyle(3, 0xff0000, 0.8); // 紅色邊框，80% 透明度
-        this.fullscreenHitDebug.fillStyle(0xff0000, 0.2);    // 紅色填充，20% 透明度
-        this.fullscreenHitDebug.fillRect(
-            this.fullscreenBtn.x - HIT_SIZE/2,
-            this.fullscreenBtn.y - HIT_SIZE/2,
-            HIT_SIZE,
-            HIT_SIZE
-        );
-        this.fullscreenHitDebug.strokeRect(
-            this.fullscreenBtn.x - HIT_SIZE/2,
-            this.fullscreenBtn.y - HIT_SIZE/2,
-            HIT_SIZE,
-            HIT_SIZE
-        );
-        this.fullscreenHitDebug.setDepth(3); // 在最上層顯示
+        // 移除調試用的紅色邊框標記，保持透明命中區功能
 
         // 命中區點擊時，轉送事件給原按鈕邏輯
         this.fullscreenHit.on('pointerup', () => {
-            console.log('🎯 透明命中區被點擊！'); // DEBUG 日誌
             this.fullscreenBtn.emit('pointerup');
         });
 
 
         this.fullscreenBtn.on("pointerup", () => {
-            console.log('🔘 原始全螢幕按鈕被點擊！'); // DEBUG 日誌
             const inIframe = !!(window.parent && window.parent !== window);
             if (this.scale.isFullscreen) {
                 // 已在（Phaser）全螢幕：退出 Phaser 全螢幕
@@ -266,25 +248,7 @@ export default class Hub extends Phaser.Scene {
             this.fullscreenHit.x = this.scale.gameSize.width - 30;
             this.fullscreenHit.y = this.fullscreenBtn.y; // 直接使用按鈕的 Y 位置
 
-            // 🔍 DEBUG: 同步更新可見標記位置
-            if (this.fullscreenHitDebug) {
-                const HIT_SIZE = 88;
-                this.fullscreenHitDebug.clear();
-                this.fullscreenHitDebug.lineStyle(3, 0xff0000, 0.8);
-                this.fullscreenHitDebug.fillStyle(0xff0000, 0.2);
-                this.fullscreenHitDebug.fillRect(
-                    this.fullscreenHit.x - HIT_SIZE/2,
-                    this.fullscreenHit.y - HIT_SIZE/2,
-                    HIT_SIZE,
-                    HIT_SIZE
-                );
-                this.fullscreenHitDebug.strokeRect(
-                    this.fullscreenHit.x - HIT_SIZE/2,
-                    this.fullscreenHit.y - HIT_SIZE/2,
-                    HIT_SIZE,
-                    HIT_SIZE
-                );
-            }
+            // 移除調試用的紅色標記更新代碼
         }
     }
 }
