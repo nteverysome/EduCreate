@@ -213,17 +213,9 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [showTapOverlay, setShowTapOverlay] = useState<boolean>(false);
 
-  // 顯示「全螢幕並開始」覆蓋層的邏輯
-  useEffect(() => {
-    if (mounted && isMobile) {
-      // 檢查是否在全螢幕狀態
-      const isInFullscreen = checkParentFullscreenState();
-      // 只要離開全螢幕就顯示覆蓋層
-      setShowTapOverlay(!isInFullscreen);
-    } else {
-      setShowTapOverlay(false);
-    }
-  }, [mounted, isMobile, showExitOverlay]); // 添加 showExitOverlay 依賴
+  // 父頁面全螢幕退出按鈕狀態
+  const [showExitOverlay, setShowExitOverlay] = useState(false);
+  const [isParentFullscreenActive, setIsParentFullscreenActive] = useState(false);
 
   // 確保父頁面全螢幕樣式存在（避免重複注入）
   const ensureParentFullscreenStyles = () => {
@@ -241,10 +233,6 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     }
   };
 
-  // 父頁面全螢幕退出按鈕狀態
-  const [showExitOverlay, setShowExitOverlay] = useState(false);
-  const [isParentFullscreenActive, setIsParentFullscreenActive] = useState(false);
-
   // 檢查父頁面全螢幕狀態
   const checkParentFullscreenState = () => {
     const hasFullscreenElement = !!(document.fullscreenElement ||
@@ -254,6 +242,18 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     const hasFullscreenClass = document.body.classList.contains('parent-fullscreen-game');
     return hasFullscreenElement || hasFullscreenClass;
   };
+
+  // 顯示「全螢幕並開始」覆蓋層的邏輯
+  useEffect(() => {
+    if (mounted && isMobile) {
+      // 檢查是否在全螢幕狀態
+      const isInFullscreen = checkParentFullscreenState();
+      // 只要離開全螢幕就顯示覆蓋層
+      setShowTapOverlay(!isInFullscreen);
+    } else {
+      setShowTapOverlay(false);
+    }
+  }, [mounted, isMobile, showExitOverlay]); // 添加 showExitOverlay 依賴
 
   // 更新父頁面全螢幕狀態
   const updateParentFullscreenState = () => {
