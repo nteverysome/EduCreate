@@ -1007,12 +1007,14 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
                 aria-label="退出父頁面全螢幕"
               >
                 <div
-                  className="w-6 h-6 filter invert"
+                  className="w-12 h-12 filter invert"
                   style={{
                     backgroundImage: 'url(/games/shimozurdo-game/assets/images/fullscreen.png)',
                     backgroundSize: '96px 48px', // 精靈圖總尺寸：2幀 x 48px寬 = 96px，高度48px
                     backgroundPosition: '-48px 0px', // 顯示第二幀（退出全螢幕圖標）
-                    backgroundRepeat: 'no-repeat'
+                    backgroundRepeat: 'no-repeat',
+                    transform: 'scale(0.5)', // 縮放到原來的一半，讓48x48px變成24x24px顯示
+                    transformOrigin: 'center'
                   }}
                   title="退出全螢幕"
                 />
