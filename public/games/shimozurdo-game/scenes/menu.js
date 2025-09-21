@@ -299,9 +299,11 @@ export default class Menu extends Phaser.Scene {
                 console.log('📱 真實手機：使用真實手機專用全螢幕策略');
                 this.realMobileFullscreenStrategy();
             } else if (isMobile) {
-                // Playwright 模擬手機：使用原有策略
-                console.log('🤖 模擬手機：使用標準手機策略（測試環境）');
+                // Playwright 模擬手機：使用原有策略 + 強化網址列隱藏
+                console.log('🤖 模擬手機：使用標準手機策略（測試環境）+ 強化網址列隱藏');
                 this.mobileFullscreenStrategy();
+                // 在測試環境中也應用強化的網址列隱藏
+                this.handleAddressBarHiding();
             } else {
                 // 桌面設備：使用標準全螢幕 API
                 console.log('🖥️ 桌面設備：使用標準全螢幕 API');
@@ -507,10 +509,14 @@ export default class Menu extends Phaser.Scene {
         if (container.requestFullscreen) {
             container.requestFullscreen().then(() => {
                 console.log('✅ 成功進入全螢幕模式 (requestFullscreen)');
+                // 成功進入全螢幕後也嘗試隱藏網址列
+                this.handleAddressBarHiding();
                 this.onFullscreenEnter();
             }).catch(() => {
                 // 移除紅色錯誤提示，靜默處理
                 console.log('📱 使用替代全螢幕方案');
+                // 失敗時更需要隱藏網址列
+                this.handleAddressBarHiding();
                 this.fallbackFullscreenStrategy();
             });
         } else if (container.webkitRequestFullscreen) {
@@ -864,11 +870,17 @@ export default class Menu extends Phaser.Scene {
      */
     handleAddressBarHiding() {
         try {
-            console.log('📱 處理地址欄隱藏');
+            console.log('📱 處理地址欄隱藏 - 強化版本');
+
+            // 立即應用強力 CSS
+            this.applyForceHideAddressBarCSS();
 
             // 檢測設備方向
             const isLandscape = window.innerWidth > window.innerHeight;
             console.log(`📱 設備方向: ${isLandscape ? '橫向' : '直向'} (${window.innerWidth}x${window.innerHeight})`);
+
+            // 通用強力隱藏方法（適用於所有設備）
+            this.executeUniversalAddressBarHiding(isLandscape);
 
             // iOS Safari 專用處理
             if (this.detectIOSDevice()) {
@@ -1002,6 +1014,177 @@ export default class Menu extends Phaser.Scene {
     }
 
     /**
+     * 強力 CSS 應用 - 立即隱藏網址列
+     */
+    applyForceHideAddressBarCSS() {
+        console.log('🔧 應用強力網址列隱藏 CSS');
+
+        const style = document.createElement('style');
+        style.id = 'force-hide-address-bar';
+        style.textContent = `
+            html, body {
+                height: 100vh !important;
+                height: 100dvh !important;
+                overflow: hidden !important;
+                position: fixed !important;
+                width: 100% !important;
+                top: 0 !important;
+                left: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Chrome 手機版特殊處理 */
+            @supports (-webkit-touch-callout: none) {
+                html, body {
+                    height: calc(100vh - env(keyboard-inset-height, 0px)) !important;
+                    height: calc(100dvh - env(keyboard-inset-height, 0px)) !important;
+                }
+            }
+
+            /* 強制隱藏滾動條 */
+            ::-webkit-scrollbar {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+            }
+        `;
+
+        // 移除舊的樣式
+        const oldStyle = document.getElementById('force-hide-address-bar');
+        if (oldStyle) {
+            oldStyle.remove();
+        }
+
+        document.head.appendChild(style);
+        console.log('✅ 強力 CSS 已應用');
+    }
+
+    /**
+     * 通用網址列隱藏方法 - 適用於所有設備
+     */
+    executeUniversalAddressBarHiding(isLandscape) {
+        console.log('🌐 執行通用網址列隱藏方法');
+
+        // 立即設置基礎樣式
+        document.documentElement.style.height = '100dvh';
+        document.body.style.height = '100dvh';
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.top = '0';
+        document.body.style.left = '0';
+
+        // 多重滾動技巧 - 更密集的嘗試
+        const scrollAttempts = isLandscape ? 15 : 10;
+        for (let i = 0; i < scrollAttempts; i++) {
+            setTimeout(() => {
+                // 滾動到 1px 然後回到 0
+                window.scrollTo(0, 1);
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+
+                    // 每次滾動後重新應用樣式
+                    document.body.style.height = '100dvh';
+                    document.documentElement.style.height = '100dvh';
+
+                    // 強制重排
+                    document.body.offsetHeight;
+                }, 10);
+            }, i * 30);
+        }
+
+        // 延遲強化處理
+        setTimeout(() => {
+            this.applyDelayedAddressBarHiding(isLandscape);
+        }, 500);
+
+        // 持續監控
+        this.startAddressBarMonitoring();
+    }
+
+    /**
+     * 延遲強化網址列隱藏
+     */
+    applyDelayedAddressBarHiding(isLandscape) {
+        console.log('⏰ 執行延遲強化網址列隱藏');
+
+        // 強制觸發重排
+        document.body.style.display = 'none';
+        document.body.offsetHeight;
+        document.body.style.display = '';
+
+        // 重新應用所有樣式
+        document.documentElement.style.cssText = `
+            height: 100dvh !important;
+            overflow: hidden !important;
+            position: fixed !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        `;
+
+        document.body.style.cssText = `
+            height: 100dvh !important;
+            overflow: hidden !important;
+            position: fixed !important;
+            width: 100% !important;
+            top: 0 !important;
+            left: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #000 !important;
+            font-family: 'Open Sans', sans-serif !important;
+        `;
+
+        // 觸發視窗事件
+        window.dispatchEvent(new Event('resize'));
+        if (isLandscape) {
+            window.dispatchEvent(new Event('orientationchange'));
+        }
+
+        console.log('✅ 延遲強化處理完成');
+    }
+
+    /**
+     * 持續監控網址列狀態
+     */
+    startAddressBarMonitoring() {
+        console.log('👁️ 開始網址列持續監控');
+
+        // 清除舊的監控
+        if (this.addressBarMonitor) {
+            clearInterval(this.addressBarMonitor);
+        }
+
+        this.addressBarMonitor = setInterval(() => {
+            // 檢查視窗高度變化
+            const currentHeight = window.innerHeight;
+            const expectedHeight = window.screen.height;
+
+            if (currentHeight < expectedHeight * 0.9) {
+                console.log('🔍 檢測到可能的網址列顯示，重新隱藏');
+
+                // 重新應用隱藏
+                window.scrollTo(0, 1);
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    document.body.style.height = '100dvh';
+                    document.documentElement.style.height = '100dvh';
+                }, 10);
+            }
+        }, 1000);
+
+        // 10秒後停止監控
+        setTimeout(() => {
+            if (this.addressBarMonitor) {
+                clearInterval(this.addressBarMonitor);
+                console.log('⏹️ 網址列監控已停止');
+            }
+        }, 10000);
+    }
+
+    /**
      * 隱藏手機瀏覽器網址列（保留給測試環境）
      */
     hideAddressBar() {
@@ -1051,6 +1234,9 @@ export default class Menu extends Phaser.Scene {
      */
     onFullscreenEnter() {
         console.log('🎮 已進入全螢幕模式，調整遊戲顯示');
+
+        // 強化網址列隱藏（確保在所有情況下都執行）
+        this.handleAddressBarHiding();
 
         // 添加全螢幕樣式
         this.addFullscreenStyles();

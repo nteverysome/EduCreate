@@ -125,6 +125,11 @@ export default class Hub extends Phaser.Scene {
 
 
         this.fullscreenBtn.on("pointerup", () => {
+            // 每次點擊都嘗試隱藏網址列
+            if (this.scene.get('menu') && this.scene.get('menu').handleAddressBarHiding) {
+                this.scene.get('menu').handleAddressBarHiding();
+            }
+
             const inIframe = !!(window.parent && window.parent !== window);
             if (this.scale.isFullscreen) {
                 // 已在（Phaser）全螢幕：退出 Phaser 全螢幕
