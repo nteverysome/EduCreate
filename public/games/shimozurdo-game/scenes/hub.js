@@ -119,87 +119,27 @@ export default class Hub extends Phaser.Scene {
             .setOrigin(.5)
             .setDepth(1)
             .setInteractive({ cursor: "pointer" })
-        // 啟動時查詢父頁目前的全螢幕狀態（以利後續按鈕決策）
-        try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'QUERY_FULLSCREEN_STATE', source: 'shimozurdo-game' }, '*'); } catch {}
         // 移除透明命中區，使用原始按鈕點擊區域
 
 
+        // 為全螢幕按鈕添加點擊事件監聽器 - 使用簡單的原生 Phaser3 實現
         this.fullscreenBtn.on("pointerup", () => {
-            // 每次點擊都嘗試隱藏網址列
-            if (this.scene.get('menu') && this.scene.get('menu').handleAddressBarHiding) {
-                this.scene.get('menu').handleAddressBarHiding();
+            // 檢查當前是否處於全螢幕狀態
+            if (this.scale.isFullscreen) {
+                // 如果已在全螢幕，設定按鈕為非全螢幕圖示並退出全螢幕
+                this.fullscreenBtn.setFrame(0)
+                this.scale.stopFullscreen()
             }
-
-            const inIframe = !!(window.parent && window.parent !== window);
-            if (this.scale.isFullscreen || document.fullscreenElement || document.webkitFullscreenElement) {
-                // 已在全螢幕：退出全螢幕
-                console.log('🚪 退出全螢幕模式');
-                this.fullscreenBtn.setFrame(0);
-
-                // 嘗試退出各種全螢幕模式
-                if (this.scale.isFullscreen) {
-                    this.scale.stopFullscreen();
-                }
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                }
-                if (document.webkitFullscreenElement) {
-                    document.webkitExitFullscreen();
-                }
-
-                // 調用 menu 場景的退出全螢幕處理
-                const menuScene = this.scene.get('menu');
-                if (menuScene && menuScene.onFullscreenExit) {
-                    menuScene.onFullscreenExit();
-                }
-            } else if (inIframe) {
-                // 內嵌情境：根據父頁面狀態決定進入或退出
-                try {
-                    if (this._parentFSActive) {
-                        // 父頁面已全螢幕，請求退出
-                        window.parent.postMessage({ type: 'REQUEST_EXIT_FULLSCREEN', source: 'shimozurdo-game' }, '*');
-                    } else {
-                        // 父頁面未全螢幕，請求進入
-                        window.parent.postMessage({ type: 'REQUEST_FULLSCREEN', source: 'shimozurdo-game' }, '*');
-                    }
-                } catch (e) {
-                    // 後備：嘗試切換 Phaser 全螢幕
-                    this.fullscreenBtn.setFrame(1);
-                    this.scale.startFullscreen();
-                }
-            } else {
-                // 非內嵌（桌面）情境：使用完整的桌面全螢幕策略
-                console.log('🖥️ 桌面全螢幕按鈕點擊，調用完整桌面策略');
-                this.fullscreenBtn.setFrame(1);
-
-                // 調用 menu 場景的完整桌面全螢幕策略
-                const menuScene = this.scene.get('menu');
-                if (menuScene && menuScene.desktopFullscreenStrategy) {
-                    menuScene.desktopFullscreenStrategy();
-                } else {
-                    // 後備方案：使用 Phaser 全螢幕
-                    console.log('⚠️ 無法找到 menu 場景，使用 Phaser 全螢幕後備方案');
-                    this.scale.startFullscreen();
-                }
+            else {
+                // 如果不在全螢幕，設定按鈕為全螢幕圖示並進入全螢幕
+                this.fullscreenBtn.setFrame(1)
+                this.scale.startFullscreen()
             }
         })
         // 監聽視窗大小調整事件，當視窗大小改變時調用 resize 方法
         this.scale.on("resize", this.resize, this)
 
-        // 監聽父頁面的全螢幕狀態變化消息
-        this._parentFSActive = false; // 追蹤父頁面全螢幕狀態
-        window.addEventListener('message', (event) => {
-            const data = event.data;
-            if (data.source === 'parent-page') {
-                if (data.type === 'FULLSCREEN_SUCCESS' || data.type === 'FULLSCREEN_FAILED') {
-                    this._parentFSActive = true;
-                } else if (data.type === 'FULLSCREEN_EXITED') {
-                    this._parentFSActive = false;
-                } else if (data.type === 'FULLSCREEN_STATE') {
-                    this._parentFSActive = data.active || false;
-                }
-            }
-        });
+
     }
 
 
