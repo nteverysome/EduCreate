@@ -1127,7 +1127,7 @@ export default class GameScene extends Phaser.Scene {
       moveDown: false
     };
 
-    // 🔧 簡化觸控處理：移除複雜邏輯，直接響應
+    // 🎯 以飛機水平線為基準的觸控處理
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       // 只在遊戲進行中響應控制
       if (!this.gameState.isPlaying || this.gameState.isPaused || this.showStartScreen) {
@@ -1138,32 +1138,31 @@ export default class GameScene extends Phaser.Scene {
       const touchControl = (this as any).touchControl;
       touchControl.isPressed = true;
 
-      // 🚀 簡化座標檢測：使用更寬鬆的判斷
-      const gameHeight = this.cameras.main.height;
+      // 🎯 使用飛機的Y座標作為基準線，而不是螢幕中心
       const clickY = pointer.y;
-      const centerY = gameHeight / 2;
+      const planeY = this.player.y; // 飛機當前的Y座標
 
-      console.log(`🎯 [簡化版] 觸控檢測 - 遊戲高度: ${gameHeight}, 點擊Y: ${clickY}, 中心Y: ${centerY}`);
+      console.log(`🎯 [飛機基準線] 觸控檢測 - 點擊Y: ${clickY}, 飛機Y: ${planeY}`);
 
-      if (clickY < centerY) {
-        // 點擊上半部分 - 向上移動
+      if (clickY < planeY) {
+        // 點擊飛機上方 - 向上移動
         touchControl.moveUp = true;
         touchControl.moveDown = false;
-        console.log('🚀 [高靈敏度] 觸控：向上移動！');
+        console.log('🚀 [飛機基準] 點擊飛機上方：向上移動！');
 
-        // 🎯 添加視覺反饋：讓飛機閃爍表示檢測到觸控
-        this.player.setTint(0x00ff00); // 綠色閃爍
+        // 🎯 綠色閃爍表示向上
+        this.player.setTint(0x00ff00);
         this.time.delayedCall(100, () => {
           this.player.clearTint();
         });
       } else {
-        // 點擊下半部分 - 向下移動
+        // 點擊飛機下方 - 向下移動
         touchControl.moveUp = false;
         touchControl.moveDown = true;
-        console.log('🚀 [高靈敏度] 觸控：向下移動！');
+        console.log('🚀 [飛機基準] 點擊飛機下方：向下移動！');
 
-        // 🎯 添加視覺反饋：讓飛機閃爍表示檢測到觸控
-        this.player.setTint(0xff0000); // 紅色閃爍
+        // 🎯 紅色閃爍表示向下
+        this.player.setTint(0xff0000);
         this.time.delayedCall(100, () => {
           this.player.clearTint();
         });

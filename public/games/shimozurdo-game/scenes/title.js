@@ -213,7 +213,7 @@ export default class Title extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();  // 創建方向鍵監聽器
         this.wasd = this.input.keyboard.addKeys('W,S,A,D');     // 創建WASD鍵監聽器
 
-        // 2. 點擊/觸控控制 - 設置目標位置實現平滑移動（長按時不觸發）
+        // 🎯 以太空船水平線為基準的點擊/觸控控制
         this.input.on('pointerdown', (pointer) => {     // 監聽滑鼠點擊或觸控事件
             if (!this.player) return;                   // 確保太空船存在
 
@@ -223,15 +223,17 @@ export default class Title extends Phaser.Scene {
             const clickY = pointer.y;                    // 獲取點擊的Y座標
             const playerY = this.player.y;               // 獲取太空船當前Y座標
 
-            if (clickY < playerY - 30) {                 // 點擊在太空船上方30像素以上
+            console.log(`🎯 [太空船基準線] 觸控檢測 - 點擊Y: ${clickY}, 太空船Y: ${playerY}`);
+
+            if (clickY < playerY) {                      // 點擊在太空船上方（任何位置）
                 // 點擊上方，設置向上移動目標
                 this.playerTargetY = Math.max(80, playerY - 100);  // 設置目標位置，最高不超過80像素
-                console.log('🔼 太空船向上移動');
-            } else if (clickY > playerY + 30) {          // 點擊在太空船下方30像素以下
+                console.log('� [太空船基準] 點擊太空船上方：向上移動！');
+            } else {                                     // 點擊在太空船下方（任何位置）
                 // 點擊下方，設置向下移動目標
                 const { height } = this;                 // 獲取場景高度
                 this.playerTargetY = Math.min(height - 80, playerY + 100);  // 設置目標位置，最低不超過底部80像素
-                console.log('🔽 太空船向下移動');
+                console.log('� [太空船基準] 點擊太空船下方：向下移動！');
             }
         });
 
