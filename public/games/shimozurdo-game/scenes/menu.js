@@ -675,6 +675,8 @@ export default class Menu extends Phaser.Scene {
                     height: calc(var(--vh, 1vh) * 100) !important;
                     background: black !important;
                     border: none !important;
+                    outline: none !important;
+                    box-shadow: none !important;
                     z-index: 9999 !important;
                 }
 
@@ -687,6 +689,27 @@ export default class Menu extends Phaser.Scene {
                     object-fit: contain !important;
                     background: transparent !important;
                     display: block !important;
+                    border: none !important;
+                    outline: none !important;
+                    box-shadow: none !important;
+                    -webkit-appearance: none !important;
+                    -moz-appearance: none !important;
+                    appearance: none !important;
+                }
+
+                /* 移除所有可能的紅色框框和邊框 */
+                body.real-mobile-fullscreen *,
+                body.real-mobile-fullscreen *:before,
+                body.real-mobile-fullscreen *:after {
+                    border: none !important;
+                    outline: none !important;
+                    box-shadow: none !important;
+                    -webkit-tap-highlight-color: transparent !important;
+                    -webkit-touch-callout: none !important;
+                    -webkit-user-select: none !important;
+                    -moz-user-select: none !important;
+                    -ms-user-select: none !important;
+                    user-select: none !important;
                 }
 
                 /* iOS Safari 特殊處理 */
@@ -757,6 +780,8 @@ export default class Menu extends Phaser.Scene {
                     height: 100dvh !important;
                     background: black !important;
                     border: none !important;
+                    outline: none !important;
+                    box-shadow: none !important;
                 }
 
                 body.mobile-fullscreen canvas {
@@ -832,35 +857,70 @@ export default class Menu extends Phaser.Scene {
     }
 
     /**
-     * 改進的地址欄隱藏處理
+     * 改進的地址欄隱藏處理（支援橫向模式）
      */
     handleAddressBarHiding() {
         try {
             console.log('📱 處理地址欄隱藏');
 
+            // 檢測設備方向
+            const isLandscape = window.innerWidth > window.innerHeight;
+            console.log(`📱 設備方向: ${isLandscape ? '橫向' : '直向'} (${window.innerWidth}x${window.innerHeight})`);
+
             // iOS Safari 專用處理
             if (this.detectIOSDevice()) {
                 console.log('🍎 iOS Safari 地址欄處理');
 
-                // 滾動觸發地址欄隱藏
-                window.scrollTo(0, 1);
-                setTimeout(() => window.scrollTo(0, 0), 100);
+                // 橫向模式需要更強力的處理
+                if (isLandscape) {
+                    console.log('🔄 橫向模式：強化地址欄隱藏');
 
-                // 設置 minimal-ui
+                    // 多次滾動確保地址欄隱藏
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => {
+                            window.scrollTo(0, 1);
+                            setTimeout(() => window.scrollTo(0, 0), 50);
+                        }, i * 100);
+                    }
+
+                    // 強制觸發 resize 事件
+                    setTimeout(() => {
+                        window.dispatchEvent(new Event('resize'));
+                    }, 500);
+                } else {
+                    // 直向模式的標準處理
+                    window.scrollTo(0, 1);
+                    setTimeout(() => window.scrollTo(0, 0), 100);
+                }
+
+                // 設置 minimal-ui（橫向模式更重要）
                 const viewport = document.querySelector('meta[name=viewport]');
                 if (viewport) {
                     viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui, viewport-fit=cover';
                     console.log('📱 已更新 iOS viewport 設定');
                 }
 
-                // 額外的 iOS 處理
+                // 額外的 iOS 處理（橫向模式延長時間）
+                const delay = isLandscape ? 800 : 300;
                 setTimeout(() => {
                     window.scrollTo(0, 0);
                     document.body.scrollTop = 0;
                     if (document.documentElement) {
                         document.documentElement.scrollTop = 0;
                     }
-                }, 300);
+
+                    // 橫向模式額外處理
+                    if (isLandscape) {
+                        // 強制重新計算視窗高度
+                        document.documentElement.style.height = '100vh';
+                        document.body.style.height = '100vh';
+
+                        // 觸發視窗調整
+                        setTimeout(() => {
+                            window.dispatchEvent(new Event('orientationchange'));
+                        }, 100);
+                    }
+                }, delay);
             }
             // Android Chrome 處理
             else {
@@ -870,9 +930,29 @@ export default class Menu extends Phaser.Scene {
                 document.documentElement.style.setProperty('--safe-area-inset-top', 'env(safe-area-inset-top)');
                 document.documentElement.style.setProperty('--safe-area-inset-bottom', 'env(safe-area-inset-bottom)');
 
-                // Android 滾動處理
-                window.scrollTo(0, 1);
-                setTimeout(() => window.scrollTo(0, 0), 50);
+                // 橫向模式的 Android 處理
+                if (isLandscape) {
+                    console.log('🔄 Android 橫向模式處理');
+
+                    // 多次滾動
+                    for (let i = 0; i < 5; i++) {
+                        setTimeout(() => {
+                            window.scrollTo(0, 1);
+                            setTimeout(() => window.scrollTo(0, 0), 30);
+                        }, i * 80);
+                    }
+
+                    // 強制全螢幕樣式
+                    setTimeout(() => {
+                        document.documentElement.style.height = '100vh';
+                        document.body.style.height = '100vh';
+                        document.body.style.overflow = 'hidden';
+                    }, 400);
+                } else {
+                    // 直向模式標準處理
+                    window.scrollTo(0, 1);
+                    setTimeout(() => window.scrollTo(0, 0), 50);
+                }
             }
 
             console.log('✅ 地址欄隱藏處理完成');
