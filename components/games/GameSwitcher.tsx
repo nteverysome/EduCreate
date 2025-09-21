@@ -1003,13 +1003,18 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
               <button
                 type="button"
                 onClick={exitParentFullscreen}
-                className="bg-black/60 hover:bg-black/80 text-white p-3 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-lg"
+                className="bg-black/60 hover:bg-black/80 text-white p-3 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-lg relative overflow-hidden"
                 aria-label="退出父頁面全螢幕"
               >
-                <img
-                  src="/games/shimozurdo-game/assets/images/fullscreen.png"
-                  alt="退出全螢幕"
+                <div
                   className="w-6 h-6 filter invert"
+                  style={{
+                    backgroundImage: 'url(/games/shimozurdo-game/assets/images/fullscreen.png)',
+                    backgroundSize: '96px 48px', // 精靈圖總尺寸：2幀 x 48px寬 = 96px，高度48px
+                    backgroundPosition: '-48px 0px', // 顯示第二幀（退出全螢幕圖標）
+                    backgroundRepeat: 'no-repeat'
+                  }}
+                  title="退出全螢幕"
                 />
               </button>
             </div>
