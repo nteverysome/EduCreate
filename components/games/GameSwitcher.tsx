@@ -213,14 +213,17 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [showTapOverlay, setShowTapOverlay] = useState<boolean>(false);
 
-  // 在行動裝置顯示「一鍵全螢幕開始」覆蓋層
+  // 顯示「全螢幕並開始」覆蓋層的邏輯
   useEffect(() => {
     if (mounted && isMobile) {
-      setShowTapOverlay(true);
+      // 檢查是否在全螢幕狀態
+      const isInFullscreen = checkParentFullscreenState();
+      // 只要離開全螢幕就顯示覆蓋層
+      setShowTapOverlay(!isInFullscreen);
     } else {
       setShowTapOverlay(false);
     }
-  }, [mounted, isMobile]);
+  }, [mounted, isMobile, showExitOverlay]); // 添加 showExitOverlay 依賴
 
   // 確保父頁面全螢幕樣式存在（避免重複注入）
   const ensureParentFullscreenStyles = () => {
@@ -299,6 +302,12 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     // 4. 更新狀態
     setShowExitOverlay(false);
     setIsParentFullscreenActive(false);
+
+    // 5. 在手機設備上顯示「全螢幕並開始」覆蓋層
+    if (isMobile) {
+      setShowTapOverlay(true);
+      console.log('📱 顯示全螢幕並開始覆蓋層');
+    }
 
     // 5. 通知子頁面（遊戲）
     iframeRef.current?.contentWindow?.postMessage({
@@ -962,7 +971,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
             className="absolute inset-0 z-20 bg-black/50 text-white flex flex-col items-center justify-center gap-2"
             aria-label="全螢幕開始遊戲"
           >
-            <span className="text-lg font-semibold">點一下進入全螢幕並開始</span>
+            <span className="text-lg font-semibold">全螢幕並開始</span>
             <span className="text-xs opacity-80">若瀏覽器不支援，將以近全螢幕顯示</span>
           </button>
         )}
@@ -992,7 +1001,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
           <div className="absolute top-0 left-0 right-0 z-[1000000] bg-gradient-to-b from-black/80 to-transparent p-4">
             <div className="flex items-center justify-between">
               <div className="text-white text-sm opacity-80">
-                🔍 全螢幕模式 | 按 ESC 或點擊退出
+               
               </div>
               <button
                 type="button"
@@ -1004,13 +1013,6 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
                 <span>退出全螢幕</span>
               </button>
             </div>
-          </div>
-        )}
-
-        {/* ESC 鍵退出全螢幕提示（僅在全螢幕時顯示） */}
-        {showExitOverlay && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-[1000000] bg-black/60 text-white px-3 py-2 rounded-md text-xs opacity-80">
-            按 ESC 鍵快速退出全螢幕
           </div>
         )}
       </div>
