@@ -186,66 +186,57 @@
         return false;
       };
 
-      // 🔧 優化觸控事件：添加長按檢測，避免干擾正常點擊
-      let touchStartTime = 0;
-      let touchStartPos = null;
-      const LONG_PRESS_THRESHOLD = 300; // 300ms 後才算長按
-      const MOVE_THRESHOLD = 10; // 移動超過10px就不算長按
+      // 🚀 簡化觸控事件：只處理真正的長按，避免干擾正常點擊
+      let longPressTimer = null;
+      const LONG_PRESS_THRESHOLD = 500; // 提高到 500ms，減少干擾
 
       overlay.addEventListener('touchstart', (e) => {
         preventDefaults(e);
         if (!ensureCanvas()) return;
 
         const t = e.changedTouches[0];
-        touchStartTime = Date.now();
-        touchStartPos = { x: t.clientX, y: t.clientY };
+        const rect = overlay.getBoundingClientRect();
+        const direction = (t.clientY - rect.top) < rect.height/2 ? 'up' : 'down';
 
-        // 延遲啟動長按，給正常點擊留出時間
-        setTimeout(() => {
-          if (touchStartTime > 0) { // 還在觸控中
-            const rect = overlay.getBoundingClientRect();
-            const direction = (t.clientY - rect.top) < rect.height/2 ? 'up' : 'down';
-            startPress(direction, t);
-            console.log('🔄 長按控制啟動:', direction);
-          }
+        // 🎯 只在真正長按時才啟動，給 Phaser 遊戲更多處理時間
+        longPressTimer = setTimeout(() => {
+          startPress(direction, t);
+          console.log('🔄 [簡化版] 長按控制啟動:', direction);
         }, LONG_PRESS_THRESHOLD);
       }, {passive:false});
 
       overlay.addEventListener('touchend', (e) => {
         preventDefaults(e);
-        const touchDuration = Date.now() - touchStartTime;
-        touchStartTime = 0; // 重置觸控開始時間
 
-        if (touchDuration < LONG_PRESS_THRESHOLD) {
-          console.log('👆 短按檢測，交給遊戲處理');
-          // 短按不啟動長按控制，讓遊戲的正常觸控處理
+        // 🚀 簡化：清除長按計時器，停止控制
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+          console.log('👆 [簡化版] 短按檢測，交給遊戲處理');
         } else {
-          console.log('🔄 長按結束');
+          console.log('🔄 [簡化版] 長按結束');
         }
         endPress();
       }, {passive:false});
 
       overlay.addEventListener('touchcancel', (e) => {
         preventDefaults(e);
-        touchStartTime = 0; // 重置觸控開始時間
+
+        // 🚀 簡化：清除長按計時器
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
         endPress();
       }, {passive:false});
 
       overlay.addEventListener('touchmove', (e) => {
         preventDefaults(e);
-
-        // 檢查是否移動太多，如果是則取消長按
-        if (touchStartPos && touchStartTime > 0) {
-          const t = e.changedTouches[0];
-          const moveDistance = Math.sqrt(
-            Math.pow(t.clientX - touchStartPos.x, 2) +
-            Math.pow(t.clientY - touchStartPos.y, 2)
-          );
-
-          if (moveDistance > MOVE_THRESHOLD) {
-            touchStartTime = 0; // 取消長按
-            console.log('👋 移動距離過大，取消長按');
-          }
+        // 🚀 簡化：移動時取消長按
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+          console.log('👋 [簡化版] 移動取消長按');
         }
       }, {passive:false});
 

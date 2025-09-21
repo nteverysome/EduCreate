@@ -1127,81 +1127,71 @@ export default class GameScene extends Phaser.Scene {
       moveDown: false
     };
 
-    // 監聽指針按下事件（滑鼠左鍵或觸碰）
+    // 🔧 簡化觸控處理：移除複雜邏輯，直接響應
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       // 只在遊戲進行中響應控制
       if (!this.gameState.isPlaying || this.gameState.isPaused || this.showStartScreen) {
+        console.log('⚠️ 遊戲未進行中，忽略觸控');
         return;
       }
 
       const touchControl = (this as any).touchControl;
       touchControl.isPressed = true;
 
-      // 🔧 優化：使用實際遊戲區域高度而非固定值
-      const camera = this.cameras.main;
-      const gameHeight = camera.height;
+      // 🚀 簡化座標檢測：使用更寬鬆的判斷
+      const gameHeight = this.cameras.main.height;
+      const clickY = pointer.y;
       const centerY = gameHeight / 2;
 
-      // 🔧 優化：使用相對於遊戲區域的座標
-      const relativeY = pointer.y - camera.scrollY;
+      console.log(`🎯 [簡化版] 觸控檢測 - 遊戲高度: ${gameHeight}, 點擊Y: ${clickY}, 中心Y: ${centerY}`);
 
-      console.log(`🎯 觸控檢測 - 遊戲高度: ${gameHeight}, 中心Y: ${centerY}, 點擊Y: ${relativeY}`);
-
-      if (relativeY < centerY) {
+      if (clickY < centerY) {
         // 點擊上半部分 - 向上移動
         touchControl.moveUp = true;
         touchControl.moveDown = false;
-        console.log('👆 觸碰控制：向上移動 (優化版)');
+        console.log('🚀 [高靈敏度] 觸控：向上移動！');
+
+        // 🎯 添加視覺反饋：讓飛機閃爍表示檢測到觸控
+        this.player.setTint(0x00ff00); // 綠色閃爍
+        this.time.delayedCall(100, () => {
+          this.player.clearTint();
+        });
       } else {
         // 點擊下半部分 - 向下移動
         touchControl.moveUp = false;
         touchControl.moveDown = true;
-        console.log('👇 觸碰控制：向下移動 (優化版)');
+        console.log('🚀 [高靈敏度] 觸控：向下移動！');
+
+        // 🎯 添加視覺反饋：讓飛機閃爍表示檢測到觸控
+        this.player.setTint(0xff0000); // 紅色閃爍
+        this.time.delayedCall(100, () => {
+          this.player.clearTint();
+        });
       }
     });
 
-    // 監聽指針釋放事件
+    // 🔧 簡化指針釋放事件
     this.input.on('pointerup', () => {
       const touchControl = (this as any).touchControl;
       touchControl.isPressed = false;
       touchControl.moveUp = false;
       touchControl.moveDown = false;
-      console.log('✋ 觸碰控制：停止移動');
+      console.log('✋ [簡化版] 觸控停止');
+
+      // 清除飛機顏色提示
+      this.player.clearTint();
     });
 
-    // 監聽指針移出遊戲區域
+    // 🔧 簡化指針移出事件
     this.input.on('pointerout', () => {
       const touchControl = (this as any).touchControl;
       touchControl.isPressed = false;
       touchControl.moveUp = false;
       touchControl.moveDown = false;
-      console.log('🚫 觸碰控制：指針移出，停止移動');
-    });
+      console.log('🚫 [簡化版] 觸控移出');
 
-    // 🔧 新增：監聽指針移動事件，支援拖拽控制
-    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      // 只在按下狀態且遊戲進行中響應
-      if (!pointer.isDown || !this.gameState.isPlaying || this.gameState.isPaused || this.showStartScreen) {
-        return;
-      }
-
-      const touchControl = (this as any).touchControl;
-      if (!touchControl.isPressed) return;
-
-      // 使用實際遊戲區域高度
-      const camera = this.cameras.main;
-      const gameHeight = camera.height;
-      const centerY = gameHeight / 2;
-      const relativeY = pointer.y - camera.scrollY;
-
-      // 根據當前指針位置更新移動方向
-      if (relativeY < centerY) {
-        touchControl.moveUp = true;
-        touchControl.moveDown = false;
-      } else {
-        touchControl.moveUp = false;
-        touchControl.moveDown = true;
-      }
+      // 清除飛機顏色提示
+      this.player.clearTint();
     });
 
     console.log('✅ 觸碰和滑鼠控制設置完成');
@@ -1852,7 +1842,8 @@ export default class GameScene extends Phaser.Scene {
    * 處理玩家移動 - 只允許上下移動（鍵盤 + 觸碰 + 滑鼠）
    */
   private handlePlayerMovement(): void {
-    const speed = 250;
+    // 🚀 大幅提升飛機靈敏度：從 250 提升到 600
+    const speed = 600;
     const wasd = (this as any).wasd;
     const touchControl = (this as any).touchControl;
 
@@ -1866,8 +1857,10 @@ export default class GameScene extends Phaser.Scene {
 
     if (moveUp) {
       this.player.setVelocityY(-speed);
+      console.log('🚀 飛機向上移動 - 高靈敏度模式');
     } else if (moveDown) {
       this.player.setVelocityY(speed);
+      console.log('🚀 飛機向下移動 - 高靈敏度模式');
     } else {
       this.player.setVelocityY(0);
     }
