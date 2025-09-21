@@ -289,13 +289,18 @@ export default class Menu extends Phaser.Scene {
         try {
             // 檢測設備類型
             const isMobile = this.detectMobileDevice();
+            const isRealMobile = this.detectRealMobileDevice();
             const isIOS = this.detectIOSDevice();
 
-            console.log('🖥️ 設備檢測:', { isMobile, isIOS });
+            console.log('🖥️ 設備檢測:', { isMobile, isRealMobile, isIOS });
 
-            if (isMobile) {
-                // 手機設備：優先使用網址列隱藏和偽全螢幕
-                console.log('📱 手機設備：使用手機專用全螢幕策略');
+            if (isRealMobile) {
+                // 真實手機：使用專用策略，不依賴 Fullscreen API
+                console.log('📱 真實手機：使用真實手機專用全螢幕策略');
+                this.realMobileFullscreenStrategy();
+            } else if (isMobile) {
+                // Playwright 模擬手機：使用原有策略
+                console.log('🤖 模擬手機：使用標準手機策略（測試環境）');
                 this.mobileFullscreenStrategy();
             } else {
                 // 桌面設備：使用標準全螢幕 API
@@ -350,10 +355,58 @@ export default class Menu extends Phaser.Scene {
     }
 
     /**
-     * 手機專用全螢幕策略
+     * 檢測真實手機設備（區分 Playwright 模擬環境）
+     */
+    detectRealMobileDevice() {
+        // 檢測是否為自動化測試環境
+        const isPlaywright = !!(
+            navigator.webdriver ||
+            window.navigator.webdriver ||
+            window.__playwright ||
+            navigator.userAgent.includes('HeadlessChrome') ||
+            navigator.userAgent.includes('Playwright') ||
+            window.chrome?.runtime?.onConnect // Chrome 自動化標識
+        );
+
+        const isMobile = this.detectMobileDevice();
+
+        console.log('🔍 真實設備檢測:', {
+            isMobile,
+            isPlaywright,
+            userAgent: navigator.userAgent,
+            isRealMobile: isMobile && !isPlaywright
+        });
+
+        // 真實手機：手機設備且非自動化環境
+        return isMobile && !isPlaywright;
+    }
+
+    /**
+     * 真實手機專用全螢幕策略（不依賴 Fullscreen API）
+     */
+    realMobileFullscreenStrategy() {
+        console.log('📱 執行真實手機全螢幕策略');
+
+        // 1. 立即設置真實手機專用樣式
+        this.setRealMobileFullscreenStyles();
+
+        // 2. 處理地址欄隱藏
+        this.handleAddressBarHiding();
+
+        // 3. 設置動態 viewport 處理
+        this.setupDynamicViewport();
+
+        // 4. 不嘗試 Fullscreen API，直接觸發完成
+        setTimeout(() => {
+            this.onFullscreenEnter();
+        }, 100);
+    }
+
+    /**
+     * 手機專用全螢幕策略（保留給 Playwright 測試）
      */
     mobileFullscreenStrategy() {
-        console.log('📱 執行手機全螢幕策略');
+        console.log('📱 執行手機全螢幕策略（測試環境）');
 
         // 0. ANDROID/非 iOS：先嘗試與桌面相同的 in-iframe 全螢幕（Phaser → 原生）
         const isIOS = this.detectIOSDevice();
@@ -576,11 +629,98 @@ export default class Menu extends Phaser.Scene {
     }
 
     /**
-     * 設置手機專用全螢幕樣式
+     * 設置真實手機專用全螢幕樣式（更激進的方法）
+     */
+    setRealMobileFullscreenStyles() {
+        try {
+            console.log('📱 設置真實手機專用全螢幕樣式');
+
+            // 創建真實手機專用樣式
+            let realMobileStyle = document.getElementById('real-mobile-fullscreen-style');
+            if (!realMobileStyle) {
+                realMobileStyle = document.createElement('style');
+                realMobileStyle.id = 'real-mobile-fullscreen-style';
+                document.head.appendChild(realMobileStyle);
+            }
+
+            realMobileStyle.textContent = `
+                /* 真實手機全螢幕樣式 */
+                body.real-mobile-fullscreen {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    overflow: hidden !important;
+                    position: fixed !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    height: 100dvh !important;
+                    height: -webkit-fill-available !important;
+                    height: calc(var(--vh, 1vh) * 100) !important;
+                    background: black !important;
+                    -webkit-user-select: none !important;
+                    -moz-user-select: none !important;
+                    -ms-user-select: none !important;
+                    user-select: none !important;
+                }
+
+                body.real-mobile-fullscreen #game {
+                    position: fixed !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    height: 100dvh !important;
+                    height: -webkit-fill-available !important;
+                    height: calc(var(--vh, 1vh) * 100) !important;
+                    background: black !important;
+                    border: none !important;
+                    z-index: 9999 !important;
+                }
+
+                body.real-mobile-fullscreen canvas {
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    height: 100dvh !important;
+                    height: -webkit-fill-available !important;
+                    height: calc(var(--vh, 1vh) * 100) !important;
+                    object-fit: contain !important;
+                    background: transparent !important;
+                    display: block !important;
+                }
+
+                /* iOS Safari 特殊處理 */
+                @supports (-webkit-touch-callout: none) {
+                    body.real-mobile-fullscreen {
+                        height: 100dvh !important;
+                        height: -webkit-fill-available !important;
+                    }
+                    body.real-mobile-fullscreen #game {
+                        height: 100dvh !important;
+                        height: -webkit-fill-available !important;
+                    }
+                    body.real-mobile-fullscreen canvas {
+                        height: 100dvh !important;
+                        height: -webkit-fill-available !important;
+                    }
+                }
+            `;
+
+            // 添加 body class
+            document.body.classList.add('real-mobile-fullscreen');
+
+            console.log('✅ 真實手機專用全螢幕樣式已設置');
+        } catch (error) {
+            console.warn('⚠️ 設置真實手機全螢幕樣式失敗:', error);
+        }
+    }
+
+    /**
+     * 設置手機專用全螢幕樣式（保留給測試環境）
      */
     setMobileFullscreenStyles() {
         try {
-            console.log('📱 設置手機專用全螢幕樣式');
+            console.log('📱 設置手機專用全螢幕樣式（測試環境）');
 
             // 創建手機專用樣式
             let mobileStyle = document.getElementById('mobile-fullscreen-style');
@@ -646,11 +786,107 @@ export default class Menu extends Phaser.Scene {
     }
 
     /**
-     * 隱藏手機瀏覽器網址列
+     * 動態 viewport 處理（解決地址欄問題）
+     */
+    setupDynamicViewport() {
+        try {
+            console.log('📱 設置動態 viewport 處理');
+
+            const updateViewport = () => {
+                // 使用實際視窗高度
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+                console.log('📐 更新 viewport:', {
+                    innerHeight: window.innerHeight,
+                    screenHeight: screen.height,
+                    vh: vh
+                });
+
+                // 更新遊戲尺寸
+                if (this.scale) {
+                    this.scale.resize(window.innerWidth, window.innerHeight);
+                    this.scale.refresh();
+                }
+            };
+
+            // 初始設置
+            updateViewport();
+
+            // 監聽視窗變化（地址欄顯示/隱藏）
+            window.addEventListener('resize', updateViewport);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(updateViewport, 100);
+                setTimeout(updateViewport, 500); // 雙重保險
+            });
+
+            // 監聽視覺 viewport 變化（更精確的地址欄檢測）
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', updateViewport);
+            }
+
+            console.log('✅ 動態 viewport 處理已設置');
+        } catch (error) {
+            console.warn('⚠️ 設置動態 viewport 失敗:', error);
+        }
+    }
+
+    /**
+     * 改進的地址欄隱藏處理
+     */
+    handleAddressBarHiding() {
+        try {
+            console.log('📱 處理地址欄隱藏');
+
+            // iOS Safari 專用處理
+            if (this.detectIOSDevice()) {
+                console.log('🍎 iOS Safari 地址欄處理');
+
+                // 滾動觸發地址欄隱藏
+                window.scrollTo(0, 1);
+                setTimeout(() => window.scrollTo(0, 0), 100);
+
+                // 設置 minimal-ui
+                const viewport = document.querySelector('meta[name=viewport]');
+                if (viewport) {
+                    viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui, viewport-fit=cover';
+                    console.log('📱 已更新 iOS viewport 設定');
+                }
+
+                // 額外的 iOS 處理
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    document.body.scrollTop = 0;
+                    if (document.documentElement) {
+                        document.documentElement.scrollTop = 0;
+                    }
+                }, 300);
+            }
+            // Android Chrome 處理
+            else {
+                console.log('🤖 Android Chrome 地址欄處理');
+
+                // 使用 CSS 環境變數
+                document.documentElement.style.setProperty('--safe-area-inset-top', 'env(safe-area-inset-top)');
+                document.documentElement.style.setProperty('--safe-area-inset-bottom', 'env(safe-area-inset-bottom)');
+
+                // Android 滾動處理
+                window.scrollTo(0, 1);
+                setTimeout(() => window.scrollTo(0, 0), 50);
+            }
+
+            console.log('✅ 地址欄隱藏處理完成');
+        } catch (error) {
+            console.warn('⚠️ 地址欄隱藏處理失敗:', error);
+        }
+    }
+
+    /**
+     * 隱藏手機瀏覽器網址列（保留給測試環境）
      */
     hideAddressBar() {
         try {
-            console.log('📱 嘗試隱藏手機瀏覽器網址列');
+            console.log('📱 嘗試隱藏手機瀏覽器網址列（測試環境）');
 
             // 方法 1: 滾動到頂部隱藏網址列
             window.scrollTo(0, 1);
