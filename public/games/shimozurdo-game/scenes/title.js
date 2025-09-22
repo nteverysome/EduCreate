@@ -152,11 +152,17 @@ export default class Title extends Phaser.Scene {
         }
 
         // 🔧 初始化調試模式和性能監控
-        this.debugMode = false; // 設為 true 啟用詳細調試信息
+        this.debugMode = true; // 設為 true 啟用詳細調試信息 - 座標偏移診斷
         this.performanceStats = {
             touchResponses: [],
             averageResponseTime: 0
         };
+
+        // 🔧 初始化座標修復工具
+        this.coordinateFix = new (window.CoordinateFix || class {
+            getOptimalCoordinates(pointer) { return { x: pointer.x, y: pointer.y }; }
+            testCoordinateAccuracy() { return { isAccurate: true }; }
+        })(this);
 
         // 設置太空船控制 - 初始化鍵盤和滑鼠控制
         this.setupSpaceshipControls();
@@ -273,7 +279,7 @@ export default class Title extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();  // 創建方向鍵監聽器
         this.wasd = this.input.keyboard.addKeys('W,S,A,D');     // 創建WASD鍵監聽器
 
-        // 🎯 以太空船水平線為基準的點擊/觸控控制（優化版）
+        // 🎯 以太空船水平線為基準的點擊/觸控控制（座標偏移修復版）
         this.input.on('pointerdown', (pointer) => {     // 監聽滑鼠點擊或觸控事件
             if (!this.player) return;                   // 確保太空船存在
 
@@ -283,33 +289,61 @@ export default class Title extends Phaser.Scene {
             // ⚡ 立即響應優化 - 減少計算複雜度
             const startTime = performance.now();        // 記錄開始時間用於性能監控
 
-            // 🎯 簡化座標處理 - 優先速度
-            const rawClickY = pointer.y;                // 原始點擊Y座標
+            // 🔧 座標偏移修復 - 使用座標修復工具
+            const optimalCoords = this.coordinateFix.getOptimalCoordinates(pointer);
+            const clickX = optimalCoords.x;
+            const clickY = optimalCoords.y;
+
             const playerY = this.player.y;              // 太空船當前Y座標
 
             // 🎨 立即視覺反饋 - 在任何計算前先提供反饋
-            this.showTouchFeedback(pointer.x, rawClickY);
+            this.showTouchFeedback(clickX, clickY);
 
-            // 🔧 簡化的調試信息（僅在需要時）
+            // 🔧 詳細的調試信息（座標偏移診斷）
             if (this.debugMode) {
+                // 獲取詳細的容器和座標信息
+                const canvas = this.sys.game.canvas;
+                const canvasRect = canvas.getBoundingClientRect();
+                const gameContainer = canvas.parentElement;
+                const containerRect = gameContainer ? gameContainer.getBoundingClientRect() : null;
+
                 const screenInfo = {
                     windowSize: `${window.innerWidth}x${window.innerHeight}`,
-                    orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+                    orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait',
+                    devicePixelRatio: window.devicePixelRatio,
+                    scrollPosition: `${window.scrollX}, ${window.scrollY}`
+                };
+
+                const canvasInfo = {
+                    canvasSize: `${canvas.width}x${canvas.height}`,
+                    canvasClientSize: `${canvas.clientWidth}x${canvas.clientHeight}`,
+                    canvasRect: `${canvasRect.x}, ${canvasRect.y}, ${canvasRect.width}x${canvasRect.height}`,
+                    containerRect: containerRect ? `${containerRect.x}, ${containerRect.y}, ${containerRect.width}x${containerRect.height}` : 'null'
                 };
 
                 const coordinateInfo = {
-                    rawPointer: `${pointer.x}, ${rawClickY}`,
+                    rawPointer: `${pointer.x}, ${pointer.y}`,
+                    worldPointer: `${pointer.worldX}, ${pointer.worldY}`,
+                    fixedPointer: `${clickX}, ${clickY}`,
                     playerPosition: `${this.player.x}, ${playerY}`,
-                    clickVsPlayer: `${rawClickY} vs ${playerY} (diff: ${rawClickY - playerY})`
+                    clickVsPlayer: `${clickY} vs ${playerY} (diff: ${clickY - playerY})`,
+                    cameraInfo: `scroll: ${this.cameras.main.scrollX}, ${this.cameras.main.scrollY}, zoom: ${this.cameras.main.zoom}`
                 };
 
-                console.log(`🎯 [太空船基準線] 觸控檢測 - 點擊Y: ${rawClickY}, 太空船Y: ${playerY}`);
+                console.log(`🎯 [座標偏移診斷] 觸控檢測 - 點擊Y: ${clickY}, 太空船Y: ${playerY}`);
                 console.log(`📱 [螢幕信息] ${JSON.stringify(screenInfo)}`);
+                console.log(`🖼️ [畫布信息] ${JSON.stringify(canvasInfo)}`);
                 console.log(`📊 [座標詳情] ${JSON.stringify(coordinateInfo)}`);
+
+                // 檢查是否有覆蓋層
+                const overlay = document.querySelector('div[style*="z-index:999999"]');
+                if (overlay) {
+                    const overlayRect = overlay.getBoundingClientRect();
+                    console.log(`🔍 [覆蓋層檢測] 發現覆蓋層: ${overlayRect.x}, ${overlayRect.y}, ${overlayRect.width}x${overlayRect.height}`);
+                }
             }
 
-            // 🔧 使用原始座標進行比較（更快速）
-            const clickY = rawClickY;                    // 直接使用原始座標，避免轉換延遲
+            // 🔧 座標已經通過修復工具處理，直接使用
 
             if (clickY < playerY) {                      // 點擊在太空船上方（任何位置）
                 // 點擊上方，設置向上移動目標
