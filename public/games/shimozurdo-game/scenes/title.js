@@ -151,6 +151,13 @@ export default class Title extends Phaser.Scene {
             this.createBackupSpaceship(width, height);      // 資源不存在時使用備用方案
         }
 
+        // 🔧 初始化調試模式和性能監控
+        this.debugMode = false; // 設為 true 啟用詳細調試信息
+        this.performanceStats = {
+            touchResponses: [],
+            averageResponseTime: 0
+        };
+
         // 設置太空船控制 - 初始化鍵盤和滑鼠控制
         this.setupSpaceshipControls();
     }
@@ -201,6 +208,59 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
+     * 🎨 顯示觸控點擊反饋效果
+     */
+    showTouchFeedback(x, y) {
+        // 創建點擊波紋效果
+        const ripple = this.add.circle(x, y, 5, 0x00ff00, 0.8);
+        ripple.setDepth(1000); // 確保在最上層
+
+        // 波紋擴散動畫
+        this.tweens.add({
+            targets: ripple,
+            scaleX: 3,
+            scaleY: 3,
+            alpha: 0,
+            duration: 300,
+            ease: 'Power2',
+            onComplete: () => {
+                ripple.destroy(); // 動畫完成後銷毀
+            }
+        });
+    }
+
+    /**
+     * 🎨 顯示太空船反饋效果
+     */
+    showPlayerFeedback(direction) {
+        if (!this.player) return;
+
+        // 太空船閃爍效果
+        const originalTint = this.player.tint;
+        const feedbackColor = direction === 'up' ? 0x00ff00 : 0xff4444; // 上綠下紅
+
+        this.player.setTint(feedbackColor);
+
+        // 恢復原色
+        this.time.delayedCall(100, () => {
+            if (this.player) {
+                this.player.setTint(originalTint);
+            }
+        });
+
+        // 輕微縮放效果
+        const originalScale = this.player.scaleX;
+        this.tweens.add({
+            targets: this.player,
+            scaleX: originalScale * 1.1,
+            scaleY: originalScale * 1.1,
+            duration: 50,
+            yoyo: true,
+            ease: 'Power1'
+        });
+    }
+
+    /**
      * 🎮 設置太空船控制（非物理方式）- 初始化多種輸入控制方式
      */
     setupSpaceshipControls() {
@@ -213,49 +273,43 @@ export default class Title extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();  // 創建方向鍵監聽器
         this.wasd = this.input.keyboard.addKeys('W,S,A,D');     // 創建WASD鍵監聽器
 
-        // 🎯 以太空船水平線為基準的點擊/觸控控制
+        // 🎯 以太空船水平線為基準的點擊/觸控控制（優化版）
         this.input.on('pointerdown', (pointer) => {     // 監聽滑鼠點擊或觸控事件
             if (!this.player) return;                   // 確保太空船存在
 
             // 如果是長按控制中，不執行點擊移動
             if (this.isLongPressing) return;
 
-            // 🔧 詳細的觸控調試信息 - 分析橫向模式問題
-            const screenInfo = {
-                windowSize: `${window.innerWidth}x${window.innerHeight}`,
-                gameSize: `${this.game.config.width}x${this.game.config.height}`,
-                cameraSize: `${this.cameras.main.width}x${this.cameras.main.height}`,
-                cameraZoom: this.cameras.main.zoom,
-                scaleMode: this.scale.scaleMode,
-                orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
-            };
+            // ⚡ 立即響應優化 - 減少計算複雜度
+            const startTime = performance.now();        // 記錄開始時間用於性能監控
 
-            // 🎯 座標轉換和調試
-            const rawClickY = pointer.y;                 // 原始點擊Y座標
-            const worldClickY = pointer.worldY;          // 世界座標Y
-            const playerY = this.player.y;               // 太空船當前Y座標
+            // 🎯 簡化座標處理 - 優先速度
+            const rawClickY = pointer.y;                // 原始點擊Y座標
+            const playerY = this.player.y;              // 太空船當前Y座標
 
-            // 🔧 計算縮放比例（與 Handler.js 中的邏輯一致）
-            const scaleX = this.cameras.main.width / this.game.screenBaseSize.width;
-            const scaleY = this.cameras.main.height / this.game.screenBaseSize.height;
-            const actualZoom = Math.max(scaleX, scaleY);
+            // 🎨 立即視覺反饋 - 在任何計算前先提供反饋
+            this.showTouchFeedback(pointer.x, rawClickY);
 
-            const coordinateInfo = {
-                rawPointer: `${pointer.x}, ${rawClickY}`,
-                worldPointer: `${pointer.worldX}, ${worldClickY}`,
-                playerPosition: `${this.player.x}, ${playerY}`,
-                scaleRatio: `scaleX: ${scaleX.toFixed(3)}, scaleY: ${scaleY.toFixed(3)}`,
-                actualZoom: actualZoom.toFixed(3),
-                cameraZoom: this.cameras.main.zoom.toFixed(3),
-                clickVsPlayer: `${rawClickY} vs ${playerY} (diff: ${rawClickY - playerY})`
-            };
+            // 🔧 簡化的調試信息（僅在需要時）
+            if (this.debugMode) {
+                const screenInfo = {
+                    windowSize: `${window.innerWidth}x${window.innerHeight}`,
+                    orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+                };
 
-            console.log(`🎯 [太空船基準線] 觸控檢測 - 點擊Y: ${rawClickY}, 太空船Y: ${playerY}`);
-            console.log(`📱 [螢幕信息] ${JSON.stringify(screenInfo)}`);
-            console.log(`📊 [座標詳情] ${JSON.stringify(coordinateInfo)}`);
+                const coordinateInfo = {
+                    rawPointer: `${pointer.x}, ${rawClickY}`,
+                    playerPosition: `${this.player.x}, ${playerY}`,
+                    clickVsPlayer: `${rawClickY} vs ${playerY} (diff: ${rawClickY - playerY})`
+                };
 
-            // 🔧 使用世界座標進行比較（更準確）
-            const clickY = worldClickY || rawClickY;     // 優先使用世界座標，回退到原始座標
+                console.log(`🎯 [太空船基準線] 觸控檢測 - 點擊Y: ${rawClickY}, 太空船Y: ${playerY}`);
+                console.log(`📱 [螢幕信息] ${JSON.stringify(screenInfo)}`);
+                console.log(`📊 [座標詳情] ${JSON.stringify(coordinateInfo)}`);
+            }
+
+            // 🔧 使用原始座標進行比較（更快速）
+            const clickY = rawClickY;                    // 直接使用原始座標，避免轉換延遲
 
             if (clickY < playerY) {                      // 點擊在太空船上方（任何位置）
                 // 點擊上方，設置向上移動目標
@@ -266,6 +320,47 @@ export default class Title extends Phaser.Scene {
                 const { height } = this;                 // 獲取場景高度
                 this.playerTargetY = Math.min(height - 80, playerY + 100);  // 設置目標位置，最低不超過底部80像素
                 console.log('� [太空船基準] 點擊太空船下方：向下移動！');
+            }
+            // ⚡ 快速方向判斷和響應
+            let direction = '';
+            if (clickY < playerY) {                      // 點擊在太空船上方（任何位置）
+                // 點擊上方，設置向上移動目標
+                this.playerTargetY = Math.max(80, playerY - 100);  // 設置目標位置，最高不超過80像素
+                direction = 'up';
+                if (this.debugMode) console.log('🚀 [太空船基準] 點擊太空船上方：向上移動！');
+            } else {                                     // 點擊在太空船下方（任何位置）
+                // 點擊下方，設置向下移動目標
+                const { height } = this;                 // 獲取場景高度
+                this.playerTargetY = Math.min(height - 80, playerY + 100);  // 設置目標位置，最低不超過底部80像素
+                direction = 'down';
+                if (this.debugMode) console.log('🚀 [太空船基準] 點擊太空船下方：向下移動！');
+            }
+
+            // 🎨 增強視覺反饋 - 太空船閃爍效果
+            this.showPlayerFeedback(direction);
+
+            // ⚡ 性能監控和統計
+            const endTime = performance.now();
+            const responseTime = endTime - startTime;
+
+            // 記錄性能數據
+            this.performanceStats.touchResponses.push(responseTime);
+            if (this.performanceStats.touchResponses.length > 100) {
+                this.performanceStats.touchResponses.shift(); // 保持最近100次記錄
+            }
+
+            // 計算平均響應時間
+            this.performanceStats.averageResponseTime =
+                this.performanceStats.touchResponses.reduce((a, b) => a + b, 0) /
+                this.performanceStats.touchResponses.length;
+
+            if (this.debugMode) {
+                console.log(`⚡ 觸控響應時間: ${responseTime.toFixed(2)}ms (平均: ${this.performanceStats.averageResponseTime.toFixed(2)}ms)`);
+
+                // 如果響應時間超過16ms（60fps），發出警告
+                if (responseTime > 16) {
+                    console.warn(`⚠️ 觸控響應延遲: ${responseTime.toFixed(2)}ms (建議<16ms)`);
+                }
             }
         });
 

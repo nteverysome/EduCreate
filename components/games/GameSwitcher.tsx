@@ -1299,7 +1299,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
             className="absolute inset-0 z-20 bg-black/50 text-white flex flex-col items-center justify-center gap-2"
             aria-label="全螢幕開始遊戲"
           >
-            <span className="text-lg font-semibold">🔒 鎖定全螢幕並開始</span>
+            <span className="text-lg font-semibold">鎖定全螢幕並開始</span>
             <span className="text-xs opacity-80">隱藏網址列和所有瀏覽器UI，防止意外退出</span>
           </button>
         )}
