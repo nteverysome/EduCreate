@@ -1120,7 +1120,17 @@ export default class GameScene extends Phaser.Scene {
 
     // 🎯 優化的飛機水平線基準觸控處理
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // 🔧 詳細的觸控調試信息
+      const screenInfo = {
+        windowSize: `${window.innerWidth}x${window.innerHeight}`,
+        cameraSize: `${this.cameras.main.width}x${this.cameras.main.height}`,
+        gameSize: `${this.game.config.width}x${this.game.config.height}`,
+        scaleMode: this.scale.scaleMode,
+        zoom: this.cameras.main.zoom
+      };
+
       console.log(`🎯 [觸控檢測] 遊戲狀態 - isPlaying: ${this.gameState.isPlaying}, isPaused: ${this.gameState.isPaused}, showStartScreen: ${this.showStartScreen}`);
+      console.log(`📱 [螢幕信息] ${JSON.stringify(screenInfo)}`);
 
       // 🎮 如果是開始畫面，處理開始遊戲
       if (this.showStartScreen) {
@@ -1143,7 +1153,17 @@ export default class GameScene extends Phaser.Scene {
       const clickY = pointer.y;
       const planeY = this.player.y; // 飛機當前的Y座標
 
+      // 🔧 詳細的座標調試信息
+      const coordinateInfo = {
+        rawPointer: `${pointer.x}, ${pointer.y}`,
+        worldPointer: `${pointer.worldX}, ${pointer.worldY}`,
+        cameraScroll: `${this.cameras.main.scrollX}, ${this.cameras.main.scrollY}`,
+        planePosition: `${this.player.x}, ${this.player.y}`,
+        clickVsPlane: `${clickY} vs ${planeY} (diff: ${clickY - planeY})`
+      };
+
       console.log(`🎯 [飛機基準線] 觸控檢測 - 點擊Y: ${clickY}, 飛機Y: ${planeY}, 差值: ${clickY - planeY}`);
+      console.log(`📊 [座標詳情] ${JSON.stringify(coordinateInfo)}`);
 
       if (clickY < planeY) {
         // 點擊飛機上方 - 向上移動

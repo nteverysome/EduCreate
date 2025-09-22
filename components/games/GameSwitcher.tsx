@@ -733,20 +733,40 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         const isLandscapeMobile = window.innerWidth === 812 && window.innerHeight === 375;
 
         if (isLandscapeMobile) {
-          // 強制設置手機橫向模式樣式，覆蓋所有 CSS
-          container.style.width = '100%';
-          container.style.height = '375px';
-          container.style.maxWidth = 'none';
-          container.style.aspectRatio = '812/375';
-          container.style.minHeight = '375px';
-          container.style.maxHeight = '375px';
+          // 🔧 優化手機橫向模式：保持遊戲可玩性和觸控準確性
+          const gameAspectRatio = 1274 / 739; // Phaser 遊戲的原始寬高比
+          const screenAspectRatio = 812 / 375; // 手機橫向的寬高比
 
-          console.log('🎯 強制設置手機橫向模式容器樣式:', {
-            width: container.style.width,
-            height: container.style.height,
-            maxWidth: container.style.maxWidth,
-            aspectRatio: container.style.aspectRatio,
-            actualSize: `${container.offsetWidth}x${container.offsetHeight}`
+          // 計算最佳尺寸：保持遊戲寬高比，最大化利用螢幕空間
+          let optimalWidth, optimalHeight;
+
+          if (screenAspectRatio > gameAspectRatio) {
+            // 螢幕更寬，以高度為基準
+            optimalHeight = 375;
+            optimalWidth = Math.round(375 * gameAspectRatio);
+          } else {
+            // 螢幕更高，以寬度為基準
+            optimalWidth = 812;
+            optimalHeight = Math.round(812 / gameAspectRatio);
+          }
+
+          // 設置優化後的容器樣式
+          container.style.width = `${optimalWidth}px`;
+          container.style.height = `${optimalHeight}px`;
+          container.style.maxWidth = `${optimalWidth}px`;
+          container.style.maxHeight = `${optimalHeight}px`;
+          container.style.minWidth = `${optimalWidth}px`;
+          container.style.minHeight = `${optimalHeight}px`;
+          container.style.aspectRatio = `${1274}/${739}`; // 保持遊戲原始寬高比
+          container.style.margin = '0 auto'; // 水平居中
+
+          console.log('🎯 優化手機橫向模式容器樣式:', {
+            screenSize: '812x375',
+            gameAspectRatio: gameAspectRatio.toFixed(3),
+            screenAspectRatio: screenAspectRatio.toFixed(3),
+            optimalSize: `${optimalWidth}x${optimalHeight}`,
+            actualSize: `${container.offsetWidth}x${container.offsetHeight}`,
+            touchAreaImprovement: '保持遊戲寬高比，提升觸控準確性'
           });
         }
       }
