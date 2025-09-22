@@ -220,10 +220,42 @@ export default class Title extends Phaser.Scene {
             // 如果是長按控制中，不執行點擊移動
             if (this.isLongPressing) return;
 
-            const clickY = pointer.y;                    // 獲取點擊的Y座標
-            const playerY = this.player.y;               // 獲取太空船當前Y座標
+            // 🔧 詳細的觸控調試信息 - 分析橫向模式問題
+            const screenInfo = {
+                windowSize: `${window.innerWidth}x${window.innerHeight}`,
+                gameSize: `${this.game.config.width}x${this.game.config.height}`,
+                cameraSize: `${this.cameras.main.width}x${this.cameras.main.height}`,
+                cameraZoom: this.cameras.main.zoom,
+                scaleMode: this.scale.scaleMode,
+                orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+            };
 
-            console.log(`🎯 [太空船基準線] 觸控檢測 - 點擊Y: ${clickY}, 太空船Y: ${playerY}`);
+            // 🎯 座標轉換和調試
+            const rawClickY = pointer.y;                 // 原始點擊Y座標
+            const worldClickY = pointer.worldY;          // 世界座標Y
+            const playerY = this.player.y;               // 太空船當前Y座標
+
+            // 🔧 計算縮放比例（與 Handler.js 中的邏輯一致）
+            const scaleX = this.cameras.main.width / this.game.screenBaseSize.width;
+            const scaleY = this.cameras.main.height / this.game.screenBaseSize.height;
+            const actualZoom = Math.max(scaleX, scaleY);
+
+            const coordinateInfo = {
+                rawPointer: `${pointer.x}, ${rawClickY}`,
+                worldPointer: `${pointer.worldX}, ${worldClickY}`,
+                playerPosition: `${this.player.x}, ${playerY}`,
+                scaleRatio: `scaleX: ${scaleX.toFixed(3)}, scaleY: ${scaleY.toFixed(3)}`,
+                actualZoom: actualZoom.toFixed(3),
+                cameraZoom: this.cameras.main.zoom.toFixed(3),
+                clickVsPlayer: `${rawClickY} vs ${playerY} (diff: ${rawClickY - playerY})`
+            };
+
+            console.log(`🎯 [太空船基準線] 觸控檢測 - 點擊Y: ${rawClickY}, 太空船Y: ${playerY}`);
+            console.log(`📱 [螢幕信息] ${JSON.stringify(screenInfo)}`);
+            console.log(`📊 [座標詳情] ${JSON.stringify(coordinateInfo)}`);
+
+            // 🔧 使用世界座標進行比較（更準確）
+            const clickY = worldClickY || rawClickY;     // 優先使用世界座標，回退到原始座標
 
             if (clickY < playerY) {                      // 點擊在太空船上方（任何位置）
                 // 點擊上方，設置向上移動目標
