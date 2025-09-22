@@ -418,15 +418,48 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         console.log('🧹 移除鎖定樣式表');
       }
 
-      // 恢復正常樣式
-      if (isMobile) {
-        document.documentElement.style.height = '';
-        document.body.style.height = '';
+      // 移除父頁面全螢幕樣式表
+      const parentStyle = document.getElementById('parent-fullscreen-style');
+      if (parentStyle) {
+        parentStyle.remove();
+        console.log('🧹 移除父頁面全螢幕樣式表');
       }
+
+      // 恢復正常樣式
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.height = '';
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+      document.body.style.touchAction = '';
+      document.body.style.userSelect = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.width = '';
+      document.body.style.zIndex = '';
+      document.body.style.background = '';
 
       console.log('✅ 強制清理完成');
     } catch (error) {
       console.warn('⚠️ 強制清理時發生錯誤:', error);
+    }
+  };
+
+  // 🧹 頁面載入時的初始清理
+  const initialCleanup = () => {
+    console.log('🧹 執行頁面載入初始清理');
+
+    // 檢查是否有殘留的鎖定狀態
+    const hasLockedClass = document.body.classList.contains('locked-fullscreen');
+    const hasParentClass = document.body.classList.contains('parent-fullscreen-game');
+    const hasLockedStyle = document.getElementById('locked-fullscreen-style');
+    const hasParentStyle = document.getElementById('parent-fullscreen-style');
+
+    if (hasLockedClass || hasParentClass || hasLockedStyle || hasParentStyle) {
+      console.log('🧹 發現殘留的鎖定狀態，執行清理');
+      forceCleanupLockState();
+    } else {
+      console.log('✅ 無殘留鎖定狀態');
     }
   };
 
@@ -621,6 +654,9 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   // 客戶端掛載狀態
   useEffect(() => {
     setMounted(true);
+
+    // 🧹 頁面載入時執行初始清理
+    initialCleanup();
 
     // 檢測螢幕尺寸
     const checkScreenSize = () => {
