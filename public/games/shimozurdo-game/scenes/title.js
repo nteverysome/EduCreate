@@ -399,8 +399,8 @@ export default class Title extends Phaser.Scene {
         });
 
         console.log('🎮 太空船控制設置完成：方向鍵、WASD、點擊');
-        // 🎮 長按上/下控制（手機專用）- 透明覆蓋層實現長按連續移動
-        this.setupMobileLongPressControls();
+        // 🔧 移除長按控制以避免覆蓋層阻擋點擊
+        // this.setupMobileLongPressControls(); // 暫時停用以修復點擊問題
     }
     /**
      * 🎮 設置手機長按上/下控制 - 透明覆蓋層實現長按連續移動
@@ -409,16 +409,15 @@ export default class Title extends Phaser.Scene {
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         if (!isMobile) return;
 
-        // 創建透明覆蓋層接管觸控
-        const overlay = document.createElement('div');
-        overlay.style.cssText = 'position:absolute;inset:0;z-index:999999;background:transparent;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;pointer-events:auto;';
+        // 🔧 修復：不創建阻擋性覆蓋層，直接在 Canvas 上處理長按
+        console.log('📱 手機長按控制：使用 Canvas 事件，不創建覆蓋層');
 
-        // 確保遊戲容器有相對定位
-        const gameContainer = document.getElementById('game-container') || document.body;
-        if (gameContainer.style.position !== 'relative') {
-            gameContainer.style.position = 'relative';
+        // 移除可能存在的舊覆蓋層
+        const existingOverlay = document.querySelector('div[style*="z-index:999999"]');
+        if (existingOverlay) {
+            existingOverlay.remove();
+            console.log('🗑️ 移除舊的阻擋性覆蓋層');
         }
-        gameContainer.appendChild(overlay);
 
         let rafId = 0, pressing = false, direction = null;
 
