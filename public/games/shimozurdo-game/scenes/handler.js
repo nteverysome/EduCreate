@@ -38,8 +38,15 @@ export default class Handler extends Phaser.Scene {
      * @param {Object} data - 傳遞給場景的初始化數據（可選）
      */
     launchScene(scene, data) {
-        // 使用 Phaser 的場景管理器啟動指定場景，場景會並行運行
-        this.scene.launch(scene, data)
+        // 對於主要遊戲場景，使用 start 確保可見和活躍
+        if (scene === 'title' || scene === 'menu') {
+            console.log(`🚀 啟動主要場景: ${scene}`);
+            this.scene.start(scene, data);
+        } else {
+            // 對於背景場景（如 preload, hub），使用 launch 並行運行
+            console.log(`🔧 啟動背景場景: ${scene}`);
+            this.scene.launch(scene, data);
+        }
         // 獲取並保存場景實例的引用，方便後續操作
         this.gameScene = this.scene.get(scene)
     }
