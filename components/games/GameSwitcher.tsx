@@ -341,6 +341,29 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     }
   };
 
+  // 🔒 智能觸控事件處理（只在遊戲區域內禁用滾動）
+  const handleSmartTouchMove = (e: TouchEvent) => {
+    // 檢查是否在全螢幕狀態
+    const isInFullscreen = !!(document.fullscreenElement ||
+                             (document as any).webkitFullscreenElement ||
+                             (document as any).mozFullScreenElement ||
+                             (document as any).msFullscreenElement);
+
+    // 檢查是否有鎖定全螢幕樣式
+    const hasLockedClass = document.body.classList.contains('locked-fullscreen');
+
+    // 只在真正的鎖定全螢幕狀態下才阻止滾動
+    if (isInFullscreen && hasLockedClass) {
+      console.log('🔒 鎖定全螢幕狀態，阻止觸控滾動');
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+
+    // 其他情況允許正常滾動
+    return true;
+  };
+
   const enableFullscreenLock = () => {
     console.log('🔒 啟用全螢幕鎖定功能');
 
@@ -356,20 +379,55 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     // 禁用常見的退出全螢幕快捷鍵
     document.addEventListener('keydown', handleFullscreenLockKeys, { passive: false });
 
-    // 防止滾動
-    document.addEventListener('touchmove', preventDefaultEvent, { passive: false });
+    // 🔒 智能滾動控制（只在真正全螢幕時禁用）
+    document.addEventListener('touchmove', handleSmartTouchMove as any, { passive: false });
     document.addEventListener('wheel', preventDefaultEvent, { passive: false });
   };
 
   const disableFullscreenLock = () => {
     console.log('🔓 停用全螢幕鎖定功能');
 
-    document.removeEventListener('contextmenu', preventDefaultEvent);
-    document.removeEventListener('selectstart', preventDefaultEvent);
-    document.removeEventListener('dragstart', preventDefaultEvent);
-    document.removeEventListener('keydown', handleFullscreenLockKeys);
-    document.removeEventListener('touchmove', preventDefaultEvent);
-    document.removeEventListener('wheel', preventDefaultEvent);
+    try {
+      document.removeEventListener('contextmenu', preventDefaultEvent);
+      document.removeEventListener('selectstart', preventDefaultEvent);
+      document.removeEventListener('dragstart', preventDefaultEvent);
+      document.removeEventListener('keydown', handleFullscreenLockKeys);
+      document.removeEventListener('touchmove', handleSmartTouchMove as any);
+      document.removeEventListener('wheel', preventDefaultEvent);
+      console.log('✅ 所有鎖定事件監聽器已移除');
+    } catch (error) {
+      console.warn('⚠️ 移除事件監聽器時發生錯誤:', error);
+    }
+  };
+
+  // 🔧 強制清理所有鎖定狀態（防護性清理）
+  const forceCleanupLockState = () => {
+    console.log('🧹 執行強制清理鎖定狀態');
+
+    try {
+      // 移除所有可能的事件監聽器
+      disableFullscreenLock();
+
+      // 移除所有鎖定相關的CSS類
+      document.body.classList.remove('parent-fullscreen-game', 'locked-fullscreen');
+
+      // 移除鎖定樣式表
+      const lockedStyle = document.getElementById('locked-fullscreen-style');
+      if (lockedStyle) {
+        lockedStyle.remove();
+        console.log('🧹 移除鎖定樣式表');
+      }
+
+      // 恢復正常樣式
+      if (isMobile) {
+        document.documentElement.style.height = '';
+        document.body.style.height = '';
+      }
+
+      console.log('✅ 強制清理完成');
+    } catch (error) {
+      console.warn('⚠️ 強制清理時發生錯誤:', error);
+    }
   };
 
   // 隱藏地址欄（移動設備）
@@ -592,13 +650,42 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     document.addEventListener('mozfullscreenchange', handleFullscreenChange);
     document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
+    // 🧹 頁面卸載時的清理
+    const handleBeforeUnload = () => {
+      console.log('🧹 頁面即將卸載，執行清理');
+      forceCleanupLockState();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log('🧹 頁面隱藏，執行預防性清理');
+        // 如果頁面被隱藏且處於鎖定狀態，執行清理
+        if (document.body.classList.contains('locked-fullscreen')) {
+          forceCleanupLockState();
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
+      console.log('🧹 GameSwitcher 組件卸載，執行清理');
+
+      // 清理鎖定狀態
+      forceCleanupLockState();
+
+      // 清理原有事件監聽器
       window.removeEventListener('resize', checkScreenSize);
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
       document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+
+      // 清理新增的事件監聽器
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [showExitOverlay]);
 
