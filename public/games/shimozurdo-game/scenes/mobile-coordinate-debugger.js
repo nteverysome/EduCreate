@@ -91,13 +91,30 @@ class MobileCoordinateDebugger {
      * 設置DOM事件監聽器 - 獲取真正的原始觸控座標
      */
     setupDOMEventListeners() {
-        // 獲取canvas元素
+        // 獲取canvas元素和其邊界信息
         const canvas = this.scene.game.canvas;
+        const canvasRect = canvas.getBoundingClientRect();
 
-        // 監聽觸控事件（手機）
-        canvas.addEventListener('touchstart', (event) => {
+        console.log('🔴 Canvas邊界信息:', {
+            left: canvasRect.left,
+            top: canvasRect.top,
+            right: canvasRect.right,
+            bottom: canvasRect.bottom,
+            width: canvasRect.width,
+            height: canvasRect.height
+        });
+
+        // 監聽整個頁面的觸控事件（手機）- 不限制在Canvas內
+        document.addEventListener('touchstart', (event) => {
             if (event.touches.length > 0) {
                 const touch = event.touches[0];
+                const isInCanvas = (
+                    touch.clientX >= canvasRect.left &&
+                    touch.clientX <= canvasRect.right &&
+                    touch.clientY >= canvasRect.top &&
+                    touch.clientY <= canvasRect.bottom
+                );
+
                 this.lastDOMCoordinates = {
                     clientX: touch.clientX,
                     clientY: touch.clientY,
@@ -105,14 +122,23 @@ class MobileCoordinateDebugger {
                     pageY: touch.pageY,
                     screenX: touch.screenX,
                     screenY: touch.screenY,
-                    type: 'touch'
+                    type: 'touch',
+                    isInCanvas: isInCanvas,
+                    canvasRect: canvasRect
                 };
-                console.log('🔴 [DOM觸控] 真正的原始座標:', this.lastDOMCoordinates);
+                console.log('🔴 [DOM觸控-全頁面] 真正的原始座標:', this.lastDOMCoordinates);
             }
         }, { passive: true });
 
-        // 監聽滑鼠事件（桌面測試）
-        canvas.addEventListener('mousedown', (event) => {
+        // 監聽整個頁面的滑鼠事件（桌面測試）- 不限制在Canvas內
+        document.addEventListener('mousedown', (event) => {
+            const isInCanvas = (
+                event.clientX >= canvasRect.left &&
+                event.clientX <= canvasRect.right &&
+                event.clientY >= canvasRect.top &&
+                event.clientY <= canvasRect.bottom
+            );
+
             this.lastDOMCoordinates = {
                 clientX: event.clientX,
                 clientY: event.clientY,
@@ -120,12 +146,14 @@ class MobileCoordinateDebugger {
                 pageY: event.pageY,
                 screenX: event.screenX,
                 screenY: event.screenY,
-                type: 'mouse'
+                type: 'mouse',
+                isInCanvas: isInCanvas,
+                canvasRect: canvasRect
             };
-            console.log('🔴 [DOM滑鼠] 真正的原始座標:', this.lastDOMCoordinates);
+            console.log('🔴 [DOM滑鼠-全頁面] 真正的原始座標:', this.lastDOMCoordinates);
         });
 
-        console.log('🔴 DOM事件監聽器已設置，將追蹤真正的原始觸控座標');
+        console.log('🔴 DOM事件監聽器已設置到整個頁面，將追蹤全螢幕觸控座標');
     }
     
     /**
@@ -420,17 +448,25 @@ class MobileCoordinateDebugger {
             const phaserY = basicInfo.rawPointer.y;
             const diffX = Math.abs(domX - phaserX);
             const diffY = Math.abs(domY - phaserY);
+            const isInCanvas = this.lastDOMCoordinates.isInCanvas;
 
             debugInfo += `\n🔴 DOM原始: (${domX.toFixed(0)}, ${domY.toFixed(0)})\n`;
             debugInfo += `🟠 Phaser: (${phaserX.toFixed(0)}, ${phaserY.toFixed(0)})\n`;
             debugInfo += `📏 差異: (${diffX.toFixed(0)}, ${diffY.toFixed(0)})\n`;
+            debugInfo += `📍 在Canvas內: ${isInCanvas ? '✅' : '❌'}\n`;
+
+            if (this.lastDOMCoordinates.canvasRect) {
+                const rect = this.lastDOMCoordinates.canvasRect;
+                debugInfo += `🖼️ Canvas: ${rect.width.toFixed(0)}x${rect.height.toFixed(0)}\n`;
+            }
         }
 
-        debugInfo += `\n🔴 紅色圓圈 = DOM真正觸控位置\n`;
+        debugInfo += `\n🔴 紅色圓圈 = DOM真正觸控位置（全螢幕）\n`;
         debugInfo += `🟠 橙色圓圈 = Phaser認為位置\n`;
         debugInfo += `🟢 綠色圓圈 = 修復後位置\n`;
         debugInfo += `🔵 藍色方框 = 太空船位置\n`;
-        debugInfo += `\n💡 長按螢幕3秒可清除所有標記\n`;
+        debugInfo += `\n💡 現在監聽整個頁面，不限Canvas\n`;
+        debugInfo += `💡 長按螢幕3秒可清除所有標記\n`;
 
         this.debugText.setText(debugInfo);
     }
