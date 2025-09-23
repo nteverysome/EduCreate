@@ -20,6 +20,10 @@ export default class Title extends Phaser.Scene {
 
     create() {
         const { width, height } = this                   // 解構賦值獲取寬高
+
+        // 🔧 修復：在場景創建時立即清理攔截層
+        this.cleanupInterceptLayers();
+
         // CONFIG SCENE - 場景配置區塊
         this.handlerScene.updateResize(this)             // 更新響應式配置
         if (this.game.debugMode)                         // 如果是調試模式
@@ -158,7 +162,11 @@ export default class Title extends Phaser.Scene {
             averageResponseTime: 0
         };
 
-        // 🔧 移除座標修復工具 - 使用原生Phaser座標
+        // 🔧 初始化座標修復工具
+        this.coordinateFix = new (window.CoordinateFix || class {
+            getOptimalCoordinates(pointer) { return { x: pointer.x, y: pointer.y }; }
+            testCoordinateAccuracy() { return { isAccurate: true }; }
+        })(this);
 
         // 設置太空船控制 - 初始化鍵盤和滑鼠控制
         this.setupSpaceshipControls();
@@ -275,6 +283,9 @@ export default class Title extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();  // 創建方向鍵監聽器
         this.wasd = this.input.keyboard.addKeys('W,S,A,D');     // 創建WASD鍵監聽器
 
+        // 🔧 修復：在設置觸控事件前，先清理任何可能的攔截層
+        this.cleanupInterceptLayers();
+
         // 🎯 以太空船水平線為基準的點擊/觸控控制（座標偏移修復版）
         this.input.on('pointerdown', (pointer) => {     // 監聽滑鼠點擊或觸控事件
             if (!this.player) return;                   // 確保太空船存在
@@ -285,9 +296,10 @@ export default class Title extends Phaser.Scene {
             // ⚡ 立即響應優化 - 減少計算複雜度
             const startTime = performance.now();        // 記錄開始時間用於性能監控
 
-            // 🔍 使用原生Phaser座標 - 簡化處理
-            let clickX = pointer.x;
-            let clickY = pointer.y;
+            // 🔧 座標偏移修復 - 使用座標修復工具
+            const optimalCoords = this.coordinateFix.getOptimalCoordinates(pointer);
+            const clickX = optimalCoords.x;
+            const clickY = optimalCoords.y;
 
             const playerY = this.player.y;              // 太空船當前Y座標
 
@@ -396,8 +408,38 @@ export default class Title extends Phaser.Scene {
         console.log('🎮 太空船控制設置完成：方向鍵、WASD、點擊');
         // 🔧 移除長按控制以避免覆蓋層阻擋點擊
         // this.setupMobileLongPressControls(); // 暫時停用以修復點擊問題
+    }
 
-        // 🔍 移除手機座標調試器 - 使用原生Phaser處理
+    /**
+     * 🔧 清理可能攔截觸控事件的層
+     */
+    cleanupInterceptLayers() {
+        console.log('🧹 清理攔截層');
+
+        // 移除高 z-index 的覆蓋層
+        const overlays = document.querySelectorAll('div[style*="z-index:999999"], div[style*="z-index: 999999"]');
+        overlays.forEach(overlay => {
+            console.log('🗑️ 移除攔截層:', overlay);
+            overlay.remove();
+        });
+
+        // 移除可能攔截觸控的 CSS 類別
+        document.body.classList.remove('mobile-fullscreen', 'fullscreen-game');
+
+        // 確保遊戲容器和 Canvas 能接收觸控事件
+        const gameContainer = document.getElementById('game');
+        if (gameContainer) {
+            gameContainer.style.pointerEvents = 'auto';
+            gameContainer.style.touchAction = 'manipulation';
+        }
+
+        const canvas = this.sys.game.canvas;
+        if (canvas) {
+            canvas.style.pointerEvents = 'auto';
+            canvas.style.touchAction = 'manipulation';
+        }
+
+        console.log('✅ 攔截層清理完成');
     }
     /**
      * 🎮 設置手機長按上/下控制 - 透明覆蓋層實現長按連續移動
@@ -501,8 +543,6 @@ export default class Title extends Phaser.Scene {
 
         console.log('📱 手機長按上/下控制已設置');
     }
-
-
 
     /**
      * ☁️ 創建敵人系統 - 初始化雲朵敵人生成和管理系統

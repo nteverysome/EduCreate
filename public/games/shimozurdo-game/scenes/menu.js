@@ -653,7 +653,7 @@ export default class Menu extends Phaser.Scene {
             }
 
             realMobileStyle.textContent = `
-                /* 真實手機全螢幕樣式 */
+                /* 真實手機全螢幕樣式 - 修復觸控攔截問題 */
                 body.real-mobile-fullscreen {
                     margin: 0 !important;
                     padding: 0 !important;
@@ -671,6 +671,8 @@ export default class Menu extends Phaser.Scene {
                     -moz-user-select: none !important;
                     -ms-user-select: none !important;
                     user-select: none !important;
+                    /* 🔧 修復：確保 body 不攔截觸控事件 */
+                    pointer-events: none !important;
                 }
 
                 body.real-mobile-fullscreen #game {
@@ -686,7 +688,10 @@ export default class Menu extends Phaser.Scene {
                     border: none !important;
                     outline: none !important;
                     box-shadow: none !important;
-                    z-index: 9999 !important;
+                    /* 🔧 修復：移除高 z-index 避免攔截觸控事件 */
+                    z-index: auto !important;
+                    /* 🔧 確保觸控事件能正確傳遞 */
+                    pointer-events: auto !important;
                 }
 
                 body.real-mobile-fullscreen canvas {
@@ -704,6 +709,14 @@ export default class Menu extends Phaser.Scene {
                     -webkit-appearance: none !important;
                     -moz-appearance: none !important;
                     appearance: none !important;
+                    /* 🔧 修復：確保 Canvas 能接收觸控事件 */
+                    pointer-events: auto !important;
+                    touch-action: manipulation !important;
+                    -webkit-touch-callout: none !important;
+                    -webkit-user-select: none !important;
+                    -moz-user-select: none !important;
+                    -ms-user-select: none !important;
+                    user-select: none !important;
                 }
 
                 /* 移除所有可能的紅色框框和邊框 */
@@ -763,7 +776,7 @@ export default class Menu extends Phaser.Scene {
             }
 
             mobileStyle.textContent = `
-                /* 手機專用全螢幕樣式（iframe 內部安全版） */
+                /* 手機專用全螢幕樣式（iframe 內部安全版） - 修復觸控攔截問題 */
                 body.mobile-fullscreen {
                     margin: 0 !important;
                     padding: 0 !important;
@@ -778,6 +791,8 @@ export default class Menu extends Phaser.Scene {
                     -moz-user-select: none !important;
                     -ms-user-select: none !important;
                     user-select: none !important;
+                    /* 🔧 修復：確保 body 不攔截觸控事件 */
+                    pointer-events: none !important;
                 }
 
                 /* 只調整 #game 與 canvas，不隱藏任何元素 */
@@ -791,6 +806,9 @@ export default class Menu extends Phaser.Scene {
                     border: none !important;
                     outline: none !important;
                     box-shadow: none !important;
+                    /* 🔧 修復：確保遊戲容器能接收觸控事件 */
+                    pointer-events: auto !important;
+                    touch-action: manipulation !important;
                 }
 
                 body.mobile-fullscreen canvas {
@@ -799,6 +817,9 @@ export default class Menu extends Phaser.Scene {
                     height: 100% !important;
                     object-fit: contain !important;
                     background: transparent !important;
+                    /* 🔧 修復：確保 Canvas 能接收觸控事件 */
+                    pointer-events: auto !important;
+                    touch-action: manipulation !important;
                 }
 
                 /* iOS Safari 特殊處理 */
@@ -1319,12 +1340,14 @@ export default class Menu extends Phaser.Scene {
             }
 
             fullscreenStyle.textContent = `
-                /* 桌面全螢幕遊戲樣式（iframe 內部安全版） */
+                /* 桌面全螢幕遊戲樣式（iframe 內部安全版） - 修復觸控攔截問題 */
                 body.fullscreen-game {
                     margin: 0 !important;
                     padding: 0 !important;
                     overflow: hidden !important;
                     background: black !important;
+                    /* 🔧 修復：確保 body 不攔截觸控事件 */
+                    pointer-events: none !important;
                 }
 
                 /* 只調整遊戲容器與畫布，不隱藏任意元素，避免黑屏 */
@@ -1335,19 +1358,25 @@ export default class Menu extends Phaser.Scene {
                     width: 100vw !important;
                     height: 100dvh !important;
                     background: black !important;
+                    /* 🔧 修復：確保遊戲容器能接收觸控事件 */
+                    pointer-events: auto !important;
+                    touch-action: manipulation !important;
                 }
 
-                /* 確保遊戲 canvas 正確顯示 */
+                /* 確保遊戲 canvas 正確顯示並能接收觸控事件 */
                 body.fullscreen-game canvas {
                     display: block !important;
                     width: 100% !important;
                     height: 100% !important;
                     object-fit: contain !important;
                     background: transparent !important;
+                    /* 🔧 修復：確保 Canvas 能接收觸控事件 */
+                    pointer-events: auto !important;
+                    touch-action: manipulation !important;
                 }
             `;
 
-            // 添加 body class
+            // 🔧 修復：仍然添加 CSS 類別，但通過 CSS 確保不攔截觸控事件
             document.body.classList.add('fullscreen-game');
 
             console.log('✅ 桌面全螢幕樣式已添加');

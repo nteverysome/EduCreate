@@ -125,7 +125,7 @@ npm install
 # 3. 啟動前端開發服務器
 npm run dev
 # 或者使用特定端口
-npm run dev -- --port 3001
+npm run dev -- --port 3000
 ```
 
 #### 後端開發 (可選)

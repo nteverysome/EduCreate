@@ -297,10 +297,11 @@ export default class Hub extends Phaser.Scene {
             const isRealMobile = menuScene.detectRealMobileDevice ? menuScene.detectRealMobileDevice() : false;
 
             if (isRealMobile && menuScene.setRealMobileFullscreenStyles) {
-                // 真實手機：使用 CSS 全螢幕
-                console.log('📱 使用 menu 場景的 CSS 全螢幕方法');
+                // 真實手機：使用 CSS 全螢幕，但不添加可能攔截觸控的 CSS 類別
+                console.log('📱 使用 menu 場景的 CSS 全螢幕方法（優化觸控）');
                 menuScene.setRealMobileFullscreenStyles();
-                document.body.classList.add('real-mobile-fullscreen');
+                // 🔧 修復：不添加可能攔截觸控的 CSS 類別到 body
+                // document.body.classList.add('real-mobile-fullscreen');
 
                 // 處理地址欄隱藏
                 if (menuScene.handleAddressBarHiding) {
@@ -334,9 +335,16 @@ export default class Hub extends Phaser.Scene {
         this.requestParentExitFullscreen();
 
         // 🧹 第二步：清理遊戲內部全螢幕（第二層）
-        // 1. 移除所有 CSS 全螢幕樣式（這是關鍵！）
-        console.log('🧹 移除父頁面 CSS 全螢幕樣式');
+        // 1. 移除所有可能攔截觸控的 CSS 全螢幕樣式（這是關鍵！）
+        console.log('🧹 移除父頁面 CSS 全螢幕樣式和攔截層');
         document.body.classList.remove('mobile-fullscreen', 'real-mobile-fullscreen', 'fullscreen-game');
+
+        // 🔧 修復：移除任何可能的透明攔截層
+        const overlays = document.querySelectorAll('div[style*="z-index:999999"], div[style*="z-index: 999999"]');
+        overlays.forEach(overlay => {
+            console.log('🗑️ 移除發現的攔截層:', overlay);
+            overlay.remove();
+        });
 
         // 2. 移除 CSS 樣式標籤
         const realMobileStyle = document.getElementById('real-mobile-fullscreen-style');
