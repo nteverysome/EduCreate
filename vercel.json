@@ -138,6 +138,14 @@
       "destination": "/games/starshake-game/dist/index.html"
     },
     {
+      "source": "/games/starshake-game/dist",
+      "destination": "/games/starshake-game/dist/index.html"
+    },
+    {
+      "source": "/games/starshake-game/dist/",
+      "destination": "/games/starshake-game/dist/index.html"
+    },
+    {
       "source": "/games/starshake-game/(.*)",
       "destination": "/games/starshake-game/$1"
     }
