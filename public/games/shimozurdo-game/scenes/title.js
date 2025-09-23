@@ -5,6 +5,7 @@ export default class Title extends Phaser.Scene {
     sceneStopped = false        // 場景停止狀態標記
     backgroundLayers = null     // 視差背景層物件容器
     scrollPositions = null      // 各背景層滾動位置記錄
+    mobileDebugger = null       // 手機座標調試器
 
     constructor() {
         super({ key: 'title' })  // 註冊場景名稱為 'title'
@@ -289,10 +290,19 @@ export default class Title extends Phaser.Scene {
             // ⚡ 立即響應優化 - 減少計算複雜度
             const startTime = performance.now();        // 記錄開始時間用於性能監控
 
-            // 🔧 座標偏移修復 - 使用座標修復工具
-            const optimalCoords = this.coordinateFix.getOptimalCoordinates(pointer);
-            const clickX = optimalCoords.x;
-            const clickY = optimalCoords.y;
+            // 🔍 座標偏移修復 - 使用強化版手機調試器（如果可用）
+            let clickX, clickY;
+            if (this.mobileDebugger) {
+                const debugFix = this.mobileDebugger.getBestCoordinateFix(pointer);
+                clickX = debugFix.x;
+                clickY = debugFix.y;
+                console.log(`🔍 [調試器修復] 方法: ${debugFix.method}, 信心度: ${debugFix.confidence}`);
+            } else {
+                // 回退到原有的座標修復工具
+                const optimalCoords = this.coordinateFix.getOptimalCoordinates(pointer);
+                clickX = optimalCoords.x;
+                clickY = optimalCoords.y;
+            }
 
             const playerY = this.player.y;              // 太空船當前Y座標
 
@@ -401,6 +411,9 @@ export default class Title extends Phaser.Scene {
         console.log('🎮 太空船控制設置完成：方向鍵、WASD、點擊');
         // 🔧 移除長按控制以避免覆蓋層阻擋點擊
         // this.setupMobileLongPressControls(); // 暫時停用以修復點擊問題
+
+        // 🔍 啟動手機座標調試器（用於解決真實手機環境的座標偏移問題）
+        this.setupMobileCoordinateDebugger();
     }
     /**
      * 🎮 設置手機長按上/下控制 - 透明覆蓋層實現長按連續移動
@@ -503,6 +516,34 @@ export default class Title extends Phaser.Scene {
         overlay.addEventListener('mousemove', preventDefaults, { passive: false });
 
         console.log('📱 手機長按上/下控制已設置');
+    }
+
+    /**
+     * 🔍 設置手機座標調試器 - 實時診斷座標偏移問題
+     */
+    setupMobileCoordinateDebugger() {
+        // 檢查是否為手機設備
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (isMobile || this.game.debugMode) {
+            console.log('🔍 啟動手機座標調試器');
+
+            // 創建調試器實例
+            if (window.MobileCoordinateDebugger) {
+                this.mobileDebugger = new window.MobileCoordinateDebugger(this);
+
+                // 替換原有的座標修復邏輯
+                this.getBestCoordinateFix = (pointer) => {
+                    return this.mobileDebugger.getBestCoordinateFix(pointer);
+                };
+
+                console.log('✅ 手機座標調試器已啟動，將在螢幕上顯示實時座標信息');
+            } else {
+                console.warn('⚠️ MobileCoordinateDebugger 類別未載入');
+            }
+        } else {
+            console.log('💻 桌面環境，跳過手機座標調試器');
+        }
     }
 
     /**
