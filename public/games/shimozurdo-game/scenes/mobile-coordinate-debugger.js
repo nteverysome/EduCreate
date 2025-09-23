@@ -126,6 +126,10 @@ class MobileCoordinateDebugger {
                     isInCanvas: isInCanvas,
                     canvasRect: canvasRect
                 };
+
+                // 🔴 立即繪製紅色標記 - 不等待Phaser事件
+                this.drawImmediateDOMMarker(touch.clientX, touch.clientY, isInCanvas);
+
                 console.log('🔴 [DOM觸控-全頁面] 真正的原始座標:', this.lastDOMCoordinates);
             }
         }, { passive: true });
@@ -150,10 +154,59 @@ class MobileCoordinateDebugger {
                 isInCanvas: isInCanvas,
                 canvasRect: canvasRect
             };
+
+            // 🔴 立即繪製紅色標記 - 不等待Phaser事件
+            this.drawImmediateDOMMarker(event.clientX, event.clientY, isInCanvas);
+
             console.log('🔴 [DOM滑鼠-全頁面] 真正的原始座標:', this.lastDOMCoordinates);
         });
 
         console.log('🔴 DOM事件監聽器已設置到整個頁面，將追蹤全螢幕觸控座標');
+    }
+
+    /**
+     * 立即繪製DOM標記 - 不等待Phaser事件觸發
+     */
+    drawImmediateDOMMarker(clientX, clientY, isInCanvas) {
+        try {
+            // 將DOM座標轉換為Phaser世界座標
+            const canvas = this.scene.game.canvas;
+            const canvasRect = canvas.getBoundingClientRect();
+
+            // 計算相對於Canvas的座標
+            const canvasX = clientX - canvasRect.left;
+            const canvasY = clientY - canvasRect.top;
+
+            // 轉換為Phaser世界座標（考慮縮放）
+            const scaleX = this.scene.game.config.width / canvasRect.width;
+            const scaleY = this.scene.game.config.height / canvasRect.height;
+
+            const worldX = canvasX * scaleX;
+            const worldY = canvasY * scaleY;
+
+            // 創建紅色標記
+            const marker = this.scene.add.circle(worldX, worldY, 8, 0xff0000, 0.8);
+            marker.setDepth(1000);
+
+            // 添加到標記列表
+            this.visualMarkers.push(marker);
+
+            // 添加文字標籤
+            const label = this.scene.add.text(worldX + 15, worldY - 10,
+                `DOM(${clientX.toFixed(0)},${clientY.toFixed(0)})${isInCanvas ? '✅' : '❌'}`, {
+                fontSize: '12px',
+                fill: '#ff0000',
+                backgroundColor: '#000000',
+                padding: { x: 4, y: 2 }
+            });
+            label.setDepth(1001);
+            this.visualMarkers.push(label);
+
+            console.log(`🔴 [立即標記] DOM座標(${clientX}, ${clientY}) → 世界座標(${worldX.toFixed(1)}, ${worldY.toFixed(1)}) Canvas內:${isInCanvas}`);
+
+        } catch (error) {
+            console.error('🔴 [立即標記錯誤]', error);
+        }
     }
     
     /**
@@ -461,11 +514,12 @@ class MobileCoordinateDebugger {
             }
         }
 
-        debugInfo += `\n🔴 紅色圓圈 = DOM真正觸控位置（全螢幕）\n`;
+        debugInfo += `\n🔴 紅色圓圈 = DOM真正觸控位置（即時顯示）\n`;
         debugInfo += `🟠 橙色圓圈 = Phaser認為位置\n`;
         debugInfo += `🟢 綠色圓圈 = 修復後位置\n`;
         debugInfo += `🔵 藍色方框 = 太空船位置\n`;
-        debugInfo += `\n💡 現在監聽整個頁面，不限Canvas\n`;
+        debugInfo += `\n💡 紅色標記立即顯示，不等待Phaser事件\n`;
+        debugInfo += `💡 現在可追蹤全螢幕任何位置的觸控\n`;
         debugInfo += `💡 長按螢幕3秒可清除所有標記\n`;
 
         this.debugText.setText(debugInfo);
