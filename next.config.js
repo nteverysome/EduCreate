@@ -88,6 +88,14 @@ const nextConfig = {
         destination: '/games/starshake-game/dist/index.html'
       },
       {
+        source: '/games/starshake-game/dist',
+        destination: '/games/starshake-game/dist/index.html'
+      },
+      {
+        source: '/games/starshake-game/dist/',
+        destination: '/games/starshake-game/dist/index.html'
+      },
+      {
         source: '/games/starshake-game/:path*',
         destination: '/games/starshake-game/:path*'
       },
