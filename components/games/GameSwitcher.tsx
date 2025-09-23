@@ -195,6 +195,18 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '🏰',
     estimatedLoadTime: 800
   },
+  {
+    id: 'blastemup-game',
+    name: 'blastemup',
+    displayName: 'Blastemup 太空射擊',
+    description: '駕駛太空船在宇宙中戰鬥，射擊敵人和小行星。經典的太空射擊遊戲，訓練反應速度和手眼協調',
+    type: 'iframe',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '💥',
+    estimatedLoadTime: 900
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -285,6 +297,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/fate-game/dist/';
     case 'dungeon-game':
       return '/games/dungeon-game/dist/';
+    case 'blastemup-game':
+      return '/games/blastemup-game/dist/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':

@@ -260,6 +260,22 @@
     {
       "source": "/games/dungeon-game/(.*)",
       "destination": "/games/dungeon-game/$1"
+    },
+    {
+      "source": "/games/blastemup-game",
+      "destination": "/games/blastemup-game/dist/index.html"
+    },
+    {
+      "source": "/games/blastemup-game/dist",
+      "destination": "/games/blastemup-game/dist/index.html"
+    },
+    {
+      "source": "/games/blastemup-game/dist/",
+      "destination": "/games/blastemup-game/dist/index.html"
+    },
+    {
+      "source": "/games/blastemup-game/(.*)",
+      "destination": "/games/blastemup-game/$1"
     }
   ]
 }

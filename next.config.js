@@ -217,6 +217,23 @@ const nextConfig = {
         source: '/games/dungeon-game/:path*',
         destination: '/games/dungeon-game/:path*'
       },
+      // Blastemup 太空射擊遊戲路由
+      {
+        source: '/games/blastemup-game',
+        destination: '/games/blastemup-game/dist/index.html'
+      },
+      {
+        source: '/games/blastemup-game/dist',
+        destination: '/games/blastemup-game/dist/index.html'
+      },
+      {
+        source: '/games/blastemup-game/dist/',
+        destination: '/games/blastemup-game/dist/index.html'
+      },
+      {
+        source: '/games/blastemup-game/:path*',
+        destination: '/games/blastemup-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',
