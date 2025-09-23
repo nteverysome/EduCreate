@@ -56,6 +56,8 @@ node_modules/prisma/engines/
 out/
 build/
 dist/
+# 但允許遊戲的 dist 目錄
+!public/games/*/dist/
 
 # 緩存
 .cache/
