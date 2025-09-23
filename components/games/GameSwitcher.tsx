@@ -183,6 +183,18 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '⚡',
     estimatedLoadTime: 1400
   },
+  {
+    id: 'dungeon-game',
+    name: 'dungeon',
+    displayName: 'Dungeon 地牢探險',
+    description: '探索神秘地牢，收集寶藏，戰勝怪物。基於 Phaser 3 的 2D 冒險遊戲，訓練空間記憶和策略思維',
+    type: 'iframe',
+    memoryType: '空間視覺記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🏰',
+    estimatedLoadTime: 800
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -271,6 +283,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/mars-game/dist/';
     case 'fate-game':
       return '/games/fate-game/dist/';
+    case 'dungeon-game':
+      return '/games/dungeon-game/dist/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':

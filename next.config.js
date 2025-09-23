@@ -200,6 +200,23 @@ const nextConfig = {
         source: '/games/fate-game/:path*',
         destination: '/games/fate-game/:path*'
       },
+      // Dungeon 地牢探險遊戲路由
+      {
+        source: '/games/dungeon-game',
+        destination: '/games/dungeon-game/dist/index.html'
+      },
+      {
+        source: '/games/dungeon-game/dist',
+        destination: '/games/dungeon-game/dist/index.html'
+      },
+      {
+        source: '/games/dungeon-game/dist/',
+        destination: '/games/dungeon-game/dist/index.html'
+      },
+      {
+        source: '/games/dungeon-game/:path*',
+        destination: '/games/dungeon-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',

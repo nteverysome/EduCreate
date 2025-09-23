@@ -244,6 +244,22 @@
     {
       "source": "/games/fate-game/(.*)",
       "destination": "/games/fate-game/$1"
+    },
+    {
+      "source": "/games/dungeon-game",
+      "destination": "/games/dungeon-game/dist/index.html"
+    },
+    {
+      "source": "/games/dungeon-game/dist",
+      "destination": "/games/dungeon-game/dist/index.html"
+    },
+    {
+      "source": "/games/dungeon-game/dist/",
+      "destination": "/games/dungeon-game/dist/index.html"
+    },
+    {
+      "source": "/games/dungeon-game/(.*)",
+      "destination": "/games/dungeon-game/$1"
     }
   ]
 }
