@@ -47,18 +47,34 @@ class MobileCoordinateDebugger {
      * 設置事件監聽器
      */
     setupEventListeners() {
-        // 監聽觸控事件
+        let longPressTimer = null;
+
+        // 監聽觸控開始
         this.scene.input.on('pointerdown', (pointer) => {
             if (this.isEnabled) {
                 this.diagnoseCoordinates(pointer);
+
+                // 開始長按計時器
+                longPressTimer = setTimeout(() => {
+                    this.clearAllMarkers();
+                    console.log('🧹 已清除所有標記');
+                }, 3000);
             }
         });
-        
+
+        // 監聽觸控結束
+        this.scene.input.on('pointerup', () => {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        });
+
         // 監聽視窗大小變化
         window.addEventListener('resize', () => {
             setTimeout(() => this.updateDeviceInfo(), 100);
         });
-        
+
         // 監聽方向變化
         window.addEventListener('orientationchange', () => {
             setTimeout(() => this.updateDeviceInfo(), 500);
@@ -230,38 +246,59 @@ class MobileCoordinateDebugger {
     }
     
     /**
-     * 更新視覺標記
+     * 更新視覺標記 - 紅色圓圈長時間顯示
      */
     updateVisualMarkers(diagnosis) {
         const { basicInfo, fixMethods, offsets } = diagnosis;
-        
-        // 清除舊標記
-        this.crosshair.clear();
-        this.fixedMarker.clear();
-        this.playerMarker.clear();
-        
-        // 繪製原始點擊位置十字線（紅色）
-        this.crosshair.lineStyle(2, 0xff0000);
+
+        // 🔴 不清除舊標記，讓所有點擊都保持顯示
+         this.crosshair.clear();
+         this.fixedMarker.clear();
+         this.playerMarker.clear();
+
+        // 🔴 繪製原始點擊位置紅色圓圈 - 使用原始螢幕座標
         const rawX = basicInfo.rawPointer.x;
         const rawY = basicInfo.rawPointer.y;
-        this.crosshair.moveTo(rawX - 10, rawY).lineTo(rawX + 10, rawY);
-        this.crosshair.moveTo(rawX, rawY - 10).lineTo(rawX, rawY + 10);
-        
-        // 繪製最佳修復位置標記（綠色圓圈）
+
+        this.crosshair.lineStyle(4, 0xff0000, 1);
+        this.crosshair.strokeCircle(rawX, rawY, 15);
+
+        // 添加一個實心的小紅點在中心
+        this.crosshair.fillStyle(0xff0000, 0.8);
+        this.crosshair.fillCircle(rawX, rawY, 3);
+
+        // 🟢 繪製修復位置綠色圓圈
         const bestMethod = this.findBestMethod(offsets);
         if (bestMethod && fixMethods[bestMethod]) {
             const fixedX = fixMethods[bestMethod].x;
             const fixedY = fixMethods[bestMethod].y;
-            this.fixedMarker.lineStyle(2, 0x00ff00);
-            this.fixedMarker.strokeCircle(fixedX, fixedY, 8);
+
+            this.fixedMarker.lineStyle(4, 0x00ff00, 1);
+            this.fixedMarker.strokeCircle(fixedX, fixedY, 12);
+
+            // 添加一個實心的小綠點在中心
+            this.fixedMarker.fillStyle(0x00ff00, 0.8);
+            this.fixedMarker.fillCircle(fixedX, fixedY, 3);
         }
-        
-        // 繪製太空船位置標記（藍色方框）
+
+        // 🔵 繪製太空船位置藍色方框
         if (basicInfo.playerPosition) {
             const playerX = basicInfo.playerPosition.x;
             const playerY = basicInfo.playerPosition.y;
-            this.playerMarker.lineStyle(2, 0x0000ff);
-            this.playerMarker.strokeRect(playerX - 8, playerY - 8, 16, 16);
+
+            this.playerMarker.lineStyle(4, 0x0000ff, 1);
+            this.playerMarker.strokeRect(playerX - 12, playerY - 12, 24, 24);
+
+            // 添加一個實心的小藍點在中心
+            this.playerMarker.fillStyle(0x0000ff, 0.8);
+            this.playerMarker.fillCircle(playerX, playerY, 3);
+        }
+
+        // 在調試文字中顯示座標對比
+        console.log(`🔴 [原始點擊] 螢幕座標: (${rawX}, ${rawY})`);
+        if (bestMethod && fixMethods[bestMethod]) {
+            console.log(`🟢 [修復結果] 遊戲座標: (${fixMethods[bestMethod].x.toFixed(0)}, ${fixMethods[bestMethod].y.toFixed(0)})`);
+            console.log(`📏 [距離差異] ${Math.sqrt(Math.pow(fixMethods[bestMethod].x - rawX, 2) + Math.pow(fixMethods[bestMethod].y - rawY, 2)).toFixed(0)}px`);
         }
     }
     
@@ -309,7 +346,12 @@ class MobileCoordinateDebugger {
         if (basicInfo.playerPosition) {
             debugInfo += `太空船: (${basicInfo.playerPosition.x.toFixed(0)}, ${basicInfo.playerPosition.y.toFixed(0)})\n`;
         }
-        
+
+        debugInfo += `\n🔴 紅色圓圈 = 您點擊的原始位置\n`;
+        debugInfo += `🟢 綠色圓圈 = 修復後位置\n`;
+        debugInfo += `🔵 藍色方框 = 太空船位置\n`;
+        debugInfo += `\n💡 長按螢幕3秒可清除所有標記\n`;
+
         this.debugText.setText(debugInfo);
     }
     
@@ -385,6 +427,23 @@ class MobileCoordinateDebugger {
     }
     
     /**
+     * 清除所有視覺標記
+     */
+    clearAllMarkers() {
+        if (this.crosshair) this.crosshair.clear();
+        if (this.fixedMarker) this.fixedMarker.clear();
+        if (this.playerMarker) this.playerMarker.clear();
+
+        // 更新調試文字，顯示清除信息
+        if (this.debugText) {
+            const currentText = this.debugText.text;
+            const lines = currentText.split('\n');
+            lines.push('🧹 已清除所有標記');
+            this.debugText.setText(lines.slice(-15).join('\n')); // 保持最近15行
+        }
+    }
+
+    /**
      * 銷毀調試器
      */
     destroy() {
@@ -392,7 +451,7 @@ class MobileCoordinateDebugger {
         if (this.crosshair) this.crosshair.destroy();
         if (this.fixedMarker) this.fixedMarker.destroy();
         if (this.playerMarker) this.playerMarker.destroy();
-        
+
         console.log('📱 手機座標調試器已銷毀');
     }
 }
