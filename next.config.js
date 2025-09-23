@@ -83,6 +83,14 @@ const nextConfig = {
         source: '/games/shimozurdo-game/:path*',
         destination: '/games/shimozurdo-game/:path*'
       },
+      {
+        source: '/games/starshake-game',
+        destination: '/games/starshake-game/dist/index.html'
+      },
+      {
+        source: '/games/starshake-game/:path*',
+        destination: '/games/starshake-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',

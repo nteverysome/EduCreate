@@ -99,6 +99,18 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '🎯',
     estimatedLoadTime: 800
   },
+  {
+    id: 'starshake-game',
+    name: 'starshake',
+    displayName: 'Starshake 太空冒險',
+    description: '一個充滿樂趣的太空冒險遊戲，基於 Phaser 3 引擎開發的動作遊戲',
+    type: 'iframe',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🌟',
+    estimatedLoadTime: 1000
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -173,6 +185,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/shimozurdo-game/';
     case 'shimozurdo-responsive':
       return '/games/shimozurdo-game/';
+    case 'starshake-game':
+      return '/games/starshake-game/dist/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':
