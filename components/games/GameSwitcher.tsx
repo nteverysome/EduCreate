@@ -171,6 +171,18 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '🔴',
     estimatedLoadTime: 1200
   },
+  {
+    id: 'fate-game',
+    name: 'fate',
+    displayName: 'Fate 命運之戰',
+    description: '一個3D太空戰鬥遊戲，通過駕駛太空船戰鬥和探索來完成任務，基於 Phaser 3 引擎開發',
+    type: 'iframe',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '⚡',
+    estimatedLoadTime: 1400
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -257,6 +269,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/zenbaki-game/dist/';
     case 'mars-game':
       return '/games/mars-game/dist/';
+    case 'fate-game':
+      return '/games/fate-game/dist/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':

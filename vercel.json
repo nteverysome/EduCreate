@@ -228,6 +228,22 @@
     {
       "source": "/games/mars-game/(.*)",
       "destination": "/games/mars-game/$1"
+    },
+    {
+      "source": "/games/fate-game",
+      "destination": "/games/fate-game/dist/index.html"
+    },
+    {
+      "source": "/games/fate-game/dist",
+      "destination": "/games/fate-game/dist/index.html"
+    },
+    {
+      "source": "/games/fate-game/dist/",
+      "destination": "/games/fate-game/dist/index.html"
+    },
+    {
+      "source": "/games/fate-game/(.*)",
+      "destination": "/games/fate-game/$1"
     }
   ]
 }

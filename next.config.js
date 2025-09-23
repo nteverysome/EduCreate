@@ -183,6 +183,23 @@ const nextConfig = {
         source: '/games/mars-game/:path*',
         destination: '/games/mars-game/:path*'
       },
+      // Fate 命運之戰遊戲路由
+      {
+        source: '/games/fate-game',
+        destination: '/games/fate-game/dist/index.html'
+      },
+      {
+        source: '/games/fate-game/dist',
+        destination: '/games/fate-game/dist/index.html'
+      },
+      {
+        source: '/games/fate-game/dist/',
+        destination: '/games/fate-game/dist/index.html'
+      },
+      {
+        source: '/games/fate-game/:path*',
+        destination: '/games/fate-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',
