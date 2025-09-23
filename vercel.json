@@ -180,6 +180,22 @@
     {
       "source": "/games/pushpull-game/(.*)",
       "destination": "/games/pushpull-game/$1"
+    },
+    {
+      "source": "/games/wallhammer-game",
+      "destination": "/games/wallhammer-game/dist/index.html"
+    },
+    {
+      "source": "/games/wallhammer-game/dist",
+      "destination": "/games/wallhammer-game/dist/index.html"
+    },
+    {
+      "source": "/games/wallhammer-game/dist/",
+      "destination": "/games/wallhammer-game/dist/index.html"
+    },
+    {
+      "source": "/games/wallhammer-game/(.*)",
+      "destination": "/games/wallhammer-game/$1"
     }
   ]
 }

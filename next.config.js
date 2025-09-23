@@ -132,6 +132,23 @@ const nextConfig = {
         source: '/games/pushpull-game/:path*',
         destination: '/games/pushpull-game/:path*'
       },
+      // WallHammer 破牆遊戲路由
+      {
+        source: '/games/wallhammer-game',
+        destination: '/games/wallhammer-game/dist/index.html'
+      },
+      {
+        source: '/games/wallhammer-game/dist',
+        destination: '/games/wallhammer-game/dist/index.html'
+      },
+      {
+        source: '/games/wallhammer-game/dist/',
+        destination: '/games/wallhammer-game/dist/index.html'
+      },
+      {
+        source: '/games/wallhammer-game/:path*',
+        destination: '/games/wallhammer-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',
