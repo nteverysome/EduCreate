@@ -148,6 +148,22 @@
     {
       "source": "/games/starshake-game/(.*)",
       "destination": "/games/starshake-game/$1"
+    },
+    {
+      "source": "/games/runner-game",
+      "destination": "/games/runner-game/dist/index.html"
+    },
+    {
+      "source": "/games/runner-game/dist",
+      "destination": "/games/runner-game/dist/index.html"
+    },
+    {
+      "source": "/games/runner-game/dist/",
+      "destination": "/games/runner-game/dist/index.html"
+    },
+    {
+      "source": "/games/runner-game/(.*)",
+      "destination": "/games/runner-game/$1"
     }
   ]
 }

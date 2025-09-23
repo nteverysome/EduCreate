@@ -99,6 +99,22 @@ const nextConfig = {
         source: '/games/starshake-game/:path*',
         destination: '/games/starshake-game/:path*'
       },
+      {
+        source: '/games/runner-game',
+        destination: '/games/runner-game/dist/index.html'
+      },
+      {
+        source: '/games/runner-game/dist',
+        destination: '/games/runner-game/dist/index.html'
+      },
+      {
+        source: '/games/runner-game/dist/',
+        destination: '/games/runner-game/dist/index.html'
+      },
+      {
+        source: '/games/runner-game/:path*',
+        destination: '/games/runner-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',

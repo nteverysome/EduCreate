@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/style.css">
+    <title>EduCreate - Runner</title>
+
+    <style>
+        /* reset CSS */
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        #app {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            max-width: 1000px;
+            max-height: 800px;
+        }
+    </style>
+  <script type="module" crossorigin src="/games/runner-game/dist/assets/index-D3N7x-dJ.js"></script>
+  <link rel="modulepreload" crossorigin href="/games/runner-game/dist/assets/phaser-CmFXOKba.js">
+</head>
+
+<body>
+    <div id="app">
+        <div id="game-container"></div>
+    </div>
+</body>
+</html>

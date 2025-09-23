@@ -111,6 +111,18 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '🌟',
     estimatedLoadTime: 1000
   },
+  {
+    id: 'runner-game',
+    name: 'runner',
+    displayName: 'Runner 跑酷遊戲',
+    description: '一個刺激的跑酷遊戲，通過跳躍和收集金幣來挑戰高分，基於 Phaser 3 引擎開發',
+    type: 'iframe',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🏃',
+    estimatedLoadTime: 1000
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -187,6 +199,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/shimozurdo-game/';
     case 'starshake-game':
       return '/games/starshake-game/dist/';
+    case 'runner-game':
+      return '/games/runner-game/dist/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':
