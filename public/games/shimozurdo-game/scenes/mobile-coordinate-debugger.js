@@ -45,10 +45,39 @@ class MobileCoordinateDebugger {
         // 創建Phaser座標標記（橙色）
         this.phaserMarker = this.scene.add.graphics().setDepth(9999);
 
+        // 🎯 創建全域輸入接收器 - 確保整個遊戲區域都能觸發Phaser事件
+        this.createGlobalInputReceiver();
+
         // 顯示設備信息
         this.updateDeviceInfo();
     }
-    
+
+    /**
+     * 創建全域輸入接收器 - 確保整個遊戲區域都能觸發Phaser事件
+     */
+    createGlobalInputReceiver() {
+        // 獲取遊戲區域尺寸
+        const gameWidth = this.scene.game.config.width;
+        const gameHeight = this.scene.game.config.height;
+
+        // 創建一個不可見的矩形覆蓋整個遊戲區域
+        this.globalInputReceiver = this.scene.add.rectangle(
+            gameWidth / 2,  // x: 中心點
+            gameHeight / 2, // y: 中心點
+            gameWidth,      // width: 全寬
+            gameHeight,     // height: 全高
+            0x000000,       // color: 黑色
+            0               // alpha: 完全透明
+        );
+
+        // 設定為可互動，但不阻擋其他物件
+        this.globalInputReceiver
+            .setInteractive()
+            .setDepth(-1000); // 設定最低深度，確保不會遮擋其他物件
+
+        console.log(`🎯 全域輸入接收器已創建: ${gameWidth}x${gameHeight}，確保整個遊戲區域都能觸發Phaser事件`);
+    }
+
     /**
      * 設置事件監聽器
      */
@@ -515,11 +544,12 @@ class MobileCoordinateDebugger {
         }
 
         debugInfo += `\n🔴 紅色圓圈 = DOM真正觸控位置（即時顯示）\n`;
-        debugInfo += `🟠 橙色圓圈 = Phaser認為位置\n`;
+        debugInfo += `🟠 橙色圓圈 = Phaser認為位置（全域接收）\n`;
         debugInfo += `🟢 綠色圓圈 = 修復後位置\n`;
         debugInfo += `🔵 藍色方框 = 太空船位置\n`;
         debugInfo += `\n💡 紅色標記立即顯示，不等待Phaser事件\n`;
-        debugInfo += `💡 現在可追蹤全螢幕任何位置的觸控\n`;
+        debugInfo += `💡 橙色標記現在覆蓋整個遊戲區域\n`;
+        debugInfo += `💡 全域輸入接收器確保完整事件覆蓋\n`;
         debugInfo += `💡 長按螢幕3秒可清除所有標記\n`;
 
         this.debugText.setText(debugInfo);
