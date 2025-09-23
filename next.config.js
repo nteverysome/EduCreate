@@ -149,6 +149,23 @@ const nextConfig = {
         source: '/games/wallhammer-game/:path*',
         destination: '/games/wallhammer-game/:path*'
       },
+      // Zenbaki 數字遊戲路由
+      {
+        source: '/games/zenbaki-game',
+        destination: '/games/zenbaki-game/dist/index.html'
+      },
+      {
+        source: '/games/zenbaki-game/dist',
+        destination: '/games/zenbaki-game/dist/index.html'
+      },
+      {
+        source: '/games/zenbaki-game/dist/',
+        destination: '/games/zenbaki-game/dist/index.html'
+      },
+      {
+        source: '/games/zenbaki-game/:path*',
+        destination: '/games/zenbaki-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',

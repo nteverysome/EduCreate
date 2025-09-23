@@ -147,6 +147,18 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '🔨',
     estimatedLoadTime: 1300
   },
+  {
+    id: 'zenbaki-game',
+    name: 'zenbaki',
+    displayName: 'Zenbaki 數字遊戲',
+    description: '一個基於數字的策略遊戲，通過數字計算和邏輯推理來解決謎題，基於 Phaser 3 引擎開發',
+    type: 'iframe',
+    memoryType: '基礎記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🔢',
+    estimatedLoadTime: 1100
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -229,6 +241,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/pushpull-game/dist/';
     case 'wallhammer-game':
       return '/games/wallhammer-game/dist/';
+    case 'zenbaki-game':
+      return '/games/zenbaki-game/dist/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':

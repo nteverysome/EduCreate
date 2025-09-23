@@ -196,6 +196,22 @@
     {
       "source": "/games/wallhammer-game/(.*)",
       "destination": "/games/wallhammer-game/$1"
+    },
+    {
+      "source": "/games/zenbaki-game",
+      "destination": "/games/zenbaki-game/dist/index.html"
+    },
+    {
+      "source": "/games/zenbaki-game/dist",
+      "destination": "/games/zenbaki-game/dist/index.html"
+    },
+    {
+      "source": "/games/zenbaki-game/dist/",
+      "destination": "/games/zenbaki-game/dist/index.html"
+    },
+    {
+      "source": "/games/zenbaki-game/(.*)",
+      "destination": "/games/zenbaki-game/$1"
     }
   ]
 }
