@@ -164,6 +164,22 @@
     {
       "source": "/games/runner-game/(.*)",
       "destination": "/games/runner-game/$1"
+    },
+    {
+      "source": "/games/pushpull-game",
+      "destination": "/games/pushpull-game/dist/index.html"
+    },
+    {
+      "source": "/games/pushpull-game/dist",
+      "destination": "/games/pushpull-game/dist/index.html"
+    },
+    {
+      "source": "/games/pushpull-game/dist/",
+      "destination": "/games/pushpull-game/dist/index.html"
+    },
+    {
+      "source": "/games/pushpull-game/(.*)",
+      "destination": "/games/pushpull-game/$1"
     }
   ]
 }

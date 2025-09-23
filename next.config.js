@@ -115,6 +115,23 @@ const nextConfig = {
         source: '/games/runner-game/:path*',
         destination: '/games/runner-game/:path*'
       },
+      // PushPull 推拉方塊遊戲路由
+      {
+        source: '/games/pushpull-game',
+        destination: '/games/pushpull-game/dist/index.html'
+      },
+      {
+        source: '/games/pushpull-game/dist',
+        destination: '/games/pushpull-game/dist/index.html'
+      },
+      {
+        source: '/games/pushpull-game/dist/',
+        destination: '/games/pushpull-game/dist/index.html'
+      },
+      {
+        source: '/games/pushpull-game/:path*',
+        destination: '/games/pushpull-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',

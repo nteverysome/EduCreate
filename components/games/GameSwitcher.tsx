@@ -123,6 +123,18 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '🏃',
     estimatedLoadTime: 1000
   },
+  {
+    id: 'pushpull-game',
+    name: 'pushpull',
+    displayName: 'PushPull 推拉方塊',
+    description: '一個策略性的推拉方塊遊戲，通過移動彩色方塊到指定位置來解決謎題，基於 Phaser 3 引擎開發',
+    type: 'iframe',
+    memoryType: '重構邏輯記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🧩',
+    estimatedLoadTime: 1200
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -201,6 +213,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/starshake-game/dist/';
     case 'runner-game':
       return '/games/runner-game/dist/';
+    case 'pushpull-game':
+      return '/games/pushpull-game/dist/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':
