@@ -193,6 +193,124 @@ class MobileCoordinateDebugger {
         });
 
         console.log('🔴 DOM事件監聽器已設置到整個頁面，將追蹤全螢幕觸控座標');
+
+        // 🔍 創建DOM事件準確性測試
+        this.createDOMAccuracyTest();
+    }
+
+    /**
+     * 創建DOM事件準確性測試 - 驗證DOM事件是否真的是觸碰位置
+     */
+    createDOMAccuracyTest() {
+        // 創建測試標記容器
+        this.domTestMarkers = [];
+
+        // 添加多層DOM事件監聽器來比較
+        const testLayers = [
+            { element: document, name: 'document' },
+            { element: document.body, name: 'body' },
+            { element: this.scene.game.canvas, name: 'canvas' },
+            { element: this.scene.game.canvas.parentElement, name: 'canvas-parent' }
+        ];
+
+        testLayers.forEach(layer => {
+            if (layer.element) {
+                // 觸控事件
+                layer.element.addEventListener('touchstart', (event) => {
+                    if (event.touches.length > 0) {
+                        const touch = event.touches[0];
+                        this.recordDOMAccuracyTest(touch, layer.name, 'touch');
+                    }
+                }, { passive: true });
+
+                // 滑鼠事件
+                layer.element.addEventListener('mousedown', (event) => {
+                    this.recordDOMAccuracyTest(event, layer.name, 'mouse');
+                }, { passive: true });
+            }
+        });
+
+        console.log('🔍 DOM事件準確性測試已啟動 - 將比較多層DOM事件座標');
+    }
+
+    /**
+     * 記錄DOM準確性測試數據
+     */
+    recordDOMAccuracyTest(event, layerName, eventType) {
+        const testData = {
+            layer: layerName,
+            type: eventType,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            pageX: event.pageX,
+            pageY: event.pageY,
+            screenX: event.screenX,
+            screenY: event.screenY,
+            timestamp: Date.now()
+        };
+
+        // 儲存測試數據
+        if (!this.domAccuracyTests) {
+            this.domAccuracyTests = [];
+        }
+        this.domAccuracyTests.push(testData);
+
+        // 只保留最近10次測試
+        if (this.domAccuracyTests.length > 10) {
+            this.domAccuracyTests.shift();
+        }
+
+        console.log(`🔍 [DOM準確性] ${layerName}-${eventType}: client(${event.clientX}, ${event.clientY}) page(${event.pageX}, ${event.pageY}) screen(${event.screenX}, ${event.screenY})`);
+
+        // 創建即時視覺標記
+        this.createDOMTestMarker(event.clientX, event.clientY, layerName, eventType);
+    }
+
+    /**
+     * 創建DOM測試視覺標記
+     */
+    createDOMTestMarker(clientX, clientY, layerName, eventType) {
+        // 轉換為Phaser座標
+        const canvas = this.scene.game.canvas;
+        const canvasRect = canvas.getBoundingClientRect();
+        const canvasX = clientX - canvasRect.left;
+        const canvasY = clientY - canvasRect.top;
+        const scaleX = this.scene.game.config.width / canvasRect.width;
+        const scaleY = this.scene.game.config.height / canvasRect.height;
+        const worldX = canvasX * scaleX;
+        const worldY = canvasY * scaleY;
+
+        // 不同層使用不同顏色
+        const colors = {
+            'document': 0xff0000,    // 紅色
+            'body': 0x00ff00,        // 綠色
+            'canvas': 0x0000ff,      // 藍色
+            'canvas-parent': 0xffff00 // 黃色
+        };
+
+        const color = colors[layerName] || 0xffffff;
+
+        // 創建小圓點標記
+        const marker = this.scene.add.circle(worldX, worldY, 3, color, 0.8);
+        marker.setDepth(10001);
+
+        // 添加文字標籤
+        const label = this.scene.add.text(worldX + 5, worldY - 5, `${layerName}-${eventType}`, {
+            fontSize: '8px',
+            fill: `#${color.toString(16).padStart(6, '0')}`,
+            backgroundColor: 'rgba(0,0,0,0.5)'
+        }).setDepth(10002);
+
+        // 儲存標記以便清理
+        this.domTestMarkers.push(marker, label);
+
+        // 限制標記數量
+        if (this.domTestMarkers.length > 40) {
+            const oldMarker = this.domTestMarkers.shift();
+            const oldLabel = this.domTestMarkers.shift();
+            if (oldMarker && oldMarker.destroy) oldMarker.destroy();
+            if (oldLabel && oldLabel.destroy) oldLabel.destroy();
+        }
     }
 
     /**
@@ -593,9 +711,12 @@ class MobileCoordinateDebugger {
         debugInfo += `🟠 橙色圓圈 = Phaser座標（DOM修正後）\n`;
         debugInfo += `🟢 綠色圓圈 = 修復後位置\n`;
         debugInfo += `🔵 藍色方框 = 太空船位置\n`;
+        debugInfo += `\n🔍 DOM準確性測試：\n`;
+        debugInfo += `🔴 document層 🟢 body層 🔵 canvas層 🟡 parent層\n`;
         debugInfo += `\n🎯 目標：DOM座標 = Phaser座標\n`;
         debugInfo += `💡 Phaser現在使用DOM修正座標\n`;
         debugInfo += `💡 紅色和橙色圓圈應該重疊\n`;
+        debugInfo += `💡 觀察不同DOM層的座標差異\n`;
         debugInfo += `💡 長按螢幕3秒可清除所有標記\n`;
 
         this.debugText.setText(debugInfo);
@@ -707,11 +828,21 @@ class MobileCoordinateDebugger {
         if (this.playerMarker) this.playerMarker.clear();
         if (this.phaserMarker) this.phaserMarker.clear();
 
+        // 清除DOM測試標記
+        if (this.domTestMarkers) {
+            this.domTestMarkers.forEach(marker => {
+                if (marker && marker.destroy) {
+                    marker.destroy();
+                }
+            });
+            this.domTestMarkers = [];
+        }
+
         // 更新調試文字，顯示清除信息
         if (this.debugText) {
             const currentText = this.debugText.text;
             const lines = currentText.split('\n');
-            lines.push('🧹 已清除所有標記');
+            lines.push('🧹 已清除所有標記（包含DOM測試標記）');
             this.debugText.setText(lines.slice(-15).join('\n')); // 保持最近15行
         }
     }
