@@ -10,12 +10,15 @@ class MobileCoordinateDebugger {
         this.crosshair = null;
         this.fixedMarker = null;
         this.playerMarker = null;
+        this.phaserMarker = null;  // 新增：顯示Phaser座標
         this.isEnabled = true;
-        
+        this.lastDOMCoordinates = null;  // 儲存DOM原始座標
+
         this.setupDebugOverlay();
         this.setupEventListeners();
-        
-        console.log('📱 手機座標調試器已啟動');
+        this.setupDOMEventListeners();  // 新增：DOM事件監聽
+
+        console.log('📱 手機座標調試器已啟動 - 包含DOM原始座標追蹤');
     }
     
     /**
@@ -38,7 +41,10 @@ class MobileCoordinateDebugger {
         
         // 創建太空船目標標記
         this.playerMarker = this.scene.add.graphics().setDepth(9999);
-        
+
+        // 創建Phaser座標標記（橙色）
+        this.phaserMarker = this.scene.add.graphics().setDepth(9999);
+
         // 顯示設備信息
         this.updateDeviceInfo();
     }
@@ -79,6 +85,47 @@ class MobileCoordinateDebugger {
         window.addEventListener('orientationchange', () => {
             setTimeout(() => this.updateDeviceInfo(), 500);
         });
+    }
+
+    /**
+     * 設置DOM事件監聽器 - 獲取真正的原始觸控座標
+     */
+    setupDOMEventListeners() {
+        // 獲取canvas元素
+        const canvas = this.scene.game.canvas;
+
+        // 監聽觸控事件（手機）
+        canvas.addEventListener('touchstart', (event) => {
+            if (event.touches.length > 0) {
+                const touch = event.touches[0];
+                this.lastDOMCoordinates = {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY,
+                    pageX: touch.pageX,
+                    pageY: touch.pageY,
+                    screenX: touch.screenX,
+                    screenY: touch.screenY,
+                    type: 'touch'
+                };
+                console.log('🔴 [DOM觸控] 真正的原始座標:', this.lastDOMCoordinates);
+            }
+        }, { passive: true });
+
+        // 監聽滑鼠事件（桌面測試）
+        canvas.addEventListener('mousedown', (event) => {
+            this.lastDOMCoordinates = {
+                clientX: event.clientX,
+                clientY: event.clientY,
+                pageX: event.pageX,
+                pageY: event.pageY,
+                screenX: event.screenX,
+                screenY: event.screenY,
+                type: 'mouse'
+            };
+            console.log('🔴 [DOM滑鼠] 真正的原始座標:', this.lastDOMCoordinates);
+        });
+
+        console.log('🔴 DOM事件監聽器已設置，將追蹤真正的原始觸控座標');
     }
     
     /**
@@ -252,20 +299,38 @@ class MobileCoordinateDebugger {
         const { basicInfo, fixMethods, offsets } = diagnosis;
 
         // 🔴 不清除舊標記，讓所有點擊都保持顯示
-         this.crosshair.clear();
-         this.fixedMarker.clear();
-         this.playerMarker.clear();
+        // this.crosshair.clear();
+        // this.fixedMarker.clear();
+        // this.playerMarker.clear();
+        // this.phaserMarker.clear();
 
-        // 🔴 繪製原始點擊位置紅色圓圈 - 使用原始螢幕座標
-        const rawX = basicInfo.rawPointer.x;
-        const rawY = basicInfo.rawPointer.y;
+        // 🔴 繪製DOM原始座標紅色圓圈 - 真正的觸控位置
+        if (this.lastDOMCoordinates) {
+            const domX = this.lastDOMCoordinates.clientX;
+            const domY = this.lastDOMCoordinates.clientY;
 
-        this.crosshair.lineStyle(4, 0xff0000, 1);
-        this.crosshair.strokeCircle(rawX, rawY, 15);
+            this.crosshair.lineStyle(4, 0xff0000, 1);
+            this.crosshair.strokeCircle(domX, domY, 18);
 
-        // 添加一個實心的小紅點在中心
-        this.crosshair.fillStyle(0xff0000, 0.8);
-        this.crosshair.fillCircle(rawX, rawY, 3);
+            // 添加一個實心的小紅點在中心
+            this.crosshair.fillStyle(0xff0000, 0.8);
+            this.crosshair.fillCircle(domX, domY, 4);
+
+            console.log(`🔴 [DOM原始] 真正觸控位置: (${domX}, ${domY})`);
+        }
+
+        // 🟠 繪製Phaser座標橙色圓圈 - Phaser認為的位置
+        const phaserX = basicInfo.rawPointer.x;
+        const phaserY = basicInfo.rawPointer.y;
+
+        this.phaserMarker.lineStyle(4, 0xff8800, 1);
+        this.phaserMarker.strokeCircle(phaserX, phaserY, 15);
+
+        // 添加一個實心的小橙點在中心
+        this.phaserMarker.fillStyle(0xff8800, 0.8);
+        this.phaserMarker.fillCircle(phaserX, phaserY, 3);
+
+        console.log(`🟠 [Phaser] Phaser認為位置: (${phaserX}, ${phaserY})`);
 
         // 🟢 繪製修復位置綠色圓圈
         const bestMethod = this.findBestMethod(offsets);
@@ -347,7 +412,22 @@ class MobileCoordinateDebugger {
             debugInfo += `太空船: (${basicInfo.playerPosition.x.toFixed(0)}, ${basicInfo.playerPosition.y.toFixed(0)})\n`;
         }
 
-        debugInfo += `\n🔴 紅色圓圈 = 您點擊的原始位置\n`;
+        // 顯示DOM座標 vs Phaser座標差異
+        if (this.lastDOMCoordinates) {
+            const domX = this.lastDOMCoordinates.clientX;
+            const domY = this.lastDOMCoordinates.clientY;
+            const phaserX = basicInfo.rawPointer.x;
+            const phaserY = basicInfo.rawPointer.y;
+            const diffX = Math.abs(domX - phaserX);
+            const diffY = Math.abs(domY - phaserY);
+
+            debugInfo += `\n🔴 DOM原始: (${domX.toFixed(0)}, ${domY.toFixed(0)})\n`;
+            debugInfo += `🟠 Phaser: (${phaserX.toFixed(0)}, ${phaserY.toFixed(0)})\n`;
+            debugInfo += `📏 差異: (${diffX.toFixed(0)}, ${diffY.toFixed(0)})\n`;
+        }
+
+        debugInfo += `\n🔴 紅色圓圈 = DOM真正觸控位置\n`;
+        debugInfo += `🟠 橙色圓圈 = Phaser認為位置\n`;
         debugInfo += `🟢 綠色圓圈 = 修復後位置\n`;
         debugInfo += `🔵 藍色方框 = 太空船位置\n`;
         debugInfo += `\n💡 長按螢幕3秒可清除所有標記\n`;
@@ -433,6 +513,7 @@ class MobileCoordinateDebugger {
         if (this.crosshair) this.crosshair.clear();
         if (this.fixedMarker) this.fixedMarker.clear();
         if (this.playerMarker) this.playerMarker.clear();
+        if (this.phaserMarker) this.phaserMarker.clear();
 
         // 更新調試文字，顯示清除信息
         if (this.debugText) {
@@ -451,6 +532,7 @@ class MobileCoordinateDebugger {
         if (this.crosshair) this.crosshair.destroy();
         if (this.fixedMarker) this.fixedMarker.destroy();
         if (this.playerMarker) this.playerMarker.destroy();
+        if (this.phaserMarker) this.phaserMarker.destroy();
 
         console.log('📱 手機座標調試器已銷毀');
     }
