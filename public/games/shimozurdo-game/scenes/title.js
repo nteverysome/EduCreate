@@ -526,9 +526,15 @@ export default class Title extends Phaser.Scene {
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
         if (isMobile || this.game.debugMode) {
-            console.log('🔍 啟動手機座標調試器');
+            console.log('🎯 啟動Phaser-DOM座標統一系統');
 
-            // 創建調試器實例
+            // 🎯 創建進階座標統一器
+            if (window.PhaserDOMCoordinateUnifier) {
+                this.coordinateUnifier = new window.PhaserDOMCoordinateUnifier(this);
+                console.log('✅ Phaser-DOM座標統一器已啟動');
+            }
+
+            // 創建調試器實例（用於視覺化）
             if (window.MobileCoordinateDebugger) {
                 this.mobileDebugger = new window.MobileCoordinateDebugger(this);
 

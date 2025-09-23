@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Phaser-DOM座標統一測試</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+        }
+        
+        #gameContainer {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 2px solid #00ff00;
+            position: relative;
+        }
+        
+        #info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 10000;
+        }
+        
+        .marker {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        .dom-marker {
+            background: red;
+        }
+        
+        .phaser-marker {
+            background: blue;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <div>🎯 Phaser-DOM座標統一測試</div>
+        <div id="domCoords">DOM座標: (0, 0)</div>
+        <div id="phaserCoords">Phaser座標: (0, 0)</div>
+        <div id="status">狀態: 初始化中...</div>
+    </div>
+    
+    <div id="gameContainer"></div>
+
+    <!-- Phaser 3 -->
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.53.1/dist/phaser.min.js"></script>
+    
+    <!-- 我們的座標統一器 -->
+    <script src="/games/shimozurdo-game/scenes/phaser-dom-coordinate-unifier.js"></script>
+    
+    <script>
+        // 全域變數
+        let domCoords = { x: 0, y: 0 };
+        let phaserCoords = { x: 0, y: 0 };
+        let coordinateUnifier = null;
+        let markers = [];
+        
+        // DOM座標追蹤
+        function setupDOMTracking() {
+            document.addEventListener('touchstart', (event) => {
+                if (event.touches.length > 0) {
+                    const touch = event.touches[0];
+                    domCoords.x = touch.clientX;
+                    domCoords.y = touch.clientY;
+                    createMarker(touch.clientX, touch.clientY, 'dom-marker');
+                    updateInfo();
+                }
+            }, { passive: true });
+
+            document.addEventListener('mousedown', (event) => {
+                domCoords.x = event.clientX;
+                domCoords.y = event.clientY;
+                createMarker(event.clientX, event.clientY, 'dom-marker');
+                updateInfo();
+            }, { passive: true });
+        }
+        
+        // 創建視覺標記
+        function createMarker(x, y, className) {
+            const marker = document.createElement('div');
+            marker.className = `marker ${className}`;
+            marker.style.left = (x - 10) + 'px';
+            marker.style.top = (y - 10) + 'px';
+            document.body.appendChild(marker);
+            
+            markers.push(marker);
+            
+            // 限制標記數量
+            if (markers.length > 10) {
+                const oldMarker = markers.shift();
+                if (oldMarker.parentNode) {
+                    oldMarker.parentNode.removeChild(oldMarker);
+                }
+            }
+            
+            // 3秒後自動移除
+            setTimeout(() => {
+                if (marker.parentNode) {
+                    marker.parentNode.removeChild(marker);
+                }
+            }, 3000);
+        }
+        
+        // 更新信息顯示
+        function updateInfo() {
+            document.getElementById('domCoords').textContent = `DOM座標: (${domCoords.x}, ${domCoords.y})`;
+            document.getElementById('phaserCoords').textContent = `Phaser座標: (${phaserCoords.x}, ${phaserCoords.y})`;
+            
+            const diff = Math.sqrt(Math.pow(domCoords.x - phaserCoords.x, 2) + Math.pow(domCoords.y - phaserCoords.y, 2));
+            const status = diff < 5 ? '✅ 座標統一成功' : `❌ 座標偏差: ${diff.toFixed(1)}px`;
+            document.getElementById('status').textContent = `狀態: ${status}`;
+        }
+        
+        // Phaser遊戲配置
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            parent: 'gameContainer',
+            backgroundColor: '#2c3e50',
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+        
+        let scene;
+        
+        function preload() {
+            // 創建簡單的圖形
+            this.add.graphics()
+                .fillStyle(0x3498db)
+                .fillRect(0, 0, 800, 600);
+        }
+        
+        function create() {
+            scene = this;
+            
+            // 🎯 初始化座標統一器
+            if (window.PhaserDOMCoordinateUnifier) {
+                coordinateUnifier = new window.PhaserDOMCoordinateUnifier(this);
+                console.log('✅ 座標統一器已初始化');
+            }
+            
+            // 添加說明文字
+            this.add.text(400, 50, '🎯 Phaser-DOM座標統一測試', {
+                fontSize: '24px',
+                fill: '#ffffff',
+                align: 'center'
+            }).setOrigin(0.5);
+            
+            this.add.text(400, 100, '點擊任何位置測試座標統一效果', {
+                fontSize: '16px',
+                fill: '#ecf0f1',
+                align: 'center'
+            }).setOrigin(0.5);
+            
+            this.add.text(400, 130, '🔴 紅色 = DOM座標  🔵 藍色 = Phaser座標', {
+                fontSize: '14px',
+                fill: '#95a5a6',
+                align: 'center'
+            }).setOrigin(0.5);
+            
+            // Phaser輸入事件
+            this.input.on('pointerdown', (pointer) => {
+                phaserCoords.x = pointer.x;
+                phaserCoords.y = pointer.y;
+                
+                // 轉換為螢幕座標
+                const canvas = this.sys.game.canvas;
+                const canvasRect = canvas.getBoundingClientRect();
+                const screenX = canvasRect.left + pointer.x;
+                const screenY = canvasRect.top + pointer.y;
+                
+                createMarker(screenX, screenY, 'phaser-marker');
+                updateInfo();
+                
+                console.log(`🎯 Phaser事件: (${pointer.x}, ${pointer.y})`);
+                console.log(`🎯 螢幕位置: (${screenX}, ${screenY})`);
+                
+                if (coordinateUnifier) {
+                    const unifiedCoords = coordinateUnifier.getUnifiedCoordinates();
+                    console.log(`🎯 統一座標: (${unifiedCoords.x}, ${unifiedCoords.y})`);
+                }
+            });
+        }
+        
+        function update() {
+            // 遊戲更新邏輯
+        }
+        
+        // 初始化
+        setupDOMTracking();
+        const game = new Phaser.Game(config);
+        
+        console.log('🎯 座標統一測試頁面已載入');
+    </script>
+</body>
+</html>

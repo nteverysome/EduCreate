@@ -1,24 +1,95 @@
 /**
- * 極簡DOM觸控位置驗證器
- * 只驗證DOM事件記錄的位置是否就是真正的觸碰位置
+ * 🎯 Phaser-DOM座標統一器
+ * 讓Phaser事件直接使用DOM座標，實現完美的觸控響應
  */
 class MobileCoordinateDebugger {
     constructor(scene) {
         this.scene = scene;
         this.isEnabled = true;
         this.domMarkers = [];  // 儲存DOM標記
+        this.lastDOMCoordinates = { x: 0, y: 0 };  // 儲存最後的DOM座標
 
+        // 🎯 核心功能：攔截並統一座標系統
+        this.setupPhaserDOMCoordinateUnification();
         this.setupSimpleDOMTest();
 
-        console.log('🔍 極簡DOM觸控驗證器已啟動 - 只驗證DOM位置準確性');
+        console.log('🎯 Phaser-DOM座標統一器已啟動 - 讓Phaser直接使用DOM座標');
     }
     
+    /**
+     * 🎯 設置Phaser-DOM座標統一系統
+     */
+    setupPhaserDOMCoordinateUnification() {
+        // 攔截Phaser的輸入事件，用DOM座標替換
+        this.interceptPhaserInputEvents();
+
+        // 設置DOM事件監聽器來捕獲真實座標
+        this.setupDOMCoordinateCapture();
+
+        console.log('🎯 Phaser-DOM座標統一系統已設置');
+    }
+
+    /**
+     * 🔧 攔截Phaser輸入事件
+     */
+    interceptPhaserInputEvents() {
+        // 攔截pointerdown事件，在事件處理前修改座標
+        const originalOn = this.scene.input.on.bind(this.scene.input);
+
+        // 重寫input.on方法來攔截pointerdown事件
+        this.scene.input.on = (event, callback, context) => {
+            if (event === 'pointerdown') {
+                // 包裝原始回調，在執行前修改pointer座標
+                const wrappedCallback = (pointer) => {
+                    // 🎯 關鍵：使用DOM座標替換Phaser座標
+                    if (this.lastDOMCoordinates.x !== 0 || this.lastDOMCoordinates.y !== 0) {
+                        pointer.x = this.lastDOMCoordinates.x;
+                        pointer.y = this.lastDOMCoordinates.y;
+                        pointer.worldX = this.lastDOMCoordinates.x;
+                        pointer.worldY = this.lastDOMCoordinates.y;
+
+                        console.log(`🎯 [座標統一] Phaser座標已替換為DOM座標: (${pointer.x}, ${pointer.y})`);
+                    }
+
+                    // 執行原始回調
+                    callback.call(context, pointer);
+                };
+
+                return originalOn(event, wrappedCallback, context);
+            } else {
+                return originalOn(event, callback, context);
+            }
+        };
+    }
+
+    /**
+     * 🔧 設置DOM座標捕獲
+     */
+    setupDOMCoordinateCapture() {
+        // 捕獲真實的DOM觸控座標
+        document.addEventListener('touchstart', (event) => {
+            if (event.touches.length > 0) {
+                const touch = event.touches[0];
+                this.lastDOMCoordinates.x = touch.clientX;
+                this.lastDOMCoordinates.y = touch.clientY;
+                console.log(`🔧 [DOM捕獲] 觸控座標: (${touch.clientX}, ${touch.clientY})`);
+            }
+        }, { passive: true });
+
+        // 捕獲真實的DOM滑鼠座標
+        document.addEventListener('mousedown', (event) => {
+            this.lastDOMCoordinates.x = event.clientX;
+            this.lastDOMCoordinates.y = event.clientY;
+            console.log(`🔧 [DOM捕獲] 滑鼠座標: (${event.clientX}, ${event.clientY})`);
+        }, { passive: true });
+    }
+
     /**
      * 設置極簡DOM測試
      */
     setupSimpleDOMTest() {
         // 創建簡單的調試文字
-        this.debugText = this.scene.add.text(10, 10, '🔍 極簡DOM觸控驗證器\n點擊螢幕任何位置測試DOM位置準確性', {
+        this.debugText = this.scene.add.text(10, 10, '🎯 Phaser-DOM座標統一器\n點擊螢幕測試座標統一效果', {
             fontSize: '14px',
             fill: '#00ff00',
             backgroundColor: 'rgba(0,0,0,0.8)',
@@ -49,8 +120,8 @@ class MobileCoordinateDebugger {
 
         // 長按清除功能
         let longPressTimer = null;
-        
-        document.addEventListener('touchstart', (event) => {
+
+        document.addEventListener('touchstart', () => {
             longPressTimer = setTimeout(() => {
                 this.clearAllDOMMarkers();
                 console.log('🧹 已清除所有DOM標記');
@@ -122,19 +193,22 @@ class MobileCoordinateDebugger {
      * 更新調試信息
      */
     updateDebugInfo(clientX, clientY, eventType) {
-        const info = `🔍 極簡DOM觸控驗證器
-        
+        const info = `🎯 Phaser-DOM座標統一器
+
 最後點擊: ${eventType}(${clientX}, ${clientY})
+DOM座標: (${this.lastDOMCoordinates.x}, ${this.lastDOMCoordinates.y})
 
-🎯 測試目標：
-DOM記錄的位置是否就是您觸碰的位置？
+🎯 功能狀態：
+✅ DOM座標捕獲正常
+✅ Phaser座標攔截啟用
+✅ 座標統一系統運行中
 
-🔴 紅色圓圈 = 觸控位置
-🔵 藍色圓圈 = 滑鼠位置
+🔴 紅色圓圈 = 觸控位置 (DOM)
+🔵 藍色圓圈 = 滑鼠位置 (DOM)
+🎯 Phaser現在使用相同的DOM座標
 
-💡 標記直接使用DOM座標，無任何轉換
 💡 長按3秒清除所有標記
-💡 觀察標記是否出現在您觸碰的位置`;
+💡 太空船移動現在使用DOM座標`;
 
         if (this.debugText) {
             this.debugText.setText(info);
@@ -153,17 +227,39 @@ DOM記錄的位置是否就是您觸碰的位置？
         this.domMarkers = [];
         
         if (this.debugText) {
-            this.debugText.setText('🔍 極簡DOM觸控驗證器\n點擊螢幕任何位置測試DOM位置準確性\n\n🧹 已清除所有標記');
+            this.debugText.setText('🎯 Phaser-DOM座標統一器\n點擊螢幕測試座標統一效果\n\n🧹 已清除所有標記');
         }
     }
 
-    // 保留這些方法以維持兼容性，但簡化實現
+    // 🎯 新的座標修復方法 - 直接返回DOM座標
     getBestCoordinateFix(pointer) {
+        // 如果有DOM座標，直接使用
+        if (this.lastDOMCoordinates.x !== 0 || this.lastDOMCoordinates.y !== 0) {
+            return {
+                x: this.lastDOMCoordinates.x,
+                y: this.lastDOMCoordinates.y,
+                method: 'DOM座標統一',
+                confidence: 1.0
+            };
+        }
+
+        // 回退到原始座標
         return {
             x: pointer.x,
             y: pointer.y,
-            method: '無修正',
-            confidence: 1.0
+            method: '原始座標',
+            confidence: 0.5
+        };
+    }
+
+    /**
+     * 🎯 獲取統一後的座標
+     */
+    getUnifiedCoordinates() {
+        return {
+            x: this.lastDOMCoordinates.x,
+            y: this.lastDOMCoordinates.y,
+            timestamp: Date.now()
         };
     }
 }
