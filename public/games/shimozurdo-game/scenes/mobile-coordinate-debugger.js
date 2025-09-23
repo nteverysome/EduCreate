@@ -87,7 +87,9 @@ class MobileCoordinateDebugger {
         // 監聽觸控開始
         this.scene.input.on('pointerdown', (pointer) => {
             if (this.isEnabled) {
-                this.diagnoseCoordinates(pointer);
+                // 🎯 使用DOM座標覆蓋Phaser座標
+                const correctedPointer = this.createDOMCorrectedPointer(pointer);
+                this.diagnoseCoordinates(correctedPointer);
 
                 // 開始長按計時器
                 longPressTimer = setTimeout(() => {
@@ -191,6 +193,45 @@ class MobileCoordinateDebugger {
         });
 
         console.log('🔴 DOM事件監聽器已設置到整個頁面，將追蹤全螢幕觸控座標');
+    }
+
+    /**
+     * 創建DOM座標修正的Pointer物件 - 讓Phaser使用真正的DOM座標
+     */
+    createDOMCorrectedPointer(originalPointer) {
+        if (!this.lastDOMCoordinates) {
+            console.log('⚠️ 沒有DOM座標數據，使用原始Phaser座標');
+            return originalPointer;
+        }
+
+        // 將DOM座標轉換為Phaser世界座標
+        const canvas = this.scene.game.canvas;
+        const canvasRect = canvas.getBoundingClientRect();
+
+        // 計算相對於Canvas的座標
+        const canvasX = this.lastDOMCoordinates.clientX - canvasRect.left;
+        const canvasY = this.lastDOMCoordinates.clientY - canvasRect.top;
+
+        // 轉換為Phaser世界座標（考慮縮放）
+        const scaleX = this.scene.game.config.width / canvasRect.width;
+        const scaleY = this.scene.game.config.height / canvasRect.height;
+
+        const worldX = canvasX * scaleX;
+        const worldY = canvasY * scaleY;
+
+        // 創建修正後的pointer物件
+        const correctedPointer = {
+            ...originalPointer,
+            x: worldX,
+            y: worldY,
+            worldX: worldX,
+            worldY: worldY,
+            _isDOMCorrected: true
+        };
+
+        console.log(`🎯 [DOM座標修正] 原始Phaser(${originalPointer.x.toFixed(1)}, ${originalPointer.y.toFixed(1)}) → DOM修正(${worldX.toFixed(1)}, ${worldY.toFixed(1)})`);
+
+        return correctedPointer;
     }
 
     /**
@@ -508,7 +549,12 @@ class MobileCoordinateDebugger {
         debugInfo += `像素比: ${basicInfo.devicePixelRatio}\n`;
         debugInfo += `Canvas: ${basicInfo.canvasSize.width}x${basicInfo.canvasSize.height}\n`;
         debugInfo += `\n🎯 點擊座標:\n`;
-        debugInfo += `原始: (${basicInfo.rawPointer.x.toFixed(0)}, ${basicInfo.rawPointer.y.toFixed(0)})\n`;
+        debugInfo += `Phaser: (${basicInfo.rawPointer.x.toFixed(0)}, ${basicInfo.rawPointer.y.toFixed(0)})`;
+        if (basicInfo.rawPointer._isDOMCorrected) {
+            debugInfo += ` [DOM修正] ✅\n`;
+        } else {
+            debugInfo += ` [原始] ⚠️\n`;
+        }
         
         if (bestMethod && fixMethods[bestMethod]) {
             const method = fixMethods[bestMethod];
@@ -544,12 +590,12 @@ class MobileCoordinateDebugger {
         }
 
         debugInfo += `\n🔴 紅色圓圈 = DOM真正觸控位置（即時顯示）\n`;
-        debugInfo += `🟠 橙色圓圈 = Phaser認為位置（全域接收）\n`;
+        debugInfo += `🟠 橙色圓圈 = Phaser座標（DOM修正後）\n`;
         debugInfo += `🟢 綠色圓圈 = 修復後位置\n`;
         debugInfo += `🔵 藍色方框 = 太空船位置\n`;
-        debugInfo += `\n💡 紅色標記立即顯示，不等待Phaser事件\n`;
-        debugInfo += `💡 橙色標記現在覆蓋整個遊戲區域\n`;
-        debugInfo += `💡 全域輸入接收器確保完整事件覆蓋\n`;
+        debugInfo += `\n🎯 目標：DOM座標 = Phaser座標\n`;
+        debugInfo += `💡 Phaser現在使用DOM修正座標\n`;
+        debugInfo += `💡 紅色和橙色圓圈應該重疊\n`;
         debugInfo += `💡 長按螢幕3秒可清除所有標記\n`;
 
         this.debugText.setText(debugInfo);
@@ -573,10 +619,35 @@ class MobileCoordinateDebugger {
      * 獲取最佳座標修復結果
      */
     getBestCoordinateFix(pointer) {
+        // 🎯 優先使用DOM修正座標（如果可用）
+        if (pointer._isDOMCorrected) {
+            console.log(`🎯 [太空船移動] 使用DOM修正座標: (${pointer.x.toFixed(1)}, ${pointer.y.toFixed(1)})`);
+            return {
+                x: pointer.x,
+                y: pointer.y,
+                method: 'DOM修正座標',
+                confidence: 1.0
+            };
+        }
+
+        // 🔄 如果沒有DOM修正，嘗試使用DOM座標創建修正版本
+        if (this.lastDOMCoordinates) {
+            const correctedPointer = this.createDOMCorrectedPointer(pointer);
+            console.log(`🎯 [太空船移動] 創建DOM修正座標: (${correctedPointer.x.toFixed(1)}, ${correctedPointer.y.toFixed(1)})`);
+            return {
+                x: correctedPointer.x,
+                y: correctedPointer.y,
+                method: 'DOM即時修正',
+                confidence: 0.9
+            };
+        }
+
+        // 🔙 回退到原有的診斷方法
         const diagnosis = this.performComprehensiveDiagnosis(pointer);
         const bestMethod = this.findBestMethod(diagnosis.offsets);
-        
+
         if (bestMethod && diagnosis.fixMethods[bestMethod]) {
+            console.log(`🎯 [太空船移動] 使用診斷方法: ${bestMethod}`);
             return {
                 x: diagnosis.fixMethods[bestMethod].x,
                 y: diagnosis.fixMethods[bestMethod].y,
@@ -584,7 +655,8 @@ class MobileCoordinateDebugger {
                 confidence: this.calculateConfidence(diagnosis.offsets[bestMethod])
             };
         }
-        
+
+        console.log(`⚠️ [太空船移動] 使用原始座標（無修正）`);
         return {
             x: pointer.x,
             y: pointer.y,
