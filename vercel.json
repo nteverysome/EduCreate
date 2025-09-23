@@ -79,6 +79,19 @@
           "value": "SAMEORIGIN"
         }
       ]
+    },
+    {
+      "source": "/games/starshake-game/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
+      ]
     }
   ],
   "redirects": [
@@ -119,6 +132,14 @@
     {
       "source": "/games/airplane-game/(.*)",
       "destination": "/games/airplane-game/$1"
+    },
+    {
+      "source": "/games/starshake-game",
+      "destination": "/games/starshake-game/dist/index.html"
+    },
+    {
+      "source": "/games/starshake-game/(.*)",
+      "destination": "/games/starshake-game/$1"
     }
   ]
 }
