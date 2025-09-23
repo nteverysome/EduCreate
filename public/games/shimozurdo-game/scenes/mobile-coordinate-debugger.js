@@ -1,6 +1,6 @@
 /**
- * 🎯 Phaser-DOM座標統一器
- * 讓Phaser事件直接使用DOM座標，實現完美的觸控響應
+ * 📱 手機座標修復器 - 專門解決手機設備的座標偏移問題
+ * 針對手機設備的特殊情況進行座標修復和統一
  */
 class MobileCoordinateDebugger {
     constructor(scene) {
@@ -9,24 +9,124 @@ class MobileCoordinateDebugger {
         this.domMarkers = [];  // 儲存DOM標記
         this.lastDOMCoordinates = { x: 0, y: 0 };  // 儲存最後的DOM座標
 
-        // 🎯 核心功能：攔截並統一座標系統
-        this.setupPhaserDOMCoordinateUnification();
+        // 📱 手機設備檢測
+        this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        this.deviceInfo = this.getDeviceInfo();
+
+        console.log('📱 手機設備檢測:', this.deviceInfo);
+
+        // 🎯 核心功能：手機專用座標修復系統
+        this.setupMobileCoordinateFix();
         this.setupSimpleDOMTest();
 
-        console.log('🎯 Phaser-DOM座標統一器已啟動 - 讓Phaser直接使用DOM座標');
+        console.log('📱 手機座標修復器已啟動 - 專門處理手機設備座標問題');
+    }
+
+    /**
+     * 📱 獲取設備信息
+     */
+    getDeviceInfo() {
+        return {
+            isMobile: this.isMobile,
+            devicePixelRatio: window.devicePixelRatio || 1,
+            screenWidth: window.screen.width,
+            screenHeight: window.screen.height,
+            windowWidth: window.innerWidth,
+            windowHeight: window.innerHeight,
+            userAgent: navigator.userAgent,
+            isIOS: /iPhone|iPad|iPod/i.test(navigator.userAgent),
+            isAndroid: /Android/i.test(navigator.userAgent)
+        };
     }
     
     /**
-     * 🎯 設置Phaser-DOM座標統一系統
+     * 📱 設置手機專用座標修復系統
      */
-    setupPhaserDOMCoordinateUnification() {
-        // 攔截Phaser的輸入事件，用DOM座標替換
+    setupMobileCoordinateFix() {
+        if (!this.isMobile) {
+            console.log('💻 非手機設備，跳過手機座標修復');
+            return;
+        }
+
+        // 攔截Phaser的輸入事件，用修復後的座標替換
         this.interceptPhaserInputEvents();
 
         // 設置DOM事件監聽器來捕獲真實座標
         this.setupDOMCoordinateCapture();
 
-        console.log('🎯 Phaser-DOM座標統一系統已設置');
+        // 設置手機專用座標修復算法
+        this.setupMobileCoordinateAlgorithms();
+
+        console.log('📱 手機專用座標修復系統已設置');
+    }
+
+    /**
+     * 📱 設置手機專用座標修復算法
+     */
+    setupMobileCoordinateAlgorithms() {
+        // 計算各種修復參數
+        this.calculateMobileFixParameters();
+
+        // 設置動態修復監聽器
+        this.setupDynamicFixListeners();
+
+        console.log('📱 手機座標修復算法已設置');
+    }
+
+    /**
+     * 📱 計算手機修復參數
+     */
+    calculateMobileFixParameters() {
+        const canvas = this.scene.sys.game.canvas;
+        const canvasRect = canvas.getBoundingClientRect();
+
+        this.mobileFixParams = {
+            // Canvas相關參數
+            canvasWidth: canvas.width,
+            canvasHeight: canvas.height,
+            canvasClientWidth: canvasRect.width,
+            canvasClientHeight: canvasRect.height,
+            canvasLeft: canvasRect.left,
+            canvasTop: canvasRect.top,
+
+            // 設備相關參數
+            devicePixelRatio: this.deviceInfo.devicePixelRatio,
+            scaleX: canvasRect.width / canvas.width,
+            scaleY: canvasRect.height / canvas.height,
+
+            // 視窗相關參數
+            windowWidth: window.innerWidth,
+            windowHeight: window.innerHeight,
+            scrollX: window.scrollX || window.pageXOffset || 0,
+            scrollY: window.scrollY || window.pageYOffset || 0
+        };
+
+        console.log('📱 手機修復參數:', this.mobileFixParams);
+    }
+
+    /**
+     * 📱 設置動態修復監聽器
+     */
+    setupDynamicFixListeners() {
+        // 監聽視窗大小變化
+        window.addEventListener('resize', () => {
+            this.calculateMobileFixParameters();
+            console.log('📱 視窗大小變化，重新計算修復參數');
+        });
+
+        // 監聽方向變化
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                this.calculateMobileFixParameters();
+                console.log('📱 設備方向變化，重新計算修復參數');
+            }, 100);
+        });
+
+        // 監聽滾動變化
+        window.addEventListener('scroll', () => {
+            this.mobileFixParams.scrollX = window.scrollX || window.pageXOffset || 0;
+            this.mobileFixParams.scrollY = window.scrollY || window.pageYOffset || 0;
+        });
     }
 
     /**
@@ -63,25 +163,140 @@ class MobileCoordinateDebugger {
     }
 
     /**
-     * 🔧 設置DOM座標捕獲
+     * � 設置DOM座標捕獲（手機專用）
      */
     setupDOMCoordinateCapture() {
-        // 捕獲真實的DOM觸控座標
+        // 📱 捕獲真實的DOM觸控座標（手機專用處理）
         document.addEventListener('touchstart', (event) => {
             if (event.touches.length > 0) {
                 const touch = event.touches[0];
-                this.lastDOMCoordinates.x = touch.clientX;
-                this.lastDOMCoordinates.y = touch.clientY;
-                console.log(`🔧 [DOM捕獲] 觸控座標: (${touch.clientX}, ${touch.clientY})`);
+
+                // 🎯 手機專用座標修復
+                const fixedCoords = this.applyMobileCoordinateFix(touch.clientX, touch.clientY);
+
+                this.lastDOMCoordinates.x = fixedCoords.x;
+                this.lastDOMCoordinates.y = fixedCoords.y;
+
+                console.log(`� [觸控捕獲] 原始: (${touch.clientX}, ${touch.clientY}) → 修復: (${fixedCoords.x}, ${fixedCoords.y})`);
+
+                // 創建視覺標記
+                this.createDOMMarker(fixedCoords.x, fixedCoords.y, 'touch');
             }
         }, { passive: true });
 
-        // 捕獲真實的DOM滑鼠座標
+        // 📱 捕獲真實的DOM滑鼠座標（用於桌面測試）
         document.addEventListener('mousedown', (event) => {
-            this.lastDOMCoordinates.x = event.clientX;
-            this.lastDOMCoordinates.y = event.clientY;
-            console.log(`🔧 [DOM捕獲] 滑鼠座標: (${event.clientX}, ${event.clientY})`);
+            const fixedCoords = this.applyMobileCoordinateFix(event.clientX, event.clientY);
+
+            this.lastDOMCoordinates.x = fixedCoords.x;
+            this.lastDOMCoordinates.y = fixedCoords.y;
+
+            console.log(`� [滑鼠捕獲] 原始: (${event.clientX}, ${event.clientY}) → 修復: (${fixedCoords.x}, ${fixedCoords.y})`);
+
+            // 創建視覺標記
+            this.createDOMMarker(fixedCoords.x, fixedCoords.y, 'mouse');
         }, { passive: true });
+    }
+
+    /**
+     * 📱 應用手機專用座標修復算法
+     */
+    applyMobileCoordinateFix(clientX, clientY) {
+        if (!this.mobileFixParams) {
+            this.calculateMobileFixParameters();
+        }
+
+        const params = this.mobileFixParams;
+
+        // 🎯 多重修復算法
+        let fixedX = clientX;
+        let fixedY = clientY;
+
+        // 修復1: 減去Canvas偏移
+        fixedX -= params.canvasLeft;
+        fixedY -= params.canvasTop;
+
+        // 修復2: 考慮滾動偏移
+        fixedX += params.scrollX;
+        fixedY += params.scrollY;
+
+        // 修復3: 設備像素比修復（手機設備常見問題）
+        if (this.isMobile && params.devicePixelRatio !== 1) {
+            // 對於手機設備，通常需要除以devicePixelRatio而不是乘以
+            fixedX = fixedX / params.devicePixelRatio;
+            fixedY = fixedY / params.devicePixelRatio;
+        }
+
+        // 修復4: Canvas縮放修復
+        if (params.scaleX !== 1 || params.scaleY !== 1) {
+            fixedX = fixedX * (params.canvasWidth / params.canvasClientWidth);
+            fixedY = fixedY * (params.canvasHeight / params.canvasClientHeight);
+        }
+
+        // 修復5: 手機專用邊界檢查
+        fixedX = Math.max(0, Math.min(params.canvasWidth, fixedX));
+        fixedY = Math.max(0, Math.min(params.canvasHeight, fixedY));
+
+        return { x: Math.round(fixedX), y: Math.round(fixedY) };
+    }
+
+    /**
+     * 📱 創建DOM視覺標記
+     */
+    createDOMMarker(x, y, type) {
+        // 清除舊標記
+        this.clearDOMMarkers();
+
+        const marker = document.createElement('div');
+        marker.style.cssText = `
+            position: fixed;
+            left: ${x - 10}px;
+            top: ${y - 10}px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: ${type === 'touch' ? '#ff4444' : '#4444ff'};
+            border: 2px solid white;
+            z-index: 999999;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        `;
+
+        // 添加標籤
+        const label = document.createElement('div');
+        label.textContent = `${type}(${x},${y})`;
+        label.style.cssText = `
+            position: absolute;
+            top: 25px;
+            left: -20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+        `;
+
+        marker.appendChild(label);
+        document.body.appendChild(marker);
+        this.domMarkers.push(marker);
+
+        // 3秒後自動清除
+        setTimeout(() => {
+            this.clearDOMMarkers();
+        }, 3000);
+    }
+
+    /**
+     * 📱 清除DOM標記
+     */
+    clearDOMMarkers() {
+        this.domMarkers.forEach(marker => {
+            if (marker.parentNode) {
+                marker.parentNode.removeChild(marker);
+            }
+        });
+        this.domMarkers = [];
     }
 
     /**
@@ -231,15 +446,26 @@ DOM座標: (${this.lastDOMCoordinates.x}, ${this.lastDOMCoordinates.y})
         }
     }
 
-    // 🎯 新的座標修復方法 - 直接返回DOM座標
+    // 📱 手機專用座標修復方法 - 使用修復後的DOM座標
     getBestCoordinateFix(pointer) {
-        // 如果有DOM座標，直接使用
+        // 📱 如果有修復後的DOM座標，直接使用
         if (this.lastDOMCoordinates.x !== 0 || this.lastDOMCoordinates.y !== 0) {
             return {
                 x: this.lastDOMCoordinates.x,
                 y: this.lastDOMCoordinates.y,
-                method: 'DOM座標統一',
+                method: '手機座標修復',
                 confidence: 1.0
+            };
+        }
+
+        // 📱 如果沒有DOM座標，嘗試對Phaser座標進行手機修復
+        if (this.isMobile) {
+            const fixedCoords = this.applyMobileCoordinateFix(pointer.x, pointer.y);
+            return {
+                x: fixedCoords.x,
+                y: fixedCoords.y,
+                method: '手機Phaser座標修復',
+                confidence: 0.8
             };
         }
 
