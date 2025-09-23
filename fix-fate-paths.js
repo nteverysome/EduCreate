@@ -80,13 +80,29 @@ function fixFatePaths() {
         jsContent = jsContent.replace(/"contenedor"/g, '"game-container"');
         totalReplacements += containerIdMatches.length;
     }
-    
+
     // 檢查是否有其他可能的容器 ID
     const appIdMatches = jsContent.match(/getElementById\("app"\)/g);
     if (appIdMatches) {
         console.log(`🔄 修復 ${appIdMatches.length} 個 app 容器引用`);
         jsContent = jsContent.replace(/getElementById\("app"\)/g, 'getElementById("game-container")');
         totalReplacements += appIdMatches.length;
+    }
+
+    // 修復 Phaser 遊戲配置中的容器引用
+    const phaserParentMatches = jsContent.match(/parent:\s*["']?[^"',}]+["']?/g);
+    if (phaserParentMatches) {
+        console.log(`🔄 找到 ${phaserParentMatches.length} 個 Phaser parent 配置`);
+        jsContent = jsContent.replace(/parent:\s*["']?[^"',}]+["']?/g, 'parent:"game-container"');
+        totalReplacements += phaserParentMatches.length;
+    }
+
+    // 修復可能的 body 容器引用
+    const bodyContainerMatches = jsContent.match(/document\.body/g);
+    if (bodyContainerMatches) {
+        console.log(`🔄 修復 ${bodyContainerMatches.length} 個 body 容器引用`);
+        jsContent = jsContent.replace(/document\.body/g, 'document.getElementById("game-container")');
+        totalReplacements += bodyContainerMatches.length;
     }
     
     // 記錄修復後的一些路徑範例

@@ -13,6 +13,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            background: #000;
         }
 
         #app {
@@ -32,8 +33,55 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            background: #000;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 1000px !important;
+            max-height: 800px !important;
+            display: block !important;
+            background: #000 !important;
         }
     </style>
+  <script>
+    // EduCreate Fate 遊戲 WebAssembly 路徑修復
+    (function() {
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options) {
+        // 修復 WebAssembly 路徑
+        if (typeof url === 'string' && url.includes('assets/ammo/')) {
+          if (url.startsWith('./assets/ammo/')) {
+            url = url.replace('./assets/ammo/', '/games/fate-game/dist/assets/ammo/');
+            console.log('🔧 修復 WebAssembly 路徑:', url);
+          } else if (url.startsWith('assets/ammo/')) {
+            url = '/games/fate-game/dist/' + url;
+            console.log('🔧 修復 WebAssembly 路徑:', url);
+          }
+        }
+        return originalFetch.call(this, url, options);
+      };
+
+      // 修復 Canvas 容器
+      window.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          const canvas = document.querySelector('canvas');
+          const gameContainer = document.getElementById('game-container');
+
+          if (canvas && gameContainer && !gameContainer.contains(canvas)) {
+            console.log('🎮 移動 Canvas 到正確容器');
+            gameContainer.appendChild(canvas);
+            canvas.width = 1000;
+            canvas.height = 800;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.display = 'block';
+          }
+        }, 1000);
+      });
+    })();
+  </script>
   <script type="module" crossorigin src="/games/fate-game/dist/assets/index-DBbMvyNZ.js"></script>
   <link rel="modulepreload" crossorigin href="/games/fate-game/dist/assets/phaser-YLX_gXuc.js">
 </head>
