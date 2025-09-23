@@ -207,6 +207,18 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '💥',
     estimatedLoadTime: 900
   },
+  {
+    id: 'math-attack-game',
+    name: 'math-attack',
+    displayName: 'Math Attack 數學攻擊',
+    description: '快速解決數學問題，提升計算能力。結合時間壓力的數學遊戲，訓練數字記憶和運算速度',
+    type: 'iframe',
+    memoryType: '基礎記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🔢',
+    estimatedLoadTime: 1200
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -299,6 +311,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/dungeon-game/dist/';
     case 'blastemup-game':
       return '/games/blastemup-game/dist/';
+    case 'math-attack-game':
+      return '/games/math-attack-game/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':

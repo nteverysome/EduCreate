@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="/games/math-attack-game/favicon.ico" />
+    <title>🔢 Math Attack 數學攻擊 - EduCreate</title>
+
+    <style>
+        /* EduCreate 遊戲樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Open Sans', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #app {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        #game-container {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            background: #000;
+            max-width: 100%;
+            max-height: 100vh;
+            border: 2px solid #4CAF50;
+        }
+
+        #game {
+            display: block;
+            max-width: 100%;
+            max-height: 100vh;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100vh;
+            object-fit: contain;
+        }
+
+        /* 載入動畫 */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #4CAF50;
+            font-size: 18px;
+            z-index: 1000;
+            text-shadow: 0 0 10px #4CAF50;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="loading">🔢 載入數學攻擊遊戲中...</div>
+        <div id="game-container">
+            <div id="game"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.53.1/dist/phaser.min.js"></script>
+    <script src="/games/math-attack-game/main.js" type="module"></script>
+
+    <script>
+        // 遊戲載入完成後隱藏載入動畫
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loading = document.querySelector('.loading');
+                if (loading) {
+                    loading.style.display = 'none';
+                }
+            }, 3000);
+        });
+
+        // 監聽 Phaser 遊戲創建
+        window.addEventListener('phaser-game-ready', () => {
+            console.log('🎮 Math Attack 遊戲已準備就緒');
+            const loading = document.querySelector('.loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

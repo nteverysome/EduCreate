@@ -234,6 +234,19 @@ const nextConfig = {
         source: '/games/blastemup-game/:path*',
         destination: '/games/blastemup-game/:path*'
       },
+      // Math Attack 數學攻擊遊戲路由
+      {
+        source: '/games/math-attack-game',
+        destination: '/games/math-attack-game/index.html'
+      },
+      {
+        source: '/games/math-attack-game/',
+        destination: '/games/math-attack-game/index.html'
+      },
+      {
+        source: '/games/math-attack-game/:path*',
+        destination: '/games/math-attack-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',

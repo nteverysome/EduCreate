@@ -276,6 +276,18 @@
     {
       "source": "/games/blastemup-game/(.*)",
       "destination": "/games/blastemup-game/$1"
+    },
+    {
+      "source": "/games/math-attack-game",
+      "destination": "/games/math-attack-game/index.html"
+    },
+    {
+      "source": "/games/math-attack-game/",
+      "destination": "/games/math-attack-game/index.html"
+    },
+    {
+      "source": "/games/math-attack-game/(.*)",
+      "destination": "/games/math-attack-game/$1"
     }
   ]
 }
