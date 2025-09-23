@@ -212,6 +212,22 @@
     {
       "source": "/games/zenbaki-game/(.*)",
       "destination": "/games/zenbaki-game/$1"
+    },
+    {
+      "source": "/games/mars-game",
+      "destination": "/games/mars-game/dist/index.html"
+    },
+    {
+      "source": "/games/mars-game/dist",
+      "destination": "/games/mars-game/dist/index.html"
+    },
+    {
+      "source": "/games/mars-game/dist/",
+      "destination": "/games/mars-game/dist/index.html"
+    },
+    {
+      "source": "/games/mars-game/(.*)",
+      "destination": "/games/mars-game/$1"
     }
   ]
 }

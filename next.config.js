@@ -166,6 +166,23 @@ const nextConfig = {
         source: '/games/zenbaki-game/:path*',
         destination: '/games/zenbaki-game/:path*'
       },
+      // Mars 火星探險遊戲路由
+      {
+        source: '/games/mars-game',
+        destination: '/games/mars-game/dist/index.html'
+      },
+      {
+        source: '/games/mars-game/dist',
+        destination: '/games/mars-game/dist/index.html'
+      },
+      {
+        source: '/games/mars-game/dist/',
+        destination: '/games/mars-game/dist/index.html'
+      },
+      {
+        source: '/games/mars-game/:path*',
+        destination: '/games/mars-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',
