@@ -156,6 +156,7 @@
     <!-- 觸摸控制 JavaScript -->
     <script>
         // 觸摸控制系統
+        // 觸摸控制系統
         class TouchControls {
             constructor() {
                 this.joystick = document.getElementById('touch-joystick');
@@ -168,21 +169,51 @@
                 this.currentDirection = { x: 0, y: 0 };
                 this.shooting = false;
                 
+                // 調試標誌
+                this.debug = true;
+                
                 this.init();
             }
             
             init() {
-                // 搖桿控制
-                this.joystick.addEventListener('touchstart', this.onJoystickStart.bind(this));
-                this.joystick.addEventListener('touchmove', this.onJoystickMove.bind(this));
-                this.joystick.addEventListener('touchend', this.onJoystickEnd.bind(this));
+                if (this.debug) console.log('🎮 TouchControls 初始化開始...');
+                
+                // 檢查元素是否存在
+                if (!this.joystick || !this.knob || !this.shootBtn) {
+                    console.error('❌ TouchControls 元素未找到:', {
+                        joystick: !!this.joystick,
+                        knob: !!this.knob,
+                        shootBtn: !!this.shootBtn
+                    });
+                    return;
+                }
+                
+                // 搖桿控制 - 添加多種事件類型
+                this.joystick.addEventListener('touchstart', this.onJoystickStart.bind(this), { passive: false });
+                this.joystick.addEventListener('touchmove', this.onJoystickMove.bind(this), { passive: false });
+                this.joystick.addEventListener('touchend', this.onJoystickEnd.bind(this), { passive: false });
+                this.joystick.addEventListener('touchcancel', this.onJoystickEnd.bind(this), { passive: false });
+                
+                // 添加鼠標事件作為備用（用於桌面測試）
+                this.joystick.addEventListener('mousedown', this.onJoystickStartMouse.bind(this));
+                this.joystick.addEventListener('mousemove', this.onJoystickMoveMouse.bind(this));
+                this.joystick.addEventListener('mouseup', this.onJoystickEndMouse.bind(this));
+                this.joystick.addEventListener('mouseleave', this.onJoystickEndMouse.bind(this));
                 
                 // 射擊按鈕
-                this.shootBtn.addEventListener('touchstart', this.onShootStart.bind(this));
-                this.shootBtn.addEventListener('touchend', this.onShootEnd.bind(this));
+                this.shootBtn.addEventListener('touchstart', this.onShootStart.bind(this), { passive: false });
+                this.shootBtn.addEventListener('touchend', this.onShootEnd.bind(this), { passive: false });
+                this.shootBtn.addEventListener('touchcancel', this.onShootEnd.bind(this), { passive: false });
+                
+                // 鼠標事件作為備用
+                this.shootBtn.addEventListener('mousedown', this.onShootStart.bind(this));
+                this.shootBtn.addEventListener('mouseup', this.onShootEnd.bind(this));
                 
                 // 全螢幕按鈕
-                this.fullscreenBtn.addEventListener('click', this.toggleFullscreen.bind(this));
+                if (this.fullscreenBtn) {
+                    this.fullscreenBtn.addEventListener('click', this.toggleFullscreen.bind(this));
+                    this.fullscreenBtn.addEventListener('touchend', this.toggleFullscreen.bind(this));
+                }
                 
                 // 防止默認觸摸行為
                 document.addEventListener('touchmove', (e) => {
@@ -190,10 +221,32 @@
                         e.preventDefault();
                     }
                 }, { passive: false });
+                
+                // 防止上下文菜單
+                document.addEventListener('contextmenu', (e) => {
+                    if (e.target.closest('#touch-controls')) {
+                        e.preventDefault();
+                    }
+                });
+                
+                if (this.debug) console.log('✅ TouchControls 事件監聽器已設置');
             }
             
             onJoystickStart(e) {
                 e.preventDefault();
+                if (this.debug) console.log('🕹️ 搖桿觸摸開始');
+                this.joystickActive = true;
+                const rect = this.joystick.getBoundingClientRect();
+                this.joystickCenter = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+                if (this.debug) console.log('📍 搖桿中心:', this.joystickCenter);
+            }
+            
+            onJoystickStartMouse(e) {
+                e.preventDefault();
+                if (this.debug) console.log('🖱️ 搖桿鼠標開始');
                 this.joystickActive = true;
                 const rect = this.joystick.getBoundingClientRect();
                 this.joystickCenter = {
@@ -207,8 +260,21 @@
                 e.preventDefault();
                 
                 const touch = e.touches[0];
-                const deltaX = touch.clientX - this.joystickCenter.x;
-                const deltaY = touch.clientY - this.joystickCenter.y;
+                if (!touch) return;
+                
+                this.updateJoystickPosition(touch.clientX, touch.clientY);
+            }
+            
+            onJoystickMoveMouse(e) {
+                if (!this.joystickActive) return;
+                e.preventDefault();
+                
+                this.updateJoystickPosition(e.clientX, e.clientY);
+            }
+            
+            updateJoystickPosition(clientX, clientY) {
+                const deltaX = clientX - this.joystickCenter.x;
+                const deltaY = clientY - this.joystickCenter.y;
                 
                 const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
                 const maxDistance = 40;
@@ -230,10 +296,23 @@
                         y: Math.sin(angle)
                     };
                 }
+                
+                if (this.debug && Math.abs(this.currentDirection.x) > 0.1 || Math.abs(this.currentDirection.y) > 0.1) {
+                    console.log('🎯 搖桿方向:', this.currentDirection);
+                }
             }
             
             onJoystickEnd(e) {
                 e.preventDefault();
+                if (this.debug) console.log('🕹️ 搖桿觸摸結束');
+                this.joystickActive = false;
+                this.knob.style.transform = 'translate(-50%, -50%)';
+                this.currentDirection = { x: 0, y: 0 };
+            }
+            
+            onJoystickEndMouse(e) {
+                e.preventDefault();
+                if (this.debug) console.log('🖱️ 搖桿鼠標結束');
                 this.joystickActive = false;
                 this.knob.style.transform = 'translate(-50%, -50%)';
                 this.currentDirection = { x: 0, y: 0 };
@@ -241,35 +320,107 @@
             
             onShootStart(e) {
                 e.preventDefault();
+                if (this.debug) console.log('🚀 射擊開始');
                 this.shooting = true;
+                // 添加視覺反饋
+                this.shootBtn.style.transform = 'scale(0.9)';
+                this.shootBtn.style.backgroundColor = '#ff6b6b';
             }
             
             onShootEnd(e) {
                 e.preventDefault();
+                if (this.debug) console.log('🚀 射擊結束');
                 this.shooting = false;
+                // 恢復視覺反饋
+                this.shootBtn.style.transform = 'scale(1)';
+                this.shootBtn.style.backgroundColor = '#ff4757';
             }
             
             toggleFullscreen() {
+                if (this.debug) console.log('🖥️ 切換全螢幕');
                 if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log('全螢幕請求失敗:', err);
+                    });
                 } else {
-                    document.exitFullscreen();
+                    document.exitFullscreen().catch(err => {
+                        console.log('退出全螢幕失敗:', err);
+                    });
                 }
             }
             
             // 獲取當前輸入狀態
             getInputState() {
-                return {
-                    direction: this.currentDirection,
+                const state = {
+                    direction: { ...this.currentDirection },
                     shooting: this.shooting
                 };
+                
+                // 只在狀態變化時記錄
+                if (this.debug && (Math.abs(state.direction.x) > 0.1 || Math.abs(state.direction.y) > 0.1 || state.shooting)) {
+                    console.log('📊 當前狀態:', state);
+                }
+                
+                return state;
+            }
+            
+            // 測試方法
+            testControls() {
+                console.log('🧪 TouchControls 測試:');
+                console.log('  - 搖桿元素:', !!this.joystick);
+                console.log('  - 搖桿旋鈕:', !!this.knob);
+                console.log('  - 射擊按鈕:', !!this.shootBtn);
+                console.log('  - 全螢幕按鈕:', !!this.fullscreenBtn);
+                console.log('  - 當前狀態:', this.getInputState());
+                return true;
             }
         }
         
         // 初始化觸摸控制
         window.touchControls = new TouchControls();
         
+        // 添加測試方法到 window
+        window.testTouchControls = () => window.touchControls.testControls();
+        
         console.log('🎮 觸摸控制系統已初始化');
+        console.log('💡 使用 testTouchControls() 進行測試');
+        
+        // 調試功能
+        window.toggleTouchDebug = function() {
+            document.body.classList.toggle('touch-debug');
+            console.log('🐛 TouchControls 調試模式:', document.body.classList.contains('touch-debug') ? '開啟' : '關閉');
+        };
+        
+        // 強制顯示 TouchControls（用於測試）
+        window.forceTouchControls = function(show = true) {
+            const controls = document.getElementById('touch-controls');
+            if (controls) {
+                controls.style.display = show ? 'block' : 'none';
+                console.log('🎮 TouchControls 強制顯示:', show);
+            }
+        };
+        
+        // 檢查媒體查詢
+        window.checkMediaQueries = function() {
+            const queries = [
+                '(max-width: 1024px)',
+                '(max-height: 768px)',
+                '(pointer: coarse)',
+                '(hover: none) and (pointer: coarse)',
+                '(min-width: 768px) and (max-width: 1024px)',
+                '(min-width: 414px) and (max-width: 768px)'
+            ];
+            
+            console.log('📱 媒體查詢檢查:');
+            queries.forEach(query => {
+                const matches = window.matchMedia(query).matches;
+                console.log(`  ${query}: ${matches ? '✅' : '❌'}`);
+            });
+            
+            const controls = document.getElementById('touch-controls');
+            const isVisible = controls && window.getComputedStyle(controls).display !== 'none';
+            console.log(`🎮 TouchControls 可見: ${isVisible ? '✅' : '❌'}`);
+        };
     </script>
 
     <!-- 啟動畫面點擊支援 JavaScript -->
