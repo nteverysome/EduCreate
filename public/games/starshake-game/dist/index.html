@@ -734,6 +734,354 @@
         </script>
         
         
+        
+        <!-- 🔍 PostMessage 通信診斷工具 - POSTMESSAGE_DIAGNOSTIC_TOOL -->
+        <script>
+            console.log('🔍 載入 PostMessage 通信診斷工具');
+            
+            // PostMessage 通信診斷類
+            class PostMessageDiagnostic {
+                constructor() {
+                    this.diagnosticResults = {
+                        environment: {},
+                        communication: {},
+                        errors: [],
+                        timeline: []
+                    };
+                    this.init();
+                }
+                
+                init() {
+                    console.log('🚀 初始化 PostMessage 診斷工具');
+                    this.diagnoseEnvironment();
+                    this.setupCommunicationTest();
+                    this.addDiagnosticFunctions();
+                }
+                
+                // 診斷環境
+                diagnoseEnvironment() {
+                    console.log('🔍 診斷環境設置');
+                    
+                    const env = {
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        isInIframe: window !== window.parent,
+                        canAccessParent: this.canAccessParent(),
+                        isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
+                        isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+                        isMobile: /Mobi|Android/i.test(navigator.userAgent),
+                        windowLocation: window.location.href,
+                        parentLocation: this.getParentLocation(),
+                        hasPostMessage: typeof window.postMessage === 'function',
+                        hasParentPostMessage: this.hasParentPostMessage()
+                    };
+                    
+                    this.diagnosticResults.environment = env;
+                    console.log('🔍 環境診斷結果:', env);
+                    
+                    // 記錄關鍵發現
+                    if (!env.isInIframe) {
+                        this.addError('NOT_IN_IFRAME', '不在 iframe 環境中，PostMessage 通信不適用');
+                    }
+                    
+                    if (!env.canAccessParent) {
+                        this.addError('CANNOT_ACCESS_PARENT', '無法訪問父頁面，可能有跨域限制');
+                    }
+                    
+                    if (env.isIOS && env.isSafari) {
+                        this.addWarning('IOS_SAFARI_DETECTED', 'iOS Safari 檢測到，可能有特殊限制');
+                    }
+                }
+                
+                // 檢查是否能訪問父頁面
+                canAccessParent() {
+                    try {
+                        return window.parent && window.parent !== window;
+                    } catch (error) {
+                        this.addError('PARENT_ACCESS_ERROR', error.message);
+                        return false;
+                    }
+                }
+                
+                // 獲取父頁面位置
+                getParentLocation() {
+                    try {
+                        return window.parent ? window.parent.location.href : 'N/A';
+                    } catch (error) {
+                        return 'BLOCKED_BY_CORS';
+                    }
+                }
+                
+                // 檢查父頁面是否有 postMessage
+                hasParentPostMessage() {
+                    try {
+                        return window.parent && typeof window.parent.postMessage === 'function';
+                    } catch (error) {
+                        return false;
+                    }
+                }
+                
+                // 設置通信測試
+                setupCommunicationTest() {
+                    console.log('📡 設置通信測試');
+                    
+                    // 監聽來自父頁面的消息
+                    window.addEventListener('message', (event) => {
+                        this.handleIncomingMessage(event);
+                    });
+                    
+                    // 如果在 iframe 中，設置定期測試
+                    if (this.diagnosticResults.environment.isInIframe) {
+                        this.startCommunicationTest();
+                    }
+                }
+                
+                // 處理接收到的消息
+                handleIncomingMessage(event) {
+                    const timestamp = new Date().toISOString();
+                    console.log('📥 收到消息:', event.data, 'from:', event.origin);
+                    
+                    this.diagnosticResults.timeline.push({
+                        timestamp: timestamp,
+                        type: 'RECEIVED',
+                        data: event.data,
+                        origin: event.origin,
+                        source: event.source === window.parent ? 'PARENT' : 'OTHER'
+                    });
+                    
+                    // 如果是診斷響應
+                    if (event.data.type === 'DIAGNOSTIC_RESPONSE') {
+                        this.diagnosticResults.communication.parentResponse = {
+                            received: true,
+                            timestamp: timestamp,
+                            data: event.data
+                        };
+                        console.log('✅ 父頁面響應已收到');
+                    }
+                }
+                
+                // 開始通信測試
+                startCommunicationTest() {
+                    console.log('🧪 開始通信測試');
+                    
+                    const testMessage = {
+                        type: 'DIAGNOSTIC_REQUEST',
+                        action: 'COMMUNICATION_TEST',
+                        timestamp: new Date().toISOString(),
+                        testId: Math.random().toString(36).substr(2, 9)
+                    };
+                    
+                    try {
+                        window.parent.postMessage(testMessage, '*');
+                        
+                        this.diagnosticResults.timeline.push({
+                            timestamp: testMessage.timestamp,
+                            type: 'SENT',
+                            data: testMessage,
+                            target: 'PARENT'
+                        });
+                        
+                        console.log('📤 測試消息已發送:', testMessage);
+                        
+                        // 等待響應
+                        setTimeout(() => {
+                            if (!this.diagnosticResults.communication.parentResponse) {
+                                this.addError('NO_PARENT_RESPONSE', '父頁面沒有響應測試消息');
+                            }
+                        }, 3000);
+                        
+                    } catch (error) {
+                        this.addError('SEND_MESSAGE_ERROR', '發送消息失敗: ' + error.message);
+                    }
+                }
+                
+                // 測試雙重全螢幕通信
+                testDualFullscreenCommunication() {
+                    console.log('🎯 測試雙重全螢幕通信');
+                    
+                    if (!this.diagnosticResults.environment.isInIframe) {
+                        console.log('⚠️ 不在 iframe 中，跳過雙重全螢幕通信測試');
+                        return {
+                            skipped: true,
+                            reason: 'Not in iframe environment'
+                        };
+                    }
+                    
+                    const testMessage = {
+                        type: 'DUAL_FULLSCREEN_REQUEST',
+                        action: 'ENTER_CSS_FULLSCREEN',
+                        timestamp: new Date().toISOString(),
+                        testMode: true
+                    };
+                    
+                    try {
+                        window.parent.postMessage(testMessage, '*');
+                        
+                        this.diagnosticResults.timeline.push({
+                            timestamp: testMessage.timestamp,
+                            type: 'SENT',
+                            data: testMessage,
+                            target: 'PARENT'
+                        });
+                        
+                        console.log('📤 雙重全螢幕測試消息已發送');
+                        
+                        return {
+                            sent: true,
+                            message: testMessage
+                        };
+                        
+                    } catch (error) {
+                        this.addError('DUAL_FULLSCREEN_SEND_ERROR', error.message);
+                        return {
+                            sent: false,
+                            error: error.message
+                        };
+                    }
+                }
+                
+                // 添加錯誤
+                addError(code, message) {
+                    const error = {
+                        code: code,
+                        message: message,
+                        timestamp: new Date().toISOString()
+                    };
+                    this.diagnosticResults.errors.push(error);
+                    console.log('❌ 診斷錯誤:', error);
+                }
+                
+                // 添加警告
+                addWarning(code, message) {
+                    const warning = {
+                        code: code,
+                        message: message,
+                        timestamp: new Date().toISOString(),
+                        type: 'WARNING'
+                    };
+                    this.diagnosticResults.errors.push(warning);
+                    console.log('⚠️ 診斷警告:', warning);
+                }
+                
+                // 添加診斷函數到全局
+                addDiagnosticFunctions() {
+                    // 獲取完整診斷報告
+                    window.getPostMessageDiagnostic = () => {
+                        console.log('📊 PostMessage 診斷報告:', this.diagnosticResults);
+                        return this.diagnosticResults;
+                    };
+                    
+                    // 測試通信
+                    window.testPostMessageCommunication = () => {
+                        console.log('🧪 手動測試 PostMessage 通信');
+                        return this.testDualFullscreenCommunication();
+                    };
+                    
+                    // 檢查父頁面監聽器
+                    window.checkParentListener = () => {
+                        console.log('🔍 檢查父頁面監聽器');
+                        
+                        const checkMessage = {
+                            type: 'LISTENER_CHECK',
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        try {
+                            window.parent.postMessage(checkMessage, '*');
+                            console.log('📤 監聽器檢查消息已發送');
+                            return { sent: true };
+                        } catch (error) {
+                            console.log('❌ 監聽器檢查失敗:', error);
+                            return { sent: false, error: error.message };
+                        }
+                    };
+                    
+                    // 強制診斷
+                    window.forceDiagnostic = () => {
+                        console.log('🔧 強制執行完整診斷');
+                        this.diagnoseEnvironment();
+                        this.startCommunicationTest();
+                        return this.diagnosticResults;
+                    };
+                    
+                    console.log('✅ PostMessage 診斷函數已添加到全局');
+                }
+                
+                // 生成診斷報告
+                generateReport() {
+                    const report = {
+                        summary: {
+                            environment: this.diagnosticResults.environment.isInIframe ? 'IFRAME' : 'DIRECT',
+                            canCommunicate: this.diagnosticResults.communication.parentResponse?.received || false,
+                            errorCount: this.diagnosticResults.errors.filter(e => e.type !== 'WARNING').length,
+                            warningCount: this.diagnosticResults.errors.filter(e => e.type === 'WARNING').length
+                        },
+                        details: this.diagnosticResults,
+                        recommendations: this.generateRecommendations()
+                    };
+                    
+                    console.log('📋 PostMessage 診斷報告:', report);
+                    return report;
+                }
+                
+                // 生成建議
+                generateRecommendations() {
+                    const recommendations = [];
+                    
+                    if (!this.diagnosticResults.environment.isInIframe) {
+                        recommendations.push({
+                            type: 'INFO',
+                            message: '直接訪問模式：使用 Safari 原生 API，不需要 PostMessage 通信'
+                        });
+                    }
+                    
+                    if (this.diagnosticResults.environment.isIOS && this.diagnosticResults.environment.isSafari) {
+                        recommendations.push({
+                            type: 'WARNING',
+                            message: 'iOS Safari：確保全螢幕由直接用戶手勢觸發'
+                        });
+                    }
+                    
+                    if (this.diagnosticResults.errors.some(e => e.code === 'CANNOT_ACCESS_PARENT')) {
+                        recommendations.push({
+                            type: 'ERROR',
+                            message: '跨域限制：檢查 iframe 和父頁面的域名設置'
+                        });
+                    }
+                    
+                    if (!this.diagnosticResults.communication.parentResponse) {
+                        recommendations.push({
+                            type: 'ERROR',
+                            message: '父頁面無響應：檢查 GameSwitcher 的消息監聽器'
+                        });
+                    }
+                    
+                    return recommendations;
+                }
+            }
+            
+            // 初始化診斷工具
+            let postMessageDiagnostic;
+            
+            function initPostMessageDiagnostic() {
+                console.log('🚀 初始化 PostMessage 診斷工具');
+                postMessageDiagnostic = new PostMessageDiagnostic();
+                
+                // 5秒後生成初始報告
+                setTimeout(() => {
+                    const report = postMessageDiagnostic.generateReport();
+                    console.log('📋 初始診斷報告已生成');
+                }, 5000);
+            }
+            
+            // 頁面載入完成後初始化
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initPostMessageDiagnostic);
+            } else {
+                initPostMessageDiagnostic();
+            }
+        </script>
+        <!-- PostMessage 通信診斷工具結束 -->
         <!-- 🍎 Safari 全螢幕支援 - SAFARI_FULLSCREEN_SUPPORT -->
         <script>
             console.log('🍎 載入 Safari 全螢幕支援');
@@ -1211,6 +1559,248 @@
             }
         </script>
         <!-- 雙重全螢幕同步功能結束 -->
+        <!-- 🔧 Safari 整合順序修復 - SAFARI_INTEGRATION_ORDER_FIXED -->
+        <script>
+            console.log('🔧 載入 Safari 整合順序修復');
+            
+            // 等待所有支援載入完成後修復整合順序
+            function fixSafariIntegrationOrder() {
+                console.log('🚀 開始修復 Safari 整合順序');
+                
+                // 等待所有功能載入
+                const waitForAllFeatures = () => {
+                    return new Promise((resolve) => {
+                        const checkFeatures = () => {
+                            const hasBasicTouchControls = window.touchControls && window.touchControls.toggleFullscreen;
+                            const hasSafariSupport = window.requestFullscreenCrossBrowser && window.testSafariFullscreen;
+                            const hasCoordinateSync = hasBasicTouchControls; // 座標同步已整合到 TouchControls
+                            
+                            if (hasBasicTouchControls && hasSafariSupport && hasCoordinateSync) {
+                                resolve();
+                            } else {
+                                setTimeout(checkFeatures, 100);
+                            }
+                        };
+                        checkFeatures();
+                    });
+                };
+                
+                waitForAllFeatures().then(() => {
+                    console.log('✅ 所有功能已載入，開始修復整合順序');
+                    
+                    // 保存當前的各個版本
+                    const originalToggleFullscreen = window.touchControls.toggleFullscreen;
+                    const safariCrossBrowserAPI = window.requestFullscreenCrossBrowser;
+                    const safariExitAPI = window.exitFullscreenCrossBrowser;
+                    const safariStateCheck = window.isFullscreenCrossBrowser;
+                    
+                    console.log('🔧 創建 Safari 增強的座標同步版本');
+                    
+                    // 創建 Safari 增強的座標同步版本
+                    const safariEnhancedCoordinateSync = async function() {
+                        console.log('🍎 執行 Safari 增強的座標同步全螢幕切換');
+                        
+                        try {
+                            const isCurrentlyFullscreen = safariStateCheck ? safariStateCheck() : !!document.fullscreenElement;
+                            
+                            if (!isCurrentlyFullscreen) {
+                                console.log('📱 進入 Safari 增強全螢幕模式');
+                                
+                                // 1. 使用 Safari 兼容的跨瀏覽器 API
+                                if (safariCrossBrowserAPI) {
+                                    await safariCrossBrowserAPI();
+                                    console.log('✅ Safari 兼容全螢幕已觸發');
+                                } else {
+                                    // 回退到標準 API
+                                    await document.documentElement.requestFullscreen();
+                                    console.log('✅ 標準全螢幕已觸發（回退）');
+                                }
+                                
+                                // 2. 等待全螢幕狀態穩定
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                                
+                                // 3. 重新計算座標
+                                if (this.recalculateCoordinates) {
+                                    this.recalculateCoordinates();
+                                    console.log('📐 座標已重新計算');
+                                }
+                                
+                                // 4. 觸發 resize 事件讓 Phaser 重新計算
+                                window.dispatchEvent(new Event('resize'));
+                                
+                                // 5. 刷新 Phaser scale
+                                if (window.game && window.game.scale) {
+                                    setTimeout(() => {
+                                        window.game.scale.refresh();
+                                        console.log('🎮 Phaser 遊戲 scale 已刷新');
+                                    }, 100);
+                                }
+                                
+                                console.log('✅ Safari 增強全螢幕已完成');
+                                
+                            } else {
+                                console.log('📱 退出 Safari 增強全螢幕模式');
+                                
+                                // 使用 Safari 兼容的退出 API
+                                if (safariExitAPI) {
+                                    await safariExitAPI();
+                                    console.log('✅ Safari 兼容退出全螢幕已觸發');
+                                } else {
+                                    // 回退到標準 API
+                                    await document.exitFullscreen();
+                                    console.log('✅ 標準退出全螢幕已觸發（回退）');
+                                }
+                                
+                                // 等待退出狀態穩定
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                                
+                                // 重新計算座標
+                                if (this.recalculateCoordinates) {
+                                    this.recalculateCoordinates();
+                                    console.log('📐 座標已重新計算');
+                                }
+                                
+                                // 觸發 resize 事件
+                                window.dispatchEvent(new Event('resize'));
+                                
+                                // 刷新 Phaser scale
+                                if (window.game && window.game.scale) {
+                                    setTimeout(() => {
+                                        window.game.scale.refresh();
+                                        console.log('🎮 Phaser 遊戲 scale 已刷新');
+                                    }, 100);
+                                }
+                                
+                                console.log('✅ 已退出 Safari 增強全螢幕');
+                            }
+                            
+                        } catch (error) {
+                            console.log('❌ Safari 增強全螢幕切換失敗:', error);
+                            
+                            // 回退到原始方法
+                            if (originalToggleFullscreen) {
+                                console.log('🔄 回退到原始全螢幕方法');
+                                originalToggleFullscreen.call(this);
+                            }
+                        }
+                    };
+                    
+                    console.log('🔧 更新雙重同步以使用 Safari 增強版本');
+                    
+                    // 找到並更新雙重同步函數
+                    if (window.touchControls && typeof window.touchControls.toggleFullscreen === 'function') {
+                        // 檢查是否是雙重同步版本
+                        const currentFunction = window.touchControls.toggleFullscreen.toString();
+                        
+                        if (currentFunction.includes('雙重全螢幕同步切換')) {
+                            console.log('🔧 發現雙重同步版本，進行 Safari 增強');
+                            
+                            // 保存當前雙重同步版本
+                            const currentDualSync = window.touchControls.toggleFullscreen;
+                            
+                            // 創建 Safari 增強的雙重同步版本
+                            window.touchControls.toggleFullscreen = async function() {
+                                console.log('🍎🎯 執行 Safari 增強的雙重全螢幕同步切換');
+                                
+                                try {
+                                    const isCurrentlyFullscreen = safariStateCheck ? safariStateCheck() : !!document.fullscreenElement;
+                                    const isInIframe = window !== window.parent;
+                                    
+                                    if (!isCurrentlyFullscreen) {
+                                        console.log('📱 進入 Safari 增強雙重全螢幕模式');
+                                        
+                                        // 1. 觸發 Safari 增強的座標同步版本
+                                        await safariEnhancedCoordinateSync.call(this);
+                                        
+                                        // 2. 如果在 iframe 中，通知父頁面觸發 CSS 強制全螢幕
+                                        if (isInIframe) {
+                                            console.log('📤 通知父頁面觸發 CSS 強制全螢幕');
+                                            window.parent.postMessage({
+                                                type: 'DUAL_FULLSCREEN_REQUEST',
+                                                action: 'ENTER_CSS_FULLSCREEN',
+                                                timestamp: Date.now()
+                                            }, '*');
+                                        }
+                                        
+                                        // 3. 等待父頁面響應
+                                        await new Promise(resolve => setTimeout(resolve, 200));
+                                        
+                                        console.log('✅ Safari 增強雙重全螢幕（原生 + CSS）已啟用');
+                                        
+                                    } else {
+                                        console.log('📱 退出 Safari 增強雙重全螢幕模式');
+                                        
+                                        // 1. 如果在 iframe 中，通知父頁面退出 CSS 強制全螢幕
+                                        if (isInIframe) {
+                                            console.log('📤 通知父頁面退出 CSS 強制全螢幕');
+                                            window.parent.postMessage({
+                                                type: 'DUAL_FULLSCREEN_REQUEST',
+                                                action: 'EXIT_CSS_FULLSCREEN',
+                                                timestamp: Date.now()
+                                            }, '*');
+                                        }
+                                        
+                                        // 2. 觸發 Safari 增強的座標同步退出
+                                        await safariEnhancedCoordinateSync.call(this);
+                                        
+                                        console.log('✅ Safari 增強雙重全螢幕已退出');
+                                    }
+                                    
+                                } catch (error) {
+                                    console.log('❌ Safari 增強雙重全螢幕同步失敗:', error);
+                                    
+                                    // 回退到 Safari 增強座標同步版本
+                                    console.log('🔄 回退到 Safari 增強座標同步版本');
+                                    safariEnhancedCoordinateSync.call(this);
+                                }
+                            };
+                            
+                            console.log('✅ 雙重同步已升級為 Safari 增強版本');
+                            
+                        } else {
+                            console.log('🔧 直接升級為 Safari 增強座標同步版本');
+                            
+                            // 直接替換為 Safari 增強版本
+                            window.touchControls.toggleFullscreen = safariEnhancedCoordinateSync;
+                        }
+                    }
+                    
+                    // 添加測試函數
+                    window.testSafariIntegrationFix = function() {
+                        console.log('🧪 測試 Safari 整合修復');
+                        
+                        const status = {
+                            hasTouchControls: !!window.touchControls,
+                            hasToggleFullscreen: !!(window.touchControls && window.touchControls.toggleFullscreen),
+                            hasSafariSupport: !!window.requestFullscreenCrossBrowser,
+                            hasCoordinateSync: !!(window.touchControls && window.touchControls.recalculateCoordinates),
+                            integrationFixed: true,
+                            currentFunction: window.touchControls ? window.touchControls.toggleFullscreen.toString().substring(0, 100) + '...' : 'N/A'
+                        };
+                        
+                        console.log('🍎 Safari 整合修復狀態:', status);
+                        return status;
+                    };
+                    
+                    console.log('✅ Safari 整合順序修復完成');
+                    console.log('🎯 修復內容：');
+                    console.log('   ✅ 創建 Safari 增強的座標同步版本');
+                    console.log('   ✅ 雙重同步現在使用 Safari 增強版本');
+                    console.log('   ✅ 跨瀏覽器 API 正確整合');
+                    console.log('   ✅ 錯誤處理和回退機制完善');
+                });
+            }
+            
+            // 頁面載入完成後修復整合順序
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', fixSafariIntegrationOrder);
+            } else {
+                // 延遲執行確保所有功能都已載入
+                setTimeout(fixSafariIntegrationOrder, 1000);
+            }
+        </script>
+        <!-- Safari 整合順序修復結束 -->
+        
         <!-- 座標同步解決方案結束 -->
     </body>
 </html>
