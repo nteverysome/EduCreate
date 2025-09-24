@@ -661,6 +661,80 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
+  // 🎯 雙重全螢幕同步監聽器 - DUAL_FULLSCREEN_LISTENER
+  useEffect(() => {
+    const handleDualFullscreenMessage = async (event: MessageEvent) => {
+      if (event.data.type === 'DUAL_FULLSCREEN_REQUEST') {
+        console.log('📥 收到遊戲內雙重全螢幕請求:', event.data);
+        
+        try {
+          switch (event.data.action) {
+            case 'ENTER_CSS_FULLSCREEN':
+              console.log('🔒 啟用父頁面 CSS 強制全螢幕');
+              
+              // 確保樣式存在
+              ensureLockedFullscreenStyles();
+              
+              // 添加鎖定樣式
+              document.body.classList.add('locked-fullscreen');
+              
+              // 啟用事件鎖定
+              enableFullscreenLock();
+              
+              // 響應遊戲
+              event.source?.postMessage({
+                type: 'DUAL_FULLSCREEN_RESPONSE',
+                action: 'CSS_FULLSCREEN_ENABLED',
+                timestamp: Date.now()
+              }, '*');
+              
+              console.log('✅ 父頁面 CSS 強制全螢幕已啟用');
+              break;
+              
+            case 'EXIT_CSS_FULLSCREEN':
+              console.log('🔓 停用父頁面 CSS 強制全螢幕');
+              
+              // 移除鎖定樣式
+              document.body.classList.remove('locked-fullscreen');
+              
+              // 停用事件鎖定
+              disableFullscreenLock();
+              
+              // 響應遊戲
+              event.source?.postMessage({
+                type: 'DUAL_FULLSCREEN_RESPONSE',
+                action: 'CSS_FULLSCREEN_DISABLED',
+                timestamp: Date.now()
+              }, '*');
+              
+              console.log('✅ 父頁面 CSS 強制全螢幕已停用');
+              break;
+          }
+          
+        } catch (error) {
+          console.log('❌ 處理雙重全螢幕請求失敗:', error);
+          
+          // 響應錯誤
+          event.source?.postMessage({
+            type: 'DUAL_FULLSCREEN_RESPONSE',
+            action: 'CSS_FULLSCREEN_ERROR',
+            error: error.message,
+            timestamp: Date.now()
+          }, '*');
+        }
+      }
+    };
+    
+    // 添加消息監聽器
+    window.addEventListener('message', handleDualFullscreenMessage);
+    
+    // 清理函數
+    return () => {
+      window.removeEventListener('message', handleDualFullscreenMessage);
+    };
+  }, []);
+  // 雙重全螢幕同步監聽器結束
+
 
   // 動態設置容器尺寸以適應手機橫向模式
   useEffect(() => {

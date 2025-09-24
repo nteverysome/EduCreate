@@ -732,6 +732,153 @@
                 implementCoordinateSync();
             }
         </script>
+        
+        <!-- 🎯 雙重全螢幕同步功能 - DUAL_FULLSCREEN_SYNC -->
+        <script>
+            console.log('🎯 載入雙重全螢幕同步功能');
+            
+            // 等待 TouchControls 和座標同步載入完成
+            function waitForEnhancedTouchControls() {
+                return new Promise((resolve) => {
+                    const checkEnhanced = () => {
+                        if (window.touchControls && 
+                            window.touchControls.toggleFullscreen && 
+                            window.touchControls.recalculateCoordinates) {
+                            resolve();
+                        } else {
+                            setTimeout(checkEnhanced, 100);
+                        }
+                    };
+                    checkEnhanced();
+                });
+            }
+            
+            // 實現雙重全螢幕同步
+            async function implementDualFullscreenSync() {
+                await waitForEnhancedTouchControls();
+                
+                console.log('🔧 開始實現雙重全螢幕同步');
+                
+                // 保存當前的座標同步版本
+                const coordinateSyncToggleFullscreen = window.touchControls.toggleFullscreen;
+                
+                // 替換為雙重同步版本
+                window.touchControls.toggleFullscreen = async function() {
+                    console.log('🎯 執行雙重全螢幕同步切換');
+                    
+                    try {
+                        const isCurrentlyFullscreen = !!document.fullscreenElement;
+                        const isInIframe = window !== window.parent;
+                        
+                        if (!isCurrentlyFullscreen) {
+                            // 進入全螢幕
+                            console.log('📱 進入雙重全螢幕模式');
+                            
+                            // 1. 觸發原生 Fullscreen API（座標同步版本）
+                            await coordinateSyncToggleFullscreen.call(this);
+                            
+                            // 2. 如果在 iframe 中，通知父頁面觸發 CSS 強制全螢幕
+                            if (isInIframe) {
+                                console.log('📤 通知父頁面觸發 CSS 強制全螢幕');
+                                window.parent.postMessage({
+                                    type: 'DUAL_FULLSCREEN_REQUEST',
+                                    action: 'ENTER_CSS_FULLSCREEN',
+                                    timestamp: Date.now()
+                                }, '*');
+                            }
+                            
+                            // 3. 等待父頁面響應
+                            await new Promise(resolve => setTimeout(resolve, 200));
+                            
+                            console.log('✅ 雙重全螢幕（原生 + CSS）已啟用');
+                            
+                        } else {
+                            // 退出全螢幕
+                            console.log('📱 退出雙重全螢幕模式');
+                            
+                            // 1. 如果在 iframe 中，通知父頁面退出 CSS 強制全螢幕
+                            if (isInIframe) {
+                                console.log('📤 通知父頁面退出 CSS 強制全螢幕');
+                                window.parent.postMessage({
+                                    type: 'DUAL_FULLSCREEN_REQUEST',
+                                    action: 'EXIT_CSS_FULLSCREEN',
+                                    timestamp: Date.now()
+                                }, '*');
+                            }
+                            
+                            // 2. 觸發原生 Fullscreen API 退出（座標同步版本）
+                            await coordinateSyncToggleFullscreen.call(this);
+                            
+                            console.log('✅ 雙重全螢幕已退出');
+                        }
+                        
+                    } catch (error) {
+                        console.log('❌ 雙重全螢幕同步失敗:', error);
+                        // 回退到座標同步版本
+                        coordinateSyncToggleFullscreen.call(this);
+                    }
+                };
+                
+                // 監聽來自父頁面的響應
+                window.addEventListener('message', (event) => {
+                    if (event.data.type === 'DUAL_FULLSCREEN_RESPONSE') {
+                        console.log('📥 收到父頁面響應:', event.data);
+                        
+                        switch (event.data.action) {
+                            case 'CSS_FULLSCREEN_ENABLED':
+                                console.log('✅ 父頁面 CSS 強制全螢幕已啟用');
+                                break;
+                            case 'CSS_FULLSCREEN_DISABLED':
+                                console.log('✅ 父頁面 CSS 強制全螢幕已停用');
+                                break;
+                            case 'CSS_FULLSCREEN_ERROR':
+                                console.log('❌ 父頁面 CSS 強制全螢幕錯誤:', event.data.error);
+                                break;
+                        }
+                    }
+                });
+                
+                console.log('✅ 雙重全螢幕同步功能實現完成');
+                
+                // 添加測試函數
+                window.testDualFullscreen = function() {
+                    console.log('🧪 測試雙重全螢幕功能');
+                    
+                    const status = {
+                        isInIframe: window !== window.parent,
+                        nativeFullscreen: !!document.fullscreenElement,
+                        viewport: {
+                            width: window.innerWidth,
+                            height: window.innerHeight
+                        },
+                        touchControls: !!window.touchControls,
+                        dualSyncEnabled: true
+                    };
+                    
+                    console.log('📊 雙重全螢幕狀態:', status);
+                    return status;
+                };
+                
+                // 添加強制同步函數
+                window.forceDualFullscreenSync = async function() {
+                    console.log('🔧 強制執行雙重全螢幕同步');
+                    
+                    if (window.touchControls && window.touchControls.toggleFullscreen) {
+                        await window.touchControls.toggleFullscreen();
+                    }
+                    
+                    console.log('✅ 強制同步完成');
+                };
+            }
+            
+            // 頁面載入完成後實現雙重同步
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', implementDualFullscreenSync);
+            } else {
+                implementDualFullscreenSync();
+            }
+        </script>
+        <!-- 雙重全螢幕同步功能結束 -->
         <!-- 座標同步解決方案結束 -->
     </body>
 </html>
