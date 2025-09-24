@@ -1,0 +1,84 @@
+
+<!-- 父頁面 PostMessage 監聽器 -->
+<script>
+console.log('📡 載入父頁面 PostMessage 監聽器');
+
+// 父頁面監聽器
+window.addEventListener('message', function(event) {
+    console.log('📨 父頁面收到消息:', event.data);
+    
+    try {
+        if (!event.data || typeof event.data !== 'object') {
+            return;
+        }
+        
+        const message = event.data;
+        
+        // 處理監聽器設置請求
+        if (message.type === 'SETUP_PARENT_LISTENER') {
+            console.log('🔧 處理監聽器設置請求');
+            
+            // 響應監聽器已就緒
+            event.source.postMessage({
+                type: 'PARENT_LISTENER_READY',
+                timestamp: Date.now(),
+                parentUserAgent: navigator.userAgent
+            }, event.origin);
+            
+            console.log('✅ 父頁面監聽器已就緒響應已發送');
+        }
+        
+        // 處理通信測試
+        else if (message.type === 'COMMUNICATION_TEST') {
+            console.log('🧪 處理通信測試:', message.testId);
+            
+            // 響應測試
+            event.source.postMessage({
+                type: 'COMMUNICATION_TEST_RESPONSE',
+                testId: message.testId,
+                timestamp: Date.now(),
+                parentUserAgent: navigator.userAgent,
+                receivedAt: Date.now(),
+                originalMessage: message
+            }, event.origin);
+            
+            console.log('✅ 通信測試響應已發送');
+        }
+        
+        // 處理全螢幕請求
+        else if (message.type === 'DUAL_FULLSCREEN_REQUEST') {
+            console.log('🍎 處理全螢幕請求:', message.action);
+            
+            if (message.action === 'ENTER_CSS_FULLSCREEN') {
+                // 添加 CSS 強制全螢幕
+                document.body.style.position = 'fixed';
+                document.body.style.top = '0';
+                document.body.style.left = '0';
+                document.body.style.width = '100vw';
+                document.body.style.height = '100vh';
+                document.body.style.zIndex = '9999';
+                document.body.style.backgroundColor = '#000';
+                
+                console.log('✅ CSS 強制全螢幕已啟用');
+                
+            } else if (message.action === 'EXIT_CSS_FULLSCREEN') {
+                // 移除 CSS 強制全螢幕
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.left = '';
+                document.body.style.width = '';
+                document.body.style.height = '';
+                document.body.style.zIndex = '';
+                document.body.style.backgroundColor = '';
+                
+                console.log('✅ CSS 強制全螢幕已退出');
+            }
+        }
+        
+    } catch (error) {
+        console.log('❌ 父頁面消息處理失敗:', error);
+    }
+});
+
+console.log('✅ 父頁面 PostMessage 監聽器已載入');
+</script>

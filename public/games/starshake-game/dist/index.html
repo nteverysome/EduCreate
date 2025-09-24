@@ -1800,6 +1800,272 @@
             }
         </script>
         <!-- Safari 整合順序修復結束 -->
+        <!-- 🔧 PostMessage 通信修復 - POSTMESSAGE_COMMUNICATION_FIXED -->
+        <script>
+            console.log('🔧 載入 PostMessage 通信修復');
+            
+            // 強化的 PostMessage 通信修復系統
+            function initPostMessageCommFix() {
+                console.log('🚀 初始化 PostMessage 通信修復系統');
+                
+                // 通信狀態管理
+                window.postMessageCommStatus = {
+                    initialized: false,
+                    parentListenerActive: false,
+                    communicationWorking: false,
+                    lastTestTime: null,
+                    retryCount: 0,
+                    maxRetries: 10,
+                    testResults: []
+                };
+                
+                // 強化的父頁面監聽器設置
+                window.setupParentListener = function() {
+                    console.log('📡 設置強化的父頁面監聽器');
+                    
+                    try {
+                        // 檢查是否在 iframe 中
+                        const isInIframe = window !== window.parent;
+                        
+                        if (!isInIframe) {
+                            console.log('⚠️ 不在 iframe 中，跳過父頁面監聽器設置');
+                            return false;
+                        }
+                        
+                        // 嘗試通知父頁面設置監聽器
+                        const setupMessage = {
+                            type: 'SETUP_PARENT_LISTENER',
+                            timestamp: Date.now(),
+                            userAgent: navigator.userAgent,
+                            location: window.location.href
+                        };
+                        
+                        console.log('📤 發送父頁面監聽器設置請求:', setupMessage);
+                        window.parent.postMessage(setupMessage, '*');
+                        
+                        // 等待父頁面響應
+                        return new Promise((resolve) => {
+                            const timeout = setTimeout(() => {
+                                console.log('⏰ 父頁面監聽器設置超時');
+                                resolve(false);
+                            }, 3000);
+                            
+                            const responseHandler = (event) => {
+                                if (event.data && event.data.type === 'PARENT_LISTENER_READY') {
+                                    console.log('✅ 父頁面監聽器已就緒');
+                                    clearTimeout(timeout);
+                                    window.removeEventListener('message', responseHandler);
+                                    window.postMessageCommStatus.parentListenerActive = true;
+                                    resolve(true);
+                                }
+                            };
+                            
+                            window.addEventListener('message', responseHandler);
+                        });
+                        
+                    } catch (error) {
+                        console.log('❌ 設置父頁面監聽器失敗:', error);
+                        return false;
+                    }
+                };
+                
+                // 強化的通信測試
+                window.testPostMessageCommEnhanced = async function() {
+                    console.log('🧪 執行強化的 PostMessage 通信測試');
+                    
+                    const testId = 'test_' + Date.now();
+                    const testResult = {
+                        testId: testId,
+                        timestamp: Date.now(),
+                        success: false,
+                        error: null,
+                        responseTime: null,
+                        retryCount: window.postMessageCommStatus.retryCount
+                    };
+                    
+                    try {
+                        const isInIframe = window !== window.parent;
+                        
+                        if (!isInIframe) {
+                            testResult.error = 'NOT_IN_IFRAME';
+                            console.log('⚠️ 不在 iframe 環境中');
+                            return testResult;
+                        }
+                        
+                        // 發送測試消息
+                        const testMessage = {
+                            type: 'COMMUNICATION_TEST',
+                            testId: testId,
+                            timestamp: Date.now(),
+                            userAgent: navigator.userAgent,
+                            isMobile: /Mobi|Android/i.test(navigator.userAgent),
+                            isSafari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
+                            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
+                        };
+                        
+                        console.log('📤 發送強化測試消息:', testMessage);
+                        
+                        const startTime = Date.now();
+                        window.parent.postMessage(testMessage, '*');
+                        
+                        // 等待響應
+                        const response = await new Promise((resolve, reject) => {
+                            const timeout = setTimeout(() => {
+                                reject(new Error('COMMUNICATION_TIMEOUT'));
+                            }, 5000);
+                            
+                            const responseHandler = (event) => {
+                                if (event.data && 
+                                    event.data.type === 'COMMUNICATION_TEST_RESPONSE' && 
+                                    event.data.testId === testId) {
+                                    
+                                    clearTimeout(timeout);
+                                    window.removeEventListener('message', responseHandler);
+                                    resolve(event.data);
+                                }
+                            };
+                            
+                            window.addEventListener('message', responseHandler);
+                        });
+                        
+                        testResult.success = true;
+                        testResult.responseTime = Date.now() - startTime;
+                        window.postMessageCommStatus.communicationWorking = true;
+                        
+                        console.log('✅ 強化通信測試成功:', response);
+                        console.log('⏱️ 響應時間:', testResult.responseTime + 'ms');
+                        
+                    } catch (error) {
+                        testResult.error = error.message;
+                        console.log('❌ 強化通信測試失敗:', error);
+                    }
+                    
+                    window.postMessageCommStatus.testResults.push(testResult);
+                    window.postMessageCommStatus.lastTestTime = Date.now();
+                    
+                    return testResult;
+                };
+                
+                // 自動重試通信建立
+                window.autoRetryCommSetup = async function() {
+                    console.log('🔄 自動重試通信建立');
+                    
+                    while (window.postMessageCommStatus.retryCount < window.postMessageCommStatus.maxRetries) {
+                        console.log(`🔄 重試 ${window.postMessageCommStatus.retryCount + 1}/${window.postMessageCommStatus.maxRetries}`);
+                        
+                        // 1. 設置父頁面監聽器
+                        const listenerSetup = await window.setupParentListener();
+                        
+                        if (listenerSetup) {
+                            // 2. 測試通信
+                            const testResult = await window.testPostMessageCommEnhanced();
+                            
+                            if (testResult.success) {
+                                console.log('✅ 通信建立成功！');
+                                return true;
+                            }
+                        }
+                        
+                        window.postMessageCommStatus.retryCount++;
+                        
+                        // 等待後重試
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
+                    
+                    console.log('❌ 通信建立失敗，已達最大重試次數');
+                    return false;
+                };
+                
+                // 強化的全螢幕請求（使用修復後的通信）
+                window.requestFullscreenWithCommFix = async function() {
+                    console.log('🍎 使用修復後的通信請求全螢幕');
+                    
+                    try {
+                        // 確保通信正常
+                        if (!window.postMessageCommStatus.communicationWorking) {
+                            console.log('🔄 通信未建立，嘗試自動修復');
+                            const commFixed = await window.autoRetryCommSetup();
+                            
+                            if (!commFixed) {
+                                console.log('❌ 通信修復失敗，使用本地全螢幕');
+                                // 回退到本地全螢幕
+                                if (window.touchControls && window.touchControls.toggleFullscreen) {
+                                    window.touchControls.toggleFullscreen();
+                                }
+                                return;
+                            }
+                        }
+                        
+                        // 發送全螢幕請求
+                        const fullscreenMessage = {
+                            type: 'DUAL_FULLSCREEN_REQUEST',
+                            action: 'ENTER_CSS_FULLSCREEN',
+                            timestamp: Date.now(),
+                            enhanced: true,
+                            userAgent: navigator.userAgent
+                        };
+                        
+                        console.log('📤 發送強化全螢幕請求:', fullscreenMessage);
+                        window.parent.postMessage(fullscreenMessage, '*');
+                        
+                        // 同時觸發本地全螢幕
+                        if (window.touchControls && window.touchControls.toggleFullscreen) {
+                            // 使用 Safari 增強版本
+                            window.touchControls.toggleFullscreen();
+                        }
+                        
+                        console.log('✅ 強化全螢幕請求已發送');
+                        
+                    } catch (error) {
+                        console.log('❌ 強化全螢幕請求失敗:', error);
+                        
+                        // 回退到本地全螢幕
+                        if (window.touchControls && window.touchControls.toggleFullscreen) {
+                            window.touchControls.toggleFullscreen();
+                        }
+                    }
+                };
+                
+                // 通信狀態監控
+                window.monitorCommStatus = function() {
+                    console.log('📊 PostMessage 通信狀態監控');
+                    
+                    const status = {
+                        ...window.postMessageCommStatus,
+                        currentTime: Date.now(),
+                        environment: {
+                            isInIframe: window !== window.parent,
+                            userAgent: navigator.userAgent,
+                            isMobile: /Mobi|Android/i.test(navigator.userAgent),
+                            isSafari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
+                            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
+                        }
+                    };
+                    
+                    console.log('📊 通信狀態:', status);
+                    return status;
+                };
+                
+                // 初始化完成
+                window.postMessageCommStatus.initialized = true;
+                console.log('✅ PostMessage 通信修復系統初始化完成');
+                
+                // 自動嘗試建立通信
+                setTimeout(() => {
+                    console.log('🚀 自動嘗試建立 PostMessage 通信');
+                    window.autoRetryCommSetup();
+                }, 1000);
+            }
+            
+            // 頁面載入完成後初始化
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initPostMessageCommFix);
+            } else {
+                setTimeout(initPostMessageCommFix, 500);
+            }
+        </script>
+        <!-- PostMessage 通信修復結束 -->
+        
         
         <!-- 座標同步解決方案結束 -->
     </body>
