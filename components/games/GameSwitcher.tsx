@@ -1215,7 +1215,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
           onLoad={handleIframeLoad}
           allow="fullscreen; autoplay; microphone; camera"
           allowFullScreen
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-pointer-lock allow-orientation-lock allow-presentation allow-top-navigation-by-user-activation"
         />
 
 
