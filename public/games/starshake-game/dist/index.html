@@ -360,5 +360,99 @@
         
         console.log('🎮 觸摸控制系統已初始化');
     </script>
+
+    <!-- 啟動畫面點擊支援 JavaScript -->
+    <script>
+        // 啟動畫面點擊和觸摸支援
+        window.addStartScreenClickSupport = function() {
+            console.log('🎮 添加啟動畫面點擊和觸摸支援');
+            
+            // 等待 Phaser 遊戲初始化
+            const checkPhaserGame = setInterval(() => {
+                if (window.game && window.game.scene && window.game.scene.scenes.length > 0) {
+                    clearInterval(checkPhaserGame);
+                    
+                    // 查找 splash 場景
+                    const splashScene = window.game.scene.scenes.find(scene => scene.scene.key === 'splash');
+                    
+                    if (splashScene && splashScene.scene.isActive()) {
+                        console.log('🎯 找到 splash 場景，添加點擊支援');
+                        addClickSupportToSplash(splashScene);
+                    } else {
+                        // 監聽場景切換，當 splash 場景啟動時添加支援
+                        window.game.events.on('scenestart', (scene) => {
+                            if (scene.scene.key === 'splash') {
+                                console.log('🎯 splash 場景啟動，添加點擊支援');
+                                setTimeout(() => addClickSupportToSplash(scene), 100);
+                            }
+                        });
+                    }
+                }
+            }, 100);
+            
+            // 為 splash 場景添加點擊和觸摸支援
+            function addClickSupportToSplash(scene) {
+                if (scene.clickSupportAdded) return;
+                scene.clickSupportAdded = true;
+                
+                console.log('✅ 為 splash 場景添加點擊和觸摸支援');
+                
+                // 添加點擊事件監聽器
+                scene.input.on('pointerdown', () => {
+                    console.log('🖱️ 檢測到點擊，開始遊戲');
+                    if (scene.transitionToChange && typeof scene.transitionToChange === 'function') {
+                        scene.transitionToChange();
+                    }
+                });
+                
+                // 添加觸摸事件監聽器（備用）
+                const canvas = scene.sys.game.canvas;
+                if (canvas) {
+                    const touchStartHandler = (e) => {
+                        e.preventDefault();
+                        console.log('👆 檢測到觸摸，開始遊戲');
+                        if (scene.transitionToChange && typeof scene.transitionToChange === 'function') {
+                            scene.transitionToChange();
+                        }
+                    };
+                    
+                    canvas.addEventListener('touchstart', touchStartHandler, { passive: false });
+                    canvas.addEventListener('click', touchStartHandler);
+                    
+                    // 清理函數
+                    scene.events.once('shutdown', () => {
+                        canvas.removeEventListener('touchstart', touchStartHandler);
+                        canvas.removeEventListener('click', touchStartHandler);
+                    });
+                }
+                
+                // 添加視覺提示
+                const instructionText = scene.add.bitmapText(
+                    scene.center_width, 
+                    scene.center_height + 150, 
+                    "wendy", 
+                    "點擊任意位置或按 SPACE 開始", 
+                    40
+                ).setOrigin(0.5);
+                
+                // 閃爍效果
+                scene.tweens.add({
+                    targets: instructionText,
+                    alpha: { from: 0.3, to: 1 },
+                    duration: 800,
+                    repeat: -1,
+                    yoyo: true
+                });
+            }
+        };
+        
+        // 當頁面載入完成後初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', window.addStartScreenClickSupport);
+        } else {
+            window.addStartScreenClickSupport();
+        }
+    </script>
+
 </body>
 </html>
