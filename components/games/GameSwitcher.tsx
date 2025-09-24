@@ -351,27 +351,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showTapOverlay, setShowTapOverlay] = useState<boolean>(false);
 
-  // 父頁面全螢幕退出按鈕狀態
-  const [showExitOverlay, setShowExitOverlay] = useState(false);
-  const [isParentFullscreenActive, setIsParentFullscreenActive] = useState(false);
 
-  // 確保父頁面全螢幕樣式存在（避免重複注入）
-  const ensureParentFullscreenStyles = () => {
-    let style = document.getElementById('parent-fullscreen-style');
-    if (!style) {
-      style = document.createElement('style');
-      style.id = 'parent-fullscreen-style';
-      style.textContent = `
-        body.parent-fullscreen-game { margin:0 !important; padding:0 !important; overflow:hidden !important; background:black !important; }
-        body.parent-fullscreen-game [data-testid="game-container"],
-        body.parent-fullscreen-game .game-iframe-container { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100dvh !important; z-index: 999999 !important; background: black !important; }
-        body.parent-fullscreen-game .game-iframe-container iframe { width:100% !important; height:100% !important; border:0 !important; }
-      `;
-      document.head.appendChild(style);
-    }
-  };
 
   // 🔒 確保鎖定全螢幕樣式存在
   const ensureLockedFullscreenStyles = () => {
@@ -622,174 +603,13 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     }, 200);
   };
 
-  // 檢查父頁面全螢幕狀態
-  const checkParentFullscreenState = () => {
-    const hasFullscreenElement = !!(document.fullscreenElement ||
-      (document as any).webkitFullscreenElement ||
-      (document as any).mozFullScreenElement ||
-      (document as any).msFullscreenElement);
-    const hasFullscreenClass = document.body.classList.contains('parent-fullscreen-game') ||
-                               document.body.classList.contains('locked-fullscreen');
-    return hasFullscreenElement || hasFullscreenClass;
-  };
 
-  // 顯示「全螢幕並開始」覆蓋層的邏輯
-  useEffect(() => {
-    if (mounted && isMobile) {
-      // 檢查是否在全螢幕狀態
-      const isInFullscreen = checkParentFullscreenState();
-      // 只要離開全螢幕就顯示覆蓋層
-      setShowTapOverlay(!isInFullscreen);
-    } else {
-      setShowTapOverlay(false);
-    }
-  }, [mounted, isMobile, showExitOverlay]); // 添加 showExitOverlay 依賴
 
-  // 更新父頁面全螢幕狀態
-  const updateParentFullscreenState = () => {
-    const isActive = checkParentFullscreenState();
-    setIsParentFullscreenActive(isActive);
-    setShowExitOverlay(isActive);
-  };
 
-  // 退出父頁面全螢幕（原生 API + CSS 近全螢幕）
-  const exitParentFullscreen = async () => {
-    console.log('🚪 開始退出父頁面全螢幕');
 
-    try {
-      // 1. 退出原生瀏覽器全螢幕 API
-      const d: any = document;
-      if (document.fullscreenElement && document.exitFullscreen) {
-        await document.exitFullscreen();
-        console.log('✅ 退出原生全螢幕 (exitFullscreen)');
-      } else if (d.webkitFullscreenElement && d.webkitExitFullscreen) {
-        await d.webkitExitFullscreen();
-        console.log('✅ 退出 WebKit 全螢幕');
-      } else if (d.mozFullScreenElement && d.mozCancelFullScreen) {
-        await d.mozCancelFullScreen();
-        console.log('✅ 退出 Firefox 全螢幕');
-      } else if (d.msFullscreenElement && d.msExitFullscreen) {
-        await d.msExitFullscreen();
-        console.log('✅ 退出 IE/Edge 全螢幕');
-      } else {
-        console.log('ℹ️ 沒有檢測到原生全螢幕狀態');
-      }
-    } catch (error) {
-      console.warn('⚠️ 退出原生全螢幕失敗:', error);
-    }
 
-    // 🔓 第一步：停用全螢幕鎖定功能
-    disableFullscreenLock();
 
-    // 🔓 第二步：移除所有全螢幕樣式
-    document.body.classList.remove('parent-fullscreen-game', 'locked-fullscreen');
-    console.log('🧹 移除鎖定全螢幕樣式');
 
-    // 🔓 第三步：移除全螢幕樣式表
-    const parentStyle = document.getElementById('parent-fullscreen-style');
-    if (parentStyle) {
-      parentStyle.remove();
-      console.log('🧹 移除父頁面全螢幕樣式表');
-    }
-
-    const lockedStyle = document.getElementById('locked-fullscreen-style');
-    if (lockedStyle) {
-      lockedStyle.remove();
-      console.log('🧹 移除鎖定全螢幕樣式表');
-    }
-
-    // 🔓 第四步：恢復正常樣式
-    if (isMobile) {
-      document.documentElement.style.height = '';
-      document.body.style.height = '';
-    }
-
-    // 🔓 第五步：更新狀態
-    setShowExitOverlay(false);
-    setIsParentFullscreenActive(false);
-
-    // 🔓 第六步：在手機設備上顯示「全螢幕並開始」覆蓋層
-    if (isMobile) {
-      setShowTapOverlay(true);
-      console.log('📱 顯示全螢幕並開始覆蓋層');
-    }
-
-    // 🔓 第七步：通知子頁面（遊戲）
-    iframeRef.current?.contentWindow?.postMessage({
-      source: 'parent-page',
-      type: 'LOCKED_FULLSCREEN_EXITED'
-    }, '*');
-
-    console.log('✅ 鎖定全螢幕退出完成');
-  };
-
-  // 🔒 鎖定全螢幕開始函數
-  const handleTapToStart = async () => {
-    try {
-      console.log('🔒 開始鎖定全螢幕流程');
-      setShowTapOverlay(false);
-      ensureLockedFullscreenStyles();
-
-      const el = containerRef.current || document.documentElement;
-      let success = false;
-
-      // 🔒 第一步：嘗試原生全螢幕 API（隱藏所有瀏覽器UI）
-      if ((el as any).requestFullscreen) {
-        await (el as any).requestFullscreen({ navigationUI: 'hide' });
-        success = true;
-        console.log('✅ 鎖定全螢幕成功 (requestFullscreen with navigationUI: hide)');
-      } else if ((el as any).webkitRequestFullscreen) {
-        (el as any).webkitRequestFullscreen();
-        success = true;
-        console.log('✅ WebKit 鎖定全螢幕成功');
-      } else if ((el as any).mozRequestFullScreen) {
-        (el as any).mozRequestFullScreen();
-        success = true;
-        console.log('✅ Firefox 鎖定全螢幕成功');
-      } else if ((el as any).msRequestFullscreen) {
-        (el as any).msRequestFullscreen();
-        success = true;
-        console.log('✅ IE/Edge 鎖定全螢幕成功');
-      } else {
-        console.log('ℹ️ 瀏覽器不支援原生全螢幕 API，使用鎖定 CSS 全螢幕');
-      }
-
-      // 🔒 第二步：應用鎖定全螢幕樣式（強制隱藏所有UI元素）
-      document.body.classList.add('parent-fullscreen-game', 'locked-fullscreen');
-      console.log('✅ 應用鎖定全螢幕樣式');
-
-      // 🔒 第三步：啟用全螢幕鎖定功能
-      enableFullscreenLock();
-
-      // 🔒 第四步：強制隱藏地址欄（移動設備）
-      if (isMobile) {
-        hideAddressBar();
-      }
-
-      // 顯示退出按鈕
-      updateParentFullscreenState();
-
-      // 通知 iframe（遊戲）當前狀態
-      iframeRef.current?.contentWindow?.postMessage({
-        source: 'parent-page',
-        type: success ? 'LOCKED_FULLSCREEN_SUCCESS' : 'LOCKED_FULLSCREEN_FAILED'
-      }, '*');
-
-      console.log('📤 通知遊戲鎖定全螢幕狀態:', success ? 'SUCCESS' : 'FAILED');
-    } catch (e) {
-      console.warn('⚠️ 鎖定全螢幕失敗:', e);
-      // 失敗：套用鎖定近全螢幕並通知開始
-      ensureLockedFullscreenStyles();
-      document.body.classList.add('parent-fullscreen-game', 'locked-fullscreen');
-      enableFullscreenLock();
-      if (isMobile) hideAddressBar();
-      updateParentFullscreenState();
-      iframeRef.current?.contentWindow?.postMessage({
-        source: 'parent-page',
-        type: 'LOCKED_FULLSCREEN_FAILED'
-      }, '*');
-    }
-  };
 
   // 客戶端掛載狀態
   useEffect(() => {
@@ -806,25 +626,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
 
-    // ESC 鍵退出全螢幕監聽
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && showExitOverlay) {
-        console.log('⌨️ ESC 鍵觸發退出全螢幕');
-        exitParentFullscreen();
-      }
-    };
 
-    // 全螢幕狀態變化監聽
-    const handleFullscreenChange = () => {
-      console.log('🔄 全螢幕狀態變化');
-      updateParentFullscreenState();
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
     // 🧹 頁面卸載時的清理
     const handleBeforeUnload = () => {
@@ -853,17 +655,12 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
       // 清理原有事件監聽器
       window.removeEventListener('resize', checkScreenSize);
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
 
       // 清理新增的事件監聽器
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [showExitOverlay]);
+  }, []);
 
   // 動態設置容器尺寸以適應手機橫向模式
   useEffect(() => {
@@ -1013,24 +810,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   }, [currentGame]);
 
   // iframe 消息處理
-  const isParentFSActive = () => !!(document.fullscreenElement || (document as any).webkitFullscreenElement || document.body.classList.contains('parent-fullscreen-game'));
 
-  const enterParentNearFullscreen = () => {
-    console.log('🔄 進入父頁面近全螢幕模式');
-    ensureParentFullscreenStyles();
-    document.body.classList.add('parent-fullscreen-game');
 
-    // 顯示退出按鈕
-    updateParentFullscreenState();
-
-    // 通知子頁面（近全螢幕）
-    iframeRef.current?.contentWindow?.postMessage({
-      source: 'parent-page',
-      type: 'FULLSCREEN_FAILED'
-    }, '*');
-
-    console.log('✅ 父頁面近全螢幕模式已啟動');
-  };
 
   const handleIframeMessage = useCallback((event: MessageEvent) => {
     if (!currentGame) return;
@@ -1040,23 +821,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
       console.log('🎮 GameSwitcher 收到消息:', data);
 
-      if (data.type === 'REQUEST_FULLSCREEN') {
-        console.log('🔄 處理 REQUEST_FULLSCREEN');
-        enterParentNearFullscreen();
-      } else if (data.type === 'REQUEST_EXIT_FULLSCREEN') {
-        console.log('🔄 處理 REQUEST_EXIT_FULLSCREEN');
-        exitParentFullscreen();
-      } else if (data.type === 'REQUEST_TOGGLE_FULLSCREEN') {
-        console.log('🔄 處理 REQUEST_TOGGLE_FULLSCREEN');
-        if (isParentFSActive()) {
-          exitParentFullscreen();
-        } else {
-          enterParentNearFullscreen();
-        }
-      } else if (data.type === 'QUERY_FULLSCREEN_STATE') {
-        const active = isParentFSActive();
-        iframeRef.current?.contentWindow?.postMessage({ source: 'parent-page', type: 'FULLSCREEN_STATE', active }, '*');
-      } else if (data.type === 'GAME_STATE_UPDATE') {
+      if (data.type === 'GAME_STATE_UPDATE') {
         const newState: GameState = {
           score: data.score || 0,
           level: data.level || currentGeptLevel,
@@ -1431,18 +1196,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         }}
         data-testid="game-container"
       >
-        {/* 手機一鍵全螢幕開始覆蓋層（確保父頁面手勢上下文）*/}
-        {isMobile && showTapOverlay && (
-          <button
-            type="button"
-            onClick={handleTapToStart}
-            className="absolute inset-0 z-20 bg-black/50 text-white flex flex-col items-center justify-center gap-2"
-            aria-label="全螢幕開始遊戲"
-          >
-            <span className="text-lg font-semibold">鎖定全螢幕並開始</span>
-            <span className="text-xs opacity-80">隱藏網址列和所有瀏覽器UI，防止意外退出</span>
-          </button>
-        )}
+
         {isLoading && (
           <div className="loading-overlay absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center z-10">
             <div className="loading-content text-center">
@@ -1464,32 +1218,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
         />
 
-        {/* 父頁面全螢幕退出按鈕（原生 API + CSS 近全螢幕） */}
-        {showExitOverlay && (
-          <div className="absolute top-0 left-0 right-0 z-[1000000] bg-gradient-to-b from-black/60 to-transparent p-4">
-            <div className="flex items-center justify-end">
-              <button
-                type="button"
-                onClick={exitParentFullscreen}
-                className="bg-transparent hover:bg-black/20 text-white p-3 rounded-lg transition-colors duration-200 flex items-center justify-center relative overflow-hidden"
-                aria-label="退出父頁面全螢幕"
-              >
-                <div
-                  className="w-12 h-12 filter invert"
-                  style={{
-                    backgroundImage: 'url(/games/shimozurdo-game/assets/images/fullscreen.png)',
-                    backgroundSize: '96px 48px', // 精靈圖總尺寸：2幀 x 48px寬 = 96px，高度48px
-                    backgroundPosition: '-48px 0px', // 顯示第二幀（退出全螢幕圖標）
-                    backgroundRepeat: 'no-repeat',
-                    transform: 'scale(0.5)', // 縮放到原來的一半，讓48x48px變成24x24px顯示
-                    transformOrigin: 'center'
-                  }}
-                  title="退出全螢幕"
-                />
-              </button>
-            </div>
-          </div>
-        )}
+
       </div>
 
       {/* 遊戲狀態顯示 - 響應式設計 */}
