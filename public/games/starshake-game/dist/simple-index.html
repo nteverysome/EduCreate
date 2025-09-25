@@ -174,33 +174,48 @@
                 console.log('✅ 簡化TouchControls初始化完成');
             }
             
-            // 發送簡化的全螢幕請求 - 核心功能
+            // 發送簡化的全螢幕請求 - 防重複版本
             sendSimpleFullscreenRequest(event) {
                 event.preventDefault();
                 event.stopPropagation();
-                
+
+                // 防重複機制
+                const now = Date.now();
+                if (this.lastRequestTime && (now - this.lastRequestTime) < 1000) {
+                    console.log('⚠️ 防重複：忽略1秒內的重複點擊');
+                    return;
+                }
+                this.lastRequestTime = now;
+
                 console.log('🎮 全螢幕按鈕被點擊 - 發送簡化請求');
-                
+
                 try {
                     // 檢查是否在iframe中
                     const isInIframe = window !== window.parent;
-                    
+
                     if (isInIframe) {
                         console.log('📤 在iframe中，發送PostMessage');
-                        
+
                         // 發送簡化的全螢幕請求
                         window.parent.postMessage({
                             type: 'SIMPLE_FULLSCREEN_TOGGLE',
-                            timestamp: Date.now(),
-                            source: 'simplified-game'
+                            timestamp: now,
+                            source: 'simplified-game',
+                            requestId: 'req_' + now
                         }, '*');
-                        
-                        console.log('✅ 簡化全螢幕請求已發送');
-                        
+
+                        console.log('✅ 簡化全螢幕請求已發送，ID:', 'req_' + now);
+
+                        // 視覺反饋
+                        this.fullscreenBtn.style.background = 'rgba(0, 255, 0, 0.4)';
+                        setTimeout(() => {
+                            this.fullscreenBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                        }, 200);
+
                     } else {
                         console.log('🖥️ 不在iframe中，無法發送PostMessage');
                     }
-                    
+
                 } catch (error) {
                     console.log('❌ 發送簡化全螢幕請求失敗:', error);
                 }

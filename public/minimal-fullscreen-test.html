@@ -166,25 +166,61 @@
             log(`📊 切換完成，新狀態: ${isFullscreen}`);
         }
         
-        // PostMessage 監聽器 - 最簡化版本
+        // 請求阻止機制
+        let isProcessing = false;
+        let lastProcessTime = 0;
+
+        // PostMessage 監聽器 - 增強調試版本
         window.addEventListener('message', (event) => {
             try {
                 const message = event.data;
-                
-                // 只處理特定類型的消息
-                if (message.type === 'SIMPLE_FULLSCREEN_TOGGLE') {
-                    log('🍎 收到簡化全螢幕切換請求');
-                    toggleFullscreen();
-                } else if (message.type === 'DUAL_FULLSCREEN_REQUEST') {
-                    log('🍎 收到傳統全螢幕請求，轉換為簡化處理');
-                    toggleFullscreen();
-                } else {
-                    // 忽略其他消息，避免日誌混亂
-                    // log('ℹ️ 忽略消息: ' + message.type);
+                const now = Date.now();
+                const timeSinceLastProcess = now - lastProcessTime;
+
+                // 記錄所有收到的消息
+                log(`📨 收到消息: ${JSON.stringify(message)}`);
+                log(`⏰ 距離上次處理: ${timeSinceLastProcess}ms`);
+                log(`🔒 當前處理狀態: ${isProcessing ? '處理中' : '空閒'}`);
+
+                // 檢查是否正在處理中
+                if (isProcessing) {
+                    log('⚠️ 正在處理中，忽略新請求');
+                    return;
                 }
-                
+
+                // 檢查是否是快速重複請求
+                if (timeSinceLastProcess < 500) {
+                    log('⚠️ 快速重複請求 (<500ms)，忽略');
+                    return;
+                }
+
+                // 處理全螢幕請求
+                if (message.type === 'SIMPLE_FULLSCREEN_TOGGLE' || message.type === 'DUAL_FULLSCREEN_REQUEST') {
+                    log('🍎 開始處理全螢幕請求');
+
+                    isProcessing = true;
+                    lastProcessTime = now;
+
+                    // 延遲執行，確保狀態穩定
+                    setTimeout(() => {
+                        try {
+                            toggleFullscreen();
+                        } finally {
+                            // 1秒後才允許下次處理
+                            setTimeout(() => {
+                                isProcessing = false;
+                                log('🔓 處理狀態已解鎖');
+                            }, 1000);
+                        }
+                    }, 100);
+
+                } else {
+                    log('ℹ️ 忽略非全螢幕消息: ' + message.type);
+                }
+
             } catch (error) {
                 log('❌ 消息處理失敗: ' + error.message);
+                isProcessing = false;
             }
         });
         
