@@ -287,11 +287,17 @@
                         log('🍎 處理全螢幕請求: ' + message.action + ', 當前狀態: ' + window.isGameFullscreen);
 
                         if (message.action === 'ENTER_CSS_FULLSCREEN') {
-                            // 防止重複執行
+                            // 智能切換：如果已經全螢幕，則退出全螢幕
                             if (window.isGameFullscreen) {
-                                log('⚠️ 已經全螢幕，忽略重複請求');
-                                return;
+                                log('🔄 已經全螢幕，自動切換為退出全螢幕');
+                                message.action = 'EXIT_CSS_FULLSCREEN';
+                                // 跳轉到退出全螢幕邏輯
+                            } else {
+                                log('📱 進入全螢幕模式');
                             }
+                        }
+
+                        if (message.action === 'ENTER_CSS_FULLSCREEN') {
 
                             // 隱藏測試工具界面，只顯示遊戲 iframe
                             const container = document.querySelector('.container');
@@ -375,12 +381,16 @@
                                 log('❌ 找不到必要的 DOM 元素');
                             }
 
-                        } else if (message.action === 'EXIT_CSS_FULLSCREEN') {
+                        }
+
+                        if (message.action === 'EXIT_CSS_FULLSCREEN') {
                             // 防止重複執行
                             if (!window.isGameFullscreen) {
                                 log('⚠️ 已經退出全螢幕，忽略重複請求');
                                 return;
                             }
+
+                            log('🔄 退出全螢幕模式');
 
                             // 恢復測試工具界面
                             const container = document.querySelector('.container');
