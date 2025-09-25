@@ -318,15 +318,26 @@
                                 container.style.background = 'transparent';
 
                                 // 設置 iframe 容器全螢幕
+                                iframeContainer.style.position = 'fixed';
+                                iframeContainer.style.top = '0';
+                                iframeContainer.style.left = '0';
                                 iframeContainer.style.width = '100vw';
                                 iframeContainer.style.height = '100vh';
                                 iframeContainer.style.margin = '0';
+                                iframeContainer.style.padding = '0';
                                 iframeContainer.style.border = 'none';
                                 iframeContainer.style.borderRadius = '0';
+                                iframeContainer.style.zIndex = '10000';
 
-                                // 設置 iframe 全螢幕
+                                // 設置 iframe 全螢幕，確保完全填滿螢幕
+                                iframe.style.position = 'absolute';
+                                iframe.style.top = '0';
+                                iframe.style.left = '0';
                                 iframe.style.width = '100vw';
                                 iframe.style.height = '100vh';
+                                iframe.style.border = 'none';
+                                iframe.style.margin = '0';
+                                iframe.style.padding = '0';
 
                                 log('✅ 遊戲 iframe CSS 全螢幕已啟用');
                                 updateStatus('✅ 遊戲全螢幕已啟用', 'success');
@@ -367,15 +378,26 @@
                                 container.style.background = '';
 
                                 // 恢復 iframe 容器樣式
+                                iframeContainer.style.position = '';
+                                iframeContainer.style.top = '';
+                                iframeContainer.style.left = '';
                                 iframeContainer.style.width = '';
                                 iframeContainer.style.height = '';
                                 iframeContainer.style.margin = '';
+                                iframeContainer.style.padding = '';
                                 iframeContainer.style.border = '';
                                 iframeContainer.style.borderRadius = '';
+                                iframeContainer.style.zIndex = '';
 
                                 // 恢復 iframe 樣式
+                                iframe.style.position = '';
+                                iframe.style.top = '';
+                                iframe.style.left = '';
                                 iframe.style.width = '';
                                 iframe.style.height = '';
+                                iframe.style.border = '';
+                                iframe.style.margin = '';
+                                iframe.style.padding = '';
 
                                 log('✅ 遊戲 iframe CSS 全螢幕已退出');
                                 updateStatus('✅ 遊戲全螢幕已退出', 'success');
