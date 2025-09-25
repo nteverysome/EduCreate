@@ -1979,13 +1979,13 @@
                 // 強化的全螢幕請求（使用修復後的通信）
                 window.requestFullscreenWithCommFix = async function() {
                     console.log('🍎 使用修復後的通信請求全螢幕');
-                    
+
                     try {
                         // 確保通信正常
                         if (!window.postMessageCommStatus.communicationWorking) {
                             console.log('🔄 通信未建立，嘗試自動修復');
                             const commFixed = await window.autoRetryCommSetup();
-                            
+
                             if (!commFixed) {
                                 console.log('❌ 通信修復失敗，使用本地全螢幕');
                                 // 回退到本地全螢幕
@@ -1995,7 +1995,7 @@
                                 return;
                             }
                         }
-                        
+
                         // 發送全螢幕請求
                         const fullscreenMessage = {
                             type: 'DUAL_FULLSCREEN_REQUEST',
@@ -2004,27 +2004,94 @@
                             enhanced: true,
                             userAgent: navigator.userAgent
                         };
-                        
+
                         console.log('📤 發送強化全螢幕請求:', fullscreenMessage);
                         window.parent.postMessage(fullscreenMessage, '*');
-                        
+
                         // 同時觸發本地全螢幕
                         if (window.touchControls && window.touchControls.toggleFullscreen) {
                             // 使用 Safari 增強版本
                             window.touchControls.toggleFullscreen();
                         }
-                        
+
                         console.log('✅ 強化全螢幕請求已發送');
-                        
+
                     } catch (error) {
                         console.log('❌ 強化全螢幕請求失敗:', error);
-                        
+
                         // 回退到本地全螢幕
                         if (window.touchControls && window.touchControls.toggleFullscreen) {
                             window.touchControls.toggleFullscreen();
                         }
                     }
                 };
+
+                // 🔧 修復遊戲內全螢幕按鈕連接
+                function fixGameFullscreenButton() {
+                    console.log('🔧 修復遊戲內全螢幕按鈕連接');
+
+                    // 等待 TouchControls 載入
+                    const waitForTouchControls = () => {
+                        return new Promise((resolve) => {
+                            const check = () => {
+                                if (window.touchControls && window.touchControls.toggleFullscreen) {
+                                    resolve();
+                                } else {
+                                    setTimeout(check, 100);
+                                }
+                            };
+                            check();
+                        });
+                    };
+
+                    waitForTouchControls().then(() => {
+                        console.log('🎯 開始修復遊戲內全螢幕按鈕');
+
+                        // 保存原始的 toggleFullscreen 方法
+                        const originalToggleFullscreen = window.touchControls.toggleFullscreen;
+
+                        // 替換為使用修復後通信的版本
+                        window.touchControls.toggleFullscreen = async function() {
+                            console.log('🎮 遊戲內全螢幕按鈕被點擊 - 使用修復後的通信');
+
+                            try {
+                                // 檢查是否在 iframe 中
+                                const isInIframe = window !== window.parent;
+
+                                if (isInIframe) {
+                                    console.log('📱 在 iframe 中，使用修復後的 PostMessage 通信');
+
+                                    // 使用修復後的通信系統
+                                    await window.requestFullscreenWithCommFix();
+
+                                } else {
+                                    console.log('🖥️ 不在 iframe 中，使用原始全螢幕方法');
+
+                                    // 直接使用原始方法
+                                    await originalToggleFullscreen.call(this);
+                                }
+
+                            } catch (error) {
+                                console.log('❌ 修復後的全螢幕切換失敗:', error);
+
+                                // 回退到原始方法
+                                try {
+                                    await originalToggleFullscreen.call(this);
+                                } catch (fallbackError) {
+                                    console.log('❌ 原始全螢幕方法也失敗:', fallbackError);
+                                }
+                            }
+                        };
+
+                        console.log('✅ 遊戲內全螢幕按鈕修復完成');
+                        console.log('🎯 現在點擊遊戲內的 ⛶ 按鈕應該會使用修復後的 PostMessage 通信');
+                    });
+                }
+
+                // 執行修復
+                setTimeout(() => {
+                    fixGameFullscreenButton();
+                }, 2000);
                 
                 // 通信狀態監控
                 window.monitorCommStatus = function() {
