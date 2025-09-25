@@ -282,20 +282,106 @@
                         updateStatus('✅ PostMessage 通信正常工作', 'success');
                     }
                     
-                    // 處理全螢幕請求 - 純CSS切換版本
+                    // 處理全螢幕請求
                     else if (message.type === 'DUAL_FULLSCREEN_REQUEST') {
-                        log('🍎 收到全螢幕請求，當前狀態: ' + window.isGameFullscreen);
+                        log('🍎 處理全螢幕請求: ' + message.action + ', 當前狀態: ' + window.isGameFullscreen);
 
-                        // 簡單切換：只根據當前狀態決定動作
-                        if (window.isGameFullscreen) {
-                            log('🔄 當前全螢幕，執行退出CSS');
-                            exitCSSFullscreen();
-                        } else {
-                            log('📱 當前非全螢幕，執行進入CSS');
-                            enterCSSFullscreen();
+                        if (message.action === 'ENTER_CSS_FULLSCREEN') {
+                            // 智能切換：如果已經全螢幕，則退出全螢幕
+                            if (window.isGameFullscreen) {
+                                log('🔄 已經全螢幕，自動切換為退出全螢幕');
+                                message.action = 'EXIT_CSS_FULLSCREEN';
+                                // 跳轉到退出全螢幕邏輯
+                            } else {
+                                log('📱 進入全螢幕模式');
+                            }
                         }
 
+                        if (message.action === 'ENTER_CSS_FULLSCREEN') {
 
+                            // 隱藏測試工具界面，只顯示遊戲 iframe
+                            const container = document.querySelector('.container');
+                            const iframeContainer = document.querySelector('.iframe-container');
+                            const iframe = document.getElementById('gameIframe');
+
+                            if (container && iframeContainer && iframe) {
+                                // 隱藏所有其他內容
+                                const children = container.children;
+                                for (let i = 0; i < children.length; i++) {
+                                    if (children[i] !== iframeContainer.parentElement) {
+                                        children[i].style.display = 'none';
+                                    }
+                                }
+
+                                // 設置 body 全螢幕
+                                document.body.style.position = 'fixed';
+                                document.body.style.top = '0';
+                                document.body.style.left = '0';
+                                document.body.style.width = '100vw';
+                                document.body.style.height = '100vh';
+                                document.body.style.zIndex = '9999';
+                                document.body.style.backgroundColor = '#000';
+                                document.body.style.margin = '0';
+                                document.body.style.padding = '0';
+
+                                // 設置容器全螢幕
+                                container.style.maxWidth = 'none';
+                                container.style.width = '100vw';
+                                container.style.height = '100vh';
+                                container.style.margin = '0';
+                                container.style.padding = '0';
+                                container.style.background = 'transparent';
+
+                                // 設置 iframe 容器全螢幕，向上移動
+                                iframeContainer.style.position = 'fixed';
+                                iframeContainer.style.top = '-80px';  // 容器也向上移動
+                                iframeContainer.style.left = '0';
+                                iframeContainer.style.width = '100vw';
+                                iframeContainer.style.height = 'calc(100vh + 80px)';  // 增加容器高度
+                                iframeContainer.style.margin = '0';
+                                iframeContainer.style.padding = '0';
+                                iframeContainer.style.border = 'none';
+                                iframeContainer.style.borderRadius = '0';
+                                iframeContainer.style.zIndex = '10000';
+                                iframeContainer.style.overflow = 'hidden';  // 隱藏溢出
+
+                                log('✅ iframe 容器位置調整: top: -80px, height: calc(100vh + 80px)');
+
+                                // 設置 iframe 全螢幕，向上移動給搖桿留空間
+                                iframe.style.position = 'absolute';
+                                iframe.style.top = '-100px';  // 向上移動100px給搖桿留更多空間
+                                iframe.style.left = '0';
+                                iframe.style.width = '100vw';
+                                iframe.style.height = 'calc(100vh + 100px)';  // 增加高度補償向上移動
+                                iframe.style.border = 'none';
+                                iframe.style.margin = '0';
+                                iframe.style.padding = '0';
+                                iframe.style.transform = 'translateY(0)';
+                                iframe.style.overflow = 'hidden';  // 隱藏溢出部分
+
+                                log('✅ iframe 位置調整: top: -100px, height: calc(100vh + 100px)');
+
+                                // 嘗試隱藏 Safari 地址欄（僅使用滾動技巧）
+                                try {
+                                    // 滾動到頂部隱藏地址欄
+                                    window.scrollTo(0, 1);
+                                    setTimeout(() => window.scrollTo(0, 0), 100);
+
+                                    log('✅ 嘗試隱藏 Safari 地址欄（滾動方法）');
+                                } catch (error) {
+                                    log('⚠️ 隱藏地址欄失敗: ' + error.message);
+                                }
+
+                                log('✅ 遊戲 iframe CSS 全螢幕已啟用');
+                                updateStatus('✅ 遊戲全螢幕已啟用', 'success');
+
+                                // 標記全螢幕狀態
+                                window.isGameFullscreen = true;
+                            } else {
+                                log('❌ 找不到必要的 DOM 元素');
+                            }
+
+                        }
 
                         if (message.action === 'EXIT_CSS_FULLSCREEN') {
                             // 防止重複執行
@@ -362,20 +448,8 @@
                                 iframe.style.transform = '';
                                 iframe.style.overflow = '';
 
-                                // 退出原生全螢幕
-                                try {
-                                    if (document.exitFullscreen) {
-                                        document.exitFullscreen().catch(e => {
-                                            log('⚠️ 退出原生全螢幕失敗: ' + e.message);
-                                        });
-                                    } else if (document.webkitExitFullscreen) {
-                                        document.webkitExitFullscreen();
-                                    }
-
-                                    log('✅ 嘗試退出原生全螢幕');
-                                } catch (error) {
-                                    log('⚠️ 退出全螢幕失敗: ' + error.message);
-                                }
+                                // 只退出CSS全螢幕，不調用原生API
+                                log('✅ 只使用CSS退出全螢幕，避免API衝突');
 
                                 log('✅ 遊戲 iframe CSS 全螢幕已退出');
                                 updateStatus('✅ 遊戲全螢幕已退出', 'success');
