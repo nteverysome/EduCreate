@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarShake - 簡化版</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        #game-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+        }
+        
+        #touch-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 120px;
+            z-index: 1000;
+        }
+        
+        .joystick {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .joystick-knob {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            transition: transform 0.1s;
+        }
+        
+        .shoot-btn {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 71, 87, 0.8);
+            border: 2px solid rgba(255, 71, 87, 1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            user-select: none;
+        }
+        
+        .fullscreen-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .game-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- 星空背景 -->
+        <div class="stars" id="stars"></div>
+        
+        <!-- 遊戲標題 -->
+        <div class="game-title">
+            ⭐ StarShake ⭐
+            <div style="font-size: 16px; margin-top: 10px; opacity: 0.8;">
+                簡化版 - 無複雜全螢幕邏輯
+            </div>
+        </div>
+        
+        <!-- 觸控控制 -->
+        <div id="touch-controls">
+            <!-- 搖桿 -->
+            <div class="joystick" id="joystick">
+                <div class="joystick-knob" id="joystick-knob"></div>
+            </div>
+            
+            <!-- 射擊按鈕 -->
+            <div class="shoot-btn" id="shoot-btn">🚀</div>
+            
+            <!-- 全螢幕按鈕 -->
+            <div class="fullscreen-btn" id="fullscreen-btn">⛶</div>
+        </div>
+    </div>
+
+    <script>
+        // 簡化的TouchControls類
+        class SimpleTouchControls {
+            constructor() {
+                this.joystick = document.getElementById('joystick');
+                this.joystickKnob = document.getElementById('joystick-knob');
+                this.shootBtn = document.getElementById('shoot-btn');
+                this.fullscreenBtn = document.getElementById('fullscreen-btn');
+                
+                this.init();
+            }
+            
+            init() {
+                console.log('🎮 初始化簡化TouchControls');
+                
+                // 綁定全螢幕按鈕 - 只發送PostMessage，不執行任何複雜邏輯
+                if (this.fullscreenBtn) {
+                    this.fullscreenBtn.addEventListener('click', this.sendSimpleFullscreenRequest.bind(this));
+                    this.fullscreenBtn.addEventListener('touchend', this.sendSimpleFullscreenRequest.bind(this));
+                }
+                
+                // 簡單的視覺反饋
+                this.addVisualFeedback();
+                
+                console.log('✅ 簡化TouchControls初始化完成');
+            }
+            
+            // 發送簡化的全螢幕請求 - 核心功能
+            sendSimpleFullscreenRequest(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                console.log('🎮 全螢幕按鈕被點擊 - 發送簡化請求');
+                
+                try {
+                    // 檢查是否在iframe中
+                    const isInIframe = window !== window.parent;
+                    
+                    if (isInIframe) {
+                        console.log('📤 在iframe中，發送PostMessage');
+                        
+                        // 發送簡化的全螢幕請求
+                        window.parent.postMessage({
+                            type: 'SIMPLE_FULLSCREEN_TOGGLE',
+                            timestamp: Date.now(),
+                            source: 'simplified-game'
+                        }, '*');
+                        
+                        console.log('✅ 簡化全螢幕請求已發送');
+                        
+                    } else {
+                        console.log('🖥️ 不在iframe中，無法發送PostMessage');
+                    }
+                    
+                } catch (error) {
+                    console.log('❌ 發送簡化全螢幕請求失敗:', error);
+                }
+            }
+            
+            // 添加視覺反饋
+            addVisualFeedback() {
+                // 全螢幕按鈕懸停效果
+                this.fullscreenBtn.addEventListener('mouseenter', () => {
+                    this.fullscreenBtn.style.background = 'rgba(255, 255, 255, 0.4)';
+                });
+                
+                this.fullscreenBtn.addEventListener('mouseleave', () => {
+                    this.fullscreenBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                });
+                
+                // 點擊反饋
+                this.fullscreenBtn.addEventListener('mousedown', () => {
+                    this.fullscreenBtn.style.transform = 'scale(0.9)';
+                });
+                
+                this.fullscreenBtn.addEventListener('mouseup', () => {
+                    this.fullscreenBtn.style.transform = 'scale(1)';
+                });
+            }
+        }
+        
+        // 創建星空背景
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 50;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // 監聽來自父頁面的消息
+        window.addEventListener('message', (event) => {
+            try {
+                const message = event.data;
+                
+                if (message.type === 'DISABLE_COMPLEX_FULLSCREEN') {
+                    console.log('📨 收到禁用複雜邏輯指令:', message.message);
+                    console.log('✅ 本版本已經是簡化版，無需額外禁用');
+                }
+                
+            } catch (error) {
+                console.log('❌ 處理父頁面消息失敗:', error);
+            }
+        });
+        
+        // 初始化
+        console.log('🚀 StarShake 簡化版初始化');
+        
+        // 創建星空
+        createStars();
+        
+        // 初始化觸控控制
+        window.touchControls = new SimpleTouchControls();
+        
+        console.log('✅ StarShake 簡化版載入完成');
+        console.log('🔧 此版本完全移除了複雜的全螢幕邏輯，只保留基本的PostMessage通信');
+    </script>
+</body>
+</html>

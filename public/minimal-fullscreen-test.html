@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最小化全螢幕測試</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .status {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .iframe-container {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #gameIframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            display: block;
+        }
+        
+        .log {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        /* 全螢幕樣式 */
+        .fullscreen-mode {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            background: #000 !important;
+        }
+        
+        .fullscreen-mode #gameIframe {
+            position: absolute !important;
+            top: -80px !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: calc(100vh + 80px) !important;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status">
+            <h2>🎮 最小化全螢幕測試</h2>
+            <p>狀態: <span id="status">載入中...</span></p>
+            <p>全螢幕: <span id="fullscreenStatus">否</span></p>
+            <p style="color: #666; font-size: 14px;">
+                ⚠️ 這個版本完全禁用了遊戲內的複雜全螢幕邏輯，只保留純粹的PostMessage通信
+            </p>
+        </div>
+        
+        <div class="iframe-container" id="iframeContainer">
+            <iframe id="gameIframe" src="/games/starshake-game/dist/simple-index.html"></iframe>
+        </div>
+        
+        <div class="log" id="logContainer">
+            <div id="logContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // 全螢幕狀態
+        let isFullscreen = false;
+        let toggleCount = 0;
+        
+        // 日誌函數
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logContent = document.getElementById('logContent');
+            logContent.innerHTML += `[${timestamp}] ${message}<br>`;
+            logContent.scrollTop = logContent.scrollHeight;
+            console.log(message);
+        }
+        
+        // 更新狀態顯示
+        function updateStatus() {
+            document.getElementById('fullscreenStatus').textContent = isFullscreen ? '是' : '否';
+            document.getElementById('status').textContent = isFullscreen ? '全螢幕模式' : '正常模式';
+        }
+        
+        // 切換全螢幕 - 最簡化版本
+        function toggleFullscreen() {
+            toggleCount++;
+            log(`🔄 執行全螢幕切換 #${toggleCount}，當前狀態: ${isFullscreen}`);
+            
+            const container = document.querySelector('.container');
+            const iframeContainer = document.getElementById('iframeContainer');
+            
+            if (!isFullscreen) {
+                // 進入全螢幕
+                log('📱 進入全螢幕模式');
+                
+                // 隱藏其他元素
+                const children = container.children;
+                for (let i = 0; i < children.length; i++) {
+                    if (children[i] !== iframeContainer) {
+                        children[i].classList.add('hidden');
+                    }
+                }
+                
+                // 設置全螢幕樣式
+                iframeContainer.classList.add('fullscreen-mode');
+                
+                // 隱藏地址欄
+                window.scrollTo(0, 1);
+                setTimeout(() => window.scrollTo(0, 1), 100);
+                
+                isFullscreen = true;
+                log('✅ 進入全螢幕完成');
+                
+            } else {
+                // 退出全螢幕
+                log('🔄 退出全螢幕模式');
+                
+                // 恢復其他元素
+                const children = container.children;
+                for (let i = 0; i < children.length; i++) {
+                    children[i].classList.remove('hidden');
+                }
+                
+                // 移除全螢幕樣式
+                iframeContainer.classList.remove('fullscreen-mode');
+                
+                isFullscreen = false;
+                log('✅ 退出全螢幕完成');
+            }
+            
+            updateStatus();
+            log(`📊 切換完成，新狀態: ${isFullscreen}`);
+        }
+        
+        // PostMessage 監聽器 - 最簡化版本
+        window.addEventListener('message', (event) => {
+            try {
+                const message = event.data;
+                
+                // 只處理特定類型的消息
+                if (message.type === 'SIMPLE_FULLSCREEN_TOGGLE') {
+                    log('🍎 收到簡化全螢幕切換請求');
+                    toggleFullscreen();
+                } else if (message.type === 'DUAL_FULLSCREEN_REQUEST') {
+                    log('🍎 收到傳統全螢幕請求，轉換為簡化處理');
+                    toggleFullscreen();
+                } else {
+                    // 忽略其他消息，避免日誌混亂
+                    // log('ℹ️ 忽略消息: ' + message.type);
+                }
+                
+            } catch (error) {
+                log('❌ 消息處理失敗: ' + error.message);
+            }
+        });
+        
+        // 向遊戲發送禁用複雜邏輯的指令
+        function disableComplexLogic() {
+            const iframe = document.getElementById('gameIframe');
+            if (iframe && iframe.contentWindow) {
+                try {
+                    iframe.contentWindow.postMessage({
+                        type: 'DISABLE_COMPLEX_FULLSCREEN',
+                        message: '禁用複雜全螢幕邏輯，只保留基本PostMessage'
+                    }, '*');
+                    log('📤 已發送禁用複雜邏輯指令');
+                } catch (error) {
+                    log('⚠️ 無法發送禁用指令: ' + error.message);
+                }
+            }
+        }
+        
+        // 初始化
+        log('🚀 最小化全螢幕測試初始化');
+        updateStatus();
+        
+        // 等待iframe載入後發送禁用指令
+        setTimeout(() => {
+            disableComplexLogic();
+            log('✅ 準備就緒，等待遊戲內全螢幕按鈕點擊');
+            log('🔧 已嘗試禁用遊戲內的複雜全螢幕邏輯');
+        }, 3000);
+    </script>
+</body>
+</html>
