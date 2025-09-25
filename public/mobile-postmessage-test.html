@@ -317,28 +317,34 @@
                                 container.style.padding = '0';
                                 container.style.background = 'transparent';
 
-                                // 設置 iframe 容器全螢幕
+                                // 設置 iframe 容器全螢幕，向上移動
                                 iframeContainer.style.position = 'fixed';
-                                iframeContainer.style.top = '0';
+                                iframeContainer.style.top = '-80px';  // 容器也向上移動
                                 iframeContainer.style.left = '0';
                                 iframeContainer.style.width = '100vw';
-                                iframeContainer.style.height = '100vh';
+                                iframeContainer.style.height = 'calc(100vh + 80px)';  // 增加容器高度
                                 iframeContainer.style.margin = '0';
                                 iframeContainer.style.padding = '0';
                                 iframeContainer.style.border = 'none';
                                 iframeContainer.style.borderRadius = '0';
                                 iframeContainer.style.zIndex = '10000';
+                                iframeContainer.style.overflow = 'hidden';  // 隱藏溢出
+
+                                log('✅ iframe 容器位置調整: top: -80px, height: calc(100vh + 80px)');
 
                                 // 設置 iframe 全螢幕，向上移動給搖桿留空間
                                 iframe.style.position = 'absolute';
-                                iframe.style.top = '-60px';  // 向上移動60px給搖桿留空間
+                                iframe.style.top = '-100px';  // 向上移動100px給搖桿留更多空間
                                 iframe.style.left = '0';
                                 iframe.style.width = '100vw';
-                                iframe.style.height = 'calc(100vh + 60px)';  // 增加高度補償向上移動
+                                iframe.style.height = 'calc(100vh + 100px)';  // 增加高度補償向上移動
                                 iframe.style.border = 'none';
                                 iframe.style.margin = '0';
                                 iframe.style.padding = '0';
-                                iframe.style.transform = 'translateY(0)';  // 確保變換正確
+                                iframe.style.transform = 'translateY(0)';
+                                iframe.style.overflow = 'hidden';  // 隱藏溢出部分
+
+                                log('✅ iframe 位置調整: top: -100px, height: calc(100vh + 100px)');
 
                                 log('✅ 遊戲 iframe CSS 全螢幕已啟用');
                                 updateStatus('✅ 遊戲全螢幕已啟用', 'success');
@@ -389,6 +395,7 @@
                                 iframeContainer.style.border = '';
                                 iframeContainer.style.borderRadius = '';
                                 iframeContainer.style.zIndex = '';
+                                iframeContainer.style.overflow = '';
 
                                 // 恢復 iframe 樣式
                                 iframe.style.position = '';
@@ -400,6 +407,7 @@
                                 iframe.style.margin = '';
                                 iframe.style.padding = '';
                                 iframe.style.transform = '';
+                                iframe.style.overflow = '';
 
                                 log('✅ 遊戲 iframe CSS 全螢幕已退出');
                                 updateStatus('✅ 遊戲全螢幕已退出', 'success');
