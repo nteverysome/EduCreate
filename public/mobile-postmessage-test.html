@@ -284,21 +284,15 @@
                     
                     // 處理全螢幕請求
                     else if (message.type === 'DUAL_FULLSCREEN_REQUEST') {
-                        log('🍎 處理全螢幕請求: ' + message.action);
+                        log('🍎 處理全螢幕請求: ' + message.action + ', 當前狀態: ' + window.isGameFullscreen);
 
-                        // 智能切換：如果已經全螢幕就退出，否則進入
+                        // 智能切換邏輯：根據當前狀態決定動作
+                        if (message.action === 'ENTER_CSS_FULLSCREEN' && window.isGameFullscreen) {
+                            log('🔄 已經全螢幕，切換為退出');
+                            message.action = 'EXIT_CSS_FULLSCREEN';
+                        }
+
                         if (message.action === 'ENTER_CSS_FULLSCREEN') {
-                            if (window.isGameFullscreen) {
-                                log('🔄 已經全螢幕，自動切換為退出全螢幕');
-                                // 觸發退出全螢幕
-                                window.postMessage({
-                                    type: 'DUAL_FULLSCREEN_REQUEST',
-                                    action: 'EXIT_CSS_FULLSCREEN',
-                                    timestamp: Date.now(),
-                                    source: 'AUTO_TOGGLE'
-                                }, '*');
-                                return;
-                            }
                             // 隱藏測試工具界面，只顯示遊戲 iframe
                             const container = document.querySelector('.container');
                             const iframeContainer = document.querySelector('.iframe-container');
@@ -361,22 +355,13 @@
 
                                 log('✅ iframe 位置調整: top: -100px, height: calc(100vh + 100px)');
 
-                                // 嘗試隱藏 Safari 地址欄
+                                // 嘗試隱藏 Safari 地址欄（僅使用滾動技巧）
                                 try {
                                     // 滾動到頂部隱藏地址欄
                                     window.scrollTo(0, 1);
                                     setTimeout(() => window.scrollTo(0, 0), 100);
 
-                                    // 嘗試使用原生全螢幕 API
-                                    if (document.documentElement.requestFullscreen) {
-                                        document.documentElement.requestFullscreen().catch(e => {
-                                            log('⚠️ 原生全螢幕 API 失敗: ' + e.message);
-                                        });
-                                    } else if (document.documentElement.webkitRequestFullscreen) {
-                                        document.documentElement.webkitRequestFullscreen();
-                                    }
-
-                                    log('✅ 嘗試隱藏 Safari 地址欄');
+                                    log('✅ 嘗試隱藏 Safari 地址欄（滾動方法）');
                                 } catch (error) {
                                     log('⚠️ 隱藏地址欄失敗: ' + error.message);
                                 }
