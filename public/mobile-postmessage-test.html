@@ -180,6 +180,9 @@
             lastTest: null,
             errors: []
         };
+
+        // 全螢幕狀態
+        window.isGameFullscreen = false;
         
         // 日誌函數
         function log(message, type = 'info') {
@@ -283,7 +286,19 @@
                     else if (message.type === 'DUAL_FULLSCREEN_REQUEST') {
                         log('🍎 處理全螢幕請求: ' + message.action);
 
+                        // 智能切換：如果已經全螢幕就退出，否則進入
                         if (message.action === 'ENTER_CSS_FULLSCREEN') {
+                            if (window.isGameFullscreen) {
+                                log('🔄 已經全螢幕，自動切換為退出全螢幕');
+                                // 觸發退出全螢幕
+                                window.postMessage({
+                                    type: 'DUAL_FULLSCREEN_REQUEST',
+                                    action: 'EXIT_CSS_FULLSCREEN',
+                                    timestamp: Date.now(),
+                                    source: 'AUTO_TOGGLE'
+                                }, '*');
+                                return;
+                            }
                             // 隱藏測試工具界面，只顯示遊戲 iframe
                             const container = document.querySelector('.container');
                             const iframeContainer = document.querySelector('.iframe-container');
@@ -346,8 +361,31 @@
 
                                 log('✅ iframe 位置調整: top: -100px, height: calc(100vh + 100px)');
 
+                                // 嘗試隱藏 Safari 地址欄
+                                try {
+                                    // 滾動到頂部隱藏地址欄
+                                    window.scrollTo(0, 1);
+                                    setTimeout(() => window.scrollTo(0, 0), 100);
+
+                                    // 嘗試使用原生全螢幕 API
+                                    if (document.documentElement.requestFullscreen) {
+                                        document.documentElement.requestFullscreen().catch(e => {
+                                            log('⚠️ 原生全螢幕 API 失敗: ' + e.message);
+                                        });
+                                    } else if (document.documentElement.webkitRequestFullscreen) {
+                                        document.documentElement.webkitRequestFullscreen();
+                                    }
+
+                                    log('✅ 嘗試隱藏 Safari 地址欄');
+                                } catch (error) {
+                                    log('⚠️ 隱藏地址欄失敗: ' + error.message);
+                                }
+
                                 log('✅ 遊戲 iframe CSS 全螢幕已啟用');
                                 updateStatus('✅ 遊戲全螢幕已啟用', 'success');
+
+                                // 標記全螢幕狀態
+                                window.isGameFullscreen = true;
                             } else {
                                 log('❌ 找不到必要的 DOM 元素');
                             }
@@ -409,8 +447,26 @@
                                 iframe.style.transform = '';
                                 iframe.style.overflow = '';
 
+                                // 退出原生全螢幕
+                                try {
+                                    if (document.exitFullscreen) {
+                                        document.exitFullscreen().catch(e => {
+                                            log('⚠️ 退出原生全螢幕失敗: ' + e.message);
+                                        });
+                                    } else if (document.webkitExitFullscreen) {
+                                        document.webkitExitFullscreen();
+                                    }
+
+                                    log('✅ 嘗試退出原生全螢幕');
+                                } catch (error) {
+                                    log('⚠️ 退出全螢幕失敗: ' + error.message);
+                                }
+
                                 log('✅ 遊戲 iframe CSS 全螢幕已退出');
                                 updateStatus('✅ 遊戲全螢幕已退出', 'success');
+
+                                // 清除全螢幕狀態
+                                window.isGameFullscreen = false;
                             } else {
                                 log('❌ 找不到必要的 DOM 元素');
                             }
