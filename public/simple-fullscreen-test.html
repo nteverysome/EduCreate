@@ -86,6 +86,14 @@
         <div class="iframe-container" id="iframeContainer">
             <iframe id="gameIframe" src="/games/starshake-game/dist/index.html"></iframe>
         </div>
+
+        <div class="status">
+            <h3>🔧 手動測試按鈕</h3>
+            <button onclick="manualToggle()" style="padding: 10px 20px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 4px;">
+                手動切換全螢幕
+            </button>
+            <p>如果遊戲內按鈕有問題，可以用這個按鈕測試</p>
+        </div>
         
         <div class="log" id="logContainer">
             <div id="logContent"></div>
@@ -160,25 +168,53 @@
             updateStatus();
         }
         
-        // PostMessage 監聽器
+        // 請求追蹤
+        let requestCount = 0;
+        let lastRequestTime = 0;
+
+        // PostMessage 監聽器 - 增強調試版本
         window.addEventListener('message', (event) => {
             try {
                 const message = event.data;
-                
+                const now = Date.now();
+                const timeSinceLastRequest = now - lastRequestTime;
+
+                requestCount++;
+
+                log(`📨 收到消息 #${requestCount}: ${JSON.stringify(message)}`);
+                log(`⏰ 距離上次請求: ${timeSinceLastRequest}ms`);
+                log(`🎯 當前狀態: isFullscreen=${isFullscreen}`);
+
                 if (message.type === 'DUAL_FULLSCREEN_REQUEST') {
-                    log('🍎 收到全螢幕請求: ' + message.action);
+                    log('🍎 處理全螢幕請求');
+
+                    // 檢查是否是快速重複請求
+                    if (timeSinceLastRequest < 100) {
+                        log('⚠️ 檢測到快速重複請求 (<100ms)');
+                    }
+
+                    lastRequestTime = now;
                     toggleFullscreen();
+                } else {
+                    log('ℹ️ 忽略非全螢幕請求');
                 }
-                
+
             } catch (error) {
                 log('❌ 消息處理失敗: ' + error.message);
             }
         });
         
+        // 手動切換函數
+        function manualToggle() {
+            log('🔧 手動觸發全螢幕切換');
+            toggleFullscreen();
+        }
+
         // 初始化
         log('🚀 簡單全螢幕測試初始化');
         updateStatus();
         log('✅ 準備就緒，等待遊戲內全螢幕按鈕點擊');
+        log('🔧 如果遊戲內按鈕有問題，可以使用手動測試按鈕');
     </script>
 </body>
 </html>
