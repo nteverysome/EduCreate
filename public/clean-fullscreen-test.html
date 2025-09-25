@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 純CSS全螢幕測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .iframe-container {
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        #gameIframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            display: block;
+        }
+        
+        .log {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+        }
+        
+        .test-button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 純CSS全螢幕測試</h1>
+        
+        <div class="status">
+            <h3>📊 狀態</h3>
+            <p>全螢幕狀態: <span id="fullscreenStatus">否</span></p>
+            <p>說明: 這個版本只使用CSS，完全避免原生全螢幕API</p>
+        </div>
+        
+        <div class="status">
+            <h3>🔧 手動測試</h3>
+            <button class="test-button" onclick="manualToggle()">
+                手動切換全螢幕
+            </button>
+            <p style="font-size: 14px; opacity: 0.8;">
+                如果遊戲內按鈕有問題，可以用這個按鈕測試
+            </p>
+        </div>
+        
+        <div class="iframe-container" id="iframeContainer">
+            <iframe id="gameIframe" src="/games/starshake-game/dist/index.html"></iframe>
+        </div>
+        
+        <div class="log" id="logContainer">
+            <h3>📝 測試日誌</h3>
+            <div id="logContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // 全螢幕狀態
+        let isFullscreen = false;
+        
+        // 日誌函數
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logContent = document.getElementById('logContent');
+            logContent.innerHTML += `[${timestamp}] ${message}<br>`;
+            logContent.scrollTop = logContent.scrollHeight;
+            console.log(message);
+        }
+        
+        // 更新狀態顯示
+        function updateStatus() {
+            document.getElementById('fullscreenStatus').textContent = isFullscreen ? '是' : '否';
+        }
+        
+        // 進入CSS全螢幕
+        function enterCSSFullscreen() {
+            log('🚀 進入CSS全螢幕');
+            
+            const container = document.querySelector('.container');
+            const iframeContainer = document.getElementById('iframeContainer');
+            const iframe = document.getElementById('gameIframe');
+            
+            // 隱藏其他元素
+            const children = container.children;
+            for (let i = 0; i < children.length; i++) {
+                if (children[i] !== iframeContainer) {
+                    children[i].style.display = 'none';
+                }
+            }
+            
+            // 設置全螢幕樣式
+            document.body.style.margin = '0';
+            document.body.style.padding = '0';
+            document.body.style.background = '#000';
+            
+            container.style.maxWidth = 'none';
+            container.style.width = '100vw';
+            container.style.height = '100vh';
+            container.style.margin = '0';
+            container.style.padding = '0';
+            container.style.background = '#000';
+            
+            iframeContainer.style.position = 'fixed';
+            iframeContainer.style.top = '-80px';
+            iframeContainer.style.left = '0';
+            iframeContainer.style.width = '100vw';
+            iframeContainer.style.height = 'calc(100vh + 80px)';
+            iframeContainer.style.zIndex = '9999';
+            iframeContainer.style.borderRadius = '0';
+            
+            iframe.style.position = 'absolute';
+            iframe.style.top = '-100px';
+            iframe.style.left = '0';
+            iframe.style.width = '100vw';
+            iframe.style.height = 'calc(100vh + 100px)';
+            
+            // 隱藏地址欄
+            window.scrollTo(0, 1);
+            setTimeout(() => window.scrollTo(0, 1), 100);
+            
+            isFullscreen = true;
+            updateStatus();
+            log('✅ CSS全螢幕已啟用');
+        }
+        
+        // 退出CSS全螢幕
+        function exitCSSFullscreen() {
+            log('🔄 退出CSS全螢幕');
+            
+            const container = document.querySelector('.container');
+            const iframeContainer = document.getElementById('iframeContainer');
+            const iframe = document.getElementById('gameIframe');
+            
+            // 恢復其他元素
+            const children = container.children;
+            for (let i = 0; i < children.length; i++) {
+                children[i].style.display = '';
+            }
+            
+            // 恢復樣式
+            document.body.style.margin = '';
+            document.body.style.padding = '';
+            document.body.style.background = '';
+            
+            container.style.maxWidth = '';
+            container.style.width = '';
+            container.style.height = '';
+            container.style.margin = '';
+            container.style.padding = '';
+            container.style.background = '';
+            
+            iframeContainer.style.position = '';
+            iframeContainer.style.top = '';
+            iframeContainer.style.left = '';
+            iframeContainer.style.width = '';
+            iframeContainer.style.height = '';
+            iframeContainer.style.zIndex = '';
+            iframeContainer.style.borderRadius = '';
+            
+            iframe.style.position = '';
+            iframe.style.top = '';
+            iframe.style.left = '';
+            iframe.style.width = '';
+            iframe.style.height = '';
+            
+            isFullscreen = false;
+            updateStatus();
+            log('✅ CSS全螢幕已退出');
+        }
+        
+        // 手動切換
+        function manualToggle() {
+            log('🔧 手動切換全螢幕');
+            if (isFullscreen) {
+                exitCSSFullscreen();
+            } else {
+                enterCSSFullscreen();
+            }
+        }
+        
+        // PostMessage 監聽器 - 只處理CSS
+        window.addEventListener('message', (event) => {
+            try {
+                const message = event.data;
+                
+                if (message.type === 'DUAL_FULLSCREEN_REQUEST' || message.type === 'SIMPLE_FULLSCREEN_TOGGLE') {
+                    log('🍎 收到全螢幕請求');
+                    
+                    // 簡單切換：根據當前狀態決定動作
+                    if (isFullscreen) {
+                        exitCSSFullscreen();
+                    } else {
+                        enterCSSFullscreen();
+                    }
+                }
+                
+            } catch (error) {
+                log('❌ 消息處理失敗: ' + error.message);
+            }
+        });
+        
+        // 初始化
+        log('🚀 純CSS全螢幕測試初始化');
+        updateStatus();
+        log('✅ 準備就緒，等待全螢幕請求');
+        log('🔧 此版本只使用CSS，完全避免原生全螢幕API');
+    </script>
+</body>
+</html>
