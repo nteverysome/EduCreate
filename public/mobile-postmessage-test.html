@@ -282,30 +282,106 @@
                     // 處理全螢幕請求
                     else if (message.type === 'DUAL_FULLSCREEN_REQUEST') {
                         log('🍎 處理全螢幕請求: ' + message.action);
-                        
+
                         if (message.action === 'ENTER_CSS_FULLSCREEN') {
-                            document.body.style.position = 'fixed';
-                            document.body.style.top = '0';
-                            document.body.style.left = '0';
-                            document.body.style.width = '100vw';
-                            document.body.style.height = '100vh';
-                            document.body.style.zIndex = '9999';
-                            document.body.style.backgroundColor = '#000';
-                            
-                            log('✅ CSS 強制全螢幕已啟用');
-                            updateStatus('✅ CSS 全螢幕已啟用', 'success');
-                            
+                            // 隱藏測試工具界面，只顯示遊戲 iframe
+                            const container = document.querySelector('.container');
+                            const iframeContainer = document.querySelector('.iframe-container');
+                            const iframe = document.getElementById('gameIframe');
+
+                            if (container && iframeContainer && iframe) {
+                                // 隱藏所有其他內容
+                                const children = container.children;
+                                for (let i = 0; i < children.length; i++) {
+                                    if (children[i] !== iframeContainer.parentElement) {
+                                        children[i].style.display = 'none';
+                                    }
+                                }
+
+                                // 設置 body 全螢幕
+                                document.body.style.position = 'fixed';
+                                document.body.style.top = '0';
+                                document.body.style.left = '0';
+                                document.body.style.width = '100vw';
+                                document.body.style.height = '100vh';
+                                document.body.style.zIndex = '9999';
+                                document.body.style.backgroundColor = '#000';
+                                document.body.style.margin = '0';
+                                document.body.style.padding = '0';
+
+                                // 設置容器全螢幕
+                                container.style.maxWidth = 'none';
+                                container.style.width = '100vw';
+                                container.style.height = '100vh';
+                                container.style.margin = '0';
+                                container.style.padding = '0';
+                                container.style.background = 'transparent';
+
+                                // 設置 iframe 容器全螢幕
+                                iframeContainer.style.width = '100vw';
+                                iframeContainer.style.height = '100vh';
+                                iframeContainer.style.margin = '0';
+                                iframeContainer.style.border = 'none';
+                                iframeContainer.style.borderRadius = '0';
+
+                                // 設置 iframe 全螢幕
+                                iframe.style.width = '100vw';
+                                iframe.style.height = '100vh';
+
+                                log('✅ 遊戲 iframe CSS 全螢幕已啟用');
+                                updateStatus('✅ 遊戲全螢幕已啟用', 'success');
+                            } else {
+                                log('❌ 找不到必要的 DOM 元素');
+                            }
+
                         } else if (message.action === 'EXIT_CSS_FULLSCREEN') {
-                            document.body.style.position = '';
-                            document.body.style.top = '';
-                            document.body.style.left = '';
-                            document.body.style.width = '';
-                            document.body.style.height = '';
-                            document.body.style.zIndex = '';
-                            document.body.style.backgroundColor = '';
-                            
-                            log('✅ CSS 強制全螢幕已退出');
-                            updateStatus('✅ CSS 全螢幕已退出', 'success');
+                            // 恢復測試工具界面
+                            const container = document.querySelector('.container');
+                            const iframeContainer = document.querySelector('.iframe-container');
+                            const iframe = document.getElementById('gameIframe');
+
+                            if (container && iframeContainer && iframe) {
+                                // 恢復所有隱藏的內容
+                                const children = container.children;
+                                for (let i = 0; i < children.length; i++) {
+                                    children[i].style.display = '';
+                                }
+
+                                // 恢復 body 樣式
+                                document.body.style.position = '';
+                                document.body.style.top = '';
+                                document.body.style.left = '';
+                                document.body.style.width = '';
+                                document.body.style.height = '';
+                                document.body.style.zIndex = '';
+                                document.body.style.backgroundColor = '';
+                                document.body.style.margin = '';
+                                document.body.style.padding = '';
+
+                                // 恢復容器樣式
+                                container.style.maxWidth = '';
+                                container.style.width = '';
+                                container.style.height = '';
+                                container.style.margin = '';
+                                container.style.padding = '';
+                                container.style.background = '';
+
+                                // 恢復 iframe 容器樣式
+                                iframeContainer.style.width = '';
+                                iframeContainer.style.height = '';
+                                iframeContainer.style.margin = '';
+                                iframeContainer.style.border = '';
+                                iframeContainer.style.borderRadius = '';
+
+                                // 恢復 iframe 樣式
+                                iframe.style.width = '';
+                                iframe.style.height = '';
+
+                                log('✅ 遊戲 iframe CSS 全螢幕已退出');
+                                updateStatus('✅ 遊戲全螢幕已退出', 'success');
+                            } else {
+                                log('❌ 找不到必要的 DOM 元素');
+                            }
                         }
                     }
                     
