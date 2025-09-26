@@ -699,6 +699,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       iframe.style.height = 'calc(100vh + 80px)';
       iframe.style.border = 'none';
       iframe.style.borderRadius = '0';
+      iframe.style.transform = 'translateY(-80px)'; // fc294ae 版本的關鍵修復
 
       // 隱藏地址欄
       window.scrollTo(0, 1);
@@ -742,6 +743,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       iframe.style.height = '';
       iframe.style.border = '';
       iframe.style.borderRadius = '';
+      iframe.style.transform = ''; // 清除 fc294ae 版本的 transform
 
       setIsGameFullscreen(false);
       console.log('✅ 退出CSS全螢幕完成');
