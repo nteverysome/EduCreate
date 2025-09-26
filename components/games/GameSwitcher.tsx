@@ -670,7 +670,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const enterCSSFullscreen = useCallback(() => {
     console.log('🚀 執行進入CSS全螢幕');
 
-    const gameContainer = document.querySelector('.game-container') as HTMLElement;
+    const gameContainer = document.querySelector('[data-testid="game-container"]') as HTMLElement;
     const iframe = iframeRef.current;
 
     if (gameContainer && iframe) {
@@ -716,7 +716,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const exitCSSFullscreen = useCallback(() => {
     console.log('🔄 執行退出CSS全螢幕');
 
-    const gameContainer = document.querySelector('.game-container') as HTMLElement;
+    const gameContainer = document.querySelector('[data-testid="game-container"]') as HTMLElement;
     const iframe = iframeRef.current;
 
     if (gameContainer && iframe) {
