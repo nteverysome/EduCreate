@@ -709,12 +709,12 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       gameContainer.style.zIndex = '9999';
       gameContainer.style.backgroundColor = '#000';
 
-      // 設置 iframe 全螢幕 - 向下移動給上方留空間
+      // 設置 iframe 全螢幕 - 完全填滿螢幕
       iframe.style.position = 'absolute';
-      iframe.style.top = '60px'; // 向下移動60px，給上方留空間
+      iframe.style.top = '0'; // 完全填滿，不留上方空間
       iframe.style.left = '0';
       iframe.style.width = '100vw';
-      iframe.style.height = 'calc(100vh - 60px)'; // 高度減少60px
+      iframe.style.height = '100vh'; // 完全填滿螢幕高度
       iframe.style.border = 'none';
       iframe.style.borderRadius = '0';
       iframe.style.transform = ''; // 移除transform，使用top定位
@@ -724,7 +724,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       setTimeout(() => window.scrollTo(0, 1), 100);
 
       setIsGameFullscreen(true);
-      console.log('✅ 進入CSS全螢幕完成 - 遊戲向下移動60px');
+      console.log('✅ 進入CSS全螢幕完成 - 遊戲完全填滿螢幕');
     } else {
       console.log('❌ 找不到必要的 DOM 元素');
     }
