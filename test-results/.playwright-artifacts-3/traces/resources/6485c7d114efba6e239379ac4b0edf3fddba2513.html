@@ -1,0 +1,2350 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduCreate - Starshake</title>
+
+    <style>
+        /* reset CSS */
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        #app {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            max-width: 1000px;
+            max-height: 800px;
+        }
+    </style>
+  <script type="module" crossorigin src="/games/starshake-game/dist/assets/index-DEhXC0VF.js"></script>
+  <link rel="modulepreload" crossorigin href="/games/starshake-game/dist/assets/phaser-CmFXOKba.js">
+
+    <!-- 觸摸控制樣式 -->
+    
+
+    <!-- 觸摸控制樣式 -->
+    <style>
+        /* 觸摸控制面板 */
+        #touch-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: transparent;
+            display: none;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        /* 移動控制區域 */
+        .touch-joystick {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: all;
+        }
+        
+        .touch-joystick-knob {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+        }
+        
+        /* 射擊按鈕 */
+        .touch-shoot-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: transparent;
+            border: 2px solid rgba(255, 0, 0, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 0, 0, 0.8);
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: all;
+            user-select: none;
+        }
+        
+        .touch-shoot-btn:active {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: rgba(255, 0, 0, 0.8);
+            transform: scale(0.95);
+        }
+        
+        /* 移動設備檢測 */
+        @media (max-width: 768px), (pointer: coarse) {
+            #touch-controls {
+                display: block;
+            }
+        }
+        
+        /* 全螢幕按鈕 */
+        .fullscreen-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            pointer-events: all;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div id="game-container"></div>
+        
+        <!-- 觸摸控制面板 -->
+        <div id="touch-controls">
+            <!-- 移動搖桿 -->
+            <div class="touch-joystick" id="touch-joystick">
+                <div class="touch-joystick-knob" id="joystick-knob"></div>
+            </div>
+            
+            <!-- 射擊按鈕 -->
+            <div class="touch-shoot-btn" id="touch-shoot">
+                🚀
+            </div>
+            
+            <!-- 全螢幕按鈕 -->
+            <div class="fullscreen-btn" id="fullscreen-btn">
+                ⛶
+            </div>
+        </div>
+    </div>
+    
+    <!-- 觸摸控制 JavaScript -->
+    <script>
+        // 觸摸控制系統
+        // 觸摸控制系統
+        class TouchControls {
+            constructor() {
+                this.joystick = document.getElementById('touch-joystick');
+                this.knob = document.getElementById('joystick-knob');
+                this.shootBtn = document.getElementById('touch-shoot');
+                this.fullscreenBtn = document.getElementById('fullscreen-btn');
+                
+                this.joystickActive = false;
+                this.joystickCenter = { x: 0, y: 0 };
+                this.currentDirection = { x: 0, y: 0 };
+                this.shooting = false;
+                
+                // 調試標誌
+                this.debug = true;
+                
+                this.init();
+            }
+            
+            init() {
+                if (this.debug) console.log('🎮 TouchControls 初始化開始...');
+                
+                // 檢查元素是否存在
+                if (!this.joystick || !this.knob || !this.shootBtn) {
+                    console.error('❌ TouchControls 元素未找到:', {
+                        joystick: !!this.joystick,
+                        knob: !!this.knob,
+                        shootBtn: !!this.shootBtn
+                    });
+                    return;
+                }
+                
+                // 搖桿控制 - 添加多種事件類型
+                this.joystick.addEventListener('touchstart', this.onJoystickStart.bind(this), { passive: false });
+                this.joystick.addEventListener('touchmove', this.onJoystickMove.bind(this), { passive: false });
+                this.joystick.addEventListener('touchend', this.onJoystickEnd.bind(this), { passive: false });
+                this.joystick.addEventListener('touchcancel', this.onJoystickEnd.bind(this), { passive: false });
+                
+                // 添加鼠標事件作為備用（用於桌面測試）
+                this.joystick.addEventListener('mousedown', this.onJoystickStartMouse.bind(this));
+                this.joystick.addEventListener('mousemove', this.onJoystickMoveMouse.bind(this));
+                this.joystick.addEventListener('mouseup', this.onJoystickEndMouse.bind(this));
+                this.joystick.addEventListener('mouseleave', this.onJoystickEndMouse.bind(this));
+                
+                // 射擊按鈕
+                this.shootBtn.addEventListener('touchstart', this.onShootStart.bind(this), { passive: false });
+                this.shootBtn.addEventListener('touchend', this.onShootEnd.bind(this), { passive: false });
+                this.shootBtn.addEventListener('touchcancel', this.onShootEnd.bind(this), { passive: false });
+                
+                // 鼠標事件作為備用
+                this.shootBtn.addEventListener('mousedown', this.onShootStart.bind(this));
+                this.shootBtn.addEventListener('mouseup', this.onShootEnd.bind(this));
+                
+                // 全螢幕按鈕
+                if (this.fullscreenBtn) {
+                    this.fullscreenBtn.addEventListener('click', this.toggleFullscreen.bind(this));
+                    this.fullscreenBtn.addEventListener('touchend', this.toggleFullscreen.bind(this));
+                }
+                
+                // 防止默認觸摸行為
+                document.addEventListener('touchmove', (e) => {
+                    if (e.target.closest('#touch-controls')) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+                
+                // 防止上下文菜單
+                document.addEventListener('contextmenu', (e) => {
+                    if (e.target.closest('#touch-controls')) {
+                        e.preventDefault();
+                    }
+                });
+                
+                if (this.debug) console.log('✅ TouchControls 事件監聽器已設置');
+            }
+            
+            onJoystickStart(e) {
+                e.preventDefault();
+                if (this.debug) console.log('🕹️ 搖桿觸摸開始');
+                this.joystickActive = true;
+                const rect = this.joystick.getBoundingClientRect();
+                this.joystickCenter = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+                if (this.debug) console.log('📍 搖桿中心:', this.joystickCenter);
+            }
+            
+            onJoystickStartMouse(e) {
+                e.preventDefault();
+                if (this.debug) console.log('🖱️ 搖桿鼠標開始');
+                this.joystickActive = true;
+                const rect = this.joystick.getBoundingClientRect();
+                this.joystickCenter = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+            
+            onJoystickMove(e) {
+                if (!this.joystickActive) return;
+                e.preventDefault();
+                
+                const touch = e.touches[0];
+                if (!touch) return;
+                
+                this.updateJoystickPosition(touch.clientX, touch.clientY);
+            }
+            
+            onJoystickMoveMouse(e) {
+                if (!this.joystickActive) return;
+                e.preventDefault();
+                
+                this.updateJoystickPosition(e.clientX, e.clientY);
+            }
+            
+            updateJoystickPosition(clientX, clientY) {
+                const deltaX = clientX - this.joystickCenter.x;
+                const deltaY = clientY - this.joystickCenter.y;
+                
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const maxDistance = 40;
+                
+                if (distance <= maxDistance) {
+                    this.knob.style.transform = `translate(${deltaX - 20}px, ${deltaY - 20}px)`;
+                    this.currentDirection = {
+                        x: deltaX / maxDistance,
+                        y: deltaY / maxDistance
+                    };
+                } else {
+                    const angle = Math.atan2(deltaY, deltaX);
+                    const limitedX = Math.cos(angle) * maxDistance;
+                    const limitedY = Math.sin(angle) * maxDistance;
+                    
+                    this.knob.style.transform = `translate(${limitedX - 20}px, ${limitedY - 20}px)`;
+                    this.currentDirection = {
+                        x: Math.cos(angle),
+                        y: Math.sin(angle)
+                    };
+                }
+                
+                if (this.debug && Math.abs(this.currentDirection.x) > 0.1 || Math.abs(this.currentDirection.y) > 0.1) {
+                    console.log('🎯 搖桿方向:', this.currentDirection);
+                }
+            }
+            
+            onJoystickEnd(e) {
+                e.preventDefault();
+                if (this.debug) console.log('🕹️ 搖桿觸摸結束');
+                this.joystickActive = false;
+                this.knob.style.transform = 'translate(-50%, -50%)';
+                this.currentDirection = { x: 0, y: 0 };
+            }
+            
+            onJoystickEndMouse(e) {
+                e.preventDefault();
+                if (this.debug) console.log('🖱️ 搖桿鼠標結束');
+                this.joystickActive = false;
+                this.knob.style.transform = 'translate(-50%, -50%)';
+                this.currentDirection = { x: 0, y: 0 };
+            }
+            
+            onShootStart(e) {
+                e.preventDefault();
+                if (this.debug) console.log('🚀 射擊開始');
+                this.shooting = true;
+                // 添加視覺反饋
+                this.shootBtn.style.transform = 'scale(0.9)';
+                this.shootBtn.style.backgroundColor = '#ff6b6b';
+            }
+            
+            onShootEnd(e) {
+                e.preventDefault();
+                if (this.debug) console.log('🚀 射擊結束');
+                this.shooting = false;
+                // 恢復視覺反饋
+                this.shootBtn.style.transform = 'scale(1)';
+                this.shootBtn.style.backgroundColor = '#ff4757';
+            }
+            
+            toggleFullscreen() {
+                if (this.debug) console.log('🖥️ 切換全螢幕');
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log('全螢幕請求失敗:', err);
+                    });
+                } else {
+                    document.exitFullscreen().catch(err => {
+                        console.log('退出全螢幕失敗:', err);
+                    });
+                }
+            }
+            
+            // 獲取當前輸入狀態
+            getInputState() {
+                const state = {
+                    direction: { ...this.currentDirection },
+                    shooting: this.shooting
+                };
+                
+                // 只在狀態變化時記錄
+                if (this.debug && (Math.abs(state.direction.x) > 0.1 || Math.abs(state.direction.y) > 0.1 || state.shooting)) {
+                    console.log('📊 當前狀態:', state);
+                }
+                
+                return state;
+            }
+            
+            // 測試方法
+            testControls() {
+                console.log('🧪 TouchControls 測試:');
+                console.log('  - 搖桿元素:', !!this.joystick);
+                console.log('  - 搖桿旋鈕:', !!this.knob);
+                console.log('  - 射擊按鈕:', !!this.shootBtn);
+                console.log('  - 全螢幕按鈕:', !!this.fullscreenBtn);
+                console.log('  - 當前狀態:', this.getInputState());
+                return true;
+            }
+        }
+        
+        // 初始化觸摸控制
+        window.touchControls = new TouchControls();
+        
+        // 添加測試方法到 window
+        window.testTouchControls = () => window.touchControls.testControls();
+        
+        console.log('🎮 觸摸控制系統已初始化');
+        console.log('💡 使用 testTouchControls() 進行測試');
+        
+        // 調試功能
+        window.toggleTouchDebug = function() {
+            document.body.classList.toggle('touch-debug');
+            console.log('🐛 TouchControls 調試模式:', document.body.classList.contains('touch-debug') ? '開啟' : '關閉');
+        };
+        
+        // 強制顯示 TouchControls（用於測試）
+        window.forceTouchControls = function(show = true) {
+            const controls = document.getElementById('touch-controls');
+            if (controls) {
+                controls.style.display = show ? 'block' : 'none';
+                console.log('🎮 TouchControls 強制顯示:', show);
+            }
+        };
+        
+        // 檢查媒體查詢
+        window.checkMediaQueries = function() {
+            const queries = [
+                '(max-width: 1024px)',
+                '(max-height: 768px)',
+                '(pointer: coarse)',
+                '(hover: none) and (pointer: coarse)',
+                '(min-width: 768px) and (max-width: 1024px)',
+                '(min-width: 414px) and (max-width: 768px)'
+            ];
+            
+            console.log('📱 媒體查詢檢查:');
+            queries.forEach(query => {
+                const matches = window.matchMedia(query).matches;
+                console.log(`  ${query}: ${matches ? '✅' : '❌'}`);
+            });
+            
+            const controls = document.getElementById('touch-controls');
+            const isVisible = controls && window.getComputedStyle(controls).display !== 'none';
+            console.log(`🎮 TouchControls 可見: ${isVisible ? '✅' : '❌'}`);
+        };
+    </script>
+
+    <!-- 啟動畫面點擊支援 JavaScript -->
+    <script>
+        // 啟動畫面點擊和觸摸支援
+        window.addStartScreenClickSupport = function() {
+            console.log('🎮 添加啟動畫面點擊和觸摸支援');
+            
+            // 等待 Phaser 遊戲初始化
+            const checkPhaserGame = setInterval(() => {
+                if (window.game && window.game.scene && window.game.scene.scenes.length > 0) {
+                    clearInterval(checkPhaserGame);
+                    
+                    // 查找 splash 場景
+                    const splashScene = window.game.scene.scenes.find(scene => scene.scene.key === 'splash');
+                    
+                    if (splashScene && splashScene.scene.isActive()) {
+                        console.log('🎯 找到 splash 場景，添加點擊支援');
+                        addClickSupportToSplash(splashScene);
+                    } else {
+                        // 監聽場景切換，當 splash 場景啟動時添加支援
+                        window.game.events.on('scenestart', (scene) => {
+                            if (scene.scene.key === 'splash') {
+                                console.log('🎯 splash 場景啟動，添加點擊支援');
+                                setTimeout(() => addClickSupportToSplash(scene), 100);
+                            }
+                        });
+                    }
+                }
+            }, 100);
+            
+            // 為 splash 場景添加點擊和觸摸支援
+            function addClickSupportToSplash(scene) {
+                if (scene.clickSupportAdded) return;
+                scene.clickSupportAdded = true;
+                
+                console.log('✅ 為 splash 場景添加點擊和觸摸支援');
+                
+                // 添加點擊事件監聽器
+                scene.input.on('pointerdown', () => {
+                    console.log('🖱️ 檢測到點擊，開始遊戲');
+                    if (scene.transitionToChange && typeof scene.transitionToChange === 'function') {
+                        scene.transitionToChange();
+                    }
+                });
+                
+                // 添加觸摸事件監聽器（備用）
+                const canvas = scene.sys.game.canvas;
+                if (canvas) {
+                    const touchStartHandler = (e) => {
+                        e.preventDefault();
+                        console.log('👆 檢測到觸摸，開始遊戲');
+                        if (scene.transitionToChange && typeof scene.transitionToChange === 'function') {
+                            scene.transitionToChange();
+                        }
+                    };
+                    
+                    canvas.addEventListener('touchstart', touchStartHandler, { passive: false });
+                    canvas.addEventListener('click', touchStartHandler);
+                    
+                    // 清理函數
+                    scene.events.once('shutdown', () => {
+                        canvas.removeEventListener('touchstart', touchStartHandler);
+                        canvas.removeEventListener('click', touchStartHandler);
+                    });
+                }
+                
+                // 添加視覺提示
+                const instructionText = scene.add.bitmapText(
+                    scene.center_width, 
+                    scene.center_height + 150, 
+                    "wendy", 
+                    "點擊任意位置或按 SPACE 開始", 
+                    40
+                ).setOrigin(0.5);
+                
+                // 閃爍效果
+                scene.tweens.add({
+                    targets: instructionText,
+                    alpha: { from: 0.3, to: 1 },
+                    duration: 800,
+                    repeat: -1,
+                    yoyo: true
+                });
+            }
+        };
+        
+        // 當頁面載入完成後初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', window.addStartScreenClickSupport);
+        } else {
+            window.addStartScreenClickSupport();
+        }
+    </script>
+
+
+        <!-- 🎯 座標同步解決方案 - COORDINATE_SYNC_SOLUTION -->
+        <script>
+            console.log('🎯 載入座標同步解決方案');
+            
+            // 等待 TouchControls 載入完成
+            function waitForTouchControls() {
+                return new Promise((resolve) => {
+                    const checkTouchControls = () => {
+                        if (window.touchControls && window.touchControls.toggleFullscreen) {
+                            resolve();
+                        } else {
+                            setTimeout(checkTouchControls, 100);
+                        }
+                    };
+                    checkTouchControls();
+                });
+            }
+            
+            // 實現座標同步的全螢幕切換
+            async function implementCoordinateSync() {
+                await waitForTouchControls();
+                
+                console.log('🔧 開始實現座標同步');
+                
+                // 保存原始的全螢幕切換函數
+                const originalToggleFullscreen = window.touchControls.toggleFullscreen;
+                
+                // 替換為座標同步版本
+                window.touchControls.toggleFullscreen = async function() {
+                    console.log('🎯 執行座標同步全螢幕切換');
+                    
+                    try {
+                        const isCurrentlyFullscreen = !!document.fullscreenElement;
+                        
+                        if (!isCurrentlyFullscreen) {
+                            // 進入全螢幕
+                            console.log('📱 進入全螢幕模式');
+                            
+                            // 1. 觸發原生 Fullscreen API
+                            await document.documentElement.requestFullscreen();
+                            console.log('✅ 原生全螢幕已觸發');
+                            
+                            // 2. 等待全螢幕狀態穩定
+                            await new Promise(resolve => setTimeout(resolve, 300));
+                            
+                            // 3. 重新計算座標
+                            this.recalculateCoordinates();
+                            
+                            // 4. 觸發 resize 事件讓 Phaser 重新計算
+                            window.dispatchEvent(new Event('resize'));
+                            
+                            // 5. 如果有 Phaser 遊戲，刷新 scale
+                            if (window.game && window.game.scale) {
+                                setTimeout(() => {
+                                    window.game.scale.refresh();
+                                    console.log('🎮 Phaser 遊戲 scale 已刷新');
+                                }, 100);
+                            }
+                            
+                        } else {
+                            // 退出全螢幕
+                            console.log('📱 退出全螢幕模式');
+                            
+                            await document.exitFullscreen();
+                            console.log('✅ 已退出原生全螢幕');
+                            
+                            // 等待退出狀態穩定
+                            await new Promise(resolve => setTimeout(resolve, 300));
+                            
+                            // 重新計算座標
+                            this.recalculateCoordinates();
+                            
+                            // 觸發 resize 事件
+                            window.dispatchEvent(new Event('resize'));
+                            
+                            // 刷新 Phaser scale
+                            if (window.game && window.game.scale) {
+                                setTimeout(() => {
+                                    window.game.scale.refresh();
+                                    console.log('🎮 Phaser 遊戲 scale 已刷新');
+                                }, 100);
+                            }
+                        }
+                        
+                        console.log('✅ 座標同步全螢幕切換完成');
+                        
+                    } catch (error) {
+                        console.log('❌ 座標同步全螢幕切換失敗:', error);
+                        // 回退到原始方法
+                        originalToggleFullscreen.call(this);
+                    }
+                };
+                
+                // 添加座標重新計算方法
+                window.touchControls.recalculateCoordinates = function() {
+                    console.log('🔄 重新計算 TouchControls 座標');
+                    
+                    // 重新計算搖桿中心座標
+                    if (this.joystick) {
+                        const rect = this.joystick.getBoundingClientRect();
+                        this.joystickCenter = {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top + rect.height / 2
+                        };
+                        console.log('🕹️ 搖桿中心座標已更新:', this.joystickCenter);
+                    }
+                    
+                    // 重新計算射擊按鈕座標
+                    if (this.shootBtn) {
+                        const rect = this.shootBtn.getBoundingClientRect();
+                        console.log('🚀 射擊按鈕座標已更新:', {
+                            left: rect.left,
+                            top: rect.top,
+                            width: rect.width,
+                            height: rect.height
+                        });
+                    }
+                    
+                    // 重新計算全螢幕按鈕座標
+                    const fullscreenBtn = document.querySelector('.fullscreen-btn');
+                    if (fullscreenBtn) {
+                        const rect = fullscreenBtn.getBoundingClientRect();
+                        console.log('⛶ 全螢幕按鈕座標已更新:', {
+                            left: rect.left,
+                            top: rect.top,
+                            width: rect.width,
+                            height: rect.height
+                        });
+                    }
+                };
+                
+                // 監聽全螢幕狀態變化
+                document.addEventListener('fullscreenchange', () => {
+                    console.log('🔄 全螢幕狀態變化，重新計算座標');
+                    setTimeout(() => {
+                        if (window.touchControls && window.touchControls.recalculateCoordinates) {
+                            window.touchControls.recalculateCoordinates();
+                        }
+                    }, 200);
+                });
+                
+                // 監聽 resize 事件
+                window.addEventListener('resize', () => {
+                    console.log('🔄 視窗大小變化，重新計算座標');
+                    setTimeout(() => {
+                        if (window.touchControls && window.touchControls.recalculateCoordinates) {
+                            window.touchControls.recalculateCoordinates();
+                        }
+                    }, 100);
+                });
+                
+                console.log('✅ 座標同步解決方案實現完成');
+                
+                // 添加測試函數
+                window.testCoordinateSync = function() {
+                    console.log('🧪 測試座標同步功能');
+                    
+                    const currentCoords = {
+                        viewport: {
+                            width: window.innerWidth,
+                            height: window.innerHeight
+                        },
+                        isFullscreen: !!document.fullscreenElement,
+                        touchControls: {}
+                    };
+                    
+                    if (window.touchControls) {
+                        if (window.touchControls.joystickCenter) {
+                            currentCoords.touchControls.joystickCenter = window.touchControls.joystickCenter;
+                        }
+                        
+                        const joystick = document.querySelector('.touch-joystick');
+                        if (joystick) {
+                            const rect = joystick.getBoundingClientRect();
+                            currentCoords.touchControls.joystick = {
+                                left: rect.left,
+                                top: rect.top,
+                                width: rect.width,
+                                height: rect.height
+                            };
+                        }
+                    }
+                    
+                    console.log('📊 當前座標狀態:', currentCoords);
+                    return currentCoords;
+                };
+                
+                // 添加強制重新計算函數
+                window.forceRecalculateCoordinates = function() {
+                    console.log('🔧 強制重新計算所有座標');
+                    
+                    if (window.touchControls && window.touchControls.recalculateCoordinates) {
+                        window.touchControls.recalculateCoordinates();
+                    }
+                    
+                    // 觸發 Phaser 重新計算
+                    window.dispatchEvent(new Event('resize'));
+                    
+                    if (window.game && window.game.scale) {
+                        window.game.scale.refresh();
+                    }
+                    
+                    console.log('✅ 強制重新計算完成');
+                };
+            }
+            
+            // 頁面載入完成後實現座標同步
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', implementCoordinateSync);
+            } else {
+                implementCoordinateSync();
+            }
+        </script>
+        
+        
+        
+        <!-- 🔍 PostMessage 通信診斷工具 - POSTMESSAGE_DIAGNOSTIC_TOOL -->
+        <script>
+            console.log('🔍 載入 PostMessage 通信診斷工具');
+            
+            // PostMessage 通信診斷類
+            class PostMessageDiagnostic {
+                constructor() {
+                    this.diagnosticResults = {
+                        environment: {},
+                        communication: {},
+                        errors: [],
+                        timeline: []
+                    };
+                    this.init();
+                }
+                
+                init() {
+                    console.log('🚀 初始化 PostMessage 診斷工具');
+                    this.diagnoseEnvironment();
+                    this.setupCommunicationTest();
+                    this.addDiagnosticFunctions();
+                }
+                
+                // 診斷環境
+                diagnoseEnvironment() {
+                    console.log('🔍 診斷環境設置');
+                    
+                    const env = {
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        isInIframe: window !== window.parent,
+                        canAccessParent: this.canAccessParent(),
+                        isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
+                        isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+                        isMobile: /Mobi|Android/i.test(navigator.userAgent),
+                        windowLocation: window.location.href,
+                        parentLocation: this.getParentLocation(),
+                        hasPostMessage: typeof window.postMessage === 'function',
+                        hasParentPostMessage: this.hasParentPostMessage()
+                    };
+                    
+                    this.diagnosticResults.environment = env;
+                    console.log('🔍 環境診斷結果:', env);
+                    
+                    // 記錄關鍵發現
+                    if (!env.isInIframe) {
+                        this.addError('NOT_IN_IFRAME', '不在 iframe 環境中，PostMessage 通信不適用');
+                    }
+                    
+                    if (!env.canAccessParent) {
+                        this.addError('CANNOT_ACCESS_PARENT', '無法訪問父頁面，可能有跨域限制');
+                    }
+                    
+                    if (env.isIOS && env.isSafari) {
+                        this.addWarning('IOS_SAFARI_DETECTED', 'iOS Safari 檢測到，可能有特殊限制');
+                    }
+                }
+                
+                // 檢查是否能訪問父頁面
+                canAccessParent() {
+                    try {
+                        return window.parent && window.parent !== window;
+                    } catch (error) {
+                        this.addError('PARENT_ACCESS_ERROR', error.message);
+                        return false;
+                    }
+                }
+                
+                // 獲取父頁面位置
+                getParentLocation() {
+                    try {
+                        return window.parent ? window.parent.location.href : 'N/A';
+                    } catch (error) {
+                        return 'BLOCKED_BY_CORS';
+                    }
+                }
+                
+                // 檢查父頁面是否有 postMessage
+                hasParentPostMessage() {
+                    try {
+                        return window.parent && typeof window.parent.postMessage === 'function';
+                    } catch (error) {
+                        return false;
+                    }
+                }
+                
+                // 設置通信測試
+                setupCommunicationTest() {
+                    console.log('📡 設置通信測試');
+                    
+                    // 監聽來自父頁面的消息
+                    window.addEventListener('message', (event) => {
+                        this.handleIncomingMessage(event);
+                    });
+                    
+                    // 如果在 iframe 中，設置定期測試
+                    if (this.diagnosticResults.environment.isInIframe) {
+                        this.startCommunicationTest();
+                    }
+                }
+                
+                // 處理接收到的消息
+                handleIncomingMessage(event) {
+                    const timestamp = new Date().toISOString();
+                    console.log('📥 收到消息:', event.data, 'from:', event.origin);
+                    
+                    this.diagnosticResults.timeline.push({
+                        timestamp: timestamp,
+                        type: 'RECEIVED',
+                        data: event.data,
+                        origin: event.origin,
+                        source: event.source === window.parent ? 'PARENT' : 'OTHER'
+                    });
+                    
+                    // 如果是診斷響應
+                    if (event.data.type === 'DIAGNOSTIC_RESPONSE') {
+                        this.diagnosticResults.communication.parentResponse = {
+                            received: true,
+                            timestamp: timestamp,
+                            data: event.data
+                        };
+                        console.log('✅ 父頁面響應已收到');
+                    }
+                }
+                
+                // 開始通信測試
+                startCommunicationTest() {
+                    console.log('🧪 開始通信測試');
+                    
+                    const testMessage = {
+                        type: 'DIAGNOSTIC_REQUEST',
+                        action: 'COMMUNICATION_TEST',
+                        timestamp: new Date().toISOString(),
+                        testId: Math.random().toString(36).substr(2, 9)
+                    };
+                    
+                    try {
+                        window.parent.postMessage(testMessage, '*');
+                        
+                        this.diagnosticResults.timeline.push({
+                            timestamp: testMessage.timestamp,
+                            type: 'SENT',
+                            data: testMessage,
+                            target: 'PARENT'
+                        });
+                        
+                        console.log('📤 測試消息已發送:', testMessage);
+                        
+                        // 等待響應
+                        setTimeout(() => {
+                            if (!this.diagnosticResults.communication.parentResponse) {
+                                this.addError('NO_PARENT_RESPONSE', '父頁面沒有響應測試消息');
+                            }
+                        }, 3000);
+                        
+                    } catch (error) {
+                        this.addError('SEND_MESSAGE_ERROR', '發送消息失敗: ' + error.message);
+                    }
+                }
+                
+                // 測試雙重全螢幕通信
+                testDualFullscreenCommunication() {
+                    console.log('🎯 測試雙重全螢幕通信');
+                    
+                    if (!this.diagnosticResults.environment.isInIframe) {
+                        console.log('⚠️ 不在 iframe 中，跳過雙重全螢幕通信測試');
+                        return {
+                            skipped: true,
+                            reason: 'Not in iframe environment'
+                        };
+                    }
+                    
+                    const testMessage = {
+                        type: 'DUAL_FULLSCREEN_REQUEST',
+                        action: 'ENTER_CSS_FULLSCREEN',
+                        timestamp: new Date().toISOString(),
+                        testMode: true
+                    };
+                    
+                    try {
+                        window.parent.postMessage(testMessage, '*');
+                        
+                        this.diagnosticResults.timeline.push({
+                            timestamp: testMessage.timestamp,
+                            type: 'SENT',
+                            data: testMessage,
+                            target: 'PARENT'
+                        });
+                        
+                        console.log('📤 雙重全螢幕測試消息已發送');
+                        
+                        return {
+                            sent: true,
+                            message: testMessage
+                        };
+                        
+                    } catch (error) {
+                        this.addError('DUAL_FULLSCREEN_SEND_ERROR', error.message);
+                        return {
+                            sent: false,
+                            error: error.message
+                        };
+                    }
+                }
+                
+                // 添加錯誤
+                addError(code, message) {
+                    const error = {
+                        code: code,
+                        message: message,
+                        timestamp: new Date().toISOString()
+                    };
+                    this.diagnosticResults.errors.push(error);
+                    console.log('❌ 診斷錯誤:', error);
+                }
+                
+                // 添加警告
+                addWarning(code, message) {
+                    const warning = {
+                        code: code,
+                        message: message,
+                        timestamp: new Date().toISOString(),
+                        type: 'WARNING'
+                    };
+                    this.diagnosticResults.errors.push(warning);
+                    console.log('⚠️ 診斷警告:', warning);
+                }
+                
+                // 添加診斷函數到全局
+                addDiagnosticFunctions() {
+                    // 獲取完整診斷報告
+                    window.getPostMessageDiagnostic = () => {
+                        console.log('📊 PostMessage 診斷報告:', this.diagnosticResults);
+                        return this.diagnosticResults;
+                    };
+                    
+                    // 測試通信
+                    window.testPostMessageCommunication = () => {
+                        console.log('🧪 手動測試 PostMessage 通信');
+                        return this.testDualFullscreenCommunication();
+                    };
+                    
+                    // 檢查父頁面監聽器
+                    window.checkParentListener = () => {
+                        console.log('🔍 檢查父頁面監聽器');
+                        
+                        const checkMessage = {
+                            type: 'LISTENER_CHECK',
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        try {
+                            window.parent.postMessage(checkMessage, '*');
+                            console.log('📤 監聽器檢查消息已發送');
+                            return { sent: true };
+                        } catch (error) {
+                            console.log('❌ 監聽器檢查失敗:', error);
+                            return { sent: false, error: error.message };
+                        }
+                    };
+                    
+                    // 強制診斷
+                    window.forceDiagnostic = () => {
+                        console.log('🔧 強制執行完整診斷');
+                        this.diagnoseEnvironment();
+                        this.startCommunicationTest();
+                        return this.diagnosticResults;
+                    };
+                    
+                    console.log('✅ PostMessage 診斷函數已添加到全局');
+                }
+                
+                // 生成診斷報告
+                generateReport() {
+                    const report = {
+                        summary: {
+                            environment: this.diagnosticResults.environment.isInIframe ? 'IFRAME' : 'DIRECT',
+                            canCommunicate: this.diagnosticResults.communication.parentResponse?.received || false,
+                            errorCount: this.diagnosticResults.errors.filter(e => e.type !== 'WARNING').length,
+                            warningCount: this.diagnosticResults.errors.filter(e => e.type === 'WARNING').length
+                        },
+                        details: this.diagnosticResults,
+                        recommendations: this.generateRecommendations()
+                    };
+                    
+                    console.log('📋 PostMessage 診斷報告:', report);
+                    return report;
+                }
+                
+                // 生成建議
+                generateRecommendations() {
+                    const recommendations = [];
+                    
+                    if (!this.diagnosticResults.environment.isInIframe) {
+                        recommendations.push({
+                            type: 'INFO',
+                            message: '直接訪問模式：使用 Safari 原生 API，不需要 PostMessage 通信'
+                        });
+                    }
+                    
+                    if (this.diagnosticResults.environment.isIOS && this.diagnosticResults.environment.isSafari) {
+                        recommendations.push({
+                            type: 'WARNING',
+                            message: 'iOS Safari：確保全螢幕由直接用戶手勢觸發'
+                        });
+                    }
+                    
+                    if (this.diagnosticResults.errors.some(e => e.code === 'CANNOT_ACCESS_PARENT')) {
+                        recommendations.push({
+                            type: 'ERROR',
+                            message: '跨域限制：檢查 iframe 和父頁面的域名設置'
+                        });
+                    }
+                    
+                    if (!this.diagnosticResults.communication.parentResponse) {
+                        recommendations.push({
+                            type: 'ERROR',
+                            message: '父頁面無響應：檢查 GameSwitcher 的消息監聽器'
+                        });
+                    }
+                    
+                    return recommendations;
+                }
+            }
+            
+            // 初始化診斷工具
+            let postMessageDiagnostic;
+            
+            function initPostMessageDiagnostic() {
+                console.log('🚀 初始化 PostMessage 診斷工具');
+                postMessageDiagnostic = new PostMessageDiagnostic();
+                
+                // 5秒後生成初始報告
+                setTimeout(() => {
+                    const report = postMessageDiagnostic.generateReport();
+                    console.log('📋 初始診斷報告已生成');
+                }, 5000);
+            }
+            
+            // 頁面載入完成後初始化
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initPostMessageDiagnostic);
+            } else {
+                initPostMessageDiagnostic();
+            }
+        </script>
+        <!-- PostMessage 通信診斷工具結束 -->
+        <!-- 🍎 Safari 全螢幕支援 - SAFARI_FULLSCREEN_SUPPORT -->
+        <script>
+            console.log('🍎 載入 Safari 全螢幕支援');
+            
+            // 跨瀏覽器全螢幕 API 兼容性函數
+            function createCrossBrowserFullscreenAPI() {
+                console.log('🔧 創建跨瀏覽器全螢幕 API');
+                
+                // 檢測瀏覽器類型
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                const isWebKit = 'webkitRequestFullscreen' in document.documentElement;
+                
+                console.log('🔍 瀏覽器檢測:', {
+                    isIOS: isIOS,
+                    isSafari: isSafari,
+                    isWebKit: isWebKit,
+                    userAgent: navigator.userAgent
+                });
+                
+                // 跨瀏覽器請求全螢幕函數
+                window.requestFullscreenCrossBrowser = function(element = document.documentElement) {
+                    console.log('📱 執行跨瀏覽器全螢幕請求');
+                    
+                    return new Promise((resolve, reject) => {
+                        try {
+                            // 標準 Fullscreen API
+                            if (element.requestFullscreen) {
+                                console.log('✅ 使用標準 requestFullscreen');
+                                element.requestFullscreen().then(resolve).catch(reject);
+                            }
+                            // WebKit (Safari)
+                            else if (element.webkitRequestFullscreen) {
+                                console.log('🍎 使用 WebKit webkitRequestFullscreen');
+                                element.webkitRequestFullscreen();
+                                resolve();
+                            }
+                            // WebKit (舊版)
+                            else if (element.webkitRequestFullScreen) {
+                                console.log('🍎 使用舊版 WebKit webkitRequestFullScreen');
+                                element.webkitRequestFullScreen();
+                                resolve();
+                            }
+                            // Mozilla
+                            else if (element.mozRequestFullScreen) {
+                                console.log('🦊 使用 Mozilla mozRequestFullScreen');
+                                element.mozRequestFullScreen();
+                                resolve();
+                            }
+                            // Microsoft
+                            else if (element.msRequestFullscreen) {
+                                console.log('🪟 使用 Microsoft msRequestFullscreen');
+                                element.msRequestFullscreen();
+                                resolve();
+                            }
+                            // iOS Safari 特殊處理
+                            else if (isIOS) {
+                                console.log('📱 iOS Safari 特殊處理');
+                                // iOS Safari 不支援真正的全螢幕，使用 CSS 模擬
+                                document.body.classList.add('ios-fullscreen-simulation');
+                                resolve();
+                            }
+                            else {
+                                console.log('❌ 瀏覽器不支援全螢幕 API');
+                                reject(new Error('Fullscreen not supported'));
+                            }
+                        } catch (error) {
+                            console.log('❌ 全螢幕請求失敗:', error);
+                            reject(error);
+                        }
+                    });
+                };
+                
+                // 跨瀏覽器退出全螢幕函數
+                window.exitFullscreenCrossBrowser = function() {
+                    console.log('📱 執行跨瀏覽器退出全螢幕');
+                    
+                    return new Promise((resolve, reject) => {
+                        try {
+                            // 標準 Fullscreen API
+                            if (document.exitFullscreen) {
+                                console.log('✅ 使用標準 exitFullscreen');
+                                document.exitFullscreen().then(resolve).catch(reject);
+                            }
+                            // WebKit (Safari)
+                            else if (document.webkitExitFullscreen) {
+                                console.log('🍎 使用 WebKit webkitExitFullscreen');
+                                document.webkitExitFullscreen();
+                                resolve();
+                            }
+                            // WebKit (舊版)
+                            else if (document.webkitCancelFullScreen) {
+                                console.log('🍎 使用舊版 WebKit webkitCancelFullScreen');
+                                document.webkitCancelFullScreen();
+                                resolve();
+                            }
+                            // Mozilla
+                            else if (document.mozCancelFullScreen) {
+                                console.log('🦊 使用 Mozilla mozCancelFullScreen');
+                                document.mozCancelFullScreen();
+                                resolve();
+                            }
+                            // Microsoft
+                            else if (document.msExitFullscreen) {
+                                console.log('🪟 使用 Microsoft msExitFullscreen');
+                                document.msExitFullscreen();
+                                resolve();
+                            }
+                            // iOS Safari 特殊處理
+                            else if (isIOS) {
+                                console.log('📱 iOS Safari 退出模擬全螢幕');
+                                document.body.classList.remove('ios-fullscreen-simulation');
+                                resolve();
+                            }
+                            else {
+                                console.log('❌ 瀏覽器不支援退出全螢幕');
+                                reject(new Error('Exit fullscreen not supported'));
+                            }
+                        } catch (error) {
+                            console.log('❌ 退出全螢幕失敗:', error);
+                            reject(error);
+                        }
+                    });
+                };
+                
+                // 跨瀏覽器檢查全螢幕狀態函數
+                window.isFullscreenCrossBrowser = function() {
+                    const fullscreenElement = document.fullscreenElement ||
+                                            document.webkitFullscreenElement ||
+                                            document.webkitCurrentFullScreenElement ||
+                                            document.mozFullScreenElement ||
+                                            document.msFullscreenElement;
+                    
+                    const isIOSSimulation = document.body.classList.contains('ios-fullscreen-simulation');
+                    
+                    return !!(fullscreenElement || isIOSSimulation);
+                };
+                
+                console.log('✅ 跨瀏覽器全螢幕 API 已創建');
+            }
+            
+            // 為 iOS Safari 添加 CSS 模擬全螢幕樣式
+            function addIOSFullscreenStyles() {
+                console.log('📱 添加 iOS Safari 全螢幕模擬樣式');
+                
+                let style = document.getElementById('ios-fullscreen-style');
+                if (!style) {
+                    style = document.createElement('style');
+                    style.id = 'ios-fullscreen-style';
+                    style.textContent = `
+                        /* iOS Safari 全螢幕模擬 */
+                        body.ios-fullscreen-simulation {
+                            position: fixed !important;
+                            top: 0 !important;
+                            left: 0 !important;
+                            width: 100vw !important;
+                            height: 100vh !important;
+                            height: 100dvh !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            overflow: hidden !important;
+                            background: black !important;
+                            z-index: 2147483647 !important;
+                        }
+                        
+                        body.ios-fullscreen-simulation #app {
+                            width: 100vw !important;
+                            height: 100vh !important;
+                            height: 100dvh !important;
+                        }
+                        
+                        body.ios-fullscreen-simulation #game-container {
+                            width: 100% !important;
+                            height: 100% !important;
+                            max-width: none !important;
+                            max-height: none !important;
+                        }
+                        
+                        /* 隱藏 iOS Safari 地址欄 */
+                        @supports (-webkit-touch-callout: none) {
+                            body.ios-fullscreen-simulation {
+                                height: -webkit-fill-available !important;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    console.log('✅ iOS Safari 全螢幕模擬樣式已添加');
+                }
+            }
+            
+            // 修改原始的 toggleFullscreen 方法以支援 Safari
+            function enhanceToggleFullscreenForSafari() {
+                console.log('🔧 增強 toggleFullscreen 方法以支援 Safari');
+                
+                // 等待 TouchControls 載入
+                const waitForTouchControls = () => {
+                    return new Promise((resolve) => {
+                        const check = () => {
+                            if (window.touchControls && window.touchControls.toggleFullscreen) {
+                                resolve();
+                            } else {
+                                setTimeout(check, 100);
+                            }
+                        };
+                        check();
+                    });
+                };
+                
+                waitForTouchControls().then(() => {
+                    console.log('🔧 開始增強 TouchControls 的 Safari 支援');
+                    
+                    // 保存當前的 toggleFullscreen 方法
+                    const originalToggleFullscreen = window.touchControls.toggleFullscreen;
+                    
+                    // 替換為 Safari 兼容版本
+                    window.touchControls.toggleFullscreen = async function() {
+                        console.log('🍎 執行 Safari 兼容全螢幕切換');
+                        
+                        try {
+                            const isCurrentlyFullscreen = window.isFullscreenCrossBrowser();
+                            
+                            if (!isCurrentlyFullscreen) {
+                                console.log('📱 進入 Safari 兼容全螢幕模式');
+                                
+                                // 使用跨瀏覽器 API
+                                await window.requestFullscreenCrossBrowser();
+                                
+                                // 等待狀態穩定
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                                
+                                // 重新計算座標
+                                if (this.recalculateCoordinates) {
+                                    this.recalculateCoordinates();
+                                }
+                                
+                                // 觸發 resize 事件
+                                window.dispatchEvent(new Event('resize'));
+                                
+                                // 如果有 Phaser 遊戲，刷新 scale
+                                if (window.game && window.game.scale) {
+                                    setTimeout(() => {
+                                        window.game.scale.refresh();
+                                        console.log('🎮 Phaser 遊戲 scale 已刷新');
+                                    }, 100);
+                                }
+                                
+                                console.log('✅ Safari 兼容全螢幕已啟用');
+                                
+                            } else {
+                                console.log('📱 退出 Safari 兼容全螢幕模式');
+                                
+                                await window.exitFullscreenCrossBrowser();
+                                
+                                // 等待退出狀態穩定
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                                
+                                // 重新計算座標
+                                if (this.recalculateCoordinates) {
+                                    this.recalculateCoordinates();
+                                }
+                                
+                                // 觸發 resize 事件
+                                window.dispatchEvent(new Event('resize'));
+                                
+                                // 刷新 Phaser scale
+                                if (window.game && window.game.scale) {
+                                    setTimeout(() => {
+                                        window.game.scale.refresh();
+                                        console.log('🎮 Phaser 遊戲 scale 已刷新');
+                                    }, 100);
+                                }
+                                
+                                console.log('✅ 已退出 Safari 兼容全螢幕');
+                            }
+                            
+                        } catch (error) {
+                            console.log('❌ Safari 兼容全螢幕切換失敗:', error);
+                            // 回退到原始方法
+                            if (originalToggleFullscreen) {
+                                originalToggleFullscreen.call(this);
+                            }
+                        }
+                    };
+                    
+                    console.log('✅ TouchControls Safari 支援增強完成');
+                });
+            }
+            
+            // 初始化 Safari 支援
+            function initSafariFullscreenSupport() {
+                console.log('🚀 初始化 Safari 全螢幕支援');
+                
+                // 創建跨瀏覽器 API
+                createCrossBrowserFullscreenAPI();
+                
+                // 添加 iOS 樣式
+                addIOSFullscreenStyles();
+                
+                // 增強 toggleFullscreen 方法
+                enhanceToggleFullscreenForSafari();
+                
+                console.log('✅ Safari 全螢幕支援初始化完成');
+                
+                // 添加測試函數
+                window.testSafariFullscreen = function() {
+                    console.log('🧪 測試 Safari 全螢幕支援');
+                    
+                    const support = {
+                        standardAPI: !!document.documentElement.requestFullscreen,
+                        webkitAPI: !!document.documentElement.webkitRequestFullscreen,
+                        oldWebkitAPI: !!document.documentElement.webkitRequestFullScreen,
+                        mozAPI: !!document.documentElement.mozRequestFullScreen,
+                        msAPI: !!document.documentElement.msRequestFullscreen,
+                        isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
+                        isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
+                        currentFullscreen: window.isFullscreenCrossBrowser()
+                    };
+                    
+                    console.log('🍎 Safari 全螢幕支援狀態:', support);
+                    return support;
+                };
+            }
+            
+            // 頁面載入完成後初始化
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initSafariFullscreenSupport);
+            } else {
+                initSafariFullscreenSupport();
+            }
+        </script>
+        <!-- Safari 全螢幕支援結束 -->
+        <!-- 🎯 雙重全螢幕同步功能 - DUAL_FULLSCREEN_SYNC -->
+        <script>
+            console.log('🎯 載入雙重全螢幕同步功能');
+            
+            // 等待 TouchControls 和座標同步載入完成
+            function waitForEnhancedTouchControls() {
+                return new Promise((resolve) => {
+                    const checkEnhanced = () => {
+                        if (window.touchControls && 
+                            window.touchControls.toggleFullscreen && 
+                            window.touchControls.recalculateCoordinates) {
+                            resolve();
+                        } else {
+                            setTimeout(checkEnhanced, 100);
+                        }
+                    };
+                    checkEnhanced();
+                });
+            }
+            
+            // 實現雙重全螢幕同步
+            async function implementDualFullscreenSync() {
+                await waitForEnhancedTouchControls();
+                
+                console.log('🔧 開始實現雙重全螢幕同步');
+                
+                // 保存當前的座標同步版本
+                const coordinateSyncToggleFullscreen = window.touchControls.toggleFullscreen;
+                
+                // 替換為雙重同步版本
+                window.touchControls.toggleFullscreen = async function() {
+                    console.log('🎯 執行雙重全螢幕同步切換');
+                    
+                    try {
+                        const isCurrentlyFullscreen = !!document.fullscreenElement;
+                        const isInIframe = window !== window.parent;
+                        
+                        if (!isCurrentlyFullscreen) {
+                            // 進入全螢幕
+                            console.log('📱 進入雙重全螢幕模式');
+                            
+                            // 1. 觸發原生 Fullscreen API（座標同步版本）
+                            await coordinateSyncToggleFullscreen.call(this);
+                            
+                            // 2. 如果在 iframe 中，通知父頁面觸發 CSS 強制全螢幕
+                            if (isInIframe) {
+                                console.log('📤 通知父頁面觸發 CSS 強制全螢幕');
+                                window.parent.postMessage({
+                                    type: 'DUAL_FULLSCREEN_REQUEST',
+                                    action: 'ENTER_CSS_FULLSCREEN',
+                                    timestamp: Date.now()
+                                }, '*');
+                            }
+                            
+                            // 3. 等待父頁面響應
+                            await new Promise(resolve => setTimeout(resolve, 200));
+                            
+                            console.log('✅ 雙重全螢幕（原生 + CSS）已啟用');
+                            
+                        } else {
+                            // 退出全螢幕
+                            console.log('📱 退出雙重全螢幕模式');
+                            
+                            // 1. 如果在 iframe 中，通知父頁面退出 CSS 強制全螢幕
+                            if (isInIframe) {
+                                console.log('📤 通知父頁面退出 CSS 強制全螢幕');
+                                window.parent.postMessage({
+                                    type: 'DUAL_FULLSCREEN_REQUEST',
+                                    action: 'EXIT_CSS_FULLSCREEN',
+                                    timestamp: Date.now()
+                                }, '*');
+                            }
+                            
+                            // 2. 觸發原生 Fullscreen API 退出（座標同步版本）
+                            await coordinateSyncToggleFullscreen.call(this);
+                            
+                            console.log('✅ 雙重全螢幕已退出');
+                        }
+                        
+                    } catch (error) {
+                        console.log('❌ 雙重全螢幕同步失敗:', error);
+                        // 回退到座標同步版本
+                        coordinateSyncToggleFullscreen.call(this);
+                    }
+                };
+                
+                // 監聽來自父頁面的響應
+                window.addEventListener('message', (event) => {
+                    if (event.data.type === 'DUAL_FULLSCREEN_RESPONSE') {
+                        console.log('📥 收到父頁面響應:', event.data);
+                        
+                        switch (event.data.action) {
+                            case 'CSS_FULLSCREEN_ENABLED':
+                                console.log('✅ 父頁面 CSS 強制全螢幕已啟用');
+                                break;
+                            case 'CSS_FULLSCREEN_DISABLED':
+                                console.log('✅ 父頁面 CSS 強制全螢幕已停用');
+                                break;
+                            case 'CSS_FULLSCREEN_ERROR':
+                                console.log('❌ 父頁面 CSS 強制全螢幕錯誤:', event.data.error);
+                                break;
+                        }
+                    }
+                });
+                
+                console.log('✅ 雙重全螢幕同步功能實現完成');
+                
+                // 添加測試函數
+                window.testDualFullscreen = function() {
+                    console.log('🧪 測試雙重全螢幕功能');
+                    
+                    const status = {
+                        isInIframe: window !== window.parent,
+                        nativeFullscreen: !!document.fullscreenElement,
+                        viewport: {
+                            width: window.innerWidth,
+                            height: window.innerHeight
+                        },
+                        touchControls: !!window.touchControls,
+                        dualSyncEnabled: true
+                    };
+                    
+                    console.log('📊 雙重全螢幕狀態:', status);
+                    return status;
+                };
+                
+                // 添加強制同步函數
+                window.forceDualFullscreenSync = async function() {
+                    console.log('🔧 強制執行雙重全螢幕同步');
+                    
+                    if (window.touchControls && window.touchControls.toggleFullscreen) {
+                        await window.touchControls.toggleFullscreen();
+                    }
+                    
+                    console.log('✅ 強制同步完成');
+                };
+            }
+            
+            // 頁面載入完成後實現雙重同步
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', implementDualFullscreenSync);
+            } else {
+                implementDualFullscreenSync();
+            }
+        </script>
+        <!-- 雙重全螢幕同步功能結束 -->
+        <!-- 🔧 Safari 整合順序修復 - SAFARI_INTEGRATION_ORDER_FIXED -->
+        <script>
+            console.log('🔧 載入 Safari 整合順序修復');
+            
+            // 等待所有支援載入完成後修復整合順序
+            function fixSafariIntegrationOrder() {
+                console.log('🚀 開始修復 Safari 整合順序');
+                
+                // 等待所有功能載入
+                const waitForAllFeatures = () => {
+                    return new Promise((resolve) => {
+                        const checkFeatures = () => {
+                            const hasBasicTouchControls = window.touchControls && window.touchControls.toggleFullscreen;
+                            const hasSafariSupport = window.requestFullscreenCrossBrowser && window.testSafariFullscreen;
+                            const hasCoordinateSync = hasBasicTouchControls; // 座標同步已整合到 TouchControls
+                            
+                            if (hasBasicTouchControls && hasSafariSupport && hasCoordinateSync) {
+                                resolve();
+                            } else {
+                                setTimeout(checkFeatures, 100);
+                            }
+                        };
+                        checkFeatures();
+                    });
+                };
+                
+                waitForAllFeatures().then(() => {
+                    console.log('✅ 所有功能已載入，開始修復整合順序');
+                    
+                    // 保存當前的各個版本
+                    const originalToggleFullscreen = window.touchControls.toggleFullscreen;
+                    const safariCrossBrowserAPI = window.requestFullscreenCrossBrowser;
+                    const safariExitAPI = window.exitFullscreenCrossBrowser;
+                    const safariStateCheck = window.isFullscreenCrossBrowser;
+                    
+                    console.log('🔧 創建 Safari 增強的座標同步版本');
+                    
+                    // 創建 Safari 增強的座標同步版本
+                    const safariEnhancedCoordinateSync = async function() {
+                        console.log('🍎 執行 Safari 增強的座標同步全螢幕切換');
+                        
+                        try {
+                            const isCurrentlyFullscreen = safariStateCheck ? safariStateCheck() : !!document.fullscreenElement;
+                            
+                            if (!isCurrentlyFullscreen) {
+                                console.log('📱 進入 Safari 增強全螢幕模式');
+                                
+                                // 1. 使用 Safari 兼容的跨瀏覽器 API
+                                if (safariCrossBrowserAPI) {
+                                    await safariCrossBrowserAPI();
+                                    console.log('✅ Safari 兼容全螢幕已觸發');
+                                } else {
+                                    // 回退到標準 API
+                                    await document.documentElement.requestFullscreen();
+                                    console.log('✅ 標準全螢幕已觸發（回退）');
+                                }
+                                
+                                // 2. 等待全螢幕狀態穩定
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                                
+                                // 3. 重新計算座標
+                                if (this.recalculateCoordinates) {
+                                    this.recalculateCoordinates();
+                                    console.log('📐 座標已重新計算');
+                                }
+                                
+                                // 4. 觸發 resize 事件讓 Phaser 重新計算
+                                window.dispatchEvent(new Event('resize'));
+                                
+                                // 5. 刷新 Phaser scale
+                                if (window.game && window.game.scale) {
+                                    setTimeout(() => {
+                                        window.game.scale.refresh();
+                                        console.log('🎮 Phaser 遊戲 scale 已刷新');
+                                    }, 100);
+                                }
+                                
+                                console.log('✅ Safari 增強全螢幕已完成');
+                                
+                            } else {
+                                console.log('📱 退出 Safari 增強全螢幕模式');
+                                
+                                // 使用 Safari 兼容的退出 API
+                                if (safariExitAPI) {
+                                    await safariExitAPI();
+                                    console.log('✅ Safari 兼容退出全螢幕已觸發');
+                                } else {
+                                    // 回退到標準 API
+                                    await document.exitFullscreen();
+                                    console.log('✅ 標準退出全螢幕已觸發（回退）');
+                                }
+                                
+                                // 等待退出狀態穩定
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                                
+                                // 重新計算座標
+                                if (this.recalculateCoordinates) {
+                                    this.recalculateCoordinates();
+                                    console.log('📐 座標已重新計算');
+                                }
+                                
+                                // 觸發 resize 事件
+                                window.dispatchEvent(new Event('resize'));
+                                
+                                // 刷新 Phaser scale
+                                if (window.game && window.game.scale) {
+                                    setTimeout(() => {
+                                        window.game.scale.refresh();
+                                        console.log('🎮 Phaser 遊戲 scale 已刷新');
+                                    }, 100);
+                                }
+                                
+                                console.log('✅ 已退出 Safari 增強全螢幕');
+                            }
+                            
+                        } catch (error) {
+                            console.log('❌ Safari 增強全螢幕切換失敗:', error);
+                            
+                            // 回退到原始方法
+                            if (originalToggleFullscreen) {
+                                console.log('🔄 回退到原始全螢幕方法');
+                                originalToggleFullscreen.call(this);
+                            }
+                        }
+                    };
+                    
+                    console.log('🔧 更新雙重同步以使用 Safari 增強版本');
+                    
+                    // 找到並更新雙重同步函數
+                    if (window.touchControls && typeof window.touchControls.toggleFullscreen === 'function') {
+                        // 檢查是否是雙重同步版本
+                        const currentFunction = window.touchControls.toggleFullscreen.toString();
+                        
+                        if (currentFunction.includes('雙重全螢幕同步切換')) {
+                            console.log('🔧 發現雙重同步版本，進行 Safari 增強');
+                            
+                            // 保存當前雙重同步版本
+                            const currentDualSync = window.touchControls.toggleFullscreen;
+                            
+                            // 創建 Safari 增強的雙重同步版本
+                            window.touchControls.toggleFullscreen = async function() {
+                                console.log('🍎🎯 執行 Safari 增強的雙重全螢幕同步切換');
+                                
+                                try {
+                                    const isCurrentlyFullscreen = safariStateCheck ? safariStateCheck() : !!document.fullscreenElement;
+                                    const isInIframe = window !== window.parent;
+                                    
+                                    if (!isCurrentlyFullscreen) {
+                                        console.log('📱 進入 Safari 增強雙重全螢幕模式');
+                                        
+                                        // 1. 觸發 Safari 增強的座標同步版本
+                                        await safariEnhancedCoordinateSync.call(this);
+                                        
+                                        // 2. 如果在 iframe 中，通知父頁面觸發 CSS 強制全螢幕
+                                        if (isInIframe) {
+                                            console.log('📤 通知父頁面觸發 CSS 強制全螢幕');
+                                            window.parent.postMessage({
+                                                type: 'DUAL_FULLSCREEN_REQUEST',
+                                                action: 'ENTER_CSS_FULLSCREEN',
+                                                timestamp: Date.now()
+                                            }, '*');
+                                        }
+                                        
+                                        // 3. 等待父頁面響應
+                                        await new Promise(resolve => setTimeout(resolve, 200));
+                                        
+                                        console.log('✅ Safari 增強雙重全螢幕（原生 + CSS）已啟用');
+                                        
+                                    } else {
+                                        console.log('📱 退出 Safari 增強雙重全螢幕模式');
+                                        
+                                        // 1. 如果在 iframe 中，通知父頁面退出 CSS 強制全螢幕
+                                        if (isInIframe) {
+                                            console.log('📤 通知父頁面退出 CSS 強制全螢幕');
+                                            window.parent.postMessage({
+                                                type: 'DUAL_FULLSCREEN_REQUEST',
+                                                action: 'EXIT_CSS_FULLSCREEN',
+                                                timestamp: Date.now()
+                                            }, '*');
+                                        }
+                                        
+                                        // 2. 觸發 Safari 增強的座標同步退出
+                                        await safariEnhancedCoordinateSync.call(this);
+                                        
+                                        console.log('✅ Safari 增強雙重全螢幕已退出');
+                                    }
+                                    
+                                } catch (error) {
+                                    console.log('❌ Safari 增強雙重全螢幕同步失敗:', error);
+                                    
+                                    // 回退到 Safari 增強座標同步版本
+                                    console.log('🔄 回退到 Safari 增強座標同步版本');
+                                    safariEnhancedCoordinateSync.call(this);
+                                }
+                            };
+                            
+                            console.log('✅ 雙重同步已升級為 Safari 增強版本');
+                            
+                        } else {
+                            console.log('🔧 直接升級為 Safari 增強座標同步版本');
+                            
+                            // 直接替換為 Safari 增強版本
+                            window.touchControls.toggleFullscreen = safariEnhancedCoordinateSync;
+                        }
+                    }
+                    
+                    // 添加測試函數
+                    window.testSafariIntegrationFix = function() {
+                        console.log('🧪 測試 Safari 整合修復');
+                        
+                        const status = {
+                            hasTouchControls: !!window.touchControls,
+                            hasToggleFullscreen: !!(window.touchControls && window.touchControls.toggleFullscreen),
+                            hasSafariSupport: !!window.requestFullscreenCrossBrowser,
+                            hasCoordinateSync: !!(window.touchControls && window.touchControls.recalculateCoordinates),
+                            integrationFixed: true,
+                            currentFunction: window.touchControls ? window.touchControls.toggleFullscreen.toString().substring(0, 100) + '...' : 'N/A'
+                        };
+                        
+                        console.log('🍎 Safari 整合修復狀態:', status);
+                        return status;
+                    };
+                    
+                    console.log('✅ Safari 整合順序修復完成');
+                    console.log('🎯 修復內容：');
+                    console.log('   ✅ 創建 Safari 增強的座標同步版本');
+                    console.log('   ✅ 雙重同步現在使用 Safari 增強版本');
+                    console.log('   ✅ 跨瀏覽器 API 正確整合');
+                    console.log('   ✅ 錯誤處理和回退機制完善');
+                });
+            }
+            
+            // 頁面載入完成後修復整合順序
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', fixSafariIntegrationOrder);
+            } else {
+                // 延遲執行確保所有功能都已載入
+                setTimeout(fixSafariIntegrationOrder, 1000);
+            }
+        </script>
+        <!-- Safari 整合順序修復結束 -->
+        <!-- 🔧 PostMessage 通信修復 - POSTMESSAGE_COMMUNICATION_FIXED -->
+        <script>
+            console.log('🔧 載入 PostMessage 通信修復');
+            
+            // 強化的 PostMessage 通信修復系統
+            function initPostMessageCommFix() {
+                console.log('🚀 初始化 PostMessage 通信修復系統');
+                
+                // 通信狀態管理
+                window.postMessageCommStatus = {
+                    initialized: false,
+                    parentListenerActive: false,
+                    communicationWorking: false,
+                    lastTestTime: null,
+                    retryCount: 0,
+                    maxRetries: 10,
+                    testResults: []
+                };
+                
+                // 強化的父頁面監聽器設置
+                window.setupParentListener = function() {
+                    console.log('📡 設置強化的父頁面監聽器');
+                    
+                    try {
+                        // 檢查是否在 iframe 中
+                        const isInIframe = window !== window.parent;
+                        
+                        if (!isInIframe) {
+                            console.log('⚠️ 不在 iframe 中，跳過父頁面監聽器設置');
+                            return false;
+                        }
+                        
+                        // 嘗試通知父頁面設置監聽器
+                        const setupMessage = {
+                            type: 'SETUP_PARENT_LISTENER',
+                            timestamp: Date.now(),
+                            userAgent: navigator.userAgent,
+                            location: window.location.href
+                        };
+                        
+                        console.log('📤 發送父頁面監聽器設置請求:', setupMessage);
+                        window.parent.postMessage(setupMessage, '*');
+                        
+                        // 等待父頁面響應
+                        return new Promise((resolve) => {
+                            const timeout = setTimeout(() => {
+                                console.log('⏰ 父頁面監聽器設置超時');
+                                resolve(false);
+                            }, 3000);
+                            
+                            const responseHandler = (event) => {
+                                if (event.data && event.data.type === 'PARENT_LISTENER_READY') {
+                                    console.log('✅ 父頁面監聽器已就緒');
+                                    clearTimeout(timeout);
+                                    window.removeEventListener('message', responseHandler);
+                                    window.postMessageCommStatus.parentListenerActive = true;
+                                    resolve(true);
+                                }
+                            };
+                            
+                            window.addEventListener('message', responseHandler);
+                        });
+                        
+                    } catch (error) {
+                        console.log('❌ 設置父頁面監聽器失敗:', error);
+                        return false;
+                    }
+                };
+                
+                // 強化的通信測試
+                window.testPostMessageCommEnhanced = async function() {
+                    console.log('🧪 執行強化的 PostMessage 通信測試');
+                    
+                    const testId = 'test_' + Date.now();
+                    const testResult = {
+                        testId: testId,
+                        timestamp: Date.now(),
+                        success: false,
+                        error: null,
+                        responseTime: null,
+                        retryCount: window.postMessageCommStatus.retryCount
+                    };
+                    
+                    try {
+                        const isInIframe = window !== window.parent;
+                        
+                        if (!isInIframe) {
+                            testResult.error = 'NOT_IN_IFRAME';
+                            console.log('⚠️ 不在 iframe 環境中');
+                            return testResult;
+                        }
+                        
+                        // 發送測試消息
+                        const testMessage = {
+                            type: 'COMMUNICATION_TEST',
+                            testId: testId,
+                            timestamp: Date.now(),
+                            userAgent: navigator.userAgent,
+                            isMobile: /Mobi|Android/i.test(navigator.userAgent),
+                            isSafari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
+                            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
+                        };
+                        
+                        console.log('📤 發送強化測試消息:', testMessage);
+                        
+                        const startTime = Date.now();
+                        window.parent.postMessage(testMessage, '*');
+                        
+                        // 等待響應
+                        const response = await new Promise((resolve, reject) => {
+                            const timeout = setTimeout(() => {
+                                reject(new Error('COMMUNICATION_TIMEOUT'));
+                            }, 5000);
+                            
+                            const responseHandler = (event) => {
+                                if (event.data && 
+                                    event.data.type === 'COMMUNICATION_TEST_RESPONSE' && 
+                                    event.data.testId === testId) {
+                                    
+                                    clearTimeout(timeout);
+                                    window.removeEventListener('message', responseHandler);
+                                    resolve(event.data);
+                                }
+                            };
+                            
+                            window.addEventListener('message', responseHandler);
+                        });
+                        
+                        testResult.success = true;
+                        testResult.responseTime = Date.now() - startTime;
+                        window.postMessageCommStatus.communicationWorking = true;
+                        
+                        console.log('✅ 強化通信測試成功:', response);
+                        console.log('⏱️ 響應時間:', testResult.responseTime + 'ms');
+                        
+                    } catch (error) {
+                        testResult.error = error.message;
+                        console.log('❌ 強化通信測試失敗:', error);
+                    }
+                    
+                    window.postMessageCommStatus.testResults.push(testResult);
+                    window.postMessageCommStatus.lastTestTime = Date.now();
+                    
+                    return testResult;
+                };
+                
+                // 自動重試通信建立
+                window.autoRetryCommSetup = async function() {
+                    console.log('🔄 自動重試通信建立');
+                    
+                    while (window.postMessageCommStatus.retryCount < window.postMessageCommStatus.maxRetries) {
+                        console.log(`🔄 重試 ${window.postMessageCommStatus.retryCount + 1}/${window.postMessageCommStatus.maxRetries}`);
+                        
+                        // 1. 設置父頁面監聽器
+                        const listenerSetup = await window.setupParentListener();
+                        
+                        if (listenerSetup) {
+                            // 2. 測試通信
+                            const testResult = await window.testPostMessageCommEnhanced();
+                            
+                            if (testResult.success) {
+                                console.log('✅ 通信建立成功！');
+                                return true;
+                            }
+                        }
+                        
+                        window.postMessageCommStatus.retryCount++;
+                        
+                        // 等待後重試
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    }
+                    
+                    console.log('❌ 通信建立失敗，已達最大重試次數');
+                    return false;
+                };
+                
+                // 強化的全螢幕請求（使用修復後的通信）
+                window.requestFullscreenWithCommFix = async function() {
+                    console.log('🍎 使用修復後的通信請求全螢幕');
+
+                    try {
+                        // 確保通信正常
+                        if (!window.postMessageCommStatus.communicationWorking) {
+                            console.log('🔄 通信未建立，嘗試自動修復');
+                            const commFixed = await window.autoRetryCommSetup();
+
+                            if (!commFixed) {
+                                console.log('❌ 通信修復失敗，使用本地全螢幕');
+                                // 回退到本地全螢幕
+                                if (window.touchControls && window.touchControls.toggleFullscreen) {
+                                    window.touchControls.toggleFullscreen();
+                                }
+                                return;
+                            }
+                        }
+
+                        // 發送全螢幕請求
+                        const fullscreenMessage = {
+                            type: 'DUAL_FULLSCREEN_REQUEST',
+                            action: 'ENTER_CSS_FULLSCREEN',
+                            timestamp: Date.now(),
+                            enhanced: true,
+                            userAgent: navigator.userAgent
+                        };
+
+                        console.log('📤 發送強化全螢幕請求:', fullscreenMessage);
+                        window.parent.postMessage(fullscreenMessage, '*');
+
+                        // 同時觸發本地全螢幕
+                        if (window.touchControls && window.touchControls.toggleFullscreen) {
+                            // 使用 Safari 增強版本
+                            window.touchControls.toggleFullscreen();
+                        }
+
+                        console.log('✅ 強化全螢幕請求已發送');
+
+                    } catch (error) {
+                        console.log('❌ 強化全螢幕請求失敗:', error);
+
+                        // 回退到本地全螢幕
+                        if (window.touchControls && window.touchControls.toggleFullscreen) {
+                            window.touchControls.toggleFullscreen();
+                        }
+                    }
+                };
+
+                // 🔧 修復遊戲內全螢幕按鈕連接
+                function fixGameFullscreenButton() {
+                    console.log('🔧 修復遊戲內全螢幕按鈕連接');
+
+                    // 等待 TouchControls 載入
+                    const waitForTouchControls = () => {
+                        return new Promise((resolve) => {
+                            const check = () => {
+                                if (window.touchControls && window.touchControls.toggleFullscreen) {
+                                    resolve();
+                                } else {
+                                    setTimeout(check, 100);
+                                }
+                            };
+                            check();
+                        });
+                    };
+
+                    waitForTouchControls().then(() => {
+                        console.log('🎯 開始修復遊戲內全螢幕按鈕');
+
+                        // 保存原始的 toggleFullscreen 方法
+                        const originalToggleFullscreen = window.touchControls.toggleFullscreen;
+
+                        // 替換為使用修復後通信的版本
+                        window.touchControls.toggleFullscreen = async function() {
+                            console.log('🎮 遊戲內全螢幕按鈕被點擊 - 使用修復後的通信');
+
+                            try {
+                                // 檢查是否在 iframe 中
+                                const isInIframe = window !== window.parent;
+
+                                if (isInIframe) {
+                                    console.log('📱 在 iframe 中，使用修復後的 PostMessage 通信');
+
+                                    // 使用修復後的通信系統
+                                    await window.requestFullscreenWithCommFix();
+
+                                } else {
+                                    console.log('🖥️ 不在 iframe 中，使用原始全螢幕方法');
+
+                                    // 直接使用原始方法
+                                    await originalToggleFullscreen.call(this);
+                                }
+
+                            } catch (error) {
+                                console.log('❌ 修復後的全螢幕切換失敗:', error);
+
+                                // 回退到原始方法
+                                try {
+                                    await originalToggleFullscreen.call(this);
+                                } catch (fallbackError) {
+                                    console.log('❌ 原始全螢幕方法也失敗:', fallbackError);
+                                }
+                            }
+                        };
+
+                        console.log('✅ 遊戲內全螢幕按鈕修復完成');
+                        console.log('🎯 現在點擊遊戲內的 ⛶ 按鈕應該會使用修復後的 PostMessage 通信');
+                    });
+                }
+
+                // 執行修復
+                setTimeout(() => {
+                    fixGameFullscreenButton();
+                }, 2000);
+                
+                // 通信狀態監控
+                window.monitorCommStatus = function() {
+                    console.log('📊 PostMessage 通信狀態監控');
+                    
+                    const status = {
+                        ...window.postMessageCommStatus,
+                        currentTime: Date.now(),
+                        environment: {
+                            isInIframe: window !== window.parent,
+                            userAgent: navigator.userAgent,
+                            isMobile: /Mobi|Android/i.test(navigator.userAgent),
+                            isSafari: /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent),
+                            isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent)
+                        }
+                    };
+                    
+                    console.log('📊 通信狀態:', status);
+                    return status;
+                };
+                
+                // 初始化完成
+                window.postMessageCommStatus.initialized = true;
+                console.log('✅ PostMessage 通信修復系統初始化完成');
+                
+                // 自動嘗試建立通信
+                setTimeout(() => {
+                    console.log('🚀 自動嘗試建立 PostMessage 通信');
+                    window.autoRetryCommSetup();
+                }, 1000);
+            }
+            
+            // 頁面載入完成後初始化
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initPostMessageCommFix);
+            } else {
+                setTimeout(initPostMessageCommFix, 500);
+            }
+        </script>
+        <!-- PostMessage 通信修復結束 -->
+        <!-- 🔧 強制遊戲全螢幕按鈕修復 - FORCE_GAME_FULLSCREEN_FIX -->
+        <script>
+            console.log('🔧 載入強制遊戲全螢幕按鈕修復');
+            
+            // 強制修復遊戲內全螢幕按鈕
+            function forceFixGameFullscreenButton() {
+                console.log('🎮 開始強制修復遊戲內全螢幕按鈕');
+                
+                // 方法1：直接替換按鈕事件
+                function replaceButtonEvents() {
+                    console.log('🔧 方法1：直接替換按鈕事件');
+                    
+                    const fullscreenBtn = document.getElementById('fullscreen-btn');
+                    if (fullscreenBtn) {
+                        console.log('✅ 找到全螢幕按鈕，移除舊事件');
+                        
+                        // 移除所有現有事件監聽器
+                        const newBtn = fullscreenBtn.cloneNode(true);
+                        fullscreenBtn.parentNode.replaceChild(newBtn, fullscreenBtn);
+                        
+                        // 添加新的事件監聽器
+                        newBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('🎮 遊戲內全螢幕按鈕被點擊 - 強制修復版本');
+                            handleGameFullscreen();
+                        });
+                        
+                        newBtn.addEventListener('touchend', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('📱 遊戲內全螢幕按鈕被觸摸 - 強制修復版本');
+                            handleGameFullscreen();
+                        });
+                        
+                        console.log('✅ 全螢幕按鈕事件已替換');
+                        return true;
+                    } else {
+                        console.log('❌ 未找到全螢幕按鈕');
+                        return false;
+                    }
+                }
+                
+                // 方法2：替換 TouchControls 的 toggleFullscreen 方法
+                function replaceTouchControlsMethod() {
+                    console.log('🔧 方法2：替換 TouchControls 方法');
+                    
+                    if (window.touchControls && window.touchControls.toggleFullscreen) {
+                        console.log('✅ 找到 TouchControls，替換 toggleFullscreen 方法');
+                        
+                        // 保存原始方法
+                        const originalMethod = window.touchControls.toggleFullscreen;
+                        
+                        // 替換為強制修復版本
+                        window.touchControls.toggleFullscreen = function() {
+                            console.log('🎮 TouchControls.toggleFullscreen 被調用 - 強制修復版本');
+                            handleGameFullscreen();
+                        };
+                        
+                        console.log('✅ TouchControls.toggleFullscreen 已替換');
+                        return true;
+                    } else {
+                        console.log('❌ 未找到 TouchControls 或 toggleFullscreen 方法');
+                        return false;
+                    }
+                }
+                
+                // 處理遊戲全螢幕的核心函數
+                async function handleGameFullscreen() {
+                    console.log('🚀 執行遊戲全螢幕處理 - 強制修復版本');
+                    
+                    try {
+                        // 檢查環境
+                        const isInIframe = window !== window.parent;
+                        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+                        const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+                        
+                        console.log('🔍 環境檢測:', {
+                            isInIframe: isInIframe,
+                            isMobile: isMobile,
+                            isSafari: isSafari
+                        });
+                        
+                        if (isInIframe) {
+                            console.log('📱 在 iframe 中，使用 PostMessage 通信');
+                            
+                            // 檢查 PostMessage 通信修復是否可用
+                            if (window.requestFullscreenWithCommFix) {
+                                console.log('✅ 使用修復後的 PostMessage 通信');
+                                await window.requestFullscreenWithCommFix();
+                            } else {
+                                console.log('⚠️ PostMessage 修復不可用，使用直接通信');
+                                
+                                // 直接發送 PostMessage
+                                const fullscreenMessage = {
+                                    type: 'DUAL_FULLSCREEN_REQUEST',
+                                    action: 'ENTER_CSS_FULLSCREEN',
+                                    timestamp: Date.now(),
+                                    source: 'FORCE_FIX',
+                                    userAgent: navigator.userAgent
+                                };
+                                
+                                console.log('📤 發送直接全螢幕請求:', fullscreenMessage);
+                                window.parent.postMessage(fullscreenMessage, '*');
+                            }
+                            
+                            // 同時嘗試本地全螢幕
+                            await attemptLocalFullscreen();
+                            
+                        } else {
+                            console.log('🖥️ 不在 iframe 中，使用本地全螢幕');
+                            await attemptLocalFullscreen();
+                        }
+                        
+                    } catch (error) {
+                        console.log('❌ 遊戲全螢幕處理失敗:', error);
+                        
+                        // 最後的回退方案
+                        console.log('🔄 嘗試最後的回退方案');
+                        await attemptLocalFullscreen();
+                    }
+                }
+                
+                // 嘗試本地全螢幕
+                async function attemptLocalFullscreen() {
+                    console.log('🔧 嘗試本地全螢幕');
+                    
+                    try {
+                        const element = document.documentElement;
+                        
+                        // Safari 支援
+                        if (element.webkitRequestFullscreen) {
+                            console.log('🍎 使用 Safari webkitRequestFullscreen');
+                            await element.webkitRequestFullscreen();
+                        }
+                        // 標準 API
+                        else if (element.requestFullscreen) {
+                            console.log('🌐 使用標準 requestFullscreen');
+                            await element.requestFullscreen();
+                        }
+                        // 其他瀏覽器
+                        else if (element.mozRequestFullScreen) {
+                            console.log('🦊 使用 Firefox mozRequestFullScreen');
+                            await element.mozRequestFullScreen();
+                        }
+                        else if (element.msRequestFullscreen) {
+                            console.log('🔷 使用 IE msRequestFullscreen');
+                            await element.msRequestFullscreen();
+                        }
+                        else {
+                            console.log('❌ 瀏覽器不支援全螢幕 API');
+                        }
+                        
+                        console.log('✅ 本地全螢幕請求已發送');
+                        
+                    } catch (error) {
+                        console.log('❌ 本地全螢幕失敗:', error);
+                    }
+                }
+                
+                // 執行修復
+                console.log('🚀 開始執行強制修復');
+                
+                // 嘗試方法1：替換按鈕事件
+                const method1Success = replaceButtonEvents();
+                
+                // 嘗試方法2：替換 TouchControls 方法
+                const method2Success = replaceTouchControlsMethod();
+                
+                if (method1Success || method2Success) {
+                    console.log('✅ 強制修復成功');
+                    console.log('🎯 現在點擊遊戲內的 ⛶ 按鈕應該會有反應');
+                } else {
+                    console.log('❌ 強制修復失敗，未找到目標元素或方法');
+                }
+                
+                // 添加全局測試函數
+                window.testGameFullscreenFix = function() {
+                    console.log('🧪 測試遊戲全螢幕修復');
+                    handleGameFullscreen();
+                };
+                
+                console.log('🧪 添加了測試函數：window.testGameFullscreenFix()');
+            }
+            
+            // 等待頁面載入完成後執行修復
+            function waitAndFix() {
+                if (document.readyState === 'complete') {
+                    // 延遲執行，確保所有腳本都載入完成
+                    setTimeout(() => {
+                        forceFixGameFullscreenButton();
+                    }, 3000);
+                } else {
+                    window.addEventListener('load', () => {
+                        setTimeout(() => {
+                            forceFixGameFullscreenButton();
+                        }, 3000);
+                    });
+                }
+            }
+            
+            // 立即開始等待和修復
+            waitAndFix();
+            
+            // 也可以手動觸發修復
+            window.forceFixGameFullscreen = forceFixGameFullscreenButton;
+            
+            console.log('✅ 強制遊戲全螢幕按鈕修復已載入');
+        </script>
+        <!-- 強制遊戲全螢幕按鈕修復結束 -->
+        
+        
+        
+        <!-- 座標同步解決方案結束 -->
+    </body>
+</html>

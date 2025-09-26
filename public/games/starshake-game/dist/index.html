@@ -650,15 +650,9 @@
                     }
                 };
                 
-                // 監聽全螢幕狀態變化
-                document.addEventListener('fullscreenchange', () => {
-                    console.log('🔄 全螢幕狀態變化，重新計算座標');
-                    setTimeout(() => {
-                        if (window.touchControls && window.touchControls.recalculateCoordinates) {
-                            window.touchControls.recalculateCoordinates();
-                        }
-                    }, 200);
-                });
+                // 移除 fullscreenchange 監聽器以防止無限循環
+                // 原因：fullscreenchange 事件會觸發座標重新計算，可能間接觸發新的全螢幕請求
+                console.log('🚫 已移除 fullscreenchange 事件監聽器，防止無限循環');
                 
                 // 監聽 resize 事件
                 window.addEventListener('resize', () => {
@@ -2199,43 +2193,53 @@
                     }
                 }
                 
+                // 防重複點擊機制
+                let lastClickTime = 0;
+
                 // 處理遊戲全螢幕的核心函數
                 async function handleGameFullscreen() {
-                    console.log('🚀 執行遊戲全螢幕處理 - 強制修復版本');
-                    
+                    console.log('🚀 執行遊戲全螢幕處理 - 防循環版本');
+
+                    // 防重複點擊
+                    const now = Date.now();
+                    if (now - lastClickTime < 1000) {
+                        console.log('⚠️ 防重複：忽略1秒內的重複點擊');
+                        return;
+                    }
+                    lastClickTime = now;
+
                     try {
                         // 檢查環境
                         const isInIframe = window !== window.parent;
-                        const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-                        const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
-                        
+
                         console.log('🔍 環境檢測:', {
                             isInIframe: isInIframe,
-                            isMobile: isMobile,
-                            isSafari: isSafari
+                            timestamp: now
                         });
-                        
+
                         if (isInIframe) {
-                            console.log('📱 在 iframe 中，使用 PostMessage 通信');
-                            
-                            // 檢查 PostMessage 通信修復是否可用
-                            if (window.requestFullscreenWithCommFix) {
-                                console.log('✅ 使用修復後的 PostMessage 通信');
-                                await window.requestFullscreenWithCommFix();
-                            } else {
-                                console.log('⚠️ PostMessage 修復不可用，使用直接通信');
-                                
-                                // 直接發送 PostMessage
-                                const fullscreenMessage = {
-                                    type: 'DUAL_FULLSCREEN_REQUEST',
-                                    action: 'ENTER_CSS_FULLSCREEN',
-                                    timestamp: Date.now(),
-                                    source: 'FORCE_FIX',
-                                    userAgent: navigator.userAgent
-                                };
-                                
-                                console.log('📤 發送直接全螢幕請求:', fullscreenMessage);
-                                window.parent.postMessage(fullscreenMessage, '*');
+                            console.log('📱 在 iframe 中，發送簡單切換請求');
+
+                            // 發送簡單的切換請求，讓父頁面決定進入還是退出
+                            const fullscreenMessage = {
+                                type: 'DUAL_FULLSCREEN_REQUEST',
+                                timestamp: now,
+                                source: 'GAME_BUTTON',
+                                requestId: 'game_' + now
+                            };
+
+                            console.log('📤 發送全螢幕切換請求:', fullscreenMessage);
+                            window.parent.postMessage(fullscreenMessage, '*');
+
+                            // 視覺反饋
+                            const fullscreenBtn = document.querySelector('.fullscreen-btn') ||
+                                                document.querySelector('[onclick*="fullscreen"]') ||
+                                                document.querySelector('button[title*="全螢幕"]');
+                            if (fullscreenBtn) {
+                                fullscreenBtn.style.background = 'rgba(0, 255, 0, 0.4)';
+                                setTimeout(() => {
+                                    fullscreenBtn.style.background = '';
+                                }, 300);
                             }
                             
                             // 同時嘗試本地全螢幕
