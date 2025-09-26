@@ -345,6 +345,10 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const [mounted, setMounted] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
+  // 全螢幕狀態管理
+  const [isGameFullscreen, setIsGameFullscreen] = useState<boolean>(false);
+  const [isProcessingFullscreen, setIsProcessingFullscreen] = useState<boolean>(false);
+
   // Refs
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -661,66 +665,145 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
+
+  // 進入CSS全螢幕函數
+  const enterCSSFullscreen = useCallback(() => {
+    console.log('🚀 執行進入CSS全螢幕');
+
+    const gameContainer = document.querySelector('.game-container') as HTMLElement;
+    const iframe = iframeRef.current;
+
+    if (gameContainer && iframe) {
+      // 隱藏其他元素
+      const siblings = Array.from(gameContainer.parentElement?.children || []);
+      siblings.forEach((sibling) => {
+        if (sibling !== gameContainer) {
+          (sibling as HTMLElement).style.display = 'none';
+        }
+      });
+
+      // 設置容器全螢幕
+      gameContainer.style.position = 'fixed';
+      gameContainer.style.top = '0';
+      gameContainer.style.left = '0';
+      gameContainer.style.width = '100vw';
+      gameContainer.style.height = '100vh';
+      gameContainer.style.zIndex = '9999';
+      gameContainer.style.backgroundColor = '#000';
+
+      // 設置 iframe 全螢幕
+      iframe.style.position = 'absolute';
+      iframe.style.top = '-80px'; // 向上移動給搖桿留空間
+      iframe.style.left = '0';
+      iframe.style.width = '100vw';
+      iframe.style.height = 'calc(100vh + 80px)';
+      iframe.style.border = 'none';
+      iframe.style.borderRadius = '0';
+
+      // 隱藏地址欄
+      window.scrollTo(0, 1);
+      setTimeout(() => window.scrollTo(0, 1), 100);
+
+      setIsGameFullscreen(true);
+      console.log('✅ 進入CSS全螢幕完成');
+    } else {
+      console.log('❌ 找不到必要的 DOM 元素');
+    }
+  }, []);
+
+  // 退出CSS全螢幕函數
+  const exitCSSFullscreen = useCallback(() => {
+    console.log('🔄 執行退出CSS全螢幕');
+
+    const gameContainer = document.querySelector('.game-container') as HTMLElement;
+    const iframe = iframeRef.current;
+
+    if (gameContainer && iframe) {
+      // 恢復其他元素
+      const siblings = Array.from(gameContainer.parentElement?.children || []);
+      siblings.forEach((sibling) => {
+        (sibling as HTMLElement).style.display = '';
+      });
+
+      // 恢復容器樣式
+      gameContainer.style.position = '';
+      gameContainer.style.top = '';
+      gameContainer.style.left = '';
+      gameContainer.style.width = '';
+      gameContainer.style.height = '';
+      gameContainer.style.zIndex = '';
+      gameContainer.style.backgroundColor = '';
+
+      // 恢復 iframe 樣式
+      iframe.style.position = '';
+      iframe.style.top = '';
+      iframe.style.left = '';
+      iframe.style.width = '';
+      iframe.style.height = '';
+      iframe.style.border = '';
+      iframe.style.borderRadius = '';
+
+      setIsGameFullscreen(false);
+      console.log('✅ 退出CSS全螢幕完成');
+    } else {
+      console.log('❌ 找不到必要的 DOM 元素');
+    }
+  }, []);
+
   // 🎯 雙重全螢幕同步監聽器 - DUAL_FULLSCREEN_LISTENER
   useEffect(() => {
     const handleDualFullscreenMessage = async (event: MessageEvent) => {
       if (event.data.type === 'DUAL_FULLSCREEN_REQUEST') {
-        console.log('📥 收到遊戲內雙重全螢幕請求:', event.data);
-        
+        console.log('📥 收到遊戲內全螢幕切換請求:', event.data);
+
+        // 防重複處理
+        if (isProcessingFullscreen) {
+          console.log('⚠️ 正在處理全螢幕請求，忽略重複請求');
+          return;
+        }
+
+        setIsProcessingFullscreen(true);
+
         try {
-          switch (event.data.action) {
-            case 'ENTER_CSS_FULLSCREEN':
-              console.log('🔒 啟用父頁面 CSS 強制全螢幕');
-              
-              // 確保樣式存在
-              ensureLockedFullscreenStyles();
-              
-              // 添加鎖定樣式
-              document.body.classList.add('locked-fullscreen');
-              
-              // 啟用事件鎖定
-              enableFullscreenLock();
-              
-              // 響應遊戲
-              event.source?.postMessage({
+          // 簡單切換：根據當前狀態決定動作
+          setTimeout(() => {
+            if (isGameFullscreen) {
+              console.log('🔄 當前全螢幕，執行退出');
+              exitCSSFullscreen();
+            } else {
+              console.log('📱 當前非全螢幕，執行進入');
+              enterCSSFullscreen();
+            }
+
+            // 響應遊戲
+            if (event.source) {
+              (event.source as Window).postMessage({
                 type: 'DUAL_FULLSCREEN_RESPONSE',
-                action: 'CSS_FULLSCREEN_ENABLED',
+                action: isGameFullscreen ? 'CSS_FULLSCREEN_DISABLED' : 'CSS_FULLSCREEN_ENABLED',
                 timestamp: Date.now()
-              }, '*');
-              
-              console.log('✅ 父頁面 CSS 強制全螢幕已啟用');
-              break;
-              
-            case 'EXIT_CSS_FULLSCREEN':
-              console.log('🔓 停用父頁面 CSS 強制全螢幕');
-              
-              // 移除鎖定樣式
-              document.body.classList.remove('locked-fullscreen');
-              
-              // 停用事件鎖定
-              disableFullscreenLock();
-              
-              // 響應遊戲
-              event.source?.postMessage({
-                type: 'DUAL_FULLSCREEN_RESPONSE',
-                action: 'CSS_FULLSCREEN_DISABLED',
-                timestamp: Date.now()
-              }, '*');
-              
-              console.log('✅ 父頁面 CSS 強制全螢幕已停用');
-              break;
-          }
-          
+              }, '*' as any);
+            }
+
+            // 1秒後解除處理鎖
+            setTimeout(() => {
+              setIsProcessingFullscreen(false);
+            }, 1000);
+          }, 100);
+
         } catch (error) {
-          console.log('❌ 處理雙重全螢幕請求失敗:', error);
-          
+          console.log('❌ 處理全螢幕請求失敗:', error);
+
           // 響應錯誤
-          event.source?.postMessage({
-            type: 'DUAL_FULLSCREEN_RESPONSE',
-            action: 'CSS_FULLSCREEN_ERROR',
-            error: error.message,
-            timestamp: Date.now()
-          }, '*');
+          if (event.source) {
+            (event.source as Window).postMessage({
+              type: 'DUAL_FULLSCREEN_RESPONSE',
+              action: 'CSS_FULLSCREEN_ERROR',
+              error: error instanceof Error ? error.message : 'Unknown error',
+              timestamp: Date.now()
+            }, '*' as any);
+          }
+
+          setIsProcessingFullscreen(false);
         }
       }
     };
@@ -732,7 +815,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     return () => {
       window.removeEventListener('message', handleDualFullscreenMessage);
     };
-  }, []);
+  }, [isGameFullscreen, isProcessingFullscreen]);
   // 雙重全螢幕同步監聽器結束
 
 
@@ -884,9 +967,6 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   }, [currentGame]);
 
   // iframe 消息處理
-
-
-
   const handleIframeMessage = useCallback((event: MessageEvent) => {
     if (!currentGame) return;
 
