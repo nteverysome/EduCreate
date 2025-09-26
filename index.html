@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduCreate - 測試頁面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .test-link {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin: 10px;
+        }
+        
+        .test-link:hover {
+            background: #45a049;
+        }
+        
+        .status {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 EduCreate 測試中心</h1>
+        <p>歡迎來到 EduCreate 測試頁面！這裡提供各種測試工具來驗證功能。</p>
+        
+        <a href="./mobile-postmessage-test-root.html" class="test-link">
+            📱 手機全螢幕測試
+        </a>
+        
+        <a href="./public/mobile-postmessage-test.html" class="test-link">
+            🔧 原始測試工具
+        </a>
+        
+        <div class="status">
+            <h3>🔧 最新修復</h3>
+            <p><strong>無限循環問題已修復！</strong></p>
+            <p>✅ 移除 fullscreenchange 事件監聽器</p>
+            <p>✅ 簡化全螢幕切換邏輯</p>
+            <p>✅ 純 CSS 全螢幕實現</p>
+            <p>✅ 防重複點擊機制</p>
+        </div>
+        
+        <div class="status">
+            <h3>📱 測試指導</h3>
+            <p>1. 點擊上方的「手機全螢幕測試」連結</p>
+            <p>2. 等待遊戲載入完成（約3-5秒）</p>
+            <p>3. 點擊遊戲內的 ⛶ 按鈕</p>
+            <p>4. 驗證全螢幕功能是否正常</p>
+        </div>
+    </div>
+</body>
+</html>
