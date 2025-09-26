@@ -674,6 +674,24 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     const iframe = iframeRef.current;
 
     if (gameContainer && iframe) {
+      // 隱藏上面的控制按鈕區域
+      const gameHeader = document.querySelector('[data-testid="game-header"]') as HTMLElement;
+      const geptSelector = document.querySelector('[data-testid="gept-selector"]') as HTMLElement;
+      const gameSwitcherDropdown = document.querySelector('.game-switcher-dropdown') as HTMLElement;
+
+      if (gameHeader) {
+        gameHeader.style.display = 'none';
+        console.log('🙈 隱藏遊戲標頭');
+      }
+      if (geptSelector) {
+        geptSelector.style.display = 'none';
+        console.log('🙈 隱藏GEPT選擇器');
+      }
+      if (gameSwitcherDropdown) {
+        gameSwitcherDropdown.style.display = 'none';
+        console.log('🙈 隱藏切換遊戲下拉選單');
+      }
+
       // 隱藏其他元素
       const siblings = Array.from(gameContainer.parentElement?.children || []);
       siblings.forEach((sibling) => {
@@ -691,22 +709,22 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       gameContainer.style.zIndex = '9999';
       gameContainer.style.backgroundColor = '#000';
 
-      // 設置 iframe 全螢幕
+      // 設置 iframe 全螢幕 - 向下移動給上方留空間
       iframe.style.position = 'absolute';
-      iframe.style.top = '-80px'; // 向上移動給搖桿留空間
+      iframe.style.top = '60px'; // 向下移動60px，給上方留空間
       iframe.style.left = '0';
       iframe.style.width = '100vw';
-      iframe.style.height = 'calc(100vh + 80px)';
+      iframe.style.height = 'calc(100vh - 60px)'; // 高度減少60px
       iframe.style.border = 'none';
       iframe.style.borderRadius = '0';
-      iframe.style.transform = 'translateY(-80px)'; // fc294ae 版本的關鍵修復
+      iframe.style.transform = ''; // 移除transform，使用top定位
 
       // 隱藏地址欄
       window.scrollTo(0, 1);
       setTimeout(() => window.scrollTo(0, 1), 100);
 
       setIsGameFullscreen(true);
-      console.log('✅ 進入CSS全螢幕完成');
+      console.log('✅ 進入CSS全螢幕完成 - 遊戲向下移動60px');
     } else {
       console.log('❌ 找不到必要的 DOM 元素');
     }
@@ -720,6 +738,24 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     const iframe = iframeRef.current;
 
     if (gameContainer && iframe) {
+      // 恢復上面的控制按鈕區域
+      const gameHeader = document.querySelector('[data-testid="game-header"]') as HTMLElement;
+      const geptSelector = document.querySelector('[data-testid="gept-selector"]') as HTMLElement;
+      const gameSwitcherDropdown = document.querySelector('.game-switcher-dropdown') as HTMLElement;
+
+      if (gameHeader) {
+        gameHeader.style.display = '';
+        console.log('👁️ 恢復遊戲標頭顯示');
+      }
+      if (geptSelector) {
+        geptSelector.style.display = '';
+        console.log('👁️ 恢復GEPT選擇器顯示');
+      }
+      if (gameSwitcherDropdown) {
+        gameSwitcherDropdown.style.display = '';
+        console.log('👁️ 恢復切換遊戲下拉選單顯示');
+      }
+
       // 恢復其他元素
       const siblings = Array.from(gameContainer.parentElement?.children || []);
       siblings.forEach((sibling) => {
@@ -743,10 +779,10 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       iframe.style.height = '';
       iframe.style.border = '';
       iframe.style.borderRadius = '';
-      iframe.style.transform = ''; // 清除 fc294ae 版本的 transform
+      iframe.style.transform = ''; // 清除 transform
 
       setIsGameFullscreen(false);
-      console.log('✅ 退出CSS全螢幕完成');
+      console.log('✅ 退出CSS全螢幕完成 - 所有控制按鈕已恢復');
     } else {
       console.log('❌ 找不到必要的 DOM 元素');
     }
