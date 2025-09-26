@@ -30,6 +30,20 @@
             max-width: 1000px;
             max-height: 800px;
         }
+
+        /* 手機直向模式優化 */
+        @media (max-width: 768px) and (orientation: portrait) {
+            #game-container {
+                /* 在手機直向模式下，為虛擬控制留出更多底部空間 */
+                margin-bottom: 40px;
+                height: calc(100% - 40px);
+            }
+
+            /* 確保遊戲畫面不被虛擬控制遮擋 */
+            body {
+                padding-bottom: 40px;
+            }
+        }
     </style>
   <script type="module" crossorigin src="/games/starshake-game/dist/assets/index-DEhXC0VF.js"></script>
   <link rel="modulepreload" crossorigin href="/games/starshake-game/dist/assets/phaser-CmFXOKba.js">
@@ -45,7 +59,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 200px;
+            height: 240px;  /* 從 200px 增加到 240px，為搖桿下移提供空間 */
             background: transparent;
             display: none;
             z-index: 1000;
@@ -55,7 +69,7 @@
         /* 移動控制區域 */
         .touch-joystick {
             position: absolute;
-            bottom: 20px;
+            bottom: 60px;  /* 從 20px 增加到 60px，讓搖桿往下移動 */
             left: 20px;
             width: 120px;
             height: 120px;
@@ -81,7 +95,7 @@
         /* 射擊按鈕 */
         .touch-shoot-btn {
             position: absolute;
-            bottom: 20px;
+            bottom: 60px;  /* 從 20px 增加到 60px，與搖桿保持一致 */
             right: 20px;
             width: 80px;
             height: 80px;
