@@ -288,6 +288,14 @@
     {
       "source": "/games/math-attack-game/(.*)",
       "destination": "/games/math-attack-game/$1"
+    },
+    {
+      "source": "/mobile-test",
+      "destination": "/mobile-postmessage-test-root.html"
+    },
+    {
+      "source": "/test",
+      "destination": "/public/mobile-postmessage-test.html"
     }
   ]
 }
