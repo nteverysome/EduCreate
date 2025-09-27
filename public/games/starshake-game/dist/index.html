@@ -156,6 +156,62 @@
             pointer-events: all;
             cursor: pointer;
         }
+
+        /* 手機橫向模式優化 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            #game-container {
+                /* 移除尺寸限制，讓遊戲充分利用橫向螢幕空間 */
+                max-width: none !important;
+                max-height: none !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            #app {
+                width: 100vw !important;
+                height: 100vh !important;
+            }
+
+            body {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* 橫向模式下的虛擬控制調整 */
+            #touch-controls {
+                height: 200px; /* 減少高度，避免遮擋過多遊戲內容 */
+            }
+
+            .touch-joystick {
+                bottom: 30px !important; /* 調整位置 */
+                left: 30px !important;
+                width: 100px !important; /* 稍微縮小 */
+                height: 100px !important;
+            }
+
+            .touch-joystick-knob {
+                width: 35px !important;
+                height: 35px !important;
+            }
+
+            .touch-shoot-btn {
+                bottom: 30px !important; /* 調整位置 */
+                right: 30px !important;
+                width: 70px !important; /* 稍微縮小 */
+                height: 70px !important;
+                font-size: 18px !important;
+            }
+
+            .fullscreen-btn {
+                top: 20px !important;
+                right: 20px !important;
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 16px !important;
+            }
+        }
     </style>
 </head>
 
