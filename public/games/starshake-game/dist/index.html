@@ -35,13 +35,26 @@
         @media (max-width: 768px) and (orientation: portrait) {
             #game-container {
                 /* 在手機直向模式下，為虛擬控制留出更多底部空間 */
-                margin-bottom: 40px;
-                height: calc(100% - 40px);
+                margin-bottom: 120px;  /* 增加到120px，為虛擬控制提供更多黑色區域 */
+                height: calc(100% - 120px);
             }
 
             /* 確保遊戲畫面不被虛擬控制遮擋 */
             body {
-                padding-bottom: 40px;
+                padding-bottom: 120px;  /* 增加到120px */
+            }
+
+            /* 手機直向模式下的虛擬控制定位 - 放在黑色區域 */
+            .touch-joystick {
+                bottom: 20px !important;  /* 更靠近底部，放在黑色區域 */
+            }
+
+            .touch-shoot-btn {
+                bottom: 20px !important;  /* 更靠近底部，放在黑色區域 */
+            }
+
+            .fullscreen-btn {
+                bottom: 20px !important;  /* 全螢幕按鈕也調整到黑色區域 */
             }
         }
     </style>
