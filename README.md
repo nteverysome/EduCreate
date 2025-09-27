@@ -47,9 +47,10 @@ EduCreate 是一個基於記憶科學原理的智能教育遊戲平台，專注�
 - **類型**: 太空射擊遊戲 + TouchControls 移動控制
 - **原理**: 觸摸控制 + Phaser 遊戲邏輯完美整合
 - **功能**: 虛擬搖桿、射擊按鈕、全螢幕支援、雙重控制模式
-- **技術**: IIFE 語法包裝、事件監聽器、狀態管理
+- **技術**: IIFE 語法包裝、事件監聽器、狀態管理、PostMessage 通信
 - **狀態**: ✅ **完成並通過移動設備測試**
 - **支援設備**: iPhone、iPad、Android、桌面瀏覽器
+- **文檔**: [全螢幕通信系統指南](docs/PHASER_FULLSCREEN_COMMUNICATION_README.md) 🆕
 
 #### 📱 **TouchControls 技術成就**
 | 指標 | 規格要求 | 實際表現 | 狀態 |
@@ -59,6 +60,7 @@ EduCreate 是一個基於記憶科學原理的智能教育遊戲平台，專注�
 | **觸摸事件** | 正常觸發 | **完全正常** | ✅ **完美** |
 | **雙重控制** | 支援 | **觸摸+鍵盤** | ✅ **完美** |
 | **移動兼容** | 多設備 | **iPhone/iPad/Android** | ✅ **優秀** |
+| **全螢幕通信** | 跨瀏覽器 | **PostMessage 完美** | ✅ **完美** |
 
 #### 🎮 **GameSwitcher 核心特色**
 - **無縫切換**: 支援 AirplaneCollisionGame 的三種版本間流暢切換
@@ -179,6 +181,9 @@ npm run dev
 
 ## 📚 完整文檔系統
 
+### 🚀 **開發參考指南** 🆕 **重點推薦**
+- **[📖 開發參考指南](docs/DEVELOPMENT_REFERENCE_GUIDE.md)** - 團隊開發必備參考文檔，整合所有重要技術資源
+
 ### 🎮 **AirplaneCollisionGame 專用文檔**
 - **[📄 技術文檔](docs/airplane-collision-game-technical-documentation.md)** - 完整的架構設計和技術規格
 - **[📄 API 文檔](docs/airplane-collision-game-api-documentation.md)** - 詳細的 TypeScript API 接口
@@ -196,6 +201,7 @@ npm run dev
 - **[🧪 移動設備測試](tests/starshake-touchcontrols-final-integration-test.spec.js)** - 完整的 Playwright 移動設備測試
 - **[📱 觸摸控制技術](public/games/starshake-game/dist/assets/index-DEhXC0VF.js)** - Phaser 遊戲與 TouchControls 整合代碼
 - **[🔧 整合腳本](integrate-touchcontrols-final.js)** - 安全的 TouchControls 整合工具
+- **[📖 全螢幕通信系統](docs/PHASER_FULLSCREEN_COMMUNICATION_README.md)** - Phaser 遊戲全螢幕按鈕與虛擬搖桿通信完整指南 🆕
 
 ### 🧪 **測試和性能報告**
 - **[📊 性能測試報告](test-results/task-1-1-6-performance-optimization-test-report.md)** - 詳細的 60fps 性能分析
