@@ -61,66 +61,61 @@
         /* 手機橫向模式優化 */
         @media (max-width: 768px) and (orientation: landscape) {
             #game-container {
-                /* 移除尺寸限制，讓遊戲充分利用橫向螢幕空間 */
+                /* 優化容器尺寸，保持遊戲可見性 */
                 max-width: none !important;
-                max-height: none !important;
+                max-height: calc(100vh - 120px) !important; /* 為虛擬控制留空間 */
                 width: 100vw !important;
-                height: 100vh !important;
+                height: calc(100vh - 120px) !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                /* 使用CSS縮放來填滿螢幕，避免黑邊 */
-                transform-origin: center center;
-            }
-
-            /* 針對Phaser canvas進行縮放 */
-            #game-container canvas {
-                transform: scale(1.5) !important;
-                transform-origin: center center !important;
             }
 
             #app {
                 width: 100vw !important;
                 height: 100vh !important;
-                overflow: hidden !important;
             }
 
             body {
                 padding: 0 !important;
                 margin: 0 !important;
-                overflow: hidden !important;
             }
 
             /* 橫向模式下的虛擬控制調整 */
             #touch-controls {
-                height: 200px; /* 減少高度，避免遮擋過多遊戲內容 */
+                height: 120px !important; /* 固定高度，確保可見 */
+                background: rgba(0,0,0,0.1) !important; /* 添加背景便於調試 */
+                z-index: 2000 !important; /* 提高層級 */
             }
 
             .touch-joystick {
-                bottom: 30px !important; /* 調整位置 */
-                left: 30px !important;
-                width: 100px !important; /* 稍微縮小 */
-                height: 100px !important;
+                bottom: 20px !important; /* 調整位置 */
+                left: 20px !important;
+                width: 80px !important; /* 適合橫向模式 */
+                height: 80px !important;
+                z-index: 2001 !important;
             }
 
             .touch-joystick-knob {
-                width: 35px !important;
-                height: 35px !important;
+                width: 30px !important;
+                height: 30px !important;
             }
 
             .touch-shoot-btn {
-                bottom: 30px !important; /* 調整位置 */
-                right: 30px !important;
-                width: 70px !important; /* 稍微縮小 */
-                height: 70px !important;
-                font-size: 18px !important;
+                bottom: 20px !important; /* 調整位置 */
+                right: 20px !important;
+                width: 60px !important; /* 適合橫向模式 */
+                height: 60px !important;
+                font-size: 16px !important;
+                z-index: 2001 !important;
             }
 
             .fullscreen-btn {
-                top: 20px !important;
-                right: 20px !important;
-                width: 40px !important;
-                height: 40px !important;
-                font-size: 16px !important;
+                top: 10px !important;
+                right: 10px !important;
+                width: 35px !important;
+                height: 35px !important;
+                font-size: 14px !important;
+                z-index: 2001 !important;
             }
         }
 
