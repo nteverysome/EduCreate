@@ -129,6 +129,7 @@
             background: transparent;
             z-index: 1000;
             pointer-events: none;
+            display: none; /* 默認隱藏，只在移動設備上顯示 */
         }
 
         /* 移動控制區域 */
@@ -205,12 +206,166 @@
         /* 移動設備檢測 */
         @media (max-width: 768px), (pointer: coarse) {
             #touch-controls {
-                display: block;
+                display: block !important; /* 使用!important確保覆蓋 */
             }
         }
     </style>
   <script type="module" crossorigin src="/games/starshake-game/dist/assets/index-YL3i2bTv.js"></script>
   <link rel="modulepreload" crossorigin href="/games/starshake-game/dist/assets/phaser-HlBRf90L.js">
+
+  <!-- TouchControls JavaScript -->
+  <script>
+    // 觸摸控制系統
+    class TouchControls {
+        constructor() {
+            this.joystick = document.getElementById('touch-joystick');
+            this.knob = document.getElementById('joystick-knob');
+            this.shootBtn = document.getElementById('touch-shoot');
+            this.fullscreenBtn = document.getElementById('fullscreen-btn');
+
+            this.joystickActive = false;
+            this.joystickCenter = { x: 0, y: 0 };
+            this.currentDirection = { x: 0, y: 0 };
+            this.shooting = false;
+            this.debug = true;
+
+            this.init();
+        }
+
+        init() {
+            console.log('🎮 TouchControls 初始化開始...');
+            this.setupEventListeners();
+            console.log('✅ TouchControls 事件監聽器已設置');
+        }
+
+        setupEventListeners() {
+            if (this.joystick) {
+                this.joystick.addEventListener('touchstart', (e) => this.handleJoystickStart(e), { passive: false });
+                this.joystick.addEventListener('mousedown', (e) => this.handleJoystickStart(e));
+
+                document.addEventListener('touchmove', (e) => this.handleJoystickMove(e), { passive: false });
+                document.addEventListener('mousemove', (e) => this.handleJoystickMove(e));
+
+                document.addEventListener('touchend', (e) => this.handleJoystickEnd(e));
+                document.addEventListener('mouseup', (e) => this.handleJoystickEnd(e));
+            }
+
+            if (this.shootBtn) {
+                this.shootBtn.addEventListener('touchstart', (e) => this.handleShootStart(e), { passive: false });
+                this.shootBtn.addEventListener('mousedown', (e) => this.handleShootStart(e));
+                this.shootBtn.addEventListener('touchend', (e) => this.handleShootEnd(e));
+                this.shootBtn.addEventListener('mouseup', (e) => this.handleShootEnd(e));
+            }
+
+            if (this.fullscreenBtn) {
+                this.fullscreenBtn.addEventListener('click', (e) => this.handleFullscreen(e));
+            }
+        }
+
+        handleJoystickStart(e) {
+            e.preventDefault();
+            this.joystickActive = true;
+
+            const rect = this.joystick.getBoundingClientRect();
+            this.joystickCenter = {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+
+            if (this.debug) console.log('🕹️ 搖桿啟動:', this.joystickCenter);
+        }
+
+        handleJoystickMove(e) {
+            if (!this.joystickActive) return;
+
+            e.preventDefault();
+            const touch = e.touches ? e.touches[0] : e;
+
+            const deltaX = touch.clientX - this.joystickCenter.x;
+            const deltaY = touch.clientY - this.joystickCenter.y;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+            const maxDistance = 40;
+            const normalizedDistance = Math.min(distance, maxDistance);
+
+            if (distance > 0) {
+                this.currentDirection = {
+                    x: (deltaX / distance) * (normalizedDistance / maxDistance),
+                    y: (deltaY / distance) * (normalizedDistance / maxDistance)
+                };
+
+                const knobX = (deltaX / distance) * normalizedDistance;
+                const knobY = (deltaY / distance) * normalizedDistance;
+
+                if (this.knob) {
+                    this.knob.style.transform = `translate(${knobX}px, ${knobY}px)`;
+                }
+            }
+        }
+
+        handleJoystickEnd(e) {
+            if (!this.joystickActive) return;
+
+            this.joystickActive = false;
+            this.currentDirection = { x: 0, y: 0 };
+
+            if (this.knob) {
+                this.knob.style.transform = 'translate(0px, 0px)';
+            }
+
+            if (this.debug) console.log('🕹️ 搖桿停止');
+        }
+
+        handleShootStart(e) {
+            e.preventDefault();
+            this.shooting = true;
+            if (this.debug) console.log('🚀 射擊開始');
+        }
+
+        handleShootEnd(e) {
+            this.shooting = false;
+            if (this.debug) console.log('🚀 射擊結束');
+        }
+
+        handleFullscreen(e) {
+            e.preventDefault();
+            console.log('🖥️ 全螢幕切換');
+
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('全螢幕失敗:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        getInputState() {
+            return {
+                direction: { ...this.currentDirection },
+                shooting: this.shooting
+            };
+        }
+
+        testControls() {
+            console.log('🧪 TouchControls 測試:');
+            console.log('  - 搖桿元素:', !!this.joystick);
+            console.log('  - 搖桿旋鈕:', !!this.knob);
+            console.log('  - 射擊按鈕:', !!this.shootBtn);
+            console.log('  - 全螢幕按鈕:', !!this.fullscreenBtn);
+            console.log('  - 當前方向:', this.currentDirection);
+            console.log('  - 射擊狀態:', this.shooting);
+        }
+    }
+
+    // 初始化觸摸控制
+    document.addEventListener('DOMContentLoaded', () => {
+        window.touchControls = new TouchControls();
+        window.testTouchControls = () => window.touchControls.testControls();
+        console.log('🎮 觸摸控制系統已初始化');
+        console.log('💡 使用 testTouchControls() 進行測試');
+    });
+  </script>
 </head>
 
 <body>
@@ -218,7 +373,7 @@
         <div id="game-container"></div>
 
         <!-- 觸摸控制面板 -->
-        <div id="touch-controls" style="display: none;">
+        <div id="touch-controls">
             <!-- 移動搖桿 -->
             <div class="touch-joystick" id="touch-joystick">
                 <div class="touch-joystick-knob" id="joystick-knob"></div>
