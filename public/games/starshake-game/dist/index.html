@@ -68,16 +68,26 @@
                 height: 100vh !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                /* 使用CSS縮放來填滿螢幕，避免黑邊 */
+                transform-origin: center center;
+            }
+
+            /* 針對Phaser canvas進行縮放 */
+            #game-container canvas {
+                transform: scale(1.5) !important;
+                transform-origin: center center !important;
             }
 
             #app {
                 width: 100vw !important;
                 height: 100vh !important;
+                overflow: hidden !important;
             }
 
             body {
                 padding: 0 !important;
                 margin: 0 !important;
+                overflow: hidden !important;
             }
 
             /* 橫向模式下的虛擬控制調整 */
@@ -204,7 +214,7 @@
             }
         }
     </style>
-  <script type="module" crossorigin src="/games/starshake-game/dist/assets/index-EtpCMcWW.js"></script>
+  <script type="module" crossorigin src="/games/starshake-game/dist/assets/index-YL3i2bTv.js"></script>
   <link rel="modulepreload" crossorigin href="/games/starshake-game/dist/assets/phaser-HlBRf90L.js">
 </head>
 
