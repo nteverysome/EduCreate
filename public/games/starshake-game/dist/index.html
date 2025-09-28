@@ -28,23 +28,23 @@
             width: 100%;
             height: 100%;
             max-width: 1000px;
-            max-height: 800px;
+            max-height: 600px;
+            position: relative;
         }
 
         /* 手機直向模式優化 */
         @media (max-width: 768px) and (orientation: portrait) {
             #game-container {
-                /* 在手機直向模式下，為虛擬控制留出更多底部空間 */
-                margin-bottom: 120px;  /* 增加到120px，為虛擬控制提供更多黑色區域 */
-                height: calc(100% - 120px);
+                /* 增加底部空間給虛擬控制 */
+                margin-bottom: 120px;  /* 從40px增加到120px，為虛擬控制留更多空間 */
             }
 
-            /* 確保遊戲畫面不被虛擬控制遮擋 */
             body {
-                padding-bottom: 120px;  /* 增加到120px */
+                /* 增加底部填充，創造黑色區域 */
+                padding-bottom: 120px;  /* 從40px增加到120px */
             }
 
-            /* 手機直向模式下的虛擬控制定位 - 放在黑色區域 */
+            /* 虛擬控制調整到黑色區域 */
             .touch-joystick {
                 bottom: 20px !important;  /* 更靠近底部，放在黑色區域 */
             }
@@ -73,42 +73,25 @@
                 padding: 0 !important;
             }
 
-            #app {
-                width: 100vw !important;
-                height: 100vh !important;
-            }
-
-            body {
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-
-            /* 橫向模式下的虛擬控制調整 */
             #touch-controls {
                 height: 120px !important; /* 固定高度，確保可見 */
-                background: rgba(0,0,0,0.1) !important; /* 添加背景便於調試 */
-                z-index: 2000 !important; /* 提高層級 */
+                z-index: 2000 !important;
+                background: rgba(0,0,0,0.1) !important; /* 調試用淡色背景 */
             }
 
             .touch-joystick {
-                bottom: 20px !important; /* 調整位置 */
-                left: 20px !important;
-                width: 80px !important; /* 適合橫向模式 */
+                width: 80px !important;
                 height: 80px !important;
+                bottom: 20px !important;
+                left: 20px !important;
                 z-index: 2001 !important;
             }
 
-            .touch-joystick-knob {
-                width: 30px !important;
-                height: 30px !important;
-            }
-
             .touch-shoot-btn {
-                bottom: 20px !important; /* 調整位置 */
-                right: 20px !important;
-                width: 60px !important; /* 適合橫向模式 */
+                width: 60px !important;
                 height: 60px !important;
-                font-size: 16px !important;
+                bottom: 20px !important;
+                right: 20px !important;
                 z-index: 2001 !important;
             }
 
@@ -130,47 +113,44 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 240px;
-            background: transparent;
-            z-index: 1000;
+            height: 200px;
             pointer-events: none;
-            display: none; /* 默認隱藏，只在移動設備上顯示 */
+            z-index: 1000;
+            display: none; /* 預設隱藏 */
         }
 
-        /* 移動控制區域 */
         .touch-joystick {
             position: absolute;
-            bottom: 60px;  /* 從 20px 增加到 60px，讓搖桿往下移動 */
-            left: 20px;
-            width: 120px;
-            height: 120px;
-            background: transparent;
+            bottom: 60px;
+            left: 30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             pointer-events: all;
+            z-index: 1001;
         }
 
-        .touch-joystick-knob {
+        .joystick-knob {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 40px;
             height: 40px;
-            background: transparent;
-            border: 2px solid rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.8);
             border-radius: 50%;
             transform: translate(-50%, -50%);
             transition: all 0.1s ease;
         }
 
-        /* 射擊按鈕 */
         .touch-shoot-btn {
             position: absolute;
-            bottom: 60px;  /* 從 20px 增加到 60px，與搖桿保持一致 */
-            right: 20px;
+            bottom: 60px;
+            right: 30px;
             width: 80px;
             height: 80px;
-            background: transparent;
+            background: rgba(255, 0, 0, 0.3);
             border: 2px solid rgba(255, 0, 0, 0.6);
             border-radius: 50%;
             display: flex;
@@ -181,10 +161,11 @@
             font-weight: bold;
             pointer-events: all;
             user-select: none;
+            z-index: 1001;
         }
 
         .touch-shoot-btn:active {
-            background: rgba(255, 0, 0, 0.2);
+            background: rgba(255, 0, 0, 0.6);
             border-color: rgba(255, 0, 0, 0.8);
             transform: scale(0.95);
         }
@@ -230,184 +211,156 @@
         }
     </style>
   <script type="module" crossorigin src="/games/starshake-game/dist/assets/index-DEhXC0VF.js"></script>
-  <link rel="modulepreload" crossorigin href="/games/starshake-game/dist/assets/phaser-HlBRf90L.js">
+  <link rel="modulepreload" crossorigin href="/games/starshake-game/dist/assets/phaser-CmFXOKba.js">
 
-  <!-- TouchControls JavaScript -->
-  <script>
-    // 觸摸控制系統
-    class TouchControls {
-        constructor() {
-            this.joystick = document.getElementById('touch-joystick');
-            this.knob = document.getElementById('joystick-knob');
-            this.shootBtn = document.getElementById('touch-shoot');
-            this.fullscreenBtn = document.getElementById('fullscreen-btn');
-
-            this.joystickActive = false;
-            this.joystickCenter = { x: 0, y: 0 };
-            this.currentDirection = { x: 0, y: 0 };
-            this.shooting = false;
-            this.debug = true;
-
-            this.init();
-        }
-
-        init() {
-            console.log('🎮 TouchControls 初始化開始...');
-            this.setupEventListeners();
-            console.log('✅ TouchControls 事件監聽器已設置');
-        }
-
-        setupEventListeners() {
-            if (this.joystick) {
-                this.joystick.addEventListener('touchstart', (e) => this.handleJoystickStart(e), { passive: false });
-                this.joystick.addEventListener('mousedown', (e) => this.handleJoystickStart(e));
-
-                document.addEventListener('touchmove', (e) => this.handleJoystickMove(e), { passive: false });
-                document.addEventListener('mousemove', (e) => this.handleJoystickMove(e));
-
-                document.addEventListener('touchend', (e) => this.handleJoystickEnd(e));
-                document.addEventListener('mouseup', (e) => this.handleJoystickEnd(e));
-            }
-
-            if (this.shootBtn) {
-                this.shootBtn.addEventListener('touchstart', (e) => this.handleShootStart(e), { passive: false });
-                this.shootBtn.addEventListener('mousedown', (e) => this.handleShootStart(e));
-                this.shootBtn.addEventListener('touchend', (e) => this.handleShootEnd(e));
-                this.shootBtn.addEventListener('mouseup', (e) => this.handleShootEnd(e));
-            }
-
-            if (this.fullscreenBtn) {
-                this.fullscreenBtn.addEventListener('click', (e) => this.handleFullscreen(e));
-            }
-        }
-
-        handleJoystickStart(e) {
-            e.preventDefault();
-            this.joystickActive = true;
-
-            const rect = this.joystick.getBoundingClientRect();
-            this.joystickCenter = {
-                x: rect.left + rect.width / 2,
-                y: rect.top + rect.height / 2
-            };
-
-            if (this.debug) console.log('🕹️ 搖桿啟動:', this.joystickCenter);
-        }
-
-        handleJoystickMove(e) {
-            if (!this.joystickActive) return;
-
-            e.preventDefault();
-            const touch = e.touches ? e.touches[0] : e;
-
-            const deltaX = touch.clientX - this.joystickCenter.x;
-            const deltaY = touch.clientY - this.joystickCenter.y;
-            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-            const maxDistance = 40;
-            const normalizedDistance = Math.min(distance, maxDistance);
-
-            if (distance > 0) {
-                this.currentDirection = {
-                    x: (deltaX / distance) * (normalizedDistance / maxDistance),
-                    y: (deltaY / distance) * (normalizedDistance / maxDistance)
-                };
-
-                const knobX = (deltaX / distance) * normalizedDistance;
-                const knobY = (deltaY / distance) * normalizedDistance;
-
-                if (this.knob) {
-                    this.knob.style.transform = `translate(${knobX}px, ${knobY}px)`;
-                }
-            }
-        }
-
-        handleJoystickEnd(e) {
-            if (!this.joystickActive) return;
-
-            this.joystickActive = false;
-            this.currentDirection = { x: 0, y: 0 };
-
-            if (this.knob) {
-                this.knob.style.transform = 'translate(0px, 0px)';
-            }
-
-            if (this.debug) console.log('🕹️ 搖桿停止');
-        }
-
-        handleShootStart(e) {
-            e.preventDefault();
-            this.shooting = true;
-            if (this.debug) console.log('🚀 射擊開始');
-        }
-
-        handleShootEnd(e) {
-            this.shooting = false;
-            if (this.debug) console.log('🚀 射擊結束');
-        }
-
-        handleFullscreen(e) {
-            e.preventDefault();
-            console.log('🖥️ 全螢幕切換');
-
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log('全螢幕失敗:', err);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        }
-
-        getInputState() {
-            return {
-                direction: { ...this.currentDirection },
-                shooting: this.shooting
-            };
-        }
-
-        testControls() {
-            console.log('🧪 TouchControls 測試:');
-            console.log('  - 搖桿元素:', !!this.joystick);
-            console.log('  - 搖桿旋鈕:', !!this.knob);
-            console.log('  - 射擊按鈕:', !!this.shootBtn);
-            console.log('  - 全螢幕按鈕:', !!this.fullscreenBtn);
-            console.log('  - 當前方向:', this.currentDirection);
-            console.log('  - 射擊狀態:', this.shooting);
-        }
-    }
-
-    // 初始化觸摸控制
-    document.addEventListener('DOMContentLoaded', () => {
-        window.touchControls = new TouchControls();
-        window.testTouchControls = () => window.touchControls.testControls();
-        console.log('🎮 觸摸控制系統已初始化');
-        console.log('💡 使用 testTouchControls() 進行測試');
-    });
-  </script>
 </head>
-
 <body>
     <div id="app">
         <div id="game-container"></div>
-
-        <!-- 觸摸控制面板 -->
+        
+        <!-- 觸摸控制 -->
         <div id="touch-controls">
-            <!-- 移動搖桿 -->
+            <!-- 虛擬搖桿 -->
             <div class="touch-joystick" id="touch-joystick">
-                <div class="touch-joystick-knob" id="joystick-knob"></div>
+                <div class="joystick-knob" id="joystick-knob"></div>
             </div>
-
+            
             <!-- 射擊按鈕 -->
             <div class="touch-shoot-btn" id="touch-shoot">
                 🚀
             </div>
-
+            
             <!-- 全螢幕按鈕 -->
             <div class="fullscreen-btn" id="fullscreen-btn">
                 ⛶
             </div>
         </div>
     </div>
+    
+    <!-- 簡潔的TouchControls實現 -->
+    <script>
+        class TouchControls {
+            constructor() {
+                this.joystick = document.getElementById('touch-joystick');
+                this.knob = document.getElementById('joystick-knob');
+                this.shootBtn = document.getElementById('touch-shoot');
+                this.fullscreenBtn = document.getElementById('fullscreen-btn');
+                
+                this.joystickActive = false;
+                this.joystickCenter = { x: 0, y: 0 };
+                this.currentDirection = { x: 0, y: 0 };
+                this.shooting = false;
+                
+                this.setupEventListeners();
+                console.log('🎮 TouchControls 初始化完成');
+            }
+            
+            setupEventListeners() {
+                // 搖桿事件
+                if (this.joystick) {
+                    this.joystick.addEventListener('touchstart', (e) => this.onJoystickStart(e), { passive: false });
+                    this.joystick.addEventListener('touchmove', (e) => this.onJoystickMove(e), { passive: false });
+                    this.joystick.addEventListener('touchend', (e) => this.onJoystickEnd(e));
+                    
+                    this.joystick.addEventListener('mousedown', (e) => this.onJoystickStart(e));
+                    this.joystick.addEventListener('mousemove', (e) => this.onJoystickMove(e));
+                    this.joystick.addEventListener('mouseup', (e) => this.onJoystickEnd(e));
+                }
+                
+                // 射擊按鈕事件
+                if (this.shootBtn) {
+                    this.shootBtn.addEventListener('touchstart', (e) => this.onShootStart(e), { passive: false });
+                    this.shootBtn.addEventListener('touchend', (e) => this.onShootEnd(e));
+                    this.shootBtn.addEventListener('mousedown', (e) => this.onShootStart(e));
+                    this.shootBtn.addEventListener('mouseup', (e) => this.onShootEnd(e));
+                }
+                
+                // 全螢幕按鈕事件
+                if (this.fullscreenBtn) {
+                    this.fullscreenBtn.addEventListener('click', (e) => this.toggleFullscreen(e));
+                }
+            }
+
+            onJoystickStart(e) {
+                e.preventDefault();
+                this.joystickActive = true;
+
+                const rect = this.joystick.getBoundingClientRect();
+                this.joystickCenter = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+
+            onJoystickMove(e) {
+                if (!this.joystickActive) return;
+                e.preventDefault();
+
+                const touch = e.touches ? e.touches[0] : e;
+                const deltaX = touch.clientX - this.joystickCenter.x;
+                const deltaY = touch.clientY - this.joystickCenter.y;
+
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const maxDistance = 40;
+
+                if (distance > maxDistance) {
+                    const angle = Math.atan2(deltaY, deltaX);
+                    this.currentDirection.x = Math.cos(angle);
+                    this.currentDirection.y = Math.sin(angle);
+
+                    this.knob.style.left = (50 + Math.cos(angle) * maxDistance) + 'px';
+                    this.knob.style.top = (50 + Math.sin(angle) * maxDistance) + 'px';
+                } else {
+                    this.currentDirection.x = deltaX / maxDistance;
+                    this.currentDirection.y = deltaY / maxDistance;
+
+                    this.knob.style.left = (50 + deltaX) + 'px';
+                    this.knob.style.top = (50 + deltaY) + 'px';
+                }
+            }
+
+            onJoystickEnd(e) {
+                this.joystickActive = false;
+                this.currentDirection = { x: 0, y: 0 };
+                this.knob.style.left = '50%';
+                this.knob.style.top = '50%';
+            }
+
+            onShootStart(e) {
+                e.preventDefault();
+                this.shooting = true;
+                console.log('🚀 射擊開始');
+            }
+
+            onShootEnd(e) {
+                this.shooting = false;
+                console.log('🚀 射擊結束');
+            }
+
+            toggleFullscreen(e) {
+                e.preventDefault();
+                console.log('🖥️ 全螢幕切換');
+
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log('全螢幕失敗:', err);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            getInputState() {
+                return {
+                    direction: { ...this.currentDirection },
+                    shooting: this.shooting
+                };
+            }
+        }
+
+        // 初始化觸摸控制
+        window.touchControls = new TouchControls();
+        console.log('🎮 簡潔版TouchControls已載入');
+    </script>
 </body>
 </html>
