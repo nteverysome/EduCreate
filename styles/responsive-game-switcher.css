@@ -496,6 +496,13 @@
     max-width: none !important; /* 強制移除寬度限制 */
     aspect-ratio: 812/375 !important; /* 強制手機橫向比例 */
   }
+}
+
+/* ===== iPhone 專用裁切修復 ===== */
+@media (max-width: 640px) and (orientation: landscape) and (-webkit-min-device-pixel-ratio: 2) {
+  .game-iframe-container {
+    max-height: 400px !important; /* 🍎 iPhone 專用：增加高度解決裁切問題 */
+  }
 
   .page-header {
     padding: 8px 16px !important;
