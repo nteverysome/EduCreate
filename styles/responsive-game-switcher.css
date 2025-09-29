@@ -491,7 +491,7 @@
   .game-iframe-container {
     /* 移除固定的 aspect-ratio，讓 TypeScript 控制 */
     min-height: 250px !important;
-    max-height: 375px !important; /* 適應手機橫向模式高度 */
+    max-height: 420px !important; /* 適應手機橫向模式高度 - 大幅修改測試 */
     width: 100% !important;
     max-width: none !important; /* 強制移除寬度限制 */
     aspect-ratio: 812/375 !important; /* 強制手機橫向比例 */

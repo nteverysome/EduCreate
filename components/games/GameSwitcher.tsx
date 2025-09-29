@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDownIcon, PlayIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 
-// 遊戲配置類型定義
+// 遊戲配置類型定義 - 測試修改
 interface GameConfig {
   id: string;
   name: string;
