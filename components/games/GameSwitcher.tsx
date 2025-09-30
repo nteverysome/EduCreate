@@ -1119,7 +1119,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   }
 
   return (
-    <div className={`game-switcher-container ${className} w-full`} data-testid="game-switcher">
+    <div className={`game-switcher-container ${className} w-full flex flex-col items-start`} data-testid="game-switcher">
       {/* 緊湊標頭設計 - 手機優化，使用 JavaScript 控制顯示 */}
       {isMobile && (
         <div className="game-header bg-white rounded-lg shadow-sm border border-gray-200 mb-1" data-testid="game-header">
@@ -1373,10 +1373,10 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         </div>
       )}
 
-      {/* 遊戲 iframe 容器 - 響應式設計，動態調整高度 */}
+      {/* 遊戲 iframe 容器 - 響應式設計，動態調整高度，向上置頂 */}
       <div
         ref={containerRef}
-        className="game-iframe-container relative bg-white overflow-hidden mx-auto w-full"
+        className="game-iframe-container relative bg-white overflow-hidden w-full self-start"
         style={{
           aspectRatio: isMobile ? '812/375' : '1274/739',
           width: '100%',
