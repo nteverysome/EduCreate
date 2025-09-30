@@ -1378,7 +1378,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         ref={containerRef}
         className="game-iframe-container relative bg-white overflow-hidden w-full self-start"
         style={{
-          aspectRatio: isMobile ? '812/375' : '1274/739',
+          // 移除 aspectRatio，避免與 height: 100vh 衝突
           width: '100%',
           // 全螢幕模式：100vh，非全螢幕模式：90vh
           height: isMobile ? (isGameFullscreen ? '100vh' : '90vh') : '70vh',
