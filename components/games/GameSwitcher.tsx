@@ -1373,15 +1373,16 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         </div>
       )}
 
-      {/* 遊戲 iframe 容器 - 響應式設計，使用 vh 單位確保不超出螢幕 */}
+      {/* 遊戲 iframe 容器 - 響應式設計，動態調整高度 */}
       <div
         ref={containerRef}
         className="game-iframe-container relative bg-white overflow-hidden mx-auto w-full"
         style={{
           aspectRatio: isMobile ? '812/375' : '1274/739',
           width: '100%',
-          height: isMobile ? '90vh' : '70vh', // 使用視窗高度的百分比
-          maxHeight: isMobile ? '90vh' : '800px', // 手機：不超出螢幕，桌面：固定最大高度
+          // 全螢幕模式：100vh，非全螢幕模式：90vh
+          height: isMobile ? (isGameFullscreen ? '100vh' : '90vh') : '70vh',
+          maxHeight: isMobile ? (isGameFullscreen ? '100vh' : '90vh') : '800px',
           // 強制覆蓋CSS限制
           maxWidth: 'none !important' as any,
         }}
