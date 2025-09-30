@@ -2377,5 +2377,117 @@
         
         
         <!-- 座標同步解決方案結束 -->
+
+        <!-- 🎯 動態解析度功能 - DYNAMIC_RESOLUTION -->
+        <script>
+            console.log('🎯 載入動態解析度功能');
+
+            // 計算遊戲解析度
+            function calculateGameDimensions() {
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+                const aspectRatio = screenWidth / screenHeight;
+
+                console.log('📱 螢幕尺寸:', screenWidth, 'x', screenHeight);
+                console.log('📐 寬高比:', aspectRatio.toFixed(2));
+
+                let gameWidth, gameHeight;
+
+                // 檢測橫向模式且寬高比 > 2.0（超寬螢幕）
+                if (aspectRatio > 2.0) {
+                    // 超寬螢幕：增加遊戲寬度以填滿螢幕
+                    gameWidth = 1600;
+                    gameHeight = 800;
+                    console.log('🎮 使用超寬解析度:', gameWidth, 'x', gameHeight);
+                } else if (aspectRatio > 1.5) {
+                    // 橫向模式：使用加寬解析度
+                    gameWidth = 1200;
+                    gameHeight = 800;
+                    console.log('🎮 使用橫向解析度:', gameWidth, 'x', gameHeight);
+                } else {
+                    // 標準/直向模式
+                    gameWidth = 1000;
+                    gameHeight = 800;
+                    console.log('🎮 使用標準解析度:', gameWidth, 'x', gameHeight);
+                }
+
+                return { gameWidth, gameHeight };
+            }
+
+            // 等待 Phaser 遊戲載入
+            function waitForPhaserGame() {
+                return new Promise((resolve) => {
+                    const checkGame = () => {
+                        if (window.game && window.game.scale) {
+                            resolve();
+                        } else {
+                            setTimeout(checkGame, 100);
+                        }
+                    };
+                    checkGame();
+                });
+            }
+
+            // 應用動態解析度
+            async function applyDynamicResolution() {
+                await waitForPhaserGame();
+
+                console.log('🔧 開始應用動態解析度');
+
+                const { gameWidth, gameHeight } = calculateGameDimensions();
+
+                // 更新 Phaser 遊戲解析度
+                if (window.game && window.game.scale) {
+                    try {
+                        // 設置遊戲尺寸
+                        window.game.scale.resize(gameWidth, gameHeight);
+
+                        // 刷新 scale
+                        window.game.scale.refresh();
+
+                        console.log('✅ 動態解析度已應用:', gameWidth, 'x', gameHeight);
+                    } catch (error) {
+                        console.log('❌ 動態解析度應用失敗:', error);
+                    }
+                }
+            }
+
+            // 監聽視窗大小變化
+            let resizeTimeout;
+            let currentDimensions = calculateGameDimensions();
+
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+
+                resizeTimeout = setTimeout(() => {
+                    const newDimensions = calculateGameDimensions();
+
+                    // 如果解析度改變，重新載入遊戲
+                    if (newDimensions.gameWidth !== currentDimensions.gameWidth ||
+                        newDimensions.gameHeight !== currentDimensions.gameHeight) {
+                        console.log('🔄 螢幕尺寸改變，重新載入遊戲');
+                        window.location.reload();
+                    }
+                }, 500);
+            });
+
+            // 頁面載入完成後應用動態解析度
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', applyDynamicResolution);
+            } else {
+                applyDynamicResolution();
+            }
+
+            // 添加測試函數
+            window.testDynamicResolution = function() {
+                console.log('🧪 測試動態解析度功能');
+                const dimensions = calculateGameDimensions();
+                console.log('📊 當前解析度:', dimensions);
+                return dimensions;
+            };
+
+            console.log('✅ 動態解析度功能已載入');
+        </script>
+        <!-- 動態解析度功能結束 -->
     </body>
 </html>
