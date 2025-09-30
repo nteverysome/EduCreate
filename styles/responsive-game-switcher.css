@@ -314,12 +314,12 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 手機端：全寬度，動態高度比例，優化間距 */
+/* 手機端：全寬度，動態高度比例，向上置頂 */
 @media (max-width: 640px) {
   .game-iframe-container {
     /* 移除固定的 aspect-ratio，讓 TypeScript 控制 */
     /* 移除 min-height 和 max-height 限制，讓 FIT 模式自己處理 */
-    margin: 8px 0; /* 從 16px 減少到 8px，向上移動 8px */
+    margin: 0 !important; /* 移除所有 margin，向上置頂 */
     width: 100% !important;
     max-width: none !important; /* 強制移除寬度限制 */
   }
@@ -330,24 +330,24 @@
   }
 }
 
-/* 平板端：適中尺寸 */
+/* 平板端：適中尺寸，向上置頂 */
 @media (min-width: 641px) and (max-width: 1024px) {
   .game-iframe-container {
     /* 移除固定的 aspect-ratio，讓 TypeScript 控制 */
     max-width: none !important; /* 移除寬度限制 */
     /* 移除 min-height 和 max-height 限制，讓 FIT 模式自己處理 */
-    margin: 20px auto;
+    margin: 0 !important; /* 移除所有 margin，向上置頂 */
     width: 100% !important;
   }
 }
 
-/* 桌面端：原始尺寸 */
+/* 桌面端：原始尺寸，向上置頂 */
 @media (min-width: 1025px) {
   .game-iframe-container {
     /* 移除固定的 aspect-ratio，讓 TypeScript 控制 */
     max-width: none !important; /* 移除寬度限制 */
     /* 移除 min-height 和 max-height 限制，讓 FIT 模式自己處理 */
-    margin: 24px auto;
+    margin: 0 !important; /* 移除所有 margin，向上置頂 */
     width: 100% !important;
   }
 }
