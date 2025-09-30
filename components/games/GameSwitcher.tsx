@@ -1373,16 +1373,14 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         </div>
       )}
 
-      {/* 遊戲 iframe 容器 - 響應式設計，增加高度顯示更多內容 */}
+      {/* 遊戲 iframe 容器 - 響應式設計，移除高度限制讓 FIT 模式自己處理 */}
       <div
         ref={containerRef}
         className="game-iframe-container relative bg-white overflow-hidden mx-auto w-full"
         style={{
           aspectRatio: isMobile ? '812/375' : '1274/739',
-          minHeight: isMobile ? '400px' : '500px', // 增加最小高度
-          maxHeight: isMobile ? '500px' : '800px', // 增加最大高度
+          // 移除 minHeight, maxHeight, height 限制，讓 FIT 模式自己處理
           width: '100%',
-          height: isMobile ? '450px' : '600px', // 增加實際高度
           // 強制覆蓋CSS限制
           maxWidth: 'none !important' as any,
         }}
