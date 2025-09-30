@@ -2455,25 +2455,19 @@
             // 監聽視窗大小變化
             let resizeTimeout;
             let currentDimensions = calculateGameDimensions();
-            let currentOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
 
             window.addEventListener('resize', () => {
                 clearTimeout(resizeTimeout);
 
                 resizeTimeout = setTimeout(() => {
                     const newDimensions = calculateGameDimensions();
-                    const newOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
 
-                    // 只在螢幕方向改變時重新載入遊戲
-                    if (newOrientation !== currentOrientation) {
-                        console.log('🔄 螢幕方向改變，重新載入遊戲');
-                        console.log('  舊方向:', currentOrientation);
-                        console.log('  新方向:', newOrientation);
-                        window.location.reload();
-                    } else if (newDimensions.gameWidth !== currentDimensions.gameWidth ||
-                               newDimensions.gameHeight !== currentDimensions.gameHeight) {
-                        // 如果只是解析度改變（但方向沒變），動態調整
+                    // 如果解析度改變，動態調整（不重新載入遊戲）
+                    if (newDimensions.gameWidth !== currentDimensions.gameWidth ||
+                        newDimensions.gameHeight !== currentDimensions.gameHeight) {
                         console.log('🔧 解析度改變，動態調整');
+                        console.log('  舊解析度:', currentDimensions.gameWidth, 'x', currentDimensions.gameHeight);
+                        console.log('  新解析度:', newDimensions.gameWidth, 'x', newDimensions.gameHeight);
                         currentDimensions = newDimensions;
                         applyDynamicResolution();
                     }
