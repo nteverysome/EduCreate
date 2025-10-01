@@ -1,6 +1,7 @@
 // shimozurdo 遊戲主模組 - 模組化架構的核心配置檔案
 // 封裝原始 main.js 的邏輯，提供可重用的遊戲配置和初始化功能
 // 設計用於動態模組載入系統，支援按需載入場景
+// 🎯 使用 FIT 模式 + 動態解析度（參考 Starshake 實現）
 
 // 記錄模組載入開始
 console.log('📦 載入主模組');
@@ -13,37 +14,60 @@ const MIN_SIZE_HEIGHT_SCREEN = 270;  // 最小螢幕高度，支援小螢幕
 const SIZE_WIDTH_SCREEN = 960;       // 預設螢幕寬度，基於桌面常見尺寸
 const SIZE_HEIGHT_SCREEN = 540;      // 預設螢幕高度，基於桌面常見尺寸
 
+// 🎯 動態調整遊戲解析度 - 根據螢幕寬高比（參考 Starshake）
+function calculateGameDimensions() {
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+  const aspectRatio = screenWidth / screenHeight;
+
+  console.log('📱 Shimozurdo 螢幕尺寸:', screenWidth, 'x', screenHeight);
+  console.log('📐 寬高比:', aspectRatio.toFixed(2));
+
+  let gameWidth, gameHeight;
+
+  // 檢測橫向模式且寬高比 > 2.0（超寬螢幕）
+  if (aspectRatio > 2.0) {
+    // 超寬螢幕：增加遊戲寬度以填滿螢幕
+    gameWidth = 1600;
+    gameHeight = 900;
+    console.log('🎮 Shimozurdo 使用超寬解析度:', gameWidth, 'x', gameHeight);
+  } else if (aspectRatio > 1.5) {
+    // 橫向模式：使用加寬解析度
+    gameWidth = 1200;
+    gameHeight = 675;
+    console.log('🎮 Shimozurdo 使用橫向解析度:', gameWidth, 'x', gameHeight);
+  } else {
+    // 直向模式或正常寬高比：使用原始解析度
+    gameWidth = SIZE_WIDTH_SCREEN;
+    gameHeight = SIZE_HEIGHT_SCREEN;
+    console.log('🎮 Shimozurdo 使用標準解析度:', gameWidth, 'x', gameHeight);
+  }
+
+  return { gameWidth, gameHeight };
+}
+
+// 計算初始遊戲尺寸
+const { gameWidth, gameHeight } = calculateGameDimensions();
+
 // 導出遊戲配置物件 - 提供給模組載入器使用的基礎配置
+// 🎯 使用 FIT 模式 + 動態解析度
 export const gameConfig = {
   // 渲染器類型，AUTO 自動選擇最佳渲染方式（WebGL 優先，Canvas 備用）
   type: Phaser.AUTO,
-  // 縮放和響應式系統配置 - 優化手機適配
+  // 🎯 使用動態計算的遊戲尺寸
+  width: gameWidth,
+  height: gameHeight,
+  // 縮放和響應式系統配置 - 使用 FIT 模式
   scale: {
-    // 使用 RESIZE 模式，支援動態尺寸調整
-    mode: Phaser.Scale.RESIZE,
+    // 🎯 使用 FIT 模式，保持比例並適應容器（參考 Starshake）
+    mode: Phaser.Scale.FIT,
     // 指定遊戲掛載的 DOM 容器 ID
     parent: 'game',
-    // 遊戲的初始寬度設定（手機優先）
-    width: SIZE_WIDTH_SCREEN,
-    // 遊戲的初始高度設定（手機優先）
-    height: SIZE_HEIGHT_SCREEN,
-    // 最小尺寸限制，支援小手機螢幕
-    min: {
-      width: MIN_SIZE_WIDTH_SCREEN,   // 最小寬度限制
-      height: MIN_SIZE_HEIGHT_SCREEN  // 最小高度限制
-    },
-    // 最大尺寸限制，防止遊戲過大而影響性能
-    max: {
-      width: MAX_SIZE_WIDTH_SCREEN,   // 最大寬度限制
-      height: MAX_SIZE_HEIGHT_SCREEN  // 最大高度限制
-    },
-    // 全螢幕模式的目標 DOM 元素
-    fullscreenTarget: 'game',
-    // 允許遊戲擴展父容器尺寸
-    expandParent: true,
-    // 自動居中對齊設定
-    autoCenter: Phaser.Scale.CENTER_BOTH
+    // 🎯 水平居中，垂直向上對齊（參考 Starshake）
+    autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
   },
+  // 自動四捨五入關閉，保持精確渲染
+  autoRound: false,
   // DOM 元素支援配置
   dom: {
     // 創建 DOM 容器，支援 HTML 元素與遊戲內容混合顯示
@@ -98,6 +122,19 @@ export function initGame(scenes) {
 
   // 使用完整配置創建 Phaser 遊戲實例
   const game = new Phaser.Game(config);
+
+  // 🔄 監聽視窗大小變化，動態調整遊戲解析度（參考 Starshake）
+  window.addEventListener('resize', () => {
+    const { gameWidth: newWidth, gameHeight: newHeight } = calculateGameDimensions();
+
+    // 如果解析度改變，重新載入遊戲
+    if (newWidth !== gameWidth || newHeight !== gameHeight) {
+      console.log('🔄 Shimozurdo 螢幕尺寸改變，重新載入遊戲');
+      console.log('📊 舊解析度:', gameWidth, 'x', gameHeight);
+      console.log('📊 新解析度:', newWidth, 'x', newHeight);
+      window.location.reload();
+    }
+  });
 
   // 返回遊戲實例供外部使用
   return game;
