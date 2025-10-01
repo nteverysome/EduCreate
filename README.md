@@ -197,6 +197,33 @@ npm run dev
 - **[📱 觸摸控制技術](public/games/starshake-game/dist/assets/index-DEhXC0VF.js)** - Phaser 遊戲與 TouchControls 整合代碼
 - **[🔧 整合腳本](integrate-touchcontrols-final.js)** - 安全的 TouchControls 整合工具
 
+### 🎯 **Phaser 遊戲整合指南** 🆕
+- **[📚 完整整合指南](docs/PHASER-GAME-INTEGRATION-GUIDE.md)** - Phaser 遊戲與 React 父頁面整合的完整技術文檔
+  - 架構概覽與系統組成
+  - Phaser FIT 模式配置與原理
+  - 動態解析度系統實現
+  - PostMessage 父子頁面通信
+  - 虛擬按鈕設計與實現
+  - CSS 全螢幕解決方案
+  - 完整實踐範例（5 步驟）
+  - 故障排除指南（5 個常見問題）
+  - 性能優化技巧
+  - 測試清單（桌面、移動、不同尺寸）
+  - 進階技巧（多點觸控、狀態同步、離線支援）
+  - 部署注意事項
+- **[⚡ 快速參考卡片](docs/PHASER-QUICK-REFERENCE.md)** - 快速查閱的代碼片段和配置範例
+  - Phaser 配置速查
+  - PostMessage 通信範例
+  - 虛擬按鈕實現
+  - 全螢幕代碼
+  - 動態調整方法
+  - 調試工具
+  - Scale 模式對比表
+  - 常見問題快速解決
+  - 移動設備優化
+  - 性能優化技巧
+  - 部署檢查清單
+
 ### 🧪 **測試和性能報告**
 - **[📊 性能測試報告](test-results/task-1-1-6-performance-optimization-test-report.md)** - 詳細的 60fps 性能分析
 
