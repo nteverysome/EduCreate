@@ -105,12 +105,113 @@
             height: 100vh !important;
             background: #000;
         }
+
+        /* 🎮 TouchControls 虛擬按鈕樣式 */
+        #touch-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 240px;
+            background: transparent;
+            display: none;  /* 預設隱藏，媒體查詢控制顯示 */
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        /* 虛擬搖桿 */
+        .touch-joystick {
+            position: absolute;
+            bottom: 60px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: all;
+        }
+
+        .touch-joystick-knob {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+        }
+
+        /* 射擊按鈕 */
+        .touch-shoot-btn {
+            position: absolute;
+            bottom: 60px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: #ff4757;
+            border: none;
+            border-radius: 50%;
+            font-size: 32px;
+            pointer-events: all;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s;
+        }
+
+        .touch-shoot-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 全螢幕按鈕 */
+        .fullscreen-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 24px;
+            pointer-events: all;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s;
+        }
+
+        .fullscreen-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 媒體查詢：移動設備顯示 */
+        @media (max-width: 1024px) and (max-height: 768px),
+               (pointer: coarse),
+               (hover: none) and (pointer: coarse) {
+            #touch-controls {
+                display: block !important;
+            }
+        }
     </style>
     <title>Game</title>
 </head>
 
 <body>
     <div id='game'></div>
+
+    <!-- 🎮 TouchControls 虛擬按鈕 -->
+    <div id="touch-controls">
+        <!-- 虛擬搖桿 -->
+        <div class="touch-joystick">
+            <div class="touch-joystick-knob"></div>
+        </div>
+
+        <!-- 射擊按鈕 -->
+        <button class="touch-shoot-btn">🚀</button>
+
+        <!-- 全螢幕按鈕 -->
+        <button class="fullscreen-btn">⛶</button>
+    </div>
 
 
     <!-- Phaser 引擎 -->
@@ -121,6 +222,146 @@
 
     <!-- 模組載入器（使用絕對路徑避免無斜線 URL 的相對解析問題） -->
     <script src="/games/shimozurdo-game/module-loader.js"></script>
+
+    <!-- 🎮 TouchControls 虛擬按鈕 JavaScript -->
+    <script>
+        // TouchControls 類 - 虛擬按鈕控制系統
+        class TouchControls {
+            constructor() {
+                this.joystick = document.querySelector('.touch-joystick');
+                this.knob = document.querySelector('.touch-joystick-knob');
+                this.shootBtn = document.querySelector('.touch-shoot-btn');
+                this.fullscreenBtn = document.querySelector('.fullscreen-btn');
+
+                this.joystickActive = false;
+                this.joystickCenter = { x: 0, y: 0 };
+                this.currentDirection = { x: 0, y: 0 };
+                this.shooting = false;
+
+                this.init();
+            }
+
+            init() {
+                if (!this.joystick || !this.shootBtn || !this.fullscreenBtn) {
+                    console.warn('⚠️ TouchControls 元素未找到');
+                    return;
+                }
+
+                // 搖桿控制
+                this.joystick.addEventListener('touchstart', this.onJoystickStart.bind(this), { passive: false });
+                this.joystick.addEventListener('touchmove', this.onJoystickMove.bind(this), { passive: false });
+                this.joystick.addEventListener('touchend', this.onJoystickEnd.bind(this), { passive: false });
+
+                // 射擊按鈕
+                this.shootBtn.addEventListener('touchstart', this.onShootStart.bind(this), { passive: false });
+                this.shootBtn.addEventListener('touchend', this.onShootEnd.bind(this), { passive: false });
+
+                // 全螢幕按鈕
+                this.fullscreenBtn.addEventListener('click', this.toggleFullscreen.bind(this));
+
+                console.log('✅ TouchControls 初始化完成');
+            }
+
+            onJoystickStart(e) {
+                e.preventDefault();
+                this.joystickActive = true;
+
+                const rect = this.joystick.getBoundingClientRect();
+                this.joystickCenter = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+
+                const touch = e.touches[0];
+                this.updateJoystickPosition(touch.clientX, touch.clientY);
+            }
+
+            onJoystickMove(e) {
+                if (!this.joystickActive) return;
+                e.preventDefault();
+
+                const touch = e.touches[0];
+                this.updateJoystickPosition(touch.clientX, touch.clientY);
+            }
+
+            onJoystickEnd(e) {
+                e.preventDefault();
+                this.joystickActive = false;
+                this.currentDirection = { x: 0, y: 0 };
+                this.knob.style.transform = 'translate(-50%, -50%)';
+            }
+
+            updateJoystickPosition(clientX, clientY) {
+                const deltaX = clientX - this.joystickCenter.x;
+                const deltaY = clientY - this.joystickCenter.y;
+
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const maxDistance = 40;
+
+                if (distance <= maxDistance) {
+                    this.knob.style.transform = `translate(${deltaX - 20}px, ${deltaY - 20}px)`;
+                    this.currentDirection = {
+                        x: deltaX / maxDistance,
+                        y: deltaY / maxDistance
+                    };
+                } else {
+                    const angle = Math.atan2(deltaY, deltaX);
+                    const limitedX = Math.cos(angle) * maxDistance;
+                    const limitedY = Math.sin(angle) * maxDistance;
+
+                    this.knob.style.transform = `translate(${limitedX - 20}px, ${limitedY - 20}px)`;
+                    this.currentDirection = {
+                        x: Math.cos(angle),
+                        y: Math.sin(angle)
+                    };
+                }
+            }
+
+            onShootStart(e) {
+                e.preventDefault();
+                this.shooting = true;
+                console.log('🚀 射擊按鈕按下');
+            }
+
+            onShootEnd(e) {
+                e.preventDefault();
+                this.shooting = false;
+            }
+
+            toggleFullscreen() {
+                console.log('🖥️ 全螢幕按鈕點擊');
+
+                // 發送 PostMessage 到父頁面
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'DUAL_FULLSCREEN_REQUEST',
+                        action: 'toggle',
+                        timestamp: Date.now(),
+                        source: 'shimozurdo-fullscreen-button'
+                    }, '*');
+
+                    console.log('📤 已發送全螢幕請求到父頁面');
+                } else {
+                    // 備用方案：使用瀏覽器原生全螢幕 API
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen();
+                    } else {
+                        document.exitFullscreen();
+                    }
+                }
+            }
+
+            getInputState() {
+                return {
+                    direction: { ...this.currentDirection },
+                    shooting: this.shooting
+                };
+            }
+        }
+
+        // 初始化 TouchControls
+        window.touchControls = new TouchControls();
+    </script>
 
     <!-- 遊戲準備就緒事件監聽器 -->
     <script>
