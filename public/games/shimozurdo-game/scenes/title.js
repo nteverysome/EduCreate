@@ -860,6 +860,7 @@ export default class Title extends Phaser.Scene {
     /**
      * 🚀 更新太空船（非物理移動）- 處理太空船的移動邏輯和邊界限制
      * 🎮 整合 TouchControls 虛擬按鈕支援
+     * 🔧 修復：協調三種控制方式，避免衝突
      */
     updateSpaceship() {
         if (!this.player || !this.cursors) return;      // 防禦性檢查
@@ -873,16 +874,32 @@ export default class Title extends Phaser.Scene {
             shooting: false
         };
 
-        // 鍵盤控制邏輯 - 處理方向鍵和WASD鍵輸入
-        if (this.cursors.up.isDown || this.wasd.W.isDown) {      // 檢查上方向鍵或W鍵
-            this.player.y -= moveSpeed;                  // 向上移動
-        } else if (this.cursors.down.isDown || this.wasd.S.isDown) {  // 檢查下方向鍵或S鍵
-            this.player.y += moveSpeed;                  // 向下移動
-        }
+        // 🔧 控制優先級系統：虛擬搖桿 > 鍵盤 > 點擊移動
+        let hasDirectInput = false;  // 標記是否有直接輸入（搖桿或鍵盤）
 
-        // 🎮 虛擬搖桿控制邏輯 - 處理觸控搖桿輸入
+        // 優先級 1: 🎮 虛擬搖桿控制邏輯 - 處理觸控搖桿輸入
         if (inputState.direction.y !== 0) {
             this.player.y += inputState.direction.y * moveSpeed;  // 根據搖桿方向移動
+            hasDirectInput = true;  // 標記有直接輸入
+            // 取消點擊移動目標，避免衝突
+            this.playerTargetY = this.player.y;
+        }
+        // 優先級 2: ⌨️ 鍵盤控制邏輯 - 處理方向鍵和WASD鍵輸入
+        else if (this.cursors.up.isDown || this.wasd.W.isDown) {      // 檢查上方向鍵或W鍵
+            this.player.y -= moveSpeed;                  // 向上移動
+            hasDirectInput = true;  // 標記有直接輸入
+            // 取消點擊移動目標，避免衝突
+            this.playerTargetY = this.player.y;
+        } else if (this.cursors.down.isDown || this.wasd.S.isDown) {  // 檢查下方向鍵或S鍵
+            this.player.y += moveSpeed;                  // 向下移動
+            hasDirectInput = true;  // 標記有直接輸入
+            // 取消點擊移動目標，避免衝突
+            this.playerTargetY = this.player.y;
+        }
+        // 優先級 3: 🖱️ 點擊移動到目標位置（平滑移動） - 只在沒有直接輸入時執行
+        else if (!this.isLongPressing && !hasDirectInput && Math.abs(this.player.y - this.playerTargetY) > 2) {
+            const direction = this.playerTargetY > this.player.y ? 1 : -1;  // 計算移動方向
+            this.player.y += direction * moveSpeed;      // 向目標位置移動
         }
 
         // 🚀 處理射擊按鈕 - 當射擊按鈕按下時觸發射擊（未來功能）
@@ -890,12 +907,6 @@ export default class Title extends Phaser.Scene {
             console.log('🚀 射擊按鈕按下（射擊功能待實現）');
             // TODO: 實現射擊功能
             // this.shoot();
-        }
-
-        // 點擊移動到目標位置（平滑移動） - 實現平滑的點擊移動效果（長按時不執行）
-        if (!this.isLongPressing && Math.abs(this.player.y - this.playerTargetY) > 2) {  // 檢查是否需要移動到目標位置
-            const direction = this.playerTargetY > this.player.y ? 1 : -1;  // 計算移動方向
-            this.player.y += direction * moveSpeed;      // 向目標位置移動
         }
 
         // 限制太空船在合理的垂直範圍內 - 防止太空船移出螢幕
