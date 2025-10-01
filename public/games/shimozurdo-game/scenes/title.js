@@ -868,24 +868,11 @@ export default class Title extends Phaser.Scene {
         const { height } = this;                         // 獲取場景高度
         const moveSpeed = 4;                             // 每幀移動像素數
 
-        // 🎮 獲取 TouchControls 虛擬按鈕狀態
-        const inputState = window.touchControls?.getInputState() || {
-            direction: { x: 0, y: 0 },
-            shooting: false
-        };
+        // 🔧 控制優先級系統：鍵盤 > 點擊移動
+        let hasDirectInput = false;  // 標記是否有直接輸入（鍵盤）
 
-        // 🔧 控制優先級系統：虛擬搖桿 > 鍵盤 > 點擊移動
-        let hasDirectInput = false;  // 標記是否有直接輸入（搖桿或鍵盤）
-
-        // 優先級 1: 🎮 虛擬搖桿控制邏輯 - 處理觸控搖桿輸入
-        if (inputState.direction.y !== 0) {
-            this.player.y += inputState.direction.y * moveSpeed;  // 根據搖桿方向移動
-            hasDirectInput = true;  // 標記有直接輸入
-            // 取消點擊移動目標，避免衝突
-            this.playerTargetY = this.player.y;
-        }
-        // 優先級 2: ⌨️ 鍵盤控制邏輯 - 處理方向鍵和WASD鍵輸入
-        else if (this.cursors.up.isDown || this.wasd.W.isDown) {      // 檢查上方向鍵或W鍵
+        // 優先級 1: ⌨️ 鍵盤控制邏輯 - 處理方向鍵和WASD鍵輸入
+        if (this.cursors.up.isDown || this.wasd.W.isDown) {      // 檢查上方向鍵或W鍵
             this.player.y -= moveSpeed;                  // 向上移動
             hasDirectInput = true;  // 標記有直接輸入
             // 取消點擊移動目標，避免衝突
@@ -896,17 +883,10 @@ export default class Title extends Phaser.Scene {
             // 取消點擊移動目標，避免衝突
             this.playerTargetY = this.player.y;
         }
-        // 優先級 3: 🖱️ 點擊移動到目標位置（平滑移動） - 只在沒有直接輸入時執行
+        // 優先級 2: 🖱️ 點擊移動到目標位置（平滑移動） - 只在沒有直接輸入時執行
         else if (!this.isLongPressing && !hasDirectInput && Math.abs(this.player.y - this.playerTargetY) > 2) {
             const direction = this.playerTargetY > this.player.y ? 1 : -1;  // 計算移動方向
             this.player.y += direction * moveSpeed;      // 向目標位置移動
-        }
-
-        // 🚀 處理射擊按鈕 - 當射擊按鈕按下時觸發射擊（未來功能）
-        if (inputState.shooting) {
-            console.log('🚀 射擊按鈕按下（射擊功能待實現）');
-            // TODO: 實現射擊功能
-            // this.shoot();
         }
 
         // 限制太空船在合理的垂直範圍內 - 防止太空船移出螢幕
