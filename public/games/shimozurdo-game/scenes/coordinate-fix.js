@@ -88,53 +88,67 @@ class CoordinateFix {
     }
 
     /**
-     * 🔧 修復座標偏移
+     * 🔧 修復座標偏移（FIT 模式優化版）
      */
     fixCoordinateOffset(pointer) {
         const canvas = this.scene.sys.game.canvas;
         const canvasRect = canvas.getBoundingClientRect();
-        
-        // 方法1: 使用世界座標（如果可用）
+        const gameConfig = this.scene.sys.game.config;
+
+        // 獲取遊戲的邏輯尺寸（不是 canvas 的實際像素尺寸）
+        const gameWidth = gameConfig.width;
+        const gameHeight = gameConfig.height;
+
+        // 方法1: 使用世界座標（FIT 模式下最準確）
         if (pointer.worldX !== undefined && pointer.worldY !== undefined) {
             const worldX = pointer.worldX;
             const worldY = pointer.worldY;
-            
-            // 檢查世界座標是否在合理範圍內
-            if (worldX >= 0 && worldX <= canvas.width && worldY >= 0 && worldY <= canvas.height) {
+
+            // 🎯 使用遊戲邏輯尺寸檢查，而不是 canvas 像素尺寸
+            if (worldX >= 0 && worldX <= gameWidth && worldY >= 0 && worldY <= gameHeight) {
                 if (this.debugMode) {
-                    console.log(`🔧 [座標修復] 使用世界座標: (${worldX}, ${worldY})`);
+                    console.log(`🔧 [座標修復] 使用世界座標: (${worldX.toFixed(2)}, ${worldY.toFixed(2)})`);
+                    console.log(`  遊戲邏輯尺寸: ${gameWidth}x${gameHeight}`);
                 }
                 return { x: worldX, y: worldY, method: 'world' };
             }
         }
-        
-        // 方法2: 計算相對於畫布的座標
+
+        // 方法2: 計算相對於畫布的座標（備用方法）
         const relativeX = pointer.x - canvasRect.left;
         const relativeY = pointer.y - canvasRect.top;
-        
-        // 考慮縮放比例
-        const scaleX = canvas.width / canvasRect.width;
-        const scaleY = canvas.height / canvasRect.height;
-        
+
+        // 🎯 計算從顯示尺寸到遊戲邏輯尺寸的縮放比例
+        const scaleX = gameWidth / canvasRect.width;
+        const scaleY = gameHeight / canvasRect.height;
+
         const scaledX = relativeX * scaleX;
         const scaledY = relativeY * scaleY;
-        
+
         if (this.debugMode) {
             console.log(`🔧 [座標修復] 計算結果:`);
             console.log(`  原始座標: (${pointer.x}, ${pointer.y})`);
+            console.log(`  畫布顯示尺寸: ${canvasRect.width.toFixed(0)}x${canvasRect.height.toFixed(0)}`);
+            console.log(`  遊戲邏輯尺寸: ${gameWidth}x${gameHeight}`);
             console.log(`  畫布偏移: (${canvasRect.left}, ${canvasRect.top})`);
-            console.log(`  相對座標: (${relativeX}, ${relativeY})`);
+            console.log(`  相對座標: (${relativeX.toFixed(2)}, ${relativeY.toFixed(2)})`);
             console.log(`  縮放比例: (${scaleX.toFixed(3)}, ${scaleY.toFixed(3)})`);
             console.log(`  最終座標: (${scaledX.toFixed(2)}, ${scaledY.toFixed(2)})`);
         }
-        
-        return { 
-            x: scaledX, 
-            y: scaledY, 
+
+        return {
+            x: scaledX,
+            y: scaledY,
             method: 'calculated',
             debug: {
                 original: { x: pointer.x, y: pointer.y },
-                canvasOffset: { x: canvasRect.left, y: canvasRect.top },
+                canvasRect: {
+                    left: canvasRect.left,
+                    top: canvasRect.top,
+                    width: canvasRect.width,
+                    height: canvasRect.height
+                },
+                gameSize: { width: gameWidth, height: gameHeight },
                 relative: { x: relativeX, y: relativeY },
                 scale: { x: scaleX, y: scaleY }
             }
