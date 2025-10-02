@@ -632,24 +632,39 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 🆕 創建目標詞彙顯示系統 - 從 Airplane Game 移植
+     * 🆕 初始化目標詞彙顯示系統 - 從 Airplane Game 移植
+     * 注意：UI 元素將在第一次 update() 中創建，因為 worldView 在 create() 時還沒有初始化
      */
     createTargetWordDisplay() {
-        // 🆕 使用相機的 worldView - 這是相機實際可見的世界座標區域
+        // 初始化學習統計
+        this.wordsLearned = 0;                               // 已學習的單字數
+        this.score = 0;                                      // 分數
+        this.currentTargetWord = null;                       // 當前目標詞彙
+
+        // 🆕 標誌位：UI 是否已創建
+        this.uiCreated = false;
+
+        // 初始化 UI 元素為 null
+        this.scoreText = null;
+        this.chineseText = null;
+        this.targetText = null;
+
+        console.log('🎯 目標詞彙顯示系統初始化完成（UI 將在 worldView 初始化後創建）');
+    }
+
+    /**
+     * 🆕 實際創建 UI 元素 - 在 worldView 初始化後調用
+     */
+    createUIElements() {
         const cam = this.cameras.main;
         const worldView = cam.worldView;
 
-        console.log('📐 創建 UI - worldView:', {
+        console.log('📐 創建 UI 元素 - worldView:', {
             x: worldView.x,
             y: worldView.y,
             width: worldView.width,
             height: worldView.height
         });
-
-        // 初始化學習統計
-        this.wordsLearned = 0;                               // 已學習的單字數
-        this.score = 0;                                      // 分數
-        this.currentTargetWord = null;                       // 當前目標詞彙
 
         // 🆕 三列布局 - 基於 worldView 計算每列的 X 座標
         // worldView 是相機實際可見的世界座標區域
@@ -718,7 +733,17 @@ export default class Title extends Phaser.Scene {
         this.targetText.setScrollFactor(0);                  // 固定在螢幕上
         this.targetText.setDepth(200);                       // 確保在最前面
 
-        console.log('🎯 目標詞彙顯示系統初始化完成');
+        // 設置當前目標詞彙的顯示
+        if (this.currentTargetWord) {
+            this.chineseText.setText(this.currentTargetWord.chinese);
+            this.targetText.setText(this.currentTargetWord.english);
+        }
+
+        // 更新分數顯示
+        this.updateScoreDisplay();
+
+        console.log('✅ UI 元素創建完成');
+        this.uiCreated = true;
     }
 
     /**
@@ -1227,6 +1252,18 @@ export default class Title extends Phaser.Scene {
 
     update() {
         if (!this.sceneStopped) {
+            // 🆕 檢查是否需要創建 UI（在 worldView 初始化後）
+            if (!this.uiCreated) {
+                const cam = this.cameras.main;
+                const worldView = cam.worldView;
+
+                // 檢查 worldView 是否已初始化（width > 0）
+                if (worldView.width > 0) {
+                    console.log('✅ worldView 已初始化，創建 UI 元素');
+                    this.createUIElements();
+                }
+            }
+
             this.updateParallaxBackground();
             this.updateSpaceship();
             this.updateEnemies();
