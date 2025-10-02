@@ -88,6 +88,26 @@ export default class Preload extends Phaser.Scene {
 
     create() {
         const { width, height } = this               // 解構賦值獲取寬高
+
+        // 🆕 初始化管理器系統 - 從 Airplane Game 移植
+        console.log('🎮 初始化管理器系統...');
+
+        // 初始化 GEPT 詞彙管理器
+        if (typeof GEPTManager !== 'undefined') {
+            this.game.geptManager = new GEPTManager();
+            console.log('✅ GEPT 詞彙管理器初始化完成');
+        } else {
+            console.warn('⚠️ GEPTManager 未載入');
+        }
+
+        // 初始化雙語發音管理器
+        if (typeof BilingualManager !== 'undefined') {
+            this.game.bilingualManager = new BilingualManager();
+            console.log('✅ 雙語發音管理器初始化完成');
+        } else {
+            console.warn('⚠️ BilingualManager 未載入');
+        }
+
         // CONFIG SCENE - 場景配置區塊
         this.handlerScene.updateResize(this)         // 更新響應式配置，適應不同螢幕尺寸
         if (this.game.debugMode)                     // 如果是調試模式
