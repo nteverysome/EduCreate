@@ -635,18 +635,33 @@ export default class Title extends Phaser.Scene {
      * 🆕 創建目標詞彙顯示系統 - 從 Airplane Game 移植
      */
     createTargetWordDisplay() {
-        const { width, height } = this;
+        // 🆕 使用相機的實際可見區域 - 動態適應不同解析度
+        const cam = this.cameras.main;
+        const worldView = cam.worldView;
+
+        // 計算實際可見區域的寬度和高度
+        const visibleWidth = worldView.width || this.width;
+        const visibleHeight = worldView.height || this.height;
+        const offsetX = worldView.x || 0;
+        const offsetY = worldView.y || 0;
+
+        console.log('📐 創建 UI - 可見區域:', {
+            width: visibleWidth,
+            height: visibleHeight,
+            offsetX: offsetX,
+            offsetY: offsetY
+        });
 
         // 初始化學習統計
         this.wordsLearned = 0;                               // 已學習的單字數
         this.score = 0;                                      // 分數
         this.currentTargetWord = null;                       // 當前目標詞彙
 
-        // 🆕 三列布局 - 計算每列的 X 座標
-        const leftX = width * 0.25;                          // 左列（25%）
-        const centerX = width * 0.5;                         // 中列（50%）
-        const rightX = width * 0.75;                         // 右列（75%）
-        const topY = 50;                                     // 統一的 Y 座標
+        // 🆕 三列布局 - 基於實際可見區域計算每列的 X 座標
+        const leftX = offsetX + visibleWidth * 0.25;         // 左列（25%）
+        const centerX = offsetX + visibleWidth * 0.5;        // 中列（50%）
+        const rightX = offsetX + visibleWidth * 0.75;        // 右列（75%）
+        const topY = offsetY + 50;                           // 統一的 Y 座標（相對於可見區域）
 
         // 🆕 創建分數顯示（左列）
         this.scoreText = this.add.text(
