@@ -801,7 +801,23 @@ export default class Title extends Phaser.Scene {
             return;
         }
 
-        // 🎯 使用攝影機 worldView 獲取真正的 FIT 後遊戲可見區域
+        // � 獲取隨機詞彙 - 從 GEPT 管理器
+        if (!this.game.geptManager) {
+            console.warn('⚠️ GEPT 管理器未初始化');
+            return;
+        }
+
+        const word = this.game.geptManager.getRandomWord();
+        if (!word) {
+            console.warn('⚠️ 無法獲取隨機詞彙');
+            return;
+        }
+
+        // 🆕 判斷是否為目標詞彙
+        const isTarget = this.currentTargetWord &&
+                        word.english === this.currentTargetWord.english;
+
+        // �🎯 使用攝影機 worldView 獲取真正的 FIT 後遊戲可見區域
         const cam = this.cameras.main;
         const worldView = cam.worldView;  // 經過 FIT 縮放後的實際遊戲區域
 
@@ -816,8 +832,30 @@ export default class Title extends Phaser.Scene {
         enemy.setDepth(-65);                             // 在太空船後面，視差背景前面
         enemy.setAlpha(0.8);                             // 稍微透明，更像雲朵
 
+        // 🆕 設置敵人數據 - 存儲詞彙信息
+        enemy.setData('word', word);                     // 存儲詞彙對象
+        enemy.setData('isTarget', isTarget);             // 存儲是否為目標詞彙
+
         // 設置敵人屬性 - 移動速度
         enemy.speed = Phaser.Math.Between(1, 3);         // 隨機速度（1-3像素/幀）
+
+        // 🆕 添加詞彙文字 - 顯示英文單字
+        const wordText = this.add.text(
+            enemy.x,                                     // X座標（與敵人對齊）
+            enemy.y - 40,                                // Y座標（敵人上方40像素）
+            word.english,                                // 顯示英文單字
+            {
+                fontSize: '20px',                        // 字體大小
+                color: isTarget ? '#ff0000' : '#000000', // 目標詞彙紅色，其他黑色
+                fontStyle: isTarget ? 'bold' : 'normal', // 目標詞彙粗體
+                backgroundColor: isTarget ? '#ffff00' : 'rgba(255, 255, 255, 0.8)', // 目標詞彙黃色背景
+                padding: { x: 6, y: 3 }                  // 內邊距
+            }
+        ).setOrigin(0.5);                                // 設置原點為中央
+        wordText.setDepth(-64);                          // 在敵人前面
+
+        // 🆕 將文字綁定到敵人 - 用於同步移動和銷毀
+        enemy.setData('wordText', wordText);
 
         // 添加浮動動畫 - 讓雲朵上下浮動增加真實感
         this.tweens.add({
@@ -833,6 +871,7 @@ export default class Title extends Phaser.Scene {
         this.enemies.push(enemy);
 
         console.log(`☁️ 生成雲朵敵人在位置 (${enemy.x}, ${enemy.y})`);
+        console.log(`📝 詞彙: ${word.chinese} (${word.english}) - ${isTarget ? '目標' : '干擾'}`);
         console.log(`📐 攝影機 worldView: left=${worldView.left}, right=${worldView.right}, top=${worldView.top}, bottom=${worldView.bottom}`);
     }
 
@@ -859,15 +898,26 @@ export default class Title extends Phaser.Scene {
                 // 向左移動 - 敵人從右向左移動
                 enemy.x -= enemy.speed;
 
+                // 🆕 同步移動詞彙文字 - 讓文字跟隨敵人移動
+                const wordText = enemy.getData('wordText');
+                if (wordText && wordText.active) {
+                    wordText.x = enemy.x;                // 同步X座標
+                    wordText.y = enemy.y - 40;           // 保持在敵人上方40像素
+                }
+
                 // 檢查與太空船的碰撞 - 碰撞檢測
                 if (this.player && this.checkCollision(this.player, enemy)) {
-                    // 太空船受到傷害 - 處理碰撞後果
-                    this.takeDamage(10);                 // 造成10點傷害
+                    // 🆕 處理碰撞 - 判斷是否碰撞正確目標
+                    this.handleEnemyCollision(enemy);
+
+                    // 🆕 銷毀詞彙文字
+                    if (wordText && wordText.active) {
+                        wordText.destroy();
+                    }
 
                     // 銷毀敵人 - 清理碰撞的敵人
                     enemy.destroy();                     // 銷毀精靈物件
                     this.enemies.splice(i, 1);          // 從陣列中移除
-                    console.log('💥 太空船與雲朵碰撞！');
                     continue;                            // 跳過後續檢查
                 }
 
@@ -877,6 +927,11 @@ export default class Title extends Phaser.Scene {
 
                 // 完全飛出 FIT 後遊戲區域左邊界時銷毀
                 if (enemy.x < worldView.left - 100) {    // 檢查是否移出 FIT 後遊戲區域左側
+                    // 🆕 銷毀詞彙文字
+                    if (wordText && wordText.active) {
+                        wordText.destroy();
+                    }
+
                     enemy.destroy();                     // 銷毀精靈物件
                     this.enemies.splice(i, 1);          // 從陣列中移除
                     console.log('☁️ 雲朵敵人飛出 FIT 遊戲區域，已銷毀');
@@ -886,6 +941,120 @@ export default class Title extends Phaser.Scene {
                 this.enemies.splice(i, 1);
             }
         }
+    }
+
+    /**
+     * 🆕 處理敵人碰撞 - 判斷是否碰撞正確目標並處理後果
+     */
+    handleEnemyCollision(enemy) {
+        const word = enemy.getData('word');
+        const isTarget = enemy.getData('isTarget');
+
+        if (isTarget) {
+            // ✅ 碰撞正確目標
+            console.log('✅ 碰撞正確目標:', word.chinese, word.english);
+
+            // 增加分數和單字數
+            this.score += 10;
+            this.wordsLearned += 1;
+
+            // 播放雙語發音
+            if (this.game.bilingualManager) {
+                this.game.bilingualManager.speakBilingual(
+                    word.english,
+                    word.chinese
+                );
+            }
+
+            // 顯示成功提示
+            this.showSuccessMessage(word);
+
+            // 設置新的目標詞彙
+            this.setRandomTargetWord();
+
+            // 更新分數顯示
+            this.updateScoreDisplay();
+        } else {
+            // ❌ 碰撞錯誤目標
+            console.log('❌ 碰撞錯誤目標:', word.chinese, word.english);
+
+            // 減少分數和生命值
+            this.score = Math.max(0, this.score - 5);
+            this.takeDamage(10);
+
+            // 顯示錯誤提示
+            this.showErrorMessage();
+
+            // 更新分數顯示
+            this.updateScoreDisplay();
+        }
+    }
+
+    /**
+     * 🆕 顯示成功提示 - 碰撞正確目標時的視覺反饋
+     */
+    showSuccessMessage(word) {
+        const { width, height } = this;
+
+        // 創建成功提示文字
+        const successText = this.add.text(
+            width / 2,
+            height / 2,
+            `✅ 正確！\n${word.chinese} (${word.english})`,
+            {
+                fontSize: '32px',
+                color: '#00ff00',
+                fontStyle: 'bold',
+                align: 'center',
+                stroke: '#000000',
+                strokeThickness: 4
+            }
+        ).setOrigin(0.5);
+        successText.setScrollFactor(0);
+        successText.setDepth(300);
+
+        // 淡出動畫
+        this.tweens.add({
+            targets: successText,
+            alpha: 0,
+            duration: 2000,
+            onComplete: () => {
+                successText.destroy();
+            }
+        });
+    }
+
+    /**
+     * 🆕 顯示錯誤提示 - 碰撞錯誤目標時的視覺反饋
+     */
+    showErrorMessage() {
+        const { width, height } = this;
+
+        // 創建錯誤提示文字
+        const errorText = this.add.text(
+            width / 2,
+            height / 2,
+            '❌ 錯誤！',
+            {
+                fontSize: '32px',
+                color: '#ff0000',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 4
+            }
+        ).setOrigin(0.5);
+        errorText.setScrollFactor(0);
+        errorText.setDepth(300);
+
+        // 淡出動畫
+        this.tweens.add({
+            targets: errorText,
+            alpha: 0,
+            duration: 1000,
+            onComplete: () => {
+                errorText.destroy();
+            }
+        });
     }
 
     /**
