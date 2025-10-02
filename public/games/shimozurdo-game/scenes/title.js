@@ -635,18 +635,15 @@ export default class Title extends Phaser.Scene {
      * 🆕 創建目標詞彙顯示系統 - 從 Airplane Game 移植
      */
     createTargetWordDisplay() {
-        // 🆕 使用相機視口尺寸 - 這是實際顯示的區域
+        // 🆕 使用相機的 worldView - 這是相機實際可見的世界座標區域
         const cam = this.cameras.main;
+        const worldView = cam.worldView;
 
-        // 使用相機視口尺寸（這是實際顯示的區域）
-        const visibleWidth = cam.width;
-        const visibleHeight = cam.height;
-
-        console.log('📐 創建 UI - 相機視口:', {
-            width: visibleWidth,
-            height: visibleHeight,
-            scrollX: cam.scrollX,
-            scrollY: cam.scrollY
+        console.log('📐 創建 UI - worldView:', {
+            x: worldView.x,
+            y: worldView.y,
+            width: worldView.width,
+            height: worldView.height
         });
 
         // 初始化學習統計
@@ -654,12 +651,12 @@ export default class Title extends Phaser.Scene {
         this.score = 0;                                      // 分數
         this.currentTargetWord = null;                       // 當前目標詞彙
 
-        // 🆕 三列布局 - 基於相機視口計算每列的 X 座標
-        // 使用 cam.scrollX 來獲取相機當前的滾動位置
-        const leftX = cam.scrollX + visibleWidth * 0.25;     // 左列（25%）
-        const centerX = cam.scrollX + visibleWidth * 0.5;    // 中列（50%）
-        const rightX = cam.scrollX + visibleWidth * 0.75;    // 右列（75%）
-        const topY = cam.scrollY + 50;                       // 統一的 Y 座標（相對於相機）
+        // 🆕 三列布局 - 基於 worldView 計算每列的 X 座標
+        // worldView 是相機實際可見的世界座標區域
+        const leftX = worldView.x + worldView.width * 0.25;  // 左列（25%）
+        const centerX = worldView.x + worldView.width * 0.5; // 中列（50%）
+        const rightX = worldView.x + worldView.width * 0.75; // 右列（75%）
+        const topY = worldView.y + 50;                       // 統一的 Y 座標（相對於 worldView）
 
         // 🆕 創建分數顯示（左列）
         this.scoreText = this.add.text(
@@ -1214,13 +1211,13 @@ export default class Title extends Phaser.Scene {
         if (!this.scoreText || !this.chineseText || !this.targetText) return;
 
         const cam = this.cameras.main;
-        const visibleWidth = cam.width;
+        const worldView = cam.worldView;
 
-        // 計算三列位置（相對於相機當前位置）
-        const leftX = cam.scrollX + visibleWidth * 0.25;
-        const centerX = cam.scrollX + visibleWidth * 0.5;
-        const rightX = cam.scrollX + visibleWidth * 0.75;
-        const topY = cam.scrollY + 50;
+        // 計算三列位置（基於 worldView）
+        const leftX = worldView.x + worldView.width * 0.25;
+        const centerX = worldView.x + worldView.width * 0.5;
+        const rightX = worldView.x + worldView.width * 0.75;
+        const topY = worldView.y + 50;
 
         // 更新位置
         this.scoreText.setPosition(leftX, topY);
