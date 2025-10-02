@@ -191,9 +191,15 @@ function initializeGame() {
     console.log('  TitleScene:', !!window.TitleScene);
     console.log('  HubScene:', !!window.HubScene);
 
-    if (!window.HandlerScene || !window.PreloadScene || !window.MenuScene || !window.TitleScene || !window.HubScene) {
-      console.error('❌ 場景類別未完全載入');
+    // 🔧 修改：只檢查核心場景，HubScene 是可選的
+    if (!window.HandlerScene || !window.PreloadScene || !window.MenuScene || !window.TitleScene) {
+      console.error('❌ 核心場景類別未完全載入');
       return;
+    }
+
+    // 如果 HubScene 未載入，發出警告但繼續
+    if (!window.HubScene) {
+      console.warn('⚠️ HubScene 未載入，將跳過此場景');
     }
 
     // 創建完整的 Phaser 遊戲配置物件 - 使用手機優先配置
@@ -233,13 +239,14 @@ function initializeGame() {
         createContainer: true
       },
       // 場景載入順序，使用動態載入的場景類別
+      // 🔧 修改：只添加已成功載入的場景
       scene: [
         window.HandlerScene,  // Handler 場景 - 場景管理器
         window.PreloadScene,  // Preload 場景 - 資源載入器
         window.MenuScene,     // Menu 場景 - 主菜單 (新增)
         window.TitleScene,    // Title 場景 - 遊戲主場景
-        window.HubScene       // Hub 場景 - UI 控制介面
-      ],
+        ...(window.HubScene ? [window.HubScene] : [])  // Hub 場景 - UI 控制介面（可選）
+      ].filter(Boolean),  // 過濾掉 undefined 或 null
       // 遊戲生命週期回調函數
       callbacks: {
         // postBoot 回調 - 在遊戲引擎完全啟動後執行
