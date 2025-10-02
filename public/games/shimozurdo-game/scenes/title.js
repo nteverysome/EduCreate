@@ -42,6 +42,12 @@ export default class Title extends Phaser.Scene {
         // ❤️ 創建生命值系統 - 玩家血量顯示和管理
         this.createHealthSystem()
 
+        // 🆕 創建目標詞彙顯示系統 - 從 Airplane Game 移植
+        this.createTargetWordDisplay()
+
+        // 🆕 設置隨機目標詞彙 - 初始化第一個學習目標
+        this.setRandomTargetWord()
+
         // GAME OBJECTS - 遊戲物件區塊
         // 初始化響應式元素數組 - 用於螢幕尺寸變化時的元素調整
         this.testElements = [];
@@ -623,6 +629,115 @@ export default class Title extends Phaser.Scene {
         this.healthText.setDepth(103);                   // 在所有元素之上
 
         console.log('❤️ 生命值系統初始化完成');
+    }
+
+    /**
+     * 🆕 創建目標詞彙顯示系統 - 從 Airplane Game 移植
+     */
+    createTargetWordDisplay() {
+        const { width, height } = this;
+
+        // 初始化學習統計
+        this.wordsLearned = 0;                               // 已學習的單字數
+        this.score = 0;                                      // 分數
+        this.currentTargetWord = null;                       // 當前目標詞彙
+
+        // 創建上方黃色文字（完整信息顯示）
+        this.targetText = this.add.text(
+            width / 2,                                       // X座標（螢幕中央）
+            20,                                              // Y座標（頂部20像素）
+            '',                                              // 初始文字為空
+            {
+                fontSize: '24px',                            // 字體大小
+                color: '#ffff00',                            // 黃色
+                fontStyle: 'bold',                           // 粗體
+                stroke: '#000000',                           // 黑色描邊
+                strokeThickness: 4                           // 描邊粗細
+            }
+        ).setOrigin(0.5);                                    // 設置原點為中央
+        this.targetText.setScrollFactor(0);                  // 固定在螢幕上
+        this.targetText.setDepth(200);                       // 確保在最前面
+
+        // 創建黃色框大字（母語認知核心，可點擊發音）
+        this.chineseText = this.add.text(
+            width / 2,                                       // X座標（螢幕中央）
+            100,                                             // Y座標（頂部100像素）
+            '',                                              // 初始文字為空
+            {
+                fontSize: '48px',                            // 大字體
+                color: '#000000',                            // 黑色文字
+                backgroundColor: '#ffff00',                  // 黃色背景
+                padding: { x: 20, y: 10 }                    // 內邊距
+            }
+        ).setOrigin(0.5);                                    // 設置原點為中央
+        this.chineseText.setScrollFactor(0);                 // 固定在螢幕上
+        this.chineseText.setDepth(200);                      // 確保在最前面
+        this.chineseText.setInteractive();                   // 設置為可互動
+
+        // 點擊黃色框播放雙語發音
+        this.chineseText.on('pointerdown', () => {
+            if (this.currentTargetWord && this.game.bilingualManager) {
+                console.log('🔊 播放雙語發音:', this.currentTargetWord.chinese, this.currentTargetWord.english);
+                this.game.bilingualManager.speakBilingual(
+                    this.currentTargetWord.english,
+                    this.currentTargetWord.chinese
+                );
+            }
+        });
+
+        // 創建分數顯示（左上角）
+        this.scoreText = this.add.text(
+            20,                                              // X座標（左邊距）
+            20,                                              // Y座標（頂部20像素）
+            '分數: 0 | 單字: 0',                             // 初始文字
+            {
+                fontSize: '20px',                            // 字體大小
+                color: '#ffffff',                            // 白色
+                fontStyle: 'bold',                           // 粗體
+                stroke: '#000000',                           // 黑色描邊
+                strokeThickness: 3                           // 描邊粗細
+            }
+        ).setOrigin(0);                                      // 設置原點為左上角
+        this.scoreText.setScrollFactor(0);                   // 固定在螢幕上
+        this.scoreText.setDepth(200);                        // 確保在最前面
+
+        console.log('🎯 目標詞彙顯示系統初始化完成');
+    }
+
+    /**
+     * 🆕 設置隨機目標詞彙 - 從 GEPT 管理器獲取新的學習目標
+     */
+    setRandomTargetWord() {
+        if (!this.game.geptManager) {
+            console.warn('⚠️ GEPT 管理器未初始化');
+            return;
+        }
+
+        // 獲取隨機詞彙
+        this.currentTargetWord = this.game.geptManager.getRandomWord();
+
+        if (this.currentTargetWord) {
+            console.log('🎯 新目標詞彙:', this.currentTargetWord.chinese, this.currentTargetWord.english);
+
+            // 更新上方黃色文字
+            this.targetText.setText(
+                `目標: ${this.currentTargetWord.chinese} (${this.currentTargetWord.english})`
+            );
+
+            // 更新黃色框大字
+            this.chineseText.setText(this.currentTargetWord.chinese);
+        } else {
+            console.warn('⚠️ 無法獲取隨機詞彙');
+        }
+    }
+
+    /**
+     * 🆕 更新分數顯示 - 更新分數和單字數統計
+     */
+    updateScoreDisplay() {
+        if (this.scoreText) {
+            this.scoreText.setText(`分數: ${this.score} | 單字: ${this.wordsLearned}`);
+        }
     }
 
     /**
