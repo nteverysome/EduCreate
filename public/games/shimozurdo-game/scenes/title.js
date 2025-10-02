@@ -642,10 +642,26 @@ export default class Title extends Phaser.Scene {
         this.score = 0;                                      // 分數
         this.currentTargetWord = null;                       // 當前目標詞彙
 
-        // 創建上方黃色文字（完整信息顯示）
+        // 🆕 創建分數顯示（螢幕中上方 - 第一行）
+        this.scoreText = this.add.text(
+            width / 2,                                       // X座標（螢幕中央）
+            30,                                              // Y座標（頂部30像素）
+            '分數: 0 | 單字: 0',                             // 初始文字
+            {
+                fontSize: '20px',                            // 字體大小
+                color: '#ffffff',                            // 白色
+                fontStyle: 'bold',                           // 粗體
+                stroke: '#000000',                           // 黑色描邊
+                strokeThickness: 3                           // 描邊粗細
+            }
+        ).setOrigin(0.5);                                    // 設置原點為中央
+        this.scoreText.setScrollFactor(0);                   // 固定在螢幕上
+        this.scoreText.setDepth(200);                        // 確保在最前面
+
+        // 🆕 創建上方黃色文字（螢幕中上方 - 第二行）
         this.targetText = this.add.text(
             width / 2,                                       // X座標（螢幕中央）
-            20,                                              // Y座標（頂部20像素）
+            70,                                              // Y座標（頂部70像素）
             '',                                              // 初始文字為空
             {
                 fontSize: '24px',                            // 字體大小
@@ -658,10 +674,10 @@ export default class Title extends Phaser.Scene {
         this.targetText.setScrollFactor(0);                  // 固定在螢幕上
         this.targetText.setDepth(200);                       // 確保在最前面
 
-        // 創建黃色框大字（母語認知核心，可點擊發音）
+        // 🆕 創建黃色框大字（螢幕中上方 - 第三行，可點擊發音）
         this.chineseText = this.add.text(
             width / 2,                                       // X座標（螢幕中央）
-            100,                                             // Y座標（頂部100像素）
+            120,                                             // Y座標（頂部120像素）
             '',                                              // 初始文字為空
             {
                 fontSize: '48px',                            // 大字體
@@ -684,22 +700,6 @@ export default class Title extends Phaser.Scene {
                 );
             }
         });
-
-        // 創建分數顯示（左上角）
-        this.scoreText = this.add.text(
-            20,                                              // X座標（左邊距）
-            20,                                              // Y座標（頂部20像素）
-            '分數: 0 | 單字: 0',                             // 初始文字
-            {
-                fontSize: '20px',                            // 字體大小
-                color: '#ffffff',                            // 白色
-                fontStyle: 'bold',                           // 粗體
-                stroke: '#000000',                           // 黑色描邊
-                strokeThickness: 3                           // 描邊粗細
-            }
-        ).setOrigin(0);                                      // 設置原點為左上角
-        this.scoreText.setScrollFactor(0);                   // 固定在螢幕上
-        this.scoreText.setDepth(200);                        // 確保在最前面
 
         console.log('🎯 目標詞彙顯示系統初始化完成');
     }
