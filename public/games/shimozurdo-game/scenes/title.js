@@ -635,21 +635,18 @@ export default class Title extends Phaser.Scene {
      * 🆕 創建目標詞彙顯示系統 - 從 Airplane Game 移植
      */
     createTargetWordDisplay() {
-        // 🆕 使用相機的實際可見區域 - 動態適應不同解析度
+        // 🆕 使用相機視口尺寸 - 這是實際顯示的區域
         const cam = this.cameras.main;
-        const worldView = cam.worldView;
 
-        // 計算實際可見區域的寬度和高度
-        const visibleWidth = worldView.width || this.width;
-        const visibleHeight = worldView.height || this.height;
-        const offsetX = worldView.x || 0;
-        const offsetY = worldView.y || 0;
+        // 使用相機視口尺寸（這是實際顯示的區域）
+        const visibleWidth = cam.width;
+        const visibleHeight = cam.height;
 
-        console.log('📐 創建 UI - 可見區域:', {
+        console.log('📐 創建 UI - 相機視口:', {
             width: visibleWidth,
             height: visibleHeight,
-            offsetX: offsetX,
-            offsetY: offsetY
+            scrollX: cam.scrollX,
+            scrollY: cam.scrollY
         });
 
         // 初始化學習統計
@@ -657,11 +654,12 @@ export default class Title extends Phaser.Scene {
         this.score = 0;                                      // 分數
         this.currentTargetWord = null;                       // 當前目標詞彙
 
-        // 🆕 三列布局 - 基於實際可見區域計算每列的 X 座標
-        const leftX = offsetX + visibleWidth * 0.25;         // 左列（25%）
-        const centerX = offsetX + visibleWidth * 0.5;        // 中列（50%）
-        const rightX = offsetX + visibleWidth * 0.75;        // 右列（75%）
-        const topY = offsetY + 50;                           // 統一的 Y 座標（相對於可見區域）
+        // 🆕 三列布局 - 基於相機視口計算每列的 X 座標
+        // 使用 cam.scrollX 來獲取相機當前的滾動位置
+        const leftX = cam.scrollX + visibleWidth * 0.25;     // 左列（25%）
+        const centerX = cam.scrollX + visibleWidth * 0.5;    // 中列（50%）
+        const rightX = cam.scrollX + visibleWidth * 0.75;    // 右列（75%）
+        const topY = cam.scrollY + 50;                       // 統一的 Y 座標（相對於相機）
 
         // 🆕 創建分數顯示（左列）
         this.scoreText = this.add.text(
@@ -1209,11 +1207,33 @@ export default class Title extends Phaser.Scene {
     /**
      * 場景更新函數
      */
+    /**
+     * 🆕 更新 UI 元素位置 - 確保 UI 始終跟隨相機
+     */
+    updateUIPositions() {
+        if (!this.scoreText || !this.chineseText || !this.targetText) return;
+
+        const cam = this.cameras.main;
+        const visibleWidth = cam.width;
+
+        // 計算三列位置（相對於相機當前位置）
+        const leftX = cam.scrollX + visibleWidth * 0.25;
+        const centerX = cam.scrollX + visibleWidth * 0.5;
+        const rightX = cam.scrollX + visibleWidth * 0.75;
+        const topY = cam.scrollY + 50;
+
+        // 更新位置
+        this.scoreText.setPosition(leftX, topY);
+        this.chineseText.setPosition(centerX, topY);
+        this.targetText.setPosition(rightX, topY);
+    }
+
     update() {
         if (!this.sceneStopped) {
             this.updateParallaxBackground();
             this.updateSpaceship();
             this.updateEnemies();
+            this.updateUIPositions();  // 🆕 更新 UI 位置
         }
     }
 }
