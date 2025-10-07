@@ -1229,22 +1229,21 @@ export default class Title extends Phaser.Scene {
         // 🎯 更新血條位置 - 血條保持在右下角
         this.updateHealthBarPositions();
 
-        // 🎯 三列布局新位置：螢幕左上角（用戶要求的位置）
-        // 距離頂部 50px，距離左邊 100px
-        const uiY = 50;  // 距離頂部 50px
+        // 🎯 三列布局新位置：用戶指定座標 x=184, y=260
+        const centerX = 184;  // 用戶指定的中心 X 座標
+        const centerY = 260;  // 用戶指定的中心 Y 座標
 
-        // 🎯 三列布局水平位置：從左邊 100px 開始
+        // 🎯 三列布局水平位置：以指定座標為中心
         const spacing = 120;  // 三列之間的間距
-        const startX = 100;   // 距離左邊 100px
 
-        const leftX = startX;                   // 左列（分數）
-        const middleX = startX + spacing;       // 中列（中文詞彙）
-        const rightX = startX + spacing * 2;   // 右列（英文詞彙）
+        const leftX = centerX - spacing;     // 左列（分數）
+        const middleX = centerX;             // 中列（中文詞彙）- 中心位置
+        const rightX = centerX + spacing;   // 右列（英文詞彙）
 
         // 更新三列布局位置
-        this.scoreText.setPosition(leftX, uiY);
-        this.chineseText.setPosition(middleX, uiY);
-        this.targetText.setPosition(rightX, uiY);
+        this.scoreText.setPosition(leftX, centerY);
+        this.chineseText.setPosition(middleX, centerY);
+        this.targetText.setPosition(rightX, centerY);
     }
 
     /**
