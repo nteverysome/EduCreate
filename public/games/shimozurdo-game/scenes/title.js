@@ -1233,9 +1233,9 @@ export default class Title extends Phaser.Scene {
         // 🎯 更新血條位置 - 血條保持在右下角
         this.updateHealthBarPositions();
 
-        // 🎯 三列布局新位置：畫面右上角（安全位置）
-        const margin = 50;  // 距離邊緣的間距
-        const uiY = cam.scrollY + margin;  // 距離頂部 50px
+        // 🎯 三列布局新位置：畫面右上角（更明顯的位置）
+        const margin = 100;  // 距離邊緣的間距
+        const uiY = cam.scrollY + margin;  // 距離頂部 100px（更明顯）
 
         // 🎯 三列布局水平位置：右上角，避開遊戲主要區域
         const spacing = 120;  // 三列之間的間距
