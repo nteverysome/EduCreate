@@ -922,13 +922,32 @@ export default class Title extends Phaser.Scene {
             this.enemySpawnDelay = Phaser.Math.Between(2000, 4000);
         }
 
+        // 🎯 獲取世界邊界用於限制雲朵移動（移到迴圈外避免重複宣告）
+        const cam = this.cameras.main;
+        const worldView = cam.worldView;
+
         // 更新現有敵人 - 倒序遍歷以安全刪除元素
         for (let i = this.enemies.length - 1; i >= 0; i--) {
             const enemy = this.enemies[i];              // 獲取當前敵人
 
             if (enemy && enemy.active) {                 // 檢查敵人是否有效且活躍
+
                 // 向左移動 - 敵人從右向左移動
                 enemy.x -= enemy.speed;
+
+                // 🆕 添加邊界限制 - 限制雲朵在 worldView 範圍內
+                if (enemy.x < worldView.left) {
+                    enemy.x = worldView.left;             // 限制在左邊界
+                }
+                if (enemy.x > worldView.right) {
+                    enemy.x = worldView.right;            // 限制在右邊界
+                }
+                if (enemy.y < worldView.top) {
+                    enemy.y = worldView.top;              // 限制在上邊界
+                }
+                if (enemy.y > worldView.bottom) {
+                    enemy.y = worldView.bottom;           // 限制在下邊界
+                }
 
                 // 🆕 同步移動詞彙文字 - 讓文字跟隨敵人移動
                 const wordText = enemy.getData('wordText');
@@ -953,11 +972,10 @@ export default class Title extends Phaser.Scene {
                     continue;                            // 跳過後續檢查
                 }
 
-                // 🎯 使用攝影機 worldView 判斷是否飛出 FIT 後的遊戲區域
-                const cam = this.cameras.main;
-                const worldView = cam.worldView;
+                // 🎯 雲朵現在被限制在 worldView 範圍內，不會飛出邊界
+                // 但我們仍保留這個檢查作為安全措施
 
-                // 完全飛出 FIT 後遊戲區域左邊界時銷毀
+                // 檢查是否需要銷毀（現在主要用於清理，因為雲朵被限制在邊界內）
                 if (enemy.x < worldView.left - 100) {    // 檢查是否移出 FIT 後遊戲區域左側
                     // 🆕 銷毀詞彙文字
                     if (wordText && wordText.active) {
