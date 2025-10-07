@@ -659,7 +659,8 @@ export default class Title extends Phaser.Scene {
         const leftX = cam.scrollX + visibleWidth * 0.25;     // 左列（25%）
         const centerX = cam.scrollX + visibleWidth * 0.5;    // 中列（50%）
         const rightX = cam.scrollX + visibleWidth * 0.75;    // 右列（75%）
-        const topY = cam.scrollY + 50;                       // 統一的 Y 座標（相對於相機）
+        // 🎯 調整到視差背景上方邊緣 - 使用相機滾動位置作為基準
+        const topY = cam.scrollY + 20;                       // 距離視差背景上邊緣 20px
 
         // 🆕 創建分數顯示（左列）
         this.scoreText = this.add.text(
@@ -1220,7 +1221,8 @@ export default class Title extends Phaser.Scene {
         const leftX = cam.scrollX + visibleWidth * 0.25;
         const centerX = cam.scrollX + visibleWidth * 0.5;
         const rightX = cam.scrollX + visibleWidth * 0.75;
-        const topY = cam.scrollY + 50;
+        // 🎯 調整到視差背景上方邊緣 - 使用相機滾動位置作為基準
+        const topY = cam.scrollY + 20;  // 距離視差背景上邊緣 20px
 
         // 更新位置
         this.scoreText.setPosition(leftX, topY);
