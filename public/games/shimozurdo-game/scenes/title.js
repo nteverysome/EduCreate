@@ -1238,7 +1238,7 @@ export default class Title extends Phaser.Scene {
         const leftMargin = 50;  // 距離左邊界的邊距
 
         // 🎯 三列布局水平位置：靠左對齊
-        const spacing = 120;  // 三列之間的間距
+        const spacing = 180;  // 三列之間的間距（拉大間距）
 
         const leftX = worldView.left + leftMargin;           // 左列（分數）- 距離左邊界 50px
         const middleX = leftX + spacing;                     // 中列（中文詞彙）
