@@ -1233,16 +1233,16 @@ export default class Title extends Phaser.Scene {
         const cam = this.cameras.main;
         const worldView = cam.worldView;
 
-        // 🎯 設置在世界頂部的位置：靠左對齊
+        // 🎯 設置在世界頂部的位置：居中對齊
         const worldTopY = worldView.top + 50;  // 距離世界頂部 50px
-        const leftMargin = 50;  // 距離左邊界的邊距
+        const worldCenterX = (worldView.left + worldView.right) / 2;  // 世界中心 X
 
-        // 🎯 三列布局水平位置：靠左對齊
-        const spacing = 180;  // 三列之間的間距（拉大間距）
+        // 🎯 三列布局水平位置：居中對齊，拉大間距
+        const spacing = 220;  // 三列之間的間距（再次拉大間距）
 
-        const leftX = worldView.left + leftMargin;           // 左列（分數）- 距離左邊界 50px
-        const middleX = leftX + spacing;                     // 中列（中文詞彙）
-        const rightX = leftX + spacing * 2;                 // 右列（英文詞彙）
+        const leftX = worldCenterX - spacing;     // 左列（分數）
+        const middleX = worldCenterX;             // 中列（中文詞彙）- 中心位置
+        const rightX = worldCenterX + spacing;   // 右列（英文詞彙）
 
         // 更新三列布局位置（世界頂部座標）
         this.scoreText.setPosition(leftX, worldTopY);
