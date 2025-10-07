@@ -1230,26 +1230,20 @@ export default class Title extends Phaser.Scene {
         const visibleWidth = cam.width;
         const visibleHeight = cam.height;
 
-        // 🎯 更新血條位置 - 先更新血條位置，因為三列布局要基於血條位置計算
+        // 🎯 更新血條位置 - 血條保持在右下角
         this.updateHealthBarPositions();
 
-        // 🎯 計算血條位置（用於三列布局定位）
-        const healthBarWidth = 200;
-        const healthBarHeight = 20;
-        const margin = 20;
-        const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth;
-        const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight;
+        // 🎯 三列布局新位置：畫面左上角
+        const margin = 20;  // 距離邊緣的間距
+        const uiY = cam.scrollY + margin;  // 距離頂部 20px
 
-        // 🎯 三列布局新位置：基於血條位置，在血條上方 80px
-        const uiY = healthBarY - 80;  // 血條上方 80px
+        // 🎯 三列布局水平位置：從左上角開始，水平排列
+        const spacing = 120;  // 三列之間的間距
+        const startX = cam.scrollX + margin;  // 距離左邊緣 20px
 
-        // 🎯 三列布局水平位置：以血條為中心，左右各 120px 間距
-        const centerX = healthBarX + (healthBarWidth / 2);  // 血條中心點
-        const spacing = 120;
-
-        const leftX = centerX - spacing;    // 左列（分數）
-        const middleX = centerX;            // 中列（中文詞彙）
-        const rightX = centerX + spacing;   // 右列（英文詞彙）
+        const leftX = startX;                    // 左列（分數）
+        const middleX = startX + spacing;        // 中列（中文詞彙）
+        const rightX = startX + spacing * 2;    // 右列（英文詞彙）
 
         // 更新三列布局位置
         this.scoreText.setPosition(leftX, uiY);
