@@ -568,18 +568,22 @@ export default class Title extends Phaser.Scene {
      * ❤️ 創建生命值系統 - 建立玩家血量顯示和管理系統
      */
     createHealthSystem() {
-        const { width, height } = this;                  // 獲取場景尺寸
+        // 🎯 使用相機動態尺寸，與三列布局保持一致
+        const cam = this.cameras.main;
+        const visibleWidth = cam.width;
+        const visibleHeight = cam.height;
 
         // 生命值設定 - 初始化血量參數
         this.maxHealth = 100;                            // 最大生命值
         this.currentHealth = 100;                        // 當前生命值
 
-        // 生命值條位置和尺寸（右下角） - 計算UI元素位置
+        // 🎯 生命值條位置和尺寸（右下角） - 使用動態相機尺寸
         const healthBarWidth = 200;                      // 生命值條寬度
         const healthBarHeight = 20;                      // 生命值條高度
         const margin = 20;                               // 邊距
-        const healthBarX = width - margin - healthBarWidth;  // X座標（右邊距）
-        const healthBarY = height - margin - healthBarHeight;  // Y座標（底部邊距）
+        // 🎯 使用相機滾動位置 + 可見區域計算動態位置
+        const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth;   // 動態右邊距
+        const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight; // 動態底部邊距
 
         // 創建生命值條背景（黑色邊框） - 最外層邊框
         this.healthBarBg = this.add.rectangle(
@@ -591,6 +595,8 @@ export default class Title extends Phaser.Scene {
         );
         this.healthBarBg.setOrigin(0, 0);               // 設置原點為左上角
         this.healthBarBg.setDepth(100);                 // 確保在最前面
+        // 🎯 設置為固定在螢幕上，不跟隨相機滾動
+        this.healthBarBg.setScrollFactor(0);
 
         // 創建生命值條背景（深灰色） - 內層背景
         this.healthBarBackground = this.add.rectangle(
@@ -602,6 +608,8 @@ export default class Title extends Phaser.Scene {
         );
         this.healthBarBackground.setOrigin(0, 0);        // 設置原點為左上角
         this.healthBarBackground.setDepth(101);          // 在邊框之上
+        // 🎯 設置為固定在螢幕上，不跟隨相機滾動
+        this.healthBarBackground.setScrollFactor(0);
 
         // 創建生命值條（綠色） - 實際血量顯示條
         this.healthBar = this.add.rectangle(
@@ -613,6 +621,8 @@ export default class Title extends Phaser.Scene {
         );
         this.healthBar.setOrigin(0, 0);                  // 設置原點為左上角
         this.healthBar.setDepth(102);                    // 在背景之上
+        // 🎯 設置為固定在螢幕上，不跟隨相機滾動
+        this.healthBar.setScrollFactor(0);
 
         // 創建生命值文字 - 顯示數值（右下角，文字在血條左側）
         this.healthText = this.add.text(
@@ -627,6 +637,8 @@ export default class Title extends Phaser.Scene {
         );
         this.healthText.setOrigin(1, 0.5);               // 設置原點為右側中央
         this.healthText.setDepth(103);                   // 在所有元素之上
+        // 🎯 設置為固定在螢幕上，不跟隨相機滾動
+        this.healthText.setScrollFactor(0);
 
         console.log('❤️ 生命值系統初始化完成');
     }
@@ -1228,6 +1240,33 @@ export default class Title extends Phaser.Scene {
         this.scoreText.setPosition(leftX, topY);
         this.chineseText.setPosition(centerX, topY);
         this.targetText.setPosition(rightX, topY);
+
+        // 🎯 更新血條位置 - 讓血條也具備適應性
+        this.updateHealthBarPositions();
+    }
+
+    /**
+     * 🎯 更新血條位置 - 讓血條適應不同螢幕尺寸和相機變化
+     */
+    updateHealthBarPositions() {
+        if (!this.healthBarBg || !this.healthBarBackground || !this.healthBar || !this.healthText) return;
+
+        const cam = this.cameras.main;
+        const visibleWidth = cam.width;
+        const visibleHeight = cam.height;
+
+        // 🎯 動態計算血條位置（右下角）
+        const healthBarWidth = 200;
+        const healthBarHeight = 20;
+        const margin = 20;
+        const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth;
+        const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight;
+
+        // 更新血條背景位置
+        this.healthBarBg.setPosition(healthBarX, healthBarY);
+        this.healthBarBackground.setPosition(healthBarX + 2, healthBarY + 2);
+        this.healthBar.setPosition(healthBarX + 2, healthBarY + 2);
+        this.healthText.setPosition(healthBarX - 15, healthBarY + healthBarHeight / 2);
     }
 
     update() {
