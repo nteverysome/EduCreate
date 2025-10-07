@@ -1226,24 +1226,21 @@ export default class Title extends Phaser.Scene {
     updateUIPositions() {
         if (!this.scoreText || !this.chineseText || !this.targetText) return;
 
-        const cam = this.cameras.main;
-        const visibleWidth = cam.width;
-        const visibleHeight = cam.height;
-
         // 🎯 更新血條位置 - 血條保持在右下角
         this.updateHealthBarPositions();
 
-        // 🎯 三列布局新位置：畫面右上角（更明顯的位置）
-        const margin = 100;  // 距離邊緣的間距
-        const uiY = cam.scrollY + margin;  // 距離頂部 100px（更明顯）
+        // 🎯 三列布局新位置：血條旁邊（用戶要求的位置）
+        // 基於血條位置計算三列布局位置
+        const healthBarY = this.healthBarBg.y;
+        const uiY = healthBarY - 80;  // 血條上方 80px
 
-        // 🎯 三列布局水平位置：右上角，避開遊戲主要區域
+        // 🎯 三列布局水平位置：以血條為中心
         const spacing = 120;  // 三列之間的間距
-        const rightTopX = cam.scrollX + visibleWidth - 400;  // 距離右邊 400px
+        const healthBarX = this.healthBarBg.x;  // 血條 X 位置
 
-        const leftX = rightTopX;                    // 左列（分數）
-        const middleX = rightTopX + spacing;        // 中列（中文詞彙）
-        const rightX = rightTopX + spacing * 2;    // 右列（英文詞彙）
+        const leftX = healthBarX - spacing;     // 左列（分數）
+        const middleX = healthBarX;             // 中列（中文詞彙）
+        const rightX = healthBarX + spacing;   // 右列（英文詞彙）
 
         // 更新三列布局位置
         this.scoreText.setPosition(leftX, uiY);
