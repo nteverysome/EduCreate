@@ -688,7 +688,7 @@ export default class Title extends Phaser.Scene {
                 align: 'center'                              // 文字居中
             }
         ).setOrigin(0.5);                                    // 設置原點為中央
-        this.scoreText.setScrollFactor(0);                   // 固定在螢幕上
+        this.scoreText.setScrollFactor(1);                   // 🎯 改為世界物件，在視差背景裡面
         this.scoreText.setDepth(200);                        // 確保在最前面
 
         // 🆕 創建黃色框大字（中列，可點擊發音）
@@ -703,7 +703,7 @@ export default class Title extends Phaser.Scene {
                 padding: { x: 20, y: 10 }                    // 內邊距
             }
         ).setOrigin(0.5);                                    // 設置原點為中央
-        this.chineseText.setScrollFactor(0);                 // 固定在螢幕上
+        this.chineseText.setScrollFactor(1);                 // 🎯 改為世界物件，在視差背景裡面
         this.chineseText.setDepth(200);                      // 確保在最前面
         this.chineseText.setInteractive();                   // 設置為可互動
 
@@ -731,7 +731,7 @@ export default class Title extends Phaser.Scene {
                 strokeThickness: 4                           // 描邊粗細
             }
         ).setOrigin(0.5);                                    // 設置原點為中央
-        this.targetText.setScrollFactor(0);                  // 固定在螢幕上
+        this.targetText.setScrollFactor(1);                  // 🎯 改為世界物件，在視差背景裡面
         this.targetText.setDepth(200);                       // 確保在最前面
 
         console.log('🎯 目標詞彙顯示系統初始化完成');
@@ -1229,21 +1229,25 @@ export default class Title extends Phaser.Scene {
         // 🎯 更新血條位置 - 血條保持在右下角
         this.updateHealthBarPositions();
 
-        // 🎯 三列布局新位置：用戶指定座標 x=250, y=260
-        const centerX = 250;  // 用戶指定的中心 X 座標
-        const centerY = 260;  // 用戶指定的中心 Y 座標
+        // 🎯 三列布局現在是世界物件，使用世界座標
+        const cam = this.cameras.main;
+        const worldView = cam.worldView;
 
-        // 🎯 三列布局水平位置：以指定座標為中心
+        // 🎯 設置在可見世界範圍內的位置：左上角區域
+        const targetWorldX = worldView.left + 200;  // 距離左邊界 200px
+        const targetWorldY = worldView.top + 100;   // 距離上邊界 100px
+
+        // 🎯 三列布局水平位置：以世界座標為中心
         const spacing = 120;  // 三列之間的間距
 
-        const leftX = centerX - spacing;     // 左列（分數）
-        const middleX = centerX;             // 中列（中文詞彙）- 中心位置
-        const rightX = centerX + spacing;   // 右列（英文詞彙）
+        const leftX = targetWorldX - spacing;     // 左列（分數）
+        const middleX = targetWorldX;             // 中列（中文詞彙）- 中心位置
+        const rightX = targetWorldX + spacing;   // 右列（英文詞彙）
 
-        // 更新三列布局位置
-        this.scoreText.setPosition(leftX, centerY);
-        this.chineseText.setPosition(middleX, centerY);
-        this.targetText.setPosition(rightX, centerY);
+        // 更新三列布局位置（世界座標）
+        this.scoreText.setPosition(leftX, targetWorldY);
+        this.chineseText.setPosition(middleX, targetWorldY);
+        this.targetText.setPosition(rightX, targetWorldY);
     }
 
     /**
