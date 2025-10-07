@@ -583,7 +583,7 @@ export default class Title extends Phaser.Scene {
         const margin = 20;                               // 邊距
         // 🎯 使用相機滾動位置 + 可見區域計算動態位置
         const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth;   // 動態右邊距
-        const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight; // 動態底部邊距
+        const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight - (visibleHeight * 0.05); // 動態底部邊距，上升5%高度
 
         // 創建生命值條背景（黑色邊框） - 最外層邊框
         this.healthBarBg = this.add.rectangle(
@@ -1268,7 +1268,7 @@ export default class Title extends Phaser.Scene {
         const healthBarHeight = 20;
         const margin = 20;
         const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth;
-        const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight;
+        const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight - (visibleHeight * 0.05); // 上升5%高度
 
         // 更新血條背景位置
         this.healthBarBg.setPosition(healthBarX, healthBarY);
