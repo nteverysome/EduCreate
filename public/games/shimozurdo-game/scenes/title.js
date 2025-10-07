@@ -1238,7 +1238,7 @@ export default class Title extends Phaser.Scene {
         const worldCenterX = (worldView.left + worldView.right) / 2;  // 世界中心 X
 
         // 🎯 三列布局水平位置：居中對齊，拉大間距
-        const spacing = 220;  // 三列之間的間距（再次拉大間距）
+        const spacing = 300;  // 三列之間的間距（最大間距）
 
         const leftX = worldCenterX - spacing;     // 左列（分數）
         const middleX = worldCenterX;             // 中列（中文詞彙）- 中心位置
