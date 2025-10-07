@@ -1229,18 +1229,17 @@ export default class Title extends Phaser.Scene {
         // 🎯 更新血條位置 - 血條保持在右下角
         this.updateHealthBarPositions();
 
-        // 🎯 三列布局新位置：血條旁邊（用戶要求的位置）
-        // 基於血條位置計算三列布局位置
-        const healthBarY = this.healthBarBg.y;
-        const uiY = healthBarY - 80;  // 血條上方 80px
+        // 🎯 三列布局新位置：螢幕左上角（用戶要求的位置）
+        // 距離頂部 50px，距離左邊 100px
+        const uiY = 50;  // 距離頂部 50px
 
-        // 🎯 三列布局水平位置：以血條為中心
+        // 🎯 三列布局水平位置：從左邊 100px 開始
         const spacing = 120;  // 三列之間的間距
-        const healthBarX = this.healthBarBg.x;  // 血條 X 位置
+        const startX = 100;   // 距離左邊 100px
 
-        const leftX = healthBarX - spacing;     // 左列（分數）
-        const middleX = healthBarX;             // 中列（中文詞彙）
-        const rightX = healthBarX + spacing;   // 右列（英文詞彙）
+        const leftX = startX;                   // 左列（分數）
+        const middleX = startX + spacing;       // 中列（中文詞彙）
+        const rightX = startX + spacing * 2;   // 右列（英文詞彙）
 
         // 更新三列布局位置
         this.scoreText.setPosition(leftX, uiY);
