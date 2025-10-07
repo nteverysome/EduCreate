@@ -1229,8 +1229,8 @@ export default class Title extends Phaser.Scene {
         // 🎯 更新血條位置 - 血條保持在右下角
         this.updateHealthBarPositions();
 
-        // 🎯 三列布局新位置：用戶指定座標 x=184, y=260
-        const centerX = 184;  // 用戶指定的中心 X 座標
+        // 🎯 三列布局新位置：用戶指定座標 x=250, y=260
+        const centerX = 250;  // 用戶指定的中心 X 座標
         const centerY = 260;  // 用戶指定的中心 Y 座標
 
         // 🎯 三列布局水平位置：以指定座標為中心
