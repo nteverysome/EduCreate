@@ -922,9 +922,9 @@ export default class Title extends Phaser.Scene {
             this.enemySpawnDelay = Phaser.Math.Between(2000, 4000);
         }
 
-        // 🎯 獲取世界邊界用於限制雲朵移動（移到迴圈外避免重複宣告）
+        // 🎯 獲取視差背景邊界用於雲朵邊界檢查（移到迴圈外避免重複宣告）
         const cam = this.cameras.main;
-        const worldView = cam.worldView;
+        const { width, height } = this;  // 視差背景的實際尺寸
 
         // 更新現有敵人 - 倒序遍歷以安全刪除元素
         for (let i = this.enemies.length - 1; i >= 0; i--) {
@@ -934,20 +934,6 @@ export default class Title extends Phaser.Scene {
 
                 // 向左移動 - 敵人從右向左移動
                 enemy.x -= enemy.speed;
-
-                // 🆕 添加邊界限制 - 限制雲朵在 worldView 範圍內
-                if (enemy.x < worldView.left) {
-                    enemy.x = worldView.left;             // 限制在左邊界
-                }
-                if (enemy.x > worldView.right) {
-                    enemy.x = worldView.right;            // 限制在右邊界
-                }
-                if (enemy.y < worldView.top) {
-                    enemy.y = worldView.top;              // 限制在上邊界
-                }
-                if (enemy.y > worldView.bottom) {
-                    enemy.y = worldView.bottom;           // 限制在下邊界
-                }
 
                 // 🆕 同步移動詞彙文字 - 讓文字跟隨敵人移動
                 const wordText = enemy.getData('wordText');
@@ -972,11 +958,10 @@ export default class Title extends Phaser.Scene {
                     continue;                            // 跳過後續檢查
                 }
 
-                // 🎯 雲朵現在被限制在 worldView 範圍內，不會飛出邊界
-                // 但我們仍保留這個檢查作為安全措施
-
-                // 檢查是否需要銷毀（現在主要用於清理，因為雲朵被限制在邊界內）
-                if (enemy.x < worldView.left - 100) {    // 檢查是否移出 FIT 後遊戲區域左側
+                // 🎯 檢查雲朵是否飛出視差背景邊界 - 飛出後銷毀（消失）
+                // 視差背景邊界：左邊界 = 0，右邊界 = width，上邊界 = 0，下邊界 = height
+                if (enemy.x < -100 || enemy.x > width + 100 ||
+                    enemy.y < -100 || enemy.y > height + 100) {    // 檢查是否移出視差背景邊界
                     // 🆕 銷毀詞彙文字
                     if (wordText && wordText.active) {
                         wordText.destroy();
@@ -984,7 +969,7 @@ export default class Title extends Phaser.Scene {
 
                     enemy.destroy();                     // 銷毀精靈物件
                     this.enemies.splice(i, 1);          // 從陣列中移除
-                    console.log('☁️ 雲朵敵人飛出 FIT 遊戲區域，已銷毀');
+                    console.log('☁️ 雲朵敵人飛出視差背景邊界，已銷毀');
                 }
             } else {
                 // 清理無效敵人 - 移除已被銷毀或無效的敵人引用
