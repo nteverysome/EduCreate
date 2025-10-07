@@ -1233,21 +1233,21 @@ export default class Title extends Phaser.Scene {
         const cam = this.cameras.main;
         const worldView = cam.worldView;
 
-        // 🎯 設置在可見世界範圍內的位置：左上角區域
-        const targetWorldX = worldView.left + 200;  // 距離左邊界 200px
-        const targetWorldY = worldView.top + 100;   // 距離上邊界 100px
+        // 🎯 設置在世界頂部的位置：居中對齊
+        const worldTopY = worldView.top + 50;  // 距離世界頂部 50px
+        const worldCenterX = (worldView.left + worldView.right) / 2;  // 世界中心 X
 
-        // 🎯 三列布局水平位置：以世界座標為中心
+        // 🎯 三列布局水平位置：以世界中心為基準
         const spacing = 120;  // 三列之間的間距
 
-        const leftX = targetWorldX - spacing;     // 左列（分數）
-        const middleX = targetWorldX;             // 中列（中文詞彙）- 中心位置
-        const rightX = targetWorldX + spacing;   // 右列（英文詞彙）
+        const leftX = worldCenterX - spacing;     // 左列（分數）
+        const middleX = worldCenterX;             // 中列（中文詞彙）- 中心位置
+        const rightX = worldCenterX + spacing;   // 右列（英文詞彙）
 
-        // 更新三列布局位置（世界座標）
-        this.scoreText.setPosition(leftX, targetWorldY);
-        this.chineseText.setPosition(middleX, targetWorldY);
-        this.targetText.setPosition(rightX, targetWorldY);
+        // 更新三列布局位置（世界頂部座標）
+        this.scoreText.setPosition(leftX, worldTopY);
+        this.chineseText.setPosition(middleX, worldTopY);
+        this.targetText.setPosition(rightX, worldTopY);
     }
 
     /**
