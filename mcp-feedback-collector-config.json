@@ -11,7 +11,7 @@
         "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src\\mcp_feedback_collector\\server.py"
       ],
       "env": {
-        "MCP_DIALOG_TIMEOUT": "300",
+        "MCP_DIALOG_TIMEOUT": "1200",
         "PYTHONPATH": "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src",
         "MCP_SERVER_NAME": "feedback-collector"
       },

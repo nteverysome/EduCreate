@@ -81,6 +81,15 @@ const features: FeatureCard[] = [
     category: 'content'
   },
   {
+    id: 'vocabulary-manager',
+    title: '詞彙管理系統',
+    description: '個人化詞彙集管理，支援GEPT分級、批量操作和雲端同步，與25種遊戲無縫整合',
+    href: '/vocabulary',
+    icon: '📚',
+    status: 'available',
+    category: 'content'
+  },
+  {
     id: 'rich-text-editor',
     title: '富文本編輯器',
     description: '完整的富文本編輯功能，支持格式化、表格、列表和無障礙設計',

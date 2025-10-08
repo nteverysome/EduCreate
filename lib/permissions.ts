@@ -33,13 +33,22 @@ export const PERMISSIONS = {
   EDIT_H5P: 'edit:h5p',
   IMPORT_H5P: 'import:h5p',
   EXPORT_H5P: 'export:h5p',
+
+  // 詞彙相關權限
+  CREATE_VOCABULARY: 'create:vocabulary',
+  READ_VOCABULARY: 'read:vocabulary',
+  UPDATE_VOCABULARY: 'update:vocabulary',
+  DELETE_VOCABULARY: 'delete:vocabulary',
+  SHARE_VOCABULARY: 'share:vocabulary',
+  VIEW_ANALYTICS: 'view:analytics',
 };
 
 // ======= 修正循環參考區 =======
 const USER_PERMISSIONS = [
   PERMISSIONS.READ_ACTIVITY,
   PERMISSIONS.READ_TEMPLATE,
-  // 基本用戶只能管理自己的活動
+  PERMISSIONS.READ_VOCABULARY,
+  // 基本用戶只能管理自己的活動和詞彙
 ];
 
 const PREMIUM_USER_PERMISSIONS = [
@@ -52,6 +61,11 @@ const PREMIUM_USER_PERMISSIONS = [
   PERMISSIONS.EDIT_H5P,
   PERMISSIONS.IMPORT_H5P,
   PERMISSIONS.EXPORT_H5P,
+  PERMISSIONS.CREATE_VOCABULARY,
+  PERMISSIONS.UPDATE_VOCABULARY,
+  PERMISSIONS.DELETE_VOCABULARY,
+  PERMISSIONS.SHARE_VOCABULARY,
+  PERMISSIONS.VIEW_ANALYTICS,
 ];
 
 export const ROLE_PERMISSIONS: Record<string, string[]> = {

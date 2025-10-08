@@ -43,7 +43,7 @@
       ],
       "env": {
         "PYTHONIOENCODING": "utf-8",
-        "MCP_DIALOG_TIMEOUT": "300",
+        "MCP_DIALOG_TIMEOUT": "1200",
         "PYTHONPATH": "C:\\Users\\Administrator\\Desktop\\EduCreate\\mcp-feedback-collector\\src"
       }
     },

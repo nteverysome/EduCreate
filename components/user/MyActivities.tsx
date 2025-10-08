@@ -233,6 +233,39 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
     return () => clearTimeout(timer);
   }, [loadData]);
 
+  // 載入用戶詞彙活動
+  const loadVocabularyActivities = (): Activity[] => {
+    try {
+      const vocabularyData = localStorage.getItem('vocabulary_integration_data');
+      if (!vocabularyData) return [];
+
+      const data = JSON.parse(vocabularyData);
+      const vocabularyActivities: Activity[] = data.activities?.map((activity: any) => ({
+        id: activity.id,
+        title: activity.title || '無標題詞彙活動',
+        description: activity.description || `包含 ${activity.vocabulary?.length || 0} 個詞彙的學習活動`,
+        type: 'vocabulary',
+        folderId: folderId || undefined,
+        createdAt: new Date(activity.createdAt),
+        updatedAt: new Date(activity.updatedAt),
+        lastAccessedAt: new Date(activity.updatedAt),
+        size: (activity.vocabulary?.length || 0) * 100, // 估算大小
+        isShared: false,
+        geptLevel: activity.geptLevel || 'elementary',
+        learningEffectiveness: 0.95, // 自定義詞彙通常效果更好
+        usageCount: 1,
+        tags: ['vocabulary', 'custom', activity.geptLevel || 'elementary'],
+        thumbnail: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23dbeafe"/><text x="50" y="55" font-size="30" text-anchor="middle">📝</text></svg>'
+      })) || [];
+
+      console.log(`📚 載入 ${vocabularyActivities.length} 個詞彙活動`);
+      return vocabularyActivities;
+    } catch (error) {
+      console.error('載入詞彙活動失敗:', error);
+      return [];
+    }
+  };
+
   // 載入用戶活動（支持虛擬化和分頁）
   const loadUserActivities = async (
     userId: string,
@@ -241,14 +274,20 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
     pageSize: number = 50
   ): Promise<{ activities: Activity[]; total: number; hasMore: boolean }> => {
     try {
+      // 載入用戶創建的詞彙活動
+      const vocabularyActivities = loadVocabularyActivities();
+
       // 如果啟用虛擬化且需要大量數據，使用數據生成器
       if (enableVirtualization && maxActivities > 100) {
         console.log(`🔄 啟用虛擬化模式，生成 ${maxActivities} 個活動`);
         const generator = ActivityDataGenerator.getInstance();
 
         // 生成大量測試數據
-        const allActivities = await generator.generateLargeDataset(maxActivities);
-        console.log(`✅ 成功生成 ${allActivities.length} 個活動`);
+        const systemActivities = await generator.generateLargeDataset(maxActivities);
+        console.log(`✅ 成功生成 ${systemActivities.length} 個系統活動`);
+
+        // 合併用戶詞彙活動和系統活動
+        const allActivities = [...vocabularyActivities, ...systemActivities];
 
         // 過濾指定檔案夾的活動
         const filteredActivities = folderId
@@ -267,7 +306,7 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
         };
       }
 
-      // 默認的小量數據
+      // 默認的小量數據 - 合併用戶詞彙活動和系統活動
       const mockActivities: Activity[] = [
         {
           id: '1',
@@ -304,9 +343,12 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
         }
       ];
 
+      // 合併用戶詞彙活動和系統活動
+      const allActivities = [...vocabularyActivities, ...mockActivities];
+
       return {
-        activities: mockActivities,
-        total: mockActivities.length,
+        activities: allActivities,
+        total: allActivities.length,
         hasMore: false
       };
     } catch (error) {
@@ -392,27 +434,66 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
   // 處理活動選擇
   const handleActivitySelect = useCallback((activity: Activity) => {
     console.log('選擇活動:', activity);
-    // 這裡可以添加活動選擇邏輯，例如導航到編輯頁面
+
+    // 如果是詞彙活動，導航到統一內容編輯器
+    if (activity.type === 'vocabulary') {
+      window.open('/universal-game', '_blank');
+    } else {
+      // 其他活動的處理邏輯
+      console.log('選擇系統活動:', activity.title);
+    }
   }, []);
 
   // 處理活動編輯
   const handleActivityEdit = useCallback((activity: Activity) => {
     console.log('編輯活動:', activity);
-    // 這裡可以添加活動編輯邏輯
+
+    // 如果是詞彙活動，導航到統一內容編輯器
+    if (activity.type === 'vocabulary') {
+      window.open('/universal-game', '_blank');
+    } else {
+      // 其他活動的編輯邏輯
+      console.log('編輯系統活動:', activity.title);
+    }
   }, []);
+
+  // 刪除詞彙活動
+  const deleteVocabularyActivity = (activityId: string) => {
+    try {
+      const vocabularyData = localStorage.getItem('vocabulary_integration_data');
+      if (!vocabularyData) return;
+
+      const data = JSON.parse(vocabularyData);
+      if (data.activities) {
+        data.activities = data.activities.filter((activity: any) => activity.id !== activityId);
+        localStorage.setItem('vocabulary_integration_data', JSON.stringify(data));
+        console.log(`✅ 已刪除詞彙活動: ${activityId}`);
+      }
+    } catch (error) {
+      console.error('刪除詞彙活動失敗:', error);
+    }
+  };
 
   // 處理活動刪除
   const handleActivityDelete = useCallback(async (activityId: string) => {
-    if (confirm('確定要刪除這個活動嗎？')) {
+    const activity = activities.find(a => a.id === activityId);
+    const activityName = activity?.title || '此活動';
+
+    if (confirm(`確定要刪除「${activityName}」嗎？`)) {
       try {
-        // 這裡應該調用刪除 API
+        // 如果是詞彙活動，從本地存儲刪除
+        if (activity?.type === 'vocabulary') {
+          deleteVocabularyActivity(activityId);
+        }
+
+        // 從界面移除
         setActivities(prev => prev.filter(activity => activity.id !== activityId));
         console.log('刪除活動:', activityId);
       } catch (error) {
         console.error('刪除活動失敗:', error);
       }
     }
-  }, []);
+  }, [activities]);
 
   const handleSelectAll = () => {
     const allIds = new Set([

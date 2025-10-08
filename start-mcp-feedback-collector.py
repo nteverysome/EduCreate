@@ -27,7 +27,7 @@ def setup_mcp_server():
     # 設置環境變量
     env = os.environ.copy()
     env.update({
-        "MCP_DIALOG_TIMEOUT": "300",
+        "MCP_DIALOG_TIMEOUT": "1200",
         "PYTHONPATH": str(mcp_dir / "src"),
         "MCP_SERVER_NAME": "feedback-collector"
     })

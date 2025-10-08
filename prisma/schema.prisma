@@ -11,23 +11,25 @@ model User {
   id                   String                @id @default(cuid())
   name                 String?
   email                String                @unique
-  password             String?               // 改為可選，支持 OAuth 用戶
+  password             String?
   emailVerified        DateTime?
   image                String?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   role                 Role                  @default(USER)
+  accounts             Account[]
   activities           Activity[]
   activityVersions     ActivityVersion[]
   activityVersionLogs  ActivityVersionLog[]
-  folders              Folder[]              // 新增：用戶文件夾
+  folders              Folder[]
   h5pContents          H5PContent[]
   invoices             Invoice[]
   notificationSettings NotificationSettings?
   passwordReset        PasswordReset?
+  sessions             Session[]
   subscription         Subscription?
-  accounts             Account[]             // NextAuth 需要
-  sessions             Session[]             // NextAuth 需要
+  learningProgress     LearningProgress[]
+  vocabularySets       VocabularySet[]
 }
 
 model Account {
@@ -36,15 +38,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -74,43 +75,38 @@ model PasswordReset {
 }
 
 model Activity {
-  id           String               @id @default(cuid())
-  title        String
-  description  String?
-  content      Json?
-  elements     Json                 @default("[]")
-  type         String
-  templateType String?              // 新增：模板類型 (QUIZ, MATCHING, etc.)
-  published    Boolean              @default(false)
-  isPublic     Boolean              @default(false)
-  isDraft      Boolean              @default(false) // 新增：草稿狀態
-  folderId     String?              // 新增：文件夾 ID
-  lastPlayed   DateTime?            // 新增：最後遊玩時間
-  playCount    Int                  @default(0) // 新增：遊玩次數
-  shareCount   Int                  @default(0) // 新增：分享次數
-
-  // WordWall 風格擴展
-  gameTemplateId String?            // 新增：遊戲模板 ID
-  aiGenerated    Boolean            @default(false) // 新增：AI 生成標記
-  difficulty     DifficultyLevel?   // 新增：難度等級
-  estimatedTime  String?            // 新增：預估完成時間
-  tags           String[]           // 新增：標籤
-
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  templateId   String?
-  userId       String
-  h5pContentId String?
-
-  // 關聯
-  folder       Folder?              @relation(fields: [folderId], references: [id])
-  h5pContent   H5PContent?          @relation(fields: [h5pContentId], references: [id])
-  template     Template?            @relation(fields: [templateId], references: [id])
-  gameTemplate GameTemplate?        @relation(fields: [gameTemplateId], references: [id])
-  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  versions     ActivityVersion[]
-  versionLogs  ActivityVersionLog[]
-  gameSettings GameSettings?        // 新增：遊戲設置關聯
+  id             String               @id @default(cuid())
+  title          String
+  description    String?
+  content        Json?
+  elements       Json                 @default("[]")
+  type           String
+  templateType   String?
+  published      Boolean              @default(false)
+  isPublic       Boolean              @default(false)
+  isDraft        Boolean              @default(false)
+  folderId       String?
+  lastPlayed     DateTime?
+  playCount      Int                  @default(0)
+  shareCount     Int                  @default(0)
+  gameTemplateId String?
+  aiGenerated    Boolean              @default(false)
+  difficulty     DifficultyLevel?
+  estimatedTime  String?
+  tags           String[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  templateId     String?
+  userId         String
+  h5pContentId   String?
+  folder         Folder?              @relation(fields: [folderId], references: [id])
+  gameTemplate   GameTemplate?        @relation(fields: [gameTemplateId], references: [id])
+  h5pContent     H5PContent?          @relation(fields: [h5pContentId], references: [id])
+  template       Template?            @relation(fields: [templateId], references: [id])
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions       ActivityVersion[]
+  versionLogs    ActivityVersionLog[]
+  gameSettings   GameSettings?
 }
 
 model Template {
@@ -127,15 +123,15 @@ model Folder {
   id          String     @id @default(cuid())
   name        String
   description String?
-  color       String?    // 文件夾顏色
-  icon        String?    // 文件夾圖標
+  color       String?
+  icon        String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   activities  Activity[]
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([name, userId]) // 同一用戶不能有重名文件夾
+  @@unique([name, userId])
 }
 
 model Subscription {
@@ -251,6 +247,159 @@ model NotificationLog {
   relatedInvoice   Invoice? @relation(fields: [relatedInvoiceId], references: [id])
 }
 
+model GameTemplate {
+  id                String          @id @default(cuid())
+  name              String          @unique
+  displayName       String
+  description       String?
+  icon              String?
+  category          GameCategory    @default(QUIZ)
+  difficulty        DifficultyLevel @default(EASY)
+  estimatedTime     String?
+  features          String[]
+  minItems          Int             @default(1)
+  maxItems          Int             @default(50)
+  requiresEvenItems Boolean         @default(false)
+  isActive          Boolean         @default(true)
+  isPremium         Boolean         @default(false)
+  sortOrder         Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  activities        Activity[]
+  gameSettings      GameSettings[]
+}
+
+model VisualTheme {
+  id              String         @id @default(cuid())
+  name            String         @unique
+  displayName     String
+  description     String?
+  thumbnail       String?
+  category        ThemeCategory  @default(CLASSIC)
+  isPremium       Boolean        @default(false)
+  isActive        Boolean        @default(true)
+  sortOrder       Int            @default(0)
+  primaryColor    String         @default("#007bff")
+  secondaryColor  String         @default("#6c757d")
+  backgroundColor String         @default("#ffffff")
+  textColor       String         @default("#212529")
+  accentColor     String?
+  borderColor     String?
+  fontFamily      String?
+  borderRadius    String?
+  boxShadow       String?
+  backgroundImage String?
+  customCSS       String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  gameSettings    GameSettings[]
+}
+
+model GameSettings {
+  id               String        @id @default(cuid())
+  activityId       String        @unique
+  templateId       String?
+  themeId          String?
+  timerType        TimerType     @default(NONE)
+  timerDuration    Int?
+  livesCount       Int           @default(0)
+  shuffleQuestions Boolean       @default(false)
+  shuffleAnswers   Boolean       @default(false)
+  autoProceed      Boolean       @default(true)
+  showAnswers      Boolean       @default(true)
+  answerLabels     AnswerLabels  @default(ABC)
+  enableSounds     Boolean       @default(true)
+  enableAnimations Boolean       @default(true)
+  allowRetry       Boolean       @default(true)
+  showProgress     Boolean       @default(true)
+  showScore        Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  activity         Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  template         GameTemplate? @relation(fields: [templateId], references: [id])
+  theme            VisualTheme?  @relation(fields: [themeId], references: [id])
+}
+
+model AIPrompt {
+  id             String       @id @default(cuid())
+  name           String       @unique
+  templateType   TemplateType
+  promptTemplate String
+  exampleInput   String?
+  exampleOutput  String?
+  isActive       Boolean      @default(true)
+  version        String       @default("1.0")
+  model          String       @default("gpt-4")
+  temperature    Float        @default(0.7)
+  maxTokens      Int          @default(2000)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model VocabularySet {
+  id               String             @id @default(cuid())
+  userId           String
+  title            String
+  description      String?
+  geptLevel        GEPTLevel          @default(ELEMENTARY)
+  isPublic         Boolean            @default(false)
+  totalWords       Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  learningProgress LearningProgress[]
+  items            VocabularyItem[]
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("vocabulary_sets")
+}
+
+model VocabularyItem {
+  id               String             @id @default(cuid())
+  setId            String
+  english          String
+  chinese          String
+  phonetic         String?
+  partOfSpeech     PartOfSpeech?
+  difficultyLevel  Int                @default(1)
+  exampleSentence  String?
+  notes            String?
+  imageUrl         String?
+  audioUrl         String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  learningProgress LearningProgress[]
+  set              VocabularySet      @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@map("vocabulary_items")
+}
+
+model LearningProgress {
+  id               String          @id @default(cuid())
+  userId           String
+  vocabularySetId  String
+  vocabularyItemId String?
+  gameType         String
+  correctCount     Int             @default(0)
+  incorrectCount   Int             @default(0)
+  totalAttempts    Int             @default(0)
+  bestScore        Int             @default(0)
+  averageScore     Float           @default(0)
+  masteryLevel     Int             @default(0)
+  lastReviewed     DateTime?
+  nextReview       DateTime?
+  reviewInterval   Int             @default(1)
+  totalStudyTime   Int             @default(0)
+  sessionCount     Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vocabularyItem   VocabularyItem? @relation(fields: [vocabularyItemId], references: [id], onDelete: Cascade)
+  vocabularySet    VocabularySet   @relation(fields: [vocabularySetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, vocabularySetId, vocabularyItemId, gameType])
+  @@map("learning_progress")
+}
+
 enum Role {
   USER
   PREMIUM_USER
@@ -259,47 +408,44 @@ enum Role {
 }
 
 enum TemplateType {
-  // 現有模板
   MATCHING
   FLASHCARDS
   QUIZ
-  UNIVERSAL        // 統一內容類型
-  SPIN_WHEEL       // 隨機轉盤
-  WHACK_A_MOLE     // 打地鼠
-  MEMORY_CARDS     // 記憶卡片
-  WORD_SEARCH      // 單字搜尋
-  CROSSWORD        // 填字遊戲
-  FILL_BLANKS      // 填空題
-  TRUE_FALSE       // 是非題
-  DRAG_SORT        // 拖拽排序
-  BALLOON_POP      // 氣球爆破
-  AIRPLANE         // 飛機遊戲
-  MAZE_CHASE       // 迷宮追逐
-
-  // WordWall 風格新增模板
-  HANGMAN          // 猜字遊戲
-  IMAGE_QUIZ       // 圖片問答
-  GAMESHOW_QUIZ    // 遊戲節目問答
-  OPEN_THE_BOX     // 開箱遊戲
-  MATCHING_PAIRS   // 配對記憶
-  FIND_THE_MATCH   // 找配對
-  ANAGRAM          // 字母重組
-  SPEAKING_CARDS   // 口語卡片
-  UNJUMBLE         // 重組句子
-  COMPLETE_SENTENCE // 完成句子
-  SPELL_WORD       // 拼字遊戲
-  FLIP_TILES       // 翻轉磁磚
-  TYPE_ANSWER      // 輸入答案
-  SPEED_SORTING    // 快速分類
-  WATCH_MEMORIZE   // 觀察記憶
-  PAIR_NO_PAIR     // 配對或不配對
-  RANK_ORDER       // 排序
-  WIN_LOSE_QUIZ    // 輸贏問答
-  MATH_GENERATOR   // 數學生成器
-  WORD_MAGNETS     // 單字磁鐵
-  FLYING_FRUIT     // 飛行水果
-  GROUP_SORT       // 分組排序
-  LABELLED_DIAGRAM // 標記圖表
+  UNIVERSAL
+  SPIN_WHEEL
+  WHACK_A_MOLE
+  MEMORY_CARDS
+  WORD_SEARCH
+  CROSSWORD
+  FILL_BLANKS
+  TRUE_FALSE
+  DRAG_SORT
+  BALLOON_POP
+  AIRPLANE
+  MAZE_CHASE
+  HANGMAN
+  IMAGE_QUIZ
+  GAMESHOW_QUIZ
+  OPEN_THE_BOX
+  MATCHING_PAIRS
+  FIND_THE_MATCH
+  ANAGRAM
+  SPEAKING_CARDS
+  UNJUMBLE
+  COMPLETE_SENTENCE
+  SPELL_WORD
+  FLIP_TILES
+  TYPE_ANSWER
+  SPEED_SORTING
+  WATCH_MEMORIZE
+  PAIR_NO_PAIR
+  RANK_ORDER
+  WIN_LOSE_QUIZ
+  MATH_GENERATOR
+  WORD_MAGNETS
+  FLYING_FRUIT
+  GROUP_SORT
+  LABELLED_DIAGRAM
 }
 
 enum SubStatus {
@@ -320,122 +466,6 @@ enum H5PContentStatus {
   DRAFT
   PUBLISHED
 }
-
-// ===== WordWall 風格擴展表結構 =====
-
-model GameTemplate {
-  id               String            @id @default(cuid())
-  name             String            @unique
-  displayName      String            // 顯示名稱
-  description      String?
-  icon             String?           // 圖標 URL 或 emoji
-  category         GameCategory      @default(QUIZ)
-  difficulty       DifficultyLevel   @default(EASY)
-  estimatedTime    String?           // 預估時間 "5-15分鐘"
-  features         String[]          // 功能特色列表
-  minItems         Int               @default(1)
-  maxItems         Int               @default(50)
-  requiresEvenItems Boolean          @default(false)
-  isActive         Boolean           @default(true)
-  isPremium        Boolean           @default(false)
-  sortOrder        Int               @default(0)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-
-  // 關聯
-  activities       Activity[]
-  gameSettings     GameSettings[]
-}
-
-model VisualTheme {
-  id           String         @id @default(cuid())
-  name         String         @unique
-  displayName  String         // 顯示名稱
-  description  String?
-  thumbnail    String?        // 預覽圖片 URL
-  category     ThemeCategory  @default(CLASSIC)
-  isPremium    Boolean        @default(false)
-  isActive     Boolean        @default(true)
-  sortOrder    Int            @default(0)
-
-  // CSS 變量配置
-  primaryColor     String     @default("#007bff")
-  secondaryColor   String     @default("#6c757d")
-  backgroundColor  String     @default("#ffffff")
-  textColor        String     @default("#212529")
-  accentColor      String?
-  borderColor      String?
-
-  // 高級樣式配置
-  fontFamily       String?
-  borderRadius     String?
-  boxShadow        String?
-  backgroundImage  String?
-  customCSS        String?    @db.Text
-
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-
-  // 關聯
-  gameSettings     GameSettings[]
-}
-
-model GameSettings {
-  id                String        @id @default(cuid())
-  activityId        String        @unique
-  templateId        String?
-  themeId           String?
-
-  // 計時器設置
-  timerType         TimerType     @default(NONE)
-  timerDuration     Int?          // 秒數
-
-  // 遊戲選項
-  livesCount        Int           @default(0) // 0 = 無限
-  shuffleQuestions  Boolean       @default(false)
-  shuffleAnswers    Boolean       @default(false)
-  autoProceed       Boolean       @default(true)
-  showAnswers       Boolean       @default(true)
-  answerLabels      AnswerLabels  @default(ABC)
-
-  // 音效和動畫
-  enableSounds      Boolean       @default(true)
-  enableAnimations  Boolean       @default(true)
-
-  // 高級設置
-  allowRetry        Boolean       @default(true)
-  showProgress      Boolean       @default(true)
-  showScore         Boolean       @default(true)
-
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-
-  // 關聯
-  activity          Activity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  template          GameTemplate? @relation(fields: [templateId], references: [id])
-  theme             VisualTheme?  @relation(fields: [themeId], references: [id])
-}
-
-model AIPrompt {
-  id              String       @id @default(cuid())
-  name            String       @unique
-  templateType    TemplateType
-  promptTemplate  String       @db.Text
-  exampleInput    String?      @db.Text
-  exampleOutput   String?      @db.Text
-  isActive        Boolean      @default(true)
-  version         String       @default("1.0")
-
-  // AI 配置
-  model           String       @default("gpt-4")
-  temperature     Float        @default(0.7)
-  maxTokens       Int          @default(2000)
-
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-}
-
-// 新增枚舉類型
 
 enum GameCategory {
   QUIZ
@@ -471,4 +501,24 @@ enum AnswerLabels {
   ABC
   NUMBERS
   NONE
+}
+
+enum GEPTLevel {
+  KIDS
+  ELEMENTARY
+  INTERMEDIATE
+  HIGH_INTERMEDIATE
+}
+
+enum PartOfSpeech {
+  NOUN
+  VERB
+  ADJECTIVE
+  ADVERB
+  PRONOUN
+  PREPOSITION
+  CONJUNCTION
+  INTERJECTION
+  ARTICLE
+  PHRASE
 }
