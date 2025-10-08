@@ -782,8 +782,8 @@ export default class Title extends Phaser.Scene {
         // 計算生命值百分比 - 用於計算顯示寬度和顏色
         const healthPercent = this.currentHealth / this.maxHealth;
 
-        // 更新生命值條寬度 - 根據血量百分比調整寬度
-        const maxWidth = 200;                            // 最大寬度
+        // 更新生命值條寬度 - 根據血量百分比調整寬度（保持縮小50%的設定）
+        const maxWidth = 100;                            // 最大寬度（縮小50%：200 → 100）
         this.healthBar.displayWidth = maxWidth * healthPercent;  // 按比例調整寬度
 
         // 根據生命值改變顏色 - 提供視覺警告
