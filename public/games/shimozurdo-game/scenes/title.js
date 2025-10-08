@@ -581,8 +581,9 @@ export default class Title extends Phaser.Scene {
         const healthBarWidth = 100;                      // 生命值條寬度（縮小50%：200 → 100）
         const healthBarHeight = 10;                      // 生命值條高度（縮小50%：20 → 10）
         const margin = 20;                               // 邊距
-        // 🎯 使用相機滾動位置 + 可見區域計算動態位置（回到原本右下角位置）
-        const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth;   // 動態右邊距
+        const leftOffset = 50;                           // 往左移動的額外距離
+        // 🎯 使用相機滾動位置 + 可見區域計算動態位置（回到原本右下角位置，往左移動一些）
+        const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth - leftOffset;   // 動態右邊距，往左移動
         const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight - (visibleHeight * 0.05); // 動態底部邊距，上升5%高度
 
         // 創建生命值條背景（黑色邊框） - 最外層邊框
@@ -1262,11 +1263,12 @@ export default class Title extends Phaser.Scene {
         const visibleWidth = cam.width;
         const visibleHeight = cam.height;
 
-        // 🎯 動態計算血條位置（回到原本右下角位置，縮小50%）
+        // 🎯 動態計算血條位置（回到原本右下角位置，縮小50%，往左移動一些）
         const healthBarWidth = 100;                      // 縮小50%：200 → 100
         const healthBarHeight = 10;                      // 縮小50%：20 → 10
         const margin = 20;
-        const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth;   // 動態右邊距
+        const leftOffset = 50;                           // 往左移動的額外距離
+        const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth - leftOffset;   // 動態右邊距，往左移動
         const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight - (visibleHeight * 0.05); // 動態底部邊距，上升5%高度
 
         // 更新血條背景位置
