@@ -119,23 +119,24 @@
             pointer-events: none;
         }
 
-        /* 全螢幕按鈕 - 在所有設備上都顯示 */
+        /* 全螢幕按鈕 - 在血條旁邊顯示 */
         .fullscreen-btn {
             position: fixed !important;  /* 改為 fixed，脫離 touch-controls 限制 */
-            top: 20px !important;
-            right: 20px !important;
-            width: 50px;
-            height: 50px;
+            /* 血條位置計算：右邊距 20px + 血條寬度 100px + 左移 50px + 按鈕間距 10px */
+            right: 180px !important;     /* 20 + 100 + 50 + 10 = 180px */
+            bottom: calc(5vh + 60px) !important;  /* 血條上方 5vh + 60px（血條高度 + 上升距離） */
+            width: 40px;                  /* 縮小按鈕尺寸 */
+            height: 40px;
             background: rgba(0, 0, 0, 0.5);
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
-            font-size: 24px;
+            font-size: 20px;              /* 縮小字體 */
             pointer-events: all !important;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             transition: transform 0.1s;
             cursor: pointer;
-            z-index: 9999 !important;  /* 確保在最上層 */
-            display: block !important;  /* 強制顯示 */
+            z-index: 9999 !important;     /* 確保在最上層 */
+            display: block !important;    /* 強制顯示 */
         }
 
         .fullscreen-btn:active {
