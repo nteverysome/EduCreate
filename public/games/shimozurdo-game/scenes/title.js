@@ -578,15 +578,12 @@ export default class Title extends Phaser.Scene {
         this.currentHealth = 100;                        // 當前生命值
 
         // 🎯 生命值條位置和尺寸（右下角） - 使用動態相機尺寸
-        const healthBarWidth = 200;                      // 生命值條寬度
-        const healthBarHeight = 20;                      // 生命值條高度
+        const healthBarWidth = 100;                      // 生命值條寬度（縮小50%：200 → 100）
+        const healthBarHeight = 10;                      // 生命值條高度（縮小50%：20 → 10）
         const margin = 20;                               // 邊距
-        // 🎯 計算血條位置（飛機後面的邊界，垂直對齊）
-        // 飛機位置：width * 0.15 (左側15%)，飛機後面就是飛機右邊
-        const playerX = this.player ? this.player.x : (width * 0.15);
-        const playerY = this.player ? this.player.y : (height * 0.5);
-        const healthBarX = playerX + margin;  // 飛機右邊 + 邊距
-        const healthBarY = playerY - (healthBarHeight / 2);  // 與飛機垂直中心對齊
+        // 🎯 使用相機滾動位置 + 可見區域計算動態位置（回到原本右下角位置）
+        const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth;   // 動態右邊距
+        const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight - (visibleHeight * 0.05); // 動態底部邊距，上升5%高度
 
         // 創建生命值條背景（黑色邊框） - 最外層邊框
         this.healthBarBg = this.add.rectangle(
@@ -1265,16 +1262,12 @@ export default class Title extends Phaser.Scene {
         const visibleWidth = cam.width;
         const visibleHeight = cam.height;
 
-        // 🎯 動態計算血條位置（飛機後面的邊界，垂直對齊）
-        const healthBarWidth = 200;
-        const healthBarHeight = 20;
+        // 🎯 動態計算血條位置（回到原本右下角位置，縮小50%）
+        const healthBarWidth = 100;                      // 縮小50%：200 → 100
+        const healthBarHeight = 10;                      // 縮小50%：20 → 10
         const margin = 20;
-        // 飛機位置：width * 0.15 (左側15%)，飛機後面就是飛機右邊
-        const { width, height } = this;
-        const playerX = this.player ? this.player.x : (width * 0.15);
-        const playerY = this.player ? this.player.y : (height * 0.5);
-        const healthBarX = playerX + margin;  // 飛機右邊 + 邊距
-        const healthBarY = playerY - (healthBarHeight / 2);  // 與飛機垂直中心對齊
+        const healthBarX = cam.scrollX + visibleWidth - margin - healthBarWidth;   // 動態右邊距
+        const healthBarY = cam.scrollY + visibleHeight - margin - healthBarHeight - (visibleHeight * 0.05); // 動態底部邊距，上升5%高度
 
         // 更新血條背景位置
         this.healthBarBg.setPosition(healthBarX, healthBarY);
