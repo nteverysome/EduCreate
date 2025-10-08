@@ -692,13 +692,13 @@ export default class Title extends Phaser.Scene {
         this.scoreText.setScrollFactor(1);                   // 🎯 改為世界物件，在視差背景裡面
         this.scoreText.setDepth(200);                        // 確保在最前面
 
-        // 🆕 創建黃色框大字（中列，可點擊發音）
+        // 🆕 創建黃色框大字（中列，顯示英文，可點擊發音）
         this.chineseText = this.add.text(
             centerX,                                         // X座標（中列）
             topY,                                            // Y座標（頂部50像素）
             '',                                              // 初始文字為空
             {
-                fontSize: '48px',                            // 大字體
+                fontSize: '36px',                            // 調整字體大小適應英文
                 color: '#000000',                            // 黑色文字
                 backgroundColor: '#ffff00',                  // 黃色背景
                 padding: { x: 20, y: 10 }                    // 內邊距
@@ -719,13 +719,13 @@ export default class Title extends Phaser.Scene {
             }
         });
 
-        // 🆕 創建英文文字（右列）
+        // 🆕 創建中文文字（右列）
         this.targetText = this.add.text(
             rightX,                                          // X座標（右列）
             topY,                                            // Y座標（頂部50像素）
             '',                                              // 初始文字為空
             {
-                fontSize: '32px',                            // 字體大小
+                fontSize: '40px',                            // 調整字體大小適應中文
                 color: '#ffff00',                            // 黃色
                 fontStyle: 'bold',                           // 粗體
                 stroke: '#000000',                           // 黑色描邊
@@ -753,11 +753,11 @@ export default class Title extends Phaser.Scene {
         if (this.currentTargetWord) {
             console.log('🎯 新目標詞彙:', this.currentTargetWord.chinese, this.currentTargetWord.english);
 
-            // 🆕 更新中文大字（中列）
-            this.chineseText.setText(this.currentTargetWord.chinese);
+            // 🆕 更新英文大字（中列，對換後）
+            this.chineseText.setText(this.currentTargetWord.english);
 
-            // 🆕 更新英文文字（右列）
-            this.targetText.setText(this.currentTargetWord.english);
+            // 🆕 更新中文文字（右列，對換後）
+            this.targetText.setText(this.currentTargetWord.chinese);
         } else {
             console.warn('⚠️ 無法獲取隨機詞彙');
         }
