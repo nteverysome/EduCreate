@@ -11,3 +11,4 @@ type: "always_apply"
 Whenever you’re about to complete a user request, call the mcp-feedback-collector
  instead of simply ending the process. Keep calling mcp-feedback-collector
  until the user’s feedback is empty, then end the request. mcp-feedback-collector.collect_feedback ”
+ call the mcp-feedback-collector

@@ -14,7 +14,23 @@ class GEPTManager {
    * 初始化詞彙數據庫
    */
   initializeDatabase() {
-    // 初級詞彙（GEPT Elementary）
+    // 🆕 首先檢查是否有自定義詞彙
+    const customVocabulary = this.getCustomVocabulary();
+
+    if (customVocabulary.length > 0) {
+      console.log('🎯 使用自定義詞彙:', customVocabulary.length, '個詞彙');
+
+      // 使用自定義詞彙替換初級詞彙
+      this.wordDatabase.set('elementary', customVocabulary);
+      this.wordDatabase.set('intermediate', []);
+      this.wordDatabase.set('high-intermediate', []);
+
+      console.log('📊 自定義詞彙數據庫初始化完成');
+      console.log(`  - 自定義: ${customVocabulary.length} 個詞彙`);
+      return;
+    }
+
+    // 初級詞彙（GEPT Elementary）- 預設詞彙
     const elementaryWords = [
       { id: '1', english: 'friend', chinese: '朋友', level: 'elementary' },
       { id: '2', english: 'family', chinese: '家庭', level: 'elementary' },
@@ -171,6 +187,43 @@ class GEPTManager {
       'high-intermediate': this.getWordsForLevel('high-intermediate').length,
       total: this.getTotalWordCount()
     };
+  }
+
+  /**
+   * 🆕 獲取自定義詞彙 - 從 localStorage 載入用戶自定義的詞彙
+   */
+  getCustomVocabulary() {
+    try {
+      const data = localStorage.getItem('vocabulary_integration_data');
+      if (!data) {
+        console.log('❌ 沒有找到自定義詞彙數據');
+        return [];
+      }
+
+      const parsed = JSON.parse(data);
+      if (!parsed.vocabulary || !Array.isArray(parsed.vocabulary)) {
+        console.log('❌ 詞彙數據格式不正確');
+        return [];
+      }
+
+      // 轉換為 GEPTManager 格式
+      const customVocabulary = parsed.vocabulary.map((item, index) => ({
+        id: (index + 1000).toString(),
+        english: item.english,
+        chinese: item.chinese,
+        level: item.level || 'elementary',
+        frequency: item.frequency || 80,
+        difficulty: item.difficulty || 3,
+        partOfSpeech: item.partOfSpeech || 'noun',
+        category: item.category || 'custom'
+      }));
+
+      console.log('🎯 載入自定義詞彙:', customVocabulary);
+      return customVocabulary;
+    } catch (error) {
+      console.error('❌ 載入自定義詞彙時發生錯誤:', error);
+      return [];
+    }
   }
 }
 

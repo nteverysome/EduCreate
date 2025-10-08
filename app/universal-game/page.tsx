@@ -9,10 +9,38 @@ import Link from 'next/link';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import UniversalContentEditor from '@/components/content/UniversalContentEditor';
 import RichTextEditor from '@/components/content/RichTextEditor';
+import VocabularyTableEditor from '@/components/vocabulary/VocabularyTableEditor';
 
 export default function UniversalGamePage() {
-  const [activeTab, setActiveTab] = useState('editor');
+  const [activeTab, setActiveTab] = useState('vocabulary-table');
   const [editorContent, setEditorContent] = useState('');
+  const [vocabularyData, setVocabularyData] = useState([]);
+
+  // 處理詞彙輸入完成
+  const handleVocabularyComplete = (data: {
+    title: string;
+    vocabulary: any[];
+    activityId?: string;
+    gameVocabulary?: any[];
+  }) => {
+    console.log('🎯 詞彙輸入完成:', data);
+    setVocabularyData(data.vocabulary);
+
+    // 如果有遊戲數據，可以直接啟動遊戲
+    if (data.gameVocabulary && data.activityId) {
+      console.log('🎮 遊戲數據準備完成:', {
+        activityId: data.activityId,
+        gameVocabulary: data.gameVocabulary,
+        mapping: {
+          cloudText: '詞彙字 (英文) → 雲朵上的文字',
+          targetHint: '答案 (中文) → 提示區域的文字'
+        }
+      });
+
+      // 這裡可以導航到遊戲頁面
+      // window.location.href = `/games/airplane?activity=${data.activityId}`;
+    }
+  };
 
   const contentFeatures = [
     {
@@ -88,6 +116,17 @@ export default function UniversalGamePage() {
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-6" aria-label="Tabs">
               <button
+                onClick={() => setActiveTab('vocabulary-table')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'vocabulary-table'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+                data-testid="tab-vocabulary-table"
+              >
+                📝 詞彙表格輸入
+              </button>
+              <button
                 onClick={() => setActiveTab('editor')}
                 className={`py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === 'editor'
@@ -96,7 +135,7 @@ export default function UniversalGamePage() {
                 }`}
                 data-testid="tab-editor"
               >
-                📝 統一編輯器
+                ✏️ 統一編輯器
               </button>
               <button
                 onClick={() => setActiveTab('features')}
@@ -125,6 +164,22 @@ export default function UniversalGamePage() {
 
           {/* 編輯器內容 */}
           <div className="p-6">
+            {activeTab === 'vocabulary-table' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-900">詞彙表格輸入</h2>
+                  <div className="text-sm text-gray-600">
+                    模仿 Wordwall 的詞彙輸入界面，支援英文單字和中文翻譯
+                  </div>
+                </div>
+
+                <VocabularyTableEditor
+                  onVocabularyChange={setVocabularyData}
+                  onComplete={handleVocabularyComplete}
+                />
+              </div>
+            )}
+
             {activeTab === 'editor' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">

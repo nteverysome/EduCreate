@@ -130,9 +130,17 @@ export class GEPTManager {
    * 獲取隨機詞彙
    */
   getRandomWord(level?: GEPTLevel): GEPTWord | null {
+    // 首先嘗試從 VocabularyIntegrationService 獲取詞彙
+    const customVocabulary = this.getCustomVocabulary();
+    if (customVocabulary.length > 0) {
+      console.log('🎯 使用自定義詞彙:', customVocabulary.length, '個詞彙');
+      return customVocabulary[Math.floor(Math.random() * customVocabulary.length)];
+    }
+
+    // 如果沒有自定義詞彙，使用預設詞彙
     const targetLevel = level || this.currentLevel;
     const words = this.getWordsForLevel(targetLevel);
-    
+
     if (words.length === 0) {
       console.warn(`⚠️ 沒有找到 ${targetLevel} 等級的詞彙`);
       return null;
@@ -143,12 +151,49 @@ export class GEPTManager {
   }
 
   /**
+   * 從 VocabularyIntegrationService 獲取自定義詞彙
+   */
+  private getCustomVocabulary(): GEPTWord[] {
+    try {
+      const vocabularyData = localStorage.getItem('vocabulary_integration_data');
+      if (!vocabularyData) return [];
+
+      const parsed = JSON.parse(vocabularyData);
+      if (!parsed.vocabulary || !Array.isArray(parsed.vocabulary)) return [];
+
+      // 轉換為 GEPTWord 格式
+      return parsed.vocabulary.map((item: any, index: number) => ({
+        id: (index + 1000).toString(), // 使用高 ID 避免衝突
+        english: item.english,
+        chinese: item.chinese,
+        level: item.level || 'elementary',
+        frequency: item.frequency || 80,
+        difficulty: item.difficulty || 3,
+        partOfSpeech: item.partOfSpeech || 'noun',
+        category: item.category || 'custom'
+      }));
+    } catch (error) {
+      console.warn('⚠️ 無法讀取自定義詞彙:', error);
+      return [];
+    }
+  }
+
+  /**
    * 獲取多個隨機詞彙
    */
   getRandomWords(count: number, level?: GEPTLevel): GEPTWord[] {
+    // 首先嘗試從自定義詞彙獲取
+    const customVocabulary = this.getCustomVocabulary();
+    if (customVocabulary.length > 0) {
+      console.log('🎯 使用自定義詞彙獲取多個詞彙:', customVocabulary.length, '個可用');
+      const shuffled = [...customVocabulary].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, Math.min(count, customVocabulary.length));
+    }
+
+    // 如果沒有自定義詞彙，使用預設詞彙
     const targetLevel = level || this.currentLevel;
     const words = this.getWordsForLevel(targetLevel);
-    
+
     if (words.length === 0) return [];
 
     const shuffled = [...words].sort(() => 0.5 - Math.random());
