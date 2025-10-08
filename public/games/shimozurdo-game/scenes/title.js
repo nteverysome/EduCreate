@@ -759,6 +759,15 @@ export default class Title extends Phaser.Scene {
 
             // 🆕 更新中文文字（右列，對換後）
             this.targetText.setText(this.currentTargetWord.chinese);
+
+            // 🆕 自動播放雙語發音：中文 → 英文
+            if (this.game.bilingualManager) {
+                console.log('🔊 自動播放新單字發音:', this.currentTargetWord.chinese, '→', this.currentTargetWord.english);
+                this.game.bilingualManager.speakBilingual(
+                    this.currentTargetWord.english,
+                    this.currentTargetWord.chinese
+                );
+            }
         } else {
             console.warn('⚠️ 無法獲取隨機詞彙');
         }
