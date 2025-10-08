@@ -872,20 +872,20 @@ export default class Title extends Phaser.Scene {
         // 設置敵人屬性 - 移動速度
         enemy.speed = Phaser.Math.Between(1, 3);         // 隨機速度（1-3像素/幀）
 
-        // 🆕 添加詞彙文字 - 顯示英文單字
+        // 🆕 添加詞彙文字 - 顯示英文單字（放入雲中）
         const wordText = this.add.text(
             enemy.x,                                     // X座標（與敵人對齊）
-            enemy.y - 40,                                // Y座標（敵人上方40像素）
+            enemy.y,                                     // Y座標（與敵人中心對齊，放入雲中）
             word.english,                                // 顯示英文單字
             {
-                fontSize: '20px',                        // 字體大小
+                fontSize: '16px',                        // 縮小字體，適合雲朵內部
                 color: isTarget ? '#ff0000' : '#000000', // 目標詞彙紅色，其他黑色
-                fontStyle: isTarget ? 'bold' : 'normal', // 目標詞彙粗體
-                backgroundColor: isTarget ? '#ffff00' : 'rgba(255, 255, 255, 0.8)', // 目標詞彙黃色背景
-                padding: { x: 6, y: 3 }                  // 內邊距
+                fontStyle: isTarget ? 'bold' : 'bold',   // 都使用粗體，增加可讀性
+                backgroundColor: isTarget ? '#ffff00' : 'rgba(255, 255, 255, 0.9)', // 增加背景透明度
+                padding: { x: 8, y: 4 }                  // 增加內邊距，確保在雲中清晰可見
             }
         ).setOrigin(0.5);                                // 設置原點為中央
-        wordText.setDepth(-64);                          // 在敵人前面
+        wordText.setDepth(-63);                          // 在雲朵前面，確保文字可見
 
         // 🆕 將文字綁定到敵人 - 用於同步移動和銷毀
         enemy.setData('wordText', wordText);
@@ -934,11 +934,11 @@ export default class Title extends Phaser.Scene {
                 // 向左移動 - 敵人從右向左移動
                 enemy.x -= enemy.speed;
 
-                // 🆕 同步移動詞彙文字 - 讓文字跟隨敵人移動
+                // 🆕 同步移動詞彙文字 - 讓文字跟隨敵人移動（在雲中）
                 const wordText = enemy.getData('wordText');
                 if (wordText && wordText.active) {
                     wordText.x = enemy.x;                // 同步X座標
-                    wordText.y = enemy.y - 40;           // 保持在敵人上方40像素
+                    wordText.y = enemy.y;                // 保持在敵人中心（雲朵中心）
                 }
 
                 // 檢查與太空船的碰撞 - 碰撞檢測
