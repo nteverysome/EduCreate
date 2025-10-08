@@ -878,7 +878,7 @@ export default class Title extends Phaser.Scene {
             enemy.y,                                     // Y座標（與敵人中心對齊，放入雲中）
             word.english,                                // 顯示英文單字
             {
-                fontSize: '18px',                        // 增加10%：16px → 18px
+                fontSize: '22px',                        // 調整為22px，更大更清晰
                 color: isTarget ? '#ff0000' : '#000000', // 目標詞彙紅色，其他黑色
                 fontStyle: 'bold',                       // 粗體，增加可讀性
                 stroke: '#ffffff',                       // 白色邊框，確保在雲朵上清晰可見
