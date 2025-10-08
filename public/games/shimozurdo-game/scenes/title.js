@@ -1011,8 +1011,8 @@ export default class Title extends Phaser.Scene {
                 );
             }
 
-            // 顯示成功提示
-            this.showSuccessMessage(word);
+            // 顯示成功提示 - 在雲朵位置顯示
+            this.showSuccessMessage(word, enemy.x, enemy.y);
 
             // 設置新的目標詞彙
             this.setRandomTargetWord();
@@ -1027,8 +1027,8 @@ export default class Title extends Phaser.Scene {
             this.score = Math.max(0, this.score - 5);
             this.takeDamage(10);
 
-            // 顯示錯誤提示
-            this.showErrorMessage();
+            // 顯示錯誤提示 - 在雲朵位置顯示
+            this.showErrorMessage(enemy.x, enemy.y);
 
             // 更新分數顯示
             this.updateScoreDisplay();
@@ -1036,68 +1036,68 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 🆕 顯示成功提示 - 碰撞正確目標時的視覺反饋
+     * 🆕 顯示成功提示 - 在雲朵位置顯示碰撞正確目標時的視覺反饋
      */
-    showSuccessMessage(word) {
-        const { width, height } = this;
-
-        // 創建成功提示文字
+    showSuccessMessage(word, x, y) {
+        // 創建成功提示文字 - 在雲朵位置顯示
         const successText = this.add.text(
-            width / 2,
-            height / 2,
+            x,                                               // 雲朵的X位置
+            y - 50,                                          // 雲朵上方50像素
             `✅ 正確！\n${word.chinese} (${word.english})`,
             {
-                fontSize: '32px',
-                color: '#00ff00',
+                fontSize: '28px',                            // 稍微縮小字體適應雲朵位置
+                color: '#00ff00',                            // 綠色文字
                 fontStyle: 'bold',
                 align: 'center',
-                stroke: '#000000',
-                strokeThickness: 4
+                stroke: '#000000',                           // 黑色描邊
+                strokeThickness: 3                           // 描邊厚度
             }
-        ).setOrigin(0.5);
-        successText.setScrollFactor(0);
-        successText.setDepth(300);
+        ).setOrigin(0.5);                                    // 設置原點為中央
+        successText.setScrollFactor(1);                      // 使用世界座標，跟隨攝影機
+        successText.setDepth(400);                           // 確保在最前面
 
-        // 淡出動畫
+        // 向上飄移 + 淡出動畫
         this.tweens.add({
             targets: successText,
-            alpha: 0,
-            duration: 2000,
+            y: y - 120,                                      // 向上飄移70像素
+            alpha: 0,                                        // 淡出
+            duration: 1500,                                  // 1.5秒動畫
+            ease: 'Power2',                                  // 緩動效果
             onComplete: () => {
-                successText.destroy();
+                successText.destroy();                       // 動畫完成後銷毀
             }
         });
     }
 
     /**
-     * 🆕 顯示錯誤提示 - 碰撞錯誤目標時的視覺反饋
+     * 🆕 顯示錯誤提示 - 在雲朵位置顯示碰撞錯誤目標時的視覺反饋
      */
-    showErrorMessage() {
-        const { width, height } = this;
-
-        // 創建錯誤提示文字
+    showErrorMessage(x, y) {
+        // 創建錯誤提示文字 - 在雲朵位置顯示
         const errorText = this.add.text(
-            width / 2,
-            height / 2,
+            x,                                               // 雲朵的X位置
+            y - 50,                                          // 雲朵上方50像素
             '❌ 錯誤！',
             {
-                fontSize: '32px',
-                color: '#ff0000',
+                fontSize: '28px',                            // 稍微縮小字體適應雲朵位置
+                color: '#ff0000',                            // 紅色文字
                 fontStyle: 'bold',
-                stroke: '#000000',
-                strokeThickness: 4
+                stroke: '#000000',                           // 黑色描邊
+                strokeThickness: 3                           // 描邊厚度
             }
-        ).setOrigin(0.5);
-        errorText.setScrollFactor(0);
-        errorText.setDepth(300);
+        ).setOrigin(0.5);                                    // 設置原點為中央
+        errorText.setScrollFactor(1);                        // 使用世界座標，跟隨攝影機
+        errorText.setDepth(400);                             // 確保在最前面
 
-        // 淡出動畫
+        // 向上飄移 + 淡出動畫
         this.tweens.add({
             targets: errorText,
-            alpha: 0,
-            duration: 1000,
+            y: y - 120,                                      // 向上飄移70像素
+            alpha: 0,                                        // 淡出
+            duration: 1200,                                  // 1.2秒動畫
+            ease: 'Power2',                                  // 緩動效果
             onComplete: () => {
-                errorText.destroy();
+                errorText.destroy();                         // 動畫完成後銷毀
             }
         });
     }
