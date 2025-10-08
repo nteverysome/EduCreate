@@ -700,6 +700,7 @@ export default class Title extends Phaser.Scene {
             {
                 fontSize: '36px',                            // 調整字體大小適應英文
                 color: '#000000',                            // 黑色文字
+                fontStyle: 'bold',                           // 粗體，更好辨識
                 backgroundColor: '#ffff00',                  // 黃色背景
                 padding: { x: 20, y: 10 }                    // 內邊距
             }
