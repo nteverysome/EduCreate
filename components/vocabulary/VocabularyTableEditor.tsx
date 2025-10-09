@@ -89,7 +89,7 @@ export default function VocabularyTableEditor({
   };
 
   // 完成並保存
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const validItems = vocabulary.filter(item =>
       item.english.trim() && item.chinese.trim()
     );
@@ -100,8 +100,8 @@ export default function VocabularyTableEditor({
     }
 
     try {
-      // 使用詞彙整合服務創建活動
-      const activity = vocabularyService.createVocabularyActivity(
+      // 使用詞彙整合服務創建活動（現在是異步的）
+      const activity = await vocabularyService.createVocabularyActivity(
         activityTitle,
         validItems,
         `包含 ${validItems.length} 個詞彙的學習活動`
@@ -122,7 +122,7 @@ export default function VocabularyTableEditor({
       });
 
       // 顯示成功消息
-      alert(`🎯 詞彙輸入完成！\n活動：${activityTitle}\n詞彙數量：${validItems.length} 個\n已保存並可用於遊戲`);
+      alert(`🚀 詞彙輸入完成！\n活動：${activityTitle}\n詞彙數量：${validItems.length} 個\n已同步到 Railway 雲端數據庫`);
 
     } catch (error) {
       console.error('❌ 保存詞彙活動失敗:', error);

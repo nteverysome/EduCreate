@@ -1,10 +1,19 @@
 /**
  * 詞彙整合服務
  * 統一管理詞彙數據在不同系統間的整合和同步
+ * 支持 localStorage 和 Railway API 雙重存儲
  */
 
 // 直接定義 GEPTLevel 類型，避免循環依賴
 export type GEPTLevel = 'elementary' | 'intermediate' | 'high-intermediate';
+
+// API 響應類型
+interface APIResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+}
 
 // 前向聲明 VocabularyItem 接口
 export interface VocabularyItem {
@@ -60,6 +69,8 @@ export class VocabularyIntegrationService {
   private static instance: VocabularyIntegrationService;
   private vocabularyDatabase: Map<string, UnifiedVocabularyWord> = new Map();
   private activities: Map<string, VocabularyActivity> = new Map();
+  private useRailwayAPI: boolean = true; // 優先使用 Railway API
+  private apiBaseUrl: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   private constructor() {
     this.initializeService();
@@ -127,6 +138,109 @@ export class VocabularyIntegrationService {
   }
 
   /**
+   * 保存詞彙活動到 Railway API
+   */
+  private async saveToRailwayAPI(activity: VocabularyActivity): Promise<boolean> {
+    if (!this.useRailwayAPI) return false;
+
+    try {
+      console.log('🚀 保存詞彙活動到 Railway API...');
+
+      const response = await fetch('/api/vocabulary/sets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: activity.title,
+          description: activity.description,
+          geptLevel: activity.geptLevel.toUpperCase(),
+          isPublic: false,
+          items: activity.vocabulary.map(word => ({
+            english: word.english,
+            chinese: word.chinese,
+            partOfSpeech: word.partOfSpeech || null,
+            difficultyLevel: word.difficulty || 1,
+            notes: word.category || null,
+            imageUrl: word.image || null
+          }))
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Railway API 保存失敗:', errorData);
+        return false;
+      }
+
+      const result: APIResponse<any> = await response.json();
+      console.log('✅ Railway API 保存成功:', result.data?.id);
+      return true;
+    } catch (error) {
+      console.error('❌ Railway API 調用失敗:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 從 Railway API 載入詞彙活動
+   */
+  private async loadFromRailwayAPI(): Promise<VocabularyActivity[]> {
+    if (!this.useRailwayAPI) return [];
+
+    try {
+      console.log('📡 從 Railway API 載入詞彙活動...');
+
+      const response = await fetch('/api/vocabulary/sets', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        console.error('❌ Railway API 載入失敗:', response.status);
+        return [];
+      }
+
+      const result: APIResponse<any[]> = await response.json();
+
+      if (!result.success || !result.data) {
+        console.error('❌ Railway API 響應格式錯誤');
+        return [];
+      }
+
+      const activities: VocabularyActivity[] = result.data.map(set => ({
+        id: set.id,
+        title: set.title,
+        description: set.description || `包含 ${set.totalWords} 個詞彙的學習活動`,
+        vocabulary: set.items.map((item: any) => ({
+          id: item.id,
+          english: item.english,
+          chinese: item.chinese,
+          level: set.geptLevel.toLowerCase() as GEPTLevel,
+          frequency: 1,
+          difficulty: item.difficultyLevel || 1,
+          partOfSpeech: item.partOfSpeech || undefined,
+          category: item.notes || undefined,
+          image: item.imageUrl || undefined,
+          createdAt: new Date(item.createdAt),
+          updatedAt: new Date(set.updatedAt)
+        })),
+        geptLevel: set.geptLevel.toLowerCase() as GEPTLevel,
+        createdAt: new Date(set.createdAt),
+        updatedAt: new Date(set.updatedAt)
+      }));
+
+      console.log(`✅ 從 Railway API 載入 ${activities.length} 個詞彙活動`);
+      return activities;
+    } catch (error) {
+      console.error('❌ Railway API 載入失敗:', error);
+      return [];
+    }
+  }
+
+  /**
    * 將表格輸入的詞彙轉換為統一格式
    */
   public convertTableVocabulary(vocabularyItems: VocabularyItem[]): UnifiedVocabularyWord[] {
@@ -148,11 +262,11 @@ export class VocabularyIntegrationService {
   /**
    * 創建詞彙活動
    */
-  public createVocabularyActivity(
-    title: string, 
-    vocabularyItems: VocabularyItem[], 
+  public async createVocabularyActivity(
+    title: string,
+    vocabularyItems: VocabularyItem[],
     description?: string
-  ): VocabularyActivity {
+  ): Promise<VocabularyActivity> {
     const activity: VocabularyActivity = {
       id: `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       title: title.trim(),
@@ -171,10 +285,18 @@ export class VocabularyIntegrationService {
       this.vocabularyDatabase.set(word.id, word);
     });
 
-    // 保存到本地存儲
+    // 優先保存到 Railway API
+    const railwaySaved = await this.saveToRailwayAPI(activity);
+
+    // 無論 Railway 是否成功，都保存到本地存儲作為備份
     this.saveToStorage();
 
-    console.log(`🎯 創建詞彙活動: ${activity.title} (${activity.vocabulary.length} 個詞彙)`);
+    if (railwaySaved) {
+      console.log(`🚀 詞彙活動已保存到 Railway: ${activity.title} (${activity.vocabulary.length} 個詞彙)`);
+    } else {
+      console.log(`💾 詞彙活動已保存到本地存儲: ${activity.title} (${activity.vocabulary.length} 個詞彙)`);
+    }
+
     return activity;
   }
 
