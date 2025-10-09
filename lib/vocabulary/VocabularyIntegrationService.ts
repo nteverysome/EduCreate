@@ -126,7 +126,7 @@ export class VocabularyIntegrationService {
           items: activity.vocabulary.map(word => ({
             english: word.english,
             chinese: word.chinese,
-            partOfSpeech: word.partOfSpeech || null,
+            partOfSpeech: word.partOfSpeech ? word.partOfSpeech.toUpperCase() : 'NOUN',
             difficultyLevel: word.difficulty || 1,
             notes: word.category || null,
             imageUrl: word.image || null
@@ -218,7 +218,7 @@ export class VocabularyIntegrationService {
       level: item.level,
       frequency: this.calculateFrequency(item.level),
       difficulty: this.calculateDifficulty(item.level),
-      partOfSpeech: 'noun', // 預設詞性
+      partOfSpeech: 'NOUN', // 預設詞性（修復：使用正確的枚舉值）
       category: item.category || 'general',
       image: item.image,
       createdAt: new Date(),
