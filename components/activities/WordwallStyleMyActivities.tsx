@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, FolderPlus } from 'lucide-react';
 import FolderManager from './FolderManager';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
