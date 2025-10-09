@@ -451,13 +451,49 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
     setSelectedItems(newSelection);
   };
 
+  // 開始詞彙遊戲
+  const startVocabularyGame = async (activity: Activity) => {
+    try {
+      console.log('🎮 開始詞彙遊戲:', activity.title);
+
+      // 從 API 獲取詞彙數據
+      const response = await fetch(`/api/vocabulary/sets/${activity.id}`);
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const vocabularySet = result.data;
+
+        // 將詞彙數據存儲到 localStorage 供遊戲使用
+        const gameVocabulary = vocabularySet.items.map((item: any) => ({
+          english: item.english,
+          chinese: item.chinese,
+          level: vocabularySet.geptLevel.toLowerCase()
+        }));
+
+        localStorage.setItem('gameVocabulary', JSON.stringify(gameVocabulary));
+        localStorage.setItem('gameTitle', vocabularySet.title);
+
+        console.log(`🎯 遊戲詞彙已設置: ${gameVocabulary.length} 個詞彙`);
+
+        // 跳轉到遊戲頁面
+        window.open('/games/shimozurdo-game', '_blank');
+      } else {
+        console.error('❌ 無法載入詞彙數據');
+        alert('無法載入詞彙數據，請稍後再試');
+      }
+    } catch (error) {
+      console.error('❌ 啟動遊戲失敗:', error);
+      alert('啟動遊戲失敗，請稍後再試');
+    }
+  };
+
   // 處理活動選擇
   const handleActivitySelect = useCallback((activity: Activity) => {
     console.log('選擇活動:', activity);
 
-    // 如果是詞彙活動，導航到統一內容編輯器
+    // 如果是詞彙活動，啟動遊戲
     if (activity.type === 'vocabulary') {
-      window.open('/universal-game', '_blank');
+      startVocabularyGame(activity);
     } else {
       // 其他活動的處理邏輯
       console.log('選擇系統活動:', activity.title);
@@ -468,7 +504,7 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
   const handleActivityEdit = useCallback((activity: Activity) => {
     console.log('編輯活動:', activity);
 
-    // 如果是詞彙活動，導航到統一內容編輯器
+    // 如果是詞彙活動，導航到統一內容編輯器進行編輯
     if (activity.type === 'vocabulary') {
       window.open('/universal-game', '_blank');
     } else {
