@@ -103,7 +103,12 @@ export class VocabularyIntegrationService {
    * 保存詞彙活動到 Railway API
    */
   private async saveToRailwayAPI(activity: VocabularyActivity): Promise<boolean> {
-    if (!this.useRailwayAPI) return false;
+    console.log('🔍 saveToRailwayAPI 被調用，useRailwayAPI:', this.useRailwayAPI);
+
+    if (!this.useRailwayAPI) {
+      console.log('❌ useRailwayAPI 為 false，跳過 Railway API 調用');
+      return false;
+    }
 
     try {
       console.log('🚀 保存詞彙活動到 Railway API...');
@@ -248,11 +253,14 @@ export class VocabularyIntegrationService {
     });
 
     // 保存到 Railway API
+    console.log('🔍 準備調用 saveToRailwayAPI...');
     const railwaySaved = await this.saveToRailwayAPI(activity);
+    console.log('🔍 saveToRailwayAPI 返回結果:', railwaySaved);
 
     if (railwaySaved) {
       console.log(`🚀 詞彙活動已保存到 Railway: ${activity.title} (${activity.vocabulary.length} 個詞彙)`);
     } else {
+      console.log('❌ Railway API 保存失敗，準備拋出錯誤');
       throw new Error('保存到 Railway 失敗，請檢查網絡連接或稍後重試');
     }
 
