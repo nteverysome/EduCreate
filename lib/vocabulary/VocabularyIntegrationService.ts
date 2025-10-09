@@ -69,7 +69,7 @@ export class VocabularyIntegrationService {
   private static instance: VocabularyIntegrationService;
   private vocabularyDatabase: Map<string, UnifiedVocabularyWord> = new Map();
   private activities: Map<string, VocabularyActivity> = new Map();
-  private useRailwayAPI: boolean = true; // 優先使用 Railway API
+  private useRailwayAPI: boolean = true; // 只使用 Railway API
   private apiBaseUrl: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   private constructor() {
@@ -91,51 +91,13 @@ export class VocabularyIntegrationService {
    */
   private initializeService(): void {
     console.log('🔧 詞彙整合服務初始化中...');
-    this.loadStoredVocabulary();
+    console.log('🚀 使用 Railway 雲端存儲模式');
     console.log('✅ 詞彙整合服務初始化完成');
   }
 
-  /**
-   * 從本地存儲載入詞彙
-   */
-  private loadStoredVocabulary(): void {
-    try {
-      const stored = localStorage.getItem('vocabulary_integration_data');
-      if (stored) {
-        const data = JSON.parse(stored);
-        if (data.vocabulary) {
-          data.vocabulary.forEach((word: UnifiedVocabularyWord) => {
-            this.vocabularyDatabase.set(word.id, word);
-          });
-        }
-        if (data.activities) {
-          data.activities.forEach((activity: VocabularyActivity) => {
-            this.activities.set(activity.id, activity);
-          });
-        }
-        console.log(`📚 載入 ${this.vocabularyDatabase.size} 個詞彙和 ${this.activities.size} 個活動`);
-      }
-    } catch (error) {
-      console.warn('⚠️ 載入本地詞彙數據失敗:', error);
-    }
-  }
 
-  /**
-   * 保存詞彙到本地存儲
-   */
-  private saveToStorage(): void {
-    try {
-      const data = {
-        vocabulary: Array.from(this.vocabularyDatabase.values()),
-        activities: Array.from(this.activities.values()),
-        lastUpdated: new Date().toISOString()
-      };
-      localStorage.setItem('vocabulary_integration_data', JSON.stringify(data));
-      console.log('💾 詞彙數據已保存到本地存儲');
-    } catch (error) {
-      console.error('❌ 保存詞彙數據失敗:', error);
-    }
-  }
+
+
 
   /**
    * 保存詞彙活動到 Railway API
@@ -285,16 +247,13 @@ export class VocabularyIntegrationService {
       this.vocabularyDatabase.set(word.id, word);
     });
 
-    // 優先保存到 Railway API
+    // 保存到 Railway API
     const railwaySaved = await this.saveToRailwayAPI(activity);
-
-    // 無論 Railway 是否成功，都保存到本地存儲作為備份
-    this.saveToStorage();
 
     if (railwaySaved) {
       console.log(`🚀 詞彙活動已保存到 Railway: ${activity.title} (${activity.vocabulary.length} 個詞彙)`);
     } else {
-      console.log(`💾 詞彙活動已保存到本地存儲: ${activity.title} (${activity.vocabulary.length} 個詞彙)`);
+      throw new Error('保存到 Railway 失敗，請檢查網絡連接或稍後重試');
     }
 
     return activity;

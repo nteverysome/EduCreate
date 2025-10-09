@@ -233,77 +233,50 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
     return () => clearTimeout(timer);
   }, [loadData]);
 
-  // 載入用戶詞彙活動（支持 Railway API 和 localStorage）
+  // 載入用戶詞彙活動（只使用 Railway API）
   const loadVocabularyActivities = async (): Promise<Activity[]> => {
     try {
-      let vocabularyActivities: Activity[] = [];
+      console.log('🚀 從 Railway API 載入詞彙活動...');
 
-      // 優先從 Railway API 載入
-      try {
-        const response = await fetch('/api/vocabulary/sets', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            vocabularyActivities = result.data.map((set: any) => ({
-              id: set.id,
-              title: set.title || '無標題詞彙活動',
-              description: set.description || `包含 ${set.totalWords || 0} 個詞彙的學習活動`,
-              type: 'vocabulary',
-              folderId: folderId || undefined,
-              createdAt: new Date(set.createdAt),
-              updatedAt: new Date(set.updatedAt),
-              lastAccessedAt: new Date(set.updatedAt),
-              size: (set.totalWords || 0) * 100,
-              isShared: set.isPublic || false,
-              geptLevel: set.geptLevel?.toLowerCase() || 'elementary',
-              learningEffectiveness: 0.95,
-              usageCount: 1,
-              tags: ['vocabulary', 'railway', set.geptLevel?.toLowerCase() || 'elementary'],
-              thumbnail: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23dbeafe"/><text x="50" y="55" font-size="30" text-anchor="middle">🚀</text></svg>'
-            }));
-            console.log(`🚀 從 Railway API 載入 ${vocabularyActivities.length} 個詞彙活動`);
-          }
+      const response = await fetch('/api/vocabulary/sets', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
         }
-      } catch (apiError) {
-        console.warn('⚠️ Railway API 載入失敗，嘗試本地存儲:', apiError);
+      });
+
+      if (!response.ok) {
+        throw new Error(`API 請求失敗: ${response.status}`);
       }
 
-      // 如果 Railway API 失敗或沒有數據，從 localStorage 載入
-      if (vocabularyActivities.length === 0) {
-        const vocabularyData = localStorage.getItem('vocabulary_integration_data');
-        if (vocabularyData) {
-          const data = JSON.parse(vocabularyData);
-          vocabularyActivities = data.activities?.map((activity: any) => ({
-            id: activity.id,
-            title: activity.title || '無標題詞彙活動',
-            description: activity.description || `包含 ${activity.vocabulary?.length || 0} 個詞彙的學習活動`,
-            type: 'vocabulary',
-            folderId: folderId || undefined,
-            createdAt: new Date(activity.createdAt),
-            updatedAt: new Date(activity.updatedAt),
-            lastAccessedAt: new Date(activity.updatedAt),
-            size: (activity.vocabulary?.length || 0) * 100,
-            isShared: false,
-            geptLevel: activity.geptLevel || 'elementary',
-            learningEffectiveness: 0.95,
-            usageCount: 1,
-            tags: ['vocabulary', 'local', activity.geptLevel || 'elementary'],
-            thumbnail: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23dbeafe"/><text x="50" y="55" font-size="30" text-anchor="middle">📝</text></svg>'
-          })) || [];
-          console.log(`💾 從本地存儲載入 ${vocabularyActivities.length} 個詞彙活動`);
-        }
+      const result = await response.json();
+      if (!result.success || !result.data) {
+        throw new Error('API 響應格式錯誤');
       }
 
+      const vocabularyActivities = result.data.map((set: any) => ({
+        id: set.id,
+        title: set.title || '無標題詞彙活動',
+        description: set.description || `包含 ${set.totalWords || 0} 個詞彙的學習活動`,
+        type: 'vocabulary',
+        folderId: folderId || undefined,
+        createdAt: new Date(set.createdAt),
+        updatedAt: new Date(set.updatedAt),
+        lastAccessedAt: new Date(set.updatedAt),
+        size: (set.totalWords || 0) * 100,
+        isShared: set.isPublic || false,
+        geptLevel: set.geptLevel?.toLowerCase() || 'elementary',
+        learningEffectiveness: 0.95,
+        usageCount: 1,
+        tags: ['vocabulary', 'railway', set.geptLevel?.toLowerCase() || 'elementary'],
+        thumbnail: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23dbeafe"/><text x="50" y="55" font-size="30" text-anchor="middle">🚀</text></svg>'
+      }));
+
+      console.log(`🚀 從 Railway API 載入 ${vocabularyActivities.length} 個詞彙活動`);
       return vocabularyActivities;
     } catch (error) {
-      console.error('載入詞彙活動失敗:', error);
-      return [];
+      console.error('❌ 載入詞彙活動失敗:', error);
+      throw error; // 拋出錯誤，讓調用者處理
     }
   };
 
@@ -316,7 +289,13 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
   ): Promise<{ activities: Activity[]; total: number; hasMore: boolean }> => {
     try {
       // 載入用戶創建的詞彙活動（現在是異步的）
-      const vocabularyActivities = await loadVocabularyActivities();
+      let vocabularyActivities: Activity[] = [];
+      try {
+        vocabularyActivities = await loadVocabularyActivities();
+      } catch (vocabError) {
+        console.warn('⚠️ 載入詞彙活動失敗，將顯示空列表:', vocabError);
+        // 不拋出錯誤，繼續載入其他活動
+      }
 
       // 如果啟用虛擬化且需要大量數據，使用數據生成器
       if (enableVirtualization && maxActivities > 100) {
