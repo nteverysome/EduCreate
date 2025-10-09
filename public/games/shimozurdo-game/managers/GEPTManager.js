@@ -11,25 +11,132 @@ class GEPTManager {
   }
 
   /**
-   * 初始化詞彙數據庫
+   * 初始化詞彙數據庫 - 支援雲端載入
    */
-  initializeDatabase() {
-    // 🆕 首先檢查是否有自定義詞彙
-    const customVocabulary = this.getCustomVocabulary();
+  async initializeDatabase() {
+    // 🌐 第一優先：嘗試從雲端載入詞彙
+    console.log('🌐 嘗試從雲端載入詞彙...');
+    const cloudLoaded = await this.loadFromCloud();
+    if (cloudLoaded) {
+      console.log('✅ 使用雲端詞彙');
+      return;
+    }
 
+    // 💾 第二優先：檢查是否有本地自定義詞彙
+    const customVocabulary = this.getCustomVocabulary();
     if (customVocabulary.length > 0) {
-      console.log('🎯 使用自定義詞彙:', customVocabulary.length, '個詞彙');
+      console.log('🎯 使用本地自定義詞彙:', customVocabulary.length, '個詞彙');
 
       // 使用自定義詞彙替換初級詞彙
       this.wordDatabase.set('elementary', customVocabulary);
       this.wordDatabase.set('intermediate', []);
       this.wordDatabase.set('high-intermediate', []);
 
-      console.log('📊 自定義詞彙數據庫初始化完成');
+      console.log('📊 本地自定義詞彙數據庫初始化完成');
       console.log(`  - 自定義: ${customVocabulary.length} 個詞彙`);
       return;
     }
 
+    // 📚 第三優先：使用預設詞彙
+    console.log('📚 使用預設詞彙');
+    this.loadDefaultVocabulary();
+  }
+
+  /**
+   * 🌐 從雲端 API 載入詞彙
+   */
+  async loadFromCloud() {
+    try {
+      console.log('🌐 正在從雲端 API 載入詞彙...');
+
+      const response = await fetch('/api/vocabulary/sets');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('📡 雲端 API 響應:', result);
+
+      if (result.success && result.data && result.data.length > 0) {
+        // 清空現有詞彙數據庫
+        this.wordDatabase.clear();
+
+        // 初始化各級別詞彙數組
+        const levelWords = {
+          'elementary': [],
+          'intermediate': [],
+          'high-intermediate': []
+        };
+
+        let totalWords = 0;
+
+        // 處理每個詞彙集合
+        result.data.forEach(set => {
+          console.log(`📚 處理詞彙集合: ${set.title} (${set.items.length} 個詞彙)`);
+
+          set.items.forEach(item => {
+            const word = {
+              id: item.id,
+              english: item.english,
+              chinese: item.chinese,
+              level: this.mapGeptLevel(set.geptLevel),
+              difficulty: item.difficultyLevel || 1,
+              frequency: 100 - (item.difficultyLevel || 1) * 10,
+              category: 'cloud',
+              partOfSpeech: item.partOfSpeech || 'NOUN',
+              image: item.imageUrl,
+              createdAt: new Date(item.createdAt),
+              updatedAt: new Date(item.updatedAt)
+            };
+
+            // 根據等級分類詞彙
+            const level = word.level;
+            if (levelWords[level]) {
+              levelWords[level].push(word);
+              totalWords++;
+            }
+          });
+        });
+
+        // 設置詞彙數據庫
+        this.wordDatabase.set('elementary', levelWords.elementary);
+        this.wordDatabase.set('intermediate', levelWords.intermediate);
+        this.wordDatabase.set('high-intermediate', levelWords['high-intermediate']);
+
+        console.log(`✅ 雲端詞彙載入完成，總共 ${totalWords} 個詞彙`);
+        console.log('📊 雲端詞彙數據庫統計:');
+        console.log(`  - 初級: ${levelWords.elementary.length} 個詞彙`);
+        console.log(`  - 中級: ${levelWords.intermediate.length} 個詞彙`);
+        console.log(`  - 高級: ${levelWords['high-intermediate'].length} 個詞彙`);
+
+        return true;
+      } else {
+        console.log('⚠️ 雲端沒有詞彙數據');
+        return false;
+      }
+
+    } catch (error) {
+      console.error('❌ 雲端詞彙載入失敗:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 🗺️ 映射 GEPT 等級
+   */
+  mapGeptLevel(geptLevel) {
+    const levelMap = {
+      'ELEMENTARY': 'elementary',
+      'INTERMEDIATE': 'intermediate',
+      'ADVANCED': 'high-intermediate'
+    };
+    return levelMap[geptLevel] || 'elementary';
+  }
+
+  /**
+   * 📚 載入預設詞彙
+   */
+  loadDefaultVocabulary() {
     // 初級詞彙（GEPT Elementary）- 預設詞彙
     const elementaryWords = [
       { id: '1', english: 'friend', chinese: '朋友', level: 'elementary' },
@@ -76,7 +183,7 @@ class GEPTManager {
     this.wordDatabase.set('intermediate', intermediateWords);
     this.wordDatabase.set('high-intermediate', highIntermediateWords);
 
-    console.log('📊 詞彙數據庫初始化完成');
+    console.log('📊 預設詞彙數據庫初始化完成');
     console.log(`  - 初級: ${elementaryWords.length} 個詞彙`);
     console.log(`  - 中級: ${intermediateWords.length} 個詞彙`);
     console.log(`  - 高級: ${highIntermediateWords.length} 個詞彙`);
