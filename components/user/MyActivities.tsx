@@ -259,7 +259,7 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
         title: set.title || '無標題詞彙活動',
         description: set.description || `包含 ${set.totalWords || 0} 個詞彙的學習活動`,
         type: 'vocabulary',
-        folderId: folderId || undefined,
+        folderId: undefined,
         createdAt: new Date(set.createdAt),
         updatedAt: new Date(set.updatedAt),
         lastAccessedAt: new Date(set.updatedAt),

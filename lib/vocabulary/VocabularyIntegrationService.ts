@@ -1,7 +1,7 @@
 /**
  * 詞彙整合服務
  * 統一管理詞彙數據在不同系統間的整合和同步
- * 支持 localStorage 和 Railway API 雙重存儲
+ * 使用 Railway API 雲端存儲
  */
 
 // 直接定義 GEPTLevel 類型，避免循環依賴
@@ -391,7 +391,6 @@ export class VocabularyIntegrationService {
   public clearAllData(): void {
     this.vocabularyDatabase.clear();
     this.activities.clear();
-    localStorage.removeItem('vocabulary_integration_data');
-    console.log('🗑️ 所有詞彙數據已清空');
+    console.log('🗑️ 所有詞彙數據已清空（僅內存）');
   }
 }
