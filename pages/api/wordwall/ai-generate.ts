@@ -5,7 +5,7 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]';
+import { authOptions } from '../../../lib/auth';
 import { AIContentGenerator, AIGenerationRequest } from '@/lib/wordwall/AIContentGenerator';
 import { TemplateType } from '@prisma/client';
 
