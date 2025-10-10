@@ -50,20 +50,20 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const loadActivities = async () => {
     setLoading(true);
     try {
-      // 載入詞彙活動
-      const vocabularyActivities = loadVocabularyActivities();
-      
+      // 載入詞彙活動（異步）
+      const vocabularyActivities = await loadVocabularyActivities();
+
       // 載入系統活動（模擬數據）
       const systemActivities = generateSystemActivities();
-      
+
       // 合併活動
       const allActivities = [...vocabularyActivities, ...systemActivities];
-      
+
       // 根據當前資料夾篩選
-      const filteredActivities = currentFolderId 
+      const filteredActivities = currentFolderId
         ? allActivities.filter(activity => activity.folderId === currentFolderId)
         : allActivities.filter(activity => !activity.folderId);
-      
+
       setActivities(filteredActivities);
     } catch (error) {
       console.error('載入活動失敗:', error);
@@ -72,31 +72,37 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
-  // 載入詞彙活動
-  const loadVocabularyActivities = (): Activity[] => {
+  // 載入詞彙活動（從雲端 API）
+  const loadVocabularyActivities = async (): Promise<Activity[]> => {
     try {
-      const vocabularyData = localStorage.getItem('vocabulary_integration_data');
-      if (!vocabularyData) return [];
+      console.log('🚀 從 Railway API 載入詞彙活動...');
+      const response = await fetch('/api/vocabulary/sets');
+      const result = await response.json();
 
-      const data = JSON.parse(vocabularyData);
-      return data.activities?.map((activity: any) => ({
-        id: activity.id,
-        title: activity.title || '無標題詞彙活動',
-        description: `包含 ${activity.vocabulary?.length || 0} 個詞彙的學習活動`,
-        type: 'vocabulary' as const,
-        gameType: '詞彙遊戲',
-        isPublic: false,
-        playCount: Math.floor(Math.random() * 50),
-        lastModified: new Date(activity.updatedAt),
-        createdAt: new Date(activity.createdAt),
-        thumbnail: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23dbeafe"/><text x="50" y="55" font-size="30" text-anchor="middle">📝</text></svg>',
-        wordCount: activity.vocabulary?.length || 0,
-        geptLevel: activity.geptLevel || 'elementary',
-        tags: ['vocabulary', 'custom', activity.geptLevel || 'elementary'],
-        folderId: activity.folderId
-      })) || [];
+      if (result.success && result.data) {
+        console.log(`🚀 從 Railway API 載入 ${result.data.length} 個詞彙活動`);
+
+        return result.data.map((set: any) => ({
+          id: set.id,
+          title: set.title || '無標題詞彙活動',
+          description: `包含 ${set.items?.length || 0} 個詞彙的學習活動`,
+          type: 'vocabulary' as const,
+          gameType: '詞彙遊戲',
+          isPublic: false,
+          playCount: Math.floor(Math.random() * 50),
+          lastModified: new Date(set.updatedAt),
+          createdAt: new Date(set.createdAt),
+          thumbnail: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23dbeafe"/><text x="50" y="55" font-size="30" text-anchor="middle">📝</text></svg>',
+          wordCount: set.items?.length || 0,
+          geptLevel: set.geptLevel || 'ELEMENTARY',
+          tags: ['vocabulary', 'cloud', set.geptLevel?.toLowerCase() || 'elementary'],
+          folderId: undefined
+        }));
+      }
+
+      return [];
     } catch (error) {
-      console.error('載入詞彙活動失敗:', error);
+      console.error('載入雲端詞彙活動失敗:', error);
       return [];
     }
   };
@@ -206,9 +212,45 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
+  // 開始詞彙遊戲
+  const startVocabularyGame = async (activity: Activity) => {
+    try {
+      console.log('🎮 開始詞彙遊戲:', activity.title);
+
+      // 從 API 獲取詞彙數據
+      const response = await fetch(`/api/vocabulary/sets/${activity.id}`);
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const vocabularySet = result.data;
+
+        // 將詞彙數據存儲到 localStorage 供遊戲使用
+        const gameVocabulary = vocabularySet.items.map((item: any) => ({
+          english: item.english,
+          chinese: item.chinese,
+          level: vocabularySet.geptLevel.toLowerCase()
+        }));
+
+        localStorage.setItem('gameVocabulary', JSON.stringify(gameVocabulary));
+        localStorage.setItem('gameTitle', vocabularySet.title);
+
+        console.log(`🎯 遊戲詞彙已設置: ${gameVocabulary.length} 個詞彙`);
+
+        // 跳轉到遊戲頁面
+        window.open('/games/shimozurdo-game', '_blank');
+      } else {
+        console.error('❌ 無法載入詞彙數據');
+        alert('無法載入詞彙數據，請稍後再試');
+      }
+    } catch (error) {
+      console.error('❌ 啟動遊戲失敗:', error);
+      alert('啟動遊戲失敗，請稍後再試');
+    }
+  };
+
   const handleActivityPlay = (activity: Activity) => {
     if (activity.type === 'vocabulary') {
-      window.open('/universal-game', '_blank');
+      startVocabularyGame(activity);
     } else {
       // 處理系統活動播放
       console.log('播放活動:', activity.title);
