@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import WordwallStyleMyActivities from '@/components/activities/WordwallStyleMyActivities';
-import LoginPrompt from '@/components/auth/LoginPrompt.tsx';
+import LoginPrompt from '@/components/auth/LoginPrompt';
 
 export default function MyActivitiesPage() {
   const { data: session, status } = useSession();
