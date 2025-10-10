@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../lib/auth';
+import { authOptions } from '../../../../lib/auth';
 
 interface SyncRequest {
   action: 'sync' | 'conflict-check' | 'resolve-conflict' | 'get-status';
