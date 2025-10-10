@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../api/auth/[...nextauth]';
+import { authOptions } from '../../lib/auth';
 import Layout from '../../components/Layout';
 import AdvancedSearchInterface from '../../components/search/AdvancedSearchInterface';
 import SearchResultsDisplay from '../../components/search/SearchResultsDisplay';
