@@ -476,7 +476,7 @@ const UnifiedNavigation = ({
               </Link>
 
               {/* 原有的導航項目（簡化版） */}
-              {mainNavItems.slice(0, 2).map(item => {
+              {mainNavItems.filter(item => item.id === 'universal-content-editor').map(item => {
                 // 統一內容編輯器特殊處理 - 添加下拉菜單
                 if (item.id === 'universal-content-editor') {
                   return (
