@@ -428,17 +428,55 @@ const UnifiedNavigation = ({
       <nav className={`bg-white shadow-sm border-b ${className}`} data-testid="unified-navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center">
+            {/* 左側：Logo 和標語 */}
+            <div className="flex items-center space-x-6">
               <Link href="/" className="flex items-center" data-testid="nav-logo">
                 <span className="text-2xl font-bold text-blue-600">EduCreate</span>
                 <span className="ml-2 text-sm text-gray-500">({availableCount}/{totalCount})</span>
               </Link>
+              <span className="hidden lg:block text-sm text-gray-600">更快地創建更好的課程</span>
             </div>
 
-            {/* 桌面導航 */}
+            {/* 中間：創建活動按鈕 */}
+            <div className="hidden md:flex items-center">
+              <Link
+                href="/universal-game"
+                className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
+                data-testid="create-activity-button"
+              >
+                創建活動
+              </Link>
+            </div>
+
+            {/* 右側：導航和用戶菜單 */}
             <div className="hidden md:flex items-center space-x-6">
-              {mainNavItems.map(item => {
+              {/* Wordwall 風格導航項目 */}
+              <Link
+                href="/community"
+                className="flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                <span className="mr-1">👥</span>
+                社區
+              </Link>
+              <Link
+                href="/my-activities"
+                className={`text-sm font-medium transition-colors ${
+                  isActive('/my-activities')
+                    ? 'text-blue-600 font-semibold'
+                    : 'text-gray-700 hover:text-blue-600'
+                }`}
+              >
+                我的活動
+              </Link>
+              <Link
+                href="/my-results"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                我的結果
+              </Link>
+
+              {/* 原有的導航項目（簡化版） */}
+              {mainNavItems.slice(0, 2).map(item => {
                 // 統一內容編輯器特殊處理 - 添加下拉菜單
                 if (item.id === 'universal-content-editor') {
                   return (
@@ -528,55 +566,143 @@ const UnifiedNavigation = ({
                 );
               })}
 
-              {/* 用戶菜單 */}
+              {/* Wordwall 風格用戶菜單 */}
               <div className="relative">
                 {currentUser ? (
                   <div className="relative">
                     <button
                       onClick={() => setShowUserMenu(!showUserMenu)}
-                      className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                       data-testid="user-menu-button"
                     >
-                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                        {currentUser.name?.charAt(0) || currentUser.email?.charAt(0) || 'U'}
+                      <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-700 text-sm font-medium overflow-hidden">
+                        {currentUser.image ? (
+                          <img src={currentUser.image} alt="用戶頭像" className="w-full h-full object-cover" />
+                        ) : (
+                          currentUser.name?.charAt(0) || currentUser.email?.charAt(0) || 'U'
+                        )}
                       </div>
-                      <span>{currentUser.name || currentUser.email || '用戶'}</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <span className="font-medium">{currentUser.name || currentUser.email || '用戶'}</span>
+                      <span className="text-gray-400">▼</span>
                     </button>
 
                     {showUserMenu && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border">
-                        <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900">{currentUser.name || '用戶'}</p>
-                          <p className="text-sm text-gray-500">{currentUser.email}</p>
-                          {demoSession && (
-                            <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
-                              演示模式
-                            </span>
-                          )}
+                      <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg border z-50">
+                        {/* 用戶信息頭部 */}
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-gray-700 font-medium overflow-hidden">
+                              {currentUser.image ? (
+                                <img src={currentUser.image} alt="用戶頭像" className="w-full h-full object-cover" />
+                              ) : (
+                                currentUser.name?.charAt(0) || currentUser.email?.charAt(0) || 'U'
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{currentUser.name || '用戶'}</p>
+                              {demoSession ? (
+                                <p className="text-xs text-green-600 font-medium">演示帳戶</p>
+                              ) : (
+                                <p className="text-xs text-blue-600 font-medium">專業帳戶</p>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <Link
-                          href="/my-activities"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          我的活動
-                        </Link>
-                        <Link
-                          href="/profile"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          個人設定
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          登出
-                        </button>
+
+                        {/* 菜單項目 */}
+                        <div className="py-1">
+                          <Link
+                            href="/create"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <span className="mr-3">➕</span>
+                            創建活動
+                          </Link>
+                          <Link
+                            href="/my-activities"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <span className="mr-3">📋</span>
+                            我的活動
+                          </Link>
+                          <Link
+                            href="/my-results"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <span className="mr-3">📊</span>
+                            我的結果
+                          </Link>
+                          <div className="border-t border-gray-100 my-1"></div>
+                          <Link
+                            href="/account/personal-details"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <span className="mr-3">👤</span>
+                            編輯個人資訊
+                          </Link>
+                          <Link
+                            href="/account/payment"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <span className="mr-3">💳</span>
+                            管理付款
+                          </Link>
+                          <Link
+                            href="/account/language"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <span className="mr-3">🌐</span>
+                            語言和位置
+                          </Link>
+                          <div className="border-t border-gray-100 my-1"></div>
+                          <Link
+                            href="/community"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <span className="mr-3">👥</span>
+                            社區
+                          </Link>
+                          <Link
+                            href="/contact"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <span className="mr-3">📞</span>
+                            聯繫方式
+                          </Link>
+                          <Link
+                            href="/price-plans"
+                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <span className="mr-3">💎</span>
+                            價格計劃
+                          </Link>
+                          <div className="border-t border-gray-100 my-1"></div>
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          >
+                            <span className="mr-3">🚪</span>
+                            登出
+                          </button>
+                        </div>
+
+                        {/* 底部條款連結 */}
+                        <div className="border-t border-gray-100 px-4 py-2">
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <Link href="/terms" className="hover:text-gray-700">使用條款</Link>
+                            <span>-</span>
+                            <Link href="/privacy" className="hover:text-gray-700">隱私聲明</Link>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
