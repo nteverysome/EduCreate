@@ -5,9 +5,10 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 interface NavigationItem {
   id: string;
@@ -361,6 +362,34 @@ const UnifiedNavigation = ({
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [showContentDropdown, setShowContentDropdown] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [demoSession, setDemoSession] = useState<any>(null);
+
+  const { data: session, status } = useSession();
+
+  // 檢查演示會話
+  useEffect(() => {
+    const demo = localStorage.getItem('demo-session');
+    if (demo) {
+      try {
+        setDemoSession(JSON.parse(demo));
+      } catch (error) {
+        console.error('解析演示會話失敗:', error);
+      }
+    }
+  }, []);
+
+  const currentUser = session?.user || demoSession?.user;
+
+  const handleLogout = () => {
+    if (demoSession) {
+      localStorage.removeItem('demo-session');
+      setDemoSession(null);
+      window.location.reload();
+    } else {
+      signOut();
+    }
+  };
 
   // 按類別分組導航項目
   const groupedItems = navigationItems.reduce((groups, item) => {
@@ -498,6 +527,78 @@ const UnifiedNavigation = ({
                   </Link>
                 );
               })}
+
+              {/* 用戶菜單 */}
+              <div className="relative">
+                {currentUser ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      data-testid="user-menu-button"
+                    >
+                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                        {currentUser.name?.charAt(0) || currentUser.email?.charAt(0) || 'U'}
+                      </div>
+                      <span>{currentUser.name || currentUser.email || '用戶'}</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {showUserMenu && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border">
+                        <div className="px-4 py-2 border-b border-gray-100">
+                          <p className="text-sm font-medium text-gray-900">{currentUser.name || '用戶'}</p>
+                          <p className="text-sm text-gray-500">{currentUser.email}</p>
+                          {demoSession && (
+                            <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                              演示模式
+                            </span>
+                          )}
+                        </div>
+                        <Link
+                          href="/my-activities"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          我的活動
+                        </Link>
+                        <Link
+                          href="/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          個人設定
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          登出
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-3">
+                    <Link
+                      href="/login"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                      data-testid="login-button"
+                    >
+                      登入
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+                      data-testid="register-button"
+                    >
+                      註冊
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* 手機菜單按鈕 */}
@@ -517,6 +618,26 @@ const UnifiedNavigation = ({
           {/* 手機導航菜單 */}
           {isOpen && (
             <div className="md:hidden border-t border-gray-200 py-4" data-testid="mobile-navigation-menu">
+              {/* 用戶信息 */}
+              {currentUser && (
+                <div className="px-4 py-3 border-b border-gray-200 mb-2">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
+                      {currentUser.name?.charAt(0) || currentUser.email?.charAt(0) || 'U'}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{currentUser.name || '用戶'}</p>
+                      <p className="text-xs text-gray-500">{currentUser.email}</p>
+                      {demoSession && (
+                        <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                          演示模式
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-2">
                 {navigationItems.map(item => (
                   <Link
@@ -544,6 +665,38 @@ const UnifiedNavigation = ({
                     )}
                   </Link>
                 ))}
+
+                {/* 用戶操作 */}
+                {currentUser ? (
+                  <div className="border-t border-gray-200 pt-2 mt-2">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="mr-3">🚪</span>
+                      <div>登出</div>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border-t border-gray-200 pt-2 mt-2 space-y-2">
+                    <Link
+                      href="/login"
+                      className="flex items-center px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">🔐</span>
+                      <div>登入</div>
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="flex items-center px-4 py-3 text-sm font-medium bg-blue-600 text-white rounded-md mx-4 hover:bg-blue-700 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">✨</span>
+                      <div>註冊</div>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           )}
