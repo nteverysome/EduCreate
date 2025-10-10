@@ -9,18 +9,25 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log('🎯 詞彙集合API被調用:', {
     method: req.method,
     url: req.url,
+    query: req.query,
     timestamp: new Date().toISOString()
   });
 
   try {
+    // 檢查是否有指定的用戶ID查詢參數
+    const queryUserId = req.query.userId as string;
+
     // 驗證用戶身份
     const session = await getServerSession(req, res, authOptions);
-    if (!session?.user?.id) {
+
+    // 如果沒有會話但有查詢用戶ID，允許訪問（用於演示）
+    if (!session?.user?.id && !queryUserId) {
       console.log('❌ 未授權訪問');
       return res.status(401).json({ message: '請先登入' });
     }
 
-    const userId = session.user.id;
+    // 使用會話用戶ID或查詢用戶ID
+    const userId = session?.user?.id || queryUserId;
     console.log('👤 用戶ID:', userId);
 
     switch (req.method) {
@@ -34,7 +41,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
   } catch (error) {
     console.error('❌ 詞彙集合API錯誤:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       message: '服務器錯誤',
       error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : error) : undefined
     });

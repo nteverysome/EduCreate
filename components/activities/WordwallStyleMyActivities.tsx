@@ -72,15 +72,21 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
-  // 載入詞彙活動（從雲端 API）
+  // 載入詞彙活動（從雲端 API，根據用戶 ID）
   const loadVocabularyActivities = async (): Promise<Activity[]> => {
     try {
-      console.log('🚀 從 Railway API 載入詞彙活動...');
-      const response = await fetch('/api/vocabulary/sets');
+      console.log(`🚀 為用戶 ${userId} 從 Railway API 載入詞彙活動...`);
+
+      // 如果是演示用戶，載入所有詞彙活動
+      const apiUrl = userId === 'demo-user'
+        ? '/api/vocabulary/sets'
+        : `/api/vocabulary/sets?userId=${userId}`;
+
+      const response = await fetch(apiUrl);
       const result = await response.json();
 
       if (result.success && result.data) {
-        console.log(`🚀 從 Railway API 載入 ${result.data.length} 個詞彙活動`);
+        console.log(`🚀 為用戶 ${userId} 從 Railway API 載入 ${result.data.length} 個詞彙活動`);
 
         return result.data.map((set: any) => ({
           id: set.id,
@@ -96,13 +102,14 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           wordCount: set.items?.length || 0,
           geptLevel: set.geptLevel || 'ELEMENTARY',
           tags: ['vocabulary', 'cloud', set.geptLevel?.toLowerCase() || 'elementary'],
-          folderId: undefined
+          folderId: undefined,
+          userId: set.userId || userId
         }));
       }
 
       return [];
     } catch (error) {
-      console.error('載入雲端詞彙活動失敗:', error);
+      console.error(`載入用戶 ${userId} 的雲端詞彙活動失敗:`, error);
       return [];
     }
   };

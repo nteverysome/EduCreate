@@ -1,5 +1,6 @@
 import React from 'react';
 import '../styles/globals.css';
+import { AuthProvider } from '@/components/providers/AuthProvider';
 
 export const metadata = {
   title: 'EduCreate - 記憶科學驅動的智能教育遊戲平台',
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-TW">
-      <body className="min-h-screen bg-gray-50">{children}</body>
+      <body className="min-h-screen bg-gray-50">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   )
 }
