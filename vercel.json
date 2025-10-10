@@ -1,12 +1,12 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "npx prisma generate && SKIP_ENV_VALIDATION=true next build --no-lint",
+  "buildCommand": "npx prisma generate && next build",
   "build": {
     "env": {
       "NODE_ENV": "production",
       "SKIP_ENV_VALIDATION": "true",
-      "FORCE_REBUILD": "2025-08-07-16-13"
+      "FORCE_REBUILD": "2025-10-11-00-15"
     }
   },
   "functions": {

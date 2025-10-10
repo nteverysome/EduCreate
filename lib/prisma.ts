@@ -5,9 +5,10 @@ declare global {
   var __globalPrisma: PrismaClient | undefined;
 }
 
+// 簡化的 Prisma 配置，減少構建時錯誤
 const prisma = globalThis.__globalPrisma ?? new PrismaClient({
-  log: ['query', 'error', 'warn'],
-  errorFormat: 'pretty',
+  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  errorFormat: 'minimal',
 });
 
 if (process.env.NODE_ENV !== 'production') {

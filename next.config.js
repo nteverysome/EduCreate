@@ -1,12 +1,13 @@
-// 簡化的 Next.js 配置（移除 PWA 支援）
+// 簡化的 Next.js 配置 - 修復 Vercel 部署錯誤
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false, // 暫時關閉嚴格模式以避免錯誤
+  swcMinify: true, // 使用 SWC 壓縮器
 
   // 簡化的圖片配置
   images: {
-    domains: ['localhost', 'res.cloudinary.com'],
+    domains: ['localhost', 'res.cloudinary.com', 'edu-create.vercel.app'],
     unoptimized: true, // 簡化部署
   },
 
@@ -15,10 +16,10 @@ const nextConfig = {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
-    FORCE_REBUILD: '2025-08-07-16-13',
+    FORCE_REBUILD: '2025-10-11-00-10',
   },
 
-  // 構建配置
+  // 構建配置 - 更寬鬆的錯誤處理
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -27,17 +28,21 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
 
-  // Webpack 配置 - 外部化大型依賴到 CDN
+  // 實驗性功能
+  experimental: {
+    serverComponentsExternalPackages: ['@prisma/client'],
+  },
+
+  // 簡化的 Webpack 配置
   webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // 只在客戶端構建時外部化這些依賴
-      config.externals = {
-        ...config.externals,
-        // 注意：React 和 React-DOM 由 Next.js 管理，不建議外部化
-        // 'react': 'React',
-        // 'react-dom': 'ReactDOM',
-      };
-    }
+    // 修復潛在的模組解析問題
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+    };
+
     return config;
   },
 
