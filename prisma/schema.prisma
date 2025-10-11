@@ -101,6 +101,7 @@ model Activity {
 
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
+  deletedAt      DateTime?            // 軟刪除時間戳
   templateId     String?
   userId         String
   h5pContentId   String?

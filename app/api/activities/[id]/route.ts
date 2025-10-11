@@ -23,48 +23,36 @@ export async function DELETE(
       sessionUser: session.user
     });
 
-    // 檢查活動是否存在且屬於該用戶
+    // 檢查活動是否存在且屬於該用戶（排除已刪除的活動）
     const activity = await prisma.activity.findFirst({
       where: {
         id: activityId,
-        userId: userId
-      },
-      include: {
-        versions: true
+        userId: userId,
+        deletedAt: null  // 只能刪除未刪除的活動
       }
     });
 
     if (!activity) {
-      console.log('❌ 活動不存在或無權限:', { activityId, userId });
+      console.log('❌ 活動不存在、無權限或已刪除:', { activityId, userId });
       return NextResponse.json({ error: '活動不存在或無權限刪除' }, { status: 404 });
     }
 
-    // 簡化刪除邏輯 - 只需要刪除 Activity（級聯刪除 VocabularyItem）
-    console.log('🔍 活動內容:', JSON.stringify(activity.content, null, 2));
+    // 軟刪除 - 設置 deletedAt 時間戳
+    console.log('🗑️ 軟刪除活動:', activityId);
 
-    // 在事務中刪除活動和相關數據
-    await prisma.$transaction(async (tx) => {
-      // 刪除活動版本
-      if (activity.versions.length > 0) {
-        console.log('🗑️ 刪除活動版本:', activity.versions.length);
-        await tx.activityVersion.deleteMany({
-          where: { activityId: activityId }
-        });
+    const deletedActivity = await prisma.activity.update({
+      where: { id: activityId },
+      data: {
+        deletedAt: new Date()  // 設置刪除時間戳
       }
-
-      // 刪除活動（會自動級聯刪除關聯的 VocabularyItem）
-      console.log('🗑️ 刪除活動:', activityId);
-      await tx.activity.delete({
-        where: { id: activityId }
-      });
-
-      // 注意：VocabularyItem 會通過外鍵級聯刪除，不需要手動刪除
-      console.log('✅ 活動及其關聯的詞彙項目已刪除');
     });
 
-    return NextResponse.json({ 
-      message: '活動刪除成功',
-      deletedActivityId: activityId 
+    console.log('✅ 活動已移至回收桶');
+
+    return NextResponse.json({
+      message: '活動已移至回收桶',
+      deletedActivityId: activityId,
+      deletedAt: deletedActivity.deletedAt
     });
 
   } catch (error) {

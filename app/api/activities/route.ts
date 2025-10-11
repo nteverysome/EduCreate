@@ -96,10 +96,11 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     console.log('🔍 GET /api/activities 調用:', { userId });
 
-    // 簡化查詢 - 直接獲取活動和詞彙信息
+    // 簡化查詢 - 直接獲取活動和詞彙信息（排除已刪除的活動）
     const activities = await prisma.activity.findMany({
       where: {
-        userId: userId
+        userId: userId,
+        deletedAt: null  // 只獲取未刪除的活動
       },
       orderBy: {
         createdAt: 'desc'

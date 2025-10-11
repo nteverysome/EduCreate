@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, FolderPlus, ArrowUp } from 'lucide-react';
+import { Plus, FolderPlus, ArrowUp, Trash2 } from 'lucide-react';
 import FolderManager from './FolderManager';
 import CreateFolderModal from './CreateFolderModal';
+import TrashModal from './TrashModal';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
 import ActivitySearchAndFilter from './ActivitySearchAndFilter';
 
@@ -95,6 +96,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+  const [showTrashModal, setShowTrashModal] = useState(false);
 
   // 載入活動數據
   useEffect(() => {
@@ -247,6 +249,23 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
       console.error('❌ 創建資料夾失敗:', error);
       alert(`創建資料夾失敗: ${error.message}`);
     }
+  };
+
+  // 回收桶相關處理函數
+  const handleActivityRestore = (activityId: string) => {
+    console.log('✅ 活動已恢復:', activityId);
+    // 重新載入活動列表
+    loadActivities();
+  };
+
+  const handleActivityPermanentDelete = (activityId: string) => {
+    console.log('🗑️ 活動已永久刪除:', activityId);
+    // 不需要重新載入，因為活動已經不在主列表中
+  };
+
+  const handleEmptyTrash = () => {
+    console.log('🗑️ 回收桶已清空');
+    // 不需要重新載入，因為活動已經不在主列表中
   };
 
   const handleFolderUpdate = async (id: string, name: string, color?: string) => {
@@ -501,6 +520,14 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               <FolderPlus className="w-4 h-4" />
               新增資料夾
             </button>
+            <button
+              onClick={() => setShowTrashModal(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              title="回收桶"
+            >
+              <Trash2 className="w-4 h-4" />
+              回收桶
+            </button>
           </div>
         </div>
       </div>
@@ -597,6 +624,15 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         isOpen={showCreateFolderModal}
         onClose={() => setShowCreateFolderModal(false)}
         onCreateFolder={handleFolderCreate}
+      />
+
+      {/* 回收桶模態框 */}
+      <TrashModal
+        isOpen={showTrashModal}
+        onClose={() => setShowTrashModal(false)}
+        onActivityRestore={handleActivityRestore}
+        onActivityPermanentDelete={handleActivityPermanentDelete}
+        onEmptyTrash={handleEmptyTrash}
       />
     </div>
   );
