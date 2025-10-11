@@ -9,27 +9,25 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
+
+    if (!session?.user?.id) {
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
     const activityId = params.id;
+    const userId = session.user.id;
 
-    // 獲取用戶
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+    console.log('🔍 DELETE API 調用:', {
+      activityId,
+      userId,
+      sessionUser: session.user
     });
-
-    if (!user) {
-      return NextResponse.json({ error: '用戶不存在' }, { status: 404 });
-    }
 
     // 檢查活動是否存在且屬於該用戶
     const activity = await prisma.activity.findFirst({
       where: {
         id: activityId,
-        userId: user.id
+        userId: userId
       },
       include: {
         versions: true
@@ -37,6 +35,7 @@ export async function DELETE(
     });
 
     if (!activity) {
+      console.log('❌ 活動不存在或無權限:', { activityId, userId });
       return NextResponse.json({ error: '活動不存在或無權限刪除' }, { status: 404 });
     }
 
@@ -101,27 +100,19 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
+
+    if (!session?.user?.id) {
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
     const activityId = params.id;
-
-    // 獲取用戶
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: '用戶不存在' }, { status: 404 });
-    }
+    const userId = session.user.id;
 
     // 獲取活動詳情
     const activity = await prisma.activity.findFirst({
       where: {
         id: activityId,
-        userId: user.id
+        userId: userId
       },
       include: {
         versions: {
