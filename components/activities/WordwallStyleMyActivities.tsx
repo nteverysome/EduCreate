@@ -53,16 +53,10 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
       // 載入詞彙活動（異步）
       const vocabularyActivities = await loadVocabularyActivities();
 
-      // 載入系統活動（模擬數據）
-      const systemActivities = generateSystemActivities();
-
-      // 合併活動
-      const allActivities = [...vocabularyActivities, ...systemActivities];
-
       // 根據當前資料夾篩選
       const filteredActivities = currentFolderId
-        ? allActivities.filter(activity => activity.folderId === currentFolderId)
-        : allActivities.filter(activity => !activity.folderId);
+        ? vocabularyActivities.filter(activity => activity.folderId === currentFolderId)
+        : vocabularyActivities.filter(activity => !activity.folderId);
 
       setActivities(filteredActivities);
     } catch (error) {
@@ -109,28 +103,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
-  // 生成系統活動（模擬 Wordwall 的樣式）
-  const generateSystemActivities = (): Activity[] => {
-    const gameTypes = ['飛機遊戲', '匹配遊戲', '測驗', '問答遊戲', '開箱遊戲', '迷宮追逐'];
-    const topics = ['英文單字', '數學練習', '科學知識', '歷史問答', '地理測驗'];
-    
-    return Array.from({ length: 12 }, (_, index) => ({
-      id: `system_${index + 1}`,
-      title: `${topics[index % topics.length]} - ${gameTypes[index % gameTypes.length]}`,
-      description: `系統預設的學習活動`,
-      type: 'system' as const,
-      gameType: gameTypes[index % gameTypes.length],
-      isPublic: Math.random() > 0.5,
-      playCount: Math.floor(Math.random() * 200),
-      lastModified: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000),
-      thumbnail: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><text x="50" y="55" font-size="20" text-anchor="middle">${gameTypes[index % gameTypes.length].charAt(0)}</text></svg>`,
-      wordCount: Math.floor(Math.random() * 20) + 5,
-      geptLevel: ['elementary', 'intermediate', 'high-intermediate'][Math.floor(Math.random() * 3)],
-      tags: ['system', gameTypes[index % gameTypes.length].toLowerCase()],
-      folderId: currentFolderId
-    }));
-  };
+
 
   // 篩選和排序活動
   const filteredAndSortedActivities = useMemo(() => {
@@ -272,12 +245,6 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   };
 
   const handleActivityDelete = async (activity: Activity) => {
-    // 檢查是否為系統活動
-    if (activity.id.startsWith('system_')) {
-      alert('系統預設活動無法刪除');
-      return;
-    }
-
     if (confirm(`確定要刪除「${activity.title}」嗎？`)) {
       try {
         console.log('🗑️ 開始刪除活動:', activity.title, 'ID:', activity.id);
