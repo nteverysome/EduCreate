@@ -246,9 +246,9 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
           {!selectionMode && (
             <div className="flex items-center gap-1">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPlay?.(activity);
+                onClick={() => {
+                  // 移除 e.stopPropagation()，讓事件冒泡到卡片觸發播放
+                  // 不直接調用 onPlay，而是讓事件冒泡到 handleCardClick
                 }}
                 className="p-1.5 rounded-full hover:bg-blue-100 text-blue-600 transition-colors"
                 title="播放"
