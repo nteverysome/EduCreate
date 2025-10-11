@@ -1,18 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Play, 
-  Edit2, 
-  Copy, 
-  Trash2, 
-  Share2, 
-  MoreVertical, 
+import {
+  Play,
+  Edit2,
+  Copy,
+  Trash2,
+  Share2,
+  MoreVertical,
   Eye,
   Clock,
   Users,
   Globe,
-  Lock
+  Lock,
+  Info
 } from 'lucide-react';
 
 interface Activity {
@@ -29,6 +30,11 @@ interface Activity {
   wordCount?: number;
   geptLevel?: string;
   tags?: string[];
+  vocabularyItems?: Array<{
+    id: string;
+    english: string;
+    chinese: string;
+  }>;
 }
 
 interface WordwallStyleActivityCardProps {
@@ -55,12 +61,40 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   selectionMode = false
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [showVocabularyModal, setShowVocabularyModal] = useState(false);
+  const [vocabularyData, setVocabularyData] = useState<Array<{english: string, chinese: string}> | null>(null);
+  const [loadingVocabulary, setLoadingVocabulary] = useState(false);
+
+  // 載入詞彙數據
+  const loadVocabularyData = async () => {
+    if (vocabularyData || loadingVocabulary) return; // 避免重複載入
+
+    setLoadingVocabulary(true);
+    try {
+      const response = await fetch(`/api/activities/${activity.id}`);
+      if (!response.ok) {
+        throw new Error(`API 請求失敗: ${response.status}`);
+      }
+
+      const activityData = await response.json();
+      if (activityData?.content?.vocabularyItems) {
+        setVocabularyData(activityData.content.vocabularyItems);
+      } else {
+        setVocabularyData([]);
+      }
+    } catch (error) {
+      console.error('載入詞彙數據失敗:', error);
+      setVocabularyData([]);
+    } finally {
+      setLoadingVocabulary(false);
+    }
+  };
 
   const formatDate = (date: Date) => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) return '今天';
     if (diffDays === 2) return '昨天';
     if (diffDays <= 7) return `${diffDays} 天前`;
@@ -179,9 +213,18 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
           </div>
           
           {activity.wordCount && (
-            <div className="flex items-center gap-1">
+            <div
+              className="flex items-center gap-1 cursor-pointer hover:text-blue-600 hover:bg-blue-50 px-1 py-0.5 rounded transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                loadVocabularyData();
+                setShowVocabularyModal(true);
+              }}
+              title="點擊查看詞彙列表"
+            >
               <span>📝</span>
               <span>{activity.wordCount} 詞</span>
+              <Info className="w-3 h-3 ml-0.5" />
             </div>
           )}
 
@@ -286,10 +329,69 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
 
       {/* 點擊外部關閉菜單 */}
       {showMenu && (
-        <div 
+        <div
           className="fixed inset-0 z-[5]"
           onClick={() => setShowMenu(false)}
         />
+      )}
+
+      {/* 詞彙詳情模態框 */}
+      {showVocabularyModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                詞彙列表 - {activity.title}
+              </h3>
+              <button
+                onClick={() => setShowVocabularyModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            {loadingVocabulary ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-gray-500 mt-2">載入中...</p>
+              </div>
+            ) : vocabularyData && vocabularyData.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600 mb-3">
+                  共 {vocabularyData.length} 個詞彙：
+                </p>
+                {vocabularyData.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">{item.english}</div>
+                      <div className="text-sm text-gray-600">{item.chinese}</div>
+                    </div>
+                    <div className="text-xs text-gray-400 ml-2">
+                      #{index + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">此活動沒有詞彙數據</p>
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowVocabularyModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                關閉
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
