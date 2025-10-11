@@ -89,11 +89,25 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
       }
 
       const activityData = await response.json();
-      if (activityData?.content?.vocabularyItems) {
-        setVocabularyData(activityData.content.vocabularyItems);
-      } else {
-        setVocabularyData([]);
+
+      // 檢查詞彙數據的多個可能位置
+      let vocabularyItems = [];
+
+      if (activityData?.vocabularyItems && Array.isArray(activityData.vocabularyItems)) {
+        // 從關聯表中獲取詞彙數據（新架構）
+        vocabularyItems = activityData.vocabularyItems;
+      } else if (activityData?.content?.vocabularyItems && Array.isArray(activityData.content.vocabularyItems)) {
+        // 從 content 中獲取詞彙數據（舊架構）
+        vocabularyItems = activityData.content.vocabularyItems;
       }
+
+      console.log('📝 載入詞彙數據:', {
+        activityId: activity.id,
+        vocabularyCount: vocabularyItems.length,
+        source: activityData?.vocabularyItems ? 'vocabularyItems關聯表' : 'content.vocabularyItems'
+      });
+
+      setVocabularyData(vocabularyItems);
     } catch (error) {
       console.error('載入詞彙數據失敗:', error);
       setVocabularyData([]);

@@ -85,6 +85,7 @@ export async function GET(
         userId: userId
       },
       include: {
+        vocabularyItems: true,  // 包含詞彙項目
         versions: {
           orderBy: { createdAt: 'desc' }
         },
