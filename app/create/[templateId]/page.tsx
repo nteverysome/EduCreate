@@ -88,6 +88,15 @@ const gameTemplateConfig = {
     maxItems: 15,
     inputType: 'vocabulary'
   },
+  'shimozurdo-responsive': {
+    name: 'Shimozurdo 響應式遊戲',
+    description: 'Phaser 3 響應式遊戲，支援全螢幕和方向切換，記憶科學驅動學習',
+    icon: '🎯',
+    category: '動態反應記憶',
+    minItems: 3,
+    maxItems: 15,
+    inputType: 'vocabulary'
+  },
   'starshake-game': {
     name: 'Starshake 太空冒險',
     description: '一個充滿樂趣的太空冒險遊戲，基於 Phaser 3 引擎開發的動作遊戲',
