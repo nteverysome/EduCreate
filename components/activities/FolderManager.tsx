@@ -2,22 +2,26 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Folder, MoreVertical, Edit2, Trash2, Move } from 'lucide-react';
+import FolderCard from './FolderCard';
+import CreateFolderModal from './CreateFolderModal';
 
-interface Folder {
+interface FolderData {
   id: string;
   name: string;
+  description?: string;
+  color: string;
+  icon?: string;
   activityCount: number;
-  createdAt: Date;
-  parentId?: string;
-  color?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface FolderManagerProps {
   currentFolderId?: string;
   onFolderSelect: (folderId: string | null) => void;
-  onFolderCreate: (name: string, parentId?: string) => void;
-  onFolderUpdate: (id: string, name: string) => void;
-  onFolderDelete: (id: string) => void;
+  onFolderCreate?: (name: string, color: string) => Promise<void>;
+  onFolderUpdate?: (id: string, name: string, color?: string) => Promise<void>;
+  onFolderDelete?: (id: string) => Promise<void>;
 }
 
 export const FolderManager: React.FC<FolderManagerProps> = ({
@@ -27,89 +31,116 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   onFolderUpdate,
   onFolderDelete
 }) => {
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [isCreating, setIsCreating] = useState(false);
-  const [newFolderName, setNewFolderName] = useState('');
-  const [editingFolder, setEditingFolder] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
+  const [folders, setFolders] = useState<FolderData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingFolder, setEditingFolder] = useState<FolderData | null>(null);
 
   // 載入資料夾數據
   useEffect(() => {
     loadFolders();
   }, []);
 
-  const loadFolders = () => {
+  const loadFolders = async () => {
     try {
-      const savedFolders = localStorage.getItem('vocabulary_folders');
-      if (savedFolders) {
-        const parsedFolders = JSON.parse(savedFolders);
-        setFolders(parsedFolders.map((f: any) => ({
-          ...f,
-          createdAt: new Date(f.createdAt)
-        })));
+      setLoading(true);
+      setError('');
+
+      const response = await fetch('/api/folders');
+      if (!response.ok) {
+        throw new Error('載入資料夾失敗');
       }
-    } catch (error) {
+
+      const foldersData = await response.json();
+      setFolders(foldersData);
+    } catch (error: any) {
       console.error('載入資料夾失敗:', error);
+      setError(error.message || '載入資料夾失敗');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const saveFolders = (updatedFolders: Folder[]) => {
+  const handleCreateFolder = async (name: string, color: string) => {
     try {
-      localStorage.setItem('vocabulary_folders', JSON.stringify(updatedFolders));
-      setFolders(updatedFolders);
-    } catch (error) {
-      console.error('保存資料夾失敗:', error);
+      const response = await fetch('/api/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, color }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '創建資料夾失敗');
+      }
+
+      const newFolder = await response.json();
+      setFolders(prev => [newFolder, ...prev]);
+
+      // 調用父組件的回調
+      if (onFolderCreate) {
+        await onFolderCreate(name, color);
+      }
+    } catch (error: any) {
+      throw error; // 讓模態框處理錯誤顯示
     }
   };
 
-  const handleCreateFolder = () => {
-    if (!newFolderName.trim()) return;
-
-    const newFolder: Folder = {
-      id: `folder_${Date.now()}`,
-      name: newFolderName.trim(),
-      activityCount: 0,
-      createdAt: new Date(),
-      parentId: currentFolderId || undefined,
-      color: getRandomColor()
-    };
-
-    const updatedFolders = [...folders, newFolder];
-    saveFolders(updatedFolders);
-    onFolderCreate(newFolder.name, newFolder.parentId);
-    
-    setNewFolderName('');
-    setIsCreating(false);
+  const handleUpdateFolder = async (folder: FolderData) => {
+    // 這裡可以實現編輯功能，暫時先設置編輯狀態
+    setEditingFolder(folder);
   };
 
-  const handleUpdateFolder = (id: string) => {
-    if (!editName.trim()) return;
+  const handleDeleteFolder = async (id: string) => {
+    try {
+      const response = await fetch(`/api/folders?id=${id}`, {
+        method: 'DELETE',
+      });
 
-    const updatedFolders = folders.map(folder =>
-      folder.id === id ? { ...folder, name: editName.trim() } : folder
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '刪除資料夾失敗');
+      }
+
+      setFolders(prev => prev.filter(folder => folder.id !== id));
+
+      // 調用父組件的回調
+      if (onFolderDelete) {
+        await onFolderDelete(id);
+      }
+    } catch (error: any) {
+      alert(error.message || '刪除資料夾失敗');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="folder-manager mb-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="text-gray-500">載入資料夾中...</div>
+        </div>
+      </div>
     );
-    
-    saveFolders(updatedFolders);
-    onFolderUpdate(id, editName.trim());
-    
-    setEditingFolder(null);
-    setEditName('');
-  };
+  }
 
-  const handleDeleteFolder = (id: string) => {
-    if (confirm('確定要刪除這個資料夾嗎？資料夾內的活動將移至根目錄。')) {
-      const updatedFolders = folders.filter(folder => folder.id !== id);
-      saveFolders(updatedFolders);
-      onFolderDelete(id);
-    }
-  };
-
-  const getRandomColor = () => {
-    const colors = ['bg-blue-100', 'bg-green-100', 'bg-yellow-100', 'bg-purple-100', 'bg-pink-100', 'bg-indigo-100'];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
-
-  const currentLevelFolders = folders.filter(folder => folder.parentId === currentFolderId);
+  if (error) {
+    return (
+      <div className="folder-manager mb-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="text-red-500">載入失敗: {error}</div>
+          <button
+            onClick={loadFolders}
+            className="ml-2 text-blue-600 hover:text-blue-800"
+          >
+            重試
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="folder-manager mb-6">
@@ -133,128 +164,33 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
 
       {/* 資料夾網格 */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-        {/* 創建新資料夾 */}
-        {isCreating ? (
-          <div className="folder-card bg-white border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center min-h-[120px]">
-            <input
-              type="text"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              placeholder="資料夾名稱"
-              className="w-full text-center border-none outline-none text-sm mb-2"
-              autoFocus
-              onKeyPress={(e) => e.key === 'Enter' && handleCreateFolder()}
-              onBlur={() => {
-                if (!newFolderName.trim()) {
-                  setIsCreating(false);
-                }
-              }}
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={handleCreateFolder}
-                className="text-xs bg-blue-500 text-white px-2 py-1 rounded"
-              >
-                確定
-              </button>
-              <button
-                onClick={() => {
-                  setIsCreating(false);
-                  setNewFolderName('');
-                }}
-                className="text-xs bg-gray-300 text-gray-700 px-2 py-1 rounded"
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsCreating(true)}
-            className="folder-card bg-white border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center min-h-[120px] hover:border-blue-400 hover:bg-blue-50 transition-colors group"
-          >
-            <Plus className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-2" />
-            <span className="text-sm text-gray-600 group-hover:text-blue-600">新增資料夾</span>
-          </button>
-        )}
+        {/* 創建新資料夾按鈕 */}
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="folder-card bg-white border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center min-h-[120px] hover:border-blue-400 hover:bg-blue-50 transition-colors group"
+        >
+          <Plus className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-2" />
+          <span className="text-sm text-gray-600 group-hover:text-blue-600">新增資料夾</span>
+        </button>
 
         {/* 現有資料夾 */}
-        {currentLevelFolders.map((folder) => (
-          <div
+        {folders.map((folder) => (
+          <FolderCard
             key={folder.id}
-            className={`folder-card ${folder.color || 'bg-blue-100'} rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow relative group`}
-          >
-            {editingFolder === folder.id ? (
-              <div className="flex flex-col items-center">
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full text-center bg-transparent border-none outline-none text-sm font-medium mb-2"
-                  autoFocus
-                  onKeyPress={(e) => e.key === 'Enter' && handleUpdateFolder(folder.id)}
-                  onBlur={() => handleUpdateFolder(folder.id)}
-                />
-              </div>
-            ) : (
-              <>
-                <div
-                  onClick={() => onFolderSelect(folder.id)}
-                  className="flex flex-col items-center"
-                >
-                  <Folder className="w-8 h-8 text-blue-600 mb-2" />
-                  <h3 className="text-sm font-medium text-gray-800 text-center line-clamp-2 mb-1">
-                    {folder.name}
-                  </h3>
-                  <p className="text-xs text-gray-600">
-                    {folder.activityCount} 個活動
-                  </p>
-                </div>
-
-                {/* 資料夾選項菜單 */}
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="relative">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // 這裡可以添加下拉菜單邏輯
-                      }}
-                      className="p-1 rounded-full hover:bg-white/50"
-                    >
-                      <MoreVertical className="w-4 h-4 text-gray-600" />
-                    </button>
-                    
-                    {/* 簡化的操作按鈕 */}
-                    <div className="absolute right-0 top-6 bg-white rounded-lg shadow-lg border py-1 z-[10] hidden group-hover:block">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingFolder(folder.id);
-                          setEditName(folder.name);
-                        }}
-                        className="flex items-center gap-2 px-3 py-1 text-sm hover:bg-gray-100 w-full text-left"
-                      >
-                        <Edit2 className="w-3 h-3" />
-                        重新命名
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteFolder(folder.id);
-                        }}
-                        className="flex items-center gap-2 px-3 py-1 text-sm hover:bg-gray-100 w-full text-left text-red-600"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        刪除
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+            folder={folder}
+            onClick={onFolderSelect}
+            onEdit={handleUpdateFolder}
+            onDelete={handleDeleteFolder}
+          />
         ))}
       </div>
+
+      {/* 創建資料夾模態框 */}
+      <CreateFolderModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreateFolder={handleCreateFolder}
+      />
     </div>
   );
 };

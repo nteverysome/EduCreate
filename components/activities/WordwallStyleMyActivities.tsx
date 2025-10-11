@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Plus, FolderPlus } from 'lucide-react';
 import FolderManager from './FolderManager';
+import CreateFolderModal from './CreateFolderModal';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
 import ActivitySearchAndFilter from './ActivitySearchAndFilter';
 
@@ -41,6 +42,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
 
   // 載入活動數據
   useEffect(() => {
@@ -162,19 +164,24 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     setSelectionMode(false);
   };
 
-  const handleFolderCreate = (name: string, parentId?: string) => {
-    console.log('創建資料夾:', name, parentId);
-    // 這裡可以添加創建資料夾的邏輯
+  const handleFolderCreate = async (name: string, color: string) => {
+    console.log('創建資料夾:', name, color);
+    // 資料夾創建邏輯已在 FolderManager 中處理
+    // 這裡可以添加額外的邏輯，如重新載入活動列表
   };
 
-  const handleFolderUpdate = (id: string, name: string) => {
-    console.log('更新資料夾:', id, name);
-    // 這裡可以添加更新資料夾的邏輯
+  const handleFolderUpdate = async (id: string, name: string, color?: string) => {
+    console.log('更新資料夾:', id, name, color);
+    // 資料夾更新邏輯已在 FolderManager 中處理
   };
 
-  const handleFolderDelete = (id: string) => {
+  const handleFolderDelete = async (id: string) => {
     console.log('刪除資料夾:', id);
-    // 這裡可以添加刪除資料夾的邏輯
+    // 資料夾刪除邏輯已在 FolderManager 中處理
+    // 如果當前在被刪除的資料夾中，返回根目錄
+    if (currentFolderId === id) {
+      setCurrentFolderId(null);
+    }
   };
 
   const handleActivitySelect = (activity: Activity) => {
@@ -300,7 +307,10 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               <Plus className="w-4 h-4" />
               創建活動
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            <button
+              onClick={() => setShowCreateFolderModal(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
               <FolderPlus className="w-4 h-4" />
               新增資料夾
             </button>
@@ -382,6 +392,13 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           </div>
         )}
       </div>
+
+      {/* 創建資料夾模態框 */}
+      <CreateFolderModal
+        isOpen={showCreateFolderModal}
+        onClose={() => setShowCreateFolderModal(false)}
+        onCreateFolder={handleFolderCreate}
+      />
     </div>
   );
 };
