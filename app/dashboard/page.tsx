@@ -72,11 +72,11 @@ const features: FeatureCard[] = [
   
   // 內容管理功能
   {
-    id: 'universal-content-editor',
-    title: '統一內容編輯器',
-    description: '一站式內容管理平台，支持文字、圖片輸入，一鍵適配25種教育遊戲，模仿 Wordwall 模式',
-    href: '/universal-game',
-    icon: '📝',
+    id: 'create-activity',
+    title: '創建活動',
+    description: '選擇遊戲模板，輸入詞彙內容，一鍵創建25種記憶科學遊戲，完整的 Wordwall 風格創建流程',
+    href: '/create',
+    icon: '🚀',
     status: 'available',
     category: 'content'
   },

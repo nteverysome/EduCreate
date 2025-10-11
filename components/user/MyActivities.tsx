@@ -504,9 +504,9 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
   const handleActivityEdit = useCallback((activity: Activity) => {
     console.log('編輯活動:', activity);
 
-    // 如果是詞彙活動，導航到統一內容編輯器進行編輯
+    // 如果是詞彙活動，導航到創建活動頁面進行編輯
     if (activity.type === 'vocabulary') {
-      window.open('/universal-game', '_blank');
+      window.open('/create', '_blank');
     } else {
       // 其他活動的編輯邏輯
       console.log('編輯系統活動:', activity.title);

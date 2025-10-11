@@ -266,7 +266,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
 
   const handleActivityEdit = (activity: Activity) => {
     if (activity.type === 'vocabulary') {
-      window.open('/universal-game', '_blank');
+      window.open('/create', '_blank');
     } else {
       console.log('編輯活動:', activity.title);
     }

@@ -880,7 +880,7 @@ export class AutoSaveManager {
     const indicator = document.getElementById('autosave-indicator');
     if (indicator) {
       indicator.innerHTML = `
-        <a href="/universal-game?autosave=true&id=${this.activityId}" 
+        <a href="/create?autosave=true&id=${this.activityId}"
            class="text-blue-600 hover:text-blue-800 text-sm">
           Continue editing: ${title}?
         </a>

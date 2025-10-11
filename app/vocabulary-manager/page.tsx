@@ -375,12 +375,12 @@ export default function VocabularyManager() {
                   <Plus className="h-8 w-8 text-orange-600" />
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-600">快速操作</p>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="mt-1"
-                      onClick={() => window.location.href = '/universal-game'}
+                      onClick={() => window.location.href = '/create'}
                     >
-                      創建新詞彙
+                      創建新活動
                     </Button>
                   </div>
                 </div>

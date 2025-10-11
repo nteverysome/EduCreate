@@ -188,14 +188,14 @@ const navigationItems: NavigationItem[] = [
 
   // 統一內容編輯器核心功能
   {
-    id: 'universal-content-editor',
-    label: '統一內容編輯器',
-    href: '/universal-game',
-    icon: '📝',
-    description: '一站式內容管理平台，支持25種教育遊戲',
+    id: 'create-activity',
+    label: '創建活動',
+    href: '/create',
+    icon: '🚀',
+    description: '選擇遊戲模板，創建25種記憶科學遊戲',
     category: 'content',
     status: 'available',
-    testId: 'nav-universal-content-editor'
+    testId: 'nav-create-activity'
   },
   {
     id: 'rich-text-editor',
@@ -440,7 +440,7 @@ const UnifiedNavigation = ({
             {/* 中間：創建活動按鈕 */}
             <div className="hidden md:flex items-center">
               <Link
-                href="/universal-game"
+                href="/create"
                 className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
                 data-testid="create-activity-button"
               >

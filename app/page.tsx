@@ -497,19 +497,19 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 統一內容編輯器 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-universal-content-editor">
-              <div className="text-4xl mb-4">📝</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">統一內容編輯器</h3>
+            {/* 創建活動 */}
+            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-create-activity">
+              <div className="text-4xl mb-4">🚀</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">創建活動</h3>
               <p className="text-gray-600 mb-6">
-                一站式內容管理平台，支持文字、圖片輸入，一鍵適配25種教育遊戲，模仿 Wordwall 模式
+                選擇遊戲模板，輸入詞彙內容，一鍵創建25種記憶科學遊戲，完整的 Wordwall 風格創建流程
               </p>
               <Link
-                href="/universal-game"
+                href="/create"
                 className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="universal-content-editor-link"
+                data-testid="create-activity-link"
               >
-                立即體驗
+                立即創建
                 <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -878,11 +878,11 @@ export default function HomePage() {
               🔗 完整分享系統
             </Link>
             <Link
-              href="/universal-game"
+              href="/create"
               className="inline-flex items-center px-6 py-3 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
-              data-testid="quick-universal-content-editor"
+              data-testid="quick-create-activity"
             >
-              📝 統一內容編輯器
+              🚀 創建活動
             </Link>
             <Link
               href="/demo/smart-sorting"
