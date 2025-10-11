@@ -66,7 +66,7 @@ export async function DELETE(
 
         // 先刪除詞彙項目
         const deletedItems = await tx.vocabularyItem.deleteMany({
-          where: { vocabularySetId: vocabularySetId }
+          where: { setId: vocabularySetId }
         });
         console.log('🗑️ 刪除詞彙項目數量:', deletedItems.count);
 
