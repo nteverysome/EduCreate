@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
 // 創建 Gmail SMTP 傳輸器（完全免費）
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_SERVER_USER, // your-gmail@gmail.com

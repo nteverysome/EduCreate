@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail SMTP 設定指南 - EduCreate</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .step h3 {
+            color: #007bff;
+            margin-top: 0;
+        }
+        .code {
+            background: #f1f3f4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .progress {
+            background: #e9ecef;
+            height: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            background: #007bff;
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Gmail SMTP 設定指南</h1>
+        <p>為 EduCreate 郵箱驗證功能設定 Gmail SMTP（完全免費）</p>
+        
+        <div class="progress">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+        
+        <div id="step1" class="step">
+            <h3>📧 步驟 1: 準備 Gmail 帳戶</h3>
+            <p>您需要一個 Gmail 帳戶來發送驗證郵件。</p>
+            <div class="input-group">
+                <label for="gmailAddress">Gmail 地址:</label>
+                <input type="email" id="gmailAddress" placeholder="your-email@gmail.com">
+            </div>
+            <button onclick="openGoogleAccount()">前往 Google 帳戶設定</button>
+            <button onclick="nextStep(2)">下一步</button>
+        </div>
+        
+        <div id="step2" class="step" style="display: none;">
+            <h3>🔒 步驟 2: 啟用兩步驟驗證</h3>
+            <p>Gmail SMTP 需要兩步驟驗證才能使用應用程式密碼。</p>
+            <ol>
+                <li>在 Google 帳戶頁面，點擊左側的「安全性」</li>
+                <li>找到「兩步驟驗證」選項</li>
+                <li>如果未啟用，請點擊「開始使用」</li>
+                <li>按照指示完成設定（通常需要手機號碼）</li>
+            </ol>
+            <div class="warning">
+                ⚠️ 如果已經啟用兩步驟驗證，可以直接進行下一步。
+            </div>
+            <button onclick="openTwoFactor()">前往兩步驟驗證設定</button>
+            <button onclick="nextStep(3)">下一步</button>
+        </div>
+        
+        <div id="step3" class="step" style="display: none;">
+            <h3>🔑 步驟 3: 生成應用程式密碼</h3>
+            <p>為 EduCreate 生成專用的應用程式密碼。</p>
+            <ol>
+                <li>在兩步驟驗證頁面，找到「應用程式密碼」</li>
+                <li>點擊「應用程式密碼」</li>
+                <li>選擇應用程式：「郵件」</li>
+                <li>選擇裝置：「其他（自訂名稱）」</li>
+                <li>輸入名稱：「EduCreate SMTP」</li>
+                <li>點擊「產生」</li>
+                <li>複製顯示的 16 位數密碼</li>
+            </ol>
+            <div class="input-group">
+                <label for="appPassword">應用程式密碼 (16位數):</label>
+                <input type="password" id="appPassword" placeholder="abcd efgh ijkl mnop" maxlength="19">
+            </div>
+            <button onclick="openAppPasswords()">前往應用程式密碼</button>
+            <button onclick="nextStep(4)">下一步</button>
+        </div>
+        
+        <div id="step4" class="step" style="display: none;">
+            <h3>📝 步驟 4: 更新環境配置</h3>
+            <p>將 Gmail 憑證添加到 EduCreate 配置中。</p>
+            
+            <h4>本地開發環境 (.env 文件):</h4>
+            <div class="code" id="envConfig">
+                <div>EMAIL_SERVER_HOST="smtp.gmail.com"</div>
+                <div>EMAIL_SERVER_PORT="587"</div>
+                <div>EMAIL_SERVER_USER="<span id="envUser">your-email@gmail.com</span>"</div>
+                <div>EMAIL_SERVER_PASSWORD="<span id="envPassword">your-app-password</span>"</div>
+                <div>EMAIL_SERVER_SECURE="true"</div>
+                <div>EMAIL_FROM="<span id="envFrom">your-email@gmail.com</span>"</div>
+            </div>
+            
+            <button onclick="copyEnvConfig()">複製配置</button>
+            <button onclick="nextStep(5)">下一步</button>
+        </div>
+        
+        <div id="step5" class="step" style="display: none;">
+            <h3>🌐 步驟 5: 生產環境配置</h3>
+            <p>在 Vercel 中設定環境變數。</p>
+            <ol>
+                <li>前往 <a href="https://vercel.com/dashboard" target="_blank">Vercel 儀表板</a></li>
+                <li>選擇 EduCreate 專案</li>
+                <li>點擊「Settings」→「Environment Variables」</li>
+                <li>添加以下環境變數：</li>
+            </ol>
+            
+            <div class="code" id="vercelConfig">
+                <div>EMAIL_SERVER_USER = <span id="vercelUser">your-email@gmail.com</span></div>
+                <div>EMAIL_SERVER_PASSWORD = <span id="vercelPassword">your-app-password</span></div>
+                <div>EMAIL_FROM = <span id="vercelFrom">your-email@gmail.com</span></div>
+            </div>
+            
+            <button onclick="openVercel()">前往 Vercel 設定</button>
+            <button onclick="nextStep(6)">下一步</button>
+        </div>
+        
+        <div id="step6" class="step" style="display: none;">
+            <h3>🧪 步驟 6: 測試郵箱驗證</h3>
+            <p>測試 Gmail SMTP 是否正常工作。</p>
+            
+            <div class="success">
+                🎉 設定完成！現在您可以：
+                <ul>
+                    <li>在 EduCreate 註冊新帳戶</li>
+                    <li>檢查郵箱收到驗證郵件</li>
+                    <li>點擊驗證連結啟用帳戶</li>
+                </ul>
+            </div>
+            
+            <button onclick="testRegistration()">測試註冊功能</button>
+            <button onclick="generateReport()">生成設定報告</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        
+        function nextStep(step) {
+            // 隱藏當前步驟
+            document.getElementById(`step${currentStep}`).style.display = 'none';
+            
+            // 顯示下一步驟
+            document.getElementById(`step${step}`).style.display = 'block';
+            currentStep = step;
+            
+            // 更新進度條
+            const progress = (step / 6) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            // 更新配置信息
+            updateConfig();
+        }
+        
+        function updateConfig() {
+            const gmail = document.getElementById('gmailAddress').value;
+            const password = document.getElementById('appPassword').value;
+            
+            if (gmail) {
+                document.getElementById('envUser').textContent = gmail;
+                document.getElementById('envFrom').textContent = gmail;
+                document.getElementById('vercelUser').textContent = gmail;
+                document.getElementById('vercelFrom').textContent = gmail;
+            }
+            
+            if (password) {
+                document.getElementById('envPassword').textContent = password;
+                document.getElementById('vercelPassword').textContent = password;
+            }
+        }
+        
+        function openGoogleAccount() {
+            window.open('https://myaccount.google.com/', '_blank');
+        }
+        
+        function openTwoFactor() {
+            window.open('https://myaccount.google.com/signinoptions/two-step-verification', '_blank');
+        }
+        
+        function openAppPasswords() {
+            window.open('https://myaccount.google.com/apppasswords', '_blank');
+        }
+        
+        function openVercel() {
+            window.open('https://vercel.com/dashboard', '_blank');
+        }
+        
+        function copyEnvConfig() {
+            const config = document.getElementById('envConfig').textContent;
+            navigator.clipboard.writeText(config).then(() => {
+                alert('✅ 環境配置已複製到剪貼板！');
+            });
+        }
+        
+        function testRegistration() {
+            window.open('https://edu-create.vercel.app/register', '_blank');
+        }
+        
+        function generateReport() {
+            const gmail = document.getElementById('gmailAddress').value;
+            const password = document.getElementById('appPassword').value;
+            
+            const report = `
+Gmail SMTP 設定報告
+==================
+設定時間: ${new Date().toLocaleString()}
+Gmail 地址: ${gmail}
+應用程式密碼: ${password ? '已設定 ✅' : '未設定 ❌'}
+
+環境變數配置:
+EMAIL_SERVER_USER=${gmail}
+EMAIL_SERVER_PASSWORD=${password}
+EMAIL_FROM=${gmail}
+
+下一步:
+1. 更新 .env 文件
+2. 在 Vercel 中設定環境變數
+3. 重新部署應用程式
+4. 測試註冊功能
+            `;
+            
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'gmail-smtp-setup-report.txt';
+            a.click();
+        }
+        
+        // 監聽輸入變化
+        document.getElementById('gmailAddress').addEventListener('input', updateConfig);
+        document.getElementById('appPassword').addEventListener('input', updateConfig);
+    </script>
+</body>
+</html>
