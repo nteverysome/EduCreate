@@ -167,9 +167,21 @@ export default function CreateGamePage() {
         const activity = await response.json();
         setActivityTitle(activity.title);
 
-        // 載入詞彙數據
-        if (activity.content && activity.content.vocabularyItems) {
-          const loadedVocabulary = activity.content.vocabularyItems.map((item: any, index: number) => ({
+        // 載入詞彙數據 - 支援新舊架構
+        let vocabularyData = [];
+
+        if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems)) {
+          // 新架構：從關聯表中獲取詞彙數據
+          vocabularyData = activity.vocabularyItems;
+          console.log('📝 從關聯表載入詞彙數據:', vocabularyData.length, '個詞彙');
+        } else if (activity.content && activity.content.vocabularyItems) {
+          // 舊架構：從 content 中獲取詞彙數據
+          vocabularyData = activity.content.vocabularyItems;
+          console.log('📝 從 content 載入詞彙數據:', vocabularyData.length, '個詞彙');
+        }
+
+        if (vocabularyData.length > 0) {
+          const loadedVocabulary = vocabularyData.map((item: any, index: number) => ({
             id: (index + 1).toString(),
             english: item.english || item.word || '',
             chinese: item.chinese || item.translation || '',
@@ -178,6 +190,9 @@ export default function CreateGamePage() {
             audioUrl: item.audioUrl || ''
           }));
           setVocabularyItems(loadedVocabulary);
+          console.log('✅ 詞彙數據載入成功:', loadedVocabulary);
+        } else {
+          console.log('⚠️ 未找到詞彙數據');
         }
 
         console.log('📝 載入編輯活動成功:', activity.title);
