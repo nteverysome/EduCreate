@@ -140,7 +140,8 @@ export async function GET(request: NextRequest) {
           estimatedTime: activity.estimatedTime,
           tags: activity.tags,
           vocabularyInfo: vocabularyInfo,
-          _count: activity._count
+          _count: activity._count,
+          folderId: activity.folderId // ✅ 添加 folderId 字段
         };
       });
 
