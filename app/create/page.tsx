@@ -5,207 +5,179 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
 
-// 遊戲模板數據
+// 從 /games/switcher 整合的實際遊戲數據
 const gameTemplates = [
+  // 已完成的遊戲（可直接遊玩）
   {
-    id: 'quiz',
-    name: '測驗',
-    description: '一系列多選題。點擊正確答案繼續。',
-    icon: '📝',
-    category: '基礎記憶',
-    popular: true
+    id: 'airplane-vite',
+    name: '飛機遊戲 (Vite版)',
+    description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
+    icon: '⚡',
+    category: '動態反應記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 600
   },
   {
-    id: 'match-game',
-    name: '匹配遊戲',
-    description: '將每個關鍵字拖放到其定義旁邊。',
-    icon: '🔗',
-    category: '空間視覺記憶',
-    popular: true
+    id: 'airplane-main',
+    name: '飛機碰撞遊戲',
+    description: '通過飛機碰撞雲朵學習英語詞彙，基於主動回憶和視覺記憶原理',
+    icon: '✈️',
+    category: '動態反應記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 800
   },
   {
-    id: 'find-match',
-    name: '查找匹配項',
-    description: '點擊匹配答案以消除它。重複，直到所有答案消失。',
+    id: 'airplane-iframe',
+    name: '飛機遊戲 (iframe版)',
+    description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
+    icon: '🎮',
+    category: '動態反應記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 1000
+  },
+  {
+    id: 'shimozurdo-game',
+    name: 'Shimozurdo 雲朵遊戲',
+    description: 'Phaser 3 雲朵碰撞遊戲，支援全螢幕和響應式設計，記憶科學驅動的英語學習',
+    icon: '☁️',
+    category: '動態反應記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 800
+  },
+  {
+    id: 'shimozurdo-responsive',
+    name: 'shimozurdo 響應式遊戲',
+    description: 'Phaser 3 響應式遊戲，支援全螢幕和方向切換，記憶科學驅動學習',
     icon: '🎯',
+    category: '動態反應記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 800
+  },
+  {
+    id: 'starshake-game',
+    name: 'Starshake 太空冒險',
+    description: '一個充滿樂趣的太空冒險遊戲，基於 Phaser 3 引擎開發的動作遊戲',
+    icon: '🌟',
+    category: '動態反應記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 1000
+  },
+  {
+    id: 'runner-game',
+    name: 'Runner 跑酷遊戲',
+    description: '一個刺激的跑酷遊戲，通過跳躍和收集金幣來挑戰高分，基於 Phaser 3 引擎開發',
+    icon: '🏃',
+    category: '動態反應記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 1000
+  },
+  {
+    id: 'pushpull-game',
+    name: 'PushPull 推拉方塊',
+    description: '一個策略性的推拉方塊遊戲，通過移動彩色方塊到指定位置來解決謎題，基於 Phaser 3 引擎開發',
+    icon: '🧩',
+    category: '重構邏輯記憶',
+    popular: false,
+    status: 'completed',
+    estimatedLoadTime: 1200
+  },
+  {
+    id: 'wallhammer-game',
+    name: 'WallHammer 破牆遊戲',
+    description: '一個經典的破牆冒險遊戲，通過錘子破壞磚牆收集金幣和道具，基於 Phaser 3 引擎開發',
+    icon: '🔨',
+    category: '動態反應記憶',
+    popular: false,
+    status: 'completed',
+    estimatedLoadTime: 1300
+  },
+  {
+    id: 'zenbaki-game',
+    name: 'Zenbaki 數字遊戲',
+    description: '一個基於數字的策略遊戲，通過數字計算和邏輯推理來解決謎題，基於 Phaser 3 引擎開發',
+    icon: '🔢',
+    category: '重構邏輯記憶',
+    popular: false,
+    status: 'completed',
+    estimatedLoadTime: 1100
+  },
+  {
+    id: 'mars-game',
+    name: 'Mars 火星探險',
+    description: '一個火星探險遊戲，通過探索火星地形和收集資源來完成任務，基於 Phaser 3 引擎開發',
+    icon: '🔴',
     category: '空間視覺記憶',
-    popular: true
+    popular: false,
+    status: 'completed',
+    estimatedLoadTime: 1200
   },
   {
-    id: 'flash-cards',
-    name: '快閃記憶體卡',
-    description: '使用前面有提示的卡片和背面的答案來測試自己。',
-    icon: '📚',
+    id: 'fate-game',
+    name: 'Fate 命運之戰',
+    description: '一個3D太空戰鬥遊戲，通過駕駛太空船戰鬥和探索來完成任務，基於 Phaser 3 引擎開發',
+    icon: '⚡',
+    category: '動態反應記憶',
+    popular: false,
+    status: 'completed',
+    estimatedLoadTime: 1400
+  },
+  {
+    id: 'dungeon-game',
+    name: 'Dungeon 地牢探險',
+    description: '探索神秘地牢，收集寶藏，戰勝怪物。基於 Phaser 3 的 2D 冒險遊戲，訓練空間記憶和策略思維',
+    icon: '🏰',
+    category: '空間視覺記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 800
+  },
+  {
+    id: 'blastemup-game',
+    name: 'Blastemup 太空射擊',
+    description: '駕駛太空船在宇宙中戰鬥，射擊敵人和小行星。經典的太空射擊遊戲，訓練反應速度和手眼協調',
+    icon: '💥',
+    category: '動態反應記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 900
+  },
+  {
+    id: 'math-attack-game',
+    name: 'Math Attack 數學攻擊',
+    description: '快速解決數學問題，提升計算能力。結合時間壓力的數學遊戲，訓練數字記憶和運算速度',
+    icon: '🔢',
     category: '基礎記憶',
-    popular: true
+    popular: false,
+    status: 'completed',
+    estimatedLoadTime: 1200
   },
-  {
-    id: 'anagram',
-    name: '拼字遊戲',
-    description: '將字母拖動到正確的位置以解寫單字或短語。',
-    icon: '🔤',
-    category: '重構邏輯記憶',
-    popular: false
-  },
-  {
-    id: 'random-cards',
-    name: '隨機卡',
-    description: '從洗好的卡牌中隨機抽取一張。',
-    icon: '🎴',
-    category: '基礎記憶',
-    popular: false
-  },
-  {
-    id: 'unscramble',
-    name: '句子排列',
-    description: '拖放單詞以將每個句子重新排列到正確的順序。',
-    icon: '📝',
-    category: '重構邏輯記憶',
-    popular: false
-  },
-  {
-    id: 'spin-wheel',
-    name: '隨機輪盤',
-    description: '旋轉滾輪以查看下一個項目。',
-    icon: '🎡',
-    category: '壓力情緒記憶',
-    popular: false
-  },
-  {
-    id: 'complete-sentence',
-    name: '完成句子',
-    description: '一種完形填空活動，您可以在其中將單詞拖放到文本中的空白處。',
-    icon: '✏️',
-    category: '重構邏輯記憶',
-    popular: false
-  },
+  // 開發中的遊戲
   {
     id: 'matching-pairs',
     name: '配對遊戲',
-    description: '一次點擊一對卡片，以顯示它們是否匹配。',
+    description: '通過配對卡片強化視覺記憶和關聯學習',
     icon: '🃏',
     category: '空間視覺記憶',
-    popular: true
+    popular: true,
+    status: 'development',
+    estimatedLoadTime: 600
   },
   {
-    id: 'open-box',
-    name: '開箱遊戲',
-    description: '點擊每個框以打開它們並顯示裡面的內容。',
-    icon: '📦',
-    category: '壓力情緒記憶',
-    popular: true
-  },
-  {
-    id: 'type-answer',
-    name: '拼寫單詞',
-    description: '將字母拖動或鍵入到正確的位置以拼寫答案。',
-    icon: '⌨️',
-    category: '基礎記憶',
-    popular: false
-  },
-  {
-    id: 'gameshow-quiz',
+    id: 'quiz-game',
     name: '問答遊戲',
-    description: '帶有時間壓力，生命線和獎金回合的多項選擇測驗。',
-    icon: '🎪',
-    category: '壓力情緒記憶',
-    popular: true
-  },
-  {
-    id: 'flying-fruit',
-    name: '飛果',
-    description: '答案在螢幕上移動。當您看到正確答案時，請點擊它。',
-    icon: '🍎',
-    category: '動態反應記憶',
-    popular: true
-  },
-  {
-    id: 'image-quiz',
-    name: '標籤圖表',
-    description: '將針腳拖至圖像上的正確位置。',
-    icon: '🏷️',
-    category: '空間視覺記憶',
-    popular: false
-  },
-  {
-    id: 'group-sort',
-    name: '按組排序',
-    description: '將每個項目拖入其正確的組。',
-    icon: '📊',
-    category: '重構邏輯記憶',
-    popular: true
-  },
-  {
-    id: 'whack-mole',
-    name: '打地鼠',
-    description: '地鼠一次出現一個，只擊中正確的一個即可獲勝。',
-    icon: '🔨',
-    category: '動態反應記憶',
-    popular: false
-  },
-  {
-    id: 'wordsearch',
-    name: '搜字遊戲',
-    description: '單字隱藏在字母網格中。 儘快找到它們。',
-    icon: '🔍',
-    category: '搜索發現記憶',
-    popular: true
-  },
-  {
-    id: 'flip-tiles',
-    name: '翻轉卡片',
-    description: '通過點擊縮放和輕掃以翻轉來探索一系列雙面卡片。',
-    icon: '🔄',
-    category: '空間視覺記憶',
-    popular: false
-  },
-  {
-    id: 'hangman',
-    name: '猜字遊戲',
-    description: '嘗試通過選擇正確的字母來完成單詞。',
-    icon: '🎭',
-    category: '關聯配對記憶',
-    popular: true
-  },
-  {
-    id: 'image-quiz-slow',
-    name: '圖像測驗',
-    description: '圖像顯示緩慢。 當您可以回答問題時，請拍下按鈕作答。',
-    icon: '🖼️',
-    category: '空間視覺記憶',
-    popular: false
-  },
-  {
-    id: 'balloon-pop',
-    name: '刺破氣球',
-    description: '彈出氣球，將每個關鍵字放到其匹配內容上。',
-    icon: '🎈',
-    category: '動態反應記憶',
-    popular: true
-  },
-  {
-    id: 'maze-chase',
-    name: '迷宮追逐',
-    description: '跑到正確答案區，同時避開敵人。',
-    icon: '🏃',
-    category: '空間視覺記憶',
-    popular: true
-  },
-  {
-    id: 'true-false',
-    name: '真假遊戲',
-    description: '物品飛快地飛過。看看在時間用完之前你能答對多少。',
-    icon: '✅',
+    description: '基於主動回憶的快速問答學習',
+    icon: '❓',
     category: '基礎記憶',
-    popular: false
-  },
-  {
-    id: 'airplane',
-    name: '飛機遊戲',
-    description: '使用觸摸或鍵盤飛入正確的答案，避免錯誤的答案。',
-    icon: '✈️',
-    category: '動態反應記憶',
-    popular: true
+    popular: true,
+    status: 'development',
+    estimatedLoadTime: 500
   }
 ];
 
@@ -224,10 +196,12 @@ export default function CreateActivityPage() {
     return <LoginPrompt />;
   }
 
-  // 過濾和排序遊戲模板
+  // 過濾和排序遊戲模板（只顯示已完成的遊戲）
   const filteredTemplates = gameTemplates.filter(template =>
-    template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    template.description.toLowerCase().includes(searchTerm.toLowerCase())
+    template.status === 'completed' && (
+      template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
 
   const sortedTemplates = [...filteredTemplates].sort((a, b) => {
@@ -243,7 +217,8 @@ export default function CreateActivityPage() {
   });
 
   const handleTemplateClick = (templateId: string) => {
-    router.push(`/create/${templateId}`);
+    // 導航到遊戲切換器並自動切換到指定遊戲
+    router.push(`/games/switcher?game=${templateId}`);
   };
 
 
@@ -337,20 +312,37 @@ export default function CreateActivityPage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900 mb-1">{template.name}</h3>
-                    {template.popular && (
-                      <span className="inline-block px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
-                        熱門
-                      </span>
-                    )}
+                    <div className="flex items-center space-x-2">
+                      {template.popular && (
+                        <span className="inline-block px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
+                          熱門
+                        </span>
+                      )}
+                      {template.status === 'completed' && (
+                        <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                          ✅ 可玩
+                        </span>
+                      )}
+                      {template.status === 'development' && (
+                        <span className="inline-block px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                          🚧 開發中
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <p className="text-sm text-gray-600 leading-relaxed">
                   {template.description}
                 </p>
-                <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                     {template.category}
                   </span>
+                  {template.estimatedLoadTime && (
+                    <span className="text-xs text-gray-400">
+                      載入: ~{template.estimatedLoadTime}ms
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
