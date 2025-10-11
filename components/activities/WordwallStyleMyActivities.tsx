@@ -75,41 +75,36 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   // 載入詞彙活動（從雲端 API，根據用戶 ID）
   const loadVocabularyActivities = async (): Promise<Activity[]> => {
     try {
-      console.log(`🚀 為用戶 ${userId} 從 Railway API 載入詞彙活動...`);
+      console.log(`🚀 為用戶 ${userId} 從 Activity API 載入活動...`);
 
-      // 如果是演示用戶，載入所有詞彙活動
-      const apiUrl = userId === 'demo-user'
-        ? '/api/vocabulary/sets'
-        : `/api/vocabulary/sets?userId=${userId}`;
-
-      const response = await fetch(apiUrl);
+      const response = await fetch('/api/activities');
       const result = await response.json();
 
       if (result.success && result.data) {
-        console.log(`🚀 為用戶 ${userId} 從 Railway API 載入 ${result.data.length} 個詞彙活動`);
+        console.log(`✅ 成功載入 ${result.data.length} 個活動`);
 
-        return result.data.map((set: any) => ({
-          id: set.id,
-          title: set.title || '無標題詞彙活動',
-          description: `包含 ${set.items?.length || 0} 個詞彙的學習活動`,
+        return result.data.map((activity: any) => ({
+          id: activity.id,
+          title: activity.title || '無標題活動',
+          description: activity.description || `包含 ${activity.totalWords || 0} 個詞彙的學習活動`,
           type: 'vocabulary' as const,
           gameType: '詞彙遊戲',
-          isPublic: false,
-          playCount: Math.floor(Math.random() * 50),
-          lastModified: new Date(set.updatedAt),
-          createdAt: new Date(set.createdAt),
+          isPublic: activity.isPublic || false,
+          playCount: activity.playCount || Math.floor(Math.random() * 50),
+          lastModified: new Date(activity.updatedAt),
+          createdAt: new Date(activity.createdAt),
           thumbnail: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23dbeafe"/><text x="50" y="55" font-size="30" text-anchor="middle">📝</text></svg>',
-          wordCount: set.items?.length || 0,
-          geptLevel: set.geptLevel || 'ELEMENTARY',
-          tags: ['vocabulary', 'cloud', set.geptLevel?.toLowerCase() || 'elementary'],
+          wordCount: activity.totalWords || 0,
+          geptLevel: activity.geptLevel || 'ELEMENTARY',
+          tags: activity.tags || ['vocabulary', 'cloud', activity.geptLevel?.toLowerCase() || 'elementary'],
           folderId: undefined,
-          userId: set.userId || userId
+          userId: userId
         }));
       }
 
       return [];
     } catch (error) {
-      console.error(`載入用戶 ${userId} 的雲端詞彙活動失敗:`, error);
+      console.error(`載入用戶 ${userId} 的活動失敗:`, error);
       return [];
     }
   };

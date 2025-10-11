@@ -95,24 +95,18 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
+
+    if (!session?.user?.id) {
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
-    // 獲取用戶
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
+    const userId = session.user.id;
+    console.log('🔍 GET /api/activities 調用:', { userId });
 
-    if (!user) {
-      return NextResponse.json({ error: '用戶不存在' }, { status: 404 });
-    }
-
-    // 獲取用戶的活動
+    // 獲取用戶的活動，包含詞彙集合信息
     const activities = await prisma.activity.findMany({
       where: {
-        userId: user.id
+        userId: userId
       },
       orderBy: {
         createdAt: 'desc'
@@ -126,7 +120,65 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json(activities);
+    console.log(`✅ 找到 ${activities.length} 個活動`);
+
+    // 為每個活動獲取詞彙集合信息
+    const activitiesWithVocabulary = await Promise.all(
+      activities.map(async (activity) => {
+        let vocabularyInfo = null;
+
+        // 從活動內容中獲取詞彙集合 ID
+        const vocabularySetId = activity.content?.vocabularySetId;
+
+        if (vocabularySetId) {
+          try {
+            const vocabularySet = await prisma.vocabularySet.findUnique({
+              where: { id: vocabularySetId },
+              include: {
+                _count: {
+                  select: {
+                    items: true
+                  }
+                }
+              }
+            });
+
+            if (vocabularySet) {
+              vocabularyInfo = {
+                totalWords: vocabularySet._count.items,
+                geptLevel: vocabularySet.geptLevel
+              };
+            }
+          } catch (error) {
+            console.warn(`⚠️ 無法獲取詞彙集合 ${vocabularySetId}:`, error);
+          }
+        }
+
+        return {
+          id: activity.id,
+          title: activity.title,
+          description: activity.description,
+          type: activity.type,
+          templateType: activity.templateType,
+          content: activity.content,
+          isPublic: activity.isPublic,
+          createdAt: activity.createdAt,
+          updatedAt: activity.updatedAt,
+          playCount: activity.playCount,
+          difficulty: activity.difficulty,
+          estimatedTime: activity.estimatedTime,
+          tags: activity.tags,
+          totalWords: vocabularyInfo?.totalWords || 0,
+          geptLevel: vocabularyInfo?.geptLevel || 'ELEMENTARY',
+          _count: activity._count
+        };
+      })
+    );
+
+    return NextResponse.json({
+      success: true,
+      data: activitiesWithVocabulary
+    });
 
   } catch (error) {
     console.error('獲取活動時出錯:', error);
