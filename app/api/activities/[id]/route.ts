@@ -70,11 +70,11 @@ export async function DELETE(
         });
         console.log('🗑️ 刪除詞彙項目數量:', deletedItems.count);
 
-        // 再刪除詞彙集合
-        await tx.vocabularySet.delete({
+        // 再刪除詞彙集合 - 使用 deleteMany 避免「記錄不存在」錯誤
+        const deletedSets = await tx.vocabularySet.deleteMany({
           where: { id: vocabularySetId }
         });
-        console.log('✅ 詞彙集合刪除成功');
+        console.log(`✅ 刪除了 ${deletedSets.count} 個詞彙集合`);
       } else {
         console.log('⚠️ 沒有找到關聯的詞彙集合 ID');
       }
