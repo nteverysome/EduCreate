@@ -344,7 +344,10 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
                 詞彙列表 - {activity.title}
               </h3>
               <button
-                onClick={() => setShowVocabularyModal(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowVocabularyModal(false);
+                }}
                 className="text-gray-400 hover:text-gray-600"
               >
                 ✕
@@ -398,7 +401,10 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
                 編輯詞彙
               </button>
               <button
-                onClick={() => setShowVocabularyModal(false)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowVocabularyModal(false);
+                }}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 關閉
