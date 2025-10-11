@@ -264,18 +264,21 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
                     </button>
                     
                     <hr className="my-1" />
-                    
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete?.(activity);
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left text-red-600"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      刪除
-                    </button>
+
+                    {/* 只對非系統活動顯示刪除選項 */}
+                    {!activity.id.startsWith('system_') && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete?.(activity);
+                          setShowMenu(false);
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left text-red-600"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        刪除
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

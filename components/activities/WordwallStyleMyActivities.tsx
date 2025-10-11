@@ -272,6 +272,12 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   };
 
   const handleActivityDelete = async (activity: Activity) => {
+    // 檢查是否為系統活動
+    if (activity.id.startsWith('system_')) {
+      alert('系統預設活動無法刪除');
+      return;
+    }
+
     if (confirm(`確定要刪除「${activity.title}」嗎？`)) {
       try {
         console.log('🗑️ 開始刪除活動:', activity.title, 'ID:', activity.id);
