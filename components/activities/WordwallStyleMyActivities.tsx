@@ -276,25 +276,44 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     console.log('複製活動:', activity.title);
   };
 
-  const handleActivityDelete = (activity: Activity) => {
+  const handleActivityDelete = async (activity: Activity) => {
     if (confirm(`確定要刪除「${activity.title}」嗎？`)) {
-      if (activity.type === 'vocabulary') {
-        // 刪除詞彙活動
-        try {
-          const vocabularyData = localStorage.getItem('vocabulary_integration_data');
-          if (vocabularyData) {
-            const data = JSON.parse(vocabularyData);
-            if (data.activities) {
-              data.activities = data.activities.filter((a: any) => a.id !== activity.id);
-              localStorage.setItem('vocabulary_integration_data', JSON.stringify(data));
+      try {
+        // 調用 API 刪除活動
+        const response = await fetch(`/api/activities/${activity.id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          // 從狀態中移除
+          setActivities(prev => prev.filter(a => a.id !== activity.id));
+
+          // 從 localStorage 中移除（保持向後兼容）
+          if (activity.type === 'vocabulary') {
+            try {
+              const vocabularyData = localStorage.getItem('vocabulary_integration_data');
+              if (vocabularyData) {
+                const data = JSON.parse(vocabularyData);
+                if (data.activities) {
+                  data.activities = data.activities.filter((a: any) => a.id !== activity.id);
+                  localStorage.setItem('vocabulary_integration_data', JSON.stringify(data));
+                }
+              }
+            } catch (error) {
+              console.error('清理 localStorage 失敗:', error);
             }
           }
-        } catch (error) {
-          console.error('刪除詞彙活動失敗:', error);
+
+          console.log('✅ 活動刪除成功:', activity.title);
+        } else {
+          const errorData = await response.json();
+          console.error('❌ 刪除活動失敗:', errorData.error);
+          alert(`刪除失敗：${errorData.error}`);
         }
+      } catch (error) {
+        console.error('❌ 刪除活動時出錯:', error);
+        alert('刪除活動時發生錯誤，請稍後再試');
       }
-      
-      setActivities(prev => prev.filter(a => a.id !== activity.id));
     }
   };
 
