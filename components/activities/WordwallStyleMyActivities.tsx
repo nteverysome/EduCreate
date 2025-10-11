@@ -193,13 +193,17 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
       console.log('🎮 開始詞彙遊戲:', activity.title);
       console.log('🎯 活動 ID:', activity.id);
 
-      // 🌐 使用雲端 API 架構：直接跳轉到遊戲並傳遞 activityId 參數
-      // 遊戲的 GEPTManager 會自動從雲端 API 載入對應活動的詞彙
-      const gameUrl = `/games/shimozurdo-game?activityId=${activity.id}`;
-      console.log('🚀 啟動遊戲 URL:', gameUrl);
+      // 🎯 獲取用戶選擇的遊戲類型
+      const gameTemplateId = activity.content?.gameTemplateId || 'shimozurdo-game';
+      console.log('🎮 遊戲類型:', gameTemplateId);
 
-      // 跳轉到遊戲頁面，傳遞 activityId 參數
-      window.open(gameUrl, '_blank');
+      // 🌐 跳轉到遊戲切換器頁面，預設選擇用戶的遊戲類型
+      // 用戶可以在切換器中切換到其他遊戲，但優先顯示選擇的遊戲
+      const switcherUrl = `/games/switcher?game=${gameTemplateId}&activityId=${activity.id}`;
+      console.log('🚀 啟動遊戲切換器 URL:', switcherUrl);
+
+      // 跳轉到遊戲切換器頁面，傳遞遊戲類型和活動 ID
+      window.open(switcherUrl, '_blank');
 
     } catch (error) {
       console.error('❌ 啟動遊戲失敗:', error);
