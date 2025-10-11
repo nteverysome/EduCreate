@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, FolderPlus } from 'lucide-react';
+import { Plus, FolderPlus, ArrowUp } from 'lucide-react';
 import FolderManager from './FolderManager';
 import CreateFolderModal from './CreateFolderModal';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
@@ -27,6 +27,58 @@ interface Activity {
 interface WordwallStyleMyActivitiesProps {
   userId: string;
 }
+
+// 拖拽回根級別的目標組件
+interface DropToRootTargetProps {
+  onDropToRoot: (activityId: string) => void;
+}
+
+const DropToRootTarget: React.FC<DropToRootTargetProps> = ({ onDropToRoot }) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const activityId = e.dataTransfer.getData('text/plain');
+    if (activityId && onDropToRoot) {
+      onDropToRoot(activityId);
+    }
+  };
+
+  return (
+    <div
+      className={`
+        mb-6 p-6 border-2 border-dashed rounded-lg transition-all duration-200 cursor-pointer
+        ${isDragOver
+          ? 'border-blue-500 bg-blue-50 text-blue-700'
+          : 'border-gray-300 bg-gray-50 text-gray-500 hover:border-gray-400 hover:bg-gray-100'
+        }
+      `}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <div className="flex items-center justify-center space-x-3">
+        <ArrowUp className="w-5 h-5" />
+        <span className="font-medium">
+          {isDragOver ? '放開以移回上一層' : '拖拽活動到此處以移回上一層'}
+        </span>
+      </div>
+    </div>
+  );
+};
 
 export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps> = ({
   userId
@@ -93,7 +145,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           wordCount: activity.vocabularyInfo?.totalWords || 0,
           geptLevel: activity.vocabularyInfo?.geptLevel || 'ELEMENTARY',
           tags: activity.tags || ['vocabulary', 'cloud', activity.vocabularyInfo?.geptLevel?.toLowerCase() || 'elementary'],
-          folderId: undefined,
+          folderId: activity.folderId || null, // ✅ 修復：使用實際的 folderId
           userId: userId
         }));
       }
@@ -293,6 +345,37 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
+  // 處理從資料夾拖拽回根級別
+  const handleActivityDropToRoot = async (activityId: string) => {
+    try {
+      console.log('🏠 將活動移動回根級別:', { activityId });
+
+      const response = await fetch(`/api/activities/${activityId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          folderId: null // 設為 null 表示移回根級別
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '移動活動失敗');
+      }
+
+      console.log('✅ 活動移回根級別成功');
+
+      // 重新載入活動列表
+      await loadActivities();
+
+    } catch (error: any) {
+      console.error('❌ 移動活動失敗:', error);
+      alert(`移動活動失敗: ${error.message}`);
+    }
+  };
+
   const handleActivityEdit = (activity: Activity) => {
     console.log('🔧 編輯活動:', activity.title, '類型:', activity.type, 'ID:', activity.id);
     if (activity.type === 'vocabulary') {
@@ -415,10 +498,15 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           onClearSelection={handleClearSelection}
         />
 
+        {/* 在資料夾視圖中顯示拖拽回根級別的目標區域 */}
+        {currentFolderId && (
+          <DropToRootTarget onDropToRoot={handleActivityDropToRoot} />
+        )}
+
         {/* 活動網格/列表 */}
         <div className={`
-          ${viewMode === 'grid' 
-            ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6' 
+          ${viewMode === 'grid'
+            ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
             : 'space-y-4'
           }
         `}>
