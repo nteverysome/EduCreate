@@ -384,7 +384,8 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
 
             <div className="mt-6 flex justify-between">
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation(); // 阻止事件冒泡
                   // 獲取遊戲類型，從 activity.content.gameTemplateId 或使用默認值
                   const gameTemplateId = (activity as any).content?.gameTemplateId || 'shimozurdo-game';
                   const editUrl = `/create/${gameTemplateId}?edit=${activity.id}`;
