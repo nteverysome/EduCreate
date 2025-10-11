@@ -191,44 +191,16 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const startVocabularyGame = async (activity: Activity) => {
     try {
       console.log('🎮 開始詞彙遊戲:', activity.title);
+      console.log('🎯 活動 ID:', activity.id);
 
-      // 從 API 獲取活動數據（包含詞彙數據）
-      const response = await fetch(`/api/activities/${activity.id}`);
+      // 🌐 使用雲端 API 架構：直接跳轉到遊戲並傳遞 activityId 參數
+      // 遊戲的 GEPTManager 會自動從雲端 API 載入對應活動的詞彙
+      const gameUrl = `/games/shimozurdo-game?activityId=${activity.id}`;
+      console.log('🚀 啟動遊戲 URL:', gameUrl);
 
-      if (!response.ok) {
-        throw new Error(`API 請求失敗: ${response.status}`);
-      }
+      // 跳轉到遊戲頁面，傳遞 activityId 參數
+      window.open(gameUrl, '_blank');
 
-      const activityData = await response.json();
-
-      if (activityData && activityData.content) {
-        // 從活動的 content 字段中提取詞彙數據
-        const content = activityData.content;
-
-        // 檢查 content 是否包含詞彙數據
-        if (content.vocabularyItems && Array.isArray(content.vocabularyItems)) {
-          // 將詞彙數據存儲到 localStorage 供遊戲使用
-          const gameVocabulary = content.vocabularyItems.map((item: any) => ({
-            english: item.english || item.word,
-            chinese: item.chinese || item.translation,
-            level: activityData.geptLevel?.toLowerCase() || 'elementary'
-          }));
-
-          localStorage.setItem('gameVocabulary', JSON.stringify(gameVocabulary));
-          localStorage.setItem('gameTitle', activityData.title);
-
-          console.log(`🎯 遊戲詞彙已設置: ${gameVocabulary.length} 個詞彙`);
-
-          // 跳轉到遊戲頁面
-          window.open('/games/shimozurdo-game', '_blank');
-        } else {
-          console.error('❌ 活動中沒有找到詞彙數據');
-          alert('此活動沒有詞彙數據，無法開始遊戲');
-        }
-      } else {
-        console.error('❌ 無法載入活動數據');
-        alert('無法載入活動數據，請稍後再試');
-      }
     } catch (error) {
       console.error('❌ 啟動遊戲失敗:', error);
       alert('啟動遊戲失敗，請稍後再試');
