@@ -19,15 +19,19 @@ interface FolderCardProps {
   onClick: (folderId: string) => void;
   onEdit?: (folder: FolderData) => void;
   onDelete?: (folderId: string) => void;
+  // 拖拽相關
+  onDrop?: (activityId: string, folderId: string) => void;
 }
 
 export const FolderCard: React.FC<FolderCardProps> = ({
   folder,
   onClick,
   onEdit,
-  onDelete
+  onDelete,
+  onDrop
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const handleCardClick = () => {
     onClick(folder.id);
@@ -52,6 +56,28 @@ export const FolderCard: React.FC<FolderCardProps> = ({
     }
   };
 
+  // 拖拽目標事件處理
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const activityId = e.dataTransfer.getData('text/plain');
+    if (activityId && onDrop) {
+      onDrop(activityId, folder.id);
+    }
+  };
+
   // 將十六進制顏色轉換為 RGB 並調整透明度
   const getBackgroundColor = (color: string) => {
     // 移除 # 符號
@@ -72,9 +98,15 @@ export const FolderCard: React.FC<FolderCardProps> = ({
 
   return (
     <div
-      className="relative bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer group"
+      className={`
+        relative bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer group
+        ${isDragOver ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50' : ''}
+      `}
       onClick={handleCardClick}
-      style={{ backgroundColor: getBackgroundColor(folder.color) }}
+      style={{ backgroundColor: isDragOver ? '#EBF8FF' : getBackgroundColor(folder.color) }}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
       {/* 資料夾內容 */}
       <div className="p-4">

@@ -254,6 +254,45 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
+  // 拖拽功能
+  const handleActivityDragStart = (activity: Activity) => {
+    console.log('🎯 開始拖拽活動:', activity.title);
+  };
+
+  const handleActivityDragEnd = () => {
+    console.log('🎯 拖拽結束');
+  };
+
+  const handleActivityDropToFolder = async (activityId: string, folderId: string) => {
+    try {
+      console.log('📁 將活動移動到資料夾:', { activityId, folderId });
+
+      const response = await fetch(`/api/activities/${activityId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          folderId: folderId
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '移動活動失敗');
+      }
+
+      console.log('✅ 活動移動成功');
+
+      // 重新載入活動列表
+      await loadActivities();
+
+    } catch (error: any) {
+      console.error('❌ 移動活動失敗:', error);
+      alert(`移動活動失敗: ${error.message}`);
+    }
+  };
+
   const handleActivityEdit = (activity: Activity) => {
     console.log('🔧 編輯活動:', activity.title, '類型:', activity.type, 'ID:', activity.id);
     if (activity.type === 'vocabulary') {
@@ -353,6 +392,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           onFolderCreate={handleFolderCreate}
           onFolderUpdate={handleFolderUpdate}
           onFolderDelete={handleFolderDelete}
+          onActivityDropToFolder={handleActivityDropToFolder}
         />
 
         {/* 搜索和篩選 */}
@@ -394,6 +434,8 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               onDelete={handleActivityDelete}
               onShare={handleActivityShare}
               selectionMode={selectionMode}
+              onDragStart={handleActivityDragStart}
+              onDragEnd={handleActivityDragEnd}
             />
           ))}
         </div>

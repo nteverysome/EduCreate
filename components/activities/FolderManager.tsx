@@ -22,6 +22,8 @@ interface FolderManagerProps {
   onFolderCreate?: (name: string, color: string) => Promise<void>;
   onFolderUpdate?: (id: string, name: string, color?: string) => Promise<void>;
   onFolderDelete?: (id: string) => Promise<void>;
+  // 拖拽相關
+  onActivityDropToFolder?: (activityId: string, folderId: string) => Promise<void>;
 }
 
 export const FolderManager: React.FC<FolderManagerProps> = ({
@@ -29,7 +31,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   onFolderSelect,
   onFolderCreate,
   onFolderUpdate,
-  onFolderDelete
+  onFolderDelete,
+  onActivityDropToFolder
 }) => {
   const [folders, setFolders] = useState<FolderData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -181,6 +184,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
             onClick={onFolderSelect}
             onEdit={handleUpdateFolder}
             onDelete={handleDeleteFolder}
+            onDrop={onActivityDropToFolder}
           />
         ))}
       </div>

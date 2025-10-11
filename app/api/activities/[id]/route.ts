@@ -158,21 +158,31 @@ export async function PUT(
     }
 
     // 更新活動
+    const updateData: any = {
+      updatedAt: new Date()
+    };
+
+    // 如果有 title，更新 title
+    if (body.title !== undefined) {
+      updateData.title = body.title;
+      updateData.type = 'vocabulary';
+      updateData.content = {
+        gameTemplateId: body.gameTemplateId, // 存儲在 content 中
+        vocabularyItems: body.vocabularyItems || []
+      };
+    }
+
+    // 如果有 folderId，更新 folderId（支持拖拽功能）
+    if (body.folderId !== undefined) {
+      updateData.folderId = body.folderId;
+      console.log('📁 更新活動資料夾:', { activityId, folderId: body.folderId });
+    }
+
     const updatedActivity = await prisma.activity.update({
       where: {
         id: activityId
       },
-      data: {
-        title: body.title,
-        type: 'vocabulary',
-        // 不更新 gameTemplateId，避免外鍵約束錯誤
-        // 遊戲類型信息存儲在 content 中，與現有架構保持一致
-        content: {
-          gameTemplateId: body.gameTemplateId, // 存儲在 content 中
-          vocabularyItems: body.vocabularyItems || []
-        },
-        updatedAt: new Date()
-      }
+      data: updateData
     });
 
     console.log('✅ 活動更新成功:', updatedActivity.title);

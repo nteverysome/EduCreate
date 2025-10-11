@@ -47,6 +47,9 @@ interface WordwallStyleActivityCardProps {
   onDelete?: (activity: Activity) => void;
   onShare?: (activity: Activity) => void;
   selectionMode?: boolean;
+  // 拖拽相關
+  onDragStart?: (activity: Activity) => void;
+  onDragEnd?: () => void;
 }
 
 export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps> = ({
@@ -58,12 +61,15 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   onCopy,
   onDelete,
   onShare,
-  selectionMode = false
+  selectionMode = false,
+  onDragStart,
+  onDragEnd
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showVocabularyModal, setShowVocabularyModal] = useState(false);
   const [vocabularyData, setVocabularyData] = useState<Array<{english: string, chinese: string}> | null>(null);
   const [loadingVocabulary, setLoadingVocabulary] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // 載入詞彙數據
   const loadVocabularyData = async () => {
@@ -125,14 +131,31 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
     // 移除播放功能，只有 Play 按鈕才能觸發播放
   };
 
+  // 拖拽事件處理
+  const handleDragStart = (e: React.DragEvent) => {
+    setIsDragging(true);
+    e.dataTransfer.setData('text/plain', activity.id);
+    e.dataTransfer.effectAllowed = 'move';
+    onDragStart?.(activity);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    onDragEnd?.();
+  };
+
   return (
-    <div 
+    <div
       className={`
         activity-card bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer
         ${isSelected ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-200'}
         ${selectionMode ? 'hover:ring-2 hover:ring-blue-300' : 'hover:border-gray-300'}
+        ${isDragging ? 'opacity-50 transform rotate-2' : ''}
       `}
       onClick={handleCardClick}
+      draggable={!selectionMode}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
       {/* 卡片頭部 - 縮略圖區域 */}
       <div className="relative">
