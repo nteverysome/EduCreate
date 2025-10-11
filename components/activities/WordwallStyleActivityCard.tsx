@@ -13,7 +13,9 @@ import {
   Users,
   Globe,
   Lock,
-  Info
+  Info,
+  Check,
+  X
 } from 'lucide-react';
 
 interface Activity {
@@ -46,6 +48,7 @@ interface WordwallStyleActivityCardProps {
   onCopy?: (activity: Activity) => void;
   onDelete?: (activity: Activity) => void;
   onShare?: (activity: Activity) => void;
+  onRename?: (activity: Activity, newTitle: string) => void;
   selectionMode?: boolean;
   // 拖拽相關
   onDragStart?: (activity: Activity) => void;
@@ -61,6 +64,7 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   onCopy,
   onDelete,
   onShare,
+  onRename,
   selectionMode = false,
   onDragStart,
   onDragEnd
@@ -70,6 +74,8 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   const [vocabularyData, setVocabularyData] = useState<Array<{english: string, chinese: string}> | null>(null);
   const [loadingVocabulary, setLoadingVocabulary] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newTitle, setNewTitle] = useState(activity.title);
 
   // 載入詞彙數據
   const loadVocabularyData = async () => {
@@ -93,6 +99,32 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
       setVocabularyData([]);
     } finally {
       setLoadingVocabulary(false);
+    }
+  };
+
+  // 處理重新命名
+  const handleRename = () => {
+    setIsRenaming(true);
+    setShowMenu(false);
+  };
+
+  const handleSaveRename = () => {
+    if (newTitle.trim() && newTitle.trim() !== activity.title) {
+      onRename?.(activity, newTitle.trim());
+    }
+    setIsRenaming(false);
+  };
+
+  const handleCancelRename = () => {
+    setNewTitle(activity.title);
+    setIsRenaming(false);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveRename();
+    } else if (e.key === 'Escape') {
+      handleCancelRename();
     }
   };
 
@@ -223,9 +255,37 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
       {/* 卡片內容 */}
       <div className="p-4">
         {/* 標題 */}
-        <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-2 min-h-[2.5rem]">
-          {activity.title}
-        </h3>
+        {isRenaming ? (
+          <div className="mb-2 min-h-[2.5rem] flex items-center gap-2">
+            <input
+              type="text"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              onKeyDown={handleKeyPress}
+              onBlur={handleSaveRename}
+              className="flex-1 font-semibold text-gray-900 text-sm border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              autoFocus
+            />
+            <button
+              onClick={handleSaveRename}
+              className="p-1 text-green-600 hover:bg-green-100 rounded"
+              title="保存"
+            >
+              <Check className="w-3 h-3" />
+            </button>
+            <button
+              onClick={handleCancelRename}
+              className="p-1 text-red-600 hover:bg-red-100 rounded"
+              title="取消"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        ) : (
+          <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-2 min-h-[2.5rem]">
+            {activity.title}
+          </h3>
+        )}
 
         {/* 統計信息 */}
         <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
@@ -307,6 +367,17 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        handleRename();
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                      重新命名
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
                         onCopy?.(activity);
                         setShowMenu(false);
                       }}
@@ -315,7 +386,7 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
                       <Copy className="w-3 h-3" />
                       複製
                     </button>
-                    
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

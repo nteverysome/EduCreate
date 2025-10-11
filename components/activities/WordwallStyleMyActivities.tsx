@@ -429,6 +429,41 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     console.log('分享活動:', activity.title);
   };
 
+  const handleActivityRename = async (activity: Activity, newTitle: string) => {
+    try {
+      console.log('🏷️ 開始重新命名活動:', activity.title, '→', newTitle);
+
+      // 調用 API 更新活動標題
+      const response = await fetch(`/api/activities/${activity.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: newTitle,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`重新命名失敗: ${response.status}`);
+      }
+
+      // 更新本地狀態
+      setActivities(prevActivities =>
+        prevActivities.map(a =>
+          a.id === activity.id
+            ? { ...a, title: newTitle }
+            : a
+        )
+      );
+
+      console.log('✅ 活動重新命名成功');
+    } catch (error) {
+      console.error('❌ 重新命名活動失敗:', error);
+      alert('重新命名活動時發生錯誤，請稍後再試');
+    }
+  };
+
   const handleSelectAll = () => {
     setSelectedActivities(filteredAndSortedActivities.map(a => a.id));
   };
@@ -524,6 +559,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               onCopy={handleActivityCopy}
               onDelete={handleActivityDelete}
               onShare={handleActivityShare}
+              onRename={handleActivityRename}
               selectionMode={selectionMode}
               onDragStart={handleActivityDragStart}
               onDragEnd={handleActivityDragEnd}
