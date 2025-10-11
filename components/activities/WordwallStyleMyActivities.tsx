@@ -452,7 +452,10 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">我的活動</h1>
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+            <button
+              onClick={() => window.open('/create', '_blank')}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
               <Plus className="w-4 h-4" />
               創建活動
             </button>
@@ -542,7 +545,10 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               }
             </p>
             {!searchQuery && (
-              <button className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+              <button
+                onClick={() => window.open('/create', '_blank')}
+                className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
                 創建第一個活動
               </button>
             )}
