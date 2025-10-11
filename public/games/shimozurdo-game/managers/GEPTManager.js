@@ -49,7 +49,18 @@ class GEPTManager {
     try {
       console.log('🌐 正在從雲端 API 載入詞彙...');
 
-      const response = await fetch('/api/vocabulary/sets');
+      // 檢查 URL 參數中是否有 activityId
+      const urlParams = new URLSearchParams(window.location.search);
+      const activityId = urlParams.get('activityId');
+
+      let apiUrl = '/api/vocabulary/sets';
+      if (activityId) {
+        // 如果有 activityId，只載入該活動的詞彙
+        apiUrl = `/api/activities/${activityId}/vocabulary`;
+        console.log('🎯 載入特定活動的詞彙:', activityId);
+      }
+
+      const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -57,6 +68,40 @@ class GEPTManager {
       const result = await response.json();
       console.log('📡 雲端 API 響應:', result);
 
+      // 檢查是否是單個活動的響應格式
+      if (activityId && result.vocabularyItems) {
+        // 處理單個活動的詞彙
+        console.log(`🎯 載入活動詞彙: ${result.activity.title} (${result.vocabularyItems.length} 個詞彙)`);
+
+        // 清空現有詞彙數據庫
+        this.wordDatabase.clear();
+
+        // 將所有詞彙設為初級（因為是用戶自定義的）
+        const customWords = result.vocabularyItems.map(item => ({
+          id: item.id,
+          english: item.english,
+          chinese: item.chinese,
+          level: 'elementary',
+          difficulty: item.difficultyLevel || 1,
+          frequency: 100 - (item.difficultyLevel || 1) * 10,
+          category: 'custom',
+          partOfSpeech: item.partOfSpeech || 'NOUN',
+          image: item.imageUrl,
+          phonetic: item.phonetic
+        }));
+
+        // 只設置初級詞彙，其他級別為空
+        this.wordDatabase.set('elementary', customWords);
+        this.wordDatabase.set('intermediate', []);
+        this.wordDatabase.set('high-intermediate', []);
+
+        console.log(`✅ 自定義活動詞彙載入完成，總共 ${customWords.length} 個詞彙`);
+        console.log('📊 自定義詞彙數據庫統計:');
+        console.log(`  - 自定義: ${customWords.length} 個詞彙`);
+        return true;
+      }
+
+      // 處理所有詞彙集合的響應格式
       if (result.success && result.data && result.data.length > 0) {
         // 清空現有詞彙數據庫
         this.wordDatabase.clear();
