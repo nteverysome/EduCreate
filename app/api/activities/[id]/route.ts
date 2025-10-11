@@ -164,7 +164,7 @@ export async function PUT(
       },
       data: {
         title: body.title,
-        type: body.type || 'vocabulary',
+        type: 'vocabulary',
         gameType: body.gameTemplateId,
         content: {
           vocabularyItems: body.vocabularyItems || []
