@@ -22,7 +22,7 @@ const gameTemplateConfig = {
     icon: '⚡',
     category: '動態反應記憶',
     minItems: 3,
-    maxItems: 20,
+    maxItems: 100,
     inputType: 'vocabulary' // 單字類型
   },
   'airplane-game': {
@@ -31,7 +31,7 @@ const gameTemplateConfig = {
     icon: '✈️',
     category: '動態反應記憶',
     minItems: 3,
-    maxItems: 20,
+    maxItems: 100,
     inputType: 'vocabulary'
   },
   'airplane-iframe': {
@@ -40,7 +40,7 @@ const gameTemplateConfig = {
     icon: '🎮',
     category: '動態反應記憶',
     minItems: 3,
-    maxItems: 20,
+    maxItems: 100,
     inputType: 'vocabulary'
   },
   'blastemup-game': {
@@ -49,7 +49,7 @@ const gameTemplateConfig = {
     icon: '💥',
     category: '動態反應記憶',
     minItems: 5,
-    maxItems: 25,
+    maxItems: 100,
     inputType: 'vocabulary'
   },
   'dungeon-game': {
@@ -58,7 +58,7 @@ const gameTemplateConfig = {
     icon: '🏰',
     category: '空間視覺記憶',
     minItems: 5,
-    maxItems: 30,
+    maxItems: 100,
     inputType: 'vocabulary'
   },
   'runner-game': {
@@ -67,7 +67,7 @@ const gameTemplateConfig = {
     icon: '🏃',
     category: '動態反應記憶',
     minItems: 5,
-    maxItems: 20,
+    maxItems: 100,
     inputType: 'vocabulary'
   },
   'shimozurdo-game': {
@@ -76,7 +76,7 @@ const gameTemplateConfig = {
     icon: '🎯',
     category: '動態反應記憶',
     minItems: 3,
-    maxItems: 15,
+    maxItems: 100,
     inputType: 'vocabulary'
   },
   'shimozurdo-cloud': {
@@ -85,7 +85,7 @@ const gameTemplateConfig = {
     icon: '☁️',
     category: '動態反應記憶',
     minItems: 3,
-    maxItems: 15,
+    maxItems: 100,
     inputType: 'vocabulary'
   },
   'shimozurdo-responsive': {
@@ -94,7 +94,7 @@ const gameTemplateConfig = {
     icon: '🎯',
     category: '動態反應記憶',
     minItems: 3,
-    maxItems: 15,
+    maxItems: 100,
     inputType: 'vocabulary'
   },
   'starshake-game': {
@@ -103,7 +103,7 @@ const gameTemplateConfig = {
     icon: '🌟',
     category: '動態反應記憶',
     minItems: 5,
-    maxItems: 25,
+    maxItems: 100,
     inputType: 'vocabulary'
   },
   'math-attack': {
@@ -112,7 +112,7 @@ const gameTemplateConfig = {
     icon: '🔢',
     category: '基礎記憶',
     minItems: 10,
-    maxItems: 50,
+    maxItems: 100,
     inputType: 'math'
   },
   // 默認配置
@@ -122,7 +122,7 @@ const gameTemplateConfig = {
     icon: '🎮',
     category: '基礎記憶',
     minItems: 1,
-    maxItems: 50,
+    maxItems: 100,
     inputType: 'vocabulary'
   }
 };
