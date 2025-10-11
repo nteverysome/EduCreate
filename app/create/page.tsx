@@ -217,8 +217,8 @@ export default function CreateActivityPage() {
   });
 
   const handleTemplateClick = (templateId: string) => {
-    // 導航到遊戲切換器並自動切換到指定遊戲
-    router.push(`/games/switcher?game=${templateId}`);
+    // 導航到內容編輯頁面，讓用戶輸入標題和單字
+    router.push(`/create/${templateId}`);
   };
 
 

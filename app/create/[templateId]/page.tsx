@@ -1,54 +1,121 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
 
-interface ContentItem {
+interface VocabularyItem {
   id: string;
-  keyword: string;
-  definition: string;
-  keywordImage?: string;
-  definitionImage?: string;
+  english: string;
+  chinese: string;
+  phonetic?: string;
+  imageUrl?: string;
+  audioUrl?: string;
 }
 
-// 遊戲模板配置
+// 實際遊戲配置（來自 /games/switcher）
 const gameTemplateConfig = {
-  'balloon-pop': {
-    name: '刺破氣球',
-    description: '彈出氣球，將每個關鍵字放到其匹配內容上。',
-    icon: '🎈',
-    keywordLabel: '關鍵字',
-    keywordDescription: '這些將掛在氣球上',
-    definitionLabel: '定義',
-    definitionDescription: '這些將出現在火車上',
-    minItems: 5,
-    maxItems: 100
+  'airplane-vite': {
+    name: '飛機遊戲 (Vite版)',
+    description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
+    icon: '⚡',
+    category: '動態反應記憶',
+    minItems: 3,
+    maxItems: 20,
+    inputType: 'vocabulary' // 單字類型
   },
-  'quiz': {
-    name: '測驗',
-    description: '一系列多選題。點擊正確答案繼續。',
-    icon: '📝',
-    keywordLabel: '問題',
-    keywordDescription: '測驗問題',
-    definitionLabel: '答案',
-    definitionDescription: '正確答案',
-    minItems: 5,
-    maxItems: 50
+  'airplane-game': {
+    name: '飛機碰撞遊戲',
+    description: '通過飛機碰撞雲朵學習英語詞彙，基於主動回憶和視覺記憶原理',
+    icon: '✈️',
+    category: '動態反應記憶',
+    minItems: 3,
+    maxItems: 20,
+    inputType: 'vocabulary'
   },
-  'match-game': {
-    name: '匹配遊戲',
-    description: '將每個關鍵字拖放到其定義旁邊。',
-    icon: '🔗',
-    keywordLabel: '關鍵字',
-    keywordDescription: '要匹配的項目',
-    definitionLabel: '定義',
-    definitionDescription: '對應的定義',
+  'airplane-iframe': {
+    name: '飛機遊戲 (iframe版)',
+    description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
+    icon: '🎮',
+    category: '動態反應記憶',
+    minItems: 3,
+    maxItems: 20,
+    inputType: 'vocabulary'
+  },
+  'blastemup-game': {
+    name: 'Blastemup 太空射擊',
+    description: '駕駛太空船在宇宙中戰鬥，射擊敵人和小行星。經典的太空射擊遊戲，訓練反應速度和手眼協調',
+    icon: '💥',
+    category: '動態反應記憶',
     minItems: 5,
-    maxItems: 20
+    maxItems: 25,
+    inputType: 'vocabulary'
+  },
+  'dungeon-game': {
+    name: 'Dungeon 地牢探險',
+    description: '探索神秘地牢，收集寶藏，戰勝怪物。基於 Phaser 3 的 2D 冒險遊戲，訓練空間記憶和策略思維',
+    icon: '🏰',
+    category: '空間視覺記憶',
+    minItems: 5,
+    maxItems: 30,
+    inputType: 'vocabulary'
+  },
+  'runner-game': {
+    name: 'Runner 跑酷遊戲',
+    description: '一個刺激的跑酷遊戲，通過跳躍和收集金幣來挑戰高分，基於 Phaser 3 引擎開發',
+    icon: '🏃',
+    category: '動態反應記憶',
+    minItems: 5,
+    maxItems: 20,
+    inputType: 'vocabulary'
+  },
+  'shimozurdo-game': {
+    name: 'shimozurdo 響應式遊戲',
+    description: 'Phaser 3 響應式遊戲，支援全螢幕和方向切換，記憶科學驅動學習',
+    icon: '🎯',
+    category: '動態反應記憶',
+    minItems: 3,
+    maxItems: 15,
+    inputType: 'vocabulary'
+  },
+  'shimozurdo-cloud': {
+    name: 'Shimozurdo 雲朵遊戲',
+    description: 'Phaser 3 雲朵碰撞遊戲，支援全螢幕和響應式設計，記憶科學驅動的英語學習',
+    icon: '☁️',
+    category: '動態反應記憶',
+    minItems: 3,
+    maxItems: 15,
+    inputType: 'vocabulary'
+  },
+  'starshake-game': {
+    name: 'Starshake 太空冒險',
+    description: '一個充滿樂趣的太空冒險遊戲，基於 Phaser 3 引擎開發的動作遊戲',
+    icon: '🌟',
+    category: '動態反應記憶',
+    minItems: 5,
+    maxItems: 25,
+    inputType: 'vocabulary'
+  },
+  'math-attack': {
+    name: 'Math Attack 數學攻擊',
+    description: '快速解決數學問題，提升計算能力。結合時間壓力的數學遊戲，訓練數字記憶和運算速度',
+    icon: '🔢',
+    category: '基礎記憶',
+    minItems: 10,
+    maxItems: 50,
+    inputType: 'math'
+  },
+  // 默認配置
+  'default': {
+    name: '未知遊戲',
+    description: '請選擇一個有效的遊戲模板',
+    icon: '🎮',
+    category: '基礎記憶',
+    minItems: 1,
+    maxItems: 50,
+    inputType: 'vocabulary'
   }
-  // 可以添加更多遊戲配置
 };
 
 export default function CreateGamePage() {
@@ -58,16 +125,15 @@ export default function CreateGamePage() {
   const templateId = params.templateId as string;
   
   // 獲取遊戲配置
-  const gameConfig = gameTemplateConfig[templateId as keyof typeof gameTemplateConfig];
-  
+  const gameConfig = gameTemplateConfig[templateId as keyof typeof gameTemplateConfig] || gameTemplateConfig.default;
+
   const [activityTitle, setActivityTitle] = useState('無標題活動');
-  const [contentItems, setContentItems] = useState<ContentItem[]>([
-    { id: '1', keyword: '', definition: '' },
-    { id: '2', keyword: '', definition: '' },
-    { id: '3', keyword: '', definition: '' },
-    { id: '4', keyword: '', definition: '' },
-    { id: '5', keyword: '', definition: '' },
+  const [vocabularyItems, setVocabularyItems] = useState<VocabularyItem[]>([
+    { id: '1', english: '', chinese: '' },
+    { id: '2', english: '', chinese: '' },
+    { id: '3', english: '', chinese: '' },
   ]);
+  const [isLoading, setIsLoading] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
 
   // 如果未登入，顯示登入提示
@@ -86,69 +152,76 @@ export default function CreateGamePage() {
   }
 
   const addNewItem = () => {
-    if (contentItems.length < gameConfig.maxItems) {
-      const newId = (contentItems.length + 1).toString();
-      setContentItems([...contentItems, { id: newId, keyword: '', definition: '' }]);
+    if (vocabularyItems.length < gameConfig.maxItems) {
+      const newId = (vocabularyItems.length + 1).toString();
+      setVocabularyItems([...vocabularyItems, { id: newId, english: '', chinese: '' }]);
     }
   };
 
   const removeItem = (id: string) => {
-    if (contentItems.length > gameConfig.minItems) {
-      setContentItems(contentItems.filter(item => item.id !== id));
+    if (vocabularyItems.length > gameConfig.minItems) {
+      setVocabularyItems(vocabularyItems.filter(item => item.id !== id));
     }
   };
 
-  const updateItem = (id: string, field: 'keyword' | 'definition', value: string) => {
-    setContentItems(contentItems.map(item => 
+  const updateItem = (id: string, field: 'english' | 'chinese' | 'phonetic', value: string) => {
+    setVocabularyItems(vocabularyItems.map(item =>
       item.id === id ? { ...item, [field]: value } : item
     ));
   };
 
   const swapColumns = () => {
-    setContentItems(contentItems.map(item => ({
+    setVocabularyItems(vocabularyItems.map(item => ({
       ...item,
-      keyword: item.definition,
-      definition: item.keyword,
-      keywordImage: item.definitionImage,
-      definitionImage: item.keywordImage,
+      english: item.chinese,
+      chinese: item.english,
     })));
   };
 
-  const handleComplete = async () => {
-    // 過濾掉空的項目
-    const validItems = contentItems.filter(item => 
-      item.keyword.trim() !== '' && item.definition.trim() !== ''
-    );
-
-    if (validItems.length < gameConfig.minItems) {
-      alert(`至少需要 ${gameConfig.minItems} 個有效的${gameConfig.keywordLabel}-${gameConfig.definitionLabel}配對`);
-      return;
-    }
-
+  // 保存活動到數據庫
+  const saveActivity = async () => {
+    setIsLoading(true);
     try {
-      // 創建活動數據
-      const activityData = {
-        title: activityTitle,
-        gameType: templateId,
-        content: validItems,
-        difficulty: 'ELEMENTARY',
-        isPublic: false,
-      };
+      const response = await fetch('/api/activities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: activityTitle,
+          gameTemplateId: templateId,
+          vocabularyItems: vocabularyItems.filter(item => item.english.trim() && item.chinese.trim()),
+          type: 'vocabulary_game',
+          templateType: gameConfig.inputType,
+        }),
+      });
 
-      // 這裡可以調用 API 保存活動
-      console.log('創建活動:', activityData);
-      
-      // 跳轉到遊戲頁面或我的活動頁面
-      router.push('/my-activities');
+      if (response.ok) {
+        const activity = await response.json();
+        // 跳轉到遊戲頁面，並傳遞活動 ID
+        router.push(`/games/switcher?game=${templateId}&activityId=${activity.id}`);
+      } else {
+        alert('保存失敗，請重試');
+      }
     } catch (error) {
-      console.error('創建活動失敗:', error);
-      alert('創建活動失敗，請重試');
+      console.error('保存活動時出錯:', error);
+      alert('保存失敗，請重試');
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // 驗證詞彙項目
+  const validateItems = () => {
+    const validItems = vocabularyItems.filter(item =>
+      item.english.trim() !== '' && item.chinese.trim() !== ''
+    );
+    return validItems.length >= gameConfig.minItems;
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 導航欄 */}
+      {/* Wordwall 風格導航欄 */}
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -157,14 +230,10 @@ export default function CreateGamePage() {
                 <h1 className="text-xl font-bold text-blue-600">EduCreate</h1>
                 <span className="ml-2 text-sm text-gray-500">更快地創建更好的課程</span>
               </div>
-              <a href="/create" className="text-blue-600 hover:text-blue-800">創建活動</a>
             </div>
             <div className="flex items-center space-x-4">
-              <a href="/community" className="text-gray-600 hover:text-gray-800">👥 社區</a>
-              <a href="/my-activities" className="text-gray-600 hover:text-gray-800">我的活動</a>
-              <a href="/my-results" className="text-gray-600 hover:text-gray-800">我的結果</a>
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">{session.user?.name}</span>
+                <span className="text-sm text-gray-600">{session.user?.name || '測試用戶'}</span>
                 <button className="text-gray-600 hover:text-gray-800">▼</button>
               </div>
             </div>
@@ -172,22 +241,22 @@ export default function CreateGamePage() {
         </div>
       </nav>
 
-      {/* 主要內容 */}
-      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* 遊戲類型展示 */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">{gameConfig.icon}</span>
+      {/* Wordwall 風格頭部 */}
+      <div className="bg-white border-b">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          {/* 遊戲信息 */}
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
+              {gameConfig.icon}
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">{gameConfig.name}</h2>
-              <p className="text-gray-600">{gameConfig.description}</p>
+              <p className="text-sm text-gray-600">{gameConfig.description}</p>
             </div>
           </div>
-          
+
           {/* 進度指示器 */}
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <div className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
             <span className="text-blue-600">選擇範本</span>
             <span>→</span>
             <span className="text-blue-600 font-medium">輸入內容</span>
@@ -195,19 +264,25 @@ export default function CreateGamePage() {
             <span>播放</span>
           </div>
         </div>
+      </div>
 
+      {/* 主要內容區域 */}
+      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* 活動標題 */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">活動標題</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            活動標題
+          </label>
           <input
             type="text"
             value={activityTitle}
             onChange={(e) => setActivityTitle(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="輸入活動標題..."
           />
         </div>
 
-        {/* 內容輸入區域 */}
+        {/* 詞彙輸入區域 */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           {/* 操作說明 */}
           <div className="mb-6">
@@ -220,10 +295,10 @@ export default function CreateGamePage() {
             </button>
             {showInstructions && (
               <div className="mt-2 p-4 bg-blue-50 rounded-lg text-sm text-gray-700">
-                <p>1. 在左欄輸入{gameConfig.keywordLabel}，在右欄輸入對應的{gameConfig.definitionLabel}</p>
-                <p>2. 可以為每個項目添加圖片</p>
-                <p>3. 至少需要 {gameConfig.minItems} 個項目，最多 {gameConfig.maxItems} 個</p>
-                <p>4. 點擊「交換列」可以交換{gameConfig.keywordLabel}和{gameConfig.definitionLabel}的位置</p>
+                <p>1. 在左欄輸入英文單字，在右欄輸入對應的中文翻譯</p>
+                <p>2. 可以添加音標來幫助發音學習</p>
+                <p>3. 至少需要 {gameConfig.minItems} 個單字，最多 {gameConfig.maxItems} 個</p>
+                <p>4. 點擊「交換列」可以交換英文和中文的位置</p>
               </div>
             )}
           </div>
@@ -231,73 +306,70 @@ export default function CreateGamePage() {
           {/* 欄位標題和交換按鈕 */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex-1">
-              <h3 className="font-medium text-gray-900">{gameConfig.keywordLabel}</h3>
-              <p className="text-sm text-gray-500">{gameConfig.keywordDescription}</p>
+              <h3 className="font-medium text-gray-900">英文單字</h3>
+              <p className="text-sm text-gray-500">這些將在遊戲中顯示</p>
             </div>
             <button
               onClick={swapColumns}
-              className="mx-4 px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm"
+              className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
             >
               交換列
             </button>
-            <div className="flex-1">
-              <h3 className="font-medium text-gray-900">{gameConfig.definitionLabel}</h3>
-              <p className="text-sm text-gray-500">{gameConfig.definitionDescription}</p>
+            <div className="flex-1 ml-4">
+              <h3 className="font-medium text-gray-900">中文翻譯</h3>
+              <p className="text-sm text-gray-500">對應的中文意思</p>
             </div>
           </div>
 
-          {/* 內容項目列表 */}
+          {/* 詞彙項目列表 */}
           <div className="space-y-4">
-            {contentItems.map((item, index) => (
-              <div key={item.id} className="flex items-center space-x-4">
-                <div className="w-8 text-center text-sm text-gray-500">
+            {vocabularyItems.map((item, index) => (
+              <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                <div className="w-8 text-center text-sm text-gray-500 font-medium">
                   {index + 1}.
                 </div>
-                
-                {/* 關鍵字欄位 */}
+
+                {/* 英文單字欄位 */}
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <button className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1">
-                      添加圖像
-                    </button>
+                  <div className="space-y-2">
                     <input
                       type="text"
-                      value={item.keyword}
-                      onChange={(e) => updateItem(item.id, 'keyword', e.target.value)}
-                      placeholder={`輸入${gameConfig.keywordLabel}...`}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      value={item.english}
+                      onChange={(e) => updateItem(item.id, 'english', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="輸入英文單字..."
+                    />
+                    <input
+                      type="text"
+                      value={item.phonetic || ''}
+                      onChange={(e) => updateItem(item.id, 'phonetic', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      placeholder="音標 (可選)..."
                     />
                   </div>
                 </div>
 
-                {/* 定義欄位 */}
+                {/* 中文翻譯欄位 */}
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <button className="text-xs text-blue-600 hover:text-blue-800 border border-blue-200 rounded px-2 py-1">
-                      添加圖像
-                    </button>
-                    <input
-                      type="text"
-                      value={item.definition}
-                      onChange={(e) => updateItem(item.id, 'definition', e.target.value)}
-                      placeholder={`輸入${gameConfig.definitionLabel}...`}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    value={item.chinese}
+                    onChange={(e) => updateItem(item.id, 'chinese', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="輸入中文翻譯..."
+                  />
                 </div>
 
                 {/* 刪除按鈕 */}
-                <button
-                  onClick={() => removeItem(item.id)}
-                  disabled={contentItems.length <= gameConfig.minItems}
-                  className={`p-2 rounded ${
-                    contentItems.length <= gameConfig.minItems 
-                      ? 'text-gray-300 cursor-not-allowed' 
-                      : 'text-red-600 hover:text-red-800 hover:bg-red-50'
-                  }`}
-                >
-                  🗑️
-                </button>
+                {vocabularyItems.length > gameConfig.minItems && (
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                    title="刪除此項目"
+                  >
+                    🗑️
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -306,28 +378,33 @@ export default function CreateGamePage() {
           <div className="mt-6">
             <button
               onClick={addNewItem}
-              disabled={contentItems.length >= gameConfig.maxItems}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-                contentItems.length >= gameConfig.maxItems
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-              }`}
+              disabled={vocabularyItems.length >= gameConfig.maxItems}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="text-xl">+</span>
+              <span className="text-lg">+</span>
               <span>新增項目</span>
-              <span className="text-sm text-gray-500">最小{gameConfig.minItems} 最大{gameConfig.maxItems}</span>
+              <span className="text-sm text-gray-500">
+                最小{gameConfig.minItems} 最大{gameConfig.maxItems}
+              </span>
             </button>
           </div>
+        </div>
 
-          {/* 完成按鈕 */}
-          <div className="mt-8 flex justify-end">
-            <button
-              onClick={handleComplete}
-              className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              完成
-            </button>
-          </div>
+        {/* 完成按鈕 */}
+        <div className="mt-8 flex justify-end space-x-4">
+          <button
+            onClick={() => router.push('/create')}
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            返回
+          </button>
+          <button
+            onClick={saveActivity}
+            disabled={!validateItems() || isLoading}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isLoading ? '保存中...' : '完成並開始遊戲'}
+          </button>
         </div>
       </div>
     </div>
