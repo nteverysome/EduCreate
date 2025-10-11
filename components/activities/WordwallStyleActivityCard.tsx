@@ -382,7 +382,20 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
               </div>
             )}
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-between">
+              <button
+                onClick={() => {
+                  // 獲取遊戲類型，從 activity.content.gameTemplateId 或使用默認值
+                  const gameTemplateId = (activity as any).content?.gameTemplateId || 'shimozurdo-game';
+                  const editUrl = `/create/${gameTemplateId}?edit=${activity.id}`;
+                  console.log('🔧 從詞彙預覽跳轉到編輯頁面:', editUrl);
+                  window.open(editUrl, '_blank');
+                }}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+              >
+                <span>✏️</span>
+                編輯詞彙
+              </button>
               <button
                 onClick={() => setShowVocabularyModal(false)}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
