@@ -44,6 +44,7 @@ export default function Register() {
   });
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -113,29 +114,26 @@ export default function Register() {
         throw new Error(errorMessage);
       }
 
-      console.log('✅ 註冊成功，準備自動登入...');
+      console.log('✅ 註冊成功，郵箱驗證郵件已發送');
 
-      // 註冊成功，顯示成功消息
+      // 註冊成功，顯示郵箱驗證提示
       console.log('註冊成功:', data);
-      
-      // 註冊成功後自動登入
-      const result = await signIn('credentials', {
-        redirect: false,
-        email: formData.email,
-        password: formData.password
+
+      // 清空錯誤信息並顯示成功信息
+      setError('');
+      setSuccess(data.message || '註冊成功！請檢查您的電子郵件並點擊驗證連結來啟用帳戶。');
+
+      // 清空表單
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        country: 'TW'
       });
+      setAcceptTerms(false);
 
-      if (result?.error) {
-        // 如果自動登入失敗，提示用戶手動登入
-        setError('註冊成功，但自動登入失敗。請手動登入。');
-        setTimeout(() => {
-          router.push('/login');
-        }, 2000);
-        return;
-      }
-
-      // 重定向到儀表板
-      router.push('/dashboards');
+      // 不再自動登入，等待用戶驗證郵箱
     } catch (err: any) {
       console.error('註冊錯誤:', err);
       // 確保錯誤訊息是字串格式
@@ -198,6 +196,24 @@ export default function Register() {
               <div className="flex">
                 <div className="ml-3">
                   <p className="text-sm text-red-700">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {success && (
+            <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-green-700">{success}</p>
+                  <p className="text-xs text-green-600 mt-2">
+                    📧 請檢查您的收件匣（包括垃圾郵件資料夾）
+                  </p>
                 </div>
               </div>
             </div>

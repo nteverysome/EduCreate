@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import prisma from '../../../lib/prisma';
+import { sendVerificationEmail } from '../../../lib/email';
+import crypto from 'crypto';
 
 // 確保在服務器端運行
 if (typeof window !== 'undefined') {
@@ -62,24 +64,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const hashedPassword = await bcrypt.hash(password, 12);
 
     console.log('👤 創建新用戶...');
-    // 創建用戶
+    // 創建用戶（未驗證狀態）
     const user = await prisma.user.create({
       data: {
         name: name || email.split('@')[0], // 如果沒有提供姓名，使用郵箱前綴
         email,
         password: hashedPassword,
         country: country || 'TW', // 預設為臺灣
+        emailVerified: null, // 未驗證狀態
       }
     });
 
     console.log('✅ 用戶創建成功:', user.id);
 
+    // 生成驗證令牌
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const expires = new Date();
+    expires.setHours(expires.getHours() + 24); // 24小時後過期
+
+    // 保存驗證令牌
+    await prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token: verificationToken,
+        expires,
+      }
+    });
+
+    // 發送驗證郵件
+    const emailResult = await sendVerificationEmail(email, verificationToken);
+
+    if (!emailResult.success) {
+      console.warn('⚠️ 驗證郵件發送失敗，但用戶已創建');
+    }
+
     // 不返回密碼
     const { password: _, ...userWithoutPassword } = user;
 
     return res.status(201).json({
-      message: '用戶創建成功',
-      user: userWithoutPassword
+      message: '用戶創建成功，請檢查您的電子郵件以驗證帳戶',
+      user: userWithoutPassword,
+      emailSent: emailResult.success
     });
   } catch (error) {
     console.error('❌ 註冊錯誤詳情:', {
