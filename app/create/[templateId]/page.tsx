@@ -331,22 +331,13 @@ export default function CreateGamePage() {
 
                 {/* 英文單字欄位 */}
                 <div className="flex-1">
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={item.english}
-                      onChange={(e) => updateItem(item.id, 'english', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="輸入英文單字..."
-                    />
-                    <input
-                      type="text"
-                      value={item.phonetic || ''}
-                      onChange={(e) => updateItem(item.id, 'phonetic', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      placeholder="音標 (可選)..."
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    value={item.english}
+                    onChange={(e) => updateItem(item.id, 'english', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="輸入英文單字..."
+                  />
                 </div>
 
                 {/* 中文翻譯欄位 */}

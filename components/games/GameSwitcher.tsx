@@ -35,6 +35,8 @@ interface GameSwitcherProps {
   className?: string;
   hideGeptSelector?: boolean;
   currentGeptLevel?: string;
+  customVocabulary?: any[];
+  activityId?: string | null;
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -333,7 +335,9 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   onGameStateUpdate,
   className = '',
   hideGeptSelector = false,
-  currentGeptLevel: propGeptLevel = 'elementary'
+  currentGeptLevel: propGeptLevel = 'elementary',
+  customVocabulary = [],
+  activityId = null
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -356,7 +360,19 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // 生成包含自定義詞彙的遊戲 URL
+  const getGameUrlWithVocabulary = (game: GameConfig): string => {
+    let url = game.url;
 
+    // 如果有自定義詞彙和活動 ID，添加到 URL 參數中
+    if (customVocabulary.length > 0 && activityId) {
+      const separator = url.includes('?') ? '&' : '?';
+      url += `${separator}activityId=${activityId}&customVocabulary=true`;
+      console.log('🎯 使用自定義詞彙 URL:', url);
+    }
+
+    return url;
+  };
 
   // 🔒 確保鎖定全螢幕樣式存在
   const ensureLockedFullscreenStyles = () => {
@@ -1401,7 +1417,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
         <iframe
           ref={iframeRef}
-          src={currentGame.url}
+          src={getGameUrlWithVocabulary(currentGame)}
           className="w-full h-full border-0"
           title={currentGame.displayName}
           onLoad={handleIframeLoad}

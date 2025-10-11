@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import GameSwitcher from '@/components/games/GameSwitcher';
 import ShimozurdoGameContainer from '@/components/games/ShimozurdoGameContainer';
 import { BookOpenIcon } from '@heroicons/react/24/outline';
@@ -27,12 +28,15 @@ interface GameState {
 }
 
 const GameSwitcherPage: React.FC = () => {
+  const searchParams = useSearchParams();
   const [currentGameId, setCurrentGameId] = useState<string>('shimozurdo-game');
   const [showStats, setShowStats] = useState<boolean>(false);
   const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
   const [showMobileGeptMenu, setShowMobileGeptMenu] = useState<boolean>(false);
   const [hasUserScrolled, setHasUserScrolled] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [customVocabulary, setCustomVocabulary] = useState<any[]>([]);
+  const [activityId, setActivityId] = useState<string | null>(null);
   
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -95,6 +99,42 @@ const GameSwitcherPage: React.FC = () => {
       return updated;
     });
   }, []);
+
+  // 處理 URL 參數和載入自定義詞彙
+  useEffect(() => {
+    const gameParam = searchParams.get('game');
+    const activityIdParam = searchParams.get('activityId');
+
+    if (gameParam) {
+      setCurrentGameId(gameParam);
+    }
+
+    if (activityIdParam) {
+      setActivityId(activityIdParam);
+      // 載入自定義詞彙
+      loadCustomVocabulary(activityIdParam);
+    }
+  }, [searchParams]);
+
+  // 載入自定義詞彙的函數
+  const loadCustomVocabulary = async (activityId: string) => {
+    try {
+      console.log('🔄 載入活動詞彙:', activityId);
+      const response = await fetch(`/api/activities/${activityId}/vocabulary`);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ 成功載入自定義詞彙:', data.vocabularyItems);
+        setCustomVocabulary(data.vocabularyItems || []);
+      } else {
+        console.error('❌ 載入詞彙失敗:', response.status);
+        setCustomVocabulary([]);
+      }
+    } catch (error) {
+      console.error('❌ 載入詞彙時出錯:', error);
+      setCustomVocabulary([]);
+    }
+  };
 
   // 檢測螢幕尺寸和智能自動滾動
   useEffect(() => {
@@ -525,13 +565,15 @@ const GameSwitcherPage: React.FC = () => {
         {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
         <div className="mb-1 sm:mb-2" data-testid="game-container">
           <GameSwitcher
-            defaultGame="shimozurdo-game"
+            defaultGame={currentGameId}
             geptLevel={currentGeptLevel as 'elementary' | 'intermediate' | 'advanced'}
             onGameChange={handleGameChange}
             onGameStateUpdate={handleGameStateUpdate}
             className="w-full"
             hideGeptSelector={true}
             currentGeptLevel={currentGeptLevel}
+            customVocabulary={customVocabulary}
+            activityId={activityId}
           />
         </div>
 
