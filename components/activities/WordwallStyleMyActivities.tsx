@@ -218,7 +218,8 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
 
   const handleActivityEdit = (activity: Activity) => {
     if (activity.type === 'vocabulary') {
-      window.open('/create', '_blank');
+      // 跳轉到創建頁面並傳遞活動 ID 進行編輯
+      window.open(`/create?edit=${activity.id}`, '_blank');
     } else {
       console.log('編輯活動:', activity.title);
     }

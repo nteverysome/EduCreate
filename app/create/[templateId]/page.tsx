@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
 
@@ -131,8 +131,9 @@ export default function CreateGamePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const templateId = params.templateId as string;
-  
+
   // 獲取遊戲配置
   const gameConfig = gameTemplateConfig[templateId as keyof typeof gameTemplateConfig] || gameTemplateConfig.default;
 
@@ -144,6 +145,53 @@ export default function CreateGamePage() {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+
+  // 檢查是否為編輯模式並載入活動數據
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (editId) {
+      setIsEditMode(true);
+      setEditingActivityId(editId);
+      loadActivityForEdit(editId);
+    }
+  }, [searchParams]);
+
+  // 載入要編輯的活動數據
+  const loadActivityForEdit = async (activityId: string) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/activities/${activityId}`);
+      if (response.ok) {
+        const activity = await response.json();
+        setActivityTitle(activity.title);
+
+        // 載入詞彙數據
+        if (activity.content && activity.content.vocabularyItems) {
+          const loadedVocabulary = activity.content.vocabularyItems.map((item: any, index: number) => ({
+            id: (index + 1).toString(),
+            english: item.english || item.word || '',
+            chinese: item.chinese || item.translation || '',
+            phonetic: item.phonetic || '',
+            imageUrl: item.imageUrl || '',
+            audioUrl: item.audioUrl || ''
+          }));
+          setVocabularyItems(loadedVocabulary);
+        }
+
+        console.log('📝 載入編輯活動成功:', activity.title);
+      } else {
+        console.error('❌ 載入活動失敗:', response.status);
+        alert('載入活動失敗，請稍後再試');
+      }
+    } catch (error) {
+      console.error('❌ 載入活動錯誤:', error);
+      alert('載入活動失敗，請稍後再試');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // 如果未登入，顯示登入提示
   if (status === 'loading') {
@@ -191,30 +239,59 @@ export default function CreateGamePage() {
   const saveActivity = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/activities', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: activityTitle,
-          gameTemplateId: templateId,
-          vocabularyItems: vocabularyItems.filter(item => item.english.trim() && item.chinese.trim()),
-          type: 'vocabulary_game',
-          templateType: gameConfig.inputType,
-        }),
-      });
+      const filteredVocabulary = vocabularyItems.filter(item => item.english.trim() && item.chinese.trim());
 
-      if (response.ok) {
-        const activity = await response.json();
-        // 跳轉到遊戲頁面，並傳遞活動 ID
-        router.push(`/games/switcher?game=${templateId}&activityId=${activity.id}`);
+      if (isEditMode && editingActivityId) {
+        // 編輯模式：更新現有活動
+        const response = await fetch(`/api/activities/${editingActivityId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: activityTitle,
+            gameTemplateId: templateId,
+            vocabularyItems: filteredVocabulary,
+            type: 'vocabulary_game',
+            templateType: gameConfig.inputType,
+          }),
+        });
+
+        if (response.ok) {
+          const activity = await response.json();
+          alert('活動更新成功！');
+          // 跳轉到遊戲頁面，並傳遞活動 ID
+          router.push(`/games/switcher?game=${templateId}&activityId=${activity.id}`);
+        } else {
+          alert('更新失敗，請重試');
+        }
       } else {
-        alert('保存失敗，請重試');
+        // 創建模式：創建新活動
+        const response = await fetch('/api/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: activityTitle,
+            gameTemplateId: templateId,
+            vocabularyItems: filteredVocabulary,
+            type: 'vocabulary_game',
+            templateType: gameConfig.inputType,
+          }),
+        });
+
+        if (response.ok) {
+          const activity = await response.json();
+          // 跳轉到遊戲頁面，並傳遞活動 ID
+          router.push(`/games/switcher?game=${templateId}&activityId=${activity.id}`);
+        } else {
+          alert('保存失敗，請重試');
+        }
       }
     } catch (error) {
       console.error('保存活動時出錯:', error);
-      alert('保存失敗，請重試');
+      alert(isEditMode ? '更新失敗，請重試' : '保存失敗，請重試');
     } finally {
       setIsLoading(false);
     }
@@ -403,7 +480,7 @@ export default function CreateGamePage() {
             disabled={!validateItems() || isLoading}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isLoading ? '保存中...' : '完成並開始遊戲'}
+            {isLoading ? (isEditMode ? '更新中...' : '保存中...') : (isEditMode ? '更新並開始遊戲' : '完成並開始遊戲')}
           </button>
         </div>
       </div>

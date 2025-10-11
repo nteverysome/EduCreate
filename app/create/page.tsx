@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
 
@@ -184,9 +184,39 @@ const gameTemplates = [
 export default function CreateActivityPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('popular'); // 'popular' or 'alphabetical'
+  const [editingActivity, setEditingActivity] = useState<any>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  // 檢查是否為編輯模式
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (editId) {
+      setIsEditMode(true);
+      loadActivityForEdit(editId);
+    }
+  }, [searchParams]);
+
+  // 載入要編輯的活動數據
+  const loadActivityForEdit = async (activityId: string) => {
+    try {
+      const response = await fetch(`/api/activities/${activityId}`);
+      if (response.ok) {
+        const activity = await response.json();
+        setEditingActivity(activity);
+        console.log('📝 載入編輯活動:', activity.title);
+      } else {
+        console.error('❌ 載入活動失敗:', response.status);
+        alert('載入活動失敗，請稍後再試');
+      }
+    } catch (error) {
+      console.error('❌ 載入活動錯誤:', error);
+      alert('載入活動失敗，請稍後再試');
+    }
+  };
 
   if (status === 'loading') {
     return <div className="p-8">載入中...</div>;
@@ -217,8 +247,13 @@ export default function CreateActivityPage() {
   });
 
   const handleTemplateClick = (templateId: string) => {
-    // 導航到內容編輯頁面，讓用戶輸入標題和單字
-    router.push(`/create/${templateId}`);
+    if (isEditMode && editingActivity) {
+      // 編輯模式：導航到編輯頁面並傳遞活動數據
+      router.push(`/create/${templateId}?edit=${editingActivity.id}`);
+    } else {
+      // 創建模式：導航到內容編輯頁面，讓用戶輸入標題和單字
+      router.push(`/create/${templateId}`);
+    }
   };
 
 
@@ -255,13 +290,27 @@ export default function CreateActivityPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">選擇範本</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {isEditMode ? `編輯活動${editingActivity ? ` - ${editingActivity.title}` : ''}` : '選擇範本'}
+              </h1>
               <div className="flex items-center space-x-2 text-sm text-gray-500 mt-2">
-                <span className="text-blue-600 font-medium">選擇範本</span>
-                <span>→</span>
-                <span>輸入內容</span>
-                <span>→</span>
-                <span>播放</span>
+                {isEditMode ? (
+                  <>
+                    <span className="text-blue-600 font-medium">選擇遊戲類型</span>
+                    <span>→</span>
+                    <span>編輯詞彙</span>
+                    <span>→</span>
+                    <span>保存</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-blue-600 font-medium">選擇範本</span>
+                    <span>→</span>
+                    <span>輸入內容</span>
+                    <span>→</span>
+                    <span>播放</span>
+                  </>
+                )}
               </div>
             </div>
           </div>

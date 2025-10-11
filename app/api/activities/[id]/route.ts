@@ -122,3 +122,66 @@ export async function GET(
     );
   }
 }
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: '未授權' }, { status: 401 });
+    }
+
+    const activityId = params.id;
+    const userId = session.user.id;
+    const body = await request.json();
+
+    console.log('🔍 PUT API 調用:', {
+      activityId,
+      userId,
+      body
+    });
+
+    // 檢查活動是否存在且屬於該用戶
+    const existingActivity = await prisma.activity.findFirst({
+      where: {
+        id: activityId,
+        userId: userId
+      }
+    });
+
+    if (!existingActivity) {
+      console.log('❌ 活動不存在或無權限:', { activityId, userId });
+      return NextResponse.json({ error: '活動不存在或無權限編輯' }, { status: 404 });
+    }
+
+    // 更新活動
+    const updatedActivity = await prisma.activity.update({
+      where: {
+        id: activityId
+      },
+      data: {
+        title: body.title,
+        type: body.type || 'vocabulary',
+        gameType: body.gameTemplateId,
+        content: {
+          vocabularyItems: body.vocabularyItems || []
+        },
+        updatedAt: new Date()
+      }
+    });
+
+    console.log('✅ 活動更新成功:', updatedActivity.title);
+
+    return NextResponse.json(updatedActivity);
+
+  } catch (error) {
+    console.error('更新活動時出錯:', error);
+    return NextResponse.json(
+      { error: '更新活動失敗' },
+      { status: 500 }
+    );
+  }
+}
