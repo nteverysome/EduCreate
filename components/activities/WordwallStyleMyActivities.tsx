@@ -417,8 +417,35 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
-  const handleActivityCopy = (activity: Activity) => {
-    console.log('複製活動:', activity.title);
+  const handleActivityCopy = async (activity: Activity) => {
+    try {
+      console.log('🔄 開始複製活動:', activity.title);
+
+      const response = await fetch(`/api/activities/${activity.id}/copy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '複製活動失敗');
+      }
+
+      const result = await response.json();
+      console.log('✅ 活動複製成功:', result);
+
+      // 顯示成功提示
+      alert(`活動「${activity.title}」已成功複製為「${result.title}」`);
+
+      // 重新載入活動列表以顯示複製的活動
+      await loadActivities();
+
+    } catch (error: any) {
+      console.error('❌ 複製活動失敗:', error);
+      alert(`複製活動失敗: ${error.message}`);
+    }
   };
 
   const handleActivityDelete = async (activity: Activity) => {
