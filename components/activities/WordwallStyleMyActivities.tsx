@@ -206,12 +206,12 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         const content = activityData.content;
 
         // 檢查 content 是否包含詞彙數據
-        if (content.vocabulary && Array.isArray(content.vocabulary)) {
+        if (content.vocabularyItems && Array.isArray(content.vocabularyItems)) {
           // 將詞彙數據存儲到 localStorage 供遊戲使用
-          const gameVocabulary = content.vocabulary.map((item: any) => ({
+          const gameVocabulary = content.vocabularyItems.map((item: any) => ({
             english: item.english || item.word,
             chinese: item.chinese || item.translation,
-            level: content.geptLevel?.toLowerCase() || 'elementary'
+            level: activityData.geptLevel?.toLowerCase() || 'elementary'
           }));
 
           localStorage.setItem('gameVocabulary', JSON.stringify(gameVocabulary));
