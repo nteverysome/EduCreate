@@ -266,7 +266,9 @@ export default function CreateActivityPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-8">
               <div className="flex items-center">
-                <h1 className="text-xl font-bold text-blue-600">EduCreate</h1>
+                <a href="/" className="text-xl font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                  EduCreate
+                </a>
                 <span className="ml-2 text-sm text-gray-500">更快地創建更好的課程</span>
               </div>
               <a href="/create" className="text-blue-600 hover:text-blue-800">創建活動</a>
