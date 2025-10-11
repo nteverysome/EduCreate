@@ -165,8 +165,10 @@ export async function PUT(
       data: {
         title: body.title,
         type: 'vocabulary',
-        gameTemplateId: body.gameTemplateId,
+        // 不更新 gameTemplateId，避免外鍵約束錯誤
+        // 遊戲類型信息存儲在 content 中，與現有架構保持一致
         content: {
+          gameTemplateId: body.gameTemplateId, // 存儲在 content 中
           vocabularyItems: body.vocabularyItems || []
         },
         updatedAt: new Date()
