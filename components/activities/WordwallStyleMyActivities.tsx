@@ -217,11 +217,14 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   };
 
   const handleActivityEdit = (activity: Activity) => {
+    console.log('🔧 編輯活動:', activity.title, '類型:', activity.type, 'ID:', activity.id);
     if (activity.type === 'vocabulary') {
       // 跳轉到創建頁面並傳遞活動 ID 進行編輯
-      window.open(`/create?edit=${activity.id}`, '_blank');
+      const editUrl = `/create?edit=${activity.id}`;
+      console.log('🚀 跳轉到編輯頁面:', editUrl);
+      window.open(editUrl, '_blank');
     } else {
-      console.log('編輯活動:', activity.title);
+      console.log('❌ 不支援的活動類型:', activity.type);
     }
   };
 
