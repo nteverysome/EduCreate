@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 
 // 發送驗證郵件
 export async function sendVerificationEmail(email: string, token: string) {
-  const verificationUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${token}`;
+  const verificationUrl = `${process.env.NEXTAUTH_URL}/api/email/verify?token=${token}`;
   
   const mailOptions = {
     from: process.env.EMAIL_FROM,

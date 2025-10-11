@@ -136,7 +136,7 @@ export default function LoginPage() {
           </div>
 
           {/* 註冊連結 */}
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center space-y-2">
             <p className="text-sm text-gray-600">
               還沒有帳號？{' '}
               <a
@@ -144,6 +144,15 @@ export default function LoginPage() {
                 className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
                 立即註冊
+              </a>
+            </p>
+            <p className="text-sm text-gray-600">
+              沒收到驗證郵件？{' '}
+              <a
+                href="/auth/resend-verification"
+                className="font-medium text-orange-600 hover:text-orange-500 transition-colors"
+              >
+                重新發送
               </a>
             </p>
           </div>

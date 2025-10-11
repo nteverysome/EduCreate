@@ -214,6 +214,14 @@ export default function Register() {
                   <p className="text-xs text-green-600 mt-2">
                     📧 請檢查您的收件匣（包括垃圾郵件資料夾）
                   </p>
+                  <div className="mt-3">
+                    <Link
+                      href={`/auth/resend-verification?email=${encodeURIComponent(formData.email)}`}
+                      className="text-xs text-blue-600 hover:text-blue-800 underline"
+                    >
+                      沒收到郵件？點擊重新發送
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
