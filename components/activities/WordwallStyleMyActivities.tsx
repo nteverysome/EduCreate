@@ -192,30 +192,42 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     try {
       console.log('🎮 開始詞彙遊戲:', activity.title);
 
-      // 從 API 獲取詞彙數據
-      const response = await fetch(`/api/vocabulary/sets/${activity.id}`);
-      const result = await response.json();
+      // 從 API 獲取活動數據（包含詞彙數據）
+      const response = await fetch(`/api/activities/${activity.id}`);
 
-      if (result.success && result.data) {
-        const vocabularySet = result.data;
+      if (!response.ok) {
+        throw new Error(`API 請求失敗: ${response.status}`);
+      }
 
-        // 將詞彙數據存儲到 localStorage 供遊戲使用
-        const gameVocabulary = vocabularySet.items.map((item: any) => ({
-          english: item.english,
-          chinese: item.chinese,
-          level: vocabularySet.geptLevel.toLowerCase()
-        }));
+      const activityData = await response.json();
 
-        localStorage.setItem('gameVocabulary', JSON.stringify(gameVocabulary));
-        localStorage.setItem('gameTitle', vocabularySet.title);
+      if (activityData && activityData.content) {
+        // 從活動的 content 字段中提取詞彙數據
+        const content = activityData.content;
 
-        console.log(`🎯 遊戲詞彙已設置: ${gameVocabulary.length} 個詞彙`);
+        // 檢查 content 是否包含詞彙數據
+        if (content.vocabulary && Array.isArray(content.vocabulary)) {
+          // 將詞彙數據存儲到 localStorage 供遊戲使用
+          const gameVocabulary = content.vocabulary.map((item: any) => ({
+            english: item.english || item.word,
+            chinese: item.chinese || item.translation,
+            level: content.geptLevel?.toLowerCase() || 'elementary'
+          }));
 
-        // 跳轉到遊戲頁面
-        window.open('/games/shimozurdo-game', '_blank');
+          localStorage.setItem('gameVocabulary', JSON.stringify(gameVocabulary));
+          localStorage.setItem('gameTitle', activityData.title);
+
+          console.log(`🎯 遊戲詞彙已設置: ${gameVocabulary.length} 個詞彙`);
+
+          // 跳轉到遊戲頁面
+          window.open('/games/shimozurdo-game', '_blank');
+        } else {
+          console.error('❌ 活動中沒有找到詞彙數據');
+          alert('此活動沒有詞彙數據，無法開始遊戲');
+        }
       } else {
-        console.error('❌ 無法載入詞彙數據');
-        alert('無法載入詞彙數據，請稍後再試');
+        console.error('❌ 無法載入活動數據');
+        alert('無法載入活動數據，請稍後再試');
       }
     } catch (error) {
       console.error('❌ 啟動遊戲失敗:', error);
