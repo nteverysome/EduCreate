@@ -279,32 +279,24 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const handleActivityDelete = async (activity: Activity) => {
     if (confirm(`確定要刪除「${activity.title}」嗎？`)) {
       try {
+        console.log('🗑️ 開始刪除活動:', activity.title, 'ID:', activity.id);
+
         // 調用 API 刪除活動
         const response = await fetch(`/api/activities/${activity.id}`, {
           method: 'DELETE',
         });
 
         if (response.ok) {
+          const result = await response.json();
+          console.log('✅ 活動刪除成功:', result);
+
           // 從狀態中移除
           setActivities(prev => prev.filter(a => a.id !== activity.id));
 
-          // 從 localStorage 中移除（保持向後兼容）
-          if (activity.type === 'vocabulary') {
-            try {
-              const vocabularyData = localStorage.getItem('vocabulary_integration_data');
-              if (vocabularyData) {
-                const data = JSON.parse(vocabularyData);
-                if (data.activities) {
-                  data.activities = data.activities.filter((a: any) => a.id !== activity.id);
-                  localStorage.setItem('vocabulary_integration_data', JSON.stringify(data));
-                }
-              }
-            } catch (error) {
-              console.error('清理 localStorage 失敗:', error);
-            }
-          }
+          // 重新載入活動列表以確保數據同步
+          await loadActivities();
 
-          console.log('✅ 活動刪除成功:', activity.title);
+          console.log('✅ 活動刪除並重新載入完成:', activity.title);
         } else {
           const errorData = await response.json();
           console.error('❌ 刪除活動失敗:', errorData.error);

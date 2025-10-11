@@ -41,33 +41,43 @@ export async function DELETE(
     }
 
     // 獲取關聯的詞彙集合 ID
+    console.log('🔍 活動內容:', JSON.stringify(activity.content, null, 2));
     const vocabularySetId = activity.content?.vocabularySetId;
+    console.log('🔍 詞彙集合 ID:', vocabularySetId);
 
     // 在事務中刪除活動和相關數據
     await prisma.$transaction(async (tx) => {
       // 刪除活動版本
       if (activity.versions.length > 0) {
+        console.log('🗑️ 刪除活動版本:', activity.versions.length);
         await tx.activityVersion.deleteMany({
           where: { activityId: activityId }
         });
       }
 
       // 刪除活動
+      console.log('🗑️ 刪除活動:', activityId);
       await tx.activity.delete({
         where: { id: activityId }
       });
 
       // 如果有關聯的詞彙集合，也刪除它
       if (vocabularySetId) {
+        console.log('🗑️ 刪除詞彙集合:', vocabularySetId);
+
         // 先刪除詞彙項目
-        await tx.vocabularyItem.deleteMany({
+        const deletedItems = await tx.vocabularyItem.deleteMany({
           where: { vocabularySetId: vocabularySetId }
         });
+        console.log('🗑️ 刪除詞彙項目數量:', deletedItems.count);
 
         // 再刪除詞彙集合
         await tx.vocabularySet.delete({
           where: { id: vocabularySetId }
         });
+        console.log('✅ 詞彙集合刪除成功');
+      } else {
+        console.log('⚠️ 沒有找到關聯的詞彙集合 ID');
       }
     });
 
