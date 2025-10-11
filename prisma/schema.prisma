@@ -14,6 +14,7 @@ model User {
   password             String?
   emailVerified        DateTime?
   image                String?
+  country              String?               @default("TW")
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   role                 Role                  @default(USER)

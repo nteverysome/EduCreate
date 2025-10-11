@@ -19,13 +19,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { name, email, password } = req.body;
-    console.log('📋 接收到的數據:', { name, email, password: password ? '[PROVIDED]' : '[MISSING]' });
+    const { name, email, password, country } = req.body;
+    console.log('📋 接收到的數據:', { name, email, country, password: password ? '[PROVIDED]' : '[MISSING]' });
 
     // 驗證輸入
-    if (!name || !email || !password) {
+    if (!email || !password) {
       console.log('❌ 缺少必填欄位');
-      return res.status(400).json({ message: '所有欄位都是必填的' });
+      return res.status(400).json({ message: '電子郵件和密碼是必填的' });
     }
 
     if (password.length < 8) {
@@ -65,9 +65,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 創建用戶
     const user = await prisma.user.create({
       data: {
-        name,
+        name: name || email.split('@')[0], // 如果沒有提供姓名，使用郵箱前綴
         email,
         password: hashedPassword,
+        country: country || 'TW', // 預設為臺灣
       }
     });
 
