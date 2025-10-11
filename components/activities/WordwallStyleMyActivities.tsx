@@ -32,9 +32,10 @@ interface WordwallStyleMyActivitiesProps {
 // 拖拽回根級別的目標組件
 interface DropToRootTargetProps {
   onDropToRoot: (activityId: string) => void;
+  onClickToRoot: () => void;  // 添加點擊回到根級別的處理函數
 }
 
-const DropToRootTarget: React.FC<DropToRootTargetProps> = ({ onDropToRoot }) => {
+const DropToRootTarget: React.FC<DropToRootTargetProps> = ({ onDropToRoot, onClickToRoot }) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -70,6 +71,7 @@ const DropToRootTarget: React.FC<DropToRootTargetProps> = ({ onDropToRoot }) => 
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onClick={onClickToRoot}
     >
       <div className="flex items-center justify-center space-x-3">
         <ArrowUp className="w-5 h-5" />
@@ -395,6 +397,14 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
+  // 處理點擊導航回根級別
+  const handleClickToRoot = () => {
+    console.log('🏠 點擊導航回根級別');
+    setCurrentFolderId(null);
+    setSelectedActivities([]);
+    setSelectionMode(false);
+  };
+
   const handleActivityEdit = (activity: Activity) => {
     console.log('🔧 編輯活動:', activity.title, '類型:', activity.type, 'ID:', activity.id);
     if (activity.type === 'vocabulary') {
@@ -565,7 +575,10 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
 
         {/* 在資料夾視圖中顯示拖拽回根級別的目標區域 */}
         {currentFolderId && (
-          <DropToRootTarget onDropToRoot={handleActivityDropToRoot} />
+          <DropToRootTarget
+            onDropToRoot={handleActivityDropToRoot}
+            onClickToRoot={handleClickToRoot}
+          />
         )}
 
         {/* 活動網格/列表 */}
