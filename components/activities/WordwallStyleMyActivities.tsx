@@ -165,9 +165,36 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   };
 
   const handleFolderCreate = async (name: string, color: string) => {
-    console.log('創建資料夾:', name, color);
-    // 資料夾創建邏輯已在 FolderManager 中處理
-    // 這裡可以添加額外的邏輯，如重新載入活動列表
+    try {
+      console.log('🚀 創建資料夾:', name, color);
+
+      const response = await fetch('/api/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          color: color,
+          description: ''
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '創建資料夾失敗');
+      }
+
+      const newFolder = await response.json();
+      console.log('✅ 資料夾創建成功:', newFolder);
+
+      // 重新載入活動列表以顯示新資料夾
+      await loadActivities();
+
+    } catch (error: any) {
+      console.error('❌ 創建資料夾失敗:', error);
+      alert(`創建資料夾失敗: ${error.message}`);
+    }
   };
 
   const handleFolderUpdate = async (id: string, name: string, color?: string) => {
