@@ -86,7 +86,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         return result.data.map((activity: any) => ({
           id: activity.id,
           title: activity.title || '無標題活動',
-          description: activity.description || `包含 ${activity.totalWords || 0} 個詞彙的學習活動`,
+          description: activity.description || `包含 ${activity.vocabularyInfo?.totalWords || 0} 個詞彙的學習活動`,
           type: 'vocabulary' as const,
           gameType: '詞彙遊戲',
           isPublic: activity.isPublic || false,
@@ -94,9 +94,9 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           lastModified: new Date(activity.updatedAt),
           createdAt: new Date(activity.createdAt),
           thumbnail: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23dbeafe"/><text x="50" y="55" font-size="30" text-anchor="middle">📝</text></svg>',
-          wordCount: activity.totalWords || 0,
-          geptLevel: activity.geptLevel || 'ELEMENTARY',
-          tags: activity.tags || ['vocabulary', 'cloud', activity.geptLevel?.toLowerCase() || 'elementary'],
+          wordCount: activity.vocabularyInfo?.totalWords || 0,
+          geptLevel: activity.vocabularyInfo?.geptLevel || 'ELEMENTARY',
+          tags: activity.tags || ['vocabulary', 'cloud', activity.vocabularyInfo?.geptLevel?.toLowerCase() || 'elementary'],
           folderId: undefined,
           userId: userId
         }));

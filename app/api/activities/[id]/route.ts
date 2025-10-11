@@ -39,10 +39,8 @@ export async function DELETE(
       return NextResponse.json({ error: '活動不存在或無權限刪除' }, { status: 404 });
     }
 
-    // 獲取關聯的詞彙集合 ID
+    // 簡化刪除邏輯 - 只需要刪除 Activity（級聯刪除 VocabularyItem）
     console.log('🔍 活動內容:', JSON.stringify(activity.content, null, 2));
-    const vocabularySetId = activity.content?.vocabularySetId;
-    console.log('🔍 詞彙集合 ID:', vocabularySetId);
 
     // 在事務中刪除活動和相關數據
     await prisma.$transaction(async (tx) => {
@@ -54,30 +52,14 @@ export async function DELETE(
         });
       }
 
-      // 刪除活動
+      // 刪除活動（會自動級聯刪除關聯的 VocabularyItem）
       console.log('🗑️ 刪除活動:', activityId);
       await tx.activity.delete({
         where: { id: activityId }
       });
 
-      // 如果有關聯的詞彙集合，也刪除它
-      if (vocabularySetId) {
-        console.log('🗑️ 刪除詞彙集合:', vocabularySetId);
-
-        // 先刪除詞彙項目
-        const deletedItems = await tx.vocabularyItem.deleteMany({
-          where: { setId: vocabularySetId }
-        });
-        console.log('🗑️ 刪除詞彙項目數量:', deletedItems.count);
-
-        // 再刪除詞彙集合 - 使用 deleteMany 避免「記錄不存在」錯誤
-        const deletedSets = await tx.vocabularySet.deleteMany({
-          where: { id: vocabularySetId }
-        });
-        console.log(`✅ 刪除了 ${deletedSets.count} 個詞彙集合`);
-      } else {
-        console.log('⚠️ 沒有找到關聯的詞彙集合 ID');
-      }
+      // 注意：VocabularyItem 會通過外鍵級聯刪除，不需要手動刪除
+      console.log('✅ 活動及其關聯的詞彙項目已刪除');
     });
 
     return NextResponse.json({ 

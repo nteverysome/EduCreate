@@ -28,30 +28,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '用戶不存在' }, { status: 404 });
     }
 
-    // 創建詞彙集合
-    const vocabularySet = await prisma.vocabularySet.create({
-      data: {
-        userId: user.id,
-        title: title,
-        description: `為 ${gameTemplateId} 遊戲創建的詞彙集合`,
-        geptLevel: 'ELEMENTARY',
-        isPublic: false,
-        totalWords: vocabularyItems.length,
-        items: {
-          create: vocabularyItems.map((item: any, index: number) => ({
-            english: item.english,
-            chinese: item.chinese,
-            phonetic: item.phonetic || null,
-            difficultyLevel: 1,
-          }))
-        }
-      },
-      include: {
-        items: true
-      }
-    });
-
-    // 創建活動
+    // 簡化創建邏輯 - 一次事務創建 Activity 和 VocabularyItem
     const activity = await prisma.activity.create({
       data: {
         userId: user.id,
@@ -61,7 +38,6 @@ export async function POST(request: NextRequest) {
         templateType: templateType || 'vocabulary',
         content: {
           gameTemplateId,
-          vocabularySetId: vocabularySet.id,
           vocabularyItems: vocabularyItems
         },
         elements: vocabularyItems,
@@ -72,14 +48,31 @@ export async function POST(request: NextRequest) {
         shareCount: 0,
         difficulty: 'EASY',
         estimatedTime: '5-10 分鐘',
-        tags: [gameTemplateId, 'vocabulary', 'learning']
+        tags: [gameTemplateId, 'vocabulary', 'learning'],
+
+        // 新增：直接設置詞彙相關字段
+        geptLevel: 'ELEMENTARY',
+        totalWords: vocabularyItems.length,
+
+        // 新增：直接創建詞彙項目
+        vocabularyItems: {
+          create: vocabularyItems.map((item: any) => ({
+            english: item.english,
+            chinese: item.chinese,
+            phonetic: item.phonetic || null,
+            difficultyLevel: item.difficultyLevel || 1
+          }))
+        }
+      },
+      include: {
+        vocabularyItems: true
       }
     });
 
     return NextResponse.json({
       id: activity.id,
       title: activity.title,
-      vocabularySetId: vocabularySet.id,
+      totalWords: activity.totalWords,
       message: '活動創建成功'
     });
 
@@ -103,7 +96,7 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
     console.log('🔍 GET /api/activities 調用:', { userId });
 
-    // 獲取用戶的活動，包含詞彙集合信息
+    // 簡化查詢 - 直接獲取活動和詞彙信息
     const activities = await prisma.activity.findMany({
       where: {
         userId: userId
@@ -112,9 +105,11 @@ export async function GET(request: NextRequest) {
         createdAt: 'desc'
       },
       include: {
+        vocabularyItems: true,
         _count: {
           select: {
-            versions: true
+            versions: true,
+            vocabularyItems: true
           }
         }
       }
@@ -122,39 +117,15 @@ export async function GET(request: NextRequest) {
 
     console.log(`✅ 找到 ${activities.length} 個活動`);
 
-    // 為每個活動獲取詞彙集合信息
-    const activitiesWithVocabulary = await Promise.all(
-      activities.map(async (activity) => {
-        let vocabularyInfo = null;
+    // 簡化活動數據處理
+    const activitiesWithVocabulary = activities.map((activity) => {
+      // 優先使用新的字段，回退到舊的邏輯
+      const vocabularyInfo = {
+        totalWords: activity.totalWords || activity._count.vocabularyItems || 0,
+        geptLevel: activity.geptLevel || 'ELEMENTARY'
+      };
 
-        // 從活動內容中獲取詞彙集合 ID
-        const vocabularySetId = activity.content?.vocabularySetId;
-
-        if (vocabularySetId) {
-          try {
-            const vocabularySet = await prisma.vocabularySet.findUnique({
-              where: { id: vocabularySetId },
-              include: {
-                _count: {
-                  select: {
-                    items: true
-                  }
-                }
-              }
-            });
-
-            if (vocabularySet) {
-              vocabularyInfo = {
-                totalWords: vocabularySet._count.items,
-                geptLevel: vocabularySet.geptLevel
-              };
-            }
-          } catch (error) {
-            console.warn(`⚠️ 無法獲取詞彙集合 ${vocabularySetId}:`, error);
-          }
-        }
-
-        return {
+      return {
           id: activity.id,
           title: activity.title,
           description: activity.description,
@@ -168,12 +139,10 @@ export async function GET(request: NextRequest) {
           difficulty: activity.difficulty,
           estimatedTime: activity.estimatedTime,
           tags: activity.tags,
-          totalWords: vocabularyInfo?.totalWords || 0,
-          geptLevel: vocabularyInfo?.geptLevel || 'ELEMENTARY',
+          vocabularyInfo: vocabularyInfo,
           _count: activity._count
         };
-      })
-    );
+      });
 
     return NextResponse.json({
       success: true,

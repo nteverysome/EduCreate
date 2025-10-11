@@ -94,6 +94,11 @@ model Activity {
   difficulty     DifficultyLevel?
   estimatedTime  String?
   tags           String[]
+
+  // 新增：從 VocabularySet 合併的字段
+  geptLevel      GEPTLevel?           @default(ELEMENTARY)
+  totalWords     Int                  @default(0)
+
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
   templateId     String?
@@ -107,6 +112,9 @@ model Activity {
   versions       ActivityVersion[]
   versionLogs    ActivityVersionLog[]
   gameSettings   GameSettings?
+
+  // 新增：直接關聯詞彙項目
+  vocabularyItems VocabularyItem[]
 }
 
 model Template {
@@ -355,7 +363,8 @@ model VocabularySet {
 
 model VocabularyItem {
   id               String             @id @default(cuid())
-  setId            String
+  setId            String?            // 保留舊字段以支持遷移
+  activityId       String?            // 新增：直接關聯 Activity
   english          String
   chinese          String
   phonetic         String?
@@ -368,7 +377,10 @@ model VocabularyItem {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   learningProgress LearningProgress[]
-  set              VocabularySet      @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  // 關聯關係
+  set              VocabularySet?     @relation(fields: [setId], references: [id], onDelete: Cascade)
+  activity         Activity?          @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   @@map("vocabulary_items")
 }
