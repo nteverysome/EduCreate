@@ -53,30 +53,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '⚡',
     estimatedLoadTime: 600
   },
-  {
-    id: 'airplane-main',
-    name: 'airplane',
-    displayName: '飛機碰撞遊戲',
-    description: '通過飛機碰撞雲朵學習英語詞彙，基於主動回憶和視覺記憶原理',
-    type: 'main',
-    memoryType: '動態反應記憶',
-    geptLevels: ['elementary', 'intermediate', 'advanced'],
-    status: 'completed',
-    icon: '✈️',
-    estimatedLoadTime: 800
-  },
-  {
-    id: 'airplane-iframe',
-    name: 'airplane',
-    displayName: '飛機遊戲 (iframe版)',
-    description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
-    type: 'iframe',
-    memoryType: '動態反應記憶',
-    geptLevels: ['elementary', 'intermediate', 'advanced'],
-    status: 'completed',
-    icon: '🎮',
-    estimatedLoadTime: 1000
-  },
+
+
   {
     id: 'shimozurdo-game',
     name: 'shimozurdo',

@@ -18,26 +18,8 @@ const gameTemplates = [
     status: 'completed',
     estimatedLoadTime: 600
   },
-  {
-    id: 'airplane-main',
-    name: '飛機碰撞遊戲',
-    description: '通過飛機碰撞雲朵學習英語詞彙，基於主動回憶和視覺記憶原理',
-    icon: '✈️',
-    category: '動態反應記憶',
-    popular: true,
-    status: 'completed',
-    estimatedLoadTime: 800
-  },
-  {
-    id: 'airplane-iframe',
-    name: '飛機遊戲 (iframe版)',
-    description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
-    icon: '🎮',
-    category: '動態反應記憶',
-    popular: true,
-    status: 'completed',
-    estimatedLoadTime: 1000
-  },
+
+
   {
     id: 'shimozurdo-game',
     name: 'Shimozurdo 雲朵遊戲',
