@@ -11,7 +11,12 @@ const transporter = nodemailer.createTransport({
 
 // 發送驗證郵件
 export async function sendVerificationEmail(email: string, token: string) {
-  const verificationUrl = `${process.env.NEXTAUTH_URL}/api/email/verify?token=${token}`;
+  // 修復域名問題：確保使用正確的生產域名
+  const baseUrl = process.env.NEXTAUTH_URL?.includes('edu-create-hjhmrxr9h-minamisums-projects.vercel.app')
+    ? 'https://edu-create.vercel.app'
+    : (process.env.NEXTAUTH_URL || 'https://edu-create.vercel.app');
+
+  const verificationUrl = `${baseUrl}/api/email/verify?token=${token}`;
   
   const mailOptions = {
     from: process.env.EMAIL_FROM,
@@ -62,6 +67,10 @@ export async function sendVerificationEmail(email: string, token: string) {
 
 // 發送歡迎郵件
 export async function sendWelcomeEmail(email: string, name: string) {
+  // 修復域名問題：確保使用正確的生產域名
+  const baseUrl = process.env.NEXTAUTH_URL?.includes('edu-create-hjhmrxr9h-minamisums-projects.vercel.app')
+    ? 'https://edu-create.vercel.app'
+    : (process.env.NEXTAUTH_URL || 'https://edu-create.vercel.app');
   const mailOptions = {
     from: process.env.EMAIL_FROM,
     to: email,
@@ -90,7 +99,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${process.env.NEXTAUTH_URL}/dashboards" 
+          <a href="${baseUrl}/dashboard"
              style="background: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
             開始使用 EduCreate
           </a>
