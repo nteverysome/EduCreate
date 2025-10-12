@@ -15,7 +15,8 @@ import {
   Lock,
   Info,
   Check,
-  X
+  X,
+  Folder
 } from 'lucide-react';
 
 interface Activity {
@@ -49,6 +50,7 @@ interface WordwallStyleActivityCardProps {
   onDelete?: (activity: Activity) => void;
   onShare?: (activity: Activity) => void;
   onRename?: (activity: Activity, newTitle: string) => void;
+  onMove?: (activity: Activity) => void;
   selectionMode?: boolean;
   // 拖拽相關
   onDragStart?: (activity: Activity) => void;
@@ -65,6 +67,7 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   onDelete,
   onShare,
   onRename,
+  onMove,
   selectionMode = false,
   onDragStart,
   onDragEnd
@@ -416,7 +419,19 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
                       <Share2 className="w-3 h-3" />
                       分享
                     </button>
-                    
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMove?.(activity);
+                        setShowMenu(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
+                    >
+                      <Folder className="w-3 h-3" />
+                      移動到資料夾
+                    </button>
+
                     <hr className="my-1" />
 
                     <button

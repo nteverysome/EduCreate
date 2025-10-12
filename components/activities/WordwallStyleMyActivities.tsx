@@ -7,6 +7,7 @@ import CreateFolderModal from './CreateFolderModal';
 import TrashModal from './TrashModal';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
 import ActivitySearchAndFilter from './ActivitySearchAndFilter';
+import { MoveActivityModal } from './MoveActivityModal';
 
 interface Activity {
   id: string;
@@ -99,6 +100,9 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [loading, setLoading] = useState(true);
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
   const [showTrashModal, setShowTrashModal] = useState(false);
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [moveActivityId, setMoveActivityId] = useState<string | null>(null);
+  const [moveActivityTitle, setMoveActivityTitle] = useState('');
 
   // 載入活動數據
   useEffect(() => {
@@ -365,6 +369,45 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     } catch (error: any) {
       console.error('❌ 移動活動失敗:', error);
       alert(`移動活動失敗: ${error.message}`);
+    }
+  };
+
+  // 處理移動活動（新的模態對話框方式）
+  const handleMoveActivity = (activity: Activity) => {
+    setMoveActivityId(activity.id);
+    setMoveActivityTitle(activity.title);
+    setShowMoveModal(true);
+  };
+
+  // 處理模態對話框中的移動操作
+  const handleMoveToFolder = async (activityId: string, targetFolderId: string | null) => {
+    try {
+      console.log('📁 移動活動到資料夾:', { activityId, targetFolderId });
+
+      const response = await fetch(`/api/activities/${activityId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          folderId: targetFolderId
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '移動活動失敗');
+      }
+
+      console.log('✅ 活動移動成功');
+
+      // 重新載入活動列表
+      await loadActivities();
+
+    } catch (error: any) {
+      console.error('❌ 移動活動失敗:', error);
+      alert(`移動活動失敗: ${error.message}`);
+      throw error; // 重新拋出錯誤，讓模態對話框處理
     }
   };
 
@@ -683,6 +726,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               onDelete={handleActivityDelete}
               onShare={handleActivityShare}
               onRename={handleActivityRename}
+              onMove={handleMoveActivity}
               selectionMode={selectionMode}
               onDragStart={handleActivityDragStart}
               onDragEnd={handleActivityDragEnd}
@@ -729,6 +773,20 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         onActivityRestore={handleActivityRestore}
         onActivityPermanentDelete={handleActivityPermanentDelete}
         onEmptyTrash={handleEmptyTrash}
+      />
+
+      <MoveActivityModal
+        isOpen={showMoveModal}
+        activityId={moveActivityId}
+        activityTitle={moveActivityTitle}
+        folders={folders}
+        currentFolderId={currentFolderId}
+        onMove={handleMoveToFolder}
+        onClose={() => {
+          setShowMoveModal(false);
+          setMoveActivityId(null);
+          setMoveActivityTitle('');
+        }}
       />
     </div>
   );
