@@ -67,18 +67,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     icon: '☁️',
     estimatedLoadTime: 800
   },
-  {
-    id: 'shimozurdo-responsive',
-    name: 'shimozurdo',
-    displayName: 'shimozurdo 響應式遊戲',
-    description: 'Phaser 3 響應式遊戲，支援全螢幕和方向切換，記憶科學驅動學習',
-    type: 'iframe',
-    memoryType: '空間視覺記憶',
-    geptLevels: ['elementary', 'intermediate', 'advanced'],
-    status: 'completed',
-    icon: '🎯',
-    estimatedLoadTime: 800
-  },
+
   {
     id: 'starshake-game',
     name: 'starshake',
@@ -271,8 +260,7 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return isLocalhost ? 'http://localhost:3002/' : '/games/airplane-game/';
     case 'shimozurdo-game':
       return '/games/shimozurdo-game/';
-    case 'shimozurdo-responsive':
-      return '/games/shimozurdo-game/';
+
     case 'starshake-game':
       return '/games/starshake-game/dist/';
     case 'runner-game':

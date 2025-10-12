@@ -30,16 +30,7 @@ const gameTemplates = [
     status: 'completed',
     estimatedLoadTime: 800
   },
-  {
-    id: 'shimozurdo-responsive',
-    name: 'shimozurdo 響應式遊戲',
-    description: 'Phaser 3 響應式遊戲，支援全螢幕和方向切換，記憶科學驅動學習',
-    icon: '🎯',
-    category: '動態反應記憶',
-    popular: true,
-    status: 'completed',
-    estimatedLoadTime: 800
-  },
+
   {
     id: 'starshake-game',
     name: 'Starshake 太空冒險',
