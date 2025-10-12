@@ -69,23 +69,50 @@ const ShimozurdoGameContainer: React.FC<ShimozurdoGameContainerProps> = ({
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // 動態設置容器尺寸以適應手機橫向模式
+  // 動態設置容器尺寸以適應不同設備
   useEffect(() => {
     const handleContainerResize = () => {
       const container = document.querySelector('.shimozurdo-game-container') as HTMLElement;
       if (container) {
-        const isLandscapeMobile = window.innerWidth === 812 && window.innerHeight === 375;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const isLandscapeMobile = width > height && width <= 812;
+        const isPortraitMobile = width <= 375;
+        const isTablet = width > 375 && width <= 1024;
 
         if (isLandscapeMobile) {
-          // 強制設置手機橫向模式樣式
+          // 手機橫向模式優化
           container.style.width = '100%';
-          container.style.height = '375px';
+          container.style.height = `${Math.min(height - 100, 375)}px`; // 留出導航空間
           container.style.maxWidth = 'none';
-          container.style.aspectRatio = '812/375';
-          container.style.minHeight = '375px';
+          container.style.aspectRatio = '16/9';
+          container.style.minHeight = '300px';
           container.style.maxHeight = '375px';
-
-          console.log('🎯 強制設置手機橫向模式容器樣式');
+          console.log('🎯 手機橫向模式容器優化');
+        } else if (isPortraitMobile) {
+          // 手機直向模式優化
+          container.style.width = '100%';
+          container.style.height = 'auto';
+          container.style.aspectRatio = '4/3';
+          container.style.minHeight = '280px';
+          container.style.maxHeight = '400px';
+          console.log('🎯 手機直向模式容器優化');
+        } else if (isTablet) {
+          // 平板模式優化
+          container.style.width = '100%';
+          container.style.height = 'auto';
+          container.style.aspectRatio = '16/10';
+          container.style.minHeight = '400px';
+          container.style.maxHeight = '600px';
+          console.log('🎯 平板模式容器優化');
+        } else {
+          // 桌面模式 - 恢復默認
+          container.style.width = '';
+          container.style.height = '';
+          container.style.aspectRatio = '';
+          container.style.minHeight = '';
+          container.style.maxHeight = '';
+          console.log('🎯 桌面模式容器優化');
         }
       }
     };
@@ -249,13 +276,38 @@ const ShimozurdoGameContainer: React.FC<ShimozurdoGameContainerProps> = ({
       <div
         className="shimozurdo-game-container relative bg-white overflow-hidden mx-auto w-full rounded-lg shadow-sm border border-gray-200"
         style={{
-          aspectRatio: isMobile ? '812/375' : '1274/739',
-          minHeight: '300px',
-          maxHeight: isMobile ? '375px' : '739px',
+          aspectRatio: (() => {
+            const width = typeof window !== 'undefined' ? window.innerWidth : 800;
+            const height = typeof window !== 'undefined' ? window.innerHeight : 600;
+            const isLandscape = width > height;
+
+            if (width <= 768) {
+              // 手機和小平板
+              return isLandscape ? '16/9' : '4/3';
+            } else if (width <= 1024) {
+              // 平板
+              return '16/10';
+            } else {
+              // 桌面
+              return '1274/739';
+            }
+          })(),
+          minHeight: (() => {
+            const width = typeof window !== 'undefined' ? window.innerWidth : 800;
+            if (width <= 480) return '280px';
+            if (width <= 768) return '320px';
+            if (width <= 1024) return '400px';
+            return '500px';
+          })(),
+          maxHeight: (() => {
+            const width = typeof window !== 'undefined' ? window.innerWidth : 800;
+            const height = typeof window !== 'undefined' ? window.innerHeight : 600;
+            if (width <= 768) return `${Math.min(height - 200, 500)}px`;
+            if (width <= 1024) return '600px';
+            return '739px';
+          })(),
           width: '100%',
-          height: isMobile ? '375px' : 'auto',
-          // 強制覆蓋CSS限制
-          maxWidth: 'none !important' as any,
+          maxWidth: 'none',
         }}
         data-testid="shimozurdo-game-container"
       >
