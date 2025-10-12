@@ -1003,12 +1003,26 @@ export default class Title extends Phaser.Scene {
             this.score += 10;
             this.wordsLearned += 1;
 
-            // 播放雙語發音
+            // 播放對應語言發音 - 根據雲朵中顯示的內容決定播放哪種語言
             if (this.game.bilingualManager) {
-                this.game.bilingualManager.speakBilingual(
-                    word.english,
-                    word.chinese
-                );
+                // 獲取雲朵中顯示的文字
+                const wordText = enemy.getData('wordText');
+                const displayedText = wordText ? wordText.text : '';
+
+                // 判斷雲朵中顯示的是英文還是中文，並播放對應語言
+                if (displayedText === word.english) {
+                    // 雲朵中顯示英文，播放英文
+                    console.log('🔊 播放英文發音:', word.english);
+                    this.game.bilingualManager.speakEnglish(word.english);
+                } else if (displayedText === word.chinese) {
+                    // 雲朵中顯示中文，播放中文
+                    console.log('🔊 播放中文發音:', word.chinese);
+                    this.game.bilingualManager.speakChinese(word.chinese);
+                } else {
+                    // 備用方案：如果無法判斷，播放英文（因為目前雲朵預設顯示英文）
+                    console.log('🔊 備用方案播放英文發音:', word.english);
+                    this.game.bilingualManager.speakEnglish(word.english);
+                }
             }
 
             // 顯示成功提示 - 在雲朵位置顯示
