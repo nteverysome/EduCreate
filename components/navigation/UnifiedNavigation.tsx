@@ -16,7 +16,7 @@ interface NavigationItem {
   href: string;
   icon: string;
   description: string;
-  category: 'main' | 'features' | 'tools' | 'content';
+  category: 'main' | 'features' | 'tools' | 'content' | 'files' | 'games';
   status: 'available' | 'coming-soon';
   testId: string;
 }
@@ -402,6 +402,7 @@ const UnifiedNavigation = ({
 
   // 檢查是否為當前頁面
   const isActive = (href: string) => {
+    if (!pathname) return false;
     if (href === '/') {
       return pathname === '/';
     }
@@ -764,91 +765,13 @@ const UnifiedNavigation = ({
                 </div>
               )}
 
-              {/* 簡化的主要導航 - 只顯示核心功能 */}
-              <div className="space-y-2">
-                <Link
-                  href="/"
-                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
-                    isActive('/')
-                      ? 'bg-blue-100 text-blue-700 border-r-4 border-blue-700'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <span className="mr-3">🏠</span>
-                  <div>首頁</div>
-                </Link>
-
-                <Link
-                  href="/my-activities"
-                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
-                    isActive('/my-activities')
-                      ? 'bg-blue-100 text-blue-700 border-r-4 border-blue-700'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <span className="mr-3">📋</span>
-                  <div>我的活動</div>
-                </Link>
-
-                <Link
-                  href="/create"
-                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
-                    isActive('/create')
-                      ? 'bg-blue-100 text-blue-700 border-r-4 border-blue-700'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <span className="mr-3">🚀</span>
-                  <div>創建活動</div>
-                </Link>
-
-                <Link
-                  href="/dashboard"
-                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
-                    isActive('/dashboard')
-                      ? 'bg-blue-100 text-blue-700 border-r-4 border-blue-700'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <span className="mr-3">📊</span>
-                  <div>功能儀表板</div>
-                </Link>
-              </div>
+              {/* 手機版選單 - 只顯示用戶管理功能，不顯示導航項目 */}
 
               {/* 用戶操作 */}
               <div>
                 {currentUser ? (
-                  <div className="border-t border-gray-200 pt-2 mt-2">
-                    {/* 用戶管理功能 - 與桌面版保持一致 */}
-                    <Link
-                      href="/create"
-                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <span className="mr-3">➕</span>
-                      <div>創建活動</div>
-                    </Link>
-                    <Link
-                      href="/my-activities"
-                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <span className="mr-3">📋</span>
-                      <div>我的活動</div>
-                    </Link>
-                    <Link
-                      href="/dashboard"
-                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <span className="mr-3">📊</span>
-                      <div>我的結果</div>
-                    </Link>
-                    <div className="border-t border-gray-100 my-1"></div>
+                  <div className="pt-2 mt-2">
+                    {/* 純用戶管理功能 - 不包含導航項目 */}
                     <Link
                       href="/account/profile"
                       className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
