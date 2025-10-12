@@ -103,10 +103,12 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [moveActivityId, setMoveActivityId] = useState<string | null>(null);
   const [moveActivityTitle, setMoveActivityTitle] = useState('');
+  const [folders, setFolders] = useState<Array<{id: string, name: string, activityCount: number}>>([]);
 
   // 載入活動數據
   useEffect(() => {
     loadActivities();
+    loadFolders();
   }, [currentFolderId]);
 
 
@@ -127,6 +129,24 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
       console.error('載入活動失敗:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 載入資料夾數據
+  const loadFolders = async () => {
+    try {
+      const response = await fetch('/api/folders');
+      if (!response.ok) {
+        throw new Error('載入資料夾失敗');
+      }
+      const foldersData = await response.json();
+      setFolders(foldersData.map((folder: any) => ({
+        id: folder.id,
+        name: folder.name,
+        activityCount: folder.activityCount || 0
+      })));
+    } catch (error) {
+      console.error('❌ 載入資料夾失敗:', error);
     }
   };
 
