@@ -43,7 +43,11 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('帳號或密碼錯誤，請檢查後重試');
+        if (result.error === 'CredentialsSignin') {
+          setError('登入失敗：請檢查您的帳號密碼是否正確，或確認郵箱是否已驗證');
+        } else {
+          setError('帳號或密碼錯誤，請檢查後重試');
+        }
       } else if (result?.url) {
         router.push(result.url);
       }

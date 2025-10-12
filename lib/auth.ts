@@ -50,6 +50,12 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
+          // 檢查郵箱是否已驗證
+          if (!user.emailVerified) {
+            console.log('❌ 郵箱未驗證:', credentials.email);
+            return null;
+          }
+
           console.log('🔑 驗證密碼...');
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
