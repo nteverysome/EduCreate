@@ -148,16 +148,7 @@ const UnifiedNavigation = ({
               <span className="hidden lg:block text-sm text-gray-600">更快地創建更好的課程</span>
             </div>
 
-            {/* 中間：創建活動按鈕 */}
-            <div className="hidden md:flex items-center">
-              <Link
-                href="/create"
-                className="px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition-colors"
-                data-testid="create-activity-button"
-              >
-                創建活動
-              </Link>
-            </div>
+
 
             {/* 右側：導航和用戶菜單 */}
             <div className="hidden md:flex items-center space-x-6">
