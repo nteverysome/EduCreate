@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import GameSwitcher from '@/components/games/GameSwitcher';
 import ShimozurdoGameContainer from '@/components/games/ShimozurdoGameContainer';
+import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import { BookOpenIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
 
@@ -373,6 +374,8 @@ const GameSwitcherPage: React.FC = () => {
         height: isMobile ? `${window.innerHeight}px` : 'auto'
       }}
     >
+      {/* 統一導航系統 */}
+      <UnifiedNavigation variant="header" />
       {/* 手機版 GEPT 選擇器彈出選單 */}
       {showMobileGeptMenu && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden" onClick={() => setShowMobileGeptMenu(false)}>
