@@ -71,88 +71,93 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
   ];
 
   return (
-    <div className="search-and-filter bg-white border-b border-gray-200 p-4">
-      {/* 主要搜索欄 */}
-      <div className="flex items-center gap-4 mb-4">
-        {/* 搜索輸入框 */}
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="搜尋我的活動..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          />
-          {searchQuery && (
+    <div className="search-and-filter bg-white border border-gray-100 rounded-2xl p-6 mb-6 shadow-sm">
+      {/* 主要搜索欄 - 優化版 */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6 mb-4">
+        {/* 搜索輸入框 - 優化版 */}
+        <div className="flex-1 lg:max-w-lg relative">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="搜尋我的活動..."
+              className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500 outline-none"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => onSearchChange('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 控制按鈕組 - 優化版 */}
+        <div className="flex items-center gap-3 w-full lg:w-auto">
+          {/* 篩選按鈕 */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`
+              flex items-center gap-2 px-5 py-3 rounded-xl transition-all duration-200 font-medium
+              ${showFilters
+                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
+              }
+            `}
+          >
+            <Filter className="w-4 h-4" />
+            <span>篩選</span>
+          </button>
+
+          {/* 視圖模式切換 - 優化版 */}
+          <div className="flex bg-gray-100 rounded-xl p-1">
             <button
-              onClick={() => onSearchChange('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              onClick={() => onViewModeChange('grid')}
+              className={`
+                p-2.5 rounded-lg transition-all duration-200
+                ${viewMode === 'grid'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+                }
+              `}
+              title="網格視圖"
             >
-              <X className="w-4 h-4" />
+              <Grid3X3 className="w-4 h-4" />
             </button>
-          )}
-        </div>
+            <button
+              onClick={() => onViewModeChange('list')}
+              className={`
+                p-2.5 rounded-lg transition-all duration-200
+                ${viewMode === 'list'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+                }
+              `}
+              title="列表視圖"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
 
-        {/* 篩選按鈕 */}
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`
-            flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors
-            ${showFilters 
-              ? 'bg-blue-50 border-blue-300 text-blue-700' 
-              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-            }
-          `}
-        >
-          <Filter className="w-4 h-4" />
-          篩選
-        </button>
-
-        {/* 視圖模式切換 */}
-        <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+          {/* 選擇模式按鈕 - 優化版 */}
           <button
-            onClick={() => onViewModeChange('grid')}
+            onClick={() => onSelectionModeChange(!selectionMode)}
             className={`
-              p-2 transition-colors
-              ${viewMode === 'grid' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+              flex items-center gap-2 px-5 py-3 rounded-xl transition-all duration-200 font-medium
+              ${selectionMode
+                ? 'bg-green-500 text-white shadow-lg shadow-green-500/25'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
               }
             `}
-            title="網格視圖"
           >
-            <Grid3X3 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onViewModeChange('list')}
-            className={`
-              p-2 transition-colors border-l border-gray-300
-              ${viewMode === 'list' 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-white text-gray-600 hover:bg-gray-50'
-              }
-            `}
-            title="列表視圖"
-          >
-            <List className="w-4 h-4" />
+            {selectionMode ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+            <span>選擇</span>
           </button>
         </div>
-
-        {/* 選擇模式切換 */}
-        <button
-          onClick={() => onSelectionModeChange(!selectionMode)}
-          className={`
-            flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors
-            ${selectionMode 
-              ? 'bg-blue-50 border-blue-300 text-blue-700' 
-              : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-            }
-          `}
-        >
-          {selectionMode ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-          選擇
-        </button>
       </div>
 
       {/* 選擇模式工具欄 */}
@@ -190,19 +195,19 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
         </div>
       )}
 
-      {/* 展開的篩選選項 */}
+      {/* 展開的篩選選項 - 優化版 */}
       {showFilters && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 活動類型篩選 */}
+        <div className="bg-gradient-to-r from-gray-50 to-blue-50 border border-blue-100 rounded-xl p-6 mb-4 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* 活動類型篩選 - 優化版 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-800 mb-3">
                 活動類型
               </label>
               <select
                 value={filterType}
                 onChange={(e) => onFilterTypeChange(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200"
               >
                 {filterOptions.map(option => (
                   <option key={option.value} value={option.value}>
@@ -212,15 +217,15 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
               </select>
             </div>
 
-            {/* 排序方式 */}
+            {/* 排序方式 - 優化版 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-800 mb-3">
                 排序方式
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => onSortChange(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm transition-all duration-200"
               >
                 {sortOptions.map(option => (
                   <option key={option.value} value={option.value}>
@@ -230,19 +235,19 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
               </select>
             </div>
 
-            {/* 排序順序 */}
+            {/* 排序順序 - 優化版 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-800 mb-3">
                 排序順序
               </label>
-              <div className="flex border border-gray-300 rounded-md overflow-hidden">
+              <div className="flex bg-gray-100 rounded-xl p-1">
                 <button
                   onClick={() => onSortOrderChange('asc')}
                   className={`
-                    flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm transition-colors
-                    ${sortOrder === 'asc' 
-                      ? 'bg-blue-500 text-white' 
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                    flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm transition-all duration-200 rounded-lg font-medium
+                    ${sortOrder === 'asc'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
                     }
                   `}
                 >
@@ -252,10 +257,10 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
                 <button
                   onClick={() => onSortOrderChange('desc')}
                   className={`
-                    flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm transition-colors border-l border-gray-300
-                    ${sortOrder === 'desc' 
-                      ? 'bg-blue-500 text-white' 
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                    flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm transition-all duration-200 rounded-lg font-medium
+                    ${sortOrder === 'desc'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-800'
                     }
                   `}
                 >
