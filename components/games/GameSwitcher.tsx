@@ -53,7 +53,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '⚡',
     estimatedLoadTime: 600,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
 
   {
@@ -67,7 +67,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '☁️',
     estimatedLoadTime: 800,
-    hidden: true  // 隱藏此遊戲卡片，不在遊戲選擇器中顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
 
   {
@@ -81,7 +81,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '🌟',
     estimatedLoadTime: 1000,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
   {
     id: 'runner-game',
@@ -94,7 +94,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '🏃',
     estimatedLoadTime: 1000,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
   {
     id: 'pushpull-game',
@@ -107,7 +107,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '🧩',
     estimatedLoadTime: 1200,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
   {
     id: 'wallhammer-game',
@@ -120,7 +120,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '🔨',
     estimatedLoadTime: 1300,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
   {
     id: 'zenbaki-game',
@@ -133,7 +133,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '🔢',
     estimatedLoadTime: 1100,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
   {
     id: 'mars-game',
@@ -146,7 +146,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '🔴',
     estimatedLoadTime: 1200,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
   {
     id: 'fate-game',
@@ -159,7 +159,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '⚡',
     estimatedLoadTime: 1400,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
   {
     id: 'dungeon-game',
@@ -172,7 +172,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '🏰',
     estimatedLoadTime: 800,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
   {
     id: 'blastemup-game',
@@ -185,7 +185,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '💥',
     estimatedLoadTime: 900,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
   {
     id: 'math-attack-game',
@@ -198,7 +198,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '🔢',
     estimatedLoadTime: 1200,
-    hidden: true  // 隱藏遊戲卡片顯示
+    hidden: false  // 顯示在切換遊戲選單中
   },
   // 未來遊戲預留位置
   {
