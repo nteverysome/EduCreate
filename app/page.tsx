@@ -86,24 +86,7 @@ export default function HomePage() {
 
 
 
-            {/* 活動模板和快速創建 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-activity-templates">
-              <div className="text-4xl mb-4">🚀</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">活動模板和快速創建</h3>
-              <p className="text-gray-600 mb-6">
-                基於GEPT分級的活動模板，一鍵快速創建25種記憶科學遊戲，智能內容適配
-              </p>
-              <Link
-                href="/activities/templates"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="activity-templates-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
 
             {/* 收藏和標籤系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-favorites-tags">
@@ -174,47 +157,13 @@ export default function HomePage() {
 
 
 
-            {/* 多媒體支持系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-multimedia">
-              <div className="text-4xl mb-4">🎬</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">多媒體支持系統</h3>
-              <p className="text-gray-600 mb-6">
-                完整的多媒體上傳、管理和預覽功能，支持圖片、音頻、視頻和動畫
-              </p>
-              <Link
-                href="/content/multimedia"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="multimedia-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
 
 
 
 
 
-            {/* 語音錄製系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-voice-recording">
-              <div className="text-4xl mb-4">🎤</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">語音錄製系統</h3>
-              <p className="text-gray-600 mb-6">
-                完整的語音錄製、播放、語音識別和語音合成功能，支持多種音頻格式
-              </p>
-              <Link
-                href="/content/voice-recording"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="voice-recording-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
+
 
             {/* GEPT分級系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-gept-templates">
@@ -313,91 +262,23 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 檔案夾協作系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-folder-collaboration">
-              <div className="text-4xl mb-4">🤝</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">檔案夾協作</h3>
-              <p className="text-gray-600 mb-6">
-                三層分享模式的檔案夾協作權限系統：公開、班級、私人分享
-              </p>
-              <Link
-                href="/collaboration/folders"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="folder-collaboration-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
 
 
 
 
 
-            {/* 完整檔案空間系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-file-space-system">
-              <div className="text-4xl mb-4">📁</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">完整檔案空間系統</h3>
-              <p className="text-gray-600 mb-6">
-                嵌套檔案夾結構、權限系統、高級搜索、批量操作、智能排序等完整功能
-              </p>
-              <Link
-                href="/file-space"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="file-space-system-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
 
 
 
 
 
-            {/* 完整縮圖和預覽系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-thumbnail-preview">
-              <div className="text-4xl mb-4">🖼️</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">完整縮圖和預覽系統</h3>
-              <p className="text-gray-600 mb-6">
-                400px標準縮圖、多尺寸支持、CDN集成、懶加載、批量管理等完整功能
-              </p>
-              <Link
-                href="/content/thumbnail-preview"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="thumbnail-preview-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
 
 
 
-            {/* 活動歷史和版本管理 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-activity-history-version">
-              <div className="text-4xl mb-4">📜</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">活動歷史和版本管理</h3>
-              <p className="text-gray-600 mb-6">
-                完整的變更追蹤、版本比較、回滾機制，協作編輯歷史記錄
-              </p>
-              <Link
-                href="/activities/history-version"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="activity-history-version-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
+
+
+
 
             {/* 活動導入導出功能 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-activity-import-export">
@@ -437,24 +318,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 實時同步和衝突解決 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-real-time-sync">
-              <div className="text-4xl mb-4">⚡</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">實時同步和衝突解決</h3>
-              <p className="text-gray-600 mb-6">
-                支援多用戶同時操作的實時同步系統，智能衝突檢測和解決機制
-              </p>
-              <Link
-                href="/tools/real-time-sync"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="real-time-sync-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
 
 
           </div>
