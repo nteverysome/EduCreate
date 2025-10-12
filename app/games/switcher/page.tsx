@@ -452,13 +452,13 @@ const GameSwitcherPage: React.FC = () => {
                 📊
               </button>
 
-              <button
-                onClick={() => window.open('http://localhost:3001/games/airplane-game/', '_blank')}
-                className="px-2 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+              <Link
+                href="/my-activities"
+                className="px-2 py-2 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700"
                 style={{ minHeight: '44px' }}
               >
-                🚀
-              </button>
+                📋
+              </Link>
             </div>
           </div>
 
