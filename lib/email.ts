@@ -124,3 +124,69 @@ export async function sendWelcomeEmail(email: string, name: string) {
     return { success: false, error };
   }
 }
+
+// 發送密碼重置郵件
+export async function sendPasswordResetEmail(email: string, token: string) {
+  // 修復域名問題：確保使用正確的生產域名
+  const baseUrl = process.env.NEXTAUTH_URL?.includes('edu-create-hjhmrxr9h-minamisums-projects.vercel.app')
+    ? 'https://edu-create.vercel.app'
+    : (process.env.NEXTAUTH_URL || 'https://edu-create.vercel.app');
+
+  const resetUrl = `${baseUrl}/reset-password?token=${token}`;
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to: email,
+    subject: '重置您的 EduCreate 密碼',
+    html: `
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #4F46E5;">🔐 EduCreate</h1>
+          <h2 style="color: #374151;">重置您的密碼</h2>
+        </div>
+
+        <div style="background: #FEF3C7; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #F59E0B;">
+          <p style="margin: 0; color: #92400E;">
+            我們收到了重置您 EduCreate 帳戶密碼的請求。
+          </p>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}"
+             style="background: #EF4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            重置密碼
+          </a>
+        </div>
+
+        <div style="background: #F3F4F6; padding: 15px; border-radius: 6px; margin: 20px 0;">
+          <p style="margin: 0; color: #6B7280; font-size: 14px;">
+            如果您無法點擊按鈕，請複製以下連結到瀏覽器：<br>
+            <a href="${resetUrl}" style="color: #4F46E5; word-break: break-all;">${resetUrl}</a>
+          </p>
+        </div>
+
+        <div style="border-top: 1px solid #E5E7EB; padding-top: 20px; margin-top: 30px;">
+          <p style="color: #6B7280; font-size: 14px; margin: 0;">
+            ⏰ 此連結將在 <strong>1 小時後過期</strong>。
+          </p>
+          <p style="color: #6B7280; font-size: 14px; margin-top: 15px;">
+            🔒 如果您沒有請求重置密碼，請忽略此郵件。您的帳戶仍然安全。
+          </p>
+          <p style="color: #6B7280; font-size: 14px; margin-top: 15px;">
+            如有任何問題，請聯繫我們的支援團隊。<br>
+            EduCreate 團隊 ❤️
+          </p>
+        </div>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('✅ 密碼重置郵件發送成功:', email);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ 密碼重置郵件發送失敗:', error);
+    return { success: false, error };
+  }
+}
