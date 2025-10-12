@@ -9,6 +9,7 @@ import WordwallStyleActivityCard from './WordwallStyleActivityCard';
 import ActivitySearchAndFilter from './ActivitySearchAndFilter';
 import { MoveActivityModal } from './MoveActivityModal';
 import AssignmentModal, { AssignmentConfig } from './AssignmentModal';
+import AssignmentSetModal from './AssignmentSetModal';
 
 interface Activity {
   id: string;
@@ -107,6 +108,9 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [folders, setFolders] = useState<Array<{id: string, name: string, activityCount: number}>>([]);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [activityToAssign, setActivityToAssign] = useState<Activity | null>(null);
+  const [showAssignmentSetModal, setShowAssignmentSetModal] = useState(false);
+  const [assignmentShareUrl, setAssignmentShareUrl] = useState('');
+  const [assignmentTitle, setAssignmentTitle] = useState('');
 
   // 載入活動數據
   useEffect(() => {
@@ -516,19 +520,35 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         config: assignmentConfig
       });
 
-      // TODO: 實現課業分配邏輯
-      // 1. 創建課業會話
-      // 2. 生成分享連結
+      // 生成分享連結（模擬）
+      const assignmentId = Date.now().toString();
+      const shareUrl = `https://edu-create.vercel.app/play/${activityToAssign.id}/${assignmentId}`;
+
+      // 設置課業集模態對話框的數據
+      setAssignmentShareUrl(shareUrl);
+      setAssignmentTitle(assignmentConfig.resultTitle);
+
+      // 關閉課業分配模態對話框
+      setShowAssignmentModal(false);
+
+      // 顯示課業集模態對話框
+      setShowAssignmentSetModal(true);
+
+      // TODO: 實現真實的課業分配邏輯
+      // 1. 創建課業會話到後端
+      // 2. 保存到我的結果中
       // 3. 設置時間限制（如果有）
       // 4. 配置學生註冊方式
-
-      // 暫時顯示成功訊息
-      alert(`課業分配已設置！\n活動：${activityToAssign.title}\n註冊方式：${assignmentConfig.registrationType}\n結果標題：${assignmentConfig.resultTitle}`);
 
     } catch (error) {
       console.error('課業分配設置失敗:', error);
       alert('課業分配設置失敗，請稍後再試');
     }
+  };
+
+  // 處理跳轉到我的結果頁面
+  const handleGoToResults = () => {
+    window.location.href = '/my-results';
   };
 
   const handleActivityCopy = async (activity: Activity) => {
@@ -871,6 +891,15 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           onStartAssignment={handleStartAssignment}
         />
       )}
+
+      {/* 課業集模態對話框 */}
+      <AssignmentSetModal
+        isOpen={showAssignmentSetModal}
+        onClose={() => setShowAssignmentSetModal(false)}
+        assignmentTitle={assignmentTitle}
+        shareUrl={assignmentShareUrl}
+        onGoToResults={handleGoToResults}
+      />
     </div>
   );
 };
