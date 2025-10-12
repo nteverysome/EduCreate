@@ -32,8 +32,8 @@ export default function HomePage() {
             記憶科學驅動的智能教育遊戲平台
           </p>
           <p className="text-lg text-gray-500 max-w-3xl mx-auto mb-12" data-testid="hero-description">
-            基於記憶科學原理，提供智能排序、檔案夾統計分析、記憶遊戲等完整的教育工具，
-            支援 GEPT 分級系統和無障礙設計，讓學習更有效率。
+            基於記憶科學原理，提供記憶遊戲等完整的教育工具，
+            支援 GEPT 分級系統，讓學習更有效率。
           </p>
           
           {/* 主要行動按鈕 */}
