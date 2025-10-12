@@ -538,33 +538,87 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
 
   return (
     <div className="wordwall-style-activities min-h-screen bg-gray-50">
-      {/* 頁面標題 */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">我的活動</h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => window.open('/create', '_blank')}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              創建活動
-            </button>
-            <button
-              onClick={() => setShowCreateFolderModal(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <FolderPlus className="w-4 h-4" />
-              新增資料夾
-            </button>
-            <button
-              onClick={() => setShowTrashModal(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              title="回收桶"
-            >
-              <Trash2 className="w-4 h-4" />
-              回收桶
-            </button>
+      {/* 頁面標題 - 優化版 */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-6">
+        <div className="max-w-7xl mx-auto">
+          {/* 桌面版布局 */}
+          <div className="hidden md:flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">我的活動</h1>
+                <p className="text-sm text-gray-600 mt-1">管理您的學習活動和資料夾</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => window.open('/create', '_blank')}
+                className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="font-medium">創建活動</span>
+              </button>
+              <button
+                onClick={() => setShowCreateFolderModal(true)}
+                className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                <FolderPlus className="w-5 h-5" />
+                <span className="font-medium">新增資料夾</span>
+              </button>
+              <button
+                onClick={() => setShowTrashModal(true)}
+                className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-200 shadow-sm hover:shadow-md"
+                title="回收桶"
+              >
+                <Trash2 className="w-5 h-5" />
+                <span className="font-medium">回收桶</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 手機版布局 */}
+          <div className="md:hidden">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">我的活動</h1>
+                <p className="text-sm text-gray-600">管理您的學習活動</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-3">
+              <button
+                onClick={() => window.open('/create', '_blank')}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all duration-200 shadow-lg"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="font-medium">創建活動</span>
+              </button>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setShowCreateFolderModal(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
+                >
+                  <FolderPlus className="w-4 h-4" />
+                  <span className="font-medium text-sm">新增資料夾</span>
+                </button>
+                <button
+                  onClick={() => setShowTrashModal(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all duration-200 shadow-sm"
+                  title="回收桶"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span className="font-medium text-sm">回收桶</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
