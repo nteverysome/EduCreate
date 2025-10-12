@@ -1147,35 +1147,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         </div>
       )}
 
-      {/* 原始設計 - 桌面版，使用 JavaScript 控制顯示 */}
-      {!isMobile && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-1">
-          <div className="p-2 md:p-3">
-            <div className="flex flex-col space-y-3 md:space-y-2">
-              {/* 遊戲詳細信息 - 響應式佈局 */}
-              <div className="flex items-center space-x-2 md:space-x-4 w-full">
-                <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0">
-                  <div className="text-xl md:text-2xl flex-shrink-0">{currentGame.icon}</div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">{currentGame.displayName}</h3>
-                    <div className="flex items-center space-x-1 md:space-x-2 flex-wrap">
-                      <p className="text-xs md:text-sm text-gray-600 truncate">{currentGame.memoryType}</p>
-                      <div className={`px-1 md:px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(currentGame.status)}`}>
-                        {getStatusText(currentGame.status)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                {/* 載入時間顯示 - 桌面版顯示 */}
-                <div className="hidden lg:block text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded flex-shrink-0">
-                  載入: ~{currentGame.estimatedLoadTime}ms
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* GEPT 等級選擇器 - 響應式設計 (條件渲染) - 只在桌面版顯示 */}
       {!hideGeptSelector && !isMobile && (
