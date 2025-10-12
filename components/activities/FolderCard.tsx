@@ -107,8 +107,6 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      data-folder-drop-target="true"
-      data-folder-id={folder.id}
     >
       {/* 資料夾內容 */}
       <div className="p-4">
