@@ -101,24 +101,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 我的活動管理 - MyActivities 主要入口 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-my-activities">
-              <div className="text-4xl mb-4">📋</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">我的活動管理</h3>
-              <p className="text-gray-600 mb-6">
-                完整的活動管理系統，支持1000+活動、虛擬化列表、多視圖模式、智能搜索、批量操作
-              </p>
-              <Link
-                href="/my-activities"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="my-activities-link"
-              >
-                管理我的活動
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
 
             {/* 活動模板和快速創建 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-activity-templates">
@@ -292,43 +275,9 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 智能搜索系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-intelligent-search">
-              <div className="text-4xl mb-4">🔍</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">智能搜索系統</h3>
-              <p className="text-gray-600 mb-6">
-                全文搜索、模糊匹配、語義搜索、語音搜索的完整搜索功能，支持實時搜索結果更新
-              </p>
-              <Link
-                href="/activities/intelligent-search"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="intelligent-search-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
 
-            {/* 批量操作系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-batch-operations">
-              <div className="text-4xl mb-4">🔄</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">批量操作系統</h3>
-              <p className="text-gray-600 mb-6">
-                選擇、移動、複製、刪除、分享、標籤、導出的批量操作功能，支持多選和快捷鍵
-              </p>
-              <Link
-                href="/activities/batch-operations"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="batch-operations-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
+
 
             {/* 語音錄製系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-voice-recording">
