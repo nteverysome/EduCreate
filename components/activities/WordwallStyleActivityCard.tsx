@@ -77,6 +77,12 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   const [isRenaming, setIsRenaming] = useState(false);
   const [newTitle, setNewTitle] = useState(activity.title);
 
+  // 手機版長按拖移狀態
+  const [isMobileDragging, setIsMobileDragging] = useState(false);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+  const [touchStartPos, setTouchStartPos] = useState<{x: number, y: number} | null>(null);
+  const [dragOffset, setDragOffset] = useState<{x: number, y: number}>({x: 0, y: 0});
+
   // 載入詞彙數據
   const loadVocabularyData = async () => {
     if (vocabularyData || loadingVocabulary) return; // 避免重複載入
@@ -190,6 +196,86 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
     onDragEnd?.();
   };
 
+  // 手機版長按拖移事件處理
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (selectionMode) return;
+
+    const touch = e.touches[0];
+    setTouchStartPos({ x: touch.clientX, y: touch.clientY });
+
+    // 設置長按計時器（500ms）
+    const timer = setTimeout(() => {
+      setIsMobileDragging(true);
+      setIsDragging(true);
+      onDragStart?.(activity);
+
+      // 添加觸覺反饋（如果支援）
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+    }, 500);
+
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartPos) return;
+
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartPos.x;
+    const deltaY = touch.clientY - touchStartPos.y;
+
+    // 如果移動距離超過閾值，取消長按
+    if (!isMobileDragging && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        setLongPressTimer(null);
+      }
+      return;
+    }
+
+    // 如果正在拖移，更新位置
+    if (isMobileDragging) {
+      e.preventDefault(); // 防止頁面滾動
+      setDragOffset({ x: deltaX, y: deltaY });
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // 清除長按計時器
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+
+    if (isMobileDragging) {
+      // 檢查是否拖移到資料夾上
+      const touch = e.changedTouches[0];
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+
+      // 尋找最近的資料夾拖放目標
+      const folderTarget = elementBelow?.closest('[data-folder-drop-target]');
+      if (folderTarget) {
+        const folderId = folderTarget.getAttribute('data-folder-id');
+        if (folderId) {
+          // 觸發拖放到資料夾的事件
+          const dropEvent = new CustomEvent('mobile-drop-to-folder', {
+            detail: { activityId: activity.id, folderId }
+          });
+          document.dispatchEvent(dropEvent);
+        }
+      }
+
+      // 重置拖移狀態
+      setIsMobileDragging(false);
+      setIsDragging(false);
+      setDragOffset({ x: 0, y: 0 });
+      onDragEnd?.();
+    }
+
+    setTouchStartPos(null);
+  };
+
   return (
     <div
       className={`
@@ -197,11 +283,21 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
         ${isSelected ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-200'}
         ${selectionMode ? 'hover:ring-2 hover:ring-blue-300' : 'hover:border-gray-300'}
         ${isDragging ? 'opacity-50 transform rotate-2' : ''}
+        ${isMobileDragging ? 'fixed z-50 pointer-events-none shadow-2xl scale-105' : 'relative'}
       `}
+      style={isMobileDragging ? {
+        left: `${touchStartPos!.x + dragOffset.x - 100}px`,
+        top: `${touchStartPos!.y + dragOffset.y - 100}px`,
+        width: '200px',
+        transform: 'rotate(5deg)'
+      } : {}}
       onClick={handleCardClick}
-      draggable={!selectionMode}
+      draggable={!selectionMode && !isMobileDragging}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* 卡片頭部 - 縮略圖區域 */}
       <div className="relative">

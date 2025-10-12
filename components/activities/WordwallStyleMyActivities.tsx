@@ -105,6 +105,20 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     loadActivities();
   }, [currentFolderId]);
 
+  // 監聽手機版拖放事件
+  useEffect(() => {
+    const handleMobileDropToFolder = (event: CustomEvent) => {
+      const { activityId, folderId } = event.detail;
+      handleActivityDropToFolder(activityId, folderId);
+    };
+
+    document.addEventListener('mobile-drop-to-folder', handleMobileDropToFolder as EventListener);
+
+    return () => {
+      document.removeEventListener('mobile-drop-to-folder', handleMobileDropToFolder as EventListener);
+    };
+  }, []);
+
   const loadActivities = async () => {
     setLoading(true);
     try {
