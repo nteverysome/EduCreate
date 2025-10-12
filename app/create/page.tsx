@@ -210,6 +210,16 @@ export default function CreateActivityPage() {
     }
   });
 
+  const handleTemplateClick = (templateId: string) => {
+    if (isEditMode && editingActivity) {
+      // 編輯模式：導航到編輯頁面並傳遞活動數據
+      router.push(`/create/${templateId}?edit=${editingActivity.id}`);
+    } else {
+      // 創建模式：導航到內容編輯頁面，讓用戶輸入標題和單字
+      router.push(`/create/${templateId}`);
+    }
+  };
+
   // 統一渲染結構，避免閃爍
   return (
     <div className="min-h-screen bg-gray-50">
