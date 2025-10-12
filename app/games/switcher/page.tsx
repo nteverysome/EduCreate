@@ -454,10 +454,11 @@ const GameSwitcherPage: React.FC = () => {
 
               <Link
                 href="/my-activities"
-                className="px-2 py-2 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700"
-                style={{ minHeight: '44px' }}
+                className="px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md hover:from-green-600 hover:to-green-700 hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
+                style={{ minHeight: '44px', minWidth: '44px' }}
+                title="我的活動"
               >
-                📋
+                <span className="text-lg">📋</span>
               </Link>
             </div>
           </div>
