@@ -155,6 +155,15 @@ export default function LoginPage() {
                 重新發送
               </a>
             </p>
+            <p className="text-sm text-gray-600">
+              忘記密碼？{' '}
+              <a
+                href="/forgot-password"
+                className="font-medium text-red-600 hover:text-red-500 transition-colors"
+              >
+                重置密碼
+              </a>
+            </p>
           </div>
 
           {/* 功能說明 */}
