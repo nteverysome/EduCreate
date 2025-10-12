@@ -638,17 +638,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
-        {/* 資料夾管理 */}
-        <FolderManager
-          currentFolderId={currentFolderId}
-          onFolderSelect={handleFolderSelect}
-          onFolderCreate={handleFolderCreate}
-          onFolderUpdate={handleFolderUpdate}
-          onFolderDelete={handleFolderDelete}
-          onActivityDropToFolder={handleActivityDropToFolder}
-        />
-
-        {/* 搜索和篩選 */}
+        {/* 搜索和篩選 - 參考 Wordwall 佈局，搜索在最上方 */}
         <ActivitySearchAndFilter
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -666,6 +656,16 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           totalCount={filteredAndSortedActivities.length}
           onSelectAll={handleSelectAll}
           onClearSelection={handleClearSelection}
+        />
+
+        {/* 資料夾管理 - 參考 Wordwall 佈局，資料夾在搜索下方靠近卡片 */}
+        <FolderManager
+          currentFolderId={currentFolderId}
+          onFolderSelect={handleFolderSelect}
+          onFolderCreate={handleFolderCreate}
+          onFolderUpdate={handleFolderUpdate}
+          onFolderDelete={handleFolderDelete}
+          onActivityDropToFolder={handleActivityDropToFolder}
         />
 
         {/* 在資料夾視圖中顯示拖拽回根級別的目標區域 */}

@@ -146,7 +146,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   }
 
   return (
-    <div className="folder-manager mb-6">
+    <div className="folder-manager mb-4">
       {/* 麵包屑導航 */}
       <div className="breadcrumb mb-4">
         <button
@@ -165,8 +165,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
         )}
       </div>
 
-      {/* 資料夾網格 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
+      {/* 資料夾網格 - 參考 Wordwall 佈局，減少底部間距更靠近活動卡片 */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
         {/* 創建新資料夾按鈕 */}
         <button
           onClick={() => setShowCreateModal(true)}
