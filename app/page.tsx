@@ -140,7 +140,7 @@ export default function HomePage() {
               <div className="text-4xl mb-4">🚀</div>
               <h3 className="text-xl font-semibold text-gray-900 mb-3">創建活動</h3>
               <p className="text-gray-600 mb-6">
-                選擇遊戲模板，輸入詞彙內容，一鍵創建25種記憶科學遊戲，完整的 Wordwall 風格創建流程
+                選擇遊戲模板，輸入詞彙內容，一鍵創建25種記憶科學遊戲
               </p>
               <Link
                 href="/create"
@@ -269,13 +269,7 @@ export default function HomePage() {
             >
               📋 我的活動
             </Link>
-            <Link
-              href="/content/share-system"
-              className="inline-flex items-center px-6 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-              data-testid="quick-share-system"
-            >
-              🔗 完整分享系統
-            </Link>
+
             <Link
               href="/create"
               className="inline-flex items-center px-6 py-3 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
