@@ -326,90 +326,90 @@ export default function CreateGamePage() {
       {/* 統一導航系統 */}
       <UnifiedNavigation variant="header" />
 
-      {/* 遊戲頭部 - 現代化設計 */}
+      {/* 遊戲頭部 - 手機平板優化設計 */}
       <div className="bg-white shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {/* 遊戲信息 - 優化設計 */}
-          <div className="flex items-start sm:items-center space-x-4 sm:space-x-6 mb-6 sm:mb-8">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0 shadow-lg">
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+          {/* 遊戲信息 - 響應式優化 */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4 md:space-x-6 mb-6 sm:mb-8">
+            <div className="w-20 h-20 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-3xl sm:text-2xl md:text-3xl flex-shrink-0 shadow-lg">
               {gameConfig.icon}
             </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 leading-tight">{gameConfig.name}</h1>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-3">{gameConfig.description}</p>
-              <div className="flex items-center space-x-2">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <div className="flex-1 min-w-0 text-center sm:text-left">
+              <h1 className="text-2xl sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 leading-tight">{gameConfig.name}</h1>
+              <p className="text-base sm:text-sm md:text-base text-gray-600 leading-relaxed mb-3 px-2 sm:px-0">{gameConfig.description}</p>
+              <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-2 sm:space-y-0 sm:space-x-3">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                   {gameConfig.category}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
                   需要 {gameConfig.minItems}-{gameConfig.maxItems} 個詞彙
                 </span>
               </div>
             </div>
           </div>
 
-          {/* 進度指示器 - 現代化設計 */}
-          <div className="flex items-center justify-center sm:justify-start space-x-3 text-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs font-semibold">✓</div>
-              <span className="text-gray-600 font-medium">選擇範本</span>
+          {/* 進度指示器 - 手機平板優化 */}
+          <div className="flex items-center justify-center space-x-2 sm:space-x-3 text-xs sm:text-sm overflow-x-auto pb-2">
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs font-semibold">✓</div>
+              <span className="text-gray-600 font-medium whitespace-nowrap">選擇範本</span>
             </div>
-            <div className="w-8 h-0.5 bg-blue-200"></div>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">2</div>
-              <span className="text-blue-600 font-semibold">輸入內容</span>
+            <div className="w-6 sm:w-8 h-0.5 bg-blue-200 flex-shrink-0"></div>
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">2</div>
+              <span className="text-blue-600 font-semibold whitespace-nowrap">輸入內容</span>
             </div>
-            <div className="w-8 h-0.5 bg-gray-200"></div>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-xs font-semibold">3</div>
-              <span className="text-gray-500">開始遊戲</span>
+            <div className="w-6 sm:w-8 h-0.5 bg-gray-200 flex-shrink-0"></div>
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-xs font-semibold">3</div>
+              <span className="text-gray-500 whitespace-nowrap">開始遊戲</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 主要內容區域 - 現代化設計 */}
-      <div className="max-w-5xl mx-auto py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
-        {/* 活動標題 - 現代化設計 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6 sm:mb-8 hover:shadow-md transition-shadow duration-200">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <span className="text-white text-lg">📝</span>
+      {/* 主要內容區域 - 手機平板優化 */}
+      <div className="max-w-5xl mx-auto py-4 sm:py-6 md:py-8 lg:py-12 px-3 sm:px-4 md:px-6 lg:px-8">
+        {/* 活動標題 - 手機平板優化 */}
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 md:mb-8 hover:shadow-md transition-shadow duration-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 mb-4">
+            <div className="w-12 h-12 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mx-auto sm:mx-0">
+              <span className="text-white text-xl sm:text-lg">📝</span>
             </div>
-            <div>
-              <label className="block text-lg font-bold text-gray-900">
+            <div className="text-center sm:text-left">
+              <label className="block text-xl sm:text-lg font-bold text-gray-900">
                 活動標題
               </label>
-              <p className="text-sm text-gray-500">為您的學習活動命名</p>
+              <p className="text-sm text-gray-500 mt-1">為您的學習活動命名</p>
             </div>
           </div>
           <input
             type="text"
             value={activityTitle}
             onChange={(e) => setActivityTitle(e.target.value)}
-            className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-400 text-lg"
+            className="w-full px-4 sm:px-5 py-3 sm:py-4 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-400 text-base sm:text-lg"
             placeholder="例如：英語詞彙練習 - 動物篇"
           />
         </div>
 
-        {/* 詞彙輸入區域 - 現代化設計 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 hover:shadow-md transition-shadow duration-200">
-          {/* 區域標題 */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-                <span className="text-white text-lg">📚</span>
+        {/* 詞彙輸入區域 - 手機平板優化 */}
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8 hover:shadow-md transition-shadow duration-200">
+          {/* 區域標題 - 響應式優化 */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0 mb-6">
+            <div className="flex items-center space-x-3 w-full sm:w-auto">
+              <div className="w-12 h-12 sm:w-10 sm:h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
+                <span className="text-white text-xl sm:text-lg">📚</span>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">詞彙內容</h3>
+                <h3 className="text-xl sm:text-lg font-bold text-gray-900">詞彙內容</h3>
                 <p className="text-sm text-gray-500">添加您的學習詞彙</p>
               </div>
             </div>
 
-            {/* 操作說明按鈕 */}
+            {/* 操作說明按鈕 - 手機優化 */}
             <button
               onClick={() => setShowInstructions(!showInstructions)}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-colors duration-200"
+              className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg sm:rounded-xl transition-colors duration-200 w-full sm:w-auto"
             >
               <span>💡</span>
               <span className="font-medium">使用說明</span>
@@ -440,46 +440,92 @@ export default function CreateGamePage() {
             </div>
           )}
 
-          {/* 欄位標題和控制區域 */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-            {/* 欄位標題 */}
-            <div className="flex-1 grid grid-cols-2 gap-4">
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
-                <h4 className="font-bold text-blue-900 mb-1 flex items-center">
-                  <span className="mr-2">🇬🇧</span>
+          {/* 欄位標題和控制區域 - 手機平板優化 */}
+          <div className="flex flex-col space-y-4 mb-6">
+            {/* 欄位標題 - 響應式網格 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-blue-200">
+                <h4 className="font-bold text-blue-900 mb-1 flex items-center text-sm sm:text-base">
+                  <span className="mr-2 text-lg">🇬🇧</span>
                   英文單字
                 </h4>
                 <p className="text-xs text-blue-700">遊戲中顯示的內容</p>
               </div>
-              <div className="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-xl border border-red-200">
-                <h4 className="font-bold text-red-900 mb-1 flex items-center">
-                  <span className="mr-2">🇹🇼</span>
+              <div className="bg-gradient-to-r from-red-50 to-red-100 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-red-200">
+                <h4 className="font-bold text-red-900 mb-1 flex items-center text-sm sm:text-base">
+                  <span className="mr-2 text-lg">🇹🇼</span>
                   中文翻譯
                 </h4>
                 <p className="text-xs text-red-700">對應的中文意思</p>
               </div>
             </div>
 
-            {/* 控制按鈕組 */}
-            <div className="flex items-center space-x-3">
+            {/* 控制按鈕組 - 手機優化 */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center sm:justify-between space-y-3 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={swapColumns}
-                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                className="flex items-center justify-center space-x-2 px-4 py-3 sm:py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg sm:rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 font-medium"
               >
-                <span>🔄</span>
-                <span className="font-medium">交換</span>
+                <span className="text-lg">🔄</span>
+                <span>交換欄位</span>
               </button>
-              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg">
-                {vocabularyItems.filter(item => item.english.trim() && item.chinese.trim()).length} / {gameConfig.maxItems}
+              <div className="flex items-center justify-center space-x-2">
+                <div className="text-sm text-gray-500 bg-gray-100 px-4 py-2 rounded-lg font-medium">
+                  已完成: {vocabularyItems.filter(item => item.english.trim() && item.chinese.trim()).length} / {gameConfig.maxItems}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* 詞彙項目列表 */}
-          <div className="space-y-3">
+          {/* 詞彙項目列表 - 手機平板優化 */}
+          <div className="space-y-3 sm:space-y-4">
             {vocabularyItems.map((item, index) => (
-              <div key={item.id} className="group bg-gradient-to-r from-gray-50 to-white p-4 border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all duration-200">
-                <div className="flex items-center space-x-4">
+              <div key={item.id} className="group bg-gradient-to-r from-gray-50 to-white p-3 sm:p-4 border-2 border-gray-200 rounded-lg sm:rounded-xl hover:border-blue-300 hover:shadow-md transition-all duration-200">
+                {/* 手機版：垂直佈局 */}
+                <div className="flex flex-col sm:hidden space-y-3">
+                  {/* 序號和刪除按鈕 */}
+                  <div className="flex items-center justify-between">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                      {index + 1}
+                    </div>
+                    {vocabularyItems.length > gameConfig.minItems && (
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 rounded-lg transition-all duration-200 flex items-center justify-center"
+                        title="刪除此項目"
+                      >
+                        <span className="text-base">🗑️</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* 英文輸入框 */}
+                  <div>
+                    <label className="block text-sm font-medium text-blue-700 mb-1">🇬🇧 英文單字</label>
+                    <input
+                      type="text"
+                      value={item.english}
+                      onChange={(e) => updateItem(item.id, 'english', e.target.value)}
+                      className="w-full px-3 py-3 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 font-medium"
+                      placeholder="輸入英文單字..."
+                    />
+                  </div>
+
+                  {/* 中文輸入框 */}
+                  <div>
+                    <label className="block text-sm font-medium text-red-700 mb-1">🇹🇼 中文翻譯</label>
+                    <input
+                      type="text"
+                      value={item.chinese}
+                      onChange={(e) => updateItem(item.id, 'chinese', e.target.value)}
+                      className="w-full px-3 py-3 border-2 border-red-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200 bg-white text-gray-900 placeholder-gray-400 font-medium"
+                      placeholder="輸入中文翻譯..."
+                    />
+                  </div>
+                </div>
+
+                {/* 平板桌面版：水平佈局 */}
+                <div className="hidden sm:flex items-center space-x-4">
                   {/* 序號 */}
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
                     {index + 1}
@@ -522,12 +568,12 @@ export default function CreateGamePage() {
             ))}
           </div>
 
-          {/* 新增項目按鈕 */}
-          <div className="mt-8 flex justify-center">
+          {/* 新增項目按鈕 - 手機平板優化 */}
+          <div className="mt-6 sm:mt-8 flex justify-center">
             <button
               onClick={addNewItem}
               disabled={vocabularyItems.length >= gameConfig.maxItems}
-              className="flex items-center space-x-3 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold"
+              className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg sm:rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold w-full sm:w-auto"
             >
               <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
                 <span className="text-xl font-bold">+</span>
@@ -540,68 +586,50 @@ export default function CreateGamePage() {
           </div>
         </div>
 
-        {/* 完成按鈕區域 - 現代化設計 */}
-        <div className="mt-8 sm:mt-12">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">準備開始遊戲？</h3>
-              <p className="text-gray-600">確認詞彙內容無誤後，點擊下方按鈕開始您的學習之旅</p>
+        {/* 完成按鈕區域 - 手機平板優化 */}
+        <div className="mt-6 sm:mt-8 md:mt-12">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6 md:p-8">
+            <div className="text-center mb-4 sm:mb-6">
+              <h3 className="text-xl sm:text-lg font-bold text-gray-900 mb-2">準備開始遊戲？</h3>
+              <p className="text-gray-600 text-sm sm:text-base px-2 sm:px-0">確認詞彙內容無誤後，點擊下方按鈕開始您的學習之旅</p>
             </div>
 
-            {/* 手機版：垂直布局 */}
-            <div className="flex flex-col sm:hidden space-y-4">
+            {/* 統一按鈕佈局 - 響應式優化 */}
+            <div className="flex flex-col space-y-4">
+              {/* 主要行動按鈕 */}
               <button
                 onClick={saveActivity}
                 disabled={!validateItems() || isLoading}
-                className="w-full px-6 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 flex items-center justify-center space-x-3"
+                className="w-full px-6 py-4 sm:py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white rounded-lg sm:rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-bold text-base sm:text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 flex items-center justify-center space-x-3"
               >
                 {isLoading ? (
                   <>
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     <span>{isEditMode ? '更新中...' : '保存中...'}</span>
                   </>
                 ) : (
                   <>
-                    <span className="text-2xl">🚀</span>
-                    <span>{isEditMode ? '更新並開始遊戲' : '完成並開始遊戲'}</span>
+                    <span className="text-xl sm:text-2xl">🚀</span>
+                    <span className="text-center">{isEditMode ? '更新並開始遊戲' : '完成並開始遊戲'}</span>
                   </>
                 )}
               </button>
+
+              {/* 次要行動按鈕 */}
               <button
                 onClick={() => router.push('/create')}
-                className="w-full px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-semibold flex items-center justify-center space-x-2"
+                className="w-full px-6 py-3 sm:py-4 border-2 border-gray-300 text-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-semibold flex items-center justify-center space-x-2"
               >
-                <span>←</span>
+                <span className="text-lg">←</span>
                 <span>返回選擇範本</span>
               </button>
             </div>
 
-            {/* 桌面版：水平布局 */}
-            <div className="hidden sm:flex justify-center space-x-6">
-              <button
-                onClick={() => router.push('/create')}
-                className="px-8 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-semibold flex items-center space-x-2"
-              >
-                <span>←</span>
-                <span>返回選擇範本</span>
-              </button>
-              <button
-                onClick={saveActivity}
-                disabled={!validateItems() || isLoading}
-                className="px-10 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 flex items-center space-x-3"
-              >
-                {isLoading ? (
-                  <>
-                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>{isEditMode ? '更新中...' : '保存中...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-xl">🚀</span>
-                    <span>{isEditMode ? '更新並開始遊戲' : '完成並開始遊戲'}</span>
-                  </>
-                )}
-              </button>
+            {/* 額外提示信息 - 手機版 */}
+            <div className="mt-4 sm:hidden text-center">
+              <p className="text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-lg">
+                💡 提示：確保至少有 {gameConfig.minItems} 個完整的詞彙對才能開始遊戲
+              </p>
             </div>
           </div>
         </div>
