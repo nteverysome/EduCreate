@@ -72,9 +72,9 @@ const gameTemplateConfig = {
     inputType: 'vocabulary'
   },
   'shimozurdo-game': {
-    name: '飛機碰撞遊戲',
-    description: '通過飛機碰撞雲朵學習英語詞彙，基於主動回憶和視覺記憶原理，動態反應記憶訓練',
-    icon: '✈️',
+    name: 'Shimozurdo 雲朵遊戲',
+    description: '通過雲朵碰撞學習英語詞彙，基於主動回憶和視覺記憶原理，動態反應記憶訓練',
+    icon: '☁️',
     category: '動態反應記憶',
     minItems: 3,
     maxItems: 100,
