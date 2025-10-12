@@ -813,3 +813,4 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
 };
 
 export default WordwallStyleMyActivities;
+// 修復 folders 未定義錯誤 - 2025-10-12
