@@ -283,20 +283,7 @@ export default function HomePage() {
             >
               🚀 創建活動
             </Link>
-            <Link
-              href="/demo/smart-sorting"
-              className="inline-flex items-center px-6 py-3 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-              data-testid="quick-smart-sorting"
-            >
-              🔄 智能排序
-            </Link>
-            <Link
-              href="/demo/folder-analytics"
-              className="inline-flex items-center px-6 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
-              data-testid="quick-folder-analytics"
-            >
-              📈 檔案夾統計
-            </Link>
+
           </div>
         </div>
       </main>
