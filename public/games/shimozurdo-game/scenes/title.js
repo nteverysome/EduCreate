@@ -740,6 +740,47 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
+     * 🆕 重置所有敵人雲朵的文字顏色為黑色
+     */
+    resetAllEnemyColors() {
+        this.enemies.forEach(enemy => {
+            if (enemy && enemy.active) {
+                const wordText = enemy.getData('wordText');
+                if (wordText && wordText.active) {
+                    // 將所有雲朵文字顏色重置為黑色
+                    wordText.setColor('#000000');
+                    // 重置 isTarget 標記
+                    enemy.setData('isTarget', false);
+                }
+            }
+        });
+        console.log('🔄 重置所有雲朵文字顏色為黑色');
+    }
+
+    /**
+     * 🆕 更新匹配目標詞彙的敵人雲朵文字顏色為紅色
+     */
+    updateTargetEnemyColors() {
+        if (!this.currentTargetWord) return;
+
+        this.enemies.forEach(enemy => {
+            if (enemy && enemy.active) {
+                const word = enemy.getData('word');
+                if (word && word.english === this.currentTargetWord.english) {
+                    const wordText = enemy.getData('wordText');
+                    if (wordText && wordText.active) {
+                        // 將匹配的雲朵文字顏色設為紅色
+                        wordText.setColor('#ff0000');
+                        // 設置 isTarget 標記
+                        enemy.setData('isTarget', true);
+                    }
+                }
+            }
+        });
+        console.log('🎯 更新目標雲朵文字顏色為紅色:', this.currentTargetWord.english);
+    }
+
+    /**
      * 🆕 設置隨機目標詞彙 - 從 GEPT 管理器獲取新的學習目標
      */
     setRandomTargetWord() {
@@ -753,6 +794,12 @@ export default class Title extends Phaser.Scene {
 
         if (this.currentTargetWord) {
             console.log('🎯 新目標詞彙:', this.currentTargetWord.chinese, this.currentTargetWord.english);
+
+            // 🆕 重置所有現有雲朵的顏色為黑色，避免舊目標詞彙保持紅色
+            this.resetAllEnemyColors();
+
+            // 🆕 更新現有雲朵中匹配新目標詞彙的顏色為紅色
+            this.updateTargetEnemyColors();
 
             // 🆕 更新英文大字（中列，對換後）
             this.chineseText.setText(this.currentTargetWord.english);
