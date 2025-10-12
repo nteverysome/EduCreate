@@ -386,33 +386,38 @@ const UnifiedNavigation = ({
                 </div>
               )}
 
-              {/* 手機版選單 - 包含核心導航項目和用戶管理功能 */}
-
-              {/* 核心導航項目 */}
-              <div className="pb-2 mb-2 border-b border-gray-100">
-                {navigationItems.map(item => (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    className={`flex items-center w-full px-4 py-3 text-sm font-medium transition-colors ${
-                      isActive(item.href)
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`}
-                    data-testid={`mobile-${item.testId}`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <span className="mr-3">{item.icon}</span>
-                    <div>{item.label}</div>
-                  </Link>
-                ))}
-              </div>
+              {/* 手機版選單 - 與桌面版用戶選單保持一致 */}
 
               {/* 用戶操作 */}
               <div>
                 {currentUser ? (
                   <div className="pt-2 mt-2">
-                    {/* 純用戶管理功能 - 不包含導航項目 */}
+                    {/* 與桌面版保持一致的用戶選單項目 */}
+                    <Link
+                      href="/create"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">➕</span>
+                      <div>創建活動</div>
+                    </Link>
+                    <Link
+                      href="/my-activities"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">📋</span>
+                      <div>我的活動</div>
+                    </Link>
+                    <Link
+                      href="/my-results"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">📊</span>
+                      <div>我的結果</div>
+                    </Link>
+                    <div className="border-t border-gray-100 my-1"></div>
                     <Link
                       href="/account/profile"
                       className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
@@ -470,13 +475,21 @@ const UnifiedNavigation = ({
                       <span className="mr-3">🚪</span>
                       <div>登出</div>
                     </button>
-                    <div className="px-4 py-2">
+                    <div className="px-4 py-2 space-y-1">
                       <Link
                         href="/terms"
-                        className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                        className="block text-xs text-gray-500 hover:text-gray-700 transition-colors"
                         onClick={() => setIsOpen(false)}
                       >
                         使用條款
+                      </Link>
+                      <div className="text-xs text-gray-400">-</div>
+                      <Link
+                        href="/privacy"
+                        className="block text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        隱私聲明
                       </Link>
                     </div>
                   </div>
