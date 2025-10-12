@@ -103,8 +103,8 @@ const GameSwitcherPage: React.FC = () => {
 
   // 處理 URL 參數和載入自定義詞彙
   useEffect(() => {
-    const gameParam = searchParams.get('game');
-    const activityIdParam = searchParams.get('activityId');
+    const gameParam = searchParams?.get('game');
+    const activityIdParam = searchParams?.get('activityId');
 
     if (gameParam) {
       setCurrentGameId(gameParam);
@@ -124,7 +124,7 @@ const GameSwitcherPage: React.FC = () => {
       const response = await fetch(`/api/activities/${activityId}/vocabulary`);
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as { vocabularyItems?: any[] };
         console.log('✅ 成功載入自定義詞彙:', data.vocabularyItems);
         setCustomVocabulary(data.vocabularyItems || []);
       } else {
@@ -552,14 +552,14 @@ const GameSwitcherPage: React.FC = () => {
                 <span className="lg:hidden">📊</span>
               </button>
 
-              <button
-                onClick={() => window.open('http://localhost:3001/games/airplane-game/', '_blank')}
-                className="px-2 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+              <Link
+                href="/my-activities"
+                className="px-2 py-2 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700"
                 style={{ minHeight: '44px' }}
               >
-                <span className="hidden lg:inline">🚀 出遊戲</span>
-                <span className="lg:hidden">🚀</span>
-              </button>
+                <span className="hidden lg:inline">📋 我的活動</span>
+                <span className="lg:hidden">📋</span>
+              </Link>
             </div>
           </div>
         </div>
