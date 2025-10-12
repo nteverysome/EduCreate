@@ -39,14 +39,14 @@ export default function HomePage() {
           {/* 主要行動按鈕 */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/dashboard"
+              href="/create"
               className="inline-flex items-center px-8 py-4 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
-              data-testid="main-dashboard-button"
+              data-testid="main-create-button"
             >
               <svg className="mr-3 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              探索所有功能
+              開始創建活動
             </Link>
             <Link
               href="/simple-dashboard"
@@ -242,13 +242,13 @@ export default function HomePage() {
                 基於記憶科學的5種遊戲模板：配對、填空、選擇題、排序、記憶卡片
               </p>
               <Link
-                href="/dashboard"
+                href="/create"
                 className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
                 data-testid="memory-games-link"
               >
-                查看更多
+                立即創建
                 <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </Link>
             </div>
@@ -864,11 +864,11 @@ export default function HomePage() {
           
           <div className="flex flex-wrap justify-center gap-4">
             <Link
-              href="/dashboard"
+              href="/my-activities"
               className="inline-flex items-center px-6 py-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
-              data-testid="quick-dashboard"
+              data-testid="quick-my-activities"
             >
-              📊 功能儀表板
+              📋 我的活動
             </Link>
             <Link
               href="/content/share-system"
