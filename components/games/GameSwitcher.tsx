@@ -16,6 +16,7 @@ interface GameConfig {
   status: 'completed' | 'development' | 'planned';
   icon: string;
   estimatedLoadTime: number; // ms
+  hidden?: boolean; // 可選屬性，用於隱藏遊戲卡片
 }
 
 // 遊戲狀態類型
@@ -54,7 +55,6 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     estimatedLoadTime: 600
   },
 
-
   {
     id: 'shimozurdo-game',
     name: 'shimozurdo',
@@ -65,7 +65,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '☁️',
-    estimatedLoadTime: 800
+    estimatedLoadTime: 800,
+    hidden: true  // 隱藏此遊戲卡片，不在遊戲選擇器中顯示
   },
 
   {
@@ -295,7 +296,7 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
 };
 
 const GameSwitcher: React.FC<GameSwitcherProps> = ({
-  defaultGame = 'shimozurdo-game',
+  defaultGame = 'airplane-vite',
   geptLevel = 'elementary',
   onGameChange,
   onGameStateUpdate,
@@ -909,11 +910,11 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   // 獲取當前遊戲配置
   const currentGame = gamesConfig.find(game => game.id === currentGameId);
 
-  // 獲取可用遊戲（已完成的遊戲）
-  const availableGames = gamesConfig.filter(game => game.status === 'completed');
+  // 獲取可用遊戲（已完成且未隱藏的遊戲）
+  const availableGames = gamesConfig.filter(game => game.status === 'completed' && !game.hidden);
 
-  // 獲取開發中遊戲
-  const developmentGames = gamesConfig.filter(game => game.status === 'development');
+  // 獲取開發中遊戲（未隱藏的）
+  const developmentGames = gamesConfig.filter(game => game.status === 'development' && !game.hidden);
 
   // 載入進度模擬
   const simulateLoading = useCallback((estimatedTime: number) => {
