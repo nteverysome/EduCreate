@@ -191,11 +191,21 @@ export default function CreateActivityPage() {
   };
 
   if (status === 'loading') {
-    return <div className="p-8">載入中...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <UnifiedNavigation />
+        <div className="p-8">載入中...</div>
+      </div>
+    );
   }
 
   if (!session) {
-    return <LoginPrompt />;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <UnifiedNavigation />
+        <LoginPrompt />
+      </div>
+    );
   }
 
   // 過濾和排序遊戲模板（只顯示已完成的遊戲）
