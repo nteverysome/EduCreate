@@ -99,7 +99,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="${baseUrl}/dashboard"
+          <a href="${baseUrl}/my-activities"
              style="background: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
             開始使用 EduCreate
           </a>
