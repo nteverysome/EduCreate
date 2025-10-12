@@ -186,7 +186,23 @@ const UnifiedNavigation = ({
                 我的結果
               </Link>
 
-              {/* 簡化版導航 - 移除複雜的下拉選單 */}
+              {/* 簡化版導航 - 顯示4個核心項目 */}
+              {navigationItems.map(item => (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive(item.href)
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                  data-testid={item.testId}
+                  title={item.description}
+                >
+                  <span className="mr-2">{item.icon}</span>
+                  {item.label}
+                </Link>
+              ))}
 
               {/* Wordwall 風格用戶菜單 */}
               <div className="relative">
