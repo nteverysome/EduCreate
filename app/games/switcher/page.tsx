@@ -454,11 +454,11 @@ const GameSwitcherPage: React.FC = () => {
 
               <Link
                 href="/my-activities"
-                className="px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md hover:from-green-600 hover:to-green-700 hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
+                className="px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg shadow-lg shadow-blue-500/50 hover:from-blue-600 hover:to-cyan-600 hover:shadow-xl hover:shadow-blue-500/60 transform hover:scale-105 transition-all duration-200 flex items-center justify-center animate-pulse"
                 style={{ minHeight: '44px', minWidth: '44px' }}
                 title="我的活動"
               >
-                <span className="text-lg">📋</span>
+                <span className="text-lg drop-shadow-lg">📋</span>
               </Link>
             </div>
           </div>
@@ -518,11 +518,11 @@ const GameSwitcherPage: React.FC = () => {
 
               <Link
                 href="/my-activities"
-                className="px-2 py-2 text-xs font-medium text-white bg-green-600 rounded hover:bg-green-700"
+                className="px-2 py-2 text-xs font-medium text-white bg-gradient-to-r from-blue-500 to-cyan-500 rounded shadow-lg shadow-blue-500/50 hover:from-blue-600 hover:to-cyan-600 hover:shadow-xl hover:shadow-blue-500/60 transform hover:scale-105 transition-all duration-200 animate-pulse"
                 style={{ minHeight: '44px' }}
               >
-                <span className="hidden lg:inline">📋 我的活動</span>
-                <span className="lg:hidden">📋</span>
+                <span className="hidden lg:inline drop-shadow-lg">📋 我的活動</span>
+                <span className="lg:hidden drop-shadow-lg">📋</span>
               </Link>
             </div>
           </div>
