@@ -52,7 +52,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '⚡',
-    estimatedLoadTime: 600
+    estimatedLoadTime: 600,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
 
   {
@@ -79,7 +80,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '🌟',
-    estimatedLoadTime: 1000
+    estimatedLoadTime: 1000,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'runner-game',
@@ -91,7 +93,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '🏃',
-    estimatedLoadTime: 1000
+    estimatedLoadTime: 1000,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'pushpull-game',
@@ -103,7 +106,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '🧩',
-    estimatedLoadTime: 1200
+    estimatedLoadTime: 1200,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'wallhammer-game',
@@ -115,7 +119,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '🔨',
-    estimatedLoadTime: 1300
+    estimatedLoadTime: 1300,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'zenbaki-game',
@@ -127,7 +132,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '🔢',
-    estimatedLoadTime: 1100
+    estimatedLoadTime: 1100,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'mars-game',
@@ -139,7 +145,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '🔴',
-    estimatedLoadTime: 1200
+    estimatedLoadTime: 1200,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'fate-game',
@@ -151,7 +158,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '⚡',
-    estimatedLoadTime: 1400
+    estimatedLoadTime: 1400,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'dungeon-game',
@@ -163,7 +171,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '🏰',
-    estimatedLoadTime: 800
+    estimatedLoadTime: 800,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'blastemup-game',
@@ -175,7 +184,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '💥',
-    estimatedLoadTime: 900
+    estimatedLoadTime: 900,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'math-attack-game',
@@ -187,7 +197,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '🔢',
-    estimatedLoadTime: 1200
+    estimatedLoadTime: 1200,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   // 未來遊戲預留位置
   {
@@ -200,7 +211,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'development',
     icon: '🃏',
-    estimatedLoadTime: 700
+    estimatedLoadTime: 700,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'quiz-game',
@@ -212,7 +224,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'development',
     icon: '❓',
-    estimatedLoadTime: 500
+    estimatedLoadTime: 500,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'sequence-game',
@@ -224,7 +237,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'planned',
     icon: '🔢',
-    estimatedLoadTime: 600
+    estimatedLoadTime: 600,
+    hidden: true  // 隱藏遊戲卡片顯示
   },
   {
     id: 'flashcard-game',
@@ -236,7 +250,8 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'planned',
     icon: '📚',
-    estimatedLoadTime: 400
+    estimatedLoadTime: 400,
+    hidden: true  // 隱藏遊戲卡片顯示
   }
 ];
 
