@@ -482,6 +482,20 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
+  // 處理編輯內容（Wordwall 風格）
+  const handleEditContent = (activity: Activity) => {
+    console.log('📝 編輯內容:', activity.title, '類型:', activity.type, 'ID:', activity.id);
+
+    if (activity.type === 'vocabulary') {
+      // 直接跳轉到詞彙編輯頁面，使用活動的 gameType
+      const editUrl = `/create/${activity.gameType}?edit=${activity.id}`;
+      console.log('🚀 跳轉到內容編輯頁面:', editUrl);
+      window.open(editUrl, '_blank');
+    } else {
+      alert('此活動類型暫不支援內容編輯');
+    }
+  };
+
   const handleActivityCopy = async (activity: Activity) => {
     try {
       console.log('🔄 開始複製活動:', activity.title);
@@ -747,6 +761,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               onShare={handleActivityShare}
               onRename={handleActivityRename}
               onMove={handleMoveActivity}
+              onEditContent={handleEditContent}
               selectionMode={selectionMode}
               onDragStart={handleActivityDragStart}
               onDragEnd={handleActivityDragEnd}

@@ -16,7 +16,8 @@ import {
   Info,
   Check,
   X,
-  Folder
+  Folder,
+  FileEdit
 } from 'lucide-react';
 
 interface Activity {
@@ -51,6 +52,7 @@ interface WordwallStyleActivityCardProps {
   onShare?: (activity: Activity) => void;
   onRename?: (activity: Activity, newTitle: string) => void;
   onMove?: (activity: Activity) => void;
+  onEditContent?: (activity: Activity) => void;
   selectionMode?: boolean;
   // 拖拽相關
   onDragStart?: (activity: Activity) => void;
@@ -68,6 +70,7 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   onShare,
   onRename,
   onMove,
+  onEditContent,
   selectionMode = false,
   onDragStart,
   onDragEnd
@@ -418,6 +421,18 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
                     >
                       <Share2 className="w-3 h-3" />
                       分享
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditContent?.(activity);
+                        setShowMenu(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
+                    >
+                      <FileEdit className="w-3 h-3" />
+                      編輯內容
                     </button>
 
                     <button
