@@ -764,35 +764,63 @@ const UnifiedNavigation = ({
                 </div>
               )}
 
+              {/* 簡化的主要導航 - 只顯示核心功能 */}
               <div className="space-y-2">
-                {navigationItems.map(item => (
-                  <Link
-                    key={item.id}
-                    href={item.href}
-                    className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
-                      isActive(item.href)
-                        ? 'bg-blue-100 text-blue-700 border-r-4 border-blue-700'
-                        : item.status === 'available'
-                        ? 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                        : 'text-gray-400'
-                    }`}
-                    data-testid={`mobile-${item.testId}`}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <span className="mr-3">{item.icon}</span>
-                    <div className="flex-1">
-                      <div>{item.label}</div>
-                      <div className="text-xs text-gray-500">{item.description}</div>
-                    </div>
-                    {item.status === 'coming-soon' && (
-                      <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded">
-                        即將推出
-                      </span>
-                    )}
-                  </Link>
-                ))}
+                <Link
+                  href="/"
+                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
+                    isActive('/')
+                      ? 'bg-blue-100 text-blue-700 border-r-4 border-blue-700'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="mr-3">🏠</span>
+                  <div>首頁</div>
+                </Link>
 
-                {/* 用戶操作 */}
+                <Link
+                  href="/my-activities"
+                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
+                    isActive('/my-activities')
+                      ? 'bg-blue-100 text-blue-700 border-r-4 border-blue-700'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="mr-3">📋</span>
+                  <div>我的活動</div>
+                </Link>
+
+                <Link
+                  href="/create"
+                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
+                    isActive('/create')
+                      ? 'bg-blue-100 text-blue-700 border-r-4 border-blue-700'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="mr-3">🚀</span>
+                  <div>創建活動</div>
+                </Link>
+
+                <Link
+                  href="/dashboard"
+                  className={`flex items-center px-4 py-3 text-sm font-medium transition-colors ${
+                    isActive('/dashboard')
+                      ? 'bg-blue-100 text-blue-700 border-r-4 border-blue-700'
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="mr-3">📊</span>
+                  <div>功能儀表板</div>
+                </Link>
+              </div>
+
+              {/* 用戶操作 */}
+              <div>
                 {currentUser ? (
                   <div className="border-t border-gray-200 pt-2 mt-2">
                     {/* 用戶管理功能 - 與桌面版保持一致 */}
