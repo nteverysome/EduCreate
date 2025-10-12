@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
-import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 
 interface VocabularyItem {
   id: string;
@@ -322,184 +321,184 @@ export default function CreateGamePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* 統一導航系統 */}
-      <UnifiedNavigation variant="header" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Wordwall 風格導航欄 */}
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-8">
+              <div className="flex items-center">
+                <a href="/" className="text-xl font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                  EduCreate
+                </a>
+                <span className="ml-2 text-sm text-gray-500">更快地創建更好的課程</span>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">{session.user?.name || '測試用戶'}</span>
+                <button className="text-gray-600 hover:text-gray-800">▼</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
 
-      {/* Wordwall 完全複製風格頭部 */}
-      <div className="bg-white border-b border-gray-200">
+      {/* Wordwall 風格頭部 */}
+      <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          {/* 簡潔的標題區域 */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{gameConfig.name}</h1>
-            <p className="text-gray-600">{gameConfig.description}</p>
+          {/* 遊戲信息 */}
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
+              {gameConfig.icon}
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">{gameConfig.name}</h2>
+              <p className="text-sm text-gray-600">{gameConfig.description}</p>
+            </div>
           </div>
 
-          {/* Wordwall 風格的進度指示 */}
-          <div className="flex items-center space-x-4 text-sm">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">✓</div>
-              <span className="text-green-600 font-medium">選擇範本</span>
-            </div>
-            <div className="w-4 h-px bg-gray-300"></div>
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</div>
-              <span className="text-blue-600 font-medium">輸入內容</span>
-            </div>
-            <div className="w-4 h-px bg-gray-300"></div>
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-xs font-bold">3</div>
-              <span className="text-gray-500">完成</span>
-            </div>
+          {/* 進度指示器 */}
+          <div className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+            <span className="text-blue-600">選擇範本</span>
+            <span>→</span>
+            <span className="text-blue-600 font-medium">輸入內容</span>
+            <span>→</span>
+            <span>播放</span>
           </div>
         </div>
       </div>
 
-      {/* Wordwall 完全複製風格主要內容 */}
-      <div className="max-w-4xl mx-auto py-8 px-4 bg-white min-h-screen">
-        {/* 活動標題 - Wordwall 簡潔風格 */}
-        <div className="mb-8">
+      {/* 主要內容區域 */}
+      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* 活動標題 */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Activity title
+            活動標題
           </label>
           <input
             type="text"
             value={activityTitle}
             onChange={(e) => setActivityTitle(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-            placeholder="Enter activity title"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="輸入活動標題..."
           />
         </div>
 
-        {/* Wordwall 完全複製風格詞彙輸入 */}
-        <div className="mb-8">
+        {/* 詞彙輸入區域 */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          {/* 操作說明 */}
+          <div className="mb-6">
+            <button
+              onClick={() => setShowInstructions(!showInstructions)}
+              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+            >
+              <span>📋</span>
+              <span>操作說明</span>
+            </button>
+            {showInstructions && (
+              <div className="mt-2 p-4 bg-blue-50 rounded-lg text-sm text-gray-700">
+                <p>1. 在左欄輸入英文單字，在右欄輸入對應的中文翻譯</p>
+                <p>2. 可以添加音標來幫助發音學習</p>
+                <p>3. 至少需要 {gameConfig.minItems} 個單字，最多 {gameConfig.maxItems} 個</p>
+                <p>4. 點擊「交換列」可以交換英文和中文的位置</p>
+              </div>
+            )}
+          </div>
+
+          {/* 欄位標題和交換按鈕 */}
           <div className="flex items-center justify-between mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Enter your content
-            </label>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={swapColumns}
-                className="text-sm text-blue-600 hover:text-blue-800 underline"
-              >
-                Swap columns
-              </button>
-              <span className="text-sm text-gray-500">
-                {vocabularyItems.filter(item => item.english.trim() && item.chinese.trim()).length} items
-              </span>
+            <div className="flex-1">
+              <h3 className="font-medium text-gray-900">英文單字</h3>
+              <p className="text-sm text-gray-500">這些將在遊戲中顯示</p>
+            </div>
+            <button
+              onClick={swapColumns}
+              className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            >
+              交換列
+            </button>
+            <div className="flex-1 ml-4">
+              <h3 className="font-medium text-gray-900">中文翻譯</h3>
+              <p className="text-sm text-gray-500">對應的中文意思</p>
             </div>
           </div>
 
-          {/* 操作說明展開區域 */}
-          {showInstructions && (
-            <div className="mb-6 p-5 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl border border-blue-100">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-500 font-semibold">1.</span>
-                  <span>在左欄輸入英文單字，右欄輸入中文翻譯</span>
+          {/* 詞彙項目列表 */}
+          <div className="space-y-4">
+            {vocabularyItems.map((item, index) => (
+              <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                <div className="w-8 text-center text-sm text-gray-500 font-medium">
+                  {index + 1}.
                 </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-500 font-semibold">2.</span>
-                  <span>至少需要 {gameConfig.minItems} 個，最多 {gameConfig.maxItems} 個單字</span>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-500 font-semibold">3.</span>
-                  <span>可以添加音標幫助發音學習</span>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-blue-500 font-semibold">4.</span>
-                  <span>使用「交換列」按鈕調整欄位順序</span>
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* Wordwall 完全複製風格表格 */}
-          <div className="border border-gray-300 rounded">
-            {/* 表格頭部 */}
-            <div className="bg-gray-50 border-b border-gray-300 grid grid-cols-2 gap-0">
-              <div className="px-4 py-3 border-r border-gray-300">
-                <span className="text-sm font-medium text-gray-700">Term</span>
-              </div>
-              <div className="px-4 py-3">
-                <span className="text-sm font-medium text-gray-700">Definition</span>
-              </div>
-            </div>
-
-            {/* 表格內容 */}
-            <div className="divide-y divide-gray-300">
-              {vocabularyItems.map((item, index) => (
-                <div key={item.id} className="grid grid-cols-2 gap-0 hover:bg-gray-50">
-                  <div className="border-r border-gray-300 p-0">
-                    <input
-                      type="text"
-                      value={item.english}
-                      onChange={(e) => updateItem(item.id, 'english', e.target.value)}
-                      className="w-full px-4 py-3 border-0 focus:outline-none focus:ring-0 bg-transparent text-gray-900 placeholder-gray-400"
-                      placeholder={`Term ${index + 1}`}
-                    />
-                  </div>
-                  <div className="p-0 relative">
-                    <input
-                      type="text"
-                      value={item.chinese}
-                      onChange={(e) => updateItem(item.id, 'chinese', e.target.value)}
-                      className="w-full px-4 py-3 border-0 focus:outline-none focus:ring-0 bg-transparent text-gray-900 placeholder-gray-400 pr-10"
-                      placeholder={`Definition ${index + 1}`}
-                    />
-                    {vocabularyItems.length > gameConfig.minItems && (
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 hover:text-red-500 transition-colors"
-                        title="Delete"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
+                {/* 英文單字欄位 */}
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={item.english}
+                    onChange={(e) => updateItem(item.id, 'english', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="輸入英文單字..."
+                  />
                 </div>
-              ))}
-            </div>
+
+                {/* 中文翻譯欄位 */}
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={item.chinese}
+                    onChange={(e) => updateItem(item.id, 'chinese', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="輸入中文翻譯..."
+                  />
+                </div>
+
+                {/* 刪除按鈕 */}
+                {vocabularyItems.length > gameConfig.minItems && (
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
+                    title="刪除此項目"
+                  >
+                    🗑️
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
 
-          {/* 新增按鈕 - Wordwall 風格 */}
-          <div className="mt-4">
+          {/* 新增項目按鈕 */}
+          <div className="mt-6">
             <button
               onClick={addNewItem}
               disabled={vocabularyItems.length >= gameConfig.maxItems}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              + Add item
+              <span className="text-lg">+</span>
+              <span>新增項目</span>
+              <span className="text-sm text-gray-500">
+                最小{gameConfig.minItems} 最大{gameConfig.maxItems}
+              </span>
             </button>
           </div>
-
-
-
         </div>
 
-        {/* Wordwall 完全複製風格完成區域 */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.push('/create')}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 text-sm font-medium"
-            >
-              ← Back
-            </button>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">
-                {vocabularyItems.filter(item => item.english.trim() && item.chinese.trim()).length} items
-              </span>
-              <button
-                onClick={saveActivity}
-                disabled={!validateItems() || isLoading}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Creating...' : 'Create activity'}
-              </button>
-            </div>
-          </div>
+        {/* 完成按鈕 */}
+        <div className="mt-8 flex justify-end space-x-4">
+          <button
+            onClick={() => router.push('/create')}
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            返回
+          </button>
+          <button
+            onClick={saveActivity}
+            disabled={!validateItems() || isLoading}
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isLoading ? (isEditMode ? '更新中...' : '保存中...') : (isEditMode ? '更新並開始遊戲' : '完成並開始遊戲')}
+          </button>
         </div>
       </div>
     </div>
