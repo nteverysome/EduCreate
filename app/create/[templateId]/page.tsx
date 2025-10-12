@@ -500,8 +500,7 @@ export default function CreateGamePage() {
               </button>
             </div>
           </div>
-
-
+        </div>
       </div>
     </div>
   );
