@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
+import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 
 interface VocabularyItem {
   id: string;
@@ -71,9 +72,9 @@ const gameTemplateConfig = {
     inputType: 'vocabulary'
   },
   'shimozurdo-game': {
-    name: 'shimozurdo 響應式遊戲',
-    description: 'Phaser 3 響應式遊戲，支援全螢幕和方向切換，記憶科學驅動學習',
-    icon: '🎯',
+    name: '飛機碰撞遊戲',
+    description: '通過飛機碰撞雲朵學習英語詞彙，基於主動回憶和視覺記憶原理，動態反應記憶訓練',
+    icon: '✈️',
     category: '動態反應記憶',
     minItems: 3,
     maxItems: 100,
@@ -322,27 +323,8 @@ export default function CreateGamePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Wordwall 風格導航欄 */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center">
-                <a href="/" className="text-xl font-bold text-blue-600 hover:text-blue-800 transition-colors">
-                  EduCreate
-                </a>
-                <span className="ml-2 text-sm text-gray-500">更快地創建更好的課程</span>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">{session.user?.name || '測試用戶'}</span>
-                <button className="text-gray-600 hover:text-gray-800">▼</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* 統一用戶導航 */}
+      <UnifiedNavigation />
 
       {/* Wordwall 風格頭部 */}
       <div className="bg-white border-b">
