@@ -48,7 +48,6 @@ export default function HomePage() {
               </svg>
               開始創建活動
             </Link>
-
           </div>
         </div>
 

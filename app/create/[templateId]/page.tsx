@@ -607,6 +607,5 @@ export default function CreateGamePage() {
         </div>
       </div>
     </div>
-    </div>
   );
 }
