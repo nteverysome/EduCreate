@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import GameSwitcher from '@/components/games/GameSwitcher';
 import ShimozurdoGameContainer from '@/components/games/ShimozurdoGameContainer';
 import { BookOpenIcon } from '@heroicons/react/24/outline';
@@ -138,6 +139,9 @@ const GameSwitcherPage: React.FC = () => {
 
   // 檢測螢幕尺寸和智能自動滾動
   useEffect(() => {
+    // 重置滾動狀態，確保每次進入頁面都能自動滾動
+    setHasUserScrolled(false);
+
     const handleScroll = () => {
       setHasUserScrolled(true);
     };
@@ -499,10 +503,12 @@ const GameSwitcherPage: React.FC = () => {
           <div className="hidden md:flex items-center justify-between gap-4 min-h-16">
             {/* 左側：標題 + GEPT 選擇器 */}
             <div className="flex items-center gap-4 flex-1 min-w-0 overflow-hidden">
-              {/* 標題區域 */}
+              {/* 標題區域 - 可點擊回首頁 */}
               <div className="flex-shrink-0">
-                <h1 className="text-base lg:text-lg font-bold text-gray-900">記憶科學遊戲中心</h1>
-                <p className="text-xs text-gray-600">25 種記憶科學遊戲</p>
+                <Link href="/" className="block hover:opacity-80 transition-opacity cursor-pointer">
+                  <h1 className="text-base lg:text-lg font-bold text-gray-900">記憶科學遊戲中心</h1>
+                  <p className="text-xs text-gray-600">25 種記憶科學遊戲</p>
+                </Link>
               </div>
 
               {/* 桌面版 GEPT 選擇器 */}
