@@ -200,9 +200,10 @@ export default function CreateActivityPage() {
       ) : !session ? (
         <LoginPrompt />
       ) : (
-
-  // 過濾和排序遊戲模板（只顯示已完成的遊戲）
-  const filteredTemplates = gameTemplates.filter(template =>
+        // 主要內容區域
+        (() => {
+          // 過濾和排序遊戲模板（只顯示已完成的遊戲）
+          const filteredTemplates = gameTemplates.filter(template =>
     template.status === 'completed' && (
       template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       template.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -231,22 +232,15 @@ export default function CreateActivityPage() {
     }
   };
 
-
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 統一導航組件 */}
-      <UnifiedNavigation />
-
-      {/* 主要內容 - 優化手機和平板 */}
-      <div className="max-w-7xl mx-auto py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8">
-        {/* 頁面標題和搜索 - 響應式優化 */}
-        <div className="mb-6 sm:mb-8">
-          <div className="mb-4 sm:mb-6">
-            <div className="text-center sm:text-left">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-2">
-                {isEditMode ? `編輯活動${editingActivity ? ` - ${editingActivity.title}` : ''}` : '選擇範本'}
-              </h1>
+          return (
+            <div className="max-w-7xl mx-auto py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8">
+              {/* 頁面標題和搜索 - 響應式優化 */}
+              <div className="mb-6 sm:mb-8">
+                <div className="mb-4 sm:mb-6">
+                  <div className="text-center sm:text-left">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-2">
+                      {isEditMode ? `編輯活動${editingActivity ? ` - ${editingActivity.title}` : ''}` : '選擇範本'}
+                    </h1>
               {/* 步驟指示器 - 手機版優化 */}
               <div className="flex items-center justify-center sm:justify-start space-x-2 text-sm text-gray-500">
                 {isEditMode ? (
@@ -375,6 +369,8 @@ export default function CreateActivityPage() {
           </div>
         )}
       </div>
+          );
+        })()
       )}
     </div>
   );
