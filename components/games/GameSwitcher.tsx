@@ -45,7 +45,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'airplane-vite',
     name: 'airplane',
     displayName: '飛機遊戲 (Vite版)',
-    description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
+    description: '完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
     type: 'iframe',
     memoryType: '動態反應記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -59,7 +59,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'shimozurdo-game',
     name: 'shimozurdo',
     displayName: 'Shimozurdo 雲朵遊戲',
-    description: 'Phaser 3 雲朵碰撞遊戲，支援全螢幕和響應式設計，記憶科學驅動的英語學習',
+    description: '雲朵碰撞遊戲，支援全螢幕和響應式設計，記憶科學驅動的英語學習',
     type: 'iframe',
     memoryType: '動態反應記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -72,7 +72,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'starshake-game',
     name: 'starshake',
     displayName: 'Starshake 太空冒險',
-    description: '一個充滿樂趣的太空冒險遊戲，基於 Phaser 3 引擎開發的動作遊戲',
+    description: '一個充滿樂趣的太空冒險動作遊戲',
     type: 'iframe',
     memoryType: '動態反應記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -84,7 +84,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'runner-game',
     name: 'runner',
     displayName: 'Runner 跑酷遊戲',
-    description: '一個刺激的跑酷遊戲，通過跳躍和收集金幣來挑戰高分，基於 Phaser 3 引擎開發',
+    description: '一個刺激的跑酷遊戲，通過跳躍和收集金幣來挑戰高分',
     type: 'iframe',
     memoryType: '動態反應記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -96,7 +96,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'pushpull-game',
     name: 'pushpull',
     displayName: 'PushPull 推拉方塊',
-    description: '一個策略性的推拉方塊遊戲，通過移動彩色方塊到指定位置來解決謎題，基於 Phaser 3 引擎開發',
+    description: '一個策略性的推拉方塊遊戲，通過移動彩色方塊到指定位置來解決謎題',
     type: 'iframe',
     memoryType: '重構邏輯記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -108,7 +108,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'wallhammer-game',
     name: 'wallhammer',
     displayName: 'WallHammer 破牆遊戲',
-    description: '一個經典的破牆冒險遊戲，通過錘子破壞磚牆收集金幣和道具，基於 Phaser 3 引擎開發',
+    description: '一個經典的破牆冒險遊戲，通過錘子破壞磚牆收集金幣和道具',
     type: 'iframe',
     memoryType: '動態反應記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -120,7 +120,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'zenbaki-game',
     name: 'zenbaki',
     displayName: 'Zenbaki 數字遊戲',
-    description: '一個基於數字的策略遊戲，通過數字計算和邏輯推理來解決謎題，基於 Phaser 3 引擎開發',
+    description: '一個基於數字的策略遊戲，通過數字計算和邏輯推理來解決謎題',
     type: 'iframe',
     memoryType: '基礎記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -132,7 +132,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'mars-game',
     name: 'mars',
     displayName: 'Mars 火星探險',
-    description: '一個火星探險遊戲，通過探索火星地形和收集資源來完成任務，基於 Phaser 3 引擎開發',
+    description: '一個火星探險遊戲，通過探索火星地形和收集資源來完成任務',
     type: 'iframe',
     memoryType: '空間視覺記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -144,7 +144,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'fate-game',
     name: 'fate',
     displayName: 'Fate 命運之戰',
-    description: '一個3D太空戰鬥遊戲，通過駕駛太空船戰鬥和探索來完成任務，基於 Phaser 3 引擎開發',
+    description: '一個3D太空戰鬥遊戲，通過駕駛太空船戰鬥和探索來完成任務',
     type: 'iframe',
     memoryType: '動態反應記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -156,7 +156,7 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'dungeon-game',
     name: 'dungeon',
     displayName: 'Dungeon 地牢探險',
-    description: '探索神秘地牢，收集寶藏，戰勝怪物。基於 Phaser 3 的 2D 冒險遊戲，訓練空間記憶和策略思維',
+    description: '探索神秘地牢，收集寶藏，戰勝怪物。2D 冒險遊戲，訓練空間記憶和策略思維',
     type: 'iframe',
     memoryType: '空間視覺記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
@@ -848,7 +848,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
         if (isLandscapeMobile) {
           // 🔧 優化手機橫向模式：保持遊戲可玩性和觸控準確性
-          const gameAspectRatio = 1274 / 739; // Phaser 遊戲的原始寬高比
+          const gameAspectRatio = 1274 / 739; // 遊戲的原始寬高比
           const screenAspectRatio = 812 / 375; // 手機橫向的寬高比
 
           // 計算最佳尺寸：保持遊戲寬高比，最大化利用螢幕空間
