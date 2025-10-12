@@ -88,66 +88,15 @@ export default function HomePage() {
 
 
 
-            {/* 收藏和標籤系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-favorites-tags">
-              <div className="text-4xl mb-4">⭐</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">收藏和標籤系統</h3>
-              <p className="text-gray-600 mb-6">
-                自定義標籤、智能分類、收藏管理，基於記憶科學的個人化內容組織系統
-              </p>
-              <Link
-                href="/activities/favorites-tags"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="favorites-tags-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-
-            {/* 活動統計和分析 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-activity-analytics">
-              <div className="text-4xl mb-4">📈</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">活動統計和分析</h3>
-              <p className="text-gray-600 mb-6">
-                使用頻率、學習效果、時間分布的完整分析，基於記憶科學的個人化學習洞察
-              </p>
-              <Link
-                href="/activities/analytics"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="activity-analytics-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
 
 
 
 
 
-            {/* 記憶遊戲系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-memory-games">
-              <div className="text-4xl mb-4">🎮</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">記憶遊戲系統</h3>
-              <p className="text-gray-600 mb-6">
-                基於記憶科學的5種遊戲模板：配對、填空、選擇題、排序、記憶卡片
-              </p>
-              <Link
-                href="/create"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="memory-games-link"
-              >
-                立即創建
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              </Link>
-            </div>
+
+
+
+
 
 
 
@@ -243,24 +192,6 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 自動保存系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-auto-save">
-              <div className="text-4xl mb-4">💾</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">自動保存系統</h3>
-              <p className="text-gray-600 mb-6">
-                智能自動保存、離線支持、版本控制和批量優化，零數據丟失保證
-              </p>
-              <Link
-                href="/content/autosave"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="auto-save-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
 
 
 
@@ -280,43 +211,10 @@ export default function HomePage() {
 
 
 
-            {/* 活動導入導出功能 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-activity-import-export">
-              <div className="text-4xl mb-4">📤</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">活動導入導出功能</h3>
-              <p className="text-gray-600 mb-6">
-                支持多種格式的活動導入導出，批量處理，輕鬆遷移和分享學習內容
-              </p>
-              <Link
-                href="/activities/import-export"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="activity-import-export-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
 
-            {/* 檔案夾導入導出 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-folder-import-export">
-              <div className="text-4xl mb-4">🔄</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">檔案夾導入導出</h3>
-              <p className="text-gray-600 mb-6">
-                支援 Wordwall 格式的檔案夾和活動導入導出功能，輕鬆遷移和分享
-              </p>
-              <Link
-                href="/tools/folder-import-export"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="folder-import-export-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
+
+
 
 
 
