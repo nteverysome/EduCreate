@@ -17,7 +17,8 @@ import {
   Check,
   X,
   Folder,
-  FileEdit
+  FileEdit,
+  BookOpen
 } from 'lucide-react';
 
 interface Activity {
@@ -53,6 +54,7 @@ interface WordwallStyleActivityCardProps {
   onRename?: (activity: Activity, newTitle: string) => void;
   onMove?: (activity: Activity) => void;
   onEditContent?: (activity: Activity) => void;
+  onAssignment?: (activity: Activity) => void;
   selectionMode?: boolean;
   // 拖拽相關
   onDragStart?: (activity: Activity) => void;
@@ -71,6 +73,7 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   onRename,
   onMove,
   onEditContent,
+  onAssignment,
   selectionMode = false,
   onDragStart,
   onDragEnd
@@ -421,6 +424,18 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
                     >
                       <Share2 className="w-3 h-3" />
                       分享
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAssignment?.(activity);
+                        setShowMenu(false);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
+                    >
+                      <BookOpen className="w-3 h-3" />
+                      課業分配
                     </button>
 
                     <button

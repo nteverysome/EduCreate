@@ -8,6 +8,7 @@ import TrashModal from './TrashModal';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
 import ActivitySearchAndFilter from './ActivitySearchAndFilter';
 import { MoveActivityModal } from './MoveActivityModal';
+import AssignmentModal, { AssignmentConfig } from './AssignmentModal';
 
 interface Activity {
   id: string;
@@ -104,6 +105,8 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [moveActivityId, setMoveActivityId] = useState<string | null>(null);
   const [moveActivityTitle, setMoveActivityTitle] = useState('');
   const [folders, setFolders] = useState<Array<{id: string, name: string, activityCount: number}>>([]);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [activityToAssign, setActivityToAssign] = useState<Activity | null>(null);
 
   // 載入活動數據
   useEffect(() => {
@@ -496,6 +499,38 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
+  // 處理課業分配（Wordwall 風格）
+  const handleAssignment = (activity: Activity) => {
+    console.log('📚 課業分配:', activity.title, '類型:', activity.type, 'ID:', activity.id);
+    setActivityToAssign(activity);
+    setShowAssignmentModal(true);
+  };
+
+  // 處理開始課業分配
+  const handleStartAssignment = async (assignmentConfig: AssignmentConfig) => {
+    if (!activityToAssign) return;
+
+    try {
+      console.log('🚀 開始課業分配:', {
+        activity: activityToAssign.title,
+        config: assignmentConfig
+      });
+
+      // TODO: 實現課業分配邏輯
+      // 1. 創建課業會話
+      // 2. 生成分享連結
+      // 3. 設置時間限制（如果有）
+      // 4. 配置學生註冊方式
+
+      // 暫時顯示成功訊息
+      alert(`課業分配已設置！\n活動：${activityToAssign.title}\n註冊方式：${assignmentConfig.registrationType}\n結果標題：${assignmentConfig.resultTitle}`);
+
+    } catch (error) {
+      console.error('課業分配設置失敗:', error);
+      alert('課業分配設置失敗，請稍後再試');
+    }
+  };
+
   const handleActivityCopy = async (activity: Activity) => {
     try {
       console.log('🔄 開始複製活動:', activity.title);
@@ -762,6 +797,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               onRename={handleActivityRename}
               onMove={handleMoveActivity}
               onEditContent={handleEditContent}
+              onAssignment={handleAssignment}
               selectionMode={selectionMode}
               onDragStart={handleActivityDragStart}
               onDragEnd={handleActivityDragEnd}
@@ -823,6 +859,18 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           setMoveActivityTitle('');
         }}
       />
+
+      {activityToAssign && (
+        <AssignmentModal
+          activity={activityToAssign}
+          isOpen={showAssignmentModal}
+          onClose={() => {
+            setShowAssignmentModal(false);
+            setActivityToAssign(null);
+          }}
+          onStartAssignment={handleStartAssignment}
+        />
+      )}
     </div>
   );
 };
