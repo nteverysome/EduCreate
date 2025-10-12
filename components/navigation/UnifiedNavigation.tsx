@@ -186,23 +186,7 @@ const UnifiedNavigation = ({
                 我的結果
               </Link>
 
-              {/* 簡化版導航 - 顯示4個核心項目 */}
-              {navigationItems.map(item => (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                  }`}
-                  data-testid={item.testId}
-                  title={item.description}
-                >
-                  <span className="mr-2">{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
+              {/* 桌面版導航 - 移除核心項目，只保留原有的固定項目 */}
 
               {/* Wordwall 風格用戶菜單 */}
               <div className="relative">
@@ -402,7 +386,27 @@ const UnifiedNavigation = ({
                 </div>
               )}
 
-              {/* 手機版選單 - 只顯示用戶管理功能，不顯示導航項目 */}
+              {/* 手機版選單 - 包含核心導航項目和用戶管理功能 */}
+
+              {/* 核心導航項目 */}
+              <div className="pb-2 mb-2 border-b border-gray-100">
+                {navigationItems.map(item => (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    className={`flex items-center w-full px-4 py-3 text-sm font-medium transition-colors ${
+                      isActive(item.href)
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
+                    data-testid={`mobile-${item.testId}`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span className="mr-3">{item.icon}</span>
+                    <div>{item.label}</div>
+                  </Link>
+                ))}
+              </div>
 
               {/* 用戶操作 */}
               <div>
