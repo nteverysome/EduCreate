@@ -741,8 +741,9 @@ export default class Title extends Phaser.Scene {
 
     /**
      * 🆕 設置隨機目標詞彙 - 從 GEPT 管理器獲取新的學習目標
+     * @param {boolean} playAudio - 是否播放語音，預設為 true
      */
-    setRandomTargetWord() {
+    setRandomTargetWord(playAudio = true) {
         if (!this.game.geptManager) {
             console.warn('⚠️ GEPT 管理器未初始化');
             return;
@@ -760,13 +761,15 @@ export default class Title extends Phaser.Scene {
             // 🆕 更新中文文字（右列，對換後）
             this.targetText.setText(this.currentTargetWord.chinese);
 
-            // 🆕 自動播放雙語發音：中文 → 英文
-            if (this.game.bilingualManager) {
+            // 🆕 自動播放雙語發音：中文 → 英文（根據 playAudio 參數決定是否播放）
+            if (playAudio && this.game.bilingualManager) {
                 console.log('🔊 自動播放新單字發音:', this.currentTargetWord.chinese, '→', this.currentTargetWord.english);
                 this.game.bilingualManager.speakBilingual(
                     this.currentTargetWord.english,
                     this.currentTargetWord.chinese
                 );
+            } else if (!playAudio) {
+                console.log('🔇 跳過新單字語音播放（避免衝突）');
             }
         } else {
             console.warn('⚠️ 無法獲取隨機詞彙');
@@ -1028,8 +1031,11 @@ export default class Title extends Phaser.Scene {
             // 顯示成功提示 - 在雲朵位置顯示
             this.showSuccessMessage(word, enemy.x, enemy.y);
 
-            // 設置新的目標詞彙
-            this.setRandomTargetWord();
+            // 延遲設置新的目標詞彙，避免語音衝突
+            // 等待答對語音播放完成後再播放新單字語音
+            this.time.delayedCall(2000, () => {
+                this.setRandomTargetWord(true); // 延遲後播放新單字語音
+            });
 
             // 更新分數顯示
             this.updateScoreDisplay();
