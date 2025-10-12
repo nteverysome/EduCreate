@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
+import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 
 // 從 /games/switcher 整合的實際遊戲數據
 const gameTemplates = [
@@ -231,73 +232,8 @@ export default function CreateActivityPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 導航欄 - 優化手機版 */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* 桌面版導航 */}
-          <div className="hidden md:flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center">
-                <a href="/" className="text-xl font-bold text-blue-600 hover:text-blue-800 transition-colors">
-                  EduCreate
-                </a>
-                <span className="ml-2 text-sm text-gray-500">更快地創建更好的課程</span>
-              </div>
-              <a href="/create" className="text-blue-600 hover:text-blue-800">創建活動</a>
-            </div>
-            <div className="flex items-center space-x-4">
-              <a href="/community" className="text-gray-600 hover:text-gray-800">👥 社區</a>
-              <a href="/my-activities" className="text-gray-600 hover:text-gray-800">我的活動</a>
-              <a href="/my-results" className="text-gray-600 hover:text-gray-800">我的結果</a>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">{session.user?.name}</span>
-                <button className="text-gray-600 hover:text-gray-800">▼</button>
-              </div>
-            </div>
-          </div>
-
-          {/* 手機版導航 - 優化版 */}
-          <div className="md:hidden">
-            {/* 頂部行：Logo 和用戶 */}
-            <div className="flex justify-between items-center h-14 border-b border-gray-100">
-              <div className="flex items-center">
-                <a href="/" className="text-lg font-bold text-blue-600">
-                  EduCreate
-                </a>
-              </div>
-              <div className="flex items-center space-x-2 bg-gray-50 px-3 py-1.5 rounded-full">
-                <span className="text-sm text-gray-700 font-medium">{session?.user?.name || '測試用戶'}</span>
-                <button className="text-gray-500 hover:text-gray-700">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* 底部行：標語和導航 */}
-            <div className="py-3">
-              <div className="text-center mb-3">
-                <span className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full">更快地創建更好的課程</span>
-              </div>
-              <div className="flex justify-center space-x-1">
-                <a href="/create" className="flex items-center px-3 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors">
-                  創建活動
-                </a>
-                <a href="/community" className="flex items-center px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
-                  👥 社區
-                </a>
-                <a href="/my-activities" className="flex items-center px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
-                  我的活動
-                </a>
-                <a href="/my-results" className="flex items-center px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
-                  我的結果
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* 統一導航組件 */}
+      <UnifiedNavigation />
 
       {/* 主要內容 - 優化手機和平板 */}
       <div className="max-w-7xl mx-auto py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8">
