@@ -795,6 +795,82 @@ const UnifiedNavigation = ({
                 {/* 用戶操作 */}
                 {currentUser ? (
                   <div className="border-t border-gray-200 pt-2 mt-2">
+                    {/* 用戶管理功能 - 與桌面版保持一致 */}
+                    <Link
+                      href="/create"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">➕</span>
+                      <div>創建活動</div>
+                    </Link>
+                    <Link
+                      href="/my-activities"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">📋</span>
+                      <div>我的活動</div>
+                    </Link>
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">📊</span>
+                      <div>我的結果</div>
+                    </Link>
+                    <div className="border-t border-gray-100 my-1"></div>
+                    <Link
+                      href="/account/profile"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">👤</span>
+                      <div>編輯個人資訊</div>
+                    </Link>
+                    <Link
+                      href="/account/payment"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">💳</span>
+                      <div>管理付款</div>
+                    </Link>
+                    <Link
+                      href="/account/language"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">🌐</span>
+                      <div>語言和位置</div>
+                    </Link>
+                    <div className="border-t border-gray-100 my-1"></div>
+                    <Link
+                      href="/community"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">👥</span>
+                      <div>社區</div>
+                    </Link>
+                    <Link
+                      href="/contact"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">📞</span>
+                      <div>聯繫方式</div>
+                    </Link>
+                    <Link
+                      href="/pricing"
+                      className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <span className="mr-3">💎</span>
+                      <div>價格計劃</div>
+                    </Link>
+                    <div className="border-t border-gray-100 my-1"></div>
                     <button
                       onClick={handleLogout}
                       className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-gray-50 transition-colors"
@@ -802,6 +878,15 @@ const UnifiedNavigation = ({
                       <span className="mr-3">🚪</span>
                       <div>登出</div>
                     </button>
+                    <div className="px-4 py-2">
+                      <Link
+                        href="/terms"
+                        className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        使用條款
+                      </Link>
+                    </div>
                   </div>
                 ) : (
                   <div className="border-t border-gray-200 pt-2 mt-2 space-y-2">
