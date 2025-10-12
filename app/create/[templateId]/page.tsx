@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
+import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 
 interface VocabularyItem {
   id: string;
@@ -322,55 +323,8 @@ export default function CreateGamePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 導航欄 - 響應式優化 */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* 桌面版導航 */}
-          <div className="hidden md:flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center">
-                <a href="/" className="text-xl font-bold text-blue-600 hover:text-blue-800 transition-colors">
-                  EduCreate
-                </a>
-                <span className="ml-2 text-sm text-gray-500">更快地創建更好的課程</span>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">{session.user?.name || '測試用戶'}</span>
-                <button className="text-gray-600 hover:text-gray-800">▼</button>
-              </div>
-            </div>
-          </div>
-
-          {/* 手機版導航 - 優化版 */}
-          <div className="md:hidden">
-            {/* 頂部行：Logo 和用戶 */}
-            <div className="flex justify-between items-center h-14 border-b border-gray-100">
-              <div className="flex items-center">
-                <a href="/" className="text-lg font-bold text-blue-600">
-                  EduCreate
-                </a>
-              </div>
-              <div className="flex items-center space-x-2 bg-gray-50 px-3 py-1.5 rounded-full">
-                <span className="text-sm text-gray-700 font-medium">{session.user?.name || '測試用戶'}</span>
-                <button className="text-gray-500 hover:text-gray-700">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* 底部行：標語 */}
-            <div className="py-2">
-              <div className="text-center">
-                <span className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full">更快地創建更好的課程</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* 統一導航系統 */}
+      <UnifiedNavigation variant="header" />
 
       {/* 遊戲頭部 - 響應式優化 */}
       <div className="bg-white border-b">
