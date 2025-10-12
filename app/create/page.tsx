@@ -9,6 +9,16 @@ import LoginPrompt from '@/components/Auth/LoginPrompt';
 const gameTemplates = [
   // 已完成的遊戲（可直接遊玩）
   {
+    id: 'shimozurdo-game',
+    name: 'Shimozurdo 雲朵遊戲',
+    description: '動態反應記憶',
+    icon: '☁️',
+    category: '動態反應記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 800
+  },
+  {
     id: 'airplane-vite',
     name: '飛機遊戲 (Vite版)',
     description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
@@ -17,18 +27,6 @@ const gameTemplates = [
     popular: true,
     status: 'completed',
     estimatedLoadTime: 600
-  },
-
-
-  {
-    id: 'shimozurdo-game',
-    name: 'Shimozurdo 雲朵遊戲',
-    description: 'Phaser 3 雲朵碰撞遊戲，支援全螢幕和響應式設計，記憶科學驅動的英語學習',
-    icon: '☁️',
-    category: '動態反應記憶',
-    popular: true,
-    status: 'completed',
-    estimatedLoadTime: 800
   },
 
   {
