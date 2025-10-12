@@ -82,24 +82,7 @@ export default function HomePage() {
 
 
 
-            {/* 智能排序系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-smart-sorting">
-              <div className="text-4xl mb-4">🔄</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">智能排序系統</h3>
-              <p className="text-gray-600 mb-6">
-                支援16種排序維度，AI智能推薦，基於記憶科學原理的多維度排序
-              </p>
-              <Link
-                href="/demo/smart-sorting"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="smart-sorting-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
 
 
 
@@ -160,24 +143,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 檔案夾統計分析 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-folder-analytics">
-              <div className="text-4xl mb-4">📊</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">檔案夾統計分析</h3>
-              <p className="text-gray-600 mb-6">
-                完整的檔案夾統計數據、學習效果分析、健康度評估和趨勢分析
-              </p>
-              <Link
-                href="/demo/folder-analytics"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="folder-analytics-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
 
 
 
@@ -204,57 +170,9 @@ export default function HomePage() {
 
 
 
-            {/* 無障礙支援系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow border-2 border-purple-200" data-testid="feature-accessibility">
-              <div className="text-4xl mb-4">♿</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">無障礙支援系統</h3>
-              <p className="text-gray-600 mb-6">
-                完整的鍵盤導航、螢幕閱讀器支援、WCAG 2.1 AA 合規設計，讓所有用戶都能輕鬆使用
-              </p>
-              <div className="flex flex-col space-y-2 mb-6">
-                <div className="flex items-center text-sm text-gray-500">
-                  <span className="mr-2">⌨️</span>
-                  <span>完整鍵盤導航支援</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-500">
-                  <span className="mr-2">🔊</span>
-                  <span>螢幕閱讀器優化</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-500">
-                  <span className="mr-2">✅</span>
-                  <span>WCAG 2.1 AA 合規</span>
-                </div>
-              </div>
-              <Link
-                href="/games/match"
-                className="inline-flex items-center text-purple-600 font-medium hover:text-purple-700"
-                data-testid="accessibility-demo-link"
-              >
-                體驗無障礙遊戲
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
 
-            {/* 富文本編輯器 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-rich-text-editor">
-              <div className="text-4xl mb-4">✏️</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">富文本編輯器</h3>
-              <p className="text-gray-600 mb-6">
-                完整的富文本編輯功能，支持格式化、表格、列表和無障礙設計
-              </p>
-              <Link
-                href="/content/rich-text-editor"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="rich-text-editor-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
+
 
             {/* 多媒體支持系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-multimedia">
@@ -317,24 +235,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 實時協作系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-realtime-collaboration">
-              <div className="text-4xl mb-4">👥</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">實時協作系統</h3>
-              <p className="text-gray-600 mb-6">
-                多用戶同時編輯、版本歷史、變更追蹤和衝突解決，實時協作延遲 &lt;100ms
-              </p>
-              <Link
-                href="/content/realtime-collaboration"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="realtime-collaboration-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
 
             {/* 創建活動 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-create-activity">
@@ -431,43 +332,9 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 檔案夾模板系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-folder-templates">
-              <div className="text-4xl mb-4">📁</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">檔案夾模板</h3>
-              <p className="text-gray-600 mb-6">
-                預設模板快速創建檔案夾結構，支援語言學習、數學、科學等分類
-              </p>
-              <Link
-                href="/tools/folder-templates"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="folder-templates-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
 
-            {/* 完整5遊戲模板架構 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-five-games-architecture">
-              <div className="text-4xl mb-4">🎮</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">完整5遊戲模板架構</h3>
-              <p className="text-gray-600 mb-6">
-                Match配對、Fill-in填空、Quiz測驗、Sequence順序、Flashcard閃卡等5種記憶科學遊戲
-              </p>
-              <Link
-                href="/games/five-games-architecture"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="five-games-architecture-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
+
 
             {/* 完整檔案空間系統 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-file-space-system">
@@ -488,24 +355,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 完整遊戲切換系統 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-game-switcher">
-              <div className="text-4xl mb-4">🔄</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">完整遊戲切換系統</h3>
-              <p className="text-gray-600 mb-6">
-                無縫遊戲切換、智能內容適配、狀態保持恢復、50種切換模式等完整功能
-              </p>
-              <Link
-                href="/games/game-switcher"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="game-switcher-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
 
 
 
@@ -528,24 +378,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 活動複製和模板化 */}
-            <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-activity-copy-template">
-              <div className="text-4xl mb-4">📋</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">活動複製和模板化</h3>
-              <p className="text-gray-600 mb-6">
-                智能內容適配，一鍵複製活動，創建個人化模板，跨等級內容轉換
-              </p>
-              <Link
-                href="/activities/copy-template"
-                className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                data-testid="activity-copy-template-link"
-              >
-                立即體驗
-                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+
 
             {/* 活動歷史和版本管理 */}
             <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow" data-testid="feature-activity-history-version">
