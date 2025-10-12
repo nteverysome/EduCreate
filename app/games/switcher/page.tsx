@@ -34,7 +34,7 @@ const GameSwitcherPage: React.FC = () => {
   const [showStats, setShowStats] = useState<boolean>(false);
   const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
   const [showMobileGeptMenu, setShowMobileGeptMenu] = useState<boolean>(false);
-  const [hasUserScrolled, setHasUserScrolled] = useState<boolean>(false);
+
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [customVocabulary, setCustomVocabulary] = useState<any[]>([]);
   const [activityId, setActivityId] = useState<string | null>(null);
@@ -137,14 +137,8 @@ const GameSwitcherPage: React.FC = () => {
     }
   };
 
-  // 檢測螢幕尺寸和智能自動滾動
+  // 檢測螢幕尺寸
   useEffect(() => {
-    // 重置滾動狀態，確保每次進入頁面都能自動滾動
-    setHasUserScrolled(false);
-
-    const handleScroll = () => {
-      setHasUserScrolled(true);
-    };
 
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -289,36 +283,7 @@ const GameSwitcherPage: React.FC = () => {
       }
     };
 
-    const autoScrollToGame = () => {
-      // 檢查用戶是否偏好減少動畫
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // 對所有設備都執行自動滾動，不只是手機
-      if (!hasUserScrolled && !prefersReducedMotion) {
-        // 優先尋找 iframe 容器，如果找不到則使用遊戲容器
-        const iframeContainer = document.querySelector('.game-iframe-container');
-        const gameContainer = document.querySelector('[data-testid="game-container"]');
-        const targetElement = iframeContainer || gameContainer;
-
-        if (targetElement) {
-          // 縮短延遲時間，更快滾動到遊戲容器
-          setTimeout(() => {
-            // 計算滾動位置，讓遊戲容器頂部對齊視窗頂部
-            const elementRect = targetElement.getBoundingClientRect();
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const targetScrollPosition = scrollTop + elementRect.top;
-
-            // 平滑滾動到目標位置
-            window.scrollTo({
-              top: targetScrollPosition,
-              behavior: 'smooth'
-            });
-
-            console.log('🎯 自動滾動到遊戲容器頂部 (隱藏標題區域)');
-          }, 500);
-        }
-      }
-    };
 
     // 初始檢查螢幕尺寸
     checkScreenSize();
@@ -344,7 +309,7 @@ const GameSwitcherPage: React.FC = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+
     window.addEventListener('resize', checkScreenSize);
     window.addEventListener('message', handleFullscreenMessage);
 
@@ -354,15 +319,10 @@ const GameSwitcherPage: React.FC = () => {
     document.addEventListener('mozfullscreenchange', handleFullscreenChange);
     (document as any).addEventListener('MSFullscreenChange', handleFullscreenChange);
 
-    // 執行自動滾動 - 多次嘗試確保成功
-    autoScrollToGame();
 
-    // 額外的滾動嘗試，確保在所有內容載入後也能滾動
-    setTimeout(autoScrollToGame, 1500);
-    setTimeout(autoScrollToGame, 3000);
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+
       window.removeEventListener('resize', checkScreenSize);
       window.removeEventListener('message', handleFullscreenMessage);
 
@@ -372,7 +332,7 @@ const GameSwitcherPage: React.FC = () => {
       document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
       (document as any).removeEventListener('MSFullscreenChange', handleFullscreenChange);
     };
-  }, [hasUserScrolled]);
+  }, []);
 
   // 格式化時間
   const formatTime = (milliseconds: number): string => {
