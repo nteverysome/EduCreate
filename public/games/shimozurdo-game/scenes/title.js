@@ -741,9 +741,8 @@ export default class Title extends Phaser.Scene {
 
     /**
      * 🆕 設置隨機目標詞彙 - 從 GEPT 管理器獲取新的學習目標
-     * @param {boolean} playAudio - 是否播放語音，預設為 true
      */
-    setRandomTargetWord(playAudio = true) {
+    setRandomTargetWord() {
         if (!this.game.geptManager) {
             console.warn('⚠️ GEPT 管理器未初始化');
             return;
@@ -761,15 +760,13 @@ export default class Title extends Phaser.Scene {
             // 🆕 更新中文文字（右列，對換後）
             this.targetText.setText(this.currentTargetWord.chinese);
 
-            // 🆕 自動播放雙語發音：中文 → 英文（根據 playAudio 參數決定是否播放）
-            if (playAudio && this.game.bilingualManager) {
+            // 🆕 自動播放雙語發音：中文 → 英文
+            if (this.game.bilingualManager) {
                 console.log('🔊 自動播放新單字發音:', this.currentTargetWord.chinese, '→', this.currentTargetWord.english);
                 this.game.bilingualManager.speakBilingual(
                     this.currentTargetWord.english,
                     this.currentTargetWord.chinese
                 );
-            } else if (!playAudio) {
-                console.log('🔇 跳過新單字語音播放（避免衝突）');
             }
         } else {
             console.warn('⚠️ 無法獲取隨機詞彙');
@@ -1006,36 +1003,14 @@ export default class Title extends Phaser.Scene {
             this.score += 10;
             this.wordsLearned += 1;
 
-            // 播放對應語言發音 - 根據雲朵中顯示的內容決定播放哪種語言
-            if (this.game.bilingualManager) {
-                // 獲取雲朵中顯示的文字
-                const wordText = enemy.getData('wordText');
-                const displayedText = wordText ? wordText.text : '';
-
-                // 判斷雲朵中顯示的是英文還是中文，並播放對應語言
-                if (displayedText === word.english) {
-                    // 雲朵中顯示英文，播放英文
-                    console.log('🔊 播放英文發音:', word.english);
-                    this.game.bilingualManager.speakEnglish(word.english);
-                } else if (displayedText === word.chinese) {
-                    // 雲朵中顯示中文，播放中文
-                    console.log('🔊 播放中文發音:', word.chinese);
-                    this.game.bilingualManager.speakChinese(word.chinese);
-                } else {
-                    // 備用方案：如果無法判斷，播放英文（因為目前雲朵預設顯示英文）
-                    console.log('🔊 備用方案播放英文發音:', word.english);
-                    this.game.bilingualManager.speakEnglish(word.english);
-                }
-            }
+            // 🔇 碰撞答對時不播放語音，避免與新單字語音衝突
+            console.log('🔇 碰撞答對：不播放語音，避免衝突');
 
             // 顯示成功提示 - 在雲朵位置顯示
             this.showSuccessMessage(word, enemy.x, enemy.y);
 
-            // 延遲設置新的目標詞彙，避免語音衝突
-            // 等待答對語音播放完成後再播放新單字語音
-            this.time.delayedCall(2000, () => {
-                this.setRandomTargetWord(true); // 延遲後播放新單字語音
-            });
+            // 設置新的目標詞彙
+            this.setRandomTargetWord();
 
             // 更新分數顯示
             this.updateScoreDisplay();
