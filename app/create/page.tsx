@@ -190,23 +190,16 @@ export default function CreateActivityPage() {
     }
   };
 
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <UnifiedNavigation />
-        <div className="p-8">載入中...</div>
-      </div>
-    );
-  }
+  // 統一渲染結構，避免閃爍
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <UnifiedNavigation />
 
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <UnifiedNavigation />
+      {status === 'loading' ? (
+        <div className="p-8">載入中...</div>
+      ) : !session ? (
         <LoginPrompt />
-      </div>
-    );
-  }
+      ) : (
 
   // 過濾和排序遊戲模板（只顯示已完成的遊戲）
   const filteredTemplates = gameTemplates.filter(template =>
@@ -382,6 +375,7 @@ export default function CreateActivityPage() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
