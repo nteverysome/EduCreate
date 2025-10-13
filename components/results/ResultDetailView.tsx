@@ -74,6 +74,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   const [showFilter, setShowFilter] = useState<'all' | 'best' | 'first'>('all');
   const [expandedParticipant, setExpandedParticipant] = useState<string | null>(null);
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // 格式化時間顯示
   const formatDateTime = (dateString: string) => {
@@ -99,9 +100,28 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   };
 
   // 複製分享連結
-  const copyShareLink = () => {
-    navigator.clipboard.writeText(result.shareLink);
-    // TODO: 顯示複製成功提示
+  const copyShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(result.shareLink);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000); // 2秒後隱藏提示
+    } catch (err) {
+      console.error('複製失敗:', err);
+      // 降級方案：選擇文本
+      const textArea = document.createElement('textarea');
+      textArea.value = result.shareLink;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
+
+  // 打開遊戲連結
+  const openGameLink = () => {
+    window.open(result.shareLink, '_blank');
   };
 
   // 獲取學生的詳細答案數據
@@ -342,16 +362,45 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
         </div>
         
         <div className="mt-4 p-3 bg-gray-50 rounded-md">
-          <div className="text-sm text-gray-600 mb-1">學生分享連結：</div>
-          <div className="flex items-center">
-            <code className="text-sm bg-white px-2 py-1 rounded border flex-1 mr-2">
+          <div className="text-sm text-gray-600 mb-2">學生分享連結：</div>
+          <div className="flex items-center space-x-2">
+            <code className="text-sm bg-white px-3 py-2 rounded border flex-1">
               {result.shareLink}
             </code>
             <button
-              onClick={copyShareLink}
-              className="text-blue-600 hover:text-blue-700 text-sm"
+              onClick={openGameLink}
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              title="直接開始遊戲"
             >
-              ⧉
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m-6-8h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z" />
+              </svg>
+              Play
+            </button>
+            <button
+              onClick={copyShareLink}
+              className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md transition-colors ${
+                copySuccess
+                  ? 'text-green-700 bg-green-50 border-green-300'
+                  : 'text-gray-700 bg-white hover:bg-gray-50'
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+              title="複製連結"
+            >
+              {copySuccess ? (
+                <>
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  已複製
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  複製
+                </>
+              )}
             </button>
           </div>
         </div>
