@@ -56,7 +56,7 @@ export async function GET(
       participantCount: 1,
       createdAt: '2025-10-13T14:08:00Z',
       status: 'active',
-      gameType: '雲朵遊戲',
+      gameType: '詞彙遊戲',
       shareLink: 'https://edu-create.vercel.app/play/cmgman4s00004jj04qwxdfwu1/1760329085361',
       participants: [
         {
