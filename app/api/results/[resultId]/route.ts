@@ -113,7 +113,30 @@ function analyzeQuestionStatistics(participants: GameParticipant[]): QuestionSta
   }>();
 
   participants.forEach(participant => {
-    if (participant.gameData && participant.gameData.questions) {
+    // 🆕 檢查新的問題數據結構（從遊戲的finalResult.questions）
+    if (participant.gameData && participant.gameData.finalResult && participant.gameData.finalResult.questions) {
+      participant.gameData.finalResult.questions.forEach((question: any, index: number) => {
+        const key = `${question.questionNumber || index + 1}`;
+        const questionText = question.questionText || question.text || question.word || `問題 ${index + 1}`;
+
+        if (!questionMap.has(key)) {
+          questionMap.set(key, {
+            questionText,
+            correct: 0,
+            incorrect: 0
+          });
+        }
+
+        const stats = questionMap.get(key)!;
+        if (question.isCorrect || question.correct) {
+          stats.correct++;
+        } else {
+          stats.incorrect++;
+        }
+      });
+    }
+    // 🆕 兼容舊的數據結構
+    else if (participant.gameData && participant.gameData.questions) {
       participant.gameData.questions.forEach((question: any, index: number) => {
         const key = `${index + 1}`;
         const questionText = question.text || question.word || `問題 ${index + 1}`;

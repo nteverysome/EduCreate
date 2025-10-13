@@ -671,6 +671,9 @@ export default class Title extends Phaser.Scene {
         this.score = 0;                                      // 分數
         this.currentTargetWord = null;                       // 當前目標詞彙
 
+        // 🆕 記錄詳細的問題和答案數據
+        this.questionAnswerLog = [];                         // 記錄所有問題和答案
+
         // 🆕 三列布局 - 基於相機視口計算每列的 X 座標
         // 使用 cam.scrollX 來獲取相機當前的滾動位置
         const leftX = cam.scrollX + visibleWidth * 0.25;     // 左列（25%）
@@ -1046,6 +1049,18 @@ export default class Title extends Phaser.Scene {
         const word = enemy.getData('word');
         const isTarget = enemy.getData('isTarget');
 
+        // 🆕 記錄問題和答案數據
+        const questionData = {
+            questionNumber: this.questionAnswerLog.length + 1,
+            questionText: this.currentTargetWord ? this.currentTargetWord.chinese : '未知問題',
+            correctAnswer: this.currentTargetWord ? this.currentTargetWord.english : '未知答案',
+            studentAnswer: word.english,
+            isCorrect: isTarget,
+            timestamp: Date.now()
+        };
+        this.questionAnswerLog.push(questionData);
+        console.log('📝 記錄問題答案:', questionData);
+
         if (isTarget) {
             // ✅ 碰撞正確目標
             console.log('✅ 碰撞正確目標:', word.chinese, word.english);
@@ -1347,11 +1362,13 @@ export default class Title extends Phaser.Scene {
         const gameResult = {
             score: this.score || 0,
             correctAnswers: this.wordsLearned || 0,
-            totalQuestions: this.wordsLearned || 0, // 在這個遊戲中，每個學會的單字都是一個問題
+            totalQuestions: this.questionAnswerLog.length || 0, // 使用實際問題數量
             timeSpent: Math.floor((Date.now() - (this.gameStartTime || Date.now())) / 1000),
             gameType: 'shimozurdo-game',
             finalHealth: this.currentHealth || 0,
-            maxHealth: this.maxHealth || 100
+            maxHealth: this.maxHealth || 100,
+            // 🆕 添加詳細的問題答案數據
+            questions: this.questionAnswerLog || []
         };
 
         console.log('📊 遊戲結果:', gameResult);

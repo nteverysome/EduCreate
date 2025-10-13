@@ -72,6 +72,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   const [participantSort, setParticipantSort] = useState<'submitted' | 'name' | 'correct_time'>('submitted');
   const [questionSort, setQuestionSort] = useState<'number' | 'correct' | 'incorrect'>('number');
   const [showFilter, setShowFilter] = useState<'all' | 'best' | 'first'>('all');
+  const [expandedParticipant, setExpandedParticipant] = useState<string | null>(null);
 
   // 格式化時間顯示
   const formatDateTime = (dateString: string) => {
@@ -100,6 +101,19 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   const copyShareLink = () => {
     navigator.clipboard.writeText(result.shareLink);
     // TODO: 顯示複製成功提示
+  };
+
+  // 獲取學生的詳細答案數據
+  const getStudentAnswers = (participant: GameParticipant) => {
+    if (participant.gameData && participant.gameData.finalResult && participant.gameData.finalResult.questions) {
+      return participant.gameData.finalResult.questions;
+    }
+    return [];
+  };
+
+  // 切換學生詳細信息展開狀態
+  const toggleParticipantExpansion = (participantId: string) => {
+    setExpandedParticipant(expandedParticipant === participantId ? null : participantId);
   };
 
   // 篩選參與者
@@ -431,25 +445,79 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {sortedParticipants.map((participant) => (
-                <tr key={participant.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {participant.studentName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {participant.score}%
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {participant.correctAnswers}/{participant.totalQuestions}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDuration(participant.timeSpent)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDateTime(participant.completedAt)}
-                  </td>
-                </tr>
-              ))}
+              {sortedParticipants.map((participant) => {
+                const studentAnswers = getStudentAnswers(participant);
+                const isExpanded = expandedParticipant === participant.id;
+
+                return (
+                  <React.Fragment key={participant.id}>
+                    <tr
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={() => toggleParticipantExpansion(participant.id)}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <div className="flex items-center">
+                          <span className="mr-2">{isExpanded ? '▼' : '▶'}</span>
+                          {participant.studentName}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {participant.score}%
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {participant.correctAnswers}/{participant.totalQuestions}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {formatDuration(participant.timeSpent)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatDateTime(participant.completedAt)}
+                      </td>
+                    </tr>
+
+                    {/* 展開的詳細答案行 */}
+                    {isExpanded && studentAnswers.length > 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-4 bg-gray-50">
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium text-gray-900 mb-3">詳細答案：</h4>
+                            <div className="overflow-x-auto">
+                              <table className="min-w-full">
+                                <thead>
+                                  <tr className="border-b border-gray-200">
+                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-2">問題</th>
+                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-2">正確答案</th>
+                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-2">學生答案</th>
+                                    <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-2">結果</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {studentAnswers.map((answer: any, index: number) => (
+                                    <tr key={index} className="border-b border-gray-100">
+                                      <td className="py-2 text-sm text-gray-900">{answer.questionText || `問題 ${answer.questionNumber || index + 1}`}</td>
+                                      <td className="py-2 text-sm text-gray-900">{answer.correctAnswer || '未知'}</td>
+                                      <td className="py-2 text-sm text-gray-900">{answer.studentAnswer || '未答'}</td>
+                                      <td className="py-2 text-sm">
+                                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                                          answer.isCorrect
+                                            ? 'text-green-800 bg-green-100'
+                                            : 'text-red-800 bg-red-100'
+                                        }`}>
+                                          {answer.isCorrect ? '✓ 正確' : '✗ 錯誤'}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>
