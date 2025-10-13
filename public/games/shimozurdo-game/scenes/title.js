@@ -21,6 +21,10 @@ export default class Title extends Phaser.Scene {
     create() {
         const { width, height } = this                   // 解構賦值獲取寬高
 
+        // 🎮 記錄遊戲開始時間
+        this.gameStartTime = Date.now();
+        console.log('🎮 遊戲開始時間記錄:', new Date(this.gameStartTime).toLocaleTimeString());
+
         // 🔧 修復：在場景創建時立即清理攔截層
         this.cleanupInterceptLayers();
 
@@ -865,7 +869,7 @@ export default class Title extends Phaser.Scene {
 
         if (this.currentHealth <= 0) {                   // 檢查是否死亡
             console.log('💀 太空船被摧毀！');
-            // 這裡可以添加遊戲結束邏輯
+            this.gameOver();                              // 調用遊戲結束處理
         }
 
         console.log(`💥 受到 ${damage} 點傷害，剩餘生命值: ${this.currentHealth}`);
@@ -1328,6 +1332,155 @@ export default class Title extends Phaser.Scene {
         this.healthBarBackground.setPosition(healthBarX + 2, healthBarY + 2);
         this.healthBar.setPosition(healthBarX + 2, healthBarY + 2);
         this.healthText.setPosition(healthBarX - 15, healthBarY + healthBarHeight / 2);
+    }
+
+    /**
+     * 🎮 遊戲結束處理 - 提交結果並顯示結束畫面
+     */
+    gameOver() {
+        console.log('🎮 遊戲結束！');
+
+        // 停止遊戲更新
+        this.sceneStopped = true;
+
+        // 準備遊戲結果數據
+        const gameResult = {
+            score: this.score || 0,
+            correctAnswers: this.wordsLearned || 0,
+            totalQuestions: this.wordsLearned || 0, // 在這個遊戲中，每個學會的單字都是一個問題
+            timeSpent: Math.floor((Date.now() - (this.gameStartTime || Date.now())) / 1000),
+            gameType: 'shimozurdo-game',
+            finalHealth: this.currentHealth || 0,
+            maxHealth: this.maxHealth || 100
+        };
+
+        console.log('📊 遊戲結果:', gameResult);
+
+        // 提交結果到 EduCreate 系統
+        if (window.EduCreateResultCollector && window.EduCreateResultCollector.isAssignmentMode()) {
+            console.log('📤 提交遊戲結果到 EduCreate 系統');
+            window.EduCreateResultCollector.submitGameResult(gameResult)
+                .then(result => {
+                    if (result.success) {
+                        console.log('✅ 結果提交成功:', result);
+                        this.showGameOverScreen(gameResult, true);
+                    } else {
+                        console.warn('⚠️ 結果提交失敗:', result);
+                        this.showGameOverScreen(gameResult, false);
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ 結果提交錯誤:', error);
+                    this.showGameOverScreen(gameResult, false);
+                });
+        } else {
+            console.log('ℹ️ 非課業分配模式，跳過結果提交');
+            this.showGameOverScreen(gameResult, false);
+        }
+    }
+
+    /**
+     * 🎭 顯示遊戲結束畫面
+     */
+    showGameOverScreen(gameResult, resultSubmitted) {
+        // 創建半透明背景
+        const overlay = this.add.rectangle(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY,
+            this.cameras.main.width,
+            this.cameras.main.height,
+            0x000000,
+            0.7
+        );
+        overlay.setScrollFactor(0);
+        overlay.setDepth(1000);
+
+        // 遊戲結束標題
+        const gameOverText = this.add.text(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY - 150,
+            '遊戲結束',
+            {
+                fontSize: '48px',
+                color: '#ff4444',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 4
+            }
+        );
+        gameOverText.setOrigin(0.5);
+        gameOverText.setScrollFactor(0);
+        gameOverText.setDepth(1001);
+
+        // 分數顯示
+        const scoreText = this.add.text(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY - 50,
+            `最終分數: ${gameResult.score}\n學會單字: ${gameResult.correctAnswers}\n遊戲時間: ${gameResult.timeSpent}秒`,
+            {
+                fontSize: '24px',
+                color: '#ffffff',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 2,
+                align: 'center'
+            }
+        );
+        scoreText.setOrigin(0.5);
+        scoreText.setScrollFactor(0);
+        scoreText.setDepth(1001);
+
+        // 結果提交狀態
+        if (resultSubmitted) {
+            const submitText = this.add.text(
+                this.cameras.main.centerX,
+                this.cameras.main.centerY + 50,
+                '✅ 結果已成功記錄到課業系統',
+                {
+                    fontSize: '18px',
+                    color: '#44ff44',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 2
+                }
+            );
+            submitText.setOrigin(0.5);
+            submitText.setScrollFactor(0);
+            submitText.setDepth(1001);
+        }
+
+        // 重新開始按鈕
+        const restartButton = this.add.text(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY + 120,
+            '點擊重新開始',
+            {
+                fontSize: '20px',
+                color: '#ffff44',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 2
+            }
+        );
+        restartButton.setOrigin(0.5);
+        restartButton.setScrollFactor(0);
+        restartButton.setDepth(1001);
+        restartButton.setInteractive({ cursor: 'pointer' });
+
+        // 重新開始遊戲
+        restartButton.on('pointerdown', () => {
+            console.log('🔄 重新開始遊戲');
+            this.scene.restart();
+        });
+
+        // 添加閃爍效果
+        this.tweens.add({
+            targets: restartButton,
+            alpha: 0.5,
+            duration: 800,
+            yoyo: true,
+            repeat: -1
+        });
     }
 
     update() {
