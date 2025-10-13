@@ -218,7 +218,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
     }
 
     // 如果是顯示所有參與者，直接使用 API 統計數據
-    if (filter === 'all') {
+    if (showFilter === 'all') {
       return result.statistics;
     }
 
