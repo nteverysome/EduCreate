@@ -275,7 +275,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="text-sm text-gray-500 mb-1">最快的</div>
             <div className="text-2xl font-bold text-gray-900">
-              {formatTime(result.statistics.fastestTime.timeSpent)}
+              {formatDuration(result.statistics.fastestTime.timeSpent)}
             </div>
             <div className="text-sm text-gray-600 mt-1">{result.statistics.fastestTime.studentName}</div>
           </div>
