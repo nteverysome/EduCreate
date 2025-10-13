@@ -257,6 +257,17 @@ export async function GET(
     // 生成分享連結
     const shareLink = `https://edu-create.vercel.app/play/${result.assignment.activityId}/${result.assignmentId}`;
 
+    // 從 activity 中獲取遊戲類型，映射到實際的遊戲 ID
+    const getGameId = (activityType?: string): string => {
+      // 根據活動類型返回對應的遊戲 ID
+      switch (activityType) {
+        case '飛機碰撞遊戲':
+        case '詞彙遊戲':
+        default:
+          return 'shimozurdo-game';
+      }
+    };
+
     const formattedResult: AssignmentResult = {
       id: result.id,
       title: `"${result.assignment.activity.title}"的結果${result.resultNumber}`,
@@ -267,7 +278,7 @@ export async function GET(
       createdAt: result.createdAt.toISOString(),
       deadline: result.assignment.deadline?.toISOString(),
       status: result.status as 'active' | 'completed' | 'expired',
-      gameType: '詞彙遊戲', // 可以從 activity 中獲取具體的遊戲類型
+      gameType: getGameId(result.assignment.activity.type), // 返回實際的遊戲 ID
       shareLink,
       participants,
       statistics,
