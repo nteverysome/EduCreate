@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
-import LoginPrompt from '@/components/auth/LoginPrompt';
+import LoginPrompt from '@/components/Auth/LoginPrompt';
 import ResultDetailView from '@/components/results/ResultDetailView';
 
 interface AssignmentResult {
