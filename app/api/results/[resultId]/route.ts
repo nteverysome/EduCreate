@@ -56,7 +56,7 @@ interface AssignmentResult {
 /**
  * 計算統計數據總結
  */
-function calculateStatistics(participants: GameParticipant[]): StatisticsSummary {
+function calculateStatistics(participants: GameParticipant[], activityVocabularyCount: number): StatisticsSummary {
   if (participants.length === 0) {
     return {
       totalStudents: 0,
@@ -66,19 +66,20 @@ function calculateStatistics(participants: GameParticipant[]): StatisticsSummary
     };
   }
 
-  // 🎯 重新計算每個參與者的正確分數
+  // 🎯 重新計算每個參與者的正確分數（基於活動詞彙數量，與 Wordwall 邏輯一致）
   const participantsWithCorrectScores = participants.map(p => {
     let correctScore = 0;
 
-    // 優先使用 correctAnswers 和 totalQuestions 計算分數
-    if (p.correctAnswers !== undefined && p.totalQuestions !== undefined && p.totalQuestions > 0) {
-      correctScore = Math.round((p.correctAnswers / p.totalQuestions) * 100);
+    // 🔥 關鍵修復：使用活動詞彙數量而非遊戲問題次數
+    // 這與 Wordwall 的邏輯一致：正確答案數 ÷ 活動中的詞彙數量
+    if (p.correctAnswers !== undefined && activityVocabularyCount > 0) {
+      correctScore = Math.round((p.correctAnswers / activityVocabularyCount) * 100);
     }
-    // 如果沒有這些數據，嘗試從遊戲數據中計算
+    // 如果沒有 correctAnswers，嘗試從遊戲數據中計算
     else if (p.gameData && p.gameData.finalResult) {
       const finalResult = p.gameData.finalResult;
-      if (finalResult.correctAnswers !== undefined && finalResult.totalQuestions !== undefined && finalResult.totalQuestions > 0) {
-        correctScore = Math.round((finalResult.correctAnswers / finalResult.totalQuestions) * 100);
+      if (finalResult.correctAnswers !== undefined && activityVocabularyCount > 0) {
+        correctScore = Math.round((finalResult.correctAnswers / activityVocabularyCount) * 100);
       } else {
         // 使用原始分數作為後備
         correctScore = p.score || 0;
@@ -355,8 +356,17 @@ export async function GET(
       gameData: p.gameData
     }));
 
-    // 計算統計數據
-    const statistics = calculateStatistics(participants);
+    // 🎯 獲取活動詞彙數量用於分數計算
+    const activity = await prisma.activity.findUnique({
+      where: { id: result.assignment.activityId },
+      include: {
+        vocabularyItems: true
+      }
+    });
+    const activityVocabularyCount = activity?.vocabularyItems.length || 3; // 默認3個詞彙
+
+    // 計算統計數據（使用 Wordwall 邏輯：基於活動詞彙數量）
+    const statistics = calculateStatistics(participants, activityVocabularyCount);
     const questionStatistics = await analyzeQuestionStatistics(participants, result.assignment.activityId);
 
     // 生成分享連結
