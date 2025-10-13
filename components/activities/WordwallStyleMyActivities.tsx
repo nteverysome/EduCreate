@@ -520,9 +520,39 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         config: assignmentConfig
       });
 
-      // 生成分享連結（模擬）
-      const assignmentId = Date.now().toString();
-      const shareUrl = `https://edu-create.vercel.app/play/${activityToAssign.id}/${assignmentId}`;
+      // 準備課業分配數據
+      const assignmentData = {
+        activityId: activityToAssign.id,
+        title: assignmentConfig.resultTitle,
+        registrationType: assignmentConfig.registrationType === 'name' ? 'NAME' :
+                         assignmentConfig.registrationType === 'anonymous' ? 'ANONYMOUS' : 'GOOGLE',
+        deadline: assignmentConfig.hasDeadline ?
+                 new Date(`${assignmentConfig.deadlineDate} ${assignmentConfig.deadlineTime}`).toISOString() : null,
+        gameEndSettings: {
+          showAnswers: assignmentConfig.showAnswers,
+          showLeaderboard: assignmentConfig.showLeaderboard,
+          allowRestart: assignmentConfig.allowRestart
+        }
+      };
+
+      // 調用後端 API 創建課業分配
+      const response = await fetch('/api/assignments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(assignmentData)
+      });
+
+      if (!response.ok) {
+        throw new Error('創建課業分配失敗');
+      }
+
+      const result = await response.json();
+      console.log('✅ 課業分配創建成功:', result);
+
+      // 生成分享連結
+      const shareUrl = `https://edu-create.vercel.app/play/${activityToAssign.id}/${result.assignment.id}`;
 
       // 設置課業集模態對話框的數據
       setAssignmentShareUrl(shareUrl);
@@ -533,12 +563,6 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
 
       // 顯示課業集模態對話框
       setShowAssignmentSetModal(true);
-
-      // TODO: 實現真實的課業分配邏輯
-      // 1. 創建課業會話到後端
-      // 2. 保存到我的結果中
-      // 3. 設置時間限制（如果有）
-      // 4. 配置學生註冊方式
 
     } catch (error) {
       console.error('課業分配設置失敗:', error);

@@ -44,6 +44,29 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // 自動創建對應的結果記錄
+    const existingResults = await prisma.assignmentResult.count({
+      where: {
+        assignment: {
+          activityId: activityId
+        }
+      }
+    });
+
+    const assignmentResult = await prisma.assignmentResult.create({
+      data: {
+        assignmentId: assignment.id,
+        resultNumber: existingResults + 1,
+        status: 'ACTIVE'
+      }
+    });
+
+    console.log('✅ 課業分配和結果記錄創建成功:', {
+      assignmentId: assignment.id,
+      resultId: assignmentResult.id,
+      resultNumber: assignmentResult.resultNumber
+    });
+
     return NextResponse.json({
       success: true,
       assignment: {
@@ -54,6 +77,11 @@ export async function POST(request: NextRequest) {
         deadline: assignment.deadline?.toISOString(),
         status: assignment.status,
         createdAt: assignment.createdAt.toISOString()
+      },
+      result: {
+        id: assignmentResult.id,
+        resultNumber: assignmentResult.resultNumber,
+        status: assignmentResult.status
       }
     });
   } catch (error) {
