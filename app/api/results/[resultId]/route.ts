@@ -98,13 +98,96 @@ function calculateStatistics(participants: GameParticipant[]): StatisticsSummary
 }
 
 /**
- * 分析問題統計數據
+ * 分析問題統計數據 - 基於活動的詞彙列表
  */
-function analyzeQuestionStatistics(participants: GameParticipant[]): QuestionStatistic[] {
+async function analyzeQuestionStatistics(participants: GameParticipant[], activityId: string): Promise<QuestionStatistic[]> {
   if (participants.length === 0) {
     return [];
   }
 
+  try {
+    // 🎯 獲取活動的原始詞彙列表
+    const activity = await prisma.activity.findUnique({
+      where: { id: activityId },
+      include: {
+        vocabularyItems: {
+          include: {
+            vocabulary: true
+          }
+        }
+      }
+    });
+
+    if (!activity || !activity.vocabularyItems.length) {
+      console.log('⚠️ 活動沒有詞彙數據，使用舊邏輯');
+      return analyzeQuestionStatisticsLegacy(participants);
+    }
+
+    // 🎯 基於活動詞彙創建統計映射
+    const questionMap = new Map<string, {
+      questionText: string;
+      correct: number;
+      incorrect: number;
+    }>();
+
+    // 初始化每個詞彙的統計
+    activity.vocabularyItems.forEach((item, index) => {
+      const vocabulary = item.vocabulary;
+      const questionText = vocabulary.chinese || vocabulary.english || `詞彙 ${index + 1}`;
+      questionMap.set(questionText, {
+        questionText,
+        correct: 0,
+        incorrect: 0
+      });
+    });
+
+    // 🎯 統計每個學生對每個詞彙的答題情況
+    participants.forEach(participant => {
+      if (participant.gameData && participant.gameData.finalResult && participant.gameData.finalResult.questions) {
+        participant.gameData.finalResult.questions.forEach((question: any) => {
+          const questionText = question.questionText;
+          if (questionMap.has(questionText)) {
+            const stats = questionMap.get(questionText)!;
+            if (question.isCorrect) {
+              stats.correct++;
+            } else {
+              stats.incorrect++;
+            }
+          }
+        });
+      }
+    });
+
+    // 🎯 轉換為結果數組
+    const results: QuestionStatistic[] = [];
+    let index = 1;
+
+    for (const [questionText, stats] of questionMap) {
+      results.push({
+        questionNumber: index++,
+        questionText: stats.questionText,
+        correctCount: stats.correct,
+        incorrectCount: stats.incorrect,
+        totalAttempts: stats.correct + stats.incorrect,
+        correctPercentage: stats.correct + stats.incorrect > 0
+          ? Math.round((stats.correct / (stats.correct + stats.incorrect)) * 100)
+          : 0
+      });
+    }
+
+    console.log(`📊 基於活動詞彙統計完成: ${results.length} 個問題`);
+    return results;
+
+  } catch (error) {
+    console.error('❌ 分析問題統計時出錯:', error);
+    return analyzeQuestionStatisticsLegacy(participants);
+  }
+}
+
+/**
+ * 舊版問題統計邏輯（向後兼容）
+ */
+function analyzeQuestionStatisticsLegacy(participants: GameParticipant[]): QuestionStatistic[] {
   // 收集所有問題數據
   const questionMap = new Map<string, {
     questionText: string;
@@ -252,7 +335,7 @@ export async function GET(
 
     // 計算統計數據
     const statistics = calculateStatistics(participants);
-    const questionStatistics = analyzeQuestionStatistics(participants);
+    const questionStatistics = await analyzeQuestionStatistics(participants, result.assignment.activityId);
 
     // 生成分享連結
     const shareLink = `https://edu-create.vercel.app/play/${result.assignment.activityId}/${result.assignmentId}`;
