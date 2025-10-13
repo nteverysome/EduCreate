@@ -52,7 +52,7 @@ export default function AssignmentPlayPage() {
       const mockAssignment: Assignment = {
         id: assignmentId as string,
         activityId: activityId as string,
-        title: `"${activityData.data.title}"的結果`,
+        title: `"${activityData.title}"的結果`,
         registrationType: 'name',
         status: 'active'
       };
