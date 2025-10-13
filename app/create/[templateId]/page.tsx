@@ -148,14 +148,30 @@ export default function CreateGamePage() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+  const [isAssignmentMode, setIsAssignmentMode] = useState(false);
+  const [assignmentId, setAssignmentId] = useState<string | null>(null);
+  const [studentName, setStudentName] = useState<string | null>(null);
 
-  // 檢查是否為編輯模式並載入活動數據
+  // 檢查是否為編輯模式或課業分配模式並載入活動數據
   useEffect(() => {
+    if (!searchParams) return;
+
     const editId = searchParams.get('edit');
+    const activityId = searchParams.get('activityId');
+    const assignmentIdParam = searchParams.get('assignmentId');
+    const studentNameParam = searchParams.get('studentName');
+
     if (editId) {
+      // 編輯模式
       setIsEditMode(true);
       setEditingActivityId(editId);
       loadActivityForEdit(editId);
+    } else if (activityId && assignmentIdParam && studentNameParam) {
+      // 課業分配模式
+      setIsAssignmentMode(true);
+      setAssignmentId(assignmentIdParam);
+      setStudentName(studentNameParam);
+      loadActivityForAssignment(activityId);
     }
   }, [searchParams]);
 
@@ -207,6 +223,77 @@ export default function CreateGamePage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 載入課業分配的活動數據並自動開始遊戲
+  const loadActivityForAssignment = async (activityId: string) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/activities/${activityId}`);
+      if (response.ok) {
+        const activity: any = await response.json();
+        setActivityTitle(activity.title);
+
+        // 載入詞彙數據 - 支援新舊架構
+        let vocabularyData = [];
+
+        if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems)) {
+          // 新架構：從關聯表中獲取詞彙數據
+          vocabularyData = activity.vocabularyItems;
+          console.log('📝 從關聯表載入詞彙數據:', vocabularyData.length, '個詞彙');
+        } else if (activity.content && activity.content.vocabularyItems) {
+          // 舊架構：從 content 中獲取詞彙數據
+          vocabularyData = activity.content.vocabularyItems;
+          console.log('📝 從 content 載入詞彙數據:', vocabularyData.length, '個詞彙');
+        }
+
+        // 轉換為組件所需的格式
+        const formattedVocabulary = vocabularyData.map((item: any, index: number) => ({
+          id: (index + 1).toString(),
+          english: item.english || '',
+          chinese: item.chinese || ''
+        }));
+
+        // 確保至少有3個項目
+        while (formattedVocabulary.length < 3) {
+          formattedVocabulary.push({
+            id: (formattedVocabulary.length + 1).toString(),
+            english: '',
+            chinese: ''
+          });
+        }
+
+        setVocabularyItems(formattedVocabulary);
+        console.log('📝 載入課業分配活動成功:', activity.title);
+
+        // 自動開始遊戲
+        setTimeout(() => {
+          startAssignmentGame(activity.id);
+        }, 1000);
+      } else {
+        console.error('❌ 載入活動失敗:', response.status);
+        alert('載入活動失敗，請稍後再試');
+      }
+    } catch (error) {
+      console.error('❌ 載入活動錯誤:', error);
+      alert('載入活動失敗，請稍後再試');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 開始課業分配遊戲
+  const startAssignmentGame = (activityId: string) => {
+    console.log('🎮 開始課業分配遊戲:', {
+      activityId,
+      assignmentId,
+      studentName,
+      templateId
+    });
+
+    // 跳轉到遊戲頁面，並傳遞所有必要參數
+    const gameUrl = `/games/switcher?game=${templateId}&activityId=${activityId}&assignmentId=${assignmentId}&studentName=${encodeURIComponent(studentName || '')}`;
+    router.push(gameUrl);
   };
 
   // 如果未登入，顯示登入提示
