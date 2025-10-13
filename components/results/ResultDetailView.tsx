@@ -100,8 +100,30 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
     // TODO: 顯示複製成功提示
   };
 
-  // 排序參與者
-  const sortedParticipants = [...result.participants].sort((a, b) => {
+  // 篩選參與者
+  const filteredParticipants = (() => {
+    switch (showFilter) {
+      case 'best':
+        // 顯示最高分的參與者（可能有多個相同最高分）
+        if (result.participants.length === 0) return [];
+        const maxScore = Math.max(...result.participants.map(p => p.score));
+        return result.participants.filter(p => p.score === maxScore);
+
+      case 'first':
+        // 顯示最早提交的參與者
+        if (result.participants.length === 0) return [];
+        const earliestTime = Math.min(...result.participants.map(p => new Date(p.completedAt).getTime()));
+        return result.participants.filter(p => new Date(p.completedAt).getTime() === earliestTime);
+
+      case 'all':
+      default:
+        // 顯示所有參與者
+        return result.participants;
+    }
+  })();
+
+  // 排序篩選後的參與者
+  const sortedParticipants = [...filteredParticipants].sort((a, b) => {
     switch (participantSort) {
       case 'name':
         return a.studentName.localeCompare(b.studentName);
@@ -114,6 +136,48 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
         return new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime();
     }
   });
+
+  // 計算篩選後的統計數據
+  const filteredStatistics = (() => {
+    if (filteredParticipants.length === 0) {
+      return {
+        totalStudents: 0,
+        averageScore: 0,
+        highestScore: { score: 0, studentName: '' },
+        fastestTime: { timeSpent: 0, studentName: '' }
+      };
+    }
+
+    // 計算平均分
+    const totalScore = filteredParticipants.reduce((sum, p) => sum + p.score, 0);
+    const averageScore = Math.round((totalScore / filteredParticipants.length) * 100) / 100;
+
+    // 找出最高分
+    const highestScoreParticipant = filteredParticipants.reduce((max, p) =>
+      p.score > max.score ? p : max
+    );
+
+    // 找出最快時間（排除0或無效時間）
+    const validTimeParticipants = filteredParticipants.filter(p => p.timeSpent > 0);
+    const fastestTimeParticipant = validTimeParticipants.length > 0
+      ? validTimeParticipants.reduce((min, p) =>
+          p.timeSpent < min.timeSpent ? p : min
+        )
+      : filteredParticipants[0];
+
+    return {
+      totalStudents: filteredParticipants.length,
+      averageScore,
+      highestScore: {
+        score: highestScoreParticipant.score,
+        studentName: highestScoreParticipant.studentName
+      },
+      fastestTime: {
+        timeSpent: fastestTimeParticipant.timeSpent,
+        studentName: fastestTimeParticipant.studentName
+      }
+    };
+  })();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -249,43 +313,41 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
       <h2 className="text-xl font-bold text-gray-900 mb-6">總結</h2>
 
       {/* 統計數據總結區域 */}
-      {result.statistics && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* 學生的數量 */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="text-sm text-gray-500 mb-1">學生的數量</div>
-            <div className="text-2xl font-bold text-gray-900">{result.statistics.totalStudents}</div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* 學生的數量 */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="text-sm text-gray-500 mb-1">學生的數量</div>
+          <div className="text-2xl font-bold text-gray-900">{filteredStatistics.totalStudents}</div>
+        </div>
 
-          {/* 平均得分 */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="text-sm text-gray-500 mb-1">平均得分</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {result.statistics.averageScore.toFixed(1)}
-              <span className="text-sm text-gray-500 ml-1">/ 100</span>
-            </div>
-          </div>
-
-          {/* 最高分 */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="text-sm text-gray-500 mb-1">最高分</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {result.statistics.highestScore.score}
-              <span className="text-sm text-gray-500 ml-1">/ 100</span>
-            </div>
-            <div className="text-sm text-gray-600 mt-1">{result.statistics.highestScore.studentName}</div>
-          </div>
-
-          {/* 最快的 */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="text-sm text-gray-500 mb-1">最快的</div>
-            <div className="text-2xl font-bold text-gray-900">
-              {formatTime(result.statistics.fastestTime.timeSpent)}
-            </div>
-            <div className="text-sm text-gray-600 mt-1">{result.statistics.fastestTime.studentName}</div>
+        {/* 平均得分 */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="text-sm text-gray-500 mb-1">平均得分</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {filteredStatistics.averageScore.toFixed(1)}
+            <span className="text-sm text-gray-500 ml-1">/ 100</span>
           </div>
         </div>
-      )}
+
+        {/* 最高分 */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="text-sm text-gray-500 mb-1">最高分</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {filteredStatistics.highestScore.score}
+            <span className="text-sm text-gray-500 ml-1">/ 100</span>
+          </div>
+          <div className="text-sm text-gray-600 mt-1">{filteredStatistics.highestScore.studentName}</div>
+        </div>
+
+        {/* 最快的 */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="text-sm text-gray-500 mb-1">最快的</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {formatTime(filteredStatistics.fastestTime.timeSpent)}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">{filteredStatistics.fastestTime.studentName}</div>
+        </div>
+      </div>
 
       {/* 按學生顯示的結果 */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
