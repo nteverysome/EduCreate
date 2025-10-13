@@ -292,8 +292,8 @@ export default function CreateGamePage() {
     });
 
     // 跳轉到遊戲頁面，並傳遞所有必要參數
-    const gameUrl = `/games/switcher?game=${templateId}&activityId=${activityId}&assignmentId=${assignmentId}&studentName=${encodeURIComponent(studentName || '')}`;
-    router.push(gameUrl);
+    const gameUrl = `/games/${templateId}?activityId=${activityId}&assignmentId=${assignmentId}&studentName=${encodeURIComponent(studentName || '')}`;
+    window.location.href = gameUrl;
   };
 
   // 如果未登入，顯示登入提示
