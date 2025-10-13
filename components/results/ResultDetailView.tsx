@@ -89,6 +89,11 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // 格式化時間（秒）- 用於統計顯示
+  const formatTime = (seconds: number) => {
+    return formatDuration(seconds);
+  };
+
   // 複製分享連結
   const copyShareLink = () => {
     navigator.clipboard.writeText(result.shareLink);
@@ -275,7 +280,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="text-sm text-gray-500 mb-1">最快的</div>
             <div className="text-2xl font-bold text-gray-900">
-              {formatDuration(result.statistics.fastestTime.timeSpent)}
+              {formatTime(result.statistics.fastestTime.timeSpent)}
             </div>
             <div className="text-sm text-gray-600 mt-1">{result.statistics.fastestTime.studentName}</div>
           </div>
