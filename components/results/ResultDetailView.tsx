@@ -105,9 +105,34 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
 
   // 獲取學生的詳細答案數據
   const getStudentAnswers = (participant: GameParticipant) => {
+    // 檢查新數據格式（包含詳細問題數據）
     if (participant.gameData && participant.gameData.finalResult && participant.gameData.finalResult.questions) {
       return participant.gameData.finalResult.questions;
     }
+
+    // 處理舊數據格式 - 創建基本問題數據用於展示
+    if (participant.gameData && participant.gameData.finalResult) {
+      const finalResult = participant.gameData.finalResult;
+      const totalQuestions = finalResult.totalQuestions || 0;
+      const correctAnswers = finalResult.correctAnswers || 0;
+
+      if (totalQuestions > 0) {
+        const basicQuestions = [];
+        for (let i = 1; i <= totalQuestions; i++) {
+          basicQuestions.push({
+            questionNumber: i,
+            questionText: `問題 ${i}`,
+            correctAnswer: '資料不完整',
+            studentAnswer: i <= correctAnswers ? '正確' : '錯誤',
+            isCorrect: i <= correctAnswers,
+            timestamp: Date.now(),
+            isLegacyData: true // 標記為舊數據
+          });
+        }
+        return basicQuestions;
+      }
+    }
+
     return [];
   };
 
@@ -481,6 +506,14 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
                         <td colSpan={5} className="px-6 py-4 bg-gray-50">
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium text-gray-900 mb-3">詳細答案：</h4>
+                            {/* 舊數據提示 */}
+                            {studentAnswers.length > 0 && studentAnswers[0].isLegacyData && (
+                              <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                                <p className="text-sm text-yellow-800">
+                                  ℹ️ 此結果使用舊數據格式，僅顯示基本統計信息。新的遊戲會話將顯示完整的問題內容和學生答案。
+                                </p>
+                              </div>
+                            )}
                             <div className="overflow-x-auto">
                               <table className="min-w-full">
                                 <thead>
