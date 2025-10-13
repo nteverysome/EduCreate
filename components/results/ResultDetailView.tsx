@@ -174,8 +174,8 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
       case 'best':
         // 顯示最高分的參與者（可能有多個相同最高分）
         if (result.participants.length === 0) return [];
-        const maxScore = Math.max(...result.participants.map(p => p.score));
-        return result.participants.filter(p => p.score === maxScore);
+        const maxScore = Math.max(...result.participants.map(p => (p as any).calculatedScore || p.score));
+        return result.participants.filter(p => ((p as any).calculatedScore || p.score) === maxScore);
 
       case 'first':
         // 顯示最早提交的參與者
@@ -494,7 +494,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {participant.score}%
+                        {(participant as any).calculatedScore || participant.score}%
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {participant.correctAnswers}/{participant.totalQuestions}

@@ -126,6 +126,87 @@ function calculateStatistics(participants: GameParticipant[], activityVocabulary
 }
 
 /**
+ * 計算統計數據並返回修正後的參與者數據
+ */
+function calculateStatisticsWithCorrectedScores(participants: GameParticipant[], activityVocabularyCount: number): {
+  statistics: StatisticsSummary;
+  correctedParticipants: (GameParticipant & { calculatedScore: number })[];
+} {
+  if (participants.length === 0) {
+    return {
+      statistics: {
+        totalStudents: 0,
+        averageScore: 0,
+        highestScore: { score: 0, studentName: '' },
+        fastestTime: { timeSpent: 0, studentName: '' }
+      },
+      correctedParticipants: []
+    };
+  }
+
+  // 🎯 重新計算每個參與者的正確分數（基於活動詞彙數量，與 Wordwall 邏輯一致）
+  const participantsWithCorrectScores = participants.map(p => {
+    let correctScore = 0;
+
+    // 🔥 關鍵修復：使用活動詞彙數量而非遊戲問題次數
+    // 這與 Wordwall 的邏輯一致：正確答案數 ÷ 活動中的詞彙數量
+    if (p.correctAnswers !== undefined && activityVocabularyCount > 0) {
+      correctScore = Math.round((p.correctAnswers / activityVocabularyCount) * 100);
+    }
+    // 如果沒有 correctAnswers，嘗試從遊戲數據中計算
+    else if (p.gameData && p.gameData.finalResult) {
+      const finalResult = p.gameData.finalResult;
+      if (finalResult.correctAnswers !== undefined && activityVocabularyCount > 0) {
+        correctScore = Math.round((finalResult.correctAnswers / activityVocabularyCount) * 100);
+      } else {
+        // 使用原始分數作為後備
+        correctScore = p.score || 0;
+      }
+    } else {
+      correctScore = p.score || 0;
+    }
+
+    return {
+      ...p,
+      calculatedScore: correctScore
+    };
+  });
+
+  // 計算平均分（基於修正後的分數）
+  const totalScore = participantsWithCorrectScores.reduce((sum, p) => sum + p.calculatedScore, 0);
+  const averageScore = Math.round((totalScore / participants.length) * 100) / 100;
+
+  // 找出最高分（基於修正後的分數）
+  const highestScoreParticipant = participantsWithCorrectScores.reduce((max, p) =>
+    p.calculatedScore > max.calculatedScore ? p : max
+  );
+
+  // 找出最快時間（排除0或無效時間）
+  const validTimeParticipants = participants.filter(p => p.timeSpent > 0);
+  const fastestTimeParticipant = validTimeParticipants.length > 0
+    ? validTimeParticipants.reduce((min, p) =>
+        p.timeSpent < min.timeSpent ? p : min
+      )
+    : participants[0];
+
+  return {
+    statistics: {
+      totalStudents: participants.length,
+      averageScore,
+      highestScore: {
+        score: highestScoreParticipant.calculatedScore,
+        studentName: highestScoreParticipant.studentName
+      },
+      fastestTime: {
+        timeSpent: fastestTimeParticipant.timeSpent,
+        studentName: fastestTimeParticipant.studentName
+      }
+    },
+    correctedParticipants: participantsWithCorrectScores
+  };
+}
+
+/**
  * 分析問題統計數據 - 基於活動的詞彙列表
  */
 async function analyzeQuestionStatistics(participants: GameParticipant[], activityId: string): Promise<QuestionStatistic[]> {
@@ -365,9 +446,12 @@ export async function GET(
     });
     const activityVocabularyCount = activity?.vocabularyItems.length || 3; // 默認3個詞彙
 
-    // 計算統計數據（使用 Wordwall 邏輯：基於活動詞彙數量）
-    const statistics = calculateStatistics(participants, activityVocabularyCount);
+    // 🎯 計算統計數據和修正後的參與者分數（使用 Wordwall 邏輯：基於活動詞彙數量）
+    const statisticsResult = calculateStatisticsWithCorrectedScores(participants, activityVocabularyCount);
     const questionStatistics = await analyzeQuestionStatistics(participants, result.assignment.activityId);
+
+    // 使用修正後的參與者數據
+    const correctedParticipants = statisticsResult.correctedParticipants;
 
     // 生成分享連結
     const shareLink = `https://edu-create.vercel.app/play/${result.assignment.activityId}/${result.assignmentId}`;
@@ -395,8 +479,8 @@ export async function GET(
       status: result.status as 'active' | 'completed' | 'expired',
       gameType: getGameId(result.assignment.activity.type), // 返回實際的遊戲 ID
       shareLink,
-      participants,
-      statistics,
+      participants: correctedParticipants, // 🎯 使用修正後的參與者數據（包含 calculatedScore）
+      statistics: statisticsResult.statistics, // 🎯 使用修正後的統計數據
       questionStatistics
     };
 
