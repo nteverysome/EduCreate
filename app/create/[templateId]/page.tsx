@@ -285,15 +285,19 @@ export default function CreateGamePage() {
 
   // 開始課業分配遊戲
   const startAssignmentGame = (activityId: string) => {
+    // 直接從 URL 參數獲取最新值，避免狀態更新延遲問題
+    const currentAssignmentId = searchParams?.get('assignmentId');
+    const currentStudentName = searchParams?.get('studentName');
+
     console.log('🎮 開始課業分配遊戲:', {
       activityId,
-      assignmentId,
-      studentName,
+      assignmentId: currentAssignmentId,
+      studentName: currentStudentName,
       templateId
     });
 
     // 跳轉到遊戲頁面，並傳遞所有必要參數
-    const gameUrl = `/games/${templateId}?activityId=${activityId}&assignmentId=${assignmentId}&studentName=${encodeURIComponent(studentName || '')}`;
+    const gameUrl = `/games/${templateId}?activityId=${activityId}&assignmentId=${currentAssignmentId}&studentName=${encodeURIComponent(currentStudentName || '')}`;
     window.location.href = gameUrl;
   };
 
