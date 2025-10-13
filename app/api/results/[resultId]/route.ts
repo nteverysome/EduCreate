@@ -66,13 +66,40 @@ function calculateStatistics(participants: GameParticipant[]): StatisticsSummary
     };
   }
 
-  // 計算平均分
-  const totalScore = participants.reduce((sum, p) => sum + p.score, 0);
+  // 🎯 重新計算每個參與者的正確分數
+  const participantsWithCorrectScores = participants.map(p => {
+    let correctScore = 0;
+
+    // 優先使用 correctAnswers 和 totalQuestions 計算分數
+    if (p.correctAnswers !== undefined && p.totalQuestions !== undefined && p.totalQuestions > 0) {
+      correctScore = Math.round((p.correctAnswers / p.totalQuestions) * 100);
+    }
+    // 如果沒有這些數據，嘗試從遊戲數據中計算
+    else if (p.gameData && p.gameData.finalResult) {
+      const finalResult = p.gameData.finalResult;
+      if (finalResult.correctAnswers !== undefined && finalResult.totalQuestions !== undefined && finalResult.totalQuestions > 0) {
+        correctScore = Math.round((finalResult.correctAnswers / finalResult.totalQuestions) * 100);
+      } else {
+        // 使用原始分數作為後備
+        correctScore = p.score || 0;
+      }
+    } else {
+      correctScore = p.score || 0;
+    }
+
+    return {
+      ...p,
+      calculatedScore: correctScore
+    };
+  });
+
+  // 計算平均分（基於重新計算的分數）
+  const totalScore = participantsWithCorrectScores.reduce((sum, p) => sum + p.calculatedScore, 0);
   const averageScore = Math.round((totalScore / participants.length) * 100) / 100;
 
-  // 找出最高分
-  const highestScoreParticipant = participants.reduce((max, p) =>
-    p.score > max.score ? p : max
+  // 找出最高分（基於重新計算的分數）
+  const highestScoreParticipant = participantsWithCorrectScores.reduce((max, p) =>
+    p.calculatedScore > max.calculatedScore ? p : max
   );
 
   // 找出最快時間（排除0或無效時間）
@@ -87,7 +114,7 @@ function calculateStatistics(participants: GameParticipant[]): StatisticsSummary
     totalStudents: participants.length,
     averageScore,
     highestScore: {
-      score: highestScoreParticipant.score,
+      score: highestScoreParticipant.calculatedScore,
       studentName: highestScoreParticipant.studentName
     },
     fastestTime: {
