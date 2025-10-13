@@ -166,11 +166,12 @@ export default function CreateGamePage() {
       setIsEditMode(true);
       setEditingActivityId(editId);
       loadActivityForEdit(editId);
-    } else if (activityId && assignmentIdParam && studentNameParam) {
-      // 課業分配模式
+    } else if (activityId && assignmentIdParam) {
+      // 課業分配模式 - assignmentId 存在即可，studentName 可以為空
+      console.log('🎯 檢測到課業分配模式:', { activityId, assignmentIdParam, studentNameParam });
       setIsAssignmentMode(true);
       setAssignmentId(assignmentIdParam);
-      setStudentName(studentNameParam);
+      setStudentName(studentNameParam || '');
       loadActivityForAssignment(activityId);
     }
   }, [searchParams]);

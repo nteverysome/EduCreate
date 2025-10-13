@@ -96,7 +96,9 @@ export default function AssignmentPlayPage() {
       }
 
       // 跳轉到實際的遊戲頁面
-      router.push(`/create/${getGameTemplateId(activity?.gameType)}?activityId=${activityId}&assignmentId=${assignmentId}&studentName=${encodeURIComponent(studentName.trim())}`);
+      const gameUrl = `/create/${getGameTemplateId(activity?.gameType)}?activityId=${activityId}&assignmentId=${assignmentId}&studentName=${encodeURIComponent(studentName.trim())}`;
+      console.log('🎯 跳轉到遊戲頁面:', gameUrl);
+      router.push(gameUrl);
       
     } catch (error) {
       console.error('開始遊戲失敗:', error);
