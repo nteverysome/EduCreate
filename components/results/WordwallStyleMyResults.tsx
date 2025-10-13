@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import WordwallStyleResultCard from './WordwallStyleResultCard';
 import WordwallStyleFolderCard from './WordwallStyleFolderCard';
+import NewFolderModal from './NewFolderModal';
 
 interface AssignmentResult {
   id: string;
@@ -27,6 +28,7 @@ interface ResultFolder {
   name: string;
   resultCount: number;
   createdAt: string;
+  color?: string;
 }
 
 interface WordwallStyleMyResultsProps {
@@ -44,6 +46,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [sortBy, setSortBy] = useState<'created' | 'deadline' | 'name'>('created');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showNewFolderModal, setShowNewFolderModal] = useState(false);
 
   // 載入結果數據
   const loadResults = useCallback(async () => {
@@ -171,6 +174,26 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setCurrentFolderId(folder.id);
   };
 
+  // 處理創建新資料夾
+  const handleCreateFolder = async (name: string, color: string) => {
+    try {
+      // TODO: 調用 API 創建資料夾
+      const newFolder: ResultFolder = {
+        id: `folder_${Date.now()}`,
+        name,
+        resultCount: 0,
+        createdAt: new Date().toISOString(),
+        color
+      };
+
+      setFolders(prev => [...prev, newFolder]);
+      console.log('創建資料夾成功:', newFolder);
+    } catch (error) {
+      console.error('創建資料夾失敗:', error);
+      throw error;
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -210,7 +233,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           </div>
           
           <div className="flex items-center space-x-4">
-            <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <button
+              onClick={() => setShowNewFolderModal(true)}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
               <FolderIcon className="w-4 h-4 mr-2" />
               新資料夾
             </button>
@@ -319,6 +345,13 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           </div>
         )}
       </div>
+
+      {/* 新資料夾模態對話框 */}
+      <NewFolderModal
+        isOpen={showNewFolderModal}
+        onClose={() => setShowNewFolderModal(false)}
+        onCreateFolder={handleCreateFolder}
+      />
     </div>
   );
 };
