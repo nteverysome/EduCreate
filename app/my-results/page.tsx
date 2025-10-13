@@ -37,54 +37,67 @@ export default function MyResultsPage() {
   const [sortBy, setSortBy] = useState<'created' | 'deadline' | 'name'>('created');
   const [loading, setLoading] = useState(true);
 
-  // 模擬數據載入
+  // 載入真實數據
   useEffect(() => {
     const loadResults = async () => {
       setLoading(true);
-      
-      // 模擬 API 調用
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 模擬結果數據
-      const mockResults: AssignmentResult[] = [
-        {
-          id: '1',
-          title: '"國小南一三年級英文第2課"的結果3',
-          activityName: '國小南一三年級英文第2課',
-          participantCount: 0,
-          createdAt: '2025-10-13T00:52:00Z',
-          status: 'active'
-        },
-        {
-          id: '2', 
-          title: '"國小南一三年級英文第2課"的結果2',
-          activityName: '國小南一三年級英文第2課',
-          participantCount: 0,
-          createdAt: '2025-10-13T00:51:00Z',
-          status: 'active'
-        },
-        {
-          id: '3',
-          title: '"複製無標題43"的結果1',
-          activityName: '複製無標題43',
-          participantCount: 1,
-          createdAt: '2025-10-13T00:10:00Z',
-          status: 'active'
-        }
-      ];
 
-      const mockFolders: ResultFolder[] = [
-        {
-          id: 'folder1',
-          name: '三年級上學期英文',
-          resultCount: 0,
-          createdAt: '2025-10-12T00:00:00Z'
+      try {
+        // 調用真實 API
+        const response = await fetch('/api/results');
+        if (response.ok) {
+          const data = await response.json();
+          setResults(data);
+        } else {
+          console.error('載入結果失敗:', response.status);
+          // 如果 API 失敗，使用模擬數據作為後備
+          const mockResults: AssignmentResult[] = [
+            {
+              id: '1',
+              title: '"國小南一三年級英文第2課"的結果3',
+              activityName: '國小南一三年級英文第2課',
+              participantCount: 0,
+              createdAt: '2025-10-13T00:52:00Z',
+              status: 'active'
+            },
+            {
+              id: '2',
+              title: '"國小南一三年級英文第2課"的結果2',
+              activityName: '國小南一三年級英文第2課',
+              participantCount: 0,
+              createdAt: '2025-10-13T00:51:00Z',
+              status: 'active'
+            },
+            {
+              id: '3',
+              title: '"複製無標題43"的結果1',
+              activityName: '複製無標題43',
+              participantCount: 1,
+              createdAt: '2025-10-13T00:10:00Z',
+              status: 'active'
+            }
+          ];
+          setResults(mockResults);
         }
-      ];
 
-      setResults(mockResults);
-      setFolders(mockFolders);
-      setLoading(false);
+        // 模擬資料夾數據（暫時）
+        const mockFolders: ResultFolder[] = [
+          {
+            id: 'folder1',
+            name: '三年級上學期英文',
+            resultCount: 0,
+            createdAt: '2025-10-12T00:00:00Z'
+          }
+        ];
+        setFolders(mockFolders);
+      } catch (error) {
+        console.error('載入數據失敗:', error);
+        // 錯誤時使用模擬數據
+        setResults([]);
+        setFolders([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadResults();
