@@ -58,11 +58,11 @@ export default function AssignmentPlayPage() {
       };
 
       setActivity({
-        id: activityData.data.id,
-        title: activityData.data.title || '無標題活動',
-        description: activityData.data.description,
+        id: activityData.id,
+        title: activityData.title || '無標題活動',
+        description: activityData.description,
         gameType: '飛機碰撞遊戲',
-        vocabularyData: activityData.data.vocabularyData
+        vocabularyData: activityData.vocabularyItems
       });
       
       setAssignment(mockAssignment);
