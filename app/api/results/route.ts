@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     // 真實數據庫查詢 - 數據庫已同步
     console.log('📊 從數據庫獲取結果數據');
 
+    try {
       const results = await prisma.assignmentResult.findMany({
         where: {
           assignment: {
