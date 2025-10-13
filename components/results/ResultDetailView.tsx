@@ -457,57 +457,134 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
 
       {/* 按問題顯示的結果 */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center space-x-4 mb-4">
-          <span className="text-sm text-gray-500">排序</span>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="questionSort"
-              value="number"
-              checked={questionSort === 'number'}
-              onChange={(e) => setQuestionSort(e.target.value as 'number')}
-              className="mr-2"
-            />
-            序號
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="questionSort"
-              value="correct"
-              checked={questionSort === 'correct'}
-              onChange={(e) => setQuestionSort(e.target.value as 'correct')}
-              className="mr-2"
-            />
-            正確
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="questionSort"
-              value="incorrect"
-              checked={questionSort === 'incorrect'}
-              onChange={(e) => setQuestionSort(e.target.value as 'incorrect')}
-              className="mr-2"
-            />
-            錯誤
-          </label>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium text-gray-900">按問題顯示的結果</h3>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-500">排序方式：</span>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="questionSort"
+                value="number"
+                checked={questionSort === 'number'}
+                onChange={(e) => setQuestionSort(e.target.value as 'number')}
+                className="mr-2"
+              />
+              <span className="text-sm">序號</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="questionSort"
+                value="correct"
+                checked={questionSort === 'correct'}
+                onChange={(e) => setQuestionSort(e.target.value as 'correct')}
+                className="mr-2"
+              />
+              <span className="text-sm">正確數</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="questionSort"
+                value="incorrect"
+                checked={questionSort === 'incorrect'}
+                onChange={(e) => setQuestionSort(e.target.value as 'incorrect')}
+                className="mr-2"
+              />
+              <span className="text-sm">錯誤數</span>
+            </label>
+          </div>
         </div>
-        
-        <h3 className="text-lg font-medium text-gray-900 mb-4">按問題顯示的結果</h3>
+
+        {result.questionStatistics && result.questionStatistics.length > 0 ? (
+          <>
+            {/* 問題統計總結 */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-blue-50 rounded-lg p-4">
+                <div className="text-sm text-blue-600 font-medium">總問題數</div>
+                <div className="text-2xl font-bold text-blue-900">
+                  {result.questionStatistics.length}
+                </div>
+              </div>
+              <div className="bg-green-50 rounded-lg p-4">
+                <div className="text-sm text-green-600 font-medium">平均正確率</div>
+                <div className="text-2xl font-bold text-green-900">
+                  {Math.round(result.questionStatistics.reduce((sum, q) => sum + q.correctPercentage, 0) / result.questionStatistics.length)}%
+                </div>
+              </div>
+              <div className="bg-yellow-50 rounded-lg p-4">
+                <div className="text-sm text-yellow-600 font-medium">最難問題</div>
+                <div className="text-2xl font-bold text-yellow-900">
+                  問題 {result.questionStatistics.reduce((min, q) => q.correctPercentage < min.correctPercentage ? q : min).questionNumber}
+                </div>
+                <div className="text-xs text-yellow-600">
+                  {result.questionStatistics.reduce((min, q) => q.correctPercentage < min.correctPercentage ? q : min).correctPercentage}% 正確率
+                </div>
+              </div>
+              <div className="bg-purple-50 rounded-lg p-4">
+                <div className="text-sm text-purple-600 font-medium">最簡單問題</div>
+                <div className="text-2xl font-bold text-purple-900">
+                  問題 {result.questionStatistics.reduce((max, q) => q.correctPercentage > max.correctPercentage ? q : max).questionNumber}
+                </div>
+                <div className="text-xs text-purple-600">
+                  {result.questionStatistics.reduce((max, q) => q.correctPercentage > max.correctPercentage ? q : max).correctPercentage}% 正確率
+                </div>
+              </div>
+            </div>
+          </>
+        ) : null}
 
         {result.questionStatistics && result.questionStatistics.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-gray-900"></th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900">問題</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900">正確</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-900">錯誤</th>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => setQuestionSort('number')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>序號</span>
+                      {questionSort === 'number' && (
+                        <span className="text-blue-500">↑</span>
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    問題內容
+                  </th>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => setQuestionSort('correct')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>正確</span>
+                      {questionSort === 'correct' && (
+                        <span className="text-blue-500">↓</span>
+                      )}
+                    </div>
+                  </th>
+                  <th
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => setQuestionSort('incorrect')}
+                  >
+                    <div className="flex items-center space-x-1">
+                      <span>錯誤</span>
+                      {questionSort === 'incorrect' && (
+                        <span className="text-blue-500">↓</span>
+                      )}
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    正確率
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    難度分析
+                  </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white divide-y divide-gray-200">
                 {result.questionStatistics
                   .sort((a, b) => {
                     switch (questionSort) {
@@ -519,19 +596,68 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
                         return a.questionNumber - b.questionNumber;
                     }
                   })
-                  .map((question) => (
-                    <tr key={question.questionNumber} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
-                      <td className="py-3 px-4">
-                        <span className="text-sm font-medium text-gray-900">{question.questionNumber}</span>
-                        <span className="ml-2 text-xs text-gray-500">
-                          {question.correctPercentage}%
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-900">{question.questionText}</td>
-                      <td className="py-3 px-4 text-sm text-gray-900">{question.correctCount}</td>
-                      <td className="py-3 px-4 text-sm text-gray-900">{question.incorrectCount}</td>
-                    </tr>
-                  ))}
+                  .map((question) => {
+                    // 計算難度等級
+                    const getDifficultyLevel = (percentage: number) => {
+                      if (percentage >= 90) return { text: '簡單', color: 'text-green-600 bg-green-100' };
+                      if (percentage >= 70) return { text: '中等', color: 'text-yellow-600 bg-yellow-100' };
+                      if (percentage >= 50) return { text: '困難', color: 'text-orange-600 bg-orange-100' };
+                      return { text: '很困難', color: 'text-red-600 bg-red-100' };
+                    };
+
+                    const difficulty = getDifficultyLevel(question.correctPercentage);
+
+                    return (
+                      <tr key={question.questionNumber} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-900">
+                              {question.questionNumber}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900 max-w-xs truncate" title={question.questionText}>
+                            {question.questionText}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-green-600">
+                              {question.correctCount}
+                            </span>
+                            <span className="text-xs text-gray-500 ml-1">人</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <span className="text-sm font-medium text-red-600">
+                              {question.incorrectCount}
+                            </span>
+                            <span className="text-xs text-gray-500 ml-1">人</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
+                              <div
+                                className="bg-green-500 h-2 rounded-full"
+                                style={{ width: `${question.correctPercentage}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-sm font-medium text-gray-900">
+                              {question.correctPercentage}%
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${difficulty.color}`}>
+                            {difficulty.text}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
