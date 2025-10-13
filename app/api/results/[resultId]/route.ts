@@ -110,11 +110,7 @@ async function analyzeQuestionStatistics(participants: GameParticipant[], activi
     const activity = await prisma.activity.findUnique({
       where: { id: activityId },
       include: {
-        vocabularyItems: {
-          include: {
-            vocabulary: true
-          }
-        }
+        vocabularyItems: true
       }
     });
 
@@ -132,8 +128,7 @@ async function analyzeQuestionStatistics(participants: GameParticipant[], activi
 
     // 初始化每個詞彙的統計
     activity.vocabularyItems.forEach((item, index) => {
-      const vocabulary = item.vocabulary;
-      const questionText = vocabulary.chinese || vocabulary.english || `詞彙 ${index + 1}`;
+      const questionText = item.chinese || item.english || `詞彙 ${index + 1}`;
       questionMap.set(questionText, {
         questionText,
         correct: 0,
