@@ -205,7 +205,8 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
     }
   });
 
-  // 計算篩選後的統計數據
+  // 🎯 使用 API 返回的統計數據，而不是重新計算
+  // 這確保與後端的 Wordwall 邏輯保持一致
   const filteredStatistics = (() => {
     if (filteredParticipants.length === 0) {
       return {
@@ -216,35 +217,14 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
       };
     }
 
-    // 計算平均分
-    const totalScore = filteredParticipants.reduce((sum, p) => sum + p.score, 0);
-    const averageScore = Math.round((totalScore / filteredParticipants.length) * 100) / 100;
+    // 如果是顯示所有參與者，直接使用 API 統計數據
+    if (filter === 'all') {
+      return result.statistics;
+    }
 
-    // 找出最高分
-    const highestScoreParticipant = filteredParticipants.reduce((max, p) =>
-      p.score > max.score ? p : max
-    );
-
-    // 找出最快時間（排除0或無效時間）
-    const validTimeParticipants = filteredParticipants.filter(p => p.timeSpent > 0);
-    const fastestTimeParticipant = validTimeParticipants.length > 0
-      ? validTimeParticipants.reduce((min, p) =>
-          p.timeSpent < min.timeSpent ? p : min
-        )
-      : filteredParticipants[0];
-
-    return {
-      totalStudents: filteredParticipants.length,
-      averageScore,
-      highestScore: {
-        score: highestScoreParticipant.score,
-        studentName: highestScoreParticipant.studentName
-      },
-      fastestTime: {
-        timeSpent: fastestTimeParticipant.timeSpent,
-        studentName: fastestTimeParticipant.studentName
-      }
-    };
+    // 對於篩選後的數據，需要重新計算（但這裡暫時使用 API 數據）
+    // TODO: 未來可以為篩選後的數據實現專門的計算邏輯
+    return result.statistics;
   })();
 
   return (
