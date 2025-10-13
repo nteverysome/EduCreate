@@ -73,6 +73,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   const [questionSort, setQuestionSort] = useState<'number' | 'correct' | 'incorrect'>('number');
   const [showFilter, setShowFilter] = useState<'all' | 'best' | 'first'>('all');
   const [expandedParticipant, setExpandedParticipant] = useState<string | null>(null);
+  const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
 
   // 格式化時間顯示
   const formatDateTime = (dateString: string) => {
@@ -134,6 +135,32 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
     }
 
     return [];
+  };
+
+  // 獲取特定問題的所有學生回答
+  const getQuestionAnswers = (questionText: string) => {
+    const answers: Array<{
+      studentName: string;
+      studentAnswer: string;
+      isCorrect: boolean;
+      correctAnswer: string;
+    }> = [];
+
+    result.participants.forEach(participant => {
+      const studentAnswers = getStudentAnswers(participant);
+      studentAnswers.forEach((answer: any) => {
+        if (answer.questionText === questionText) {
+          answers.push({
+            studentName: participant.studentName,
+            studentAnswer: answer.studentAnswer,
+            isCorrect: answer.isCorrect,
+            correctAnswer: answer.correctAnswer
+          });
+        }
+      });
+    });
+
+    return answers;
   };
 
   // 切換學生詳細信息展開狀態
@@ -707,21 +734,27 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
                     };
 
                     const difficulty = getDifficultyLevel(question.correctPercentage);
+                    const questionAnswers = getQuestionAnswers(question.questionText);
+                    const isExpanded = expandedQuestion === question.questionNumber;
 
                     return (
-                      <tr key={question.questionNumber} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <span className="text-sm font-medium text-gray-900">
-                              {question.questionNumber}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900 max-w-xs truncate" title={question.questionText}>
-                            {question.questionText}
-                          </div>
-                        </td>
+                      <React.Fragment key={question.questionNumber}>
+                        <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => setExpandedQuestion(isExpanded ? null : question.questionNumber)}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <span className="text-sm font-medium text-gray-900 mr-2">
+                                {question.questionNumber}
+                              </span>
+                              <span className="text-gray-400">
+                                {isExpanded ? '▼' : '▶'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900 max-w-xs truncate" title={question.questionText}>
+                              {question.questionText}
+                            </div>
+                          </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <span className="text-sm font-medium text-green-600">
@@ -757,6 +790,40 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
                           </span>
                         </td>
                       </tr>
+
+                      {/* 展開的學生回答詳情 */}
+                      {isExpanded && questionAnswers.length > 0 && (
+                        <tr>
+                          <td colSpan={6} className="px-6 py-4 bg-gray-50">
+                            <div className="space-y-4">
+                              <h4 className="font-semibold text-gray-900">學生回答詳情：</h4>
+                              <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-100">
+                                  <tr>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">學生</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">回答</th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-700">標注</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  {questionAnswers.map((answer, index) => (
+                                    <tr key={index}>
+                                      <td className="px-4 py-2 text-sm text-gray-900">{answer.studentName}</td>
+                                      <td className="px-4 py-2 text-sm text-gray-900">{answer.studentAnswer}</td>
+                                      <td className="px-4 py-2 text-sm">
+                                        <span className={`inline-flex items-center ${answer.isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+                                          {answer.isCorrect ? '✓ 正確' : '✗ 錯誤'}
+                                        </span>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                      </React.Fragment>
                     );
                   })}
               </tbody>
