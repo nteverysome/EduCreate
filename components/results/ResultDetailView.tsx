@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
+import {
   ArrowLeftIcon,
   ShareIcon,
   PlayIcon,
@@ -11,6 +11,8 @@ import {
   CalendarIcon,
   LinkIcon
 } from '@heroicons/react/24/outline';
+import ScoreDistributionChart from './ScoreDistributionChart';
+import QuestionAccuracyChart from './QuestionAccuracyChart';
 
 interface GameParticipant {
   id: string;
@@ -347,6 +349,21 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
           </div>
           <div className="text-sm text-gray-600 mt-1">{filteredStatistics.fastestTime.studentName}</div>
         </div>
+      </div>
+
+      {/* 圖表分析區域 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* 分數分佈圖表 */}
+        <ScoreDistributionChart
+          participants={filteredParticipants}
+          title="分數分佈"
+        />
+
+        {/* 問題正確率圖表 */}
+        <QuestionAccuracyChart
+          questionStatistics={result.questionStatistics || []}
+          title="問題正確率分析"
+        />
       </div>
 
       {/* 按學生顯示的結果 */}
