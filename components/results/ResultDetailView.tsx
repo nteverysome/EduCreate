@@ -23,6 +23,28 @@ interface GameParticipant {
   gameData?: any;
 }
 
+interface StatisticsSummary {
+  totalStudents: number;
+  averageScore: number;
+  highestScore: {
+    score: number;
+    studentName: string;
+  };
+  fastestTime: {
+    timeSpent: number;
+    studentName: string;
+  };
+}
+
+interface QuestionStatistic {
+  questionNumber: number;
+  questionText: string;
+  correctCount: number;
+  incorrectCount: number;
+  totalAttempts: number;
+  correctPercentage: number;
+}
+
 interface AssignmentResult {
   id: string;
   title: string;
@@ -36,6 +58,8 @@ interface AssignmentResult {
   gameType: string;
   shareLink: string;
   participants: GameParticipant[];
+  statistics?: StatisticsSummary;
+  questionStatistics?: QuestionStatistic[];
 }
 
 interface ResultDetailViewProps {
@@ -218,7 +242,46 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
 
       {/* 總結 */}
       <h2 className="text-xl font-bold text-gray-900 mb-6">總結</h2>
-      
+
+      {/* 統計數據總結區域 */}
+      {result.statistics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* 學生的數量 */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="text-sm text-gray-500 mb-1">學生的數量</div>
+            <div className="text-2xl font-bold text-gray-900">{result.statistics.totalStudents}</div>
+          </div>
+
+          {/* 平均得分 */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="text-sm text-gray-500 mb-1">平均得分</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {result.statistics.averageScore.toFixed(1)}
+              <span className="text-sm text-gray-500 ml-1">/ 100</span>
+            </div>
+          </div>
+
+          {/* 最高分 */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="text-sm text-gray-500 mb-1">最高分</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {result.statistics.highestScore.score}
+              <span className="text-sm text-gray-500 ml-1">/ 100</span>
+            </div>
+            <div className="text-sm text-gray-600 mt-1">{result.statistics.highestScore.studentName}</div>
+          </div>
+
+          {/* 最快的 */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="text-sm text-gray-500 mb-1">最快的</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {formatTime(result.statistics.fastestTime.timeSpent)}
+            </div>
+            <div className="text-sm text-gray-600 mt-1">{result.statistics.fastestTime.studentName}</div>
+          </div>
+        </div>
+      )}
+
       {/* 按學生顯示的結果 */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -348,10 +411,51 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
         </div>
         
         <h3 className="text-lg font-medium text-gray-900 mb-4">按問題顯示的結果</h3>
-        
-        <div className="text-center py-8 text-gray-500">
-          問題統計數據將在此顯示
-        </div>
+
+        {result.questionStatistics && result.questionStatistics.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 font-medium text-gray-900"></th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">問題</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">正確</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">錯誤</th>
+                </tr>
+              </thead>
+              <tbody>
+                {result.questionStatistics
+                  .sort((a, b) => {
+                    switch (questionSort) {
+                      case 'correct':
+                        return b.correctCount - a.correctCount;
+                      case 'incorrect':
+                        return b.incorrectCount - a.incorrectCount;
+                      default:
+                        return a.questionNumber - b.questionNumber;
+                    }
+                  })
+                  .map((question) => (
+                    <tr key={question.questionNumber} className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+                      <td className="py-3 px-4">
+                        <span className="text-sm font-medium text-gray-900">{question.questionNumber}</span>
+                        <span className="ml-2 text-xs text-gray-500">
+                          {question.correctPercentage}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-900">{question.questionText}</td>
+                      <td className="py-3 px-4 text-sm text-gray-900">{question.correctCount}</td>
+                      <td className="py-3 px-4 text-sm text-gray-900">{question.incorrectCount}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            暫無問題統計數據
+          </div>
+        )}
       </div>
     </div>
   );

@@ -7,6 +7,28 @@ import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
 import ResultDetailView from '@/components/results/ResultDetailView';
 
+interface StatisticsSummary {
+  totalStudents: number;
+  averageScore: number;
+  highestScore: {
+    score: number;
+    studentName: string;
+  };
+  fastestTime: {
+    timeSpent: number;
+    studentName: string;
+  };
+}
+
+interface QuestionStatistic {
+  questionNumber: number;
+  questionText: string;
+  correctCount: number;
+  incorrectCount: number;
+  totalAttempts: number;
+  correctPercentage: number;
+}
+
 interface AssignmentResult {
   id: string;
   title: string;
@@ -20,6 +42,8 @@ interface AssignmentResult {
   gameType: string;
   shareLink: string;
   participants: GameParticipant[];
+  statistics: StatisticsSummary;
+  questionStatistics: QuestionStatistic[];
 }
 
 interface GameParticipant {
