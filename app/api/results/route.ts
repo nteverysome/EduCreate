@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         where: {
           assignment: {
             activity: {
-              userId: session.user.email
+              userId: session.user.id
             }
           }
         },

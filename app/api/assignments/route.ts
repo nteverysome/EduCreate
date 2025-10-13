@@ -7,8 +7,8 @@ import { prisma } from '@/lib/prisma';
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
+
+    if (!session?.user?.id) {
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const activity = await prisma.activity.findFirst({
       where: {
         id: activityId,
-        userId: session.user.email
+        userId: session.user.id
       }
     });
 
