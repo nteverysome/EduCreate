@@ -562,6 +562,7 @@ model AssignmentResult {
   id           String               @id @default(cuid())
   assignmentId String
   resultNumber Int                  // 結果編號（如：結果1、結果2）
+  shareToken   String?              @unique // 可共用結果連結的 token
   status       ResultStatus         @default(ACTIVE)
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt

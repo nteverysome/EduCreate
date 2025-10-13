@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import crypto from 'crypto';
 
 interface GameParticipant {
   id: string;
@@ -48,6 +49,7 @@ interface AssignmentResult {
   status: 'active' | 'completed' | 'expired';
   gameType: string;
   shareLink: string;
+  shareToken?: string; // 🎯 添加 shareToken 字段
   participants: GameParticipant[];
   statistics: StatisticsSummary;
   questionStatistics: QuestionStatistic[];
@@ -388,6 +390,11 @@ function analyzeQuestionStatisticsLegacy(participants: GameParticipant[]): Quest
   }).sort((a, b) => a.questionNumber - b.questionNumber);
 }
 
+// 生成 shareToken 的函數
+function generateShareToken(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { resultId: string } }
@@ -420,13 +427,31 @@ export async function GET(
       return NextResponse.json({ error: '結果不存在' }, { status: 404 });
     }
 
+    // 如果沒有 shareToken，生成一個
+    let updatedResult = result;
+    if (!result.shareToken) {
+      const shareToken = generateShareToken();
+      updatedResult = await prisma.assignmentResult.update({
+        where: { id: resultId },
+        data: { shareToken },
+        include: {
+          assignment: {
+            include: {
+              activity: true
+            }
+          },
+          participants: true
+        }
+      });
+    }
+
     // 檢查用戶權限
     if (result.assignment.activity.userId !== session.user.id) {
       return NextResponse.json({ error: '無權限訪問此結果' }, { status: 403 });
     }
 
     // 格式化參與者數據
-    const participants: GameParticipant[] = result.participants.map(p => ({
+    const participants: GameParticipant[] = updatedResult.participants.map((p: any) => ({
       id: p.id,
       studentName: p.studentName,
       score: p.score,
@@ -468,17 +493,18 @@ export async function GET(
     };
 
     const formattedResult: AssignmentResult = {
-      id: result.id,
-      title: `"${result.assignment.activity.title}"的結果${result.resultNumber}`,
-      activityName: result.assignment.activity.title,
-      activityId: result.assignment.activityId,
-      assignmentId: result.assignmentId,
+      id: updatedResult.id,
+      title: `"${updatedResult.assignment.activity.title}"的結果${updatedResult.resultNumber}`,
+      activityName: updatedResult.assignment.activity.title,
+      activityId: updatedResult.assignment.activityId,
+      assignmentId: updatedResult.assignmentId,
       participantCount: participants.length,
-      createdAt: result.createdAt.toISOString(),
-      deadline: result.assignment.deadline?.toISOString(),
-      status: result.status as 'active' | 'completed' | 'expired',
-      gameType: getGameId(result.assignment.activity.type), // 返回實際的遊戲 ID
+      createdAt: updatedResult.createdAt.toISOString(),
+      deadline: updatedResult.assignment.deadline?.toISOString(),
+      status: updatedResult.status as 'active' | 'completed' | 'expired',
+      gameType: getGameId(updatedResult.assignment.activity.type), // 返回實際的遊戲 ID
       shareLink,
+      shareToken: updatedResult.shareToken, // 🎯 添加 shareToken
       participants: correctedParticipants, // 🎯 使用修正後的參與者數據（包含 calculatedScore）
       statistics: statisticsResult.statistics, // 🎯 使用修正後的統計數據
       questionStatistics
