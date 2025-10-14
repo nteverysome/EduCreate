@@ -108,16 +108,26 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         setResults(mockResults);
       }
 
-      // 模擬資料夾數據（暫時）
-      const mockFolders: ResultFolder[] = [
-        {
-          id: 'folder1',
-          name: '三年級上學期英文',
-          resultCount: 0,
-          createdAt: '2025-10-12T00:00:00Z'
+      // 載入真實資料夾數據
+      try {
+        const foldersResponse = await fetch('/api/folders');
+        if (foldersResponse.ok) {
+          const foldersData = await foldersResponse.json();
+          const formattedFolders: ResultFolder[] = foldersData.map((folder: any) => ({
+            id: folder.id,
+            name: folder.name,
+            resultCount: folder.activityCount || 0,
+            createdAt: folder.createdAt
+          }));
+          setFolders(formattedFolders);
+        } else {
+          console.log('無法載入資料夾，使用空列表');
+          setFolders([]);
         }
-      ];
-      setFolders(mockFolders);
+      } catch (error) {
+        console.error('載入資料夾失敗:', error);
+        setFolders([]);
+      }
     } catch (error) {
       console.error('載入數據失敗:', error);
       setError('載入數據失敗，請稍後重試');
