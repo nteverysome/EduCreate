@@ -163,7 +163,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         const formattedFolders: ResultFolder[] = foldersData.map((folder: any) => ({
           id: folder.id,
           name: folder.name,
-          resultCount: folder.activityCount || 0,
+          resultCount: folder.resultCount || 0,
           createdAt: folder.createdAt,
           color: folder.color
         }));

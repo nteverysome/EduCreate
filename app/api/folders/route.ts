@@ -24,6 +24,11 @@ export async function GET(request: NextRequest) {
           select: {
             id: true
           }
+        },
+        assignmentResults: {
+          select: {
+            id: true
+          }
         }
       },
       orderBy: {
@@ -31,7 +36,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // 計算每個資料夾的活動數量
+    // 計算每個資料夾的活動數量和結果數量
     const foldersWithCount = folders.map(folder => ({
       id: folder.id,
       name: folder.name,
@@ -40,7 +45,8 @@ export async function GET(request: NextRequest) {
       icon: folder.icon,
       createdAt: folder.createdAt,
       updatedAt: folder.updatedAt,
-      activityCount: folder.activities.length
+      activityCount: folder.activities.length,
+      resultCount: folder.assignmentResults.length
     }));
 
     return NextResponse.json(foldersWithCount);
