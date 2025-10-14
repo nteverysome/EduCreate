@@ -79,9 +79,11 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     try {
       // 調用真實 API - 根据 currentFolderId 获取对应的结果
       const folderId = currentFolderId || 'null';
+      console.log('🔍 loadResults 调用:', { currentFolderId, folderId });
       const response = await fetch(`/api/results?folderId=${folderId}`);
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ API 响应成功:', { count: data.length, data });
         setResults(data);
       } else {
         console.error('載入結果失敗:', response.status);
