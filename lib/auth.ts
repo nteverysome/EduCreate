@@ -111,6 +111,53 @@ export const authOptions: NextAuthOptions = {
     error: '/login',
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === 'google' && profile?.email) {
+        try {
+          // 檢查是否已存在相同 Google 電子郵件的用戶
+          let existingUser = await prisma.user.findUnique({
+            where: { email: profile.email }
+          });
+
+          if (!existingUser) {
+            // 創建新的 Google 用戶
+            existingUser = await prisma.user.create({
+              data: {
+                email: profile.email,
+                name: profile.name || user.name,
+                image: profile.picture || user.image,
+                emailVerified: new Date(),
+                role: 'USER'
+              }
+            });
+            console.log('✅ 創建新 Google 用戶:', existingUser.email);
+          } else {
+            // 更新現有用戶的 Google 信息
+            existingUser = await prisma.user.update({
+              where: { email: profile.email },
+              data: {
+                name: profile.name || user.name,
+                image: profile.picture || user.image,
+                emailVerified: new Date()
+              }
+            });
+            console.log('✅ 更新現有 Google 用戶:', existingUser.email);
+          }
+
+          // 更新 user 對象以確保正確的信息傳遞
+          user.id = existingUser.id;
+          user.email = existingUser.email;
+          user.name = existingUser.name;
+          user.role = existingUser.role;
+
+          return true;
+        } catch (error) {
+          console.error('❌ Google 登入處理失敗:', error);
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
