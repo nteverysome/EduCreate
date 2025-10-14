@@ -13,24 +13,22 @@ import FolderContextMenu from './FolderContextMenu';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { RecycleBinModal } from './RecycleBinModal';
 import { RenameFolderModal } from './RenameFolderModal';
-import DraggableFolderCard from './DraggableFolderCard';
-import DraggableResultCard from './DraggableResultCard';
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  closestCenter,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  arrayMove,
-} from '@dnd-kit/sortable';
+// import DraggableFolderCard from './DraggableFolderCard';
+// import DraggableResultCard from './DraggableResultCard';
+// import {
+//   DndContext,
+//   DragEndEvent,
+//   DragStartEvent,
+//   PointerSensor,
+//   useSensor,
+//   useSensors,
+//   closestCenter,
+// } from '@dnd-kit/core';
+// import {
+//   SortableContext,
+//   verticalListSortingStrategy,
+//   arrayMove,
+// } from '@dnd-kit/sortable';
 
 interface AssignmentResult {
   id: string;
@@ -84,13 +82,13 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [folderToDelete, setFolderToDelete] = useState<ResultFolder | null>(null);
 
   // 拖拽传感器
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
+  // const sensors = useSensors(
+  //   useSensor(PointerSensor, {
+  //     activationConstraint: {
+  //       distance: 8,
+  //     },
+  //   })
+  // );
 
   // 載入結果數據
   const loadResults = useCallback(async () => {
@@ -331,79 +329,79 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   };
 
   // 拖拽开始
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-  };
+  // const handleDragStart = (event: DragStartEvent) => {
+  //   setActiveId(event.active.id as string);
+  // };
 
   // 拖拽结束
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
+  // const handleDragEnd = async (event: DragEndEvent) => {
+  //   const { active, over } = event;
+  //   setActiveId(null);
 
-    if (!over) return;
+  //   if (!over) return;
 
-    const activeId = active.id as string;
-    const overId = over.id as string;
+  //   const activeId = active.id as string;
+  //   const overId = over.id as string;
 
-    // 如果拖拽到同一位置，不做任何操作
-    if (activeId === overId) return;
+  //   // 如果拖拽到同一位置，不做任何操作
+  //   if (activeId === overId) return;
 
-    // 处理结果拖拽到资料夹
-    if (activeId.startsWith('result-') && overId.startsWith('folder-')) {
-      const resultId = activeId.replace('result-', '');
-      const folderId = overId.replace('folder-', '');
-      await moveResultToFolder(resultId, folderId);
-      return;
-    }
+  //   // 处理结果拖拽到资料夹
+  //   if (activeId.startsWith('result-') && overId.startsWith('folder-')) {
+  //     const resultId = activeId.replace('result-', '');
+  //     const folderId = overId.replace('folder-', '');
+  //     await moveResultToFolder(resultId, folderId);
+  //     return;
+  //   }
 
-    // 处理资料夹排序
-    if (activeId.startsWith('folder-') && overId.startsWith('folder-')) {
-      const oldIndex = filteredFolders.findIndex(folder => `folder-${folder.id}` === activeId);
-      const newIndex = filteredFolders.findIndex(folder => `folder-${folder.id}` === overId);
+  //   // 处理资料夹排序
+  //   if (activeId.startsWith('folder-') && overId.startsWith('folder-')) {
+  //     const oldIndex = filteredFolders.findIndex(folder => `folder-${folder.id}` === activeId);
+  //     const newIndex = filteredFolders.findIndex(folder => `folder-${folder.id}` === overId);
 
-      if (oldIndex !== newIndex) {
-        const newFolders = arrayMove(filteredFolders, oldIndex, newIndex);
-        setFolders(newFolders);
-        // 这里可以调用API保存新的排序
-      }
-      return;
-    }
+  //     if (oldIndex !== newIndex) {
+  //       const newFolders = arrayMove(filteredFolders, oldIndex, newIndex);
+  //       setFolders(newFolders);
+  //       // 这里可以调用API保存新的排序
+  //     }
+  //     return;
+  //   }
 
-    // 处理结果排序
-    if (activeId.startsWith('result-') && overId.startsWith('result-')) {
-      const oldIndex = filteredAndSortedResults.findIndex(result => `result-${result.id}` === activeId);
-      const newIndex = filteredAndSortedResults.findIndex(result => `result-${result.id}` === overId);
+  //   // 处理结果排序
+  //   if (activeId.startsWith('result-') && overId.startsWith('result-')) {
+  //     const oldIndex = filteredAndSortedResults.findIndex(result => `result-${result.id}` === activeId);
+  //     const newIndex = filteredAndSortedResults.findIndex(result => `result-${result.id}` === overId);
 
-      if (oldIndex !== newIndex) {
-        const newResults = arrayMove(filteredAndSortedResults, oldIndex, newIndex);
-        setResults(newResults);
-        // 这里可以调用API保存新的排序
-      }
-    }
-  };
+  //     if (oldIndex !== newIndex) {
+  //       const newResults = arrayMove(filteredAndSortedResults, oldIndex, newIndex);
+  //       setResults(newResults);
+  //       // 这里可以调用API保存新的排序
+  //     }
+  //   }
+  // };
 
   // 移动结果到资料夹
-  const moveResultToFolder = async (resultId: string, folderId: string) => {
-    try {
-      const response = await fetch(`/api/results/${resultId}/move`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ folderId }),
-      });
+  // const moveResultToFolder = async (resultId: string, folderId: string) => {
+  //   try {
+  //     const response = await fetch(`/api/results/${resultId}/move`, {
+  //       method: 'PATCH',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ folderId }),
+  //     });
 
-      if (!response.ok) {
-        throw new Error('移动失败');
-      }
+  //     if (!response.ok) {
+  //       throw new Error('移动失败');
+  //     }
 
-      // 重新载入数据
-      await loadResults();
-      await loadFolders();
-    } catch (error) {
-      console.error('移动结果到资料夹失败:', error);
-    }
-  };
+  //     // 重新载入数据
+  //     await loadResults();
+  //     await loadFolders();
+  //   } catch (error) {
+  //     console.error('移动结果到资料夹失败:', error);
+  //   }
+  // };
 
   // 處理資料夾菜單點擊
   const handleFolderMenuClick = (folder: ResultFolder, event: React.MouseEvent) => {
@@ -495,12 +493,12 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
+    // <DndContext
+    //   sensors={sensors}
+    //   collisionDetection={closestCenter}
+    //   onDragStart={handleDragStart}
+    //   onDragEnd={handleDragEnd}
+    // >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* 頁面標題和操作按鈕 */}
       <div className="mb-8">
@@ -579,27 +577,27 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       {/* 內容區域 - 簡化的列表佈局 */}
       <div className="space-y-2">
         {/* 資料夾 */}
-        <SortableContext
+        {/* <SortableContext
           items={filteredFolders.map(folder => `folder-${folder.id}`)}
           strategy={verticalListSortingStrategy}
-        >
+        > */}
           {filteredFolders.map(folder => (
-            <DraggableFolderCard
+            <WordwallStyleFolderCard
               key={folder.id}
               folder={folder}
               onClick={handleFolderClick}
               onMenuClick={handleFolderMenuClick}
             />
           ))}
-        </SortableContext>
+        {/* </SortableContext> */}
 
         {/* 結果項目 */}
-        <SortableContext
+        {/* <SortableContext
           items={filteredAndSortedResults.map(result => `result-${result.id}`)}
           strategy={verticalListSortingStrategy}
-        >
+        > */}
           {filteredAndSortedResults.map(result => (
-            <DraggableResultCard
+            <WordwallStyleResultCard
               key={result.id}
               result={result}
               onClick={handleResultClick}
@@ -609,7 +607,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
               }}
             />
           ))}
-        </SortableContext>
+        {/* </SortableContext> */}
 
         {/* 空狀態 */}
         {filteredAndSortedResults.length === 0 && folders.length === 0 && (
@@ -686,7 +684,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         }}
       />
       </div>
-    </DndContext>
+    // </DndContext>
   );
 };
 
