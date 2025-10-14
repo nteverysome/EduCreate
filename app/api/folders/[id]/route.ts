@@ -3,6 +3,67 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+// GET - 获取单个资料夹信息
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: '未授权' }, { status: 401 });
+    }
+
+    const folderId = params.id;
+
+    // 获取资料夹信息
+    const folder = await prisma.folder.findFirst({
+      where: {
+        id: folderId,
+        userId: session.user.id,
+        deletedAt: null
+      }
+    });
+
+    if (!folder) {
+      return NextResponse.json({ error: '资料夹不存在' }, { status: 404 });
+    }
+
+    // 计算资料夹中的结果数量
+    const resultCount = await prisma.assignmentResult.count({
+      where: {
+        folderId: folderId,
+        assignment: {
+          activity: {
+            userId: session.user.id
+          }
+        }
+      }
+    });
+
+    const folderData = {
+      id: folder.id,
+      name: folder.name,
+      description: folder.description,
+      color: folder.color,
+      icon: folder.icon,
+      createdAt: folder.createdAt.toISOString(),
+      updatedAt: folder.updatedAt.toISOString(),
+      resultCount: resultCount
+    };
+
+    return NextResponse.json(folderData);
+
+  } catch (error) {
+    console.error('获取资料夹失败:', error);
+    return NextResponse.json(
+      { error: '获取资料夹失败' },
+      { status: 500 }
+    );
+  }
+}
+
 // PATCH - 更新资料夹（重命名）
 export async function PATCH(
   request: NextRequest,

@@ -12,18 +12,30 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
+    // 获取查询参数
+    const { searchParams } = new URL(request.url);
+    const folderId = searchParams.get('folderId');
+
     // 真實數據庫查詢 - 數據庫已同步
-    console.log('📊 從數據庫獲取結果數據');
+    console.log('📊 從數據庫獲取結果數據', { folderId });
 
     try {
-      const results = await prisma.assignmentResult.findMany({
-        where: {
-          assignment: {
-            activity: {
-              userId: session.user.id
-            }
+      // 构建查询条件
+      const whereCondition: any = {
+        assignment: {
+          activity: {
+            userId: session.user.id
           }
-        },
+        }
+      };
+
+      // 如果指定了 folderId，添加过滤条件
+      if (folderId !== null) {
+        whereCondition.folderId = folderId;
+      }
+
+      const results = await prisma.assignmentResult.findMany({
+        where: whereCondition,
         include: {
           assignment: {
             include: {
@@ -46,7 +58,8 @@ export async function GET(request: NextRequest) {
         deadline: result.assignment.deadline?.toISOString(),
         status: result.status,
         assignmentId: result.assignmentId,
-        activityId: result.assignment.activityId
+        activityId: result.assignment.activityId,
+        folderId: result.folderId  // 添加 folderId 字段
       }));
 
       return NextResponse.json(formattedResults);
