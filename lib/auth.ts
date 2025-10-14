@@ -110,6 +110,8 @@ export const authOptions: NextAuthOptions = {
     signOut: '/',
     error: '/login',
   },
+  // 允許 OAuth 帳號自動連結到相同電子郵件的現有帳號
+  allowDangerousEmailAccountLinking: true,
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider === 'google' && profile?.email) {
