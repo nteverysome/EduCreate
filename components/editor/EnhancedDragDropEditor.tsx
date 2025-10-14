@@ -1,9 +1,34 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, useSensor, useSensors, PointerSensor, KeyboardSensor, Modifier } from '@dnd-kit/core';
-import { SortableContext, useSortable, verticalListSortingStrategy, horizontalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
-import { CSS } from '@dnd-kit/utilities';
+// import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, useSensor, useSensors, PointerSensor, KeyboardSensor, Modifier } from '@dnd-kit/core';
+// import { SortableContext, useSortable, verticalListSortingStrategy, horizontalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+// import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
+// import { CSS } from '@dnd-kit/utilities';
+
+// 临时类型定义和函数
+interface DragEndEvent {
+  active: { id: string };
+  over?: { id: string };
+}
+
+interface DragStartEvent {
+  active: { id: string };
+}
+
+const useSortable = (config: any) => ({
+  attributes: {},
+  listeners: {},
+  setNodeRef: () => {},
+  transform: null,
+  transition: null,
+  isDragging: false,
+});
+
+const CSS = {
+  Transform: {
+    toString: () => '',
+  },
+};
 import { useEditorStore, EditorElement } from '../../store/editorStore';
 interface DraggableItemProps {
   element: EditorElement;
@@ -281,16 +306,18 @@ export default function EnhancedDragDropEditor({
       className={getContainerClassName()}
       onClick={handleCanvasClick}
     >
-      <DndContext
+      {/* 暂时禁用拖拽功能 */}
+      {/* <DndContext
         sensors={sensors}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         modifiers={modifiers}
       >
-        <SortableContext 
+        <SortableContext
           items={elements.map(el => el.id)}
           strategy={getSortingStrategy()}
         >
+      */}
           {elements.map(element => (
             <DraggableItem
               key={element.id}
@@ -304,8 +331,7 @@ export default function EnhancedDragDropEditor({
               從側邊欄拖動元素到此處開始創建活動
             </div>
           )}
-        </SortableContext>
-        {/* 拖動覆蓋層 */}
+      {/* </SortableContext>
         <DragOverlay adjustScale={true} modifiers={[snapCenterToCursor]}>
           {activeElement ? (
             <DraggableItem
@@ -315,7 +341,7 @@ export default function EnhancedDragDropEditor({
             />
           ) : null}
         </DragOverlay>
-      </DndContext>
+      </DndContext> */}
     </div>
   );
 }

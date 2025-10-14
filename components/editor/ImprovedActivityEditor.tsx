@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { DragEndEvent } from '@dnd-kit/core';
+// import { DragEndEvent } from '@dnd-kit/core';
+
+// 临时类型定义
+interface DragEndEvent {
+  active: { id: string };
+  delta: { x: number; y: number };
+}
 import { useEditorStore, EditorElement } from '../../store/editorStore';
 import EditorToolbar from './EditorToolbar';
 import EditorSidebar from './EditorSidebar';
