@@ -77,8 +77,9 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setError(null);
 
     try {
-      // 調用真實 API - 只获取不在资料夹中的结果（根目录结果）
-      const response = await fetch('/api/results?folderId=null');
+      // 調用真實 API - 根据 currentFolderId 获取对应的结果
+      const folderId = currentFolderId || 'null';
+      const response = await fetch(`/api/results?folderId=${folderId}`);
       if (response.ok) {
         const data = await response.json();
         setResults(data);
@@ -175,10 +176,11 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     }
   }, []);
 
-  // 初始載入
+  // 初始載入和资料夹变化时重新加载
   useEffect(() => {
     loadResults();
-  }, [loadResults]);
+    loadFolders();
+  }, [loadResults, currentFolderId]);
 
   // 格式化時間顯示
   const formatDateTime = (dateString: string) => {
@@ -336,7 +338,33 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
 
 
+  // 處理資料夾選擇（點擊進入資料夾）
+  const handleFolderSelect = (folderId: string | null) => {
+    setCurrentFolderId(folderId);
+  };
 
+  // 處理拖拽結果回根目錄
+  const handleMoveToRoot = async (resultId: string) => {
+    try {
+      const response = await fetch(`/api/results/${resultId}/move`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ folderId: null })
+      });
+
+      if (!response.ok) {
+        throw new Error('移動結果失敗');
+      }
+
+      // 重新載入結果
+      await loadResults();
+      console.log('結果已移動到根目錄');
+    } catch (error) {
+      console.error('移動結果失敗:', error);
+    }
+  };
 
   // 處理資料夾菜單點擊
   const handleFolderMenuClick = (folder: ResultFolder, event: React.MouseEvent) => {
@@ -434,7 +462,23 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <h1 className="text-3xl font-bold text-gray-900">我的結果</h1>
+            {/* 面包屑导航 */}
+            <div className="breadcrumb">
+              <button
+                onClick={() => handleFolderSelect(null)}
+                className={`text-3xl font-bold ${currentFolderId ? 'text-blue-600 hover:text-blue-800' : 'text-gray-900'}`}
+              >
+                我的結果
+              </button>
+              {currentFolderId && (
+                <>
+                  <span className="mx-2 text-2xl text-gray-400">/</span>
+                  <span className="text-3xl font-bold text-gray-900">
+                    {folders.find(f => f.id === currentFolderId)?.name || '未知資料夾'}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -504,10 +548,22 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         </div>
       </div>
 
+      {/* 在資料夾視圖中顯示拖拽回根級別的目標區域 */}
+      {currentFolderId && (
+        <div className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer">
+          <div className="flex items-center justify-center text-gray-600">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+            </svg>
+            拖拽結果到此處以移回上一層
+          </div>
+        </div>
+      )}
+
       {/* 內容區域 - 簡化的列表佈局 */}
       <div className="space-y-2">
-        {/* 資料夾 */}
-        {filteredFolders.map(folder => (
+        {/* 資料夾 - 只在根目录显示 */}
+        {!currentFolderId && filteredFolders.map(folder => (
           <DroppableFolderCard
             key={folder.id}
             folder={folder}
