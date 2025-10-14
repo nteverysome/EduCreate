@@ -237,8 +237,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
   // 處理資料夾點擊
   const handleFolderClick = (folder: ResultFolder) => {
+    console.log('🔍 handleFolderClick 被调用:', { folder, folderId: folder.id });
     // 導航到資料夾頁面
     setCurrentFolderId(folder.id);
+    console.log('✅ currentFolderId 已设置为:', folder.id);
   };
 
   // 處理創建新資料夾
