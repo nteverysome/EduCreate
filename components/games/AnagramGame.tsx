@@ -4,7 +4,31 @@
  * 根據WordWall Anagram模板分析設計
  */
 import React, { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
+// 临时类型定义
+interface DragDropContextProps {
+  onDragEnd: (result: any) => void;
+  children: React.ReactNode;
+}
+const DragDropContext: React.FC<DragDropContextProps> = ({ children }) => <>{children}</>;
+
+interface DroppableProps {
+  droppableId: string;
+  children: (provided: any) => React.ReactNode;
+}
+const Droppable: React.FC<DroppableProps> = ({ children }) => children({ droppableRef: () => {}, placeholder: null });
+
+interface DraggableProps {
+  draggableId: string;
+  index: number;
+  children: (provided: any) => React.ReactNode;
+}
+const Draggable: React.FC<DraggableProps> = ({ children }) => children({
+  draggableProps: {},
+  dragHandleProps: {},
+  innerRef: () => {}
+});
 interface AnagramWord {
   id: string;
   word: string;

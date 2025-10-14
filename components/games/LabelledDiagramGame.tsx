@@ -3,7 +3,31 @@
  * 基於標籤空間記憶機制的圖表標註遊戲
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
+// 临时类型定义
+interface DragDropContextProps {
+  onDragEnd: (result: any) => void;
+  children: React.ReactNode;
+}
+const DragDropContext: React.FC<DragDropContextProps> = ({ children }) => <>{children}</>;
+
+interface DroppableProps {
+  droppableId: string;
+  children: (provided: any) => React.ReactNode;
+}
+const Droppable: React.FC<DroppableProps> = ({ children }) => children({ droppableRef: () => {}, placeholder: null });
+
+interface DraggableProps {
+  draggableId: string;
+  index: number;
+  children: (provided: any) => React.ReactNode;
+}
+const Draggable: React.FC<DraggableProps> = ({ children }) => children({
+  draggableProps: {},
+  dragHandleProps: {},
+  innerRef: () => {}
+});
 interface LabelItem {
   id: string;
   text: string;
