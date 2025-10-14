@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
             id: true
           }
         },
-        assignmentResults: {
+        results: {
           select: {
             id: true
           }
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       createdAt: folder.createdAt,
       updatedAt: folder.updatedAt,
       activityCount: folder.activities.length,
-      resultCount: folder.assignmentResults.length
+      resultCount: folder.results.length
     }));
 
     return NextResponse.json(foldersWithCount);
