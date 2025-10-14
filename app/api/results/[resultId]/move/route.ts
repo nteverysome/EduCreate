@@ -22,11 +22,17 @@ export async function PATCH(
       where: {
         id: resultId,
         assignment: {
-          userId: session.user.id
+          activity: {
+            userId: session.user.id
+          }
         }
       },
       include: {
-        assignment: true
+        assignment: {
+          include: {
+            activity: true
+          }
+        }
       }
     });
 
