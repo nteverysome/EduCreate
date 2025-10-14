@@ -101,9 +101,6 @@ export const authOptions: NextAuthOptions = {
       })
     ] : []),
   ],
-  session: {
-    strategy: 'jwt'
-  },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: '/login',
@@ -114,7 +111,7 @@ export const authOptions: NextAuthOptions = {
   allowDangerousEmailAccountLinking: true,
   callbacks: {
     async signIn({ user, account, profile }) {
-      // 簡化登入邏輯，讓 NextAuth 處理用戶創建和關聯
+      // 簡化登入邏輯，讓 NextAuth 和 PrismaAdapter 處理用戶創建和關聯
       console.log('🔍 NextAuth signIn callback:', {
         provider: account?.provider,
         email: profile?.email || user?.email,
@@ -122,22 +119,11 @@ export const authOptions: NextAuthOptions = {
       });
       return true;
     },
-    async jwt({ token, user, account }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-      }
-      // 保存提供者信息
-      if (account) {
-        token.provider = account.provider;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
-        session.user.provider = token.provider as string;
+    async session({ session, user }) {
+      // 使用數據庫會話策略時，user 來自數據庫
+      if (user && session.user) {
+        session.user.id = user.id;
+        session.user.role = user.role;
       }
       return session;
     }
