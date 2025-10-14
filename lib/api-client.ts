@@ -1,9 +1,9 @@
-// 統一的 API 客戶端 - 支持本地和遠程 API
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? '/api/backend'  // 生產環境使用統一的 Vercel API
-  : '/api/backend'; // 開發環境也使用統一的本地 API
+// 統一的 API 客戶端 - 智能路由到正確的 API
+// 優先使用 NextAuth 兼容的 API，回退到 JWT API
+const NEXTAUTH_API_BASE = '/api';  // NextAuth 兼容的 API
+const JWT_API_BASE = '/api/backend';  // JWT 認證的 API
 
-// 舊的 Railway API URL（逐步淘汰）
+// 舊的 Railway API URL（已淘汰）
 const RAILWAY_API_URL = process.env.RAILWAY_API_URL || 'https://your-railway-app.railway.app';
 
 export interface ApiResponse<T = any> {
@@ -14,16 +14,28 @@ export interface ApiResponse<T = any> {
 }
 
 class ApiClient {
-  private baseURL: string;
+  private nextAuthBaseURL: string;
+  private jwtBaseURL: string;
   private token: string | null = null;
 
-  constructor(baseURL: string = API_BASE_URL) {
-    this.baseURL = baseURL;
-    
+  constructor(nextAuthBase: string = NEXTAUTH_API_BASE, jwtBase: string = JWT_API_BASE) {
+    this.nextAuthBaseURL = nextAuthBase;
+    this.jwtBaseURL = jwtBase;
+
     // 從 localStorage 獲取 token（僅在客戶端）
     if (typeof window !== 'undefined') {
       this.token = localStorage.getItem('auth_token');
     }
+  }
+
+  // 智能選擇 API 基礎 URL
+  private getBaseURL(): string {
+    // 如果有 JWT token，使用 JWT API
+    if (this.token) {
+      return this.jwtBaseURL;
+    }
+    // 否則使用 NextAuth 兼容的 API
+    return this.nextAuthBaseURL;
   }
 
   setToken(token: string) {
@@ -41,17 +53,19 @@ class ApiClient {
   }
 
   private async request<T>(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseURL}${endpoint}`;
-    
+    const baseURL = this.getBaseURL();
+    const url = `${baseURL}${endpoint}`;
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
     };
 
-    if (this.token) {
+    // 只有在使用 JWT API 時才添加 Authorization header
+    if (this.token && baseURL === this.jwtBaseURL) {
       headers.Authorization = `Bearer ${this.token}`;
     }
 
