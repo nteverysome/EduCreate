@@ -11,6 +11,7 @@ import WordwallStyleFolderCard from './WordwallStyleFolderCard';
 import NewFolderModal from './NewFolderModal';
 import FolderContextMenu from './FolderContextMenu';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import { RecycleBinModal } from './RecycleBinModal';
 
 interface AssignmentResult {
   id: string;
@@ -139,6 +140,30 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     }
   }, []);
 
+  // 載入資料夾數據
+  const loadFolders = useCallback(async () => {
+    try {
+      const foldersResponse = await fetch('/api/folders');
+      if (foldersResponse.ok) {
+        const foldersData = await foldersResponse.json();
+        const formattedFolders: ResultFolder[] = foldersData.map((folder: any) => ({
+          id: folder.id,
+          name: folder.name,
+          resultCount: folder.activityCount || 0,
+          createdAt: folder.createdAt,
+          color: folder.color
+        }));
+        setFolders(formattedFolders);
+      } else {
+        console.log('無法載入資料夾，使用空列表');
+        setFolders([]);
+      }
+    } catch (error) {
+      console.error('載入資料夾失敗:', error);
+      setFolders([]);
+    }
+  }, []);
+
   // 初始載入
   useEffect(() => {
     loadResults();
@@ -237,8 +262,6 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 處理回收桶點擊
   const handleRecycleBinClick = () => {
     setShowRecycleBin(true);
-    // TODO: 實現回收桶功能 - 顯示已刪除的項目
-    alert('回收桶功能開發中，敬請期待！');
   };
 
   // 處理資料夾菜單點擊
@@ -478,6 +501,17 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         message={`確定要刪除資料夾「${folderToDelete?.name}」嗎？此操作無法復原。`}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
+      />
+
+      {/* 回收桶模態框 */}
+      <RecycleBinModal
+        isOpen={showRecycleBin}
+        onClose={() => setShowRecycleBin(false)}
+        onItemRestored={() => {
+          // 当项目被恢复时，重新加载数据
+          loadResults();
+          loadFolders();
+        }}
       />
     </div>
   );

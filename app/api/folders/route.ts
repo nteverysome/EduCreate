@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
 
     const folders = await prisma.folder.findMany({
       where: {
-        userId: session.user.id
+        userId: session.user.id,
+        deletedAt: null // 只获取未删除的资料夹
       },
       include: {
         activities: {
@@ -65,11 +66,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '資料夾名稱不能為空' }, { status: 400 });
     }
 
-    // 檢查是否已存在同名資料夾
+    // 檢查是否已存在同名資料夾（未删除的）
     const existingFolder = await prisma.folder.findFirst({
       where: {
         userId: session.user.id,
-        name: name.trim()
+        name: name.trim(),
+        deletedAt: null
       }
     });
 
@@ -123,11 +125,12 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: '資料夾名稱不能為空' }, { status: 400 });
     }
 
-    // 檢查資料夾是否存在且屬於當前用戶
+    // 檢查資料夾是否存在且屬於當前用戶（未删除的）
     const existingFolder = await prisma.folder.findFirst({
       where: {
         id: id,
-        userId: session.user.id
+        userId: session.user.id,
+        deletedAt: null
       }
     });
 
@@ -135,11 +138,12 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: '資料夾不存在' }, { status: 404 });
     }
 
-    // 檢查是否已存在同名資料夾（排除當前資料夾）
+    // 檢查是否已存在同名資料夾（排除當前資料夾，未删除的）
     const duplicateFolder = await prisma.folder.findFirst({
       where: {
         userId: session.user.id,
         name: name.trim(),
+        deletedAt: null,
         id: {
           not: id
         }
@@ -201,14 +205,19 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '資料夾 ID 不能為空' }, { status: 400 });
     }
 
-    // 檢查資料夾是否存在且屬於當前用戶
+    // 檢查資料夾是否存在且屬於當前用戶（未删除的）
     const existingFolder = await prisma.folder.findFirst({
       where: {
         id: id,
-        userId: session.user.id
+        userId: session.user.id,
+        deletedAt: null
       },
       include: {
-        activities: true
+        activities: {
+          where: {
+            deletedAt: null // 只包含未删除的活动
+          }
+        }
       }
     });
 
@@ -216,28 +225,32 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '資料夾不存在' }, { status: 404 });
     }
 
-    // 將資料夾內的活動移至根目錄（設置 folderId 為 null）
+    // 软删除资料夹（设置 deletedAt）
+    await prisma.folder.update({
+      where: {
+        id: id
+      },
+      data: {
+        deletedAt: new Date()
+      }
+    });
+
+    // 同时软删除资料夹内的所有活动
     if (existingFolder.activities.length > 0) {
       await prisma.activity.updateMany({
         where: {
-          folderId: id
+          folderId: id,
+          deletedAt: null
         },
         data: {
-          folderId: null
+          deletedAt: new Date()
         }
       });
     }
 
-    // 刪除資料夾
-    await prisma.folder.delete({
-      where: {
-        id: id
-      }
-    });
-
-    return NextResponse.json({ 
-      message: '資料夾已刪除',
-      movedActivities: existingFolder.activities.length
+    return NextResponse.json({
+      message: '資料夾已移至回收桶',
+      deletedActivities: existingFolder.activities.length
     });
   } catch (error) {
     console.error('刪除資料夾失敗:', error);

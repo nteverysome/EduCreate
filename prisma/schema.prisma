@@ -133,6 +133,7 @@ model Folder {
   icon        String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
   userId      String
   activities  Activity[]
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
