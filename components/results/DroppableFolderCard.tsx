@@ -35,7 +35,9 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
   };
 
   const handleCardClick = (event: React.MouseEvent) => {
+    console.log('🔍 DroppableFolderCard handleCardClick 被调用:', { folder, event });
     event.preventDefault();
+    console.log('✅ 调用 onClick 回调:', folder);
     onClick(folder);
   };
 
