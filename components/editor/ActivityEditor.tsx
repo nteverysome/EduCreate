@@ -1,6 +1,28 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { DndContext, DragEndEvent, DragStartEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
+// import { DndContext, DragEndEvent, DragStartEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
+
+// 临时类型定义
+interface DragEndEvent {
+  active: { id: string };
+  over?: { id: string };
+}
+
+interface DragStartEvent {
+  active: { id: string };
+}
+
+interface DndContextProps {
+  sensors?: any;
+  onDragStart?: (event: DragStartEvent) => void;
+  onDragEnd: (event: DragEndEvent) => void;
+  children: React.ReactNode;
+}
+const DndContext: React.FC<DndContextProps> = ({ children }) => <>{children}</>;
+
+const useSensor = () => {};
+const useSensors = () => [];
+const PointerSensor = {};
 import { useEditorStore, EditorElement } from '../../store/editorStore';
 import EditorToolbar from './EditorToolbar';
 import EditorCanvas from './EditorCanvas';

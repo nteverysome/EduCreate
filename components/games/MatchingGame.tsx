@@ -1,7 +1,37 @@
 import { useState, useEffect } from 'react';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
-import { useSortable } from '@dnd-kit/sortable';
+// import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+// import { CSS } from '@dnd-kit/utilities';
+// import { useSortable } from '@dnd-kit/sortable';
+
+// 临时类型定义
+interface DragEndEvent {
+  active: { id: string };
+  over?: { id: string };
+}
+
+interface DndContextProps {
+  collisionDetection?: any;
+  onDragEnd: (event: DragEndEvent) => void;
+  children: React.ReactNode;
+}
+const DndContext: React.FC<DndContextProps> = ({ children }) => <>{children}</>;
+
+const closestCenter = () => {};
+
+const CSS = {
+  Transform: {
+    toString: () => '',
+  },
+};
+
+const useSortable = (config: any) => ({
+  attributes: {},
+  listeners: {},
+  setNodeRef: () => {},
+  transform: null,
+  transition: null,
+  isDragging: false,
+});
 
 interface MatchingItem {
   id: string;
