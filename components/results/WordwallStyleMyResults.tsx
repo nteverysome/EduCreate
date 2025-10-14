@@ -174,7 +174,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       console.error('載入資料夾失敗:', error);
       setFolders([]);
     }
-  }, []);
+  }, [currentFolderId]);
 
   // 初始載入和资料夹变化时重新加载
   useEffect(() => {
