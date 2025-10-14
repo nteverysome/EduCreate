@@ -90,6 +90,13 @@ const UnifiedNavigation = ({
 
   // 檢查演示會話
   useEffect(() => {
+    // 如果有真實的 session，清除演示會話
+    if (session?.user) {
+      localStorage.removeItem('demo-session');
+      setDemoSession(null);
+      return;
+    }
+
     const demo = localStorage.getItem('demo-session');
     if (demo) {
       try {
@@ -98,12 +105,14 @@ const UnifiedNavigation = ({
         console.error('解析演示會話失敗:', error);
       }
     }
-  }, []);
+  }, [session]);
 
+  // 優先使用真實 session，只有在沒有真實 session 時才使用演示會話
   const currentUser = session?.user || demoSession?.user;
+  const isDemo = !session?.user && !!demoSession?.user;
 
   const handleLogout = () => {
-    if (demoSession) {
+    if (isDemo) {
       localStorage.removeItem('demo-session');
       setDemoSession(null);
       window.location.reload();
@@ -213,7 +222,8 @@ const UnifiedNavigation = ({
                             </div>
                             <div>
                               <p className="text-sm font-medium text-gray-900">{currentUser.name || '用戶'}</p>
-                              {demoSession ? (
+                              <p className="text-xs text-gray-500">{currentUser.email}</p>
+                              {isDemo ? (
                                 <p className="text-xs text-green-600 font-medium">演示帳戶</p>
                               ) : (
                                 <p className="text-xs text-blue-600 font-medium">專業帳戶</p>
@@ -367,7 +377,7 @@ const UnifiedNavigation = ({
                     <div>
                       <p className="text-sm font-medium text-gray-900">{currentUser.name || '用戶'}</p>
                       <p className="text-xs text-gray-500">{currentUser.email}</p>
-                      {demoSession && (
+                      {isDemo && (
                         <span className="inline-block mt-1 px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
                           演示模式
                         </span>
