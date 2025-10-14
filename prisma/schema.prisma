@@ -408,44 +408,6 @@ model LearningProgress {
   @@map("learning_progress")
 }
 
-model Assignment {
-  id               String             @id @default(cuid())
-  activityId       String
-  title            String
-  registrationType RegistrationType   @default(NAME)
-  deadline         DateTime?
-  gameEndSettings  Json?
-  status           AssignmentStatus   @default(ACTIVE)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  activity         Activity           @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  results          AssignmentResult[]
-}
-
-model AssignmentResult {
-  id           String            @id @default(cuid())
-  assignmentId String
-  resultNumber Int
-  status       ResultStatus      @default(ACTIVE)
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  assignment   Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  participants GameParticipant[]
-}
-
-model GameParticipant {
-  id             String           @id @default(cuid())
-  resultId       String
-  studentName    String
-  score          Int              @default(0)
-  timeSpent      Int              @default(0)
-  correctAnswers Int              @default(0)
-  totalQuestions Int              @default(0)
-  gameData       Json?
-  completedAt    DateTime         @default(now())
-  result         AssignmentResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
-}
-
 enum Role {
   USER
   PREMIUM_USER
