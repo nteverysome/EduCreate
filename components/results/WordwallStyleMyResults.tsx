@@ -209,6 +209,11 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       }
     });
 
+  // 過濾資料夾
+  const filteredFolders = folders.filter(folder =>
+    folder.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // 處理結果項目點擊
   const handleResultClick = (result: AssignmentResult) => {
     // 導航到結果詳情頁面
@@ -432,7 +437,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       {/* 內容區域 - 簡化的列表佈局 */}
       <div className="space-y-2">
         {/* 資料夾 */}
-        {folders.map(folder => (
+        {filteredFolders.map(folder => (
           <WordwallStyleFolderCard
             key={folder.id}
             folder={folder}
