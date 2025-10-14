@@ -9,6 +9,8 @@ import {
 import WordwallStyleResultCard from './WordwallStyleResultCard';
 import WordwallStyleFolderCard from './WordwallStyleFolderCard';
 import NewFolderModal from './NewFolderModal';
+import FolderContextMenu from './FolderContextMenu';
+import DeleteConfirmModal from './DeleteConfirmModal';
 
 interface AssignmentResult {
   id: string;
@@ -47,6 +49,15 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
+
+  // 菜单和删除相关状态
+  const [contextMenu, setContextMenu] = useState<{
+    folder: ResultFolder;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState<ResultFolder | null>(null);
 
   // 載入結果數據
   const loadResults = useCallback(async () => {
@@ -194,6 +205,66 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     }
   };
 
+  // 處理資料夾菜單點擊
+  const handleFolderMenuClick = (folder: ResultFolder, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    setContextMenu({
+      folder,
+      x: event.clientX,
+      y: event.clientY
+    });
+  };
+
+  // 關閉菜單
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+  };
+
+  // 處理刪除資料夾
+  const handleDeleteFolder = async (folder: ResultFolder) => {
+    setFolderToDelete(folder);
+    setShowDeleteModal(true);
+    setContextMenu(null);
+  };
+
+  // 確認刪除資料夾
+  const handleConfirmDelete = async () => {
+    if (!folderToDelete) return;
+
+    try {
+      const response = await fetch(`/api/folders?id=${folderToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '刪除資料夾失敗');
+      }
+
+      // 從列表中移除已刪除的資料夾
+      setFolders(prev => prev.filter(f => f.id !== folderToDelete.id));
+
+      // 重新載入結果以更新顯示
+      await loadResults();
+
+      console.log('資料夾刪除成功:', folderToDelete.name);
+    } catch (error) {
+      console.error('刪除資料夾失敗:', error);
+      setError(error instanceof Error ? error.message : '刪除資料夾失敗');
+    } finally {
+      setShowDeleteModal(false);
+      setFolderToDelete(null);
+    }
+  };
+
+  // 取消刪除
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setFolderToDelete(null);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -304,10 +375,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             key={folder.id}
             folder={folder}
             onClick={handleFolderClick}
-            onMenuClick={(folder, event) => {
-              // TODO: 實現資料夾菜單功能
-              console.log('資料夾菜單點擊:', folder);
-            }}
+            onMenuClick={handleFolderMenuClick}
           />
         ))}
 
@@ -351,6 +419,26 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         isOpen={showNewFolderModal}
         onClose={() => setShowNewFolderModal(false)}
         onCreateFolder={handleCreateFolder}
+      />
+
+      {/* 資料夾右鍵菜單 */}
+      {contextMenu && (
+        <FolderContextMenu
+          folder={contextMenu.folder}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={handleCloseContextMenu}
+          onDelete={() => handleDeleteFolder(contextMenu.folder)}
+        />
+      )}
+
+      {/* 刪除確認對話框 */}
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        title="刪除資料夾"
+        message={`確定要刪除資料夾「${folderToDelete?.name}」嗎？此操作無法復原。`}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
       />
     </div>
   );
