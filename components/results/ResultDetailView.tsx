@@ -58,10 +58,12 @@ interface AssignmentResult {
   deadline?: string;
   status: 'active' | 'completed' | 'expired';
   gameType: string;
-  shareLink: string;
+  shareLink?: string;
+  shareToken?: string; // 可共用結果連結的 token
   participants: GameParticipant[];
   statistics?: StatisticsSummary;
   questionStatistics?: QuestionStatistic[];
+  isSharedView?: boolean; // 標記是否為共用視圖
 }
 
 interface ResultDetailViewProps {
@@ -99,15 +101,40 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
     return formatDuration(seconds);
   };
 
-  // 複製分享連結
-  const copyShareLink = async () => {
+  // 複製可共用結果連結
+  const copyShareableResultLink = async () => {
+    if (!result.shareToken) return;
+
+    const shareableUrl = `${window.location.origin}/results/shared/${result.shareToken}`;
+
     try {
-      await navigator.clipboard.writeText(result.shareLink);
+      await navigator.clipboard.writeText(shareableUrl);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000); // 2秒後隱藏提示
     } catch (err) {
       console.error('複製失敗:', err);
       // 降級方案：選擇文本
+      const textArea = document.createElement('textarea');
+      textArea.value = shareableUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
+
+  // 複製學生分享連結（遊戲連結）
+  const copyStudentShareLink = async () => {
+    if (!result.shareLink) return;
+
+    try {
+      await navigator.clipboard.writeText(result.shareLink);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('複製失敗:', err);
       const textArea = document.createElement('textarea');
       textArea.value = result.shareLink;
       document.body.appendChild(textArea);
@@ -121,7 +148,9 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
 
   // 打開遊戲連結
   const openGameLink = () => {
-    window.open(result.shareLink, '_blank');
+    if (result.shareLink) {
+      window.open(result.shareLink, '_blank');
+    }
   };
 
   // 獲取學生的詳細答案數據
@@ -228,23 +257,25 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   // 🎯 使用 API 返回的統計數據，而不是重新計算
   // 這確保與後端的 Wordwall 邏輯保持一致
   const filteredStatistics = (() => {
+    const defaultStats = {
+      totalStudents: 0,
+      averageScore: 0,
+      highestScore: { score: 0, studentName: '' },
+      fastestTime: { timeSpent: 0, studentName: '' }
+    };
+
     if (filteredParticipants.length === 0) {
-      return {
-        totalStudents: 0,
-        averageScore: 0,
-        highestScore: { score: 0, studentName: '' },
-        fastestTime: { timeSpent: 0, studentName: '' }
-      };
+      return defaultStats;
     }
 
     // 如果是顯示所有參與者，直接使用 API 統計數據
     if (showFilter === 'all') {
-      return result.statistics;
+      return result.statistics || defaultStats;
     }
 
     // 對於篩選後的數據，需要重新計算（但這裡暫時使用 API 數據）
     // TODO: 未來可以為篩選後的數據實現專門的計算邏輯
-    return result.statistics;
+    return result.statistics || defaultStats;
   })();
 
   return (
@@ -265,14 +296,16 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
           </div>
           
           <div className="flex items-center space-x-4">
-            <button
-              onClick={copyShareLink}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <LinkIcon className="w-4 h-4 mr-2" />
-              可共用結果連結
-            </button>
-            
+            {!result.isSharedView && (
+              <button
+                onClick={copyShareableResultLink}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <LinkIcon className="w-4 h-4 mr-2" />
+                可共用結果連結
+              </button>
+            )}
+
             <a
               href={`/games/switcher?game=${result.gameType}&activityId=${result.activityId}`}
               className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -280,10 +313,12 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
               <PlayIcon className="w-4 h-4 mr-2" />
               打開活動
             </a>
-            
-            <button className="p-2 hover:bg-gray-100 rounded-full">
-              <EllipsisVerticalIcon className="w-5 h-5 text-gray-400" />
-            </button>
+
+            {!result.isSharedView && (
+              <button className="p-2 hover:bg-gray-100 rounded-full">
+                <EllipsisVerticalIcon className="w-5 h-5 text-gray-400" />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -378,7 +413,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
               Play
             </button>
             <button
-              onClick={copyShareLink}
+              onClick={copyStudentShareLink}
               className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md transition-colors ${
                 copySuccess
                   ? 'text-green-700 bg-green-50 border-green-300'

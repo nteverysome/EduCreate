@@ -569,6 +569,55 @@ enum PartOfSpeech {
   PHRASE
 }
 
+// 課業分配模型
+model Assignment {
+  id                String             @id @default(cuid())
+  activityId        String
+  title             String
+  registrationType  RegistrationType   @default(NAME)
+  deadline          DateTime?
+  gameEndSettings   Json?              // 遊戲結束設置
+  status            AssignmentStatus   @default(ACTIVE)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  // 關聯
+  activity          Activity           @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  results           AssignmentResult[]
+}
+
+// 課業結果模型
+model AssignmentResult {
+  id           String               @id @default(cuid())
+  assignmentId String
+  resultNumber Int                  // 結果編號（如：結果1、結果2）
+  shareToken   String?              @unique // 可共用結果連結的 token
+  status       ResultStatus         @default(ACTIVE)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  // 關聯
+  assignment   Assignment           @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  participants GameParticipant[]
+}
+
+// 遊戲參與者模型
+model GameParticipant {
+  id             String           @id @default(cuid())
+  resultId       String
+  studentName    String
+  score          Int              @default(0)
+  timeSpent      Int              @default(0)  // 遊戲時間（秒）
+  correctAnswers Int              @default(0)
+  totalQuestions Int              @default(0)
+  gameData       Json?            // 詳細遊戲數據
+  completedAt    DateTime         @default(now())
+
+  // 關聯
+  result         AssignmentResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+}
+
+// 註冊類型枚舉
 enum RegistrationType {
   NAME
   ANONYMOUS
