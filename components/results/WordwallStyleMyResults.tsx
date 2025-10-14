@@ -49,6 +49,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
+  const [showRecycleBin, setShowRecycleBin] = useState(false);
 
   // 菜单和删除相关状态
   const [contextMenu, setContextMenu] = useState<{
@@ -198,13 +199,31 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 處理創建新資料夾
   const handleCreateFolder = async (name: string, color: string) => {
     try {
-      // TODO: 調用 API 創建資料夾
+      const response = await fetch('/api/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          color,
+          description: null,
+          icon: 'folder'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '創建資料夾失敗');
+      }
+
+      const createdFolder = await response.json();
       const newFolder: ResultFolder = {
-        id: `folder_${Date.now()}`,
-        name,
-        resultCount: 0,
-        createdAt: new Date().toISOString(),
-        color
+        id: createdFolder.id,
+        name: createdFolder.name,
+        resultCount: createdFolder.activityCount || 0,
+        createdAt: createdFolder.createdAt,
+        color: createdFolder.color
       };
 
       setFolders(prev => [...prev, newFolder]);
@@ -213,6 +232,13 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       console.error('創建資料夾失敗:', error);
       throw error;
     }
+  };
+
+  // 處理回收桶點擊
+  const handleRecycleBinClick = () => {
+    setShowRecycleBin(true);
+    // TODO: 實現回收桶功能 - 顯示已刪除的項目
+    alert('回收桶功能開發中，敬請期待！');
   };
 
   // 處理資料夾菜單點擊
@@ -322,7 +348,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
               新資料夾
             </button>
             
-            <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <button
+              onClick={handleRecycleBinClick}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
               <TrashIcon className="w-4 h-4 mr-2" />
               回收箱
             </button>
