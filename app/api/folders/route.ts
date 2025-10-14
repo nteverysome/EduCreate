@@ -25,11 +25,7 @@ export async function GET(request: NextRequest) {
             id: true
           }
         },
-        results: {
-          select: {
-            id: true
-          }
-        }
+        // 暂时不查询 results，因为可能导致 500 错误
       },
       orderBy: {
         createdAt: 'desc'
@@ -37,16 +33,25 @@ export async function GET(request: NextRequest) {
     });
 
     // 計算每個資料夾的活動數量和結果數量
-    const foldersWithCount = folders.map(folder => ({
-      id: folder.id,
-      name: folder.name,
-      description: folder.description,
-      color: folder.color,
-      icon: folder.icon,
-      createdAt: folder.createdAt,
-      updatedAt: folder.updatedAt,
-      activityCount: folder.activities.length,
-      resultCount: folder.results.length
+    const foldersWithCount = await Promise.all(folders.map(async folder => {
+      // 手动查询每个资料夹的结果数量
+      const resultCount = await prisma.assignmentResult.count({
+        where: {
+          folderId: folder.id
+        }
+      });
+
+      return {
+        id: folder.id,
+        name: folder.name,
+        description: folder.description,
+        color: folder.color,
+        icon: folder.icon,
+        createdAt: folder.createdAt,
+        updatedAt: folder.updatedAt,
+        activityCount: folder.activities.length,
+        resultCount: resultCount
+      };
     }));
 
     return NextResponse.json(foldersWithCount);
