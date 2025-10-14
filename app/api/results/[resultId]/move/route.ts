@@ -68,8 +68,23 @@ export async function PATCH(
 
   } catch (error) {
     console.error('移动结果失败:', error);
+    console.error('错误详情:', {
+      message: error.message,
+      stack: error.stack,
+      resultId,
+      folderId,
+      userId: session?.user?.id
+    });
     return NextResponse.json(
-      { error: '移动结果失败' },
+      {
+        error: '移动结果失败',
+        details: error.message,
+        debug: {
+          resultId,
+          folderId,
+          userId: session?.user?.id
+        }
+      },
       { status: 500 }
     );
   }
