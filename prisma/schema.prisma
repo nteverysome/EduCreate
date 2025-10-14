@@ -76,50 +76,43 @@ model PasswordReset {
 }
 
 model Activity {
-  id             String               @id @default(cuid())
-  title          String
-  description    String?
-  content        Json?
-  elements       Json                 @default("[]")
-  type           String
-  templateType   String?
-  published      Boolean              @default(false)
-  isPublic       Boolean              @default(false)
-  isDraft        Boolean              @default(false)
-  folderId       String?
-  lastPlayed     DateTime?
-  playCount      Int                  @default(0)
-  shareCount     Int                  @default(0)
-  gameTemplateId String?
-  aiGenerated    Boolean              @default(false)
-  difficulty     DifficultyLevel?
-  estimatedTime  String?
-  tags           String[]
-
-  // 新增：從 VocabularySet 合併的字段
-  geptLevel      GEPTLevel?           @default(ELEMENTARY)
-  totalWords     Int                  @default(0)
-
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
-  deletedAt      DateTime?            // 軟刪除時間戳
-  templateId     String?
-  userId         String
-  h5pContentId   String?
-  folder         Folder?              @relation(fields: [folderId], references: [id])
-  gameTemplate   GameTemplate?        @relation(fields: [gameTemplateId], references: [id])
-  h5pContent     H5PContent?          @relation(fields: [h5pContentId], references: [id])
-  template       Template?            @relation(fields: [templateId], references: [id])
-  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  versions       ActivityVersion[]
-  versionLogs    ActivityVersionLog[]
-  gameSettings   GameSettings?
-
-  // 新增：直接關聯詞彙項目
+  id              String               @id @default(cuid())
+  title           String
+  description     String?
+  content         Json?
+  elements        Json                 @default("[]")
+  type            String
+  templateType    String?
+  published       Boolean              @default(false)
+  isPublic        Boolean              @default(false)
+  isDraft         Boolean              @default(false)
+  folderId        String?
+  lastPlayed      DateTime?
+  playCount       Int                  @default(0)
+  shareCount      Int                  @default(0)
+  gameTemplateId  String?
+  aiGenerated     Boolean              @default(false)
+  difficulty      DifficultyLevel?
+  estimatedTime   String?
+  tags            String[]
+  geptLevel       GEPTLevel?           @default(ELEMENTARY)
+  totalWords      Int                  @default(0)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  deletedAt       DateTime?
+  templateId      String?
+  userId          String
+  h5pContentId    String?
+  folder          Folder?              @relation(fields: [folderId], references: [id])
+  gameTemplate    GameTemplate?        @relation(fields: [gameTemplateId], references: [id])
+  h5pContent      H5PContent?          @relation(fields: [h5pContentId], references: [id])
+  template        Template?            @relation(fields: [templateId], references: [id])
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions        ActivityVersion[]
+  versionLogs     ActivityVersionLog[]
+  assignments     Assignment[]
+  gameSettings    GameSettings?
   vocabularyItems VocabularyItem[]
-
-  // 課業分配關聯
-  assignments Assignment[]
 }
 
 model Template {
@@ -368,8 +361,8 @@ model VocabularySet {
 
 model VocabularyItem {
   id               String             @id @default(cuid())
-  setId            String?            // 保留舊字段以支持遷移
-  activityId       String?            // 新增：直接關聯 Activity
+  setId            String?
+  activityId       String?
   english          String
   chinese          String
   phonetic         String?
@@ -382,10 +375,8 @@ model VocabularyItem {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   learningProgress LearningProgress[]
-
-  // 關聯關係
-  set              VocabularySet?     @relation(fields: [setId], references: [id], onDelete: Cascade)
   activity         Activity?          @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  set              VocabularySet?     @relation(fields: [setId], references: [id], onDelete: Cascade)
 
   @@map("vocabulary_items")
 }
@@ -415,6 +406,44 @@ model LearningProgress {
 
   @@unique([userId, vocabularySetId, vocabularyItemId, gameType])
   @@map("learning_progress")
+}
+
+model Assignment {
+  id               String             @id @default(cuid())
+  activityId       String
+  title            String
+  registrationType RegistrationType   @default(NAME)
+  deadline         DateTime?
+  gameEndSettings  Json?
+  status           AssignmentStatus   @default(ACTIVE)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  activity         Activity           @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  results          AssignmentResult[]
+}
+
+model AssignmentResult {
+  id           String            @id @default(cuid())
+  assignmentId String
+  resultNumber Int
+  status       ResultStatus      @default(ACTIVE)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  assignment   Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  participants GameParticipant[]
+}
+
+model GameParticipant {
+  id             String           @id @default(cuid())
+  resultId       String
+  studentName    String
+  score          Int              @default(0)
+  timeSpent      Int              @default(0)
+  correctAnswers Int              @default(0)
+  totalQuestions Int              @default(0)
+  gameData       Json?
+  completedAt    DateTime         @default(now())
+  result         AssignmentResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
@@ -540,69 +569,19 @@ enum PartOfSpeech {
   PHRASE
 }
 
-// 課業分配模型
-model Assignment {
-  id                String             @id @default(cuid())
-  activityId        String
-  title             String
-  registrationType  RegistrationType   @default(NAME)
-  deadline          DateTime?
-  gameEndSettings   Json?              // 遊戲結束設置
-  status            AssignmentStatus   @default(ACTIVE)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  // 關聯
-  activity          Activity           @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  results           AssignmentResult[]
-}
-
-// 課業結果模型
-model AssignmentResult {
-  id           String               @id @default(cuid())
-  assignmentId String
-  resultNumber Int                  // 結果編號（如：結果1、結果2）
-  status       ResultStatus         @default(ACTIVE)
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-
-  // 關聯
-  assignment   Assignment           @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  participants GameParticipant[]
-}
-
-// 遊戲參與者模型
-model GameParticipant {
-  id             String           @id @default(cuid())
-  resultId       String
-  studentName    String
-  score          Int              @default(0)
-  timeSpent      Int              @default(0)  // 遊戲時間（秒）
-  correctAnswers Int              @default(0)
-  totalQuestions Int              @default(0)
-  gameData       Json?            // 詳細遊戲數據
-  completedAt    DateTime         @default(now())
-
-  // 關聯
-  result         AssignmentResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
-}
-
-// 註冊類型枚舉
 enum RegistrationType {
-  NAME        // 輸入姓名
-  ANONYMOUS   // 匿名
-  GOOGLE      // Google 課堂
+  NAME
+  ANONYMOUS
+  GOOGLE
 }
 
-// 課業分配狀態枚舉
 enum AssignmentStatus {
-  ACTIVE      // 活躍
-  COMPLETED   // 已完成
-  EXPIRED     // 已過期
+  ACTIVE
+  COMPLETED
+  EXPIRED
 }
 
-// 結果狀態枚舉
 enum ResultStatus {
-  ACTIVE      // 活躍
-  ARCHIVED    // 已歸檔
+  ACTIVE
+  ARCHIVED
 }
