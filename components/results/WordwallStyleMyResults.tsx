@@ -8,6 +8,9 @@ import {
 } from '@heroicons/react/24/outline';
 import WordwallStyleResultCard from './WordwallStyleResultCard';
 import WordwallStyleFolderCard from './WordwallStyleFolderCard';
+import DraggableResultCard from './DraggableResultCard';
+import DroppableFolderCard from './DroppableFolderCard';
+import { DragDropProvider } from './DragDropContext';
 import NewFolderModal from './NewFolderModal';
 import FolderContextMenu from './FolderContextMenu';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -306,6 +309,31 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setShowRenameFolderModal(true);
   };
 
+  // 處理移動結果到資料夾
+  const handleMoveResult = async (resultId: string, folderId: string | null) => {
+    try {
+      const response = await fetch(`/api/results/${resultId}/move`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ folderId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('移動結果失敗');
+      }
+
+      // 重新載入結果和資料夾
+      await Promise.all([loadResults(), loadFolders()]);
+
+      console.log(`結果已移動到${folderId ? '資料夾' : '根目錄'}`);
+    } catch (error) {
+      console.error('移動結果失敗:', error);
+      throw error;
+    }
+  };
+
 
 
 
@@ -400,6 +428,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   }
 
   return (
+    <DragDropProvider onMoveResult={handleMoveResult}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* 頁面標題和操作按鈕 */}
       <div className="mb-8">
@@ -479,7 +508,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       <div className="space-y-2">
         {/* 資料夾 */}
         {filteredFolders.map(folder => (
-          <WordwallStyleFolderCard
+          <DroppableFolderCard
             key={folder.id}
             folder={folder}
             onClick={handleFolderClick}
@@ -489,7 +518,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
         {/* 結果項目 */}
         {filteredAndSortedResults.map(result => (
-          <WordwallStyleResultCard
+          <DraggableResultCard
             key={result.id}
             result={result}
             onClick={handleResultClick}
@@ -575,6 +604,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         }}
       />
       </div>
+    </DragDropProvider>
   );
 };
 
