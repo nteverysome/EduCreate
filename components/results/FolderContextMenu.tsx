@@ -94,21 +94,21 @@ export const FolderContextMenu: React.FC<FolderContextMenuProps> = ({
         }}
       >
         {/* 重命名選項 */}
-        {onRename && (
-          <button
-            onClick={() => {
+        <button
+          onClick={() => {
+            if (onRename) {
               onRename();
-              onClose();
-            }}
-            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-          >
-            <PencilIcon className="w-4 h-4 mr-3" />
-            重新命名
-          </button>
-        )}
+            }
+            onClose();
+          }}
+          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+        >
+          <PencilIcon className="w-4 h-4 mr-3" />
+          重新命名
+        </button>
 
         {/* 分隔線 */}
-        {onRename && <div className="border-t border-gray-100 my-1" />}
+        <div className="border-t border-gray-100 my-1" />
 
         {/* 刪除選項 */}
         <button
