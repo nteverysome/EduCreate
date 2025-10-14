@@ -66,17 +66,16 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
   const canAcceptDrop = isDragging && dragItem?.type === 'result';
 
   return (
-    <a
-      href={`/my-results/folder/${folder.id}`}
+    <div
       onClick={handleCardClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseUp={handleMouseUp}
-      className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all ${
-        isDropTarget 
-          ? 'border-blue-500 bg-blue-50 shadow-lg scale-105' 
-          : canAcceptDrop 
-            ? 'border-gray-300 hover:border-blue-300' 
+      className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer ${
+        isDropTarget
+          ? 'border-blue-500 bg-blue-50 shadow-lg scale-105'
+          : canAcceptDrop
+            ? 'border-gray-300 hover:border-blue-300'
             : ''
       }`}
     >
@@ -120,7 +119,7 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
           </div>
         </div>
       )}
-    </a>
+    </div>
   );
 };
 
