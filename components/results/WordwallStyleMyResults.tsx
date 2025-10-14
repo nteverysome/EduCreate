@@ -180,7 +180,33 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
   // 初始載入和资料夹变化时重新加载
   useEffect(() => {
-    loadResults();
+    // 直接在 useEffect 中调用 API，确保使用最新的 currentFolderId
+    const loadResultsForFolder = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const folderId = currentFolderId || 'null';
+        console.log('🔍 useEffect loadResults 调用:', { currentFolderId, folderId });
+        const response = await fetch(`/api/results?folderId=${folderId}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ useEffect API 响应成功:', { count: data.length, data });
+          setResults(data);
+        } else {
+          console.error('載入結果失敗:', response.status);
+          setResults([]);
+        }
+      } catch (error) {
+        console.error('載入結果錯誤:', error);
+        setResults([]);
+        setError('載入結果時發生錯誤');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadResultsForFolder();
     loadFolders();
   }, [currentFolderId]);
 
