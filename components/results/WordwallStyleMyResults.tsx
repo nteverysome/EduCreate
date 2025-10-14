@@ -119,7 +119,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             id: folder.id,
             name: folder.name,
             resultCount: folder.activityCount || 0,
-            createdAt: folder.createdAt
+            createdAt: folder.createdAt,
+            color: folder.color
           }));
           setFolders(formattedFolders);
         } else {
