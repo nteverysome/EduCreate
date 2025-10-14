@@ -182,7 +182,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   useEffect(() => {
     loadResults();
     loadFolders();
-  }, [loadResults, currentFolderId]);
+  }, [currentFolderId]);
 
   // 格式化時間顯示
   const formatDateTime = (dateString: string) => {
