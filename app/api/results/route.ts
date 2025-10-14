@@ -31,7 +31,13 @@ export async function GET(request: NextRequest) {
 
       // 如果指定了 folderId，添加过滤条件
       if (folderId !== null) {
-        whereCondition.folderId = folderId;
+        if (folderId === 'null') {
+          // 查询不在任何资料夹中的结果（根目录结果）
+          whereCondition.folderId = null;
+        } else {
+          // 查询特定资料夹中的结果
+          whereCondition.folderId = folderId;
+        }
       }
 
       const results = await prisma.assignmentResult.findMany({

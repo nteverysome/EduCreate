@@ -77,8 +77,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setError(null);
 
     try {
-      // 調用真實 API
-      const response = await fetch('/api/results');
+      // 調用真實 API - 只获取不在资料夹中的结果（根目录结果）
+      const response = await fetch('/api/results?folderId=null');
       if (response.ok) {
         const data = await response.json();
         setResults(data);
