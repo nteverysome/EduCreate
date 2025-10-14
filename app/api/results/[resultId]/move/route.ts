@@ -18,10 +18,15 @@ export async function PATCH(
     const resultId = params.resultId;
 
     // 验证结果是否存在且属于当前用户
-    const result = await prisma.result.findFirst({
+    const result = await prisma.assignmentResult.findFirst({
       where: {
         id: resultId,
-        userId: session.user.id
+        assignment: {
+          userId: session.user.id
+        }
+      },
+      include: {
+        assignment: true
       }
     });
 
@@ -45,7 +50,7 @@ export async function PATCH(
     }
 
     // 更新结果的 folderId
-    const updatedResult = await prisma.result.update({
+    const updatedResult = await prisma.assignmentResult.update({
       where: { id: resultId },
       data: { folderId: folderId || null }
     });

@@ -126,17 +126,18 @@ model Template {
 }
 
 model Folder {
-  id          String     @id @default(cuid())
+  id          String             @id @default(cuid())
   name        String
   description String?
   color       String?
   icon        String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
   deletedAt   DateTime?
   userId      String
   activities  Activity[]
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  results     AssignmentResult[] // 資料夾中的結果
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([name, userId])
 }
@@ -556,11 +557,13 @@ model AssignmentResult {
   resultNumber Int                  // 結果編號（如：結果1、結果2）
   shareToken   String?              @unique // 可共用結果連結的 token
   status       ResultStatus         @default(ACTIVE)
+  folderId     String?              // 資料夾ID，用於組織結果
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
 
   // 關聯
   assignment   Assignment           @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  folder       Folder?              @relation(fields: [folderId], references: [id], onDelete: SetNull)
   participants GameParticipant[]
 }
 
