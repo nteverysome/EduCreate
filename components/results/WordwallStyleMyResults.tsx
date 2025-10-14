@@ -187,11 +187,9 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
       try {
         const folderId = currentFolderId || 'null';
-        console.log('🔍 useEffect loadResults 调用:', { currentFolderId, folderId });
         const response = await fetch(`/api/results?folderId=${folderId}`);
         if (response.ok) {
           const data = await response.json();
-          console.log('✅ useEffect API 响应成功:', { count: data.length, data });
           setResults(data);
         } else {
           console.error('載入結果失敗:', response.status);
@@ -263,10 +261,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
   // 處理資料夾點擊
   const handleFolderClick = (folder: ResultFolder) => {
-    console.log('🔍 handleFolderClick 被调用:', { folder, folderId: folder.id });
     // 導航到資料夾頁面
     setCurrentFolderId(folder.id);
-    console.log('✅ currentFolderId 已设置为:', folder.id);
   };
 
   // 處理創建新資料夾
