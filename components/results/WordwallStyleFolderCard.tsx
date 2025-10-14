@@ -8,6 +8,7 @@ interface ResultFolder {
   name: string;
   resultCount: number;
   createdAt: string;
+  color?: string;
 }
 
 interface WordwallStyleFolderCardProps {
@@ -34,6 +35,12 @@ export const WordwallStyleFolderCard: React.FC<WordwallStyleFolderCardProps> = (
     onClick(folder);
   };
 
+  // 获取资料夹颜色，默认为蓝色
+  const getFolderIconStyle = () => {
+    const color = folder.color || '#3B82F6'; // 默认蓝色
+    return { color };
+  };
+
   return (
     <a
       href={`/my-results/folder/${folder.id}`}
@@ -43,7 +50,10 @@ export const WordwallStyleFolderCard: React.FC<WordwallStyleFolderCardProps> = (
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           {/* 資料夾圖標 */}
-          <FolderIcon className="w-8 h-8 text-blue-500 mr-4" />
+          <FolderIcon
+            className="w-8 h-8 mr-4"
+            style={getFolderIconStyle()}
+          />
           
           {/* 資料夾信息 */}
           <div>
