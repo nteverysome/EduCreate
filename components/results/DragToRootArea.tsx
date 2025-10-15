@@ -14,8 +14,8 @@ export const DragToRootArea: React.FC<DragToRootAreaProps> = ({
 }) => {
   const dragDropContext = useDragDrop();
 
-  const handleDropToRoot = async () => {
-    console.log('🎯 DragToRootArea handleDropToRoot 被调用:', {
+  const handleClick = async (event: React.MouseEvent) => {
+    console.log('🎯 DragToRootArea handleClick 被调用:', {
       hasOnDrop: !!dragDropContext?.onDrop,
       isDragging: dragDropContext?.isDragging,
       dragItemType: dragDropContext?.dragItem?.type,
@@ -23,7 +23,11 @@ export const DragToRootArea: React.FC<DragToRootAreaProps> = ({
       allConditionsMet: dragDropContext?.onDrop && dragDropContext.isDragging && dragDropContext.dragItem?.type === 'result'
     });
 
+    // 如果正在拖拽，优先处理拖拽逻辑
     if (dragDropContext?.onDrop && dragDropContext.isDragging && dragDropContext.dragItem?.type === 'result') {
+      event.preventDefault();
+      event.stopPropagation();
+
       try {
         console.log('🚀 执行拖拽到根目录操作...');
         await dragDropContext.onDrop(null, 'root');  // 使用 null 而不是 ''
@@ -32,17 +36,18 @@ export const DragToRootArea: React.FC<DragToRootAreaProps> = ({
         console.error('❌ 拖拽到根目錄失敗:', error);
       }
     } else {
-      console.log('❌ 拖拽到根目录条件不满足，跳过操作');
+      // 如果没有拖拽，执行普通的返回根目录操作
+      console.log('🔄 执行普通的返回根目录操作...');
+      onBackToRoot();
     }
   };
 
   if (!currentFolderId) return null;
 
   return (
-    <div 
+    <div
       className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer"
-      onClick={onBackToRoot}
-      onMouseUp={handleDropToRoot}
+      onClick={handleClick}
     >
       <div className="flex items-center justify-center text-gray-600">
         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
