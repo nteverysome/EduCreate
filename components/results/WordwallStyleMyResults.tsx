@@ -160,9 +160,11 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 載入資料夾數據
   const loadFolders = useCallback(async () => {
     try {
+      console.log('🔄 loadFolders 开始加载...');
       const foldersResponse = await fetch('/api/folders');
       if (foldersResponse.ok) {
         const foldersData = await foldersResponse.json();
+        console.log('📁 资料夹数据:', foldersData);
         const formattedFolders: ResultFolder[] = foldersData.map((folder: any) => ({
           id: folder.id,
           name: folder.name,
@@ -171,6 +173,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           color: folder.color
         }));
         setFolders(formattedFolders);
+        console.log('✅ 资料夹状态已更新:', formattedFolders);
       } else {
         console.log('無法載入資料夾，使用空列表');
         setFolders([]);
@@ -343,6 +346,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 處理移動結果到資料夾
   const handleMoveResult = async (resultId: string, folderId: string | null) => {
     try {
+      console.log('🚀 handleMoveResult 开始:', { resultId, folderId });
+
       const response = await fetch(`/api/results/${resultId}/move`, {
         method: 'PATCH',
         headers: {
@@ -355,9 +360,12 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         throw new Error('移動結果失敗');
       }
 
+      console.log('✅ API 调用成功，开始重新加载数据...');
+
       // 重新載入結果和資料夾
       await Promise.all([loadResults(), loadFolders()]);
 
+      console.log('✅ 数据重新加载完成');
       console.log(`結果已移動到${folderId ? '資料夾' : '根目錄'}`);
     } catch (error) {
       console.error('移動結果失敗:', error);
