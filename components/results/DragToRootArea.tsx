@@ -15,12 +15,24 @@ export const DragToRootArea: React.FC<DragToRootAreaProps> = ({
   const dragDropContext = useDragDrop();
 
   const handleDropToRoot = async () => {
+    console.log('🎯 DragToRootArea handleDropToRoot 被调用:', {
+      hasOnDrop: !!dragDropContext?.onDrop,
+      isDragging: dragDropContext?.isDragging,
+      dragItemType: dragDropContext?.dragItem?.type,
+      dragItemId: dragDropContext?.dragItem?.id,
+      allConditionsMet: dragDropContext?.onDrop && dragDropContext.isDragging && dragDropContext.dragItem?.type === 'result'
+    });
+
     if (dragDropContext?.onDrop && dragDropContext.isDragging && dragDropContext.dragItem?.type === 'result') {
       try {
-        await dragDropContext.onDrop('', 'root');
+        console.log('🚀 执行拖拽到根目录操作...');
+        await dragDropContext.onDrop(null, 'root');  // 使用 null 而不是 ''
+        console.log('✅ 拖拽到根目录成功');
       } catch (error) {
-        console.error('拖拽到根目錄失敗:', error);
+        console.error('❌ 拖拽到根目錄失敗:', error);
       }
+    } else {
+      console.log('❌ 拖拽到根目录条件不满足，跳过操作');
     }
   };
 
