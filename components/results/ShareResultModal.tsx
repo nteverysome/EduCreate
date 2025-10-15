@@ -50,10 +50,11 @@ export const ShareResultModal: React.FC<ShareResultModalProps> = ({
             setIsPublic(data.isPublic);
             setShareUrl(data.shareUrl || '');
           } else if (response.status === 401) {
-            // 会话过期，提示用户重新登录
-            console.warn('會話已過期，需要重新登錄');
-            alert('會話已過期，請重新登錄以繼續使用分享功能');
-            window.location.href = '/login';
+            // 会话过期，只在控制台记录，不打断用户操作
+            console.warn('⚠️ 會話可能已過期，請稍後重新登錄');
+            // 设置默认状态，让用户可以看到界面
+            setIsPublic(false);
+            setShareUrl('');
           } else {
             console.error('获取分享状态失败:', response.status);
           }
@@ -103,20 +104,21 @@ export const ShareResultModal: React.FC<ShareResultModalProps> = ({
 
       if (response.ok) {
         const data = await response.json();
-        console.log('🔄 API 响应数据:', data);
+        console.log('✅ 分享状态更新成功:', data);
         setIsPublic(data.isPublic);
         setShareUrl(data.shareUrl || '');
       } else if (response.status === 401) {
-        // 会话过期，提示用户重新登录
-        alert('會話已過期，請重新登錄以繼續使用分享功能');
+        // 会话过期，提供友好提示但不强制跳转
+        console.warn('⚠️ 會話已過期，請重新登錄');
+        alert('您的登錄已過期，請重新登錄後再試。\n\n點擊確定後將跳轉到登錄頁面。');
         window.location.href = '/login';
       } else {
         const errorText = await response.text();
-        console.error('更新分享状态失败:', errorText);
+        console.error('❌ 更新分享状态失败:', errorText);
         alert('更新分享狀態失敗，請稍後再試');
       }
     } catch (error) {
-      console.error('更新分享状态失败:', error);
+      console.error('❌ 更新分享状态失败:', error);
       alert('網絡錯誤，請檢查您的網絡連接');
     } finally {
       setLoading(false);
