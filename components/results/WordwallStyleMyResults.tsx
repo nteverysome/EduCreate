@@ -20,6 +20,7 @@ import RenameFolderModal from './RenameFolderModal';
 import RenameResultModal from './RenameResultModal';
 import ResultContextMenu from './ResultContextMenu';
 import SetDeadlineModal from './SetDeadlineModal';
+import ShareResultModal from './ShareResultModal';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 
@@ -88,6 +89,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 设置截止日期相关状态
   const [showSetDeadlineModal, setShowSetDeadlineModal] = useState(false);
   const [resultToSetDeadline, setResultToSetDeadline] = useState<AssignmentResult | null>(null);
+
+  // 分享结果相关状态
+  const [showShareResultModal, setShowShareResultModal] = useState(false);
+  const [resultToShare, setResultToShare] = useState<AssignmentResult | null>(null);
 
 
 
@@ -437,6 +442,12 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const handleResultSetDeadline = (result: AssignmentResult) => {
     setResultToSetDeadline(result);
     setShowSetDeadlineModal(true);
+  };
+
+  // 處理分享結果點擊
+  const handleShareResult = (result: AssignmentResult) => {
+    setResultToShare(result);
+    setShowShareResultModal(true);
   };
 
   // 處理移動結果到資料夾 - 簡化版本（參考 /my-activities 的實現方式）
@@ -802,6 +813,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             handleResultSetDeadline(resultContextMenu.result);
             setResultContextMenu(null);
           }}
+          onShareLink={() => {
+            handleShareResult(resultContextMenu.result);
+            setResultContextMenu(null);
+          }}
           onDelete={() => {
             handleDeleteResult(resultContextMenu.result);
             setResultContextMenu(null);
@@ -834,6 +849,18 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         }}
         onDeadlineSet={handleSetDeadline}
       />
+
+      {/* 分享結果模態框 */}
+      {resultToShare && (
+        <ShareResultModal
+          result={resultToShare}
+          isOpen={showShareResultModal}
+          onClose={() => {
+            setShowShareResultModal(false);
+            setResultToShare(null);
+          }}
+        />
+      )}
 
       {/* 回收桶模態框 */}
       <RecycleBinModal

@@ -6,7 +6,9 @@ import {
   TrashIcon,
   EyeIcon,
   DocumentDuplicateIcon,
-  CalendarIcon
+  CalendarIcon,
+  ShareIcon,
+  LinkIcon
 } from '@heroicons/react/24/outline';
 
 interface AssignmentResult {
@@ -32,6 +34,7 @@ interface ResultContextMenuProps {
   onView: () => void;
   onSetDeadline: () => void;
   onDuplicate?: () => void;
+  onShareLink: () => void;
 }
 
 export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
@@ -43,7 +46,8 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
   onDelete,
   onView,
   onSetDeadline,
-  onDuplicate
+  onDuplicate,
+  onShareLink
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -104,6 +108,12 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
       label: '查看詳情',
       onClick: onView,
       className: 'text-gray-700 hover:bg-gray-50'
+    },
+    {
+      icon: ShareIcon,
+      label: '可共用結果連結',
+      onClick: onShareLink,
+      className: 'text-blue-600 hover:bg-blue-50'
     },
     {
       icon: PencilIcon,
