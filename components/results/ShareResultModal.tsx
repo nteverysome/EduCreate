@@ -49,6 +49,13 @@ export const ShareResultModal: React.FC<ShareResultModalProps> = ({
             const data = await response.json();
             setIsPublic(data.isPublic);
             setShareUrl(data.shareUrl || '');
+          } else if (response.status === 401) {
+            // 会话过期，提示用户重新登录
+            console.warn('會話已過期，需要重新登錄');
+            alert('會話已過期，請重新登錄以繼續使用分享功能');
+            window.location.href = '/login';
+          } else {
+            console.error('获取分享状态失败:', response.status);
           }
         } catch (error) {
           console.error('获取分享状态失败:', error);
@@ -99,11 +106,18 @@ export const ShareResultModal: React.FC<ShareResultModalProps> = ({
         console.log('🔄 API 响应数据:', data);
         setIsPublic(data.isPublic);
         setShareUrl(data.shareUrl || '');
+      } else if (response.status === 401) {
+        // 会话过期，提示用户重新登录
+        alert('會話已過期，請重新登錄以繼續使用分享功能');
+        window.location.href = '/login';
       } else {
-        console.error('更新分享状态失败:', await response.text());
+        const errorText = await response.text();
+        console.error('更新分享状态失败:', errorText);
+        alert('更新分享狀態失敗，請稍後再試');
       }
     } catch (error) {
       console.error('更新分享状态失败:', error);
+      alert('網絡錯誤，請檢查您的網絡連接');
     } finally {
       setLoading(false);
     }
