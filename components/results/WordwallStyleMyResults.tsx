@@ -369,6 +369,30 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setCurrentFolderId(folderId);
   };
 
+  // 處理點擊返回根目錄
+  const handleBackToRoot = () => {
+    setCurrentFolderId(null);
+  };
+
+  // 處理拖拽懸停
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  // 處理拖拽到根目錄
+  const handleDropToRoot = async (e: React.DragEvent) => {
+    e.preventDefault();
+    const resultId = e.dataTransfer.getData('text/plain');
+    if (resultId) {
+      try {
+        await handleMoveToRoot(resultId);
+      } catch (error) {
+        console.error('拖拽到根目錄失敗:', error);
+      }
+    }
+  };
+
   // 處理拖拽結果回根目錄
   const handleMoveToRoot = async (resultId: string) => {
     try {
@@ -576,7 +600,12 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
       {/* 在資料夾視圖中顯示拖拽回根級別的目標區域 */}
       {currentFolderId && (
-        <div className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer">
+        <div
+          className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer"
+          onClick={handleBackToRoot}
+          onDragOver={handleDragOver}
+          onDrop={handleDropToRoot}
+        >
           <div className="flex items-center justify-center text-gray-600">
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
