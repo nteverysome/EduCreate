@@ -78,6 +78,23 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
+  // 修正學生分享連結的域名
+  const getCorrectedShareLink = () => {
+    if (!result.shareLink) return '';
+
+    try {
+      const urlObj = new URL(result.shareLink);
+      const path = urlObj.pathname; // 例如：/play/activityId/assignmentId
+      const correctedUrl = `${window.location.origin}${path}`;
+      return correctedUrl;
+    } catch (error) {
+      // 如果 URL 解析失敗，返回原始連結
+      return result.shareLink;
+    }
+  };
+
+  const correctedShareLink = getCorrectedShareLink();
+
   // 格式化時間顯示
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -111,16 +128,16 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
 
   // 複製學生分享連結（遊戲連結）
   const copyStudentShareLink = async () => {
-    if (!result.shareLink) return;
+    if (!correctedShareLink) return;
 
     try {
-      await navigator.clipboard.writeText(result.shareLink);
+      await navigator.clipboard.writeText(correctedShareLink);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
       console.error('複製失敗:', err);
       const textArea = document.createElement('textarea');
-      textArea.value = result.shareLink;
+      textArea.value = correctedShareLink;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand('copy');
@@ -132,8 +149,8 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
 
   // 打開遊戲連結
   const openGameLink = () => {
-    if (result.shareLink) {
-      window.open(result.shareLink, '_blank');
+    if (correctedShareLink) {
+      window.open(correctedShareLink, '_blank');
     }
   };
 
@@ -384,7 +401,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
           <div className="text-sm text-gray-600 mb-2">學生分享連結：</div>
           <div className="flex items-center space-x-2">
             <code className="text-sm bg-white px-3 py-2 rounded border flex-1">
-              {result.shareLink}
+              {correctedShareLink}
             </code>
             <button
               onClick={openGameLink}

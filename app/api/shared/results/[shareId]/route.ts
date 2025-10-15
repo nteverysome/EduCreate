@@ -134,6 +134,8 @@ export async function GET(
     }
 
     // 构建响应数据 - 使用与 ResultDetailView 相同的格式
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://edu-create.vercel.app';
+
     const responseData = {
       id: result.id,
       title: result.customTitle || `${result.assignment.activity?.title || '無標題活動'}的結果`,
@@ -145,7 +147,7 @@ export async function GET(
       deadline: result.assignment.deadline?.toISOString(),
       status,
       gameType: result.assignment.activity?.gameType || 'unknown',
-      shareLink: `${process.env.NEXTAUTH_URL || 'https://edu-create.vercel.app'}/shared/results/${result.shareToken}`,
+      shareLink: `${baseUrl}/play/${result.assignment.activityId}/${result.assignmentId}`, // 學生遊戲連結
       shareToken: result.shareToken,
       participants,
       statistics,
