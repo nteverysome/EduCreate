@@ -35,7 +35,14 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
   };
 
   const handleCardClick = (event: React.MouseEvent) => {
-    event.preventDefault();
+    // 如果正在拖拽，不处理点击事件
+    if (isDragging) {
+      console.log(`🚫 [${folder.name}] 拖拽状态中，忽略点击事件`);
+      event.preventDefault();
+      return;
+    }
+
+    console.log(`🖱️ [${folder.name}] 处理点击事件`);
     onClick(folder);
   };
 
