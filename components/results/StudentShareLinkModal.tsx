@@ -7,8 +7,10 @@ import {
   ClipboardDocumentIcon,
   CheckIcon,
   QrCodeIcon,
-  EyeIcon
+  EyeIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface AssignmentResult {
   id: string;
@@ -34,6 +36,7 @@ export const StudentShareLinkModal: React.FC<StudentShareLinkModalProps> = ({
   onClose
 }) => {
   const [copied, setCopied] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
 
   // 生成學生分享連結
   const getStudentShareLink = () => {
@@ -66,6 +69,31 @@ export const StudentShareLinkModal: React.FC<StudentShareLinkModalProps> = ({
   // 預覽連結
   const handlePreviewLink = () => {
     window.open(shareLink, '_blank');
+  };
+
+  // 下載 QR Code
+  const handleDownloadQRCode = () => {
+    const svg = document.getElementById('qr-code-svg');
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx?.drawImage(img, 0, 0);
+      const pngFile = canvas.toDataURL('image/png');
+
+      const downloadLink = document.createElement('a');
+      downloadLink.download = `qrcode-${result.title}.png`;
+      downloadLink.href = pngFile;
+      downloadLink.click();
+    };
+
+    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
 
   if (!isOpen) return null;
@@ -163,6 +191,45 @@ export const StudentShareLinkModal: React.FC<StudentShareLinkModalProps> = ({
                 <CheckIcon className="w-4 h-4 mr-1" />
                 連結已複製到剪貼板！
               </p>
+            )}
+          </div>
+
+          {/* QR Code 區域 */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-medium text-gray-700">
+                QR Code
+              </label>
+              <button
+                onClick={() => setShowQRCode(!showQRCode)}
+                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+              >
+                {showQRCode ? '隱藏' : '顯示'} QR Code
+              </button>
+            </div>
+
+            {showQRCode && (
+              <div className="bg-white border-2 border-purple-200 rounded-lg p-6 flex flex-col items-center space-y-4">
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <QRCodeSVG
+                    id="qr-code-svg"
+                    value={shareLink}
+                    size={200}
+                    level="H"
+                    includeMargin={true}
+                  />
+                </div>
+                <p className="text-xs text-gray-600 text-center">
+                  學生可以掃描此 QR Code 直接進入遊戲
+                </p>
+                <button
+                  onClick={handleDownloadQRCode}
+                  className="flex items-center justify-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+                >
+                  <ArrowDownTrayIcon className="w-4 h-4 mr-2" />
+                  下載 QR Code
+                </button>
+              </div>
             )}
           </div>
 
