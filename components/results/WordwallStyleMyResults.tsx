@@ -371,18 +371,31 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       }
 
       // 乐观更新：立即更新资料夹计数
-      console.log('🔄 乐观更新：更新资料夹计数');
+      console.log('🔄 乐观更新：更新资料夹计数', {
+        currentFolderId,
+        targetFolderId: folderId,
+        operation: currentFolderId ? '从资料夹减少' : '无',
+        targetOperation: folderId ? '向资料夹增加' : '向根目录移动'
+      });
+
       setFolders(prevFolders => {
-        return prevFolders.map(folder => {
+        const updatedFolders = prevFolders.map(folder => {
           if (folder.id === currentFolderId) {
             // 从当前资料夹减少计数
-            return { ...folder, resultCount: Math.max(0, folder.resultCount - 1) };
+            const newCount = Math.max(0, folder.resultCount - 1);
+            console.log(`📊 资料夹 ${folder.name} 计数: ${folder.resultCount} -> ${newCount}`);
+            return { ...folder, resultCount: newCount };
           } else if (folder.id === folderId) {
             // 向目标资料夹增加计数
-            return { ...folder, resultCount: folder.resultCount + 1 };
+            const newCount = folder.resultCount + 1;
+            console.log(`📊 资料夹 ${folder.name} 计数: ${folder.resultCount} -> ${newCount}`);
+            return { ...folder, resultCount: newCount };
           }
           return folder;
         });
+
+        console.log('✅ 乐观更新资料夹计数完成');
+        return updatedFolders;
       });
 
       console.log('✅ 乐观更新完成，开始API调用...');
@@ -430,13 +443,21 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
       console.log('✅ 服务器数据同步确认完成');
 
-      // 强制触发一次额外的重新渲染
+      // 强制触发多次状态同步，确保资料夹内容正确显示
       setTimeout(() => {
-        console.log('🔄 执行延迟状态同步...');
+        console.log('🔄 执行第一次延迟状态同步...');
         loadResults();
         loadFolders();
-        forceRefresh(); // 强制刷新
+        forceRefresh();
       }, 100);
+
+      // 额外的延迟同步，专门解决资料夹内容显示问题
+      setTimeout(() => {
+        console.log('🔄 执行第二次延迟状态同步（解决资料夹内容显示）...');
+        loadResults();
+        loadFolders();
+        forceRefresh();
+      }, 300);
 
       console.log(`✅ 結果已成功移動到${folderId ? '資料夾' : '根目錄'}`);
 
