@@ -131,6 +131,7 @@ model Folder {
   description String?
   color       String?
   icon        String?
+  type        FolderType         @default(ACTIVITIES) // 資料夾類型：ACTIVITIES 或 RESULTS
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
   deletedAt   DateTime?
@@ -139,7 +140,7 @@ model Folder {
   results     AssignmentResult[] // 資料夾中的結果
   user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([name, userId])
+  @@unique([name, userId, type]) // 同一用戶在同一類型下不能有重名資料夾
 }
 
 model Subscription {
@@ -518,6 +519,11 @@ enum GEPTLevel {
   ELEMENTARY
   INTERMEDIATE
   HIGH_INTERMEDIATE
+}
+
+enum FolderType {
+  ACTIVITIES  // 活動資料夾
+  RESULTS     // 結果資料夾
 }
 
 enum PartOfSpeech {

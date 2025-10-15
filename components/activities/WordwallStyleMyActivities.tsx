@@ -142,7 +142,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   // 載入資料夾數據
   const loadFolders = async () => {
     try {
-      const response = await fetch('/api/folders');
+      const response = await fetch('/api/folders?type=activities');
       if (!response.ok) {
         throw new Error('載入資料夾失敗');
       }
@@ -265,7 +265,8 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         body: JSON.stringify({
           name: name.trim(),
           color: color,
-          description: ''
+          description: '',
+          type: 'activities'
         }),
       });
 

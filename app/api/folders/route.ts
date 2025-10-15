@@ -9,15 +9,19 @@ const prisma = new PrismaClient();
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const type = searchParams.get('type'); // 'activities' 或 'results'
+
     const folders = await prisma.folder.findMany({
       where: {
         userId: session.user.id,
-        deletedAt: null // 只获取未删除的资料夹
+        deletedAt: null, // 只获取未删除的资料夹
+        type: type === 'results' ? 'RESULTS' : 'ACTIVITIES' // 根据类型过滤
       },
       include: {
         activities: {
@@ -71,17 +75,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, description, color, icon } = body;
+    const { name, description, color, icon, type } = body;
 
     if (!name || !name.trim()) {
       return NextResponse.json({ error: '資料夾名稱不能為空' }, { status: 400 });
     }
 
-    // 檢查是否已存在同名資料夾（未删除的）
+    const folderType = type === 'results' ? 'RESULTS' : 'ACTIVITIES';
+
+    // 檢查是否已存在同名同類型資料夾（未删除的）
     const existingFolder = await prisma.folder.findFirst({
       where: {
         userId: session.user.id,
         name: name.trim(),
+        type: folderType,
         deletedAt: null
       }
     });
@@ -96,6 +103,7 @@ export async function POST(request: NextRequest) {
         description: description?.trim() || null,
         color: color || '#3B82F6', // 默認藍色
         icon: icon || 'folder',
+        type: folderType,
         userId: session.user.id
       }
     });

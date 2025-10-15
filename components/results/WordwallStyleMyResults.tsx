@@ -162,7 +162,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 載入資料夾數據 - 簡化版本（參考 /my-activities 的實現方式）
   const loadFolders = useCallback(async () => {
     try {
-      const response = await fetch('/api/folders');
+      const response = await fetch('/api/folders?type=results');
       if (!response.ok) {
         throw new Error('載入資料夾失敗');
       }
@@ -286,7 +286,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           name,
           color,
           description: null,
-          icon: 'folder'
+          icon: 'folder',
+          type: 'results'
         }),
       });
 
