@@ -54,45 +54,103 @@ export async function GET(
     // 获取活动的总题数（从参与者数据中获取）
     const totalQuestions = result.participants.length > 0 ? result.participants[0].totalQuestions : null;
 
-    // 格式化参与者数据
+    // 格式化参与者数据 - 包含完整信息
     const participants = completedResponses.map((participant, index) => ({
       id: participant.id,
-      name: participant.studentName || `參與者 ${index + 1}`,
+      studentName: participant.studentName || `參與者 ${index + 1}`,
       score: participant.score || 0,
-      completedAt: participant.completedAt?.toISOString()
+      timeSpent: participant.timeSpent || 0,
+      correctAnswers: participant.correctAnswers || 0,
+      totalQuestions: participant.totalQuestions || 0,
+      completedAt: participant.completedAt?.toISOString() || new Date().toISOString(),
+      gameData: participant.gameData
     }));
+
+    // 计算统计摘要
+    const statistics = {
+      totalStudents: totalResponses,
+      averageScore: averageScore,
+      highestScore: {
+        score: Math.max(...participants.map(p => p.score)),
+        studentName: participants.find(p => p.score === Math.max(...participants.map(p => p.score)))?.studentName || ''
+      },
+      fastestTime: {
+        timeSpent: Math.min(...participants.filter(p => p.timeSpent > 0).map(p => p.timeSpent)),
+        studentName: participants.find(p => p.timeSpent === Math.min(...participants.filter(p => p.timeSpent > 0).map(p => p.timeSpent)))?.studentName || ''
+      }
+    };
+
+    // 计算问题统计
+    const questionStats: { [key: number]: { correct: number; incorrect: number; text: string } } = {};
+
+    participants.forEach(participant => {
+      if (participant.gameData && participant.gameData.questions) {
+        participant.gameData.questions.forEach((question: any, index: number) => {
+          const questionNumber = index + 1;
+          if (!questionStats[questionNumber]) {
+            questionStats[questionNumber] = {
+              correct: 0,
+              incorrect: 0,
+              text: question.text || question.question || `問題 ${questionNumber}`
+            };
+          }
+
+          if (question.isCorrect || question.correct) {
+            questionStats[questionNumber].correct++;
+          } else {
+            questionStats[questionNumber].incorrect++;
+          }
+        });
+      }
+    });
+
+    const questionStatistics = Object.entries(questionStats).map(([number, stats]) => {
+      const totalAttempts = stats.correct + stats.incorrect;
+      return {
+        questionNumber: parseInt(number),
+        questionText: stats.text,
+        correctCount: stats.correct,
+        incorrectCount: stats.incorrect,
+        totalAttempts,
+        correctPercentage: totalAttempts > 0 ? (stats.correct / totalAttempts) * 100 : 0
+      };
+    }).sort((a, b) => a.questionNumber - b.questionNumber);
 
     // 确定结果状态
     let status: 'active' | 'completed' | 'expired' = 'active';
-    
+
     if (result.assignment.deadline) {
       const now = new Date();
       const deadline = new Date(result.assignment.deadline);
-      
+
       if (now > deadline) {
         status = 'expired';
       }
     }
-    
+
     // 如果所有参与者都完成了，标记为已完成
     if (totalResponses > 0 && completedResponses.length === totalResponses) {
       status = 'completed';
     }
 
-    // 构建响应数据
+    // 构建响应数据 - 使用与 ResultDetailView 相同的格式
     const responseData = {
       id: result.id,
-      title: result.customTitle || `${result.assignment.activity?.title || '無標題活動'} - 結果`,
+      title: result.customTitle || `${result.assignment.activity?.title || '無標題活動'}的結果`,
       activityName: result.assignment.activity?.title || '無標題活動',
+      activityId: result.assignment.activityId,
+      assignmentId: result.assignmentId,
       participantCount: totalResponses,
       createdAt: result.createdAt.toISOString(),
       deadline: result.assignment.deadline?.toISOString(),
       status,
-      isPublic: true, // 既然能访问到这里，就表示是公开的
-      totalQuestions,
-      averageScore: averageScore > 0 ? averageScore : null,
-      completionRate: completionRate > 0 ? completionRate : null,
-      participants: participants.length > 0 ? participants : null
+      gameType: result.assignment.activity?.gameType || 'unknown',
+      shareLink: `${process.env.NEXTAUTH_URL || 'https://edu-create.vercel.app'}/shared/results/${result.shareToken}`,
+      shareToken: result.shareToken,
+      participants,
+      statistics,
+      questionStatistics: questionStatistics.length > 0 ? questionStatistics : undefined,
+      isSharedView: true // 标记为共享视图
     };
 
     return NextResponse.json(responseData);
