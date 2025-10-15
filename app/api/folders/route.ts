@@ -17,6 +17,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type'); // 'activities' 或 'results'
 
+    // 🔍 深度调试：记录所有请求
+    console.log('🔍 [API DEBUG] GET /api/folders 被调用');
+    console.log('🔍 [API DEBUG] type 参数:', type);
+    console.log('🔍 [API DEBUG] 完整 URL:', request.url);
+    console.log('🔍 [API DEBUG] 用户 ID:', session.user.id);
+
+    // 🚨 警告：如果没有 type 参数
+    if (!type) {
+      console.warn('🚨 [API WARNING] 没有 type 参数！这可能导致错误的资料夹类型');
+      console.warn('🚨 [API WARNING] 请求来源需要检查');
+    }
+
     const folders = await prisma.folder.findMany({
       where: {
         userId: session.user.id,

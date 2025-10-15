@@ -143,11 +143,19 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 載入資料夾數據 - 簡化版本（參考 /my-activities 的實現方式）
   const loadFolders = useCallback(async () => {
     try {
+      // 🔍 深度调试：记录调用堆栈
+      console.log('🔍 [DEBUG] loadFolders 被调用');
+      console.log('🔍 [DEBUG] 调用堆栈:', new Error().stack);
+
       const response = await fetch('/api/folders?type=results');
+      console.log('🔍 [DEBUG] loadFolders API 调用:', '/api/folders?type=results');
+
       if (!response.ok) {
         throw new Error('載入資料夾失敗');
       }
       const foldersData = await response.json();
+      console.log('🔍 [DEBUG] loadFolders 响应数据:', foldersData);
+
       setFolders(foldersData.map((folder: any) => ({
         id: folder.id,
         name: folder.name,
@@ -159,6 +167,24 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       console.error('❌ 載入資料夾失敗:', error);
       setFolders([]);
     }
+  }, []);
+
+  // 🔍 全局 fetch 拦截器（仅用于调试）
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const [url, options] = args;
+      if (typeof url === 'string' && url.includes('/api/folders')) {
+        console.log('🔍 [FETCH INTERCEPTOR] API 调用被拦截:', url);
+        console.log('🔍 [FETCH INTERCEPTOR] 方法:', options?.method || 'GET');
+        console.log('🔍 [FETCH INTERCEPTOR] 调用堆栈:', new Error().stack);
+      }
+      return originalFetch(...args);
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
   }, []);
 
   // 初始化时加载资料夹数据（只执行一次）
@@ -433,6 +459,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     if (!folderToDelete) return;
 
     try {
+      console.log('🔍 [DEBUG] 开始删除资料夹:', folderToDelete.name);
+
       const response = await fetch(`/api/folders?id=${folderToDelete.id}`, {
         method: 'DELETE',
       });
@@ -442,13 +470,18 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         throw new Error(errorData.error || '刪除資料夾失敗');
       }
 
+      console.log('🔍 [DEBUG] 删除 API 调用成功，开始重新加载数据');
+
       // 🚀 重新載入所有數據以確保狀態同步
+      console.log('🔍 [DEBUG] 调用 loadResults()');
       await loadResults();
+
+      console.log('🔍 [DEBUG] 调用 loadFolders()');
       await loadFolders();
 
-      console.log('資料夾刪除成功:', folderToDelete.name);
+      console.log('✅ [DEBUG] 資料夾刪除成功:', folderToDelete.name);
     } catch (error) {
-      console.error('刪除資料夾失敗:', error);
+      console.error('❌ [DEBUG] 刪除資料夾失敗:', error);
       setError(error instanceof Error ? error.message : '刪除資料夾失敗');
     } finally {
       setShowDeleteModal(false);
