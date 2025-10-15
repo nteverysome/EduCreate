@@ -494,38 +494,6 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setCurrentFolderId(null);
   };
 
-
-
-  // 處理拖拽結果回根目錄 - 簡化版本（與 handleMoveResult 一致）
-  const handleMoveToRoot = async (resultId: string) => {
-    try {
-      console.log('🏠 將結果移動回根目錄:', { resultId });
-
-      const response = await fetch(`/api/results/${resultId}/move`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ folderId: null })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '移動結果失敗');
-      }
-
-      console.log('✅ 結果移回根目錄成功');
-
-      // 🚀 簡單方案：重新載入所有數據（與 /my-activities 一致）
-      await loadResults();
-      await loadFolders();
-
-    } catch (error: any) {
-      console.error('❌ 移動結果失敗:', error);
-      alert(`移動結果失敗: ${error.message}`);
-    }
-  };
-
   // 處理資料夾菜單點擊
   const handleFolderMenuClick = (folder: ResultFolder, event: React.MouseEvent) => {
     event.preventDefault();
