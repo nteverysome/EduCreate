@@ -86,36 +86,38 @@ export const DraggableResultCard: React.FC<DraggableResultCardProps> = ({
       href={`/my-results/${result.id}`}
       onClick={handleCardClick}
       onMouseDown={handleMouseDown}
-      className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all cursor-move select-none ${
+      className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-all cursor-move select-none ${
         isBeingDragged ? 'opacity-50 scale-95' : ''
       }`}
       style={{ userSelect: 'none' }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3 flex-1 min-w-0">
+      <div className="flex items-center justify-between gap-2 sm:gap-3">
+        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
           {/* 結果圖標 */}
           <div className="flex-shrink-0">
-            <span className="text-2xl">📊</span>
+            <span className="text-xl sm:text-2xl">📊</span>
           </div>
-          
+
           {/* 結果信息 */}
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-medium text-gray-900 truncate">
+            <h2 className="text-base sm:text-lg font-medium text-gray-900 truncate">
               {result.title}
             </h2>
-            
-            {/* 參與者數量和時間信息 */}
-            <div className="flex items-center space-x-4 mt-1">
-              <div className="flex items-center text-sm text-gray-500">
-                <UserIcon className="w-4 h-4 mr-1" />
+
+            {/* 參與者數量和時間信息 - 響應式佈局 */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1">
+              <div className="flex items-center text-xs sm:text-sm text-gray-500">
+                <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 <span>{result.participantCount}</span>
               </div>
-              
-              <div className="flex items-center text-sm text-gray-500">
-                <ClockIcon className="w-4 h-4 mr-1" />
-                <span>
+
+              <div className="flex items-center text-xs sm:text-sm text-gray-500">
+                <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <span className="truncate">
                   {formatDateTime(result.createdAt)}
-                  {result.deadline ? ` – ${result.deadline === 'no-deadline' ? '無截止日期' : formatDateTime(result.deadline)}` : ' – 無截止日期'}
+                  <span className="hidden sm:inline">
+                    {result.deadline ? ` – ${result.deadline === 'no-deadline' ? '無截止日期' : formatDateTime(result.deadline)}` : ' – 無截止日期'}
+                  </span>
                 </span>
               </div>
             </div>
@@ -125,10 +127,10 @@ export const DraggableResultCard: React.FC<DraggableResultCardProps> = ({
         {/* 更多選項按鈕 */}
         <button
           onClick={handleMenuClick}
-          className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+          className="flex-shrink-0 p-1 sm:p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
           aria-label="更多選項"
         >
-          <EllipsisVerticalIcon className="w-5 h-5" />
+          <EllipsisVerticalIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
       </div>
     </a>

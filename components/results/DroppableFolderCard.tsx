@@ -98,7 +98,7 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseUp={handleMouseUp}
-      className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer ${
+      className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-all cursor-pointer ${
         isDropTarget
           ? 'border-blue-500 bg-blue-50 shadow-lg scale-105'
           : canAcceptDrop
@@ -106,22 +106,22 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
             : ''
       }`}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3 flex-1 min-w-0">
+      <div className="flex items-center justify-between gap-2 sm:gap-3">
+        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
           {/* 資料夾圖標 */}
           <div className="flex-shrink-0">
-            <FolderIcon 
-              className="w-8 h-8" 
+            <FolderIcon
+              className="w-6 h-6 sm:w-8 sm:h-8"
               style={getFolderIconStyle()}
             />
           </div>
-          
+
           {/* 資料夾信息 */}
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-medium text-gray-900 truncate">
+            <h2 className="text-base sm:text-lg font-medium text-gray-900 truncate">
               {folder.name}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500">
               {folder.resultCount}結果
             </p>
           </div>
@@ -130,7 +130,7 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
         {/* 更多選項按鈕 */}
         <button
           onClick={handleMenuClick}
-          className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+          className="flex-shrink-0 p-1 sm:p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 text-lg sm:text-xl"
           aria-label="更多選項"
         >
           ⋮

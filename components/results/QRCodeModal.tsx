@@ -91,27 +91,27 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         {/* 標題欄 */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-              <span className="text-2xl mr-2">📱</span>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center">
+              <span className="text-xl sm:text-2xl mr-2">📱</span>
               QR Code
             </h2>
-            <p className="text-sm text-gray-500 mt-1">掃描 QR Code 直接進入遊戲</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">掃描 QR Code 直接進入遊戲</p>
           </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <XMarkIcon className="w-6 h-6" />
+            <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
         {/* 內容區域 */}
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* 結果信息卡片 */}
           <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4 border border-indigo-100">
             <div className="flex items-start space-x-3">
@@ -146,18 +146,18 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
           </div>
 
           {/* QR Code 顯示區域 */}
-          <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border-2 border-indigo-200 rounded-xl p-8 flex flex-col items-center space-y-4">
-            <div className="bg-white p-6 rounded-xl shadow-lg">
+          <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 border-2 border-indigo-200 rounded-xl p-4 sm:p-8 flex flex-col items-center space-y-3 sm:space-y-4">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg">
               <QRCodeSVG
                 id="qr-code-modal-svg"
                 value={shareLink}
-                size={240}
+                size={window.innerWidth < 640 ? 180 : 240}
                 level="H"
                 includeMargin={true}
               />
             </div>
-            <div className="text-center space-y-2">
-              <p className="text-sm font-medium text-gray-700">
+            <div className="text-center space-y-1 sm:space-y-2">
+              <p className="text-xs sm:text-sm font-medium text-gray-700">
                 📱 使用手機掃描此 QR Code
               </p>
               <p className="text-xs text-gray-500">
@@ -211,47 +211,47 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
           </div>
 
           {/* 使用場景 */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-blue-900 mb-3 flex items-center">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+            <h4 className="text-xs sm:text-sm font-medium text-blue-900 mb-2 sm:mb-3 flex items-center">
               <span className="mr-2">💡</span>
               使用場景
             </h4>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white rounded-lg p-3 border border-blue-100">
-                <div className="text-xl mb-1">📺</div>
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <div className="bg-white rounded-lg p-2 sm:p-3 border border-blue-100">
+                <div className="text-lg sm:text-xl mb-1">📺</div>
                 <p className="text-xs font-medium text-gray-700">課堂投影</p>
-                <p className="text-xs text-gray-500 mt-1">投影到大屏幕讓學生掃描</p>
+                <p className="text-xs text-gray-500 mt-1 hidden sm:block">投影到大屏幕讓學生掃描</p>
               </div>
-              <div className="bg-white rounded-lg p-3 border border-blue-100">
-                <div className="text-xl mb-1">🖨️</div>
+              <div className="bg-white rounded-lg p-2 sm:p-3 border border-blue-100">
+                <div className="text-lg sm:text-xl mb-1">🖨️</div>
                 <p className="text-xs font-medium text-gray-700">打印分發</p>
-                <p className="text-xs text-gray-500 mt-1">下載後打印到作業單</p>
+                <p className="text-xs text-gray-500 mt-1 hidden sm:block">下載後打印到作業單</p>
               </div>
-              <div className="bg-white rounded-lg p-3 border border-blue-100">
-                <div className="text-xl mb-1">💬</div>
+              <div className="bg-white rounded-lg p-2 sm:p-3 border border-blue-100">
+                <div className="text-lg sm:text-xl mb-1">💬</div>
                 <p className="text-xs font-medium text-gray-700">線上分享</p>
-                <p className="text-xs text-gray-500 mt-1">通過通訊軟件發送</p>
+                <p className="text-xs text-gray-500 mt-1 hidden sm:block">通過通訊軟件發送</p>
               </div>
-              <div className="bg-white rounded-lg p-3 border border-blue-100">
-                <div className="text-xl mb-1">🏫</div>
+              <div className="bg-white rounded-lg p-2 sm:p-3 border border-blue-100">
+                <div className="text-lg sm:text-xl mb-1">🏫</div>
                 <p className="text-xs font-medium text-gray-700">學習平台</p>
-                <p className="text-xs text-gray-500 mt-1">上傳到 Classroom</p>
+                <p className="text-xs text-gray-500 mt-1 hidden sm:block">上傳到 Classroom</p>
               </div>
             </div>
           </div>
 
           {/* 操作按鈕 */}
-          <div className="flex space-x-3 pt-4 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-gray-200">
             <button
               onClick={handleDownloadQRCode}
-              className="flex-1 flex items-center justify-center px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              className="flex-1 flex items-center justify-center px-4 py-2.5 sm:py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm sm:text-base"
             >
-              <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+              <ArrowDownTrayIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               下載 QR Code
             </button>
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="flex-1 px-4 py-2.5 sm:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
             >
               完成
             </button>

@@ -608,70 +608,70 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
   return (
     <DragDropProvider onMoveResult={handleMoveResult}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
       {/* 頁面標題和操作按鈕 */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            {/* 面包屑导航 */}
-            <div className="breadcrumb">
-              <button
-                onClick={() => handleFolderSelect(null)}
-                className={`text-3xl font-bold ${currentFolderId ? 'text-blue-600 hover:text-blue-800' : 'text-gray-900'}`}
-              >
-                我的結果
-              </button>
-              {currentFolderId && (
-                <>
-                  <span className="mx-2 text-2xl text-gray-400">/</span>
-                  <span className="text-3xl font-bold text-gray-900">
-                    {folders.find(f => f.id === currentFolderId)?.name || '未知資料夾'}
-                  </span>
-                </>
-              )}
-            </div>
+      <div className="mb-6 sm:mb-8">
+        {/* 標題和按鈕 - 響應式佈局 */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* 面包屑导航 */}
+          <div className="breadcrumb">
+            <button
+              onClick={() => handleFolderSelect(null)}
+              className={`text-2xl sm:text-3xl font-bold ${currentFolderId ? 'text-blue-600 hover:text-blue-800' : 'text-gray-900'}`}
+            >
+              我的結果
+            </button>
+            {currentFolderId && (
+              <>
+                <span className="mx-2 text-xl sm:text-2xl text-gray-400">/</span>
+                <span className="text-xl sm:text-3xl font-bold text-gray-900">
+                  {folders.find(f => f.id === currentFolderId)?.name || '未知資料夾'}
+                </span>
+              </>
+            )}
           </div>
-          
-          <div className="flex items-center space-x-4">
+
+          {/* 操作按鈕區域 */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <button
               onClick={() => setShowNewFolderModal(true)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <FolderIcon className="w-4 h-4 mr-2" />
-              新資料夾
+              <FolderIcon className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">新資料夾</span>
             </button>
-            
+
             <button
               onClick={handleRecycleBinClick}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <TrashIcon className="w-4 h-4 mr-2" />
-              回收箱
+              <TrashIcon className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">回收箱</span>
             </button>
-            
-            <div className="relative">
+
+            <div className="relative flex-1 sm:flex-initial sm:w-64">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 type="text"
-                placeholder="搜尋我的結果..."
+                placeholder="搜尋..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* 排序選項 */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-6 text-sm">
-          <span className="text-gray-500">訂購者：</span>
+      {/* 排序選項 - 響應式 */}
+      <div className="mb-4 sm:mb-6">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-sm">
+          <span className="text-gray-500 text-xs sm:text-sm">訂購者：</span>
           <button
             onClick={() => setSortBy('created')}
-            className={`flex items-center space-x-1 ${
+            className={`flex items-center space-x-1 text-xs sm:text-sm ${
               sortBy === 'created' ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
             }`}
           >
@@ -680,7 +680,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           </button>
           <button
             onClick={() => setSortBy('deadline')}
-            className={`flex items-center space-x-1 ${
+            className={`flex items-center space-x-1 text-xs sm:text-sm ${
               sortBy === 'deadline' ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
             }`}
           >
@@ -689,7 +689,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           </button>
           <button
             onClick={() => setSortBy('name')}
-            className={`flex items-center space-x-1 ${
+            className={`flex items-center space-x-1 text-xs sm:text-sm ${
               sortBy === 'name' ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
             }`}
           >
