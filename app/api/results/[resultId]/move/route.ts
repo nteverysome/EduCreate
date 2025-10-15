@@ -55,10 +55,18 @@ export async function PATCH(
       }
     }
 
-    // 更新结果的 folderId
-    const updatedResult = await prisma.assignmentResult.update({
-      where: { id: resultId },
-      data: { folderId: folderId || null }
+    // 使用事务确保数据一致性
+    const updatedResult = await prisma.$transaction(async (tx) => {
+      // 更新结果的 folderId
+      const result = await tx.assignmentResult.update({
+        where: { id: resultId },
+        data: { folderId: folderId || null }
+      });
+
+      // 强制等待一小段时间确保事务完全提交
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      return result;
     });
 
     return NextResponse.json({
