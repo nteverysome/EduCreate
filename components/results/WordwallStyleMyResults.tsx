@@ -182,7 +182,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       console.error('載入資料夾失敗:', error);
       setFolders([]);
     }
-  }, [currentFolderId]);
+  }, []); // 移除 currentFolderId 依赖，因为这个函数不应该依赖当前资料夹
 
   // 初始載入和资料夹变化时重新加载
   useEffect(() => {
@@ -362,13 +362,28 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
       console.log('✅ API 调用成功，开始重新加载数据...');
 
-      // 重新載入結果和資料夾
-      await Promise.all([loadResults(), loadFolders()]);
+      // 强制重新載入結果和資料夾，确保状态同步
+      try {
+        await loadResults();
+        console.log('✅ loadResults 完成');
 
-      console.log('✅ 数据重新加载完成');
+        await loadFolders();
+        console.log('✅ loadFolders 完成');
+
+        // 强制触发组件重新渲染
+        setLoading(false);
+
+        console.log('✅ 所有数据重新加载完成，状态已同步');
+      } catch (reloadError) {
+        console.error('❌ 重新加载数据失败:', reloadError);
+        // 即使重新加载失败，也要确保loading状态正确
+        setLoading(false);
+      }
+
       console.log(`結果已移動到${folderId ? '資料夾' : '根目錄'}`);
     } catch (error) {
       console.error('移動結果失敗:', error);
+      setLoading(false);
       throw error;
     }
   };
