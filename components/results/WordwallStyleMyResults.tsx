@@ -438,7 +438,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         setTimeout(async () => {
           console.log('🔄 根目录导航后刷新状态...');
           await Promise.all([loadResults(), loadFolders(true)]);
-          forceRefresh();
+          // 移除 forceRefresh() 避免状态重置
         }, 50);
 
         console.log('✅ 結果已成功移動到根目錄並導航回根目錄');
@@ -457,15 +457,13 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       // 延迟同步资料夹数据，给数据库事务足够的时间提交
       setTimeout(() => {
         console.log('🔄 执行延迟资料夹数据同步（避免事务时机问题）...');
-        loadFolders(true); // 强制刷新
-        forceRefresh();
+        loadFolders(true); // 强制刷新，不调用forceRefresh避免状态重置
       }, 500); // 增加延迟时间，确保数据库事务完全提交
 
       // 第二次保障同步
       setTimeout(() => {
         console.log('🔄 执行第二次资料夹数据同步（最终保障）...');
-        loadFolders(true); // 强制刷新
-        forceRefresh();
+        loadFolders(true); // 强制刷新，不调用forceRefresh避免状态重置
       }, 1000); // 更长的延迟确保数据一致性
 
       console.log(`✅ 結果已成功移動到${folderId ? '資料夾' : '根目錄'}`);
