@@ -128,27 +128,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         setResults(mockResults);
       }
 
-      // 載入真實資料夾數據
-      try {
-        const foldersResponse = await fetch('/api/folders');
-        if (foldersResponse.ok) {
-          const foldersData = await foldersResponse.json();
-          const formattedFolders: ResultFolder[] = foldersData.map((folder: any) => ({
-            id: folder.id,
-            name: folder.name,
-            resultCount: folder.activityCount || 0,
-            createdAt: folder.createdAt,
-            color: folder.color
-          }));
-          setFolders(formattedFolders);
-        } else {
-          console.log('無法載入資料夾，使用空列表');
-          setFolders([]);
-        }
-      } catch (error) {
-        console.error('載入資料夾失敗:', error);
-        setFolders([]);
-      }
+      // 🚀 移除資料夾載入邏輯，使用專門的 loadFolders() 函數
+      // 這樣確保資料夾載入時使用正確的 type=results 參數
     } catch (error) {
       console.error('載入數據失敗:', error);
       setError('載入數據失敗，請稍後重試');
