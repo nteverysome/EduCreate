@@ -10,7 +10,7 @@ import WordwallStyleResultCard from './WordwallStyleResultCard';
 import WordwallStyleFolderCard from './WordwallStyleFolderCard';
 import DraggableResultCard from './DraggableResultCard';
 import DroppableFolderCard from './DroppableFolderCard';
-import { DragDropProvider } from './DragDropContext';
+import { DragDropProvider, useDragDrop } from './DragDropContext';
 import NewFolderModal from './NewFolderModal';
 import FolderContextMenu from './FolderContextMenu';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -68,6 +68,9 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState<ResultFolder | null>(null);
+
+  // 拖拽上下文
+  const dragDropContext = useDragDrop();
 
 
 
@@ -374,19 +377,12 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setCurrentFolderId(null);
   };
 
-  // 處理拖拽懸停
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
   // 處理拖拽到根目錄
-  const handleDropToRoot = async (e: React.DragEvent) => {
-    e.preventDefault();
-    const resultId = e.dataTransfer.getData('text/plain');
-    if (resultId) {
+  const handleDropToRoot = async () => {
+    // 使用拖拽上下文的 onDrop 函数
+    if (dragDropContext?.onDrop) {
       try {
-        await handleMoveToRoot(resultId);
+        await dragDropContext.onDrop('root', 'root');
       } catch (error) {
         console.error('拖拽到根目錄失敗:', error);
       }
@@ -603,8 +599,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         <div
           className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer"
           onClick={handleBackToRoot}
-          onDragOver={handleDragOver}
-          onDrop={handleDropToRoot}
+          onMouseUp={handleDropToRoot}
         >
           <div className="flex items-center justify-center text-gray-600">
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
