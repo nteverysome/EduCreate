@@ -280,43 +280,47 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   })();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* 頁面標題和導航 */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <a
-              href="/my-results"
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 mr-4"
-            >
-              <ArrowLeftIcon className="w-5 h-5 mr-1" />
-              我的結果
-            </a>
-            <span className="text-gray-400 mr-4">•</span>
-            <h1 className="text-2xl font-bold text-gray-900">{result.title}</h1>
-          </div>
-          
-          <div className="flex items-center space-x-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      {/* 頁面標題和導航 - 響應式 */}
+      <div className="mb-6 sm:mb-8">
+        {/* 返回連結 - 移動端獨立一行 */}
+        <div className="mb-3 sm:mb-0">
+          <a
+            href="/my-results"
+            className="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm sm:text-base"
+          >
+            <ArrowLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
+            我的結果
+          </a>
+        </div>
+
+        {/* 標題和操作按鈕 */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">{result.title}</h1>
+
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             {!result.isSharedView && (
               <button
                 onClick={openShareableResultLink}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                <LinkIcon className="w-4 h-4 mr-2" />
-                可共用結果連結
+                <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+                <span className="hidden sm:inline">可共用結果連結</span>
+                <span className="sm:hidden">分享</span>
               </button>
             )}
 
             <a
               href={`/games/switcher?game=${result.gameType}&activityId=${result.activityId}`}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <PlayIcon className="w-4 h-4 mr-2" />
-              打開活動
+              <PlayIcon className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+              <span className="hidden sm:inline">打開活動</span>
+              <span className="sm:hidden">活動</span>
             </a>
 
             {!result.isSharedView && (
-              <button className="p-2 hover:bg-gray-100 rounded-full">
+              <button className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full">
                 <EllipsisVerticalIcon className="w-5 h-5 text-gray-400" />
               </button>
             )}
@@ -324,44 +328,47 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
         </div>
       </div>
 
-      <hr className="mb-8" />
+      <hr className="mb-6 sm:mb-8" />
 
-      {/* 課業信息 */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {/* 課業信息 - 響應式 */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div>
-            <div className="text-sm text-gray-500 mb-1">課業</div>
-            <div className="font-medium">{result.activityName}</div>
+            <div className="text-xs sm:text-sm text-gray-500 mb-1">課業</div>
+            <div className="font-medium text-sm sm:text-base break-words">{result.activityName}</div>
           </div>
-          
+
           <div>
-            <div className="text-sm text-gray-500 mb-1">遊戲類型</div>
-            <div className="font-medium">{result.gameType}</div>
+            <div className="text-xs sm:text-sm text-gray-500 mb-1">遊戲類型</div>
+            <div className="font-medium text-sm sm:text-base">{result.gameType}</div>
           </div>
-          
-          <div className="flex items-center">
-            <ClockIcon className="w-4 h-4 text-gray-400 mr-1" />
+
+          <div className="flex items-start sm:items-center">
+            <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 mr-1 mt-0.5 sm:mt-0 flex-shrink-0" />
             <div>
-              <div className="text-sm text-gray-500">創建時間</div>
-              <div className="font-medium">{formatDateTime(result.createdAt)}</div>
+              <div className="text-xs sm:text-sm text-gray-500">創建時間</div>
+              <div className="font-medium text-sm sm:text-base">{formatDateTime(result.createdAt)}</div>
             </div>
           </div>
-          
-          <div className="flex items-center">
-            <CalendarIcon className="w-4 h-4 text-gray-400 mr-1" />
+
+          <div className="flex items-start sm:items-center">
+            <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 mr-1 mt-0.5 sm:mt-0 flex-shrink-0" />
             <div>
-              <div className="text-sm text-gray-500">截止日期</div>
-              <div className="font-medium">{result.deadline ? formatDateTime(result.deadline) : '無截止日期'}</div>
+              <div className="text-xs sm:text-sm text-gray-500">截止日期</div>
+              <div className="font-medium text-sm sm:text-base">{result.deadline ? formatDateTime(result.deadline) : '無截止日期'}</div>
             </div>
           </div>
         </div>
-        
-        <div className="mt-6 flex items-center">
-          <UserIcon className="w-4 h-4 text-gray-400 mr-1" />
-          <span className="font-medium mr-4">{result.participantCount}</span>
-          
-          <div className="flex items-center space-x-4">
-            <label className="flex items-center">
+
+        {/* 參與者數量和篩選 - 響應式 */}
+        <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0">
+          <div className="flex items-center">
+            <UserIcon className="w-4 h-4 text-gray-400 mr-1" />
+            <span className="font-medium mr-4 text-sm sm:text-base">{result.participantCount}</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <label className="flex items-center text-sm sm:text-base">
               <input
                 type="radio"
                 name="filter"
@@ -372,7 +379,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
               />
               所有
             </label>
-            <label className="flex items-center">
+            <label className="flex items-center text-sm sm:text-base">
               <input
                 type="radio"
                 name="filter"
@@ -383,7 +390,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
               />
               最好
             </label>
-            <label className="flex items-center">
+            <label className="flex items-center text-sm sm:text-base">
               <input
                 type="radio"
                 name="filter"
@@ -396,94 +403,97 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
             </label>
           </div>
         </div>
-        
-        <div className="mt-4 p-3 bg-gray-50 rounded-md">
-          <div className="text-sm text-gray-600 mb-2">學生分享連結：</div>
-          <div className="flex items-center space-x-2">
-            <code className="text-sm bg-white px-3 py-2 rounded border flex-1">
+
+        {/* 學生分享連結 - 響應式 */}
+        <div className="mt-4 p-3 sm:p-4 bg-gray-50 rounded-md">
+          <div className="text-xs sm:text-sm text-gray-600 mb-2">學生分享連結：</div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <code className="text-xs sm:text-sm bg-white px-2 sm:px-3 py-2 rounded border flex-1 break-all">
               {correctedShareLink}
             </code>
-            <button
-              onClick={openGameLink}
-              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
-              title="直接開始遊戲"
-            >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m-6-8h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z" />
-              </svg>
-              Play
-            </button>
-            <button
-              onClick={copyStudentShareLink}
-              className={`inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md transition-colors ${
-                copySuccess
-                  ? 'text-green-700 bg-green-50 border-green-300'
-                  : 'text-gray-700 bg-white hover:bg-gray-50'
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
-              title="複製連結"
-            >
-              {copySuccess ? (
-                <>
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  已複製
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  複製
-                </>
-              )}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={openGameLink}
+                className="flex-1 sm:flex-initial inline-flex items-center justify-center px-3 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                title="直接開始遊戲"
+              >
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m-6-8h8a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z" />
+                </svg>
+                <span className="hidden sm:inline">Play</span>
+              </button>
+              <button
+                onClick={copyStudentShareLink}
+                className={`flex-1 sm:flex-initial inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs sm:text-sm font-medium rounded-md transition-colors ${
+                  copySuccess
+                    ? 'text-green-700 bg-green-50 border-green-300'
+                    : 'text-gray-700 bg-white hover:bg-gray-50'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                title="複製連結"
+              >
+                {copySuccess ? (
+                  <>
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="hidden sm:inline">已複製</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span className="hidden sm:inline">複製</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 總結 */}
-      <h2 className="text-xl font-bold text-gray-900 mb-6">總結</h2>
+      {/* 總結 - 響應式 */}
+      <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">總結</h2>
 
-      {/* 統計數據總結區域 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* 統計數據總結區域 - 響應式網格 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
         {/* 學生的數量 */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="text-sm text-gray-500 mb-1">學生的數量</div>
-          <div className="text-2xl font-bold text-gray-900">{filteredStatistics.totalStudents}</div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
+          <div className="text-xs sm:text-sm text-gray-500 mb-1">學生的數量</div>
+          <div className="text-xl sm:text-2xl font-bold text-gray-900">{filteredStatistics.totalStudents}</div>
         </div>
 
         {/* 平均得分 */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="text-sm text-gray-500 mb-1">平均得分</div>
-          <div className="text-2xl font-bold text-gray-900">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
+          <div className="text-xs sm:text-sm text-gray-500 mb-1">平均得分</div>
+          <div className="text-xl sm:text-2xl font-bold text-gray-900">
             {filteredStatistics.averageScore.toFixed(1)}
-            <span className="text-sm text-gray-500 ml-1">/ 100</span>
+            <span className="text-xs sm:text-sm text-gray-500 ml-1">/ 100</span>
           </div>
         </div>
 
         {/* 最高分 */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="text-sm text-gray-500 mb-1">最高分</div>
-          <div className="text-2xl font-bold text-gray-900">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
+          <div className="text-xs sm:text-sm text-gray-500 mb-1">最高分</div>
+          <div className="text-xl sm:text-2xl font-bold text-gray-900">
             {filteredStatistics.highestScore.score}
-            <span className="text-sm text-gray-500 ml-1">/ 100</span>
+            <span className="text-xs sm:text-sm text-gray-500 ml-1">/ 100</span>
           </div>
-          <div className="text-sm text-gray-600 mt-1">{filteredStatistics.highestScore.studentName}</div>
+          <div className="text-xs sm:text-sm text-gray-600 mt-1 truncate">{filteredStatistics.highestScore.studentName}</div>
         </div>
 
         {/* 最快的 */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="text-sm text-gray-500 mb-1">最快的</div>
-          <div className="text-2xl font-bold text-gray-900">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6">
+          <div className="text-xs sm:text-sm text-gray-500 mb-1">最快的</div>
+          <div className="text-xl sm:text-2xl font-bold text-gray-900">
             {formatTime(filteredStatistics.fastestTime.timeSpent)}
           </div>
-          <div className="text-sm text-gray-600 mt-1">{filteredStatistics.fastestTime.studentName}</div>
+          <div className="text-xs sm:text-sm text-gray-600 mt-1 truncate">{filteredStatistics.fastestTime.studentName}</div>
         </div>
       </div>
 
-      {/* 圖表分析區域 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      {/* 圖表分析區域 - 響應式 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {/* 分數分佈圖表 */}
         <ScoreDistributionChart
           participants={filteredParticipants}
@@ -497,66 +507,70 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
         />
       </div>
 
-      {/* 按學生顯示的結果 */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-500">排序</span>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="participantSort"
-                value="submitted"
-                checked={participantSort === 'submitted'}
-                onChange={(e) => setParticipantSort(e.target.value as 'submitted')}
-                className="mr-2"
-              />
-              提交
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="participantSort"
-                value="name"
-                checked={participantSort === 'name'}
-                onChange={(e) => setParticipantSort(e.target.value as 'name')}
-                className="mr-2"
-              />
-              名字
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="participantSort"
-                value="correct_time"
-                checked={participantSort === 'correct_time'}
-                onChange={(e) => setParticipantSort(e.target.value as 'correct_time')}
-                className="mr-2"
-              />
-              正確 + 時間
-            </label>
+      {/* 按學生顯示的結果 - 響應式 */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
+        {/* 排序選項 - 響應式 */}
+        <div className="mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <span className="text-xs sm:text-sm text-gray-500">排序</span>
+            <div className="flex flex-wrap gap-3 sm:gap-4">
+              <label className="flex items-center text-sm">
+                <input
+                  type="radio"
+                  name="participantSort"
+                  value="submitted"
+                  checked={participantSort === 'submitted'}
+                  onChange={(e) => setParticipantSort(e.target.value as 'submitted')}
+                  className="mr-2"
+                />
+                提交
+              </label>
+              <label className="flex items-center text-sm">
+                <input
+                  type="radio"
+                  name="participantSort"
+                  value="name"
+                  checked={participantSort === 'name'}
+                  onChange={(e) => setParticipantSort(e.target.value as 'name')}
+                  className="mr-2"
+                />
+                名字
+              </label>
+              <label className="flex items-center text-sm">
+                <input
+                  type="radio"
+                  name="participantSort"
+                  value="correct_time"
+                  checked={participantSort === 'correct_time'}
+                  onChange={(e) => setParticipantSort(e.target.value as 'correct_time')}
+                  className="mr-2"
+                />
+                正確 + 時間
+              </label>
+            </div>
           </div>
         </div>
-        
-        <h3 className="text-lg font-medium text-gray-900 mb-4">按學生顯示的結果</h3>
-        
-        <div className="overflow-x-auto">
+
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">按學生顯示的結果</h3>
+
+        {/* 學生結果表格 - 響應式 */}
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   學生姓名
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   分數
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                   正確答案
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                   用時
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                   完成時間
                 </th>
               </tr>
@@ -572,22 +586,22 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
                       className="hover:bg-gray-50 cursor-pointer"
                       onClick={() => toggleParticipantExpansion(participant.id)}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-900">
                         <div className="flex items-center">
-                          <span className="mr-2">{isExpanded ? '▼' : '▶'}</span>
-                          {participant.studentName}
+                          <span className="mr-1 sm:mr-2 text-xs">{isExpanded ? '▼' : '▶'}</span>
+                          <span className="truncate">{participant.studentName}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                         {(participant as any).calculatedScore || participant.score}%
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900 hidden sm:table-cell">
                         {participant.correctAnswers}/{participant.totalQuestions}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900 hidden md:table-cell">
                         {formatDuration(participant.timeSpent)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 hidden lg:table-cell">
                         {formatDateTime(participant.completedAt)}
                       </td>
                     </tr>
