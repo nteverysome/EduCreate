@@ -256,18 +256,18 @@ test.describe('完整可共用結果連結流程', () => {
       // 嘗試從剪貼板獲取連結（如果可能）
       try {
         const clipboardText = await teacherPage.evaluate(() => navigator.clipboard.readText());
-        if (clipboardText && clipboardText.includes('/results/shared/')) {
+        if (clipboardText && clipboardText.includes('/shared/results/')) {
           shareableUrl = clipboardText;
           console.log(`🔗 可共用結果連結: ${shareableUrl}`);
         }
       } catch (error) {
         console.log('⚠️ 無法從剪貼板讀取連結，將使用構建的連結');
       }
-      
+
       // 如果無法從剪貼板獲取，構建連結
       if (!shareableUrl && resultId) {
         // 這裡需要 shareToken，實際情況下會從 API 獲取
-        shareableUrl = `https://edu-create.vercel.app/results/shared/example-token-${resultId}`;
+        shareableUrl = `https://edu-create.vercel.app/shared/results/example-token-${resultId}`;
         console.log(`🔗 構建的可共用連結: ${shareableUrl}`);
       }
     } else {

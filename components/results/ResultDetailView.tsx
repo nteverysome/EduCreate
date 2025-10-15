@@ -105,7 +105,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   const copyShareableResultLink = async () => {
     if (!result.shareToken) return;
 
-    const shareableUrl = `${window.location.origin}/results/shared/${result.shareToken}`;
+    const shareableUrl = `${window.location.origin}/shared/results/${result.shareToken}`;
 
     try {
       await navigator.clipboard.writeText(shareableUrl);
