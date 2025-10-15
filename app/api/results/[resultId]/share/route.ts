@@ -13,7 +13,18 @@ export async function PATCH(
 ) {
   try {
     const session = await getServerSession(authOptions);
+
+    // 详细的 session 日志
+    console.log('🔍 [PATCH /api/results/[resultId]/share] Session 信息:', {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id,
+      userEmail: session?.user?.email,
+      userRole: (session?.user as any)?.role
+    });
+
     if (!session?.user?.id) {
+      console.error('❌ Session 无效或缺少 user.id');
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
@@ -72,9 +83,16 @@ export async function PATCH(
     });
 
   } catch (error) {
-    console.error('設置分享狀態失敗:', error);
+    console.error('❌ [PATCH] 設置分享狀態失敗:', error);
+    console.error('❌ [PATCH] 錯誤詳情:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
-      { error: '伺服器錯誤' },
+      {
+        error: '伺服器錯誤',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
@@ -87,7 +105,18 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
+
+    // 详细的 session 日志
+    console.log('🔍 [GET /api/results/[resultId]/share] Session 信息:', {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      userId: session?.user?.id,
+      userEmail: session?.user?.email,
+      userRole: (session?.user as any)?.role
+    });
+
     if (!session?.user?.id) {
+      console.error('❌ Session 无效或缺少 user.id');
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
@@ -121,9 +150,16 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('獲取分享狀態失敗:', error);
+    console.error('❌ [GET] 獲取分享狀態失敗:', error);
+    console.error('❌ [GET] 錯誤詳情:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
-      { error: '伺服器錯誤' },
+      {
+        error: '伺服器錯誤',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
