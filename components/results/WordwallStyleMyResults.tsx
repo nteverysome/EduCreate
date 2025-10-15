@@ -203,7 +203,13 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     }
   }, []); // 移除 currentFolderId 依赖，因为这个函数不应该依赖当前资料夹
 
-  // 初始載入和资料夹变化时重新加载
+  // 初始化时加载资料夹数据（只执行一次）
+  useEffect(() => {
+    console.log('🚀 初始化加载资料夹数据...');
+    loadFolders();
+  }, []); // 空依赖数组，只在组件挂载时执行一次
+
+  // 资料夹变化时重新加载结果数据
   useEffect(() => {
     // 直接在 useEffect 中调用 API，确保使用最新的 currentFolderId
     const loadResultsForFolder = async () => {
@@ -230,7 +236,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     };
 
     loadResultsForFolder();
-    loadFolders();
+    // 🔥 关键修复：不在这里调用 loadFolders()，避免覆盖乐观更新
+    // loadFolders(); // ❌ 移除这个调用，它会覆盖乐观更新
   }, [currentFolderId]);
 
   // 格式化時間顯示
