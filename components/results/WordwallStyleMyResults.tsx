@@ -69,8 +69,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState<ResultFolder | null>(null);
 
-  // 拖拽上下文
-  const dragDropContext = useDragDrop();
+
 
 
 
@@ -377,17 +376,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setCurrentFolderId(null);
   };
 
-  // 處理拖拽到根目錄
-  const handleDropToRoot = async () => {
-    // 使用拖拽上下文的 onDrop 函数，传递空字符串作为targetId，'root'作为targetType
-    if (dragDropContext?.onDrop && dragDropContext.isDragging && dragDropContext.dragItem?.type === 'result') {
-      try {
-        await dragDropContext.onDrop('', 'root');
-      } catch (error) {
-        console.error('拖拽到根目錄失敗:', error);
-      }
-    }
-  };
+
 
   // 處理拖拽結果回根目錄
   const handleMoveToRoot = async (resultId: string) => {
@@ -501,6 +490,38 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     );
   }
 
+  // 拖拽区域组件（必须在 DragDropProvider 内部）
+  const DragToRootArea: React.FC<{ currentFolderId: string | null; onBackToRoot: () => void }> = ({ currentFolderId, onBackToRoot }) => {
+    const dragDropContext = useDragDrop();
+
+    const handleDropToRoot = async () => {
+      if (dragDropContext?.onDrop && dragDropContext.isDragging && dragDropContext.dragItem?.type === 'result') {
+        try {
+          await dragDropContext.onDrop('', 'root');
+        } catch (error) {
+          console.error('拖拽到根目錄失敗:', error);
+        }
+      }
+    };
+
+    if (!currentFolderId) return null;
+
+    return (
+      <div
+        className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer"
+        onClick={onBackToRoot}
+        onMouseUp={handleDropToRoot}
+      >
+        <div className="flex items-center justify-center text-gray-600">
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+          </svg>
+          拖拽結果到此處以移回上一層
+        </div>
+      </div>
+    );
+  };
+
   return (
     <DragDropProvider onMoveResult={handleMoveResult}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -594,21 +615,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         </div>
       </div>
 
-      {/* 在資料夾視圖中顯示拖拽回根級別的目標區域 */}
-      {currentFolderId && (
-        <div
-          className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer"
-          onClick={handleBackToRoot}
-          onMouseUp={handleDropToRoot}
-        >
-          <div className="flex items-center justify-center text-gray-600">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-            </svg>
-            拖拽結果到此處以移回上一層
-          </div>
-        </div>
-      )}
+      {/* 拖拽到根目录区域 */}
+      <DragToRootArea currentFolderId={currentFolderId} onBackToRoot={handleBackToRoot} />
 
       {/* 內容區域 - 簡化的列表佈局 */}
       <div className="space-y-2">
