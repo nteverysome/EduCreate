@@ -461,11 +461,9 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         throw new Error(errorData.error || '刪除資料夾失敗');
       }
 
-      // 從列表中移除已刪除的資料夾
-      setFolders(prev => prev.filter(f => f.id !== folderToDelete.id));
-
-      // 重新載入結果以更新顯示
+      // 🚀 重新載入所有數據以確保狀態同步
       await loadResults();
+      await loadFolders();
 
       console.log('資料夾刪除成功:', folderToDelete.name);
     } catch (error) {

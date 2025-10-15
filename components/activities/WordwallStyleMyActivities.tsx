@@ -316,6 +316,10 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     if (currentFolderId === id) {
       setCurrentFolderId(null);
     }
+
+    // 🚀 重新載入數據以確保狀態同步
+    await loadActivities();
+    console.log('✅ 資料夾刪除後數據重新載入完成');
   };
 
   const handleActivitySelect = (activity: Activity) => {

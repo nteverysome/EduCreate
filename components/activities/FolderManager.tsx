@@ -108,9 +108,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
         throw new Error(errorData.error || '刪除資料夾失敗');
       }
 
-      setFolders(prev => prev.filter(folder => folder.id !== id));
-
-      // 調用父組件的回調
+      // 🚀 調用父組件的回調來處理數據重新載入
+      // 不再直接修改本地狀態，讓父組件重新載入數據確保一致性
       if (onFolderDelete) {
         await onFolderDelete(id);
       }
