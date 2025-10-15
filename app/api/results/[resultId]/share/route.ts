@@ -41,7 +41,8 @@ export async function PATCH(
 
     if (isPublic) {
       // 如果要公开分享，生成或保持现有的 shareToken
-      if (!shareToken) {
+      // 检查现有 shareToken 是否为正确格式（纯 nanoid，不包含 - 符号）
+      if (!shareToken || shareToken.includes('-')) {
         shareToken = nanoid(16); // 生成16位随机字符串
       }
     } else {
