@@ -68,19 +68,36 @@ export const DragDropProvider: React.FC<DragDropProviderProps> = ({
     };
 
     const handleMouseUp = () => {
+      console.log('🖱️ 全局 mouseup 事件触发，结束拖拽');
       endDrag();
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
 
+    // 清理可能存在的旧监听器
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+
+    // 添加新的监听器
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
+
+    console.log('✅ 全局事件监听器已设置');
   }, []);
 
   const endDrag = useCallback(() => {
+    console.log('🔄 endDrag 被调用，清理拖拽状态');
     setDragItem(null);
     setIsDragging(false);
     setDragPreview(prev => ({ ...prev, visible: false }));
+
+    // 强制清理所有可能残留的事件监听器
+    const handleMouseMove = () => {};
+    const handleMouseUp = () => {};
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+
+    console.log('✅ 拖拽状态清理完成');
   }, []);
 
   const updateDragPreview = useCallback((x: number, y: number) => {
