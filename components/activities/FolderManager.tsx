@@ -50,7 +50,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
       setLoading(true);
       setError('');
 
-      const response = await fetch('/api/folders');
+      // 🚀 使用正确的 type=activities 参数
+      const response = await fetch('/api/folders?type=activities');
       if (!response.ok) {
         throw new Error('載入資料夾失敗');
       }
