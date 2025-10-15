@@ -165,8 +165,65 @@ export async function PUT(
     if (body.folderId !== undefined) {
       updateData.folderId = body.folderId;
       console.log('📁 更新活動資料夾:', { activityId, folderId: body.folderId });
+
+      // 🚀 [新方案] 使用事务确保数据一致性，并返回更新后的资料夹数据
+      const { updatedActivity, updatedFolders } = await prisma.$transaction(async (tx) => {
+        // 更新活动的 folderId
+        const activity = await tx.activity.update({
+          where: { id: activityId },
+          data: updateData
+        });
+
+        // 强制等待一小段时间确保事务完全提交
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // 获取更新后的所有资料夹数据
+        const folders = await tx.folder.findMany({
+          where: {
+            userId: userId,
+            deletedAt: null
+          },
+          include: {
+            activities: {
+              select: {
+                id: true
+              }
+            }
+          },
+          orderBy: {
+            createdAt: 'desc'
+          }
+        });
+
+        // 计算每个资料夹的活动数量
+        const foldersWithCount = await Promise.all(folders.map(async folder => {
+          const activityCount = folder.activities.length;
+          return {
+            id: folder.id,
+            name: folder.name,
+            description: folder.description,
+            color: folder.color,
+            icon: folder.icon,
+            createdAt: folder.createdAt,
+            updatedAt: folder.updatedAt,
+            activityCount: activityCount
+          };
+        }));
+
+        return { updatedActivity: activity, updatedFolders: foldersWithCount };
+      });
+
+      console.log('✅ 活動更新成功:', updatedActivity.title);
+      console.log('🚀 [新方案] 返回更新后的资料夹数据:', updatedFolders.length, '个资料夹');
+
+      return NextResponse.json({
+        success: true,
+        activity: updatedActivity,
+        folders: updatedFolders
+      });
     }
 
+    // 如果不是拖拽操作，使用原来的逻辑
     const updatedActivity = await prisma.activity.update({
       where: {
         id: activityId

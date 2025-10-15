@@ -372,6 +372,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const handleActivityDropToFolder = async (activityId: string, folderId: string) => {
     try {
       console.log('📁 將活動移動到資料夾:', { activityId, folderId });
+      console.log('🚀 [新方案] 开始API调用，不使用乐观更新...');
 
       const response = await fetch(`/api/activities/${activityId}`, {
         method: 'PUT',
@@ -388,10 +389,26 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         throw new Error(errorData.error || '移動活動失敗');
       }
 
+      const responseData = await response.json();
+      console.log('✅ API 调用成功:', responseData);
+
+      // 🚀 [新方案] 如果API返回了资料夹数据，直接使用
+      if (responseData.folders) {
+        console.log('🚀 [新方案] 使用API返回的资料夹数据:', responseData.folders);
+        const formattedFolders = responseData.folders.map((folder: any) => ({
+          id: folder.id,
+          name: folder.name,
+          activityCount: folder.activityCount || 0
+        }));
+        setFolders(formattedFolders);
+        console.log('✅ [新方案] 资料夹状态已直接更新为API返回的准确数据');
+      }
+
       console.log('✅ 活動移動成功');
 
       // 重新載入活動列表
       await loadActivities();
+      console.log('🚀 [新方案] 活动数据重新加载完成');
 
     } catch (error: any) {
       console.error('❌ 移動活動失敗:', error);
@@ -442,6 +459,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const handleActivityDropToRoot = async (activityId: string) => {
     try {
       console.log('🏠 將活動移動回根級別:', { activityId });
+      console.log('🚀 [新方案] 开始API调用，不使用乐观更新...');
 
       const response = await fetch(`/api/activities/${activityId}`, {
         method: 'PUT',
@@ -458,10 +476,26 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         throw new Error(errorData.error || '移動活動失敗');
       }
 
+      const responseData = await response.json();
+      console.log('✅ API 调用成功:', responseData);
+
+      // 🚀 [新方案] 如果API返回了资料夹数据，直接使用
+      if (responseData.folders) {
+        console.log('🚀 [新方案] 使用API返回的资料夹数据:', responseData.folders);
+        const formattedFolders = responseData.folders.map((folder: any) => ({
+          id: folder.id,
+          name: folder.name,
+          activityCount: folder.activityCount || 0
+        }));
+        setFolders(formattedFolders);
+        console.log('✅ [新方案] 资料夹状态已直接更新为API返回的准确数据');
+      }
+
       console.log('✅ 活動移回根級別成功');
 
       // 重新載入活動列表
       await loadActivities();
+      console.log('🚀 [新方案] 活动数据重新加载完成');
 
     } catch (error: any) {
       console.error('❌ 移動活動失敗:', error);
