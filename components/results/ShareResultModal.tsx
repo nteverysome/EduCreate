@@ -48,7 +48,24 @@ export const ShareResultModal: React.FC<ShareResultModalProps> = ({
           if (response.ok) {
             const data = await response.json();
             setIsPublic(data.isPublic);
-            setShareUrl(data.shareUrl || '');
+
+            // 🔧 修正分享 URL：使用當前域名而不是 API 返回的域名
+            if (data.shareUrl) {
+              // 從 API 返回的 URL 中提取路徑部分
+              const urlObj = new URL(data.shareUrl);
+              const path = urlObj.pathname; // 例如：/shared/results/hNX79DFe9nuoh1Pv
+
+              // 使用當前瀏覽器的域名構建正確的 URL
+              const correctedUrl = `${window.location.origin}${path}`;
+              setShareUrl(correctedUrl);
+
+              console.log('🔧 URL 修正:', {
+                原始URL: data.shareUrl,
+                修正後URL: correctedUrl
+              });
+            } else {
+              setShareUrl('');
+            }
           } else if (response.status === 401) {
             // 会话过期，只在控制台记录，不打断用户操作
             console.warn('⚠️ 會話可能已過期，請稍後重新登錄');
@@ -106,7 +123,24 @@ export const ShareResultModal: React.FC<ShareResultModalProps> = ({
         const data = await response.json();
         console.log('✅ 分享状态更新成功:', data);
         setIsPublic(data.isPublic);
-        setShareUrl(data.shareUrl || '');
+
+        // 🔧 修正分享 URL：使用當前域名而不是 API 返回的域名
+        if (data.shareUrl) {
+          // 從 API 返回的 URL 中提取路徑部分
+          const urlObj = new URL(data.shareUrl);
+          const path = urlObj.pathname; // 例如：/shared/results/hNX79DFe9nuoh1Pv
+
+          // 使用當前瀏覽器的域名構建正確的 URL
+          const correctedUrl = `${window.location.origin}${path}`;
+          setShareUrl(correctedUrl);
+
+          console.log('🔧 URL 修正:', {
+            原始URL: data.shareUrl,
+            修正後URL: correctedUrl
+          });
+        } else {
+          setShareUrl('');
+        }
       } else if (response.status === 401) {
         // 会话过期，提供友好提示但不强制跳转
         console.warn('⚠️ 會話已過期，請重新登錄');
