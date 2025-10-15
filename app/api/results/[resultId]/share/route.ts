@@ -41,13 +41,17 @@ export async function PATCH(
 
     if (isPublic) {
       // 如果要公开分享，生成或保持现有的 shareToken
-      // 检查现有 shareToken 是否为正确格式（纯 nanoid，不包含 - 符号）
-      if (!shareToken || shareToken.includes('-')) {
+      // 更严格的检测：长度不等于16或包含特殊字符
+      if (!shareToken || shareToken.length !== 16 || /[^a-zA-Z0-9]/.test(shareToken)) {
         shareToken = nanoid(16); // 生成16位随机字符串
+        console.log('🔄 生成新的 shareToken:', shareToken);
+      } else {
+        console.log('✅ 使用现有的 shareToken:', shareToken);
       }
     } else {
       // 如果要取消分享，清除 shareToken
       shareToken = null;
+      console.log('🗑️ 清除 shareToken');
     }
 
     // 更新数据库

@@ -82,6 +82,9 @@ export const ShareResultModal: React.FC<ShareResultModalProps> = ({
   // 切换公开状态
   const handleTogglePublic = async () => {
     setLoading(true);
+    // 先清除本地状态，强制刷新
+    setShareUrl('');
+
     try {
       const response = await fetch(`/api/results/${result.id}/share`, {
         method: 'PATCH',
@@ -93,6 +96,7 @@ export const ShareResultModal: React.FC<ShareResultModalProps> = ({
 
       if (response.ok) {
         const data = await response.json();
+        console.log('🔄 API 响应数据:', data);
         setIsPublic(data.isPublic);
         setShareUrl(data.shareUrl || '');
       } else {
