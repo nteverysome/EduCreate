@@ -101,28 +101,12 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
     return formatDuration(seconds);
   };
 
-  // 複製可共用結果連結
-  const copyShareableResultLink = async () => {
+  // 打開可共用結果連結
+  const openShareableResultLink = () => {
     if (!result.shareToken) return;
 
     const shareableUrl = `${window.location.origin}/shared/results/${result.shareToken}`;
-
-    try {
-      await navigator.clipboard.writeText(shareableUrl);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000); // 2秒後隱藏提示
-    } catch (err) {
-      console.error('複製失敗:', err);
-      // 降級方案：選擇文本
-      const textArea = document.createElement('textarea');
-      textArea.value = shareableUrl;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    }
+    window.open(shareableUrl, '_blank');
   };
 
   // 複製學生分享連結（遊戲連結）
@@ -298,7 +282,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
           <div className="flex items-center space-x-4">
             {!result.isSharedView && (
               <button
-                onClick={copyShareableResultLink}
+                onClick={openShareableResultLink}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <LinkIcon className="w-4 h-4 mr-2" />
