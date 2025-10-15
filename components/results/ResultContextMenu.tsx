@@ -43,6 +43,7 @@ interface ResultContextMenuProps {
   onSetDeadline: () => void;
   onDuplicate?: () => void;
   onShareLink: () => void;
+  onStudentShareLink?: () => void; // 新增：學生分享連結
   onMove?: (folderId: string | null) => void; // 新增：移動到資料夾
   folders?: ResultFolder[]; // 新增：可用的資料夾列表
 }
@@ -58,39 +59,12 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
   onSetDeadline,
   onDuplicate,
   onShareLink,
+  onStudentShareLink,
   onMove,
   folders = []
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [showMoveSubmenu, setShowMoveSubmenu] = React.useState(false);
-  const [copySuccess, setCopySuccess] = React.useState(false);
-
-  // 生成學生分享連結
-  const getStudentShareLink = () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${origin}/play/${result.activityId}/${result.assignmentId}`;
-  };
-
-  // 複製學生分享連結
-  const copyStudentShareLink = async () => {
-    const shareLink = getStudentShareLink();
-    try {
-      await navigator.clipboard.writeText(shareLink);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      console.error('複製失敗:', err);
-      // 降級方案
-      const textArea = document.createElement('textarea');
-      textArea.value = shareLink;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    }
-  };
 
   // 处理点击外部关闭菜单
   useEffect(() => {
@@ -156,12 +130,12 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
       onClick: onShareLink,
       className: 'text-blue-600 hover:bg-blue-50'
     },
-    {
+    ...(onStudentShareLink ? [{
       icon: LinkIcon,
-      label: copySuccess ? '✓ 已複製！' : '學生分享連結',
-      onClick: copyStudentShareLink,
-      className: copySuccess ? 'text-green-600 hover:bg-green-50' : 'text-purple-600 hover:bg-purple-50'
-    },
+      label: '學生分享連結',
+      onClick: onStudentShareLink,
+      className: 'text-purple-600 hover:bg-purple-50'
+    }] : []),
     {
       icon: PencilIcon,
       label: '重新命名',

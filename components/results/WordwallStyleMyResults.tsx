@@ -21,6 +21,7 @@ import RenameResultModal from './RenameResultModal';
 import ResultContextMenu from './ResultContextMenu';
 import SetDeadlineModal from './SetDeadlineModal';
 import ShareResultModal from './ShareResultModal';
+import StudentShareLinkModal from './StudentShareLinkModal';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 
@@ -93,6 +94,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 分享结果相关状态
   const [showShareResultModal, setShowShareResultModal] = useState(false);
   const [resultToShare, setResultToShare] = useState<AssignmentResult | null>(null);
+
+  // 學生分享連結相關狀態
+  const [showStudentShareLinkModal, setShowStudentShareLinkModal] = useState(false);
+  const [resultToStudentShare, setResultToStudentShare] = useState<AssignmentResult | null>(null);
 
 
 
@@ -450,6 +455,12 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setShowShareResultModal(true);
   };
 
+  // 處理學生分享連結點擊
+  const handleStudentShareLink = (result: AssignmentResult) => {
+    setResultToStudentShare(result);
+    setShowStudentShareLinkModal(true);
+  };
+
   // 處理移動結果到資料夾 - 簡化版本（參考 /my-activities 的實現方式）
   const handleMoveResult = async (resultId: string, folderId: string | null) => {
     try {
@@ -785,6 +796,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             handleShareResult(resultContextMenu.result);
             setResultContextMenu(null);
           }}
+          onStudentShareLink={() => {
+            handleStudentShareLink(resultContextMenu.result);
+            setResultContextMenu(null);
+          }}
           onDelete={() => {
             handleDeleteResult(resultContextMenu.result);
             setResultContextMenu(null);
@@ -831,6 +846,18 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           onClose={() => {
             setShowShareResultModal(false);
             setResultToShare(null);
+          }}
+        />
+      )}
+
+      {/* 學生分享連結模態框 */}
+      {resultToStudentShare && (
+        <StudentShareLinkModal
+          result={resultToStudentShare}
+          isOpen={showStudentShareLinkModal}
+          onClose={() => {
+            setShowStudentShareLinkModal(false);
+            setResultToStudentShare(null);
           }}
         />
       )}
