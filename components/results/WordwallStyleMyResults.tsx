@@ -22,6 +22,7 @@ import ResultContextMenu from './ResultContextMenu';
 import SetDeadlineModal from './SetDeadlineModal';
 import ShareResultModal from './ShareResultModal';
 import StudentShareLinkModal from './StudentShareLinkModal';
+import QRCodeModal from './QRCodeModal';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 
@@ -98,6 +99,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 學生分享連結相關狀態
   const [showStudentShareLinkModal, setShowStudentShareLinkModal] = useState(false);
   const [resultToStudentShare, setResultToStudentShare] = useState<AssignmentResult | null>(null);
+
+  // QR Code 相關狀態
+  const [showQRCodeModal, setShowQRCodeModal] = useState(false);
+  const [resultToShowQRCode, setResultToShowQRCode] = useState<AssignmentResult | null>(null);
 
 
 
@@ -461,6 +466,12 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setShowStudentShareLinkModal(true);
   };
 
+  // 處理 QR Code 點擊
+  const handleQRCode = (result: AssignmentResult) => {
+    setResultToShowQRCode(result);
+    setShowQRCodeModal(true);
+  };
+
   // 處理移動結果到資料夾 - 簡化版本（參考 /my-activities 的實現方式）
   const handleMoveResult = async (resultId: string, folderId: string | null) => {
     try {
@@ -800,6 +811,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             handleStudentShareLink(resultContextMenu.result);
             setResultContextMenu(null);
           }}
+          onQRCode={() => {
+            handleQRCode(resultContextMenu.result);
+            setResultContextMenu(null);
+          }}
           onDelete={() => {
             handleDeleteResult(resultContextMenu.result);
             setResultContextMenu(null);
@@ -858,6 +873,18 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           onClose={() => {
             setShowStudentShareLinkModal(false);
             setResultToStudentShare(null);
+          }}
+        />
+      )}
+
+      {/* QR Code 模態框 */}
+      {resultToShowQRCode && (
+        <QRCodeModal
+          result={resultToShowQRCode}
+          isOpen={showQRCodeModal}
+          onClose={() => {
+            setShowQRCodeModal(false);
+            setResultToShowQRCode(null);
           }}
         />
       )}

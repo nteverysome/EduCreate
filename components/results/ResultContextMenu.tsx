@@ -10,7 +10,8 @@ import {
   ShareIcon,
   LinkIcon,
   FolderIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  QrCodeIcon
 } from '@heroicons/react/24/outline';
 
 interface AssignmentResult {
@@ -44,6 +45,7 @@ interface ResultContextMenuProps {
   onDuplicate?: () => void;
   onShareLink: () => void;
   onStudentShareLink?: () => void; // 新增：學生分享連結
+  onQRCode?: () => void; // 新增：QR Code
   onMove?: (folderId: string | null) => void; // 新增：移動到資料夾
   folders?: ResultFolder[]; // 新增：可用的資料夾列表
 }
@@ -60,6 +62,7 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
   onDuplicate,
   onShareLink,
   onStudentShareLink,
+  onQRCode,
   onMove,
   folders = []
 }) => {
@@ -135,6 +138,12 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
       label: '學生分享連結',
       onClick: onStudentShareLink,
       className: 'text-purple-600 hover:bg-purple-50'
+    }] : []),
+    ...(onQRCode ? [{
+      icon: QrCodeIcon,
+      label: 'QR Code',
+      onClick: onQRCode,
+      className: 'text-indigo-600 hover:bg-indigo-50'
     }] : []),
     {
       icon: PencilIcon,
