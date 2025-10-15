@@ -48,6 +48,11 @@ export const DragToRootArea: React.FC<DragToRootAreaProps> = ({
         await dragDropContext.onDrop(null, 'root');
         console.log('✅ 拖拽到根目录成功');
 
+        // 拖拽成功后，导航回根目录
+        console.log('🔄 拖拽成功，导航回根目录...');
+        onBackToRoot();
+        console.log('✅ 已导航回根目录');
+
         return true; // 表示拖拽操作成功
 
       } catch (error) {
