@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { 
-  PencilIcon, 
+import {
+  PencilIcon,
   TrashIcon,
   EyeIcon,
-  DocumentDuplicateIcon
+  DocumentDuplicateIcon,
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 
 interface AssignmentResult {
@@ -29,6 +30,7 @@ interface ResultContextMenuProps {
   onRename: () => void;
   onDelete: () => void;
   onView: () => void;
+  onSetDeadline: () => void;
   onDuplicate?: () => void;
 }
 
@@ -40,6 +42,7 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
   onRename,
   onDelete,
   onView,
+  onSetDeadline,
   onDuplicate
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -106,6 +109,12 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
       icon: PencilIcon,
       label: '重新命名',
       onClick: onRename,
+      className: 'text-gray-700 hover:bg-gray-50'
+    },
+    {
+      icon: CalendarIcon,
+      label: '設置截止日期',
+      onClick: onSetDeadline,
       className: 'text-gray-700 hover:bg-gray-50'
     },
     ...(onDuplicate ? [{

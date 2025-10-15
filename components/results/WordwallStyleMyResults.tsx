@@ -19,6 +19,7 @@ import { RecycleBinModal } from './RecycleBinModal';
 import RenameFolderModal from './RenameFolderModal';
 import RenameResultModal from './RenameResultModal';
 import ResultContextMenu from './ResultContextMenu';
+import SetDeadlineModal from './SetDeadlineModal';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 
@@ -83,6 +84,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   } | null>(null);
   const [showRenameResultModal, setShowRenameResultModal] = useState(false);
   const [resultToRename, setResultToRename] = useState<AssignmentResult | null>(null);
+
+  // 设置截止日期相关状态
+  const [showSetDeadlineModal, setShowSetDeadlineModal] = useState(false);
+  const [resultToSetDeadline, setResultToSetDeadline] = useState<AssignmentResult | null>(null);
 
 
 
@@ -403,6 +408,35 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const handleDeleteResult = (result: AssignmentResult) => {
     console.log('刪除結果:', result);
     // TODO: 實現結果刪除功能
+  };
+
+  // 處理設置截止日期
+  const handleSetDeadline = async (assignmentId: string, deadline: string | null) => {
+    try {
+      const response = await fetch(`/api/assignments/${assignmentId}/deadline`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ deadline }),
+      });
+
+      if (!response.ok) {
+        throw new Error('設置截止日期失敗');
+      }
+
+      // 重新載入結果數據以更新狀態
+      await loadResults();
+    } catch (error) {
+      console.error('設置截止日期失敗:', error);
+      throw error;
+    }
+  };
+
+  // 處理結果設置截止日期點擊
+  const handleResultSetDeadline = (result: AssignmentResult) => {
+    setResultToSetDeadline(result);
+    setShowSetDeadlineModal(true);
   };
 
   // 處理移動結果到資料夾 - 簡化版本（參考 /my-activities 的實現方式）
@@ -764,6 +798,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             handleResultRename(resultContextMenu.result);
             setResultContextMenu(null);
           }}
+          onSetDeadline={() => {
+            handleResultSetDeadline(resultContextMenu.result);
+            setResultContextMenu(null);
+          }}
           onDelete={() => {
             handleDeleteResult(resultContextMenu.result);
             setResultContextMenu(null);
@@ -784,6 +822,17 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           setResultToRename(null);
         }}
         onRename={handleRenameResult}
+      />
+
+      {/* 設置截止日期模態框 */}
+      <SetDeadlineModal
+        isOpen={showSetDeadlineModal}
+        result={resultToSetDeadline}
+        onClose={() => {
+          setShowSetDeadlineModal(false);
+          setResultToSetDeadline(null);
+        }}
+        onDeadlineSet={handleSetDeadline}
       />
 
       {/* 回收桶模態框 */}

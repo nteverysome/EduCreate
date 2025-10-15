@@ -56,18 +56,37 @@ export async function GET(request: NextRequest) {
         }
       });
 
-      const formattedResults = results.map(result => ({
-        id: result.id,
-        title: result.customTitle || `"${result.assignment.activity.title}"的結果${result.resultNumber}`,
-        activityName: result.assignment.activity.title,
-        participantCount: result.participants.length,
-        createdAt: result.createdAt.toISOString(),
-        deadline: result.assignment.deadline?.toISOString(),
-        status: result.status,
-        assignmentId: result.assignmentId,
-        activityId: result.assignment.activityId,
-        folderId: result.folderId  // 添加 folderId 字段
-      }));
+      const formattedResults = results.map(result => {
+        // 计算正确的状态：基于 Assignment 的 deadline 和 status
+        let status: 'active' | 'completed' | 'expired' = 'active';
+
+        if (result.assignment.status === 'COMPLETED') {
+          status = 'completed';
+        } else if (result.assignment.status === 'EXPIRED') {
+          status = 'expired';
+        } else if (result.assignment.deadline) {
+          // 如果有截止日期，检查是否已过期
+          const now = new Date();
+          const deadline = new Date(result.assignment.deadline);
+          if (now > deadline) {
+            status = 'expired';
+          }
+        }
+        // 如果没有截止日期且状态是 ACTIVE，保持 'active'
+
+        return {
+          id: result.id,
+          title: result.customTitle || `"${result.assignment.activity.title}"的結果${result.resultNumber}`,
+          activityName: result.assignment.activity.title,
+          participantCount: result.participants.length,
+          createdAt: result.createdAt.toISOString(),
+          deadline: result.assignment.deadline?.toISOString(),
+          status: status,
+          assignmentId: result.assignmentId,
+          activityId: result.assignment.activityId,
+          folderId: result.folderId  // 添加 folderId 字段
+        };
+      });
 
       return NextResponse.json(formattedResults);
     } catch (dbError) {
