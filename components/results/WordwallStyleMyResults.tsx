@@ -391,43 +391,24 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     const originalFolders = [...folders];
 
     try {
-      // 乐观更新：立即从当前视图中移除结果
+      // 🚀 全新方案：移除乐观更新，直接等待API返回准确数据
+      console.log('🚀 [新方案] 开始API调用，不使用乐观更新...');
+
+      // 立即从当前视图移除结果（这个是安全的，因为结果确实被移动了）
       if (currentFolderId) {
-        console.log('🔄 乐观更新：从当前资料夹视图移除结果');
+        console.log('🔄 从当前资料夹视图移除结果');
         setResults(prevResults => prevResults.filter(result => result.id !== resultId));
       }
 
-      // 🔍 详细调试：乐观更新前的状态
-      console.log('🔍 乐观更新前的完整状态:', {
+      console.log('🔍 API调用前的状态:', {
         currentFolderId,
         targetFolderId: folderId,
-        operation: currentFolderId ? '从资料夹减少' : '从根目录移动',
-        targetOperation: folderId ? '向资料夹增加' : '向根目录移动',
+        operation: currentFolderId ? '从资料夹移动' : '从根目录移动',
+        targetOperation: folderId ? '向资料夹移动' : '向根目录移动',
         currentFolders: folders.map(f => ({ id: f.id, name: f.name, count: f.resultCount }))
       });
 
-      setFolders(prevFolders => {
-        console.log('🔍 setFolders 被调用，prevFolders:', prevFolders.map(f => ({ id: f.id, name: f.name, count: f.resultCount })));
-
-        const updatedFolders = prevFolders.map(folder => {
-          if (folder.id === currentFolderId) {
-            // 从当前资料夹减少计数
-            const newCount = Math.max(0, folder.resultCount - 1);
-            console.log(`📊 从资料夹减少: ${folder.name} (${folder.id}) 计数: ${folder.resultCount} -> ${newCount}`);
-            return { ...folder, resultCount: newCount };
-          } else if (folder.id === folderId) {
-            // 向目标资料夹增加计数
-            const newCount = folder.resultCount + 1;
-            console.log(`📊 向资料夹增加: ${folder.name} (${folder.id}) 计数: ${folder.resultCount} -> ${newCount}`);
-            return { ...folder, resultCount: newCount };
-          }
-          return folder;
-        });
-
-        console.log('🔍 乐观更新后的结果:', updatedFolders.map(f => ({ id: f.id, name: f.name, count: f.resultCount })));
-        console.log('✅ 乐观更新资料夹计数完成');
-        return updatedFolders;
-      });
+      // 🚀 不再进行乐观更新，直接调用API
 
       console.log('✅ 乐观更新完成，开始API调用...');
 
@@ -446,8 +427,21 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       const responseData = await response.json();
       console.log('✅ API 调用成功:', responseData);
 
-      // 🔍 API成功后的状态检查
-      console.log('🔍 API成功后，当前folders状态:', folders.map(f => ({ id: f.id, name: f.name, count: f.resultCount })));
+      // 🚀 [新方案] 直接使用API返回的资料夹数据
+      if (responseData.folders) {
+        console.log('🚀 [新方案] 使用API返回的资料夹数据:', responseData.folders);
+        const formattedFolders: ResultFolder[] = responseData.folders.map((folder: any) => ({
+          id: folder.id,
+          name: folder.name,
+          resultCount: folder.resultCount || 0,
+          createdAt: folder.createdAt,
+          color: folder.color
+        }));
+
+        console.log('🚀 [新方案] 设置新的资料夹状态:', formattedFolders.map(f => ({ id: f.id, name: f.name, count: f.resultCount })));
+        setFolders(formattedFolders);
+        console.log('✅ [新方案] 资料夹状态已直接更新为API返回的准确数据');
+      }
 
       // 特殊处理：如果是拖拽到根目录，立即导航回根目录
       if (folderId === null && currentFolderId) {
@@ -467,37 +461,13 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         return; // 提前返回，不执行后续的同步逻辑
       }
 
-      // 🔍 详细调试：API成功后的处理
-      console.log('🔄 API成功，开始处理后续同步...', {
-        willCallLoadResults: true,
-        willDelayLoadFolders: true,
-        currentFoldersState: folders.map(f => ({ id: f.id, name: f.name, count: f.resultCount }))
-      });
-
-      // 🚨 重要：不立即调用 loadFolders，因为会覆盖乐观更新
-      // 只立即同步 results，因为当前视图的结果已经被乐观更新移除了
-      console.log('🔄 调用 loadResults()...');
+      // 🚀 [新方案] 只需要重新加载结果数据，资料夹数据已经通过API更新
+      console.log('🚀 [新方案] 重新加载结果数据...');
       await loadResults();
-      console.log('✅ loadResults() 完成');
+      console.log('✅ [新方案] 结果数据重新加载完成');
 
-      // 🔍 loadResults后的状态检查
-      console.log('🔍 loadResults后，当前folders状态:', folders.map(f => ({ id: f.id, name: f.name, count: f.resultCount })));
-
-      console.log('✅ 结果数据同步完成，准备延迟同步资料夹数据...');
-
-      // 延迟同步资料夹数据，给数据库事务足够的时间提交
-      setTimeout(() => {
-        console.log('🔄 [500ms延迟] 执行延迟资料夹数据同步...');
-        console.log('🔍 [500ms延迟] 延迟同步前的folders状态:', folders.map(f => ({ id: f.id, name: f.name, count: f.resultCount })));
-        loadFolders(true); // 强制刷新，不调用forceRefresh避免状态重置
-      }, 500); // 增加延迟时间，确保数据库事务完全提交
-
-      // 第二次保障同步
-      setTimeout(() => {
-        console.log('🔄 [1000ms延迟] 执行第二次资料夹数据同步（最终保障）...');
-        console.log('🔍 [1000ms延迟] 最终同步前的folders状态:', folders.map(f => ({ id: f.id, name: f.name, count: f.resultCount })));
-        loadFolders(true); // 强制刷新，不调用forceRefresh避免状态重置
-      }, 1000); // 更长的延迟确保数据一致性
+      // 🚀 [新方案] 不需要延迟同步，因为资料夹数据已经是最新的
+      console.log('✅ [新方案] 移动操作完全完成，无需延迟同步');
 
       console.log(`✅ 結果已成功移動到${folderId ? '資料夾' : '根目錄'}`);
 

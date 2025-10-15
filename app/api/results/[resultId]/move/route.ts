@@ -55,8 +55,8 @@ export async function PATCH(
       }
     }
 
-    // 使用事务确保数据一致性
-    const updatedResult = await prisma.$transaction(async (tx) => {
+    // 使用事务确保数据一致性，并返回更新后的资料夹数据
+    const { updatedResult, updatedFolders } = await prisma.$transaction(async (tx) => {
       // 更新结果的 folderId
       const result = await tx.assignmentResult.update({
         where: { id: resultId },
@@ -66,12 +66,52 @@ export async function PATCH(
       // 强制等待一小段时间确保事务完全提交
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      return result;
+      // 获取更新后的所有资料夹数据
+      const folders = await tx.folder.findMany({
+        where: {
+          userId: session.user.id,
+          deletedAt: null
+        },
+        include: {
+          activities: {
+            select: {
+              id: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+
+      // 计算每个资料夹的结果数量
+      const foldersWithCount = await Promise.all(folders.map(async folder => {
+        const resultCount = await tx.assignmentResult.count({
+          where: {
+            folderId: folder.id
+          }
+        });
+
+        return {
+          id: folder.id,
+          name: folder.name,
+          description: folder.description,
+          color: folder.color,
+          icon: folder.icon,
+          createdAt: folder.createdAt,
+          updatedAt: folder.updatedAt,
+          activityCount: folder.activities.length,
+          resultCount: resultCount
+        };
+      }));
+
+      return { updatedResult: result, updatedFolders: foldersWithCount };
     });
 
     return NextResponse.json({
       success: true,
-      result: updatedResult
+      result: updatedResult,
+      folders: updatedFolders // 返回更新后的资料夹数据
     });
 
   } catch (error) {
