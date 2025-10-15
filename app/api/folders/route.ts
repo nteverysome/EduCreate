@@ -112,11 +112,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '資料夾名稱已存在' }, { status: 400 });
     }
 
+    // 檢查是否已存在同顏色同類型資料夾（未删除的）
+    const folderColor = color || '#3B82F6'; // 默認藍色
+    const existingColorFolder = await prisma.folder.findFirst({
+      where: {
+        userId: session.user.id,
+        color: folderColor,
+        type: folderType,
+        deletedAt: null
+      }
+    });
+
+    if (existingColorFolder) {
+      return NextResponse.json({ error: '該顏色的資料夾已存在，請選擇其他顏色' }, { status: 400 });
+    }
+
     const folder = await prisma.folder.create({
       data: {
         name: name.trim(),
         description: description?.trim() || null,
-        color: color || '#3B82F6', // 默認藍色
+        color: folderColor, // 使用已验证的颜色
         icon: icon || 'folder',
         type: folderType,
         userId: session.user.id
