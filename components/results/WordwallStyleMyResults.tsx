@@ -201,7 +201,6 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         console.log('✅ [loadFolders] 资料夹状态已更新');
       } else {
         console.error('❌ [loadFolders] API调用失败:', foldersResponse.status);
-      } else {
         console.log('無法載入資料夾，使用空列表');
         setFolders([]);
       }
