@@ -18,8 +18,7 @@ export async function GET(
       include: {
         assignment: {
           include: {
-            activity: true,
-            user: true
+            activity: true
           }
         },
         participants: true
