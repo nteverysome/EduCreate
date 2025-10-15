@@ -402,6 +402,24 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       const responseData = await response.json();
       console.log('✅ API 调用成功:', responseData);
 
+      // 特殊处理：如果是拖拽到根目录，立即导航回根目录
+      if (folderId === null && currentFolderId) {
+        console.log('🏠 检测到拖拽到根目录，立即导航回根目录...');
+
+        // 立即导航回根目录
+        setCurrentFolderId(null);
+
+        // 强制刷新状态并导航
+        setTimeout(async () => {
+          console.log('🔄 根目录导航后刷新状态...');
+          await Promise.all([loadResults(), loadFolders()]);
+          forceRefresh();
+        }, 50);
+
+        console.log('✅ 結果已成功移動到根目錄並導航回根目錄');
+        return; // 提前返回，不执行后续的同步逻辑
+      }
+
       // API成功后，进行服务器数据同步确认
       console.log('🔄 API成功，进行服务器数据同步确认...');
 
