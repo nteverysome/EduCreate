@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 
       const formattedResults = results.map(result => ({
         id: result.id,
-        title: `"${result.assignment.activity.title}"的結果${result.resultNumber}`,
+        title: result.customTitle || `"${result.assignment.activity.title}"的結果${result.resultNumber}`,
         activityName: result.assignment.activity.title,
         participantCount: result.participants.length,
         createdAt: result.createdAt.toISOString(),

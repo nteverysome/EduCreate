@@ -526,3 +526,92 @@ export async function GET(
     );
   }
 }
+
+/**
+ * 更新結果（重命名等）
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { resultId: string } }
+) {
+  try {
+    const { resultId } = params;
+    const body = await request.json() as { title?: string };
+
+    // 驗證用戶權限
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: '未授權' }, { status: 401 });
+    }
+
+    console.log('🔄 更新結果:', resultId, body);
+
+    // 檢查結果是否存在並驗證權限
+    const existingResult = await prisma.assignmentResult.findUnique({
+      where: { id: resultId },
+      include: {
+        assignment: {
+          include: {
+            activity: true
+          }
+        }
+      }
+    });
+
+    if (!existingResult) {
+      return NextResponse.json({ error: '結果不存在' }, { status: 404 });
+    }
+
+    // 檢查用戶權限
+    if (existingResult.assignment.activity.userId !== session.user.id) {
+      return NextResponse.json({ error: '無權限修改此結果' }, { status: 403 });
+    }
+
+    // 準備更新數據
+    const updateData: any = {};
+
+    // 處理標題更新
+    if (body.title !== undefined) {
+      if (typeof body.title !== 'string' || body.title.trim().length === 0) {
+        return NextResponse.json({ error: '標題不能為空' }, { status: 400 });
+      }
+      if (body.title.trim().length > 100) {
+        return NextResponse.json({ error: '標題長度不能超過100個字符' }, { status: 400 });
+      }
+      updateData.customTitle = body.title.trim();
+    }
+
+    // 執行更新
+    const updatedResult = await prisma.assignmentResult.update({
+      where: { id: resultId },
+      data: updateData,
+      include: {
+        assignment: {
+          include: {
+            activity: true
+          }
+        }
+      }
+    });
+
+    console.log('✅ 結果更新成功:', {
+      resultId,
+      updatedFields: Object.keys(updateData)
+    });
+
+    // 返回更新後的基本信息
+    return NextResponse.json({
+      id: updatedResult.id,
+      title: updatedResult.customTitle || `"${updatedResult.assignment.activity.title}"的結果${updatedResult.resultNumber}`,
+      activityName: updatedResult.assignment.activity.title,
+      updatedAt: updatedResult.updatedAt.toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ 更新結果失敗:', error);
+    return NextResponse.json(
+      { error: '更新結果失敗' },
+      { status: 500 }
+    );
+  }
+}

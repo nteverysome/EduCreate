@@ -561,6 +561,7 @@ model AssignmentResult {
   id           String               @id @default(cuid())
   assignmentId String
   resultNumber Int                  // 結果編號（如：結果1、結果2）
+  customTitle  String?              // 自定義標題，用於重命名功能
   shareToken   String?              @unique // 可共用結果連結的 token
   status       ResultStatus         @default(ACTIVE)
   folderId     String?              // 資料夾ID，用於組織結果

@@ -17,6 +17,8 @@ import FolderContextMenu from './FolderContextMenu';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { RecycleBinModal } from './RecycleBinModal';
 import RenameFolderModal from './RenameFolderModal';
+import RenameResultModal from './RenameResultModal';
+import ResultContextMenu from './ResultContextMenu';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 
@@ -72,6 +74,15 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState<ResultFolder | null>(null);
+
+  // 结果菜单和重命名相关状态
+  const [resultContextMenu, setResultContextMenu] = useState<{
+    result: AssignmentResult;
+    x: number;
+    y: number;
+  } | null>(null);
+  const [showRenameResultModal, setShowRenameResultModal] = useState(false);
+  const [resultToRename, setResultToRename] = useState<AssignmentResult | null>(null);
 
 
 
@@ -335,6 +346,63 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const handleFolderRename = (folder: ResultFolder) => {
     setRenamingFolder(folder);
     setShowRenameFolderModal(true);
+  };
+
+  // 處理結果重命名
+  const handleRenameResult = async (resultId: string, newTitle: string) => {
+    try {
+      const response = await fetch(`/api/results/${resultId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: newTitle }),
+      });
+
+      if (!response.ok) {
+        throw new Error('重命名失敗');
+      }
+
+      // 重新載入結果數據
+      await loadResults();
+    } catch (error) {
+      console.error('重命名結果失敗:', error);
+      throw error;
+    }
+  };
+
+  // 處理結果重命名點擊
+  const handleResultRename = (result: AssignmentResult) => {
+    setResultToRename(result);
+    setShowRenameResultModal(true);
+  };
+
+  // 處理結果菜單點擊
+  const handleResultMenuClick = (result: AssignmentResult, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    setResultContextMenu({
+      result,
+      x: event.clientX,
+      y: event.clientY
+    });
+  };
+
+  // 關閉結果菜單
+  const handleCloseResultContextMenu = () => {
+    setResultContextMenu(null);
+  };
+
+  // 處理查看結果詳情
+  const handleViewResult = (result: AssignmentResult) => {
+    window.open(`/my-results/${result.id}`, '_blank');
+  };
+
+  // 處理刪除結果（暫時只是日志，可以后续实现）
+  const handleDeleteResult = (result: AssignmentResult) => {
+    console.log('刪除結果:', result);
+    // TODO: 實現結果刪除功能
   };
 
   // 處理移動結果到資料夾 - 簡化版本（參考 /my-activities 的實現方式）
@@ -617,10 +685,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             key={result.id}
             result={result}
             onClick={handleResultClick}
-            onMenuClick={(result, event) => {
-              // TODO: 實現結果菜單功能
-              console.log('結果菜單點擊:', result);
-            }}
+            onMenuClick={handleResultMenuClick}
           />
         ))}
 
@@ -686,6 +751,39 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           setRenamingFolder(null);
         }}
         onRename={handleRenameFolder}
+      />
+
+      {/* 結果右鍵菜單 */}
+      {resultContextMenu && (
+        <ResultContextMenu
+          result={resultContextMenu.result}
+          x={resultContextMenu.x}
+          y={resultContextMenu.y}
+          onClose={handleCloseResultContextMenu}
+          onRename={() => {
+            handleResultRename(resultContextMenu.result);
+            setResultContextMenu(null);
+          }}
+          onDelete={() => {
+            handleDeleteResult(resultContextMenu.result);
+            setResultContextMenu(null);
+          }}
+          onView={() => {
+            handleViewResult(resultContextMenu.result);
+            setResultContextMenu(null);
+          }}
+        />
+      )}
+
+      {/* 重命名結果模態框 */}
+      <RenameResultModal
+        isOpen={showRenameResultModal}
+        result={resultToRename}
+        onClose={() => {
+          setShowRenameResultModal(false);
+          setResultToRename(null);
+        }}
+        onRename={handleRenameResult}
       />
 
       {/* 回收桶模態框 */}
