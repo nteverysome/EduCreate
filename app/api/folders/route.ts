@@ -23,10 +23,14 @@ export async function GET(request: NextRequest) {
     console.log('🔍 [API DEBUG] 完整 URL:', request.url);
     console.log('🔍 [API DEBUG] 用户 ID:', session.user.id);
 
-    // 🚨 警告：如果没有 type 参数
+    // 🚨 强制要求 type 参数
     if (!type) {
-      console.warn('🚨 [API WARNING] 没有 type 参数！这可能导致错误的资料夹类型');
-      console.warn('🚨 [API WARNING] 请求来源需要检查');
+      console.error('🚨 [API ERROR] 没有 type 参数！强制返回错误');
+      console.error('🚨 [API ERROR] 请求来源需要检查');
+      return NextResponse.json(
+        { error: '缺少必需的 type 参数。请使用 type=activities 或 type=results' },
+        { status: 400 }
+      );
     }
 
     const folders = await prisma.folder.findMany({
