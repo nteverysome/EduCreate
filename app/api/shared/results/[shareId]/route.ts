@@ -22,11 +22,7 @@ export async function GET(
             user: true
           }
         },
-        responses: {
-          include: {
-            user: true
-          }
-        }
+        participants: true
       }
     });
 
@@ -46,25 +42,25 @@ export async function GET(
     }
     
     // 计算统计数据
-    const totalResponses = result.responses.length;
-    const completedResponses = result.responses.filter(r => r.completed);
-    const completionRate = totalResponses > 0 ? (completedResponses.length / totalResponses) * 100 : 0;
-    
+    const totalResponses = result.participants.length;
+    const completedResponses = result.participants; // 所有参与者都是已完成的
+    const completionRate = totalResponses > 0 ? 100 : 0; // 简化：所有参与者都完成了
+
     // 计算平均分数
-    const scoresWithValues = completedResponses.filter(r => r.score !== null);
-    const averageScore = scoresWithValues.length > 0 
-      ? scoresWithValues.reduce((sum, r) => sum + (r.score || 0), 0) / scoresWithValues.length 
+    const scoresWithValues = completedResponses.filter(p => p.score !== null);
+    const averageScore = scoresWithValues.length > 0
+      ? scoresWithValues.reduce((sum, p) => sum + (p.score || 0), 0) / scoresWithValues.length
       : 0;
 
-    // 获取活动的总题数（如果有的话）
-    const totalQuestions = result.assignment.activity?.questionCount || null;
+    // 获取活动的总题数（从参与者数据中获取）
+    const totalQuestions = result.participants.length > 0 ? result.participants[0].totalQuestions : null;
 
     // 格式化参与者数据
-    const participants = completedResponses.map((response, index) => ({
-      id: response.id,
-      name: response.user?.name || `參與者 ${index + 1}`,
-      score: response.score || 0,
-      completedAt: response.completedAt?.toISOString() || response.createdAt.toISOString()
+    const participants = completedResponses.map((participant, index) => ({
+      id: participant.id,
+      name: participant.studentName || `參與者 ${index + 1}`,
+      score: participant.score || 0,
+      completedAt: participant.completedAt?.toISOString()
     }));
 
     // 确定结果状态
@@ -87,8 +83,8 @@ export async function GET(
     // 构建响应数据
     const responseData = {
       id: result.id,
-      title: result.customTitle || `${result.assignment.activity?.name || '無標題活動'} - 結果`,
-      activityName: result.assignment.activity?.name || '無標題活動',
+      title: result.customTitle || `${result.assignment.activity?.title || '無標題活動'} - 結果`,
+      activityName: result.assignment.activity?.title || '無標題活動',
       participantCount: totalResponses,
       createdAt: result.createdAt.toISOString(),
       deadline: result.assignment.deadline?.toISOString(),
