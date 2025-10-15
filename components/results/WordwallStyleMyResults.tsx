@@ -379,10 +379,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
   // 處理拖拽到根目錄
   const handleDropToRoot = async () => {
-    // 使用拖拽上下文的 onDrop 函数
-    if (dragDropContext?.onDrop) {
+    // 使用拖拽上下文的 onDrop 函数，传递空字符串作为targetId，'root'作为targetType
+    if (dragDropContext?.onDrop && dragDropContext.isDragging && dragDropContext.dragItem?.type === 'result') {
       try {
-        await dragDropContext.onDrop('root', 'root');
+        await dragDropContext.onDrop('', 'root');
       } catch (error) {
         console.error('拖拽到根目錄失敗:', error);
       }
