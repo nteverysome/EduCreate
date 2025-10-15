@@ -36,7 +36,9 @@ export async function PATCH(
       where: {
         id: resultId,
         assignment: {
-          userId: session.user.id
+          activity: {
+            userId: session.user.id
+          }
         }
       }
     });
@@ -127,7 +129,9 @@ export async function GET(
       where: {
         id: resultId,
         assignment: {
-          userId: session.user.id
+          activity: {
+            userId: session.user.id
+          }
         }
       }
     });
