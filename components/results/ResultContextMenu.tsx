@@ -8,7 +8,9 @@ import {
   DocumentDuplicateIcon,
   CalendarIcon,
   ShareIcon,
-  LinkIcon
+  LinkIcon,
+  FolderIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
 interface AssignmentResult {
@@ -24,6 +26,12 @@ interface AssignmentResult {
   activityId: string;
 }
 
+interface ResultFolder {
+  id: string;
+  name: string;
+  color?: string;
+}
+
 interface ResultContextMenuProps {
   result: AssignmentResult;
   x: number;
@@ -35,6 +43,8 @@ interface ResultContextMenuProps {
   onSetDeadline: () => void;
   onDuplicate?: () => void;
   onShareLink: () => void;
+  onMove?: (folderId: string | null) => void; // 新增：移動到資料夾
+  folders?: ResultFolder[]; // 新增：可用的資料夾列表
 }
 
 export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
@@ -47,9 +57,12 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
   onView,
   onSetDeadline,
   onDuplicate,
-  onShareLink
+  onShareLink,
+  onMove,
+  folders = []
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
+  const [showMoveSubmenu, setShowMoveSubmenu] = React.useState(false);
 
   // 处理点击外部关闭菜单
   useEffect(() => {
@@ -121,6 +134,13 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
       onClick: onRename,
       className: 'text-gray-700 hover:bg-gray-50'
     },
+    ...(onMove ? [{
+      icon: FolderIcon,
+      label: '移動到',
+      onClick: () => setShowMoveSubmenu(!showMoveSubmenu),
+      className: 'text-gray-700 hover:bg-gray-50',
+      hasSubmenu: true
+    }] : []),
     {
       icon: CalendarIcon,
       label: '設置截止日期',
@@ -162,18 +182,73 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
 
       {/* 菜单项 */}
       {menuItems.map((item, index) => (
-        <button
-          key={index}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            item.onClick();
-          }}
-          className={`w-full flex items-center px-3 py-2 text-sm transition-colors ${item.className}`}
-        >
-          <item.icon className="w-4 h-4 mr-3" />
-          {item.label}
-        </button>
+        <div key={index} className="relative">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              item.onClick();
+            }}
+            className={`w-full flex items-center justify-between px-3 py-2 text-sm transition-colors ${item.className}`}
+          >
+            <div className="flex items-center">
+              <item.icon className="w-4 h-4 mr-3" />
+              {item.label}
+            </div>
+            {(item as any).hasSubmenu && (
+              <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+            )}
+          </button>
+
+          {/* 移動到資料夾子菜單 */}
+          {(item as any).hasSubmenu && showMoveSubmenu && (
+            <div className="absolute left-full top-0 ml-1 bg-white rounded-md shadow-lg border border-gray-200 py-1 min-w-[180px] max-h-[300px] overflow-y-auto">
+              {/* 移動到根目錄 */}
+              {result.folderId && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onMove?.(null);
+                    onClose();
+                  }}
+                  className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <FolderIcon className="w-4 h-4 mr-3 text-gray-400" />
+                  <span>根目錄</span>
+                </button>
+              )}
+
+              {/* 資料夾列表 */}
+              {folders.length === 0 ? (
+                <div className="px-3 py-2 text-sm text-gray-400">
+                  沒有可用的資料夾
+                </div>
+              ) : (
+                folders
+                  .filter(folder => folder.id !== result.folderId) // 過濾掉當前所在的資料夾
+                  .map((folder) => (
+                    <button
+                      key={folder.id}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onMove?.(folder.id);
+                        onClose();
+                      }}
+                      className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <FolderIcon
+                        className="w-4 h-4 mr-3"
+                        style={{ color: folder.color || '#3B82F6' }}
+                      />
+                      <span className="truncate">{folder.name}</span>
+                    </button>
+                  ))
+              )}
+            </div>
+          )}
+        </div>
       ))}
 
       {/* 结果状态指示 */}

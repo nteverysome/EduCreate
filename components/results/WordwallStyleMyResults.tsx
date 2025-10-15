@@ -825,6 +825,11 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             handleViewResult(resultContextMenu.result);
             setResultContextMenu(null);
           }}
+          onMove={(folderId) => {
+            handleMoveResult(resultContextMenu.result.id, folderId);
+            setResultContextMenu(null);
+          }}
+          folders={folders}
         />
       )}
 
