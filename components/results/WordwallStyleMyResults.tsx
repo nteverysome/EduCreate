@@ -165,10 +165,22 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   }, []);
 
   // 載入資料夾數據
-  const loadFolders = useCallback(async () => {
+  const loadFolders = useCallback(async (forceRefresh = false) => {
     try {
-      console.log('🔄 loadFolders 开始加载...');
-      const foldersResponse = await fetch('/api/folders');
+      console.log('🔄 loadFolders 开始加载...', { forceRefresh, timestamp: Date.now() });
+
+      // 添加时间戳参数强制刷新，避免缓存问题
+      const timestamp = Date.now();
+      const url = forceRefresh ? `/api/folders?t=${timestamp}` : '/api/folders';
+
+      const foldersResponse = await fetch(url, {
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+
       if (foldersResponse.ok) {
         const foldersData = await foldersResponse.json();
         console.log('📁 资料夹数据:', foldersData);
@@ -425,7 +437,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         // 强制刷新状态并导航
         setTimeout(async () => {
           console.log('🔄 根目录导航后刷新状态...');
-          await Promise.all([loadResults(), loadFolders()]);
+          await Promise.all([loadResults(), loadFolders(true)]);
           forceRefresh();
         }, 50);
 
@@ -436,8 +448,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       // API成功后，进行服务器数据同步确认
       console.log('🔄 API成功，进行服务器数据同步确认...');
 
-      // 并行加载最新数据
-      const [resultsPromise, foldersPromise] = [loadResults(), loadFolders()];
+      // 并行加载最新数据，使用强制刷新
+      const [resultsPromise, foldersPromise] = [loadResults(), loadFolders(true)];
 
       await Promise.all([resultsPromise, foldersPromise]);
 
@@ -447,7 +459,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       setTimeout(() => {
         console.log('🔄 执行第一次延迟状态同步...');
         loadResults();
-        loadFolders();
+        loadFolders(true); // 强制刷新
         forceRefresh();
       }, 100);
 
@@ -455,9 +467,17 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       setTimeout(() => {
         console.log('🔄 执行第二次延迟状态同步（解决资料夹内容显示）...');
         loadResults();
-        loadFolders();
+        loadFolders(true); // 强制刷新
         forceRefresh();
       }, 300);
+
+      // 第三次强力同步，确保状态最终一致
+      setTimeout(() => {
+        console.log('🔄 执行第三次强力状态同步（最终保障）...');
+        loadResults();
+        loadFolders(true); // 强制刷新
+        forceRefresh();
+      }, 600);
 
       console.log(`✅ 結果已成功移動到${folderId ? '資料夾' : '根目錄'}`);
 
