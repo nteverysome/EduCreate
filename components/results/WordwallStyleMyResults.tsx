@@ -17,6 +17,7 @@ import FolderContextMenu from './FolderContextMenu';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { RecycleBinModal } from './RecycleBinModal';
 import RenameFolderModal from './RenameFolderModal';
+import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 
 interface AssignmentResult {
@@ -140,23 +141,17 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     }
   }, []);
 
-  // 載入資料夾數據 - 簡化版本（參考 /my-activities 的實現方式）
+  // 載入資料夾數據 - 使用统一的 API 管理器
   const loadFolders = useCallback(async () => {
     try {
-      // 🔍 深度调试：记录调用堆栈
-      console.log('🔍 [DEBUG] loadFolders 被调用');
+      console.log('🔍 [DEBUG] loadFolders 被调用 - 使用统一 API 管理器');
       console.log('🔍 [DEBUG] 调用堆栈:', new Error().stack);
 
-      const response = await fetch('/api/folders?type=results');
-      console.log('🔍 [DEBUG] loadFolders API 调用:', '/api/folders?type=results');
+      // 🚀 使用统一的 API 管理器，确保类型安全
+      const foldersData = await folderApi.getFolders('results');
+      console.log('🔍 [DEBUG] 统一 API 管理器响应数据:', foldersData);
 
-      if (!response.ok) {
-        throw new Error('載入資料夾失敗');
-      }
-      const foldersData = await response.json();
-      console.log('🔍 [DEBUG] loadFolders 响应数据:', foldersData);
-
-      setFolders(foldersData.map((folder: any) => ({
+      setFolders(foldersData.map((folder: FolderData) => ({
         id: folder.id,
         name: folder.name,
         resultCount: folder.resultCount || 0,
@@ -281,41 +276,29 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setCurrentFolderId(folder.id);
   };
 
-  // 處理創建新資料夾
+  // 處理創建新資料夾 - 使用统一的 API 管理器
   const handleCreateFolder = async (name: string, color: string) => {
     try {
-      const response = await fetch('/api/folders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          color,
-          description: null,
-          icon: 'folder',
-          type: 'results'
-        }),
+      // 🚀 使用统一的 API 管理器
+      const createdFolder = await folderApi.createFolder('results', {
+        name,
+        color,
+        description: '',
+        icon: 'folder'
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '創建資料夾失敗');
-      }
-
-      const createdFolder = await response.json();
       const newFolder: ResultFolder = {
         id: createdFolder.id,
         name: createdFolder.name,
-        resultCount: createdFolder.activityCount || 0,
+        resultCount: createdFolder.resultCount || 0,
         createdAt: createdFolder.createdAt,
         color: createdFolder.color
       };
 
       setFolders(prev => [...prev, newFolder]);
-      console.log('創建資料夾成功:', newFolder);
+      console.log('✅ 創建資料夾成功:', newFolder);
     } catch (error) {
-      console.error('創建資料夾失敗:', error);
+      console.error('❌ 創建資料夾失敗:', error);
       throw error;
     }
   };
@@ -454,23 +437,17 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setContextMenu(null);
   };
 
-  // 確認刪除資料夾
+  // 確認刪除資料夾 - 使用统一的 API 管理器
   const handleConfirmDelete = async () => {
     if (!folderToDelete) return;
 
     try {
       console.log('🔍 [DEBUG] 开始删除资料夹:', folderToDelete.name);
 
-      const response = await fetch(`/api/folders?id=${folderToDelete.id}`, {
-        method: 'DELETE',
-      });
+      // 🚀 使用统一的 API 管理器
+      await folderApi.deleteFolder(folderToDelete.id);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '刪除資料夾失敗');
-      }
-
-      console.log('🔍 [DEBUG] 删除 API 调用成功，开始重新加载数据');
+      console.log('🔍 [DEBUG] 统一 API 管理器删除成功，开始重新加载数据');
 
       // 🚀 重新載入所有數據以確保狀態同步
       console.log('🔍 [DEBUG] 调用 loadResults()');

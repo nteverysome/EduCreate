@@ -41,9 +41,22 @@ export default async function handler(
   }
 }
 
-// 獲取用戶的文件夾列表
+// 獲取用戶的文件夾列表 - 已废弃，请使用 /api/folders?type=activities 或 /api/folders?type=results
 async function handleGet(req: NextApiRequest, res: NextApiResponse, userId: string) {
   try {
+    // 🚨 这个端点已废弃，重定向到新的类型化端点
+    console.warn('🚨 [DEPRECATED] /api/universal-content/folders 已废弃');
+    console.warn('🚨 [DEPRECATED] 请使用 /api/folders?type=activities 或 /api/folders?type=results');
+
+    // 返回空数组，避免返回错误的数据
+    return res.status(200).json({
+      folders: [],
+      total: 0,
+      message: '此端点已废弃，请使用 /api/folders?type=activities 或 /api/folders?type=results'
+    });
+
+    // 原始代码保留但不执行
+    /*
     const folders = await prisma.folder.findMany({
       where: { userId },
       include: {
@@ -53,6 +66,7 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, userId: stri
       },
       orderBy: { createdAt: 'desc' }
     });
+    */
 
     const foldersWithCount = folders.map(folder => ({
       id: folder.id,

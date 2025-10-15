@@ -10,6 +10,7 @@ import ActivitySearchAndFilter from './ActivitySearchAndFilter';
 import { MoveActivityModal } from './MoveActivityModal';
 import AssignmentModal, { AssignmentConfig } from './AssignmentModal';
 import AssignmentSetModal from './AssignmentSetModal';
+import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 interface Activity {
   id: string;
@@ -139,15 +140,12 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
-  // 載入資料夾數據
+  // 載入資料夾數據 - 使用统一的 API 管理器
   const loadFolders = async () => {
     try {
-      const response = await fetch('/api/folders?type=activities');
-      if (!response.ok) {
-        throw new Error('載入資料夾失敗');
-      }
-      const foldersData = await response.json();
-      setFolders(foldersData.map((folder: any) => ({
+      // 🚀 使用统一的 API 管理器，确保类型安全
+      const foldersData = await folderApi.getFolders('activities');
+      setFolders(foldersData.map((folder: FolderData) => ({
         id: folder.id,
         name: folder.name,
         activityCount: folder.activityCount || 0
@@ -257,25 +255,14 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     try {
       console.log('🚀 創建資料夾:', name, color);
 
-      const response = await fetch('/api/folders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          color: color,
-          description: '',
-          type: 'activities'
-        }),
+      // 🚀 使用统一的 API 管理器
+      const newFolder = await folderApi.createFolder('activities', {
+        name: name.trim(),
+        color: color,
+        description: '',
+        icon: 'folder'
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '創建資料夾失敗');
-      }
-
-      const newFolder = await response.json();
       console.log('✅ 資料夾創建成功:', newFolder);
 
       // 重新載入活動列表以顯示新資料夾

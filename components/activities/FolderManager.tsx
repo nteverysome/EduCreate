@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Folder, MoreVertical, Edit2, Trash2, Move } from 'lucide-react';
 import FolderCard from './FolderCard';
 import CreateFolderModal from './CreateFolderModal';
+import { folderApi, FolderData as ApiFolderData } from '../../lib/api/folderApiManager';
 
 interface FolderData {
   id: string;
@@ -50,13 +51,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
       setLoading(true);
       setError('');
 
-      // 🚀 使用正确的 type=activities 参数
-      const response = await fetch('/api/folders?type=activities');
-      if (!response.ok) {
-        throw new Error('載入資料夾失敗');
-      }
-
-      const foldersData = await response.json();
+      // 🚀 使用统一的 API 管理器，确保类型安全
+      const foldersData = await folderApi.getFolders('activities');
       setFolders(foldersData);
     } catch (error: any) {
       console.error('載入資料夾失敗:', error);
