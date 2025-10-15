@@ -61,12 +61,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [renamingFolder, setRenamingFolder] = useState<ResultFolder | null>(null);
   // const [activeId, setActiveId] = useState<string | null>(null);
 
-  // 强制刷新机制
-  const [forceRefreshCounter, setForceRefreshCounter] = useState(0);
-  const forceRefresh = useCallback(() => {
-    console.log('🔄 执行强制刷新...');
-    setForceRefreshCounter(prev => prev + 1);
-  }, []);
+
 
   // 菜单和删除相关状态
   const [contextMenu, setContextMenu] = useState<{
@@ -164,51 +159,26 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     }
   }, []);
 
-  // 載入資料夾數據
-  const loadFolders = useCallback(async (forceRefresh = false) => {
+  // 載入資料夾數據 - 簡化版本（參考 /my-activities 的實現方式）
+  const loadFolders = useCallback(async () => {
     try {
-      console.log('🔄 loadFolders 开始加载...', { forceRefresh, timestamp: Date.now() });
-
-      // 添加时间戳参数强制刷新，避免缓存问题
-      const timestamp = Date.now();
-      const url = forceRefresh ? `/api/folders?t=${timestamp}` : '/api/folders';
-
-      const foldersResponse = await fetch(url, {
-        cache: 'no-cache',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
-
-      if (foldersResponse.ok) {
-        const foldersData = await foldersResponse.json();
-        console.log('📁 [loadFolders] API返回的原始数据:', foldersData);
-
-        const formattedFolders: ResultFolder[] = foldersData.map((folder: any) => ({
-          id: folder.id,
-          name: folder.name,
-          resultCount: folder.resultCount || 0,
-          createdAt: folder.createdAt,
-          color: folder.color
-        }));
-
-        console.log('📁 [loadFolders] 格式化后的数据:', formattedFolders.map(f => ({ id: f.id, name: f.name, count: f.resultCount })));
-        console.log('🔍 [loadFolders] 设置前的当前状态:', folders.map(f => ({ id: f.id, name: f.name, count: f.resultCount })));
-
-        setFolders(formattedFolders);
-
-        console.log('✅ [loadFolders] 资料夹状态已更新');
-      } else {
-        console.error('❌ [loadFolders] API调用失败:', foldersResponse.status);
-        console.log('無法載入資料夾，使用空列表');
-        setFolders([]);
+      const response = await fetch('/api/folders');
+      if (!response.ok) {
+        throw new Error('載入資料夾失敗');
       }
+      const foldersData = await response.json();
+      setFolders(foldersData.map((folder: any) => ({
+        id: folder.id,
+        name: folder.name,
+        resultCount: folder.resultCount || 0,
+        createdAt: folder.createdAt,
+        color: folder.color
+      })));
     } catch (error) {
-      console.error('載入資料夾失敗:', error);
+      console.error('❌ 載入資料夾失敗:', error);
       setFolders([]);
     }
-  }, []); // 移除 currentFolderId 依赖，因为这个函数不应该依赖当前资料夹
+  }, []);
 
   // 初始化时加载资料夹数据（只执行一次）
   useEffect(() => {
@@ -376,40 +346,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setShowRenameFolderModal(true);
   };
 
-  // 處理移動結果到資料夾
+  // 處理移動結果到資料夾 - 簡化版本（參考 /my-activities 的實現方式）
   const handleMoveResult = async (resultId: string, folderId: string | null) => {
-    console.log('🚀 handleMoveResult 开始:', {
-      resultId,
-      folderId,
-      currentFolderId,
-      timestamp: Date.now()
-    });
-
-    // 实现乐观更新：立即更新UI状态
-    const originalResults = [...results];
-    const originalFolders = [...folders];
-
     try {
-      // 🚀 全新方案：移除乐观更新，直接等待API返回准确数据
-      console.log('🚀 [新方案] 开始API调用，不使用乐观更新...');
-
-      // 立即从当前视图移除结果（这个是安全的，因为结果确实被移动了）
-      if (currentFolderId) {
-        console.log('🔄 从当前资料夹视图移除结果');
-        setResults(prevResults => prevResults.filter(result => result.id !== resultId));
-      }
-
-      console.log('🔍 API调用前的状态:', {
-        currentFolderId,
-        targetFolderId: folderId,
-        operation: currentFolderId ? '从资料夹移动' : '从根目录移动',
-        targetOperation: folderId ? '向资料夹移动' : '向根目录移动',
-        currentFolders: folders.map(f => ({ id: f.id, name: f.name, count: f.resultCount }))
-      });
-
-      // 🚀 不再进行乐观更新，直接调用API
-
-      console.log('✅ 乐观更新完成，开始API调用...');
+      console.log('📁 將結果移動到資料夾:', { resultId, folderId });
 
       const response = await fetch(`/api/results/${resultId}/move`, {
         method: 'PATCH',
@@ -420,69 +360,23 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       });
 
       if (!response.ok) {
-        throw new Error(`移動結果失敗: ${response.status} ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || '移動結果失敗');
       }
 
-      const responseData = await response.json();
-      console.log('✅ API 调用成功:', responseData);
+      console.log('✅ 結果移動成功');
 
-      // 🚀 [新方案] 直接使用API返回的资料夹数据
-      if (responseData.folders) {
-        console.log('🚀 [新方案] 使用API返回的资料夹数据:', responseData.folders);
-        const formattedFolders: ResultFolder[] = responseData.folders.map((folder: any) => ({
-          id: folder.id,
-          name: folder.name,
-          resultCount: folder.resultCount || 0,
-          createdAt: folder.createdAt,
-          color: folder.color
-        }));
-
-        console.log('🚀 [新方案] 设置新的资料夹状态:', formattedFolders.map(f => ({ id: f.id, name: f.name, count: f.resultCount })));
-        setFolders(formattedFolders);
-        console.log('✅ [新方案] 资料夹状态已直接更新为API返回的准确数据');
-      }
-
-      // 特殊处理：如果是拖拽到根目录，立即导航回根目录
-      if (folderId === null && currentFolderId) {
-        console.log('🏠 检测到拖拽到根目录，立即导航回根目录...');
-
-        // 立即导航回根目录
-        setCurrentFolderId(null);
-
-        // 强制刷新状态并导航
-        setTimeout(async () => {
-          console.log('🔄 根目录导航后刷新状态...');
-          await Promise.all([loadResults(), loadFolders(true)]);
-          // 移除 forceRefresh() 避免状态重置
-        }, 50);
-
-        console.log('✅ 結果已成功移動到根目錄並導航回根目錄');
-        return; // 提前返回，不执行后续的同步逻辑
-      }
-
-      // 🚀 [新方案] 只需要重新加载结果数据，资料夹数据已经通过API更新
-      console.log('🚀 [新方案] 重新加载结果数据...');
+      // 🚀 簡單方案：重新載入所有數據（與 /my-activities 一致）
       await loadResults();
-      console.log('✅ [新方案] 结果数据重新加载完成');
+      await loadFolders();
 
-      // 🚀 [新方案] 不需要延迟同步，因为资料夹数据已经是最新的
-      console.log('✅ [新方案] 移动操作完全完成，无需延迟同步');
-
-      console.log(`✅ 結果已成功移動到${folderId ? '資料夾' : '根目錄'}`);
-
-    } catch (error) {
-      console.error('❌ 移動結果失敗，回滚乐观更新:', error);
-
-      // 回滚乐观更新
-      setResults(originalResults);
-      setFolders(originalFolders);
-
-      // 即使失败也要强制刷新，确保状态一致
-      forceRefresh();
-
-      throw error;
+    } catch (error: any) {
+      console.error('❌ 移動結果失敗:', error);
+      alert(`移動結果失敗: ${error.message}`);
     }
   };
+
+
 
 
 
@@ -498,9 +392,11 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
 
 
-  // 處理拖拽結果回根目錄
+  // 處理拖拽結果回根目錄 - 簡化版本（與 handleMoveResult 一致）
   const handleMoveToRoot = async (resultId: string) => {
     try {
+      console.log('🏠 將結果移動回根目錄:', { resultId });
+
       const response = await fetch(`/api/results/${resultId}/move`, {
         method: 'PATCH',
         headers: {
@@ -510,14 +406,19 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       });
 
       if (!response.ok) {
-        throw new Error('移動結果失敗');
+        const errorData = await response.json();
+        throw new Error(errorData.error || '移動結果失敗');
       }
 
-      // 重新載入結果
+      console.log('✅ 結果移回根目錄成功');
+
+      // 🚀 簡單方案：重新載入所有數據（與 /my-activities 一致）
       await loadResults();
-      console.log('結果已移動到根目錄');
-    } catch (error) {
-      console.error('移動結果失敗:', error);
+      await loadFolders();
+
+    } catch (error: any) {
+      console.error('❌ 移動結果失敗:', error);
+      alert(`移動結果失敗: ${error.message}`);
     }
   };
 
