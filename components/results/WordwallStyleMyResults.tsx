@@ -61,6 +61,13 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [renamingFolder, setRenamingFolder] = useState<ResultFolder | null>(null);
   // const [activeId, setActiveId] = useState<string | null>(null);
 
+  // 强制刷新机制
+  const [forceRefreshCounter, setForceRefreshCounter] = useState(0);
+  const forceRefresh = useCallback(() => {
+    console.log('🔄 执行强制刷新...');
+    setForceRefreshCounter(prev => prev + 1);
+  }, []);
+
   // 菜单和删除相关状态
   const [contextMenu, setContextMenu] = useState<{
     folder: ResultFolder;
@@ -345,8 +352,40 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
   // 處理移動結果到資料夾
   const handleMoveResult = async (resultId: string, folderId: string | null) => {
+    console.log('🚀 handleMoveResult 开始:', {
+      resultId,
+      folderId,
+      currentFolderId,
+      timestamp: Date.now()
+    });
+
+    // 实现乐观更新：立即更新UI状态
+    const originalResults = [...results];
+    const originalFolders = [...folders];
+
     try {
-      console.log('🚀 handleMoveResult 开始:', { resultId, folderId });
+      // 乐观更新：立即从当前视图中移除结果
+      if (currentFolderId) {
+        console.log('🔄 乐观更新：从当前资料夹视图移除结果');
+        setResults(prevResults => prevResults.filter(result => result.id !== resultId));
+      }
+
+      // 乐观更新：立即更新资料夹计数
+      console.log('🔄 乐观更新：更新资料夹计数');
+      setFolders(prevFolders => {
+        return prevFolders.map(folder => {
+          if (folder.id === currentFolderId) {
+            // 从当前资料夹减少计数
+            return { ...folder, resultCount: Math.max(0, folder.resultCount - 1) };
+          } else if (folder.id === folderId) {
+            // 向目标资料夹增加计数
+            return { ...folder, resultCount: folder.resultCount + 1 };
+          }
+          return folder;
+        });
+      });
+
+      console.log('✅ 乐观更新完成，开始API调用...');
 
       const response = await fetch(`/api/results/${resultId}/move`, {
         method: 'PATCH',
@@ -357,33 +396,42 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       });
 
       if (!response.ok) {
-        throw new Error('移動結果失敗');
+        throw new Error(`移動結果失敗: ${response.status} ${response.statusText}`);
       }
 
-      console.log('✅ API 调用成功，开始重新加载数据...');
+      const responseData = await response.json();
+      console.log('✅ API 调用成功:', responseData);
 
-      // 强制重新載入結果和資料夾，确保状态同步
-      try {
-        await loadResults();
-        console.log('✅ loadResults 完成');
+      // API成功后，进行服务器数据同步确认
+      console.log('🔄 API成功，进行服务器数据同步确认...');
 
-        await loadFolders();
-        console.log('✅ loadFolders 完成');
+      // 并行加载最新数据
+      const [resultsPromise, foldersPromise] = [loadResults(), loadFolders()];
 
-        // 强制触发组件重新渲染
-        setLoading(false);
+      await Promise.all([resultsPromise, foldersPromise]);
 
-        console.log('✅ 所有数据重新加载完成，状态已同步');
-      } catch (reloadError) {
-        console.error('❌ 重新加载数据失败:', reloadError);
-        // 即使重新加载失败，也要确保loading状态正确
-        setLoading(false);
-      }
+      console.log('✅ 服务器数据同步确认完成');
 
-      console.log(`結果已移動到${folderId ? '資料夾' : '根目錄'}`);
+      // 强制触发一次额外的重新渲染
+      setTimeout(() => {
+        console.log('🔄 执行延迟状态同步...');
+        loadResults();
+        loadFolders();
+        forceRefresh(); // 强制刷新
+      }, 100);
+
+      console.log(`✅ 結果已成功移動到${folderId ? '資料夾' : '根目錄'}`);
+
     } catch (error) {
-      console.error('移動結果失敗:', error);
-      setLoading(false);
+      console.error('❌ 移動結果失敗，回滚乐观更新:', error);
+
+      // 回滚乐观更新
+      setResults(originalResults);
+      setFolders(originalFolders);
+
+      // 即使失败也要强制刷新，确保状态一致
+      forceRefresh();
+
       throw error;
     }
   };

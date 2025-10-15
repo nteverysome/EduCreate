@@ -88,19 +88,55 @@ export const DragDropProvider: React.FC<DragDropProviderProps> = ({
   }, []);
 
   const onDrop = useCallback(async (targetId: string, targetType: 'folder' | 'root') => {
+    console.log('🎯 DragDropContext onDrop 被调用:', {
+      targetId,
+      targetType,
+      dragItem: dragItem ? { id: dragItem.id, type: dragItem.type } : null,
+      isDragging,
+      timestamp: Date.now()
+    });
+
     if (!dragItem || dragItem.type !== 'result') {
+      console.log('❌ onDrop 条件检查失败:', {
+        hasDragItem: !!dragItem,
+        dragItemType: dragItem?.type,
+        expectedType: 'result'
+      });
       return;
     }
 
+    // 保存拖拽项信息，防止在异步操作中丢失
+    const dragItemInfo = {
+      id: dragItem.id,
+      type: dragItem.type
+    };
+
     try {
+      console.log('🚀 开始执行拖拽操作:', {
+        dragItemId: dragItemInfo.id,
+        targetType,
+        targetId
+      });
+
       const folderId = targetType === 'folder' ? targetId : null;
-      await onMoveResult(dragItem.id, folderId);
+
+      console.log('📡 调用 onMoveResult:', {
+        resultId: dragItemInfo.id,
+        folderId
+      });
+
+      await onMoveResult(dragItemInfo.id, folderId);
+
+      console.log('✅ 拖拽操作成功完成');
+
     } catch (error) {
-      console.error('拖移失败:', error);
+      console.error('❌ 拖移失败:', error);
+      throw error; // 重新抛出错误，让调用者知道操作失败
     } finally {
+      console.log('🔄 结束拖拽状态');
       endDrag();
     }
-  }, [dragItem, onMoveResult, endDrag]);
+  }, [dragItem, onMoveResult, endDrag, isDragging]);
 
   const value: DragDropContextType = {
     dragItem,
