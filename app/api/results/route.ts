@@ -29,15 +29,16 @@ export async function GET(request: NextRequest) {
         }
       };
 
-      // 如果指定了 folderId，添加过滤条件
-      if (folderId !== null) {
-        if (folderId === 'null') {
-          // 查询不在任何资料夹中的结果（根目录结果）
-          whereCondition.folderId = null;
-        } else {
-          // 查询特定资料夹中的结果
-          whereCondition.folderId = folderId;
-        }
+      // 根据 folderId 参数添加过滤条件
+      if (folderId === null) {
+        // 没有提供 folderId 参数，查询根目录结果（folderId 为 null）
+        whereCondition.folderId = null;
+      } else if (folderId === 'null') {
+        // 明确指定查询根目录结果
+        whereCondition.folderId = null;
+      } else {
+        // 查询特定资料夹中的结果
+        whereCondition.folderId = folderId;
       }
 
       const results = await prisma.assignmentResult.findMany({

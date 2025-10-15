@@ -40,8 +40,16 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
   };
 
   const handleMouseEnter = () => {
+    console.log(`🎯 [${folder.name}] handleMouseEnter:`, {
+      isDragging,
+      dragItemType: dragItem?.type,
+      dragItemId: dragItem?.id,
+      willSetDropTarget: isDragging && dragItem?.type === 'result'
+    });
+
     if (isDragging && dragItem?.type === 'result') {
       setIsDropTarget(true);
+      console.log(`✅ [${folder.name}] setIsDropTarget(true)`);
     }
   };
 
@@ -50,9 +58,21 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
   };
 
   const handleMouseUp = async () => {
+    console.log(`🎯 [${folder.name}] handleMouseUp:`, {
+      isDropTarget,
+      isDragging,
+      dragItemType: dragItem?.type,
+      dragItemId: dragItem?.id,
+      allConditionsMet: isDropTarget && isDragging && dragItem?.type === 'result'
+    });
+
     if (isDropTarget && isDragging && dragItem?.type === 'result') {
+      console.log(`🚀 [${folder.name}] 执行拖拽操作: ${dragItem.id} → ${folder.id}`);
       await onDrop(folder.id, 'folder');
       setIsDropTarget(false);
+      console.log(`✅ [${folder.name}] 拖拽操作完成`);
+    } else {
+      console.log(`❌ [${folder.name}] 拖拽条件不满足，跳过操作`);
     }
   };
 

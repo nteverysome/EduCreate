@@ -38,12 +38,24 @@ export const DragDropProvider: React.FC<DragDropProviderProps> = ({
   });
 
   const startDrag = useCallback((item: DragItem, event: React.MouseEvent) => {
+    console.log('🚀 startDrag:', {
+      itemId: item.id,
+      itemType: item.type,
+      clientX: event.clientX,
+      clientY: event.clientY
+    });
+
     setDragItem(item);
     setIsDragging(true);
     setDragPreview({
       x: event.clientX,
       y: event.clientY,
       visible: true
+    });
+
+    console.log('✅ 拖拽状态已设置:', {
+      dragItem: item,
+      isDragging: true
     });
 
     // 添加全局鼠标移动和释放事件监听器
