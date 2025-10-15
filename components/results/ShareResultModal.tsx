@@ -39,13 +39,24 @@ export const ShareResultModal: React.FC<ShareResultModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 生成分享链接
+  // 获取当前分享状态
   useEffect(() => {
-    if (isOpen && result) {
-      const baseUrl = window.location.origin;
-      const shareId = `${result.id}-${Date.now()}`;
-      setShareUrl(`${baseUrl}/shared/results/${shareId}`);
-    }
+    const fetchShareStatus = async () => {
+      if (isOpen && result) {
+        try {
+          const response = await fetch(`/api/results/${result.id}/share`);
+          if (response.ok) {
+            const data = await response.json();
+            setIsPublic(data.isPublic);
+            setShareUrl(data.shareUrl || '');
+          }
+        } catch (error) {
+          console.error('获取分享状态失败:', error);
+        }
+      }
+    };
+
+    fetchShareStatus();
   }, [isOpen, result]);
 
   // 复制链接到剪贴板
@@ -72,9 +83,21 @@ export const ShareResultModal: React.FC<ShareResultModalProps> = ({
   const handleTogglePublic = async () => {
     setLoading(true);
     try {
-      // 这里应该调用 API 来更新结果的公开状态
-      // await updateResultShareStatus(result.id, !isPublic);
-      setIsPublic(!isPublic);
+      const response = await fetch(`/api/results/${result.id}/share`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isPublic: !isPublic }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsPublic(data.isPublic);
+        setShareUrl(data.shareUrl || '');
+      } else {
+        console.error('更新分享状态失败:', await response.text());
+      }
     } catch (error) {
       console.error('更新分享状态失败:', error);
     } finally {
