@@ -63,6 +63,34 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [showMoveSubmenu, setShowMoveSubmenu] = React.useState(false);
+  const [copySuccess, setCopySuccess] = React.useState(false);
+
+  // 生成學生分享連結
+  const getStudentShareLink = () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${origin}/play/${result.activityId}/${result.assignmentId}`;
+  };
+
+  // 複製學生分享連結
+  const copyStudentShareLink = async () => {
+    const shareLink = getStudentShareLink();
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('複製失敗:', err);
+      // 降級方案
+      const textArea = document.createElement('textarea');
+      textArea.value = shareLink;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
 
   // 处理点击外部关闭菜单
   useEffect(() => {
@@ -127,6 +155,12 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
       label: '可共用結果連結',
       onClick: onShareLink,
       className: 'text-blue-600 hover:bg-blue-50'
+    },
+    {
+      icon: LinkIcon,
+      label: copySuccess ? '✓ 已複製！' : '學生分享連結',
+      onClick: copyStudentShareLink,
+      className: copySuccess ? 'text-green-600 hover:bg-green-50' : 'text-purple-600 hover:bg-purple-50'
     },
     {
       icon: PencilIcon,
