@@ -15,6 +15,7 @@ model User {
   emailVerified        DateTime?
   image                String?
   country              String?               @default("TW")
+  language             String?               @default("zh-TW") // 用戶界面語言
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   role                 Role                  @default(USER)
