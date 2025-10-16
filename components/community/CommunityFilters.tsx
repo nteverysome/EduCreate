@@ -12,7 +12,7 @@
 
 import { useState } from 'react';
 import { Search, Filter, X } from 'lucide-react';
-import { ACTIVITY_CATEGORIES, SUBJECT_TAGS } from '@/lib/community/utils';
+import { ACTIVITY_CATEGORIES, GRADE_TAGS, EDUCATION_LEVEL_TAGS, SUBJECT_TAGS } from '@/lib/community/utils';
 
 interface CommunityFiltersProps {
   onFilterChange: (filters: FilterState) => void;
@@ -152,9 +152,49 @@ export default function CommunityFilters({ onFilterChange, initialFilters }: Com
             </div>
           </div>
 
-          {/* 標籤 */}
+          {/* 年級標籤 */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">科目標籤</h4>
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">年級</h4>
+            <div className="flex flex-wrap gap-2">
+              {GRADE_TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                    filters.tags.includes(tag)
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 教育階段標籤 */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">教育階段</h4>
+            <div className="flex flex-wrap gap-2">
+              {EDUCATION_LEVEL_TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                    filters.tags.includes(tag)
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 科目標籤 */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">科目</h4>
             <div className="flex flex-wrap gap-2">
               {SUBJECT_TAGS.map((tag) => (
                 <button
@@ -163,7 +203,7 @@ export default function CommunityFilters({ onFilterChange, initialFilters }: Com
                   className={`px-3 py-1 rounded-full text-sm transition-colors ${
                     filters.tags.includes(tag)
                       ? 'bg-green-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                   }`}
                 >
                   {tag}
