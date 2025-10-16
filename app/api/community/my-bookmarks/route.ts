@@ -125,7 +125,10 @@ export async function GET(request: NextRequest) {
     });
 
     // 格式化活動數據
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app';
+    // 從請求中獲取正確的 baseUrl
+    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+    const host = request.headers.get('host') || 'edu-create.vercel.app';
+    const baseUrl = `${protocol}://${host}`;
     const formattedBookmarks = bookmarks
       .filter(bookmark => bookmark.activity && bookmark.activity.publishedToCommunityAt)
       .map(bookmark => ({

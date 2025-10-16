@@ -106,8 +106,11 @@ export async function GET(request: NextRequest) {
     ]);
 
     // 5. 格式化活動數據
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    let formattedActivities = activities.map(activity => 
+    // 從請求中獲取正確的 baseUrl
+    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+    const host = request.headers.get('host') || 'edu-create.vercel.app';
+    const baseUrl = `${protocol}://${host}`;
+    let formattedActivities = activities.map(activity =>
       formatActivityForCommunity(activity, baseUrl)
     );
 
