@@ -16,8 +16,7 @@ import {
   ACTIVITY_CATEGORIES,
   GRADE_TAGS,
   EDUCATION_LEVEL_TAGS,
-  SUBJECT_TAGS,
-  THEME_TAGS
+  SUBJECT_TAGS
 } from '@/lib/community/utils';
 
 interface PublishToCommunityModalProps {
@@ -329,7 +328,7 @@ export default function PublishToCommunityModal({
 
             {/* 教育階段標籤 */}
             <div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 items-center">
                 {EDUCATION_LEVEL_TAGS.map((tag) => (
                   <button
                     key={tag}
@@ -345,28 +344,18 @@ export default function PublishToCommunityModal({
                     {tag}
                   </button>
                 ))}
-              </div>
-            </div>
 
-            {/* 主題標籤 */}
-            <div>
-              <div className="flex flex-wrap gap-2">
-                {THEME_TAGS.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                      selectedTags.includes(tag)
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                    }`}
-                    disabled={!selectedTags.includes(tag) && selectedTags.length >= 5}
-                  >
-                    {selectedTags.includes(tag) && <Check size={14} className="inline mr-1" />}
-                    {tag}
-                  </button>
-                ))}
+                {/* 添加年齡帶按鈕 */}
+                <button
+                  type="button"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  onClick={() => {
+                    // TODO: 實現自定義年齡帶功能
+                    alert('自定義年齡帶功能即將推出！');
+                  }}
+                >
+                  + 添加年齡帶
+                </button>
               </div>
             </div>
 

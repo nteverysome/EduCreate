@@ -325,18 +325,11 @@ export const SUBJECT_TAGS = [
   '英文',
 ] as const;
 
-// 主題標籤（藍色背景）
-export const THEME_TAGS = [
-  '英文學習',
-  '生活教育',
-] as const;
-
 // 所有標籤（用於驗證）
 export const COMMON_TAGS = [
   ...GRADE_TAGS,
   ...EDUCATION_LEVEL_TAGS,
   ...SUBJECT_TAGS,
-  ...THEME_TAGS,
 ] as const;
 
 /**
