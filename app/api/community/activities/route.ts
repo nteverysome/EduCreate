@@ -51,12 +51,19 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // 搜尋
+    // 搜尋（擴展到標籤、分類、主題）
     if (search) {
       where.OR = [
+        // 搜尋標題
         { title: { contains: search, mode: 'insensitive' } },
+        // 搜尋社區描述
         { communityDescription: { contains: search, mode: 'insensitive' } },
+        // 搜尋活動描述
         { description: { contains: search, mode: 'insensitive' } },
+        // 搜尋分類
+        { communityCategory: { contains: search, mode: 'insensitive' } },
+        // 搜尋標籤（包括自定義標籤）
+        { communityTags: { has: search } },
       ];
     }
 
