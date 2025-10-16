@@ -335,6 +335,31 @@ export default function PublishToCommunityModal({
               </span>
             </div>
 
+            {/* 已選標籤顯示 */}
+            {selectedTags.length > 0 && (
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="text-xs font-medium text-blue-700 mb-2">已選標籤:</div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedTags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white text-sm rounded-md"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => toggleTag(tag)}
+                        className="hover:bg-blue-600 rounded-full p-0.5"
+                        title="移除標籤"
+                      >
+                        <X size={14} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* 年級標籤 */}
             <div>
               <div className="flex flex-wrap gap-2">
