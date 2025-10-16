@@ -11,6 +11,8 @@ import { MoveActivityModal } from './MoveActivityModal';
 import { BatchMoveModal } from './BatchMoveModal';
 import AssignmentModal, { AssignmentConfig } from './AssignmentModal';
 import AssignmentSetModal from './AssignmentSetModal';
+import CommunityShareModal from './CommunityShareModal';
+import ActivityQRCodeModal from './ActivityQRCodeModal';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 interface Activity {
@@ -108,6 +110,9 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [moveActivityId, setMoveActivityId] = useState<string | null>(null);
   const [moveActivityTitle, setMoveActivityTitle] = useState('');
   const [showBatchMoveModal, setShowBatchMoveModal] = useState(false);
+  const [showCommunityShareModal, setShowCommunityShareModal] = useState(false);
+  const [showQRCodeModal, setShowQRCodeModal] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [folders, setFolders] = useState<Array<{id: string, name: string, activityCount: number}>>([]);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [activityToAssign, setActivityToAssign] = useState<Activity | null>(null);
@@ -671,6 +676,24 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     console.log('分享活動:', activity.title);
   };
 
+  const handleCommunityShare = (activity: Activity) => {
+    setSelectedActivity(activity);
+    setShowCommunityShareModal(true);
+  };
+
+  const handleQRCode = (activity: Activity) => {
+    setSelectedActivity(activity);
+    setShowQRCodeModal(true);
+  };
+
+  const handleActivityUpdate = (updatedActivity: Activity) => {
+    setActivities(prev =>
+      prev.map(activity =>
+        activity.id === updatedActivity.id ? updatedActivity : activity
+      )
+    );
+  };
+
   const handleActivityRename = async (activity: Activity, newTitle: string) => {
     try {
       console.log('🏷️ 開始重新命名活動:', activity.title, '→', newTitle);
@@ -1047,6 +1070,8 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               onMove={handleMoveActivity}
               onEditContent={handleEditContent}
               onAssignment={handleAssignment}
+              onCommunityShare={handleCommunityShare}
+              onQRCode={handleQRCode}
               selectionMode={selectionMode}
               onDragStart={handleActivityDragStart}
               onDragEnd={handleActivityDragEnd}
@@ -1143,6 +1168,31 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         shareUrl={assignmentShareUrl}
         onGoToResults={handleGoToResults}
       />
+
+      {/* 社區分享模態框 */}
+      {selectedActivity && (
+        <CommunityShareModal
+          activity={selectedActivity}
+          isOpen={showCommunityShareModal}
+          onClose={() => {
+            setShowCommunityShareModal(false);
+            setSelectedActivity(null);
+          }}
+          onUpdate={handleActivityUpdate}
+        />
+      )}
+
+      {/* QR Code 模態框 */}
+      {selectedActivity && (
+        <ActivityQRCodeModal
+          activity={selectedActivity}
+          isOpen={showQRCodeModal}
+          onClose={() => {
+            setShowQRCodeModal(false);
+            setSelectedActivity(null);
+          }}
+        />
+      )}
     </div>
   );
 };

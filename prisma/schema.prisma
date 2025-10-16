@@ -97,6 +97,11 @@ model Activity {
   tags            String[]
   geptLevel       GEPTLevel?           @default(ELEMENTARY)
   totalWords      Int                  @default(0)
+
+  // 社區分享功能
+  isPublicShared  Boolean              @default(false)
+  shareToken      String?              @unique
+  communityPlays  Int                  @default(0)
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
   deletedAt       DateTime?

@@ -18,7 +18,8 @@ import {
   X,
   Folder,
   FileEdit,
-  BookOpen
+  BookOpen,
+  QrCode
 } from 'lucide-react';
 
 interface Activity {
@@ -55,6 +56,8 @@ interface WordwallStyleActivityCardProps {
   onMove?: (activity: Activity) => void;
   onEditContent?: (activity: Activity) => void;
   onAssignment?: (activity: Activity) => void;
+  onCommunityShare?: (activity: Activity) => void;
+  onQRCode?: (activity: Activity) => void;
   selectionMode?: boolean;
   // 拖拽相關
   onDragStart?: (activity: Activity) => void;
@@ -74,6 +77,8 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   onMove,
   onEditContent,
   onAssignment,
+  onCommunityShare,
+  onQRCode,
   selectionMode = false,
   onDragStart,
   onDragEnd
@@ -540,6 +545,30 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
             >
               <Share2 className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
               <span className="truncate">分享</span>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onCommunityShare?.(activity);
+                setShowMenu(false);
+              }}
+              className="w-full flex items-center px-3 py-2 text-xs sm:text-sm hover:bg-gray-50 transition-colors text-gray-700"
+            >
+              <Globe className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="truncate">社區分享</span>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onQRCode?.(activity);
+                setShowMenu(false);
+              }}
+              className="w-full flex items-center px-3 py-2 text-xs sm:text-sm hover:bg-gray-50 transition-colors text-gray-700"
+            >
+              <QrCode className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="truncate">QR Code</span>
             </button>
 
             <button
