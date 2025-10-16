@@ -23,8 +23,8 @@ Phase 4: 數據遷移和測試 ✅ COMPLETE (2025-10-16)
   ├─ 步驟 3: 監控 Preview 部署 ✅ COMPLETE
   ├─ 步驟 4: 測試 Preview 環境功能 ✅ COMPLETE (部分)
   ├─ 步驟 5: 驗證數據隔離 ✅ COMPLETE
-  ├─ 步驟 6: 測試破壞性操作 ⏸️ SKIPPED (可選)
-  └─ 步驟 7: 清理測試數據 ⏸️ SKIPPED (可選)
+  ├─ 步驟 6: 測試破壞性操作 ✅ COMPLETE (剛完成！)
+  └─ 步驟 7: 清理測試數據 ✅ COMPLETE (剛完成！)
 Phase 5: 文檔和監控 ✅ COMPLETE (2025-10-16)
   ├─ 創建環境設置指南 ✅ COMPLETE
   ├─ 創建數據庫架構文檔 ✅ COMPLETE
