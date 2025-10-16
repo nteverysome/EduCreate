@@ -2,28 +2,133 @@
 
 /**
  * 社區活動卡片組件
- * 
+ *
  * 顯示社區活動的卡片，包括：
  * - 活動標題和描述
  * - 作者信息
  * - 統計數據（瀏覽、喜歡、收藏、遊戲次數）
  * - 分類和標籤
  * - 遊戲類型
+ * - 互動按鈕（喜歡、收藏）
  */
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 import { FormattedCommunityActivity } from '@/lib/community/utils';
 import { Eye, Heart, Bookmark, Play, User } from 'lucide-react';
 
 interface CommunityActivityCardProps {
   activity: FormattedCommunityActivity;
+  onLikeChange?: (activityId: string, isLiked: boolean, newCount: number) => void;
+  onBookmarkChange?: (activityId: string, isBookmarked: boolean, newCount: number) => void;
 }
 
-export default function CommunityActivityCard({ activity }: CommunityActivityCardProps) {
+export default function CommunityActivityCard({
+  activity,
+  onLikeChange,
+  onBookmarkChange,
+}: CommunityActivityCardProps) {
+  const { data: session } = useSession();
+  const [isLiked, setIsLiked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [likeCount, setLikeCount] = useState(activity.stats.likes);
+  const [bookmarkCount, setBookmarkCount] = useState(activity.stats.bookmarks);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isBookmarking, setIsBookmarking] = useState(false);
+
+  // 處理喜歡
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!session) {
+      alert('請先登入');
+      return;
+    }
+
+    if (isLiking) return;
+
+    setIsLiking(true);
+    const newIsLiked = !isLiked;
+    const newCount = newIsLiked ? likeCount + 1 : likeCount - 1;
+
+    // 樂觀更新
+    setIsLiked(newIsLiked);
+    setLikeCount(newCount);
+
+    try {
+      const response = await fetch(`/api/community/activities/${activity.id}/like`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('操作失敗');
+      }
+
+      const data = await response.json();
+      setLikeCount(data.likeCount);
+      onLikeChange?.(activity.id, data.isLiked, data.likeCount);
+    } catch (error) {
+      // 回滾
+      setIsLiked(!newIsLiked);
+      setLikeCount(likeCount);
+      console.error('喜歡操作失敗:', error);
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  // 處理收藏
+  const handleBookmark = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!session) {
+      alert('請先登入');
+      return;
+    }
+
+    if (isBookmarking) return;
+
+    setIsBookmarking(true);
+    const newIsBookmarked = !isBookmarked;
+    const newCount = newIsBookmarked ? bookmarkCount + 1 : bookmarkCount - 1;
+
+    // 樂觀更新
+    setIsBookmarked(newIsBookmarked);
+    setBookmarkCount(newCount);
+
+    try {
+      const response = await fetch(`/api/community/activities/${activity.id}/bookmark`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        throw new Error('操作失敗');
+      }
+
+      const data = await response.json();
+      setBookmarkCount(data.bookmarkCount);
+      onBookmarkChange?.(activity.id, data.isBookmarked, data.bookmarkCount);
+    } catch (error) {
+      // 回滾
+      setIsBookmarked(!newIsBookmarked);
+      setBookmarkCount(bookmarkCount);
+      console.error('收藏操作失敗:', error);
+    } finally {
+      setIsBookmarking(false);
+    }
+  };
+
   return (
-    <Link href={`/community/activity/${activity.id}`}>
-      <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer">
+    <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+      <Link href={`/community/activity/${activity.id}`} className="block">
         {/* 縮圖 */}
         <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
           {activity.thumbnailUrl ? (
@@ -101,28 +206,60 @@ export default function CommunityActivityCard({ activity }: CommunityActivityCar
             <span className="text-sm text-gray-600">{activity.author.name}</span>
           </div>
 
-          {/* 統計數據 */}
-          <div className="grid grid-cols-4 gap-2 text-center">
-            <div className="flex flex-col items-center">
-              <Eye size={16} className="text-gray-400 mb-1" />
-              <span className="text-xs text-gray-600">{formatNumber(activity.stats.views)}</span>
+          {/* 統計數據和互動按鈕 */}
+          <div className="flex items-center justify-between">
+            {/* 統計數據 */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1">
+                <Eye size={16} className="text-gray-400" />
+                <span className="text-xs text-gray-600">{formatNumber(activity.stats.views)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Play size={16} className="text-green-400" />
+                <span className="text-xs text-gray-600">{formatNumber(activity.stats.plays)}</span>
+              </div>
             </div>
-            <div className="flex flex-col items-center">
-              <Heart size={16} className="text-red-400 mb-1" />
-              <span className="text-xs text-gray-600">{formatNumber(activity.stats.likes)}</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <Bookmark size={16} className="text-yellow-400 mb-1" />
-              <span className="text-xs text-gray-600">{formatNumber(activity.stats.bookmarks)}</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <Play size={16} className="text-green-400 mb-1" />
-              <span className="text-xs text-gray-600">{formatNumber(activity.stats.plays)}</span>
+
+            {/* 互動按鈕 */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleLike}
+                disabled={isLiking}
+                className={`flex items-center gap-1 px-2 py-1 rounded-full transition-colors ${
+                  isLiked
+                    ? 'bg-red-50 text-red-600'
+                    : 'hover:bg-gray-100 text-gray-600'
+                } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={isLiked ? '取消喜歡' : '喜歡'}
+              >
+                <Heart
+                  size={16}
+                  className={isLiked ? 'fill-current' : ''}
+                />
+                <span className="text-xs">{formatNumber(likeCount)}</span>
+              </button>
+
+              <button
+                onClick={handleBookmark}
+                disabled={isBookmarking}
+                className={`flex items-center gap-1 px-2 py-1 rounded-full transition-colors ${
+                  isBookmarked
+                    ? 'bg-yellow-50 text-yellow-600'
+                    : 'hover:bg-gray-100 text-gray-600'
+                } ${isBookmarking ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={isBookmarked ? '取消收藏' : '收藏'}
+              >
+                <Bookmark
+                  size={16}
+                  className={isBookmarked ? 'fill-current' : ''}
+                />
+                <span className="text-xs">{formatNumber(bookmarkCount)}</span>
+              </button>
             </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 
