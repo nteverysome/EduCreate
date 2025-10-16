@@ -41,6 +41,9 @@ interface Activity {
     english: string;
     chinese: string;
   }>;
+  isPublicShared?: boolean; // 社區分享狀態
+  shareToken?: string; // 分享 token
+  communityPlays?: number; // 社區遊玩次數
 }
 
 interface WordwallStyleActivityCardProps {
@@ -340,16 +343,23 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
           </div>
         )}
 
-        {/* 公開/私人標識 */}
+        {/* 公開/私人/社區開放標識 */}
         <div className="absolute top-2 right-2">
           <div className={`
             px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1
-            ${activity.isPublic 
-              ? 'bg-green-100 text-green-700' 
-              : 'bg-gray-100 text-gray-600'
+            ${activity.isPublicShared
+              ? 'bg-blue-100 text-blue-700'
+              : activity.isPublic
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-600'
             }
           `}>
-            {activity.isPublic ? (
+            {activity.isPublicShared ? (
+              <>
+                <Users className="w-3 h-3" />
+                社區開放
+              </>
+            ) : activity.isPublic ? (
               <>
                 <Globe className="w-3 h-3" />
                 公開
