@@ -6,7 +6,8 @@ import Link from 'next/link';
 import GameSwitcher from '@/components/games/GameSwitcher';
 import ShimozurdoGameContainer from '@/components/games/ShimozurdoGameContainer';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
-import { BookOpenIcon } from '@heroicons/react/24/outline';
+import QRCodeModal from '@/components/results/QRCodeModal';
+import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
 
 // 遊戲統計類型
@@ -42,6 +43,11 @@ const GameSwitcherPage: React.FC = () => {
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [isShared, setIsShared] = useState<boolean>(false);
   const [assignmentId, setAssignmentId] = useState<string | null>(null);
+
+  // 快速操作按鈕狀態
+  const [showCopySuccess, setShowCopySuccess] = useState<boolean>(false);
+  const [showQRCodeModal, setShowQRCodeModal] = useState<boolean>(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -78,7 +84,7 @@ const GameSwitcherPage: React.FC = () => {
   // 處理遊戲狀態更新
   const handleGameStateUpdate = useCallback((gameId: string, state: GameState) => {
     console.log('📊 遊戲狀態更新:', gameId, state);
-    
+
     // 更新統計數據
     setGameStats(prev => ({
       ...prev,
@@ -104,6 +110,53 @@ const GameSwitcherPage: React.FC = () => {
       return updated;
     });
   }, []);
+
+  // 快速操作按鈕處理函數
+  const handleCopyLink = useCallback(async () => {
+    if (!activityId) return;
+
+    const gameLink = `${window.location.origin}/games/switcher?game=${currentGameId}&activityId=${activityId}`;
+    try {
+      await navigator.clipboard.writeText(gameLink);
+      setShowCopySuccess(true);
+      setTimeout(() => setShowCopySuccess(false), 2000);
+      console.log('✅ 遊戲連結已複製:', gameLink);
+    } catch (error) {
+      console.error('❌ 複製失敗:', error);
+    }
+  }, [activityId, currentGameId]);
+
+  const handleShowQRCode = useCallback(() => {
+    if (!activityId) return;
+    setShowQRCodeModal(true);
+  }, [activityId]);
+
+  const handleDelete = useCallback(() => {
+    if (!activityId) return;
+    setShowDeleteConfirm(true);
+  }, [activityId]);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!activityId) return;
+
+    try {
+      const response = await fetch(`/api/activities/${activityId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        console.log('✅ 活動已刪除');
+        // 重定向到我的活動頁面
+        window.location.href = '/my-activities';
+      } else {
+        console.error('❌ 刪除失敗');
+      }
+    } catch (error) {
+      console.error('❌ 刪除時出錯:', error);
+    } finally {
+      setShowDeleteConfirm(false);
+    }
+  }, [activityId]);
 
   // 處理 URL 參數和載入自定義詞彙
   useEffect(() => {
@@ -571,6 +624,53 @@ const GameSwitcherPage: React.FC = () => {
                 <span className="px-1 py-0.5 text-xs bg-green-100 text-green-800 rounded">✅</span>
               </div>
 
+              {/* 快速操作按鈕 - 只在有 activityId 時顯示 */}
+              {activityId && (
+                <>
+                  {/* 複製連結按鈕 */}
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-1 px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                    style={{ minHeight: '44px' }}
+                    title="複製遊戲連結"
+                  >
+                    {showCopySuccess ? (
+                      <>
+                        <span className="text-green-600">✓</span>
+                        <span className="hidden lg:inline text-green-600">已複製</span>
+                      </>
+                    ) : (
+                      <>
+                        <LinkIcon className="w-4 h-4" />
+                        <span className="hidden lg:inline">複製連結</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* QR Code 按鈕 */}
+                  <button
+                    onClick={handleShowQRCode}
+                    className="flex items-center gap-1 px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                    style={{ minHeight: '44px' }}
+                    title="顯示 QR 代碼"
+                  >
+                    <QrCodeIcon className="w-4 h-4" />
+                    <span className="hidden lg:inline">QR 代碼</span>
+                  </button>
+
+                  {/* 刪除按鈕 */}
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center gap-1 px-2 py-2 text-xs font-medium text-red-600 bg-white border border-red-300 rounded hover:bg-red-50"
+                    style={{ minHeight: '44px' }}
+                    title="刪除活動"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                    <span className="hidden lg:inline">刪除</span>
+                  </button>
+                </>
+              )}
+
               {/* 控制按鈕組 */}
               <button
                 onClick={() => setShowStats(!showStats)}
@@ -706,6 +806,50 @@ const GameSwitcherPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* QR Code 模態框 */}
+      {showQRCodeModal && activityId && (
+        <QRCodeModal
+          isOpen={showQRCodeModal}
+          onClose={() => setShowQRCodeModal(false)}
+          result={{
+            id: activityId,
+            title: `${getGameName(currentGameId)} 遊戲`,
+            activityName: getGameName(currentGameId),
+            participantCount: 0,
+            createdAt: new Date().toISOString(),
+            status: 'active' as const,
+            assignmentId: assignmentId || activityId,
+            activityId: activityId
+          }}
+        />
+      )}
+
+      {/* 刪除確認對話框 */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">確認刪除</h3>
+            <p className="text-gray-600 mb-6">
+              確定要刪除這個活動嗎？此操作無法復原。
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
+              >
+                確認刪除
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
