@@ -54,70 +54,28 @@ export async function POST(
     const body = await request.json();
     const { category, tags, description, thumbnailUrl } = body;
 
-    // 4. 驗證必填字段
-    if (!category) {
-      return NextResponse.json(
-        {
-          error: '缺少必要字段',
-          message: '分類為必填',
-          field: 'category',
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!tags || !Array.isArray(tags) || tags.length === 0) {
-      return NextResponse.json(
-        {
-          error: '缺少必要字段',
-          message: '至少需要一個標籤',
-          field: 'tags',
-        },
-        { status: 400 }
-      );
-    }
-
-    // 5. 驗證社區數據
-    const validation = validateCommunityData({
-      category,
-      tags,
-      description,
-      thumbnailUrl,
-    });
-
-    if (!validation.valid) {
-      return NextResponse.json(
-        {
-          error: '數據驗證失敗',
-          message: validation.errors[0],
-          errors: validation.errors,
-        },
-        { status: 400 }
-      );
-    }
-
-    // 6. 生成 shareToken（如果還沒有）
+    // 4. 生成 shareToken（如果還沒有）
     const shareToken = activity.shareToken || generateShareToken();
 
-    // 7. 更新活動
+    // 5. 更新活動
     const updatedActivity = await prisma.activity.update({
       where: { id: params.id },
       data: {
         isPublicShared: true,
         shareToken,
         publishedToCommunityAt: new Date(),
-        communityCategory: category,
-        communityTags: tags,
+        communityCategory: category || null,
+        communityTags: tags && Array.isArray(tags) && tags.length > 0 ? tags : [],
         communityDescription: description || activity.description,
         communityThumbnail: thumbnailUrl || null,
       },
     });
 
-    // 8. 構建分享 URL
+    // 6. 構建分享 URL
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const shareUrl = `${baseUrl}/community/activity/${shareToken}`;
 
-    // 9. 返回成功響應
+    // 7. 返回成功響應
     return NextResponse.json({
       success: true,
       activity: {
