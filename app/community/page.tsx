@@ -12,6 +12,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import CommunityActivityCard from '@/components/community/CommunityActivityCard';
 import CommunityFilters, { FilterState } from '@/components/community/CommunityFilters';
 import { FormattedCommunityActivity } from '@/lib/community/utils';
@@ -101,9 +102,11 @@ export default function CommunityPage() {
       <div className="container mx-auto px-4 py-8">
         {/* 頁面標題 */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            🌟 EduCreate 社區
-          </h1>
+          <Link href="/" className="inline-block">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4 hover:text-blue-600 transition-colors cursor-pointer">
+              🌟 EduCreate 社區
+            </h1>
+          </Link>
           <p className="text-xl text-gray-600">
             探索教育者分享的精彩學習活動
           </p>
