@@ -44,6 +44,12 @@ export default function PublishToCommunityModal({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // 自定義標籤狀態
+  const [showCustomAgeInput, setShowCustomAgeInput] = useState(false);
+  const [showCustomTopicInput, setShowCustomTopicInput] = useState(false);
+  const [customAgeTag, setCustomAgeTag] = useState('');
+  const [customTopicTag, setCustomTopicTag] = useState('');
+
   const toggleTag = (tag: string) => {
     if (selectedTags.includes(tag)) {
       setSelectedTags(selectedTags.filter(t => t !== tag));
@@ -51,6 +57,30 @@ export default function PublishToCommunityModal({
       if (selectedTags.length < 5) {
         setSelectedTags([...selectedTags, tag]);
       }
+    }
+  };
+
+  // 添加自定義年齡帶標籤
+  const handleAddCustomAge = () => {
+    if (customAgeTag.trim() && selectedTags.length < 5) {
+      const newTag = customAgeTag.trim();
+      if (!selectedTags.includes(newTag)) {
+        setSelectedTags([...selectedTags, newTag]);
+      }
+      setCustomAgeTag('');
+      setShowCustomAgeInput(false);
+    }
+  };
+
+  // 添加自定義主題標籤
+  const handleAddCustomTopic = () => {
+    if (customTopicTag.trim() && selectedTags.length < 5) {
+      const newTag = customTopicTag.trim();
+      if (!selectedTags.includes(newTag)) {
+        setSelectedTags([...selectedTags, newTag]);
+      }
+      setCustomTopicTag('');
+      setShowCustomTopicInput(false);
     }
   };
 
@@ -345,17 +375,55 @@ export default function PublishToCommunityModal({
                   </button>
                 ))}
 
-                {/* 添加年齡帶按鈕 */}
-                <button
-                  type="button"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                  onClick={() => {
-                    // TODO: 實現自定義年齡帶功能
-                    alert('自定義年齡帶功能即將推出！');
-                  }}
-                >
-                  + 添加年齡帶
-                </button>
+                {/* 添加年齡帶按鈕/輸入框 */}
+                {!showCustomAgeInput ? (
+                  <button
+                    type="button"
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    onClick={() => setShowCustomAgeInput(true)}
+                  >
+                    + 添加年齡帶
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={customAgeTag}
+                      onChange={(e) => setCustomAgeTag(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddCustomAge();
+                        } else if (e.key === 'Escape') {
+                          setShowCustomAgeInput(false);
+                          setCustomAgeTag('');
+                        }
+                      }}
+                      placeholder="輸入年齡帶..."
+                      className="px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomAge}
+                      className="p-1 text-green-600 hover:bg-green-100 rounded"
+                      title="確認"
+                    >
+                      <Check size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCustomAgeInput(false);
+                        setCustomAgeTag('');
+                      }}
+                      className="p-1 text-red-600 hover:bg-red-100 rounded"
+                      title="取消"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -380,18 +448,56 @@ export default function PublishToCommunityModal({
               </div>
             </div>
 
-            {/* 添加主題連結 */}
+            {/* 添加主題按鈕/輸入框 */}
             <div>
-              <button
-                type="button"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                onClick={() => {
-                  // TODO: 實現自定義標籤功能
-                  alert('自定義標籤功能即將推出！');
-                }}
-              >
-                + 添加主題
-              </button>
+              {!showCustomTopicInput ? (
+                <button
+                  type="button"
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  onClick={() => setShowCustomTopicInput(true)}
+                >
+                  + 添加主題
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={customTopicTag}
+                    onChange={(e) => setCustomTopicTag(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddCustomTopic();
+                      } else if (e.key === 'Escape') {
+                        setShowCustomTopicInput(false);
+                        setCustomTopicTag('');
+                      }
+                    }}
+                    placeholder="輸入主題..."
+                    className="px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCustomTopic}
+                    className="p-1 text-green-600 hover:bg-green-100 rounded"
+                    title="確認"
+                  >
+                    <Check size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCustomTopicInput(false);
+                      setCustomTopicTag('');
+                    }}
+                    className="p-1 text-red-600 hover:bg-red-100 rounded"
+                    title="取消"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
