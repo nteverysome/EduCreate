@@ -48,6 +48,14 @@ const GameSwitcherPage: React.FC = () => {
   const [showCopySuccess, setShowCopySuccess] = useState<boolean>(false);
   const [showQRCodeModal, setShowQRCodeModal] = useState<boolean>(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+
+  // 活動信息狀態
+  const [activityInfo, setActivityInfo] = useState<{
+    title: string;
+    participantCount: number;
+    createdAt: string;
+    deadline?: string;
+  } | null>(null);
   
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -158,6 +166,25 @@ const GameSwitcherPage: React.FC = () => {
     }
   }, [activityId]);
 
+  // 載入活動信息
+  const loadActivityInfo = useCallback(async (activityId: string) => {
+    try {
+      const response = await fetch(`/api/activities/${activityId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setActivityInfo({
+          title: data.title || '未命名活動',
+          participantCount: data.participantCount || 0,
+          createdAt: data.createdAt || new Date().toISOString(),
+          deadline: data.deadline
+        });
+        console.log('✅ 活動信息已載入:', data);
+      }
+    } catch (error) {
+      console.error('❌ 載入活動信息時出錯:', error);
+    }
+  }, []);
+
   // 處理 URL 參數和載入自定義詞彙
   useEffect(() => {
     const gameParam = searchParams?.get('game');
@@ -172,6 +199,9 @@ const GameSwitcherPage: React.FC = () => {
 
     if (activityIdParam) {
       setActivityId(activityIdParam);
+
+      // 載入活動信息
+      loadActivityInfo(activityIdParam);
 
       // 優先檢查是否為學生遊戲模式（有 assignmentId）
       if (assignmentIdParam) {
@@ -194,7 +224,7 @@ const GameSwitcherPage: React.FC = () => {
         loadCustomVocabulary(activityIdParam);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, loadActivityInfo]);
 
   // 載入自定義詞彙的函數（需要身份驗證）
   const loadCustomVocabulary = async (activityId: string) => {
@@ -624,53 +654,6 @@ const GameSwitcherPage: React.FC = () => {
                 <span className="px-1 py-0.5 text-xs bg-green-100 text-green-800 rounded">✅</span>
               </div>
 
-              {/* 快速操作按鈕 - 只在有 activityId 時顯示 */}
-              {activityId && (
-                <>
-                  {/* 複製連結按鈕 */}
-                  <button
-                    onClick={handleCopyLink}
-                    className="flex items-center gap-1 px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                    style={{ minHeight: '44px' }}
-                    title="複製遊戲連結"
-                  >
-                    {showCopySuccess ? (
-                      <>
-                        <span className="text-green-600">✓</span>
-                        <span className="hidden lg:inline text-green-600">已複製</span>
-                      </>
-                    ) : (
-                      <>
-                        <LinkIcon className="w-4 h-4" />
-                        <span className="hidden lg:inline">複製連結</span>
-                      </>
-                    )}
-                  </button>
-
-                  {/* QR Code 按鈕 */}
-                  <button
-                    onClick={handleShowQRCode}
-                    className="flex items-center gap-1 px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                    style={{ minHeight: '44px' }}
-                    title="顯示 QR 代碼"
-                  >
-                    <QrCodeIcon className="w-4 h-4" />
-                    <span className="hidden lg:inline">QR 代碼</span>
-                  </button>
-
-                  {/* 刪除按鈕 */}
-                  <button
-                    onClick={handleDelete}
-                    className="flex items-center gap-1 px-2 py-2 text-xs font-medium text-red-600 bg-white border border-red-300 rounded hover:bg-red-50"
-                    style={{ minHeight: '44px' }}
-                    title="刪除活動"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                    <span className="hidden lg:inline">刪除</span>
-                  </button>
-                </>
-              )}
-
               {/* 控制按鈕組 */}
               <button
                 onClick={() => setShowStats(!showStats)}
@@ -714,6 +697,89 @@ const GameSwitcherPage: React.FC = () => {
             assignmentId={assignmentId}
           />
         </div>
+
+        {/* 作業信息區域 - 只在有 activityId 時顯示 */}
+        {activityId && activityInfo && (
+          <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-900">作業</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">標題</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">反應</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">創建</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最後期限</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  <tr>
+                    <td className="px-4 py-3 text-sm text-gray-900">{activityInfo.title}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{activityInfo.participantCount}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {new Date(activityInfo.createdAt).toLocaleDateString('zh-TW', {
+                        day: 'numeric',
+                        month: 'long',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {activityInfo.deadline
+                        ? new Date(activityInfo.deadline).toLocaleDateString('zh-TW', {
+                            day: 'numeric',
+                            month: 'long'
+                          })
+                        : '無截止日期'
+                      }
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* 快速操作按鈕 */}
+            <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-2">
+              {/* 複製連結按鈕 */}
+              <button
+                onClick={handleCopyLink}
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+              >
+                {showCopySuccess ? (
+                  <>
+                    <span className="text-green-600">✓</span>
+                    <span className="text-green-600">已複製</span>
+                  </>
+                ) : (
+                  <>
+                    <LinkIcon className="w-4 h-4" />
+                    <span>複製連結</span>
+                  </>
+                )}
+              </button>
+
+              {/* QR Code 按鈕 */}
+              <button
+                onClick={handleShowQRCode}
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+              >
+                <QrCodeIcon className="w-4 h-4" />
+                <span>QR 代碼</span>
+              </button>
+
+              {/* 刪除按鈕 */}
+              <button
+                onClick={handleDelete}
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded hover:bg-red-50 transition-colors"
+              >
+                <TrashIcon className="w-4 h-4" />
+                <span>刪除</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* 統計和歷史 - 響應式網格佈局 */}
         <div className="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
