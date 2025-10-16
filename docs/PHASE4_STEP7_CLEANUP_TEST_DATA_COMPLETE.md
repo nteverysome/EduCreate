@@ -210,6 +210,13 @@ Phase 5: 文檔和監控 ✅ COMPLETE
 - 環境狀態可預測
 - 適合持續測試
 
+### ⚠️ 注意事項
+1. 初始查詢嘗試檢查 `Result` 和 `Assignment` 表時失敗
+2. 錯誤原因: 資料表名稱應該是 `AssignmentResult` 而不是 `Result`
+3. 修正後的查詢只檢查 `Activity` 和 `User` 表，成功執行
+4. 這不影響整體驗證，因為主要目標是確認 Preview 環境狀態
+5. 實際的資料表列表可以通過 Neon Console 的 Tables 頁面查看
+
 ---
 
 **報告創建時間**: 2025-10-16 19:53  
