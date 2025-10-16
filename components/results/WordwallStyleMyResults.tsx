@@ -23,6 +23,7 @@ import SetDeadlineModal from './SetDeadlineModal';
 import ShareResultModal from './ShareResultModal';
 import StudentShareLinkModal from './StudentShareLinkModal';
 import QRCodeModal from './QRCodeModal';
+import MoveToFolderModal from './MoveToFolderModal';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 
@@ -103,6 +104,10 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // QR Code 相關狀態
   const [showQRCodeModal, setShowQRCodeModal] = useState(false);
   const [resultToShowQRCode, setResultToShowQRCode] = useState<AssignmentResult | null>(null);
+
+  // 移動到資料夾相關狀態
+  const [showMoveToFolderModal, setShowMoveToFolderModal] = useState(false);
+  const [resultToMove, setResultToMove] = useState<AssignmentResult | null>(null);
 
 
 
@@ -472,8 +477,19 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setShowQRCodeModal(true);
   };
 
-  // 處理移動結果到資料夾 - 簡化版本（參考 /my-activities 的實現方式）
+  // 處理移動結果到資料夾 - 支持模態框
   const handleMoveResult = async (resultId: string, folderId: string | null) => {
+    // 如果是特殊標識，打開移動模態框
+    if (folderId === 'OPEN_MODAL') {
+      const result = results.find(r => r.id === resultId);
+      if (result) {
+        setResultToMove(result);
+        setShowMoveToFolderModal(true);
+      }
+      return;
+    }
+
+    // 執行實際的移動操作
     try {
       console.log('📁 將結果移動到資料夾:', { resultId, folderId });
 
@@ -885,6 +901,24 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           onClose={() => {
             setShowQRCodeModal(false);
             setResultToShowQRCode(null);
+          }}
+        />
+      )}
+
+      {/* 移動到資料夾模態框 */}
+      {resultToMove && (
+        <MoveToFolderModal
+          result={resultToMove}
+          folders={folders}
+          isOpen={showMoveToFolderModal}
+          onClose={() => {
+            setShowMoveToFolderModal(false);
+            setResultToMove(null);
+          }}
+          onMove={(folderId) => {
+            handleMoveResult(resultToMove.id, folderId);
+            setShowMoveToFolderModal(false);
+            setResultToMove(null);
           }}
         />
       )}
