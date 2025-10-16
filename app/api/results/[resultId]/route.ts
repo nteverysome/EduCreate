@@ -504,7 +504,7 @@ export async function GET(
       status: updatedResult.status as 'active' | 'completed' | 'expired',
       gameType: getGameId(updatedResult.assignment.activity.type), // 返回實際的遊戲 ID
       shareLink,
-      shareToken: updatedResult.shareToken, // 🎯 添加 shareToken
+      shareToken: updatedResult.shareToken ?? undefined, // 🎯 將 null 轉換為 undefined
       participants: correctedParticipants, // 🎯 使用修正後的參與者數據（包含 calculatedScore）
       statistics: statisticsResult.statistics, // 🎯 使用修正後的統計數據
       questionStatistics

@@ -183,7 +183,12 @@ const GameSwitcherPage: React.FC = () => {
     try {
       const response = await fetch(`/api/activities/${activityId}`);
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as {
+          title?: string;
+          participantCount?: number;
+          createdAt?: string;
+          deadline?: string;
+        };
         setActivityInfo({
           title: data.title || '未命名活動',
           participantCount: data.participantCount || 0,
@@ -202,7 +207,18 @@ const GameSwitcherPage: React.FC = () => {
     try {
       const response = await fetch(`/api/leaderboard/${assignmentId}`);
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json() as {
+          success?: boolean;
+          leaderboard?: Array<{
+            rank: number;
+            studentName: string;
+            score: number;
+            timeSpent: number;
+            correctAnswers: number;
+            totalQuestions: number;
+          }>;
+          totalParticipants?: number;
+        };
         if (data.success && data.leaderboard) {
           setLeaderboard(data.leaderboard);
           setShowLeaderboard(true);
