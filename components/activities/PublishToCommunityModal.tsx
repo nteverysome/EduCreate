@@ -146,17 +146,6 @@ export default function PublishToCommunityModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // 驗證
-    if (!category) {
-      setError('請選擇分類');
-      return;
-    }
-    
-    if (selectedTags.length === 0) {
-      setError('請至少選擇一個標籤');
-      return;
-    }
 
     try {
       setLoading(true);
@@ -168,8 +157,8 @@ export default function PublishToCommunityModal({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          category,
-          tags: selectedTags,
+          category: category || undefined,
+          tags: selectedTags.length > 0 ? selectedTags : undefined,
           description: description || undefined,
           thumbnailUrl: thumbnailUrl || undefined,
         }),
@@ -181,9 +170,9 @@ export default function PublishToCommunityModal({
       }
 
       const data = await response.json();
-      
+
       setSuccess(true);
-      
+
       // 2秒後關閉並刷新
       setTimeout(() => {
         onSuccess();
@@ -367,13 +356,12 @@ export default function PublishToCommunityModal({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Tag size={16} className="inline mr-1" />
-              分類 <span className="text-red-500">*</span>
+              分類 <span className="text-gray-500 text-xs">(可選)</span>
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
             >
               <option value="">請選擇分類</option>
               {ACTIVITY_CATEGORIES.map((cat) => (
@@ -388,7 +376,7 @@ export default function PublishToCommunityModal({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="block text-sm font-medium text-gray-700">
-                標籤 <span className="text-red-500">*</span>
+                標籤 <span className="text-gray-500 text-xs">(可選)</span>
               </label>
               <span className="text-xs text-gray-500">
                 (已選擇 {selectedTags.length}/5)
@@ -656,7 +644,7 @@ export default function PublishToCommunityModal({
             </button>
             <button
               type="submit"
-              disabled={loading || !category || selectedTags.length === 0}
+              disabled={loading}
               className="flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
