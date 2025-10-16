@@ -37,6 +37,9 @@ model User {
   activityBookmarks    ActivityBookmark[]
   activityComments     ActivityComment[]
   communityReports     CommunityReport[]
+
+  // 自訂標籤
+  customTags           String[]              @default([])
 }
 
 model Account {

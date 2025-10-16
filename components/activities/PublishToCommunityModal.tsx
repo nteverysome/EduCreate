@@ -10,14 +10,15 @@
  * - 縮圖 URL（可選）
  */
 
-import { useState } from 'react';
-import { X, Globe, Tag, FileText, Image as ImageIcon, Loader2, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Globe, Tag, FileText, Image as ImageIcon, Loader2, Check, Settings } from 'lucide-react';
 import {
   ACTIVITY_CATEGORIES,
   GRADE_TAGS,
   EDUCATION_LEVEL_TAGS,
   SUBJECT_TAGS
 } from '@/lib/community/utils';
+import ManageCustomTagsModal from './ManageCustomTagsModal';
 
 interface PublishToCommunityModalProps {
   activity: {
@@ -50,6 +51,27 @@ export default function PublishToCommunityModal({
   const [customAgeTag, setCustomAgeTag] = useState('');
   const [customTopicTag, setCustomTopicTag] = useState('');
 
+  // 管理自訂標籤模態框
+  const [showManageTagsModal, setShowManageTagsModal] = useState(false);
+  const [userCustomTags, setUserCustomTags] = useState<string[]>([]);
+
+  // 載入用戶的自訂標籤
+  useEffect(() => {
+    loadUserCustomTags();
+  }, []);
+
+  const loadUserCustomTags = async () => {
+    try {
+      const response = await fetch('/api/user/custom-tags');
+      if (response.ok) {
+        const data = await response.json();
+        setUserCustomTags(data.customTags || []);
+      }
+    } catch (error) {
+      console.error('載入自訂標籤失敗:', error);
+    }
+  };
+
   const toggleTag = (tag: string) => {
     if (selectedTags.includes(tag)) {
       setSelectedTags(selectedTags.filter(t => t !== tag));
@@ -60,28 +82,66 @@ export default function PublishToCommunityModal({
     }
   };
 
-  // 添加自定義年齡帶標籤
-  const handleAddCustomAge = () => {
-    if (customAgeTag.trim() && selectedTags.length < 5) {
-      const newTag = customAgeTag.trim();
-      if (!selectedTags.includes(newTag)) {
-        setSelectedTags([...selectedTags, newTag]);
+  // 添加自定義年齡帶標籤（保存到資料庫）
+  const handleAddCustomAge = async () => {
+    if (!customAgeTag.trim() || selectedTags.length >= 5) return;
+
+    const newTag = customAgeTag.trim();
+
+    try {
+      // 保存到資料庫
+      const response = await fetch('/api/user/custom-tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tag: newTag }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserCustomTags(data.customTags);
+
+        // 添加到已選標籤
+        if (!selectedTags.includes(newTag)) {
+          setSelectedTags([...selectedTags, newTag]);
+        }
       }
-      setCustomAgeTag('');
-      setShowCustomAgeInput(false);
+    } catch (error) {
+      console.error('添加自訂標籤失敗:', error);
     }
+
+    setCustomAgeTag('');
+    setShowCustomAgeInput(false);
   };
 
-  // 添加自定義主題標籤
-  const handleAddCustomTopic = () => {
-    if (customTopicTag.trim() && selectedTags.length < 5) {
-      const newTag = customTopicTag.trim();
-      if (!selectedTags.includes(newTag)) {
-        setSelectedTags([...selectedTags, newTag]);
+  // 添加自定義主題標籤（保存到資料庫）
+  const handleAddCustomTopic = async () => {
+    if (!customTopicTag.trim() || selectedTags.length >= 5) return;
+
+    const newTag = customTopicTag.trim();
+
+    try {
+      // 保存到資料庫
+      const response = await fetch('/api/user/custom-tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tag: newTag }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserCustomTags(data.customTags);
+
+        // 添加到已選標籤
+        if (!selectedTags.includes(newTag)) {
+          setSelectedTags([...selectedTags, newTag]);
+        }
       }
-      setCustomTopicTag('');
-      setShowCustomTopicInput(false);
+    } catch (error) {
+      console.error('添加自訂標籤失敗:', error);
     }
+
+    setCustomTopicTag('');
+    setShowCustomTopicInput(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -475,55 +535,92 @@ export default function PublishToCommunityModal({
 
             {/* 添加主題按鈕/輸入框 */}
             <div>
-              {!showCustomTopicInput ? (
-                <button
-                  type="button"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                  onClick={() => setShowCustomTopicInput(true)}
-                >
-                  + 添加主題
-                </button>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={customTopicTag}
-                    onChange={(e) => setCustomTopicTag(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddCustomTopic();
-                      } else if (e.key === 'Escape') {
+              <div className="flex items-center gap-3">
+                {!showCustomTopicInput ? (
+                  <button
+                    type="button"
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    onClick={() => setShowCustomTopicInput(true)}
+                  >
+                    + 添加主題
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={customTopicTag}
+                      onChange={(e) => setCustomTopicTag(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddCustomTopic();
+                        } else if (e.key === 'Escape') {
+                          setShowCustomTopicInput(false);
+                          setCustomTopicTag('');
+                        }
+                      }}
+                      placeholder="輸入主題..."
+                      className="px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddCustomTopic}
+                      className="p-1 text-green-600 hover:bg-green-100 rounded"
+                      title="確認"
+                    >
+                      <Check size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
                         setShowCustomTopicInput(false);
                         setCustomTopicTag('');
-                      }
-                    }}
-                    placeholder="輸入主題..."
-                    className="px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddCustomTopic}
-                    className="p-1 text-green-600 hover:bg-green-100 rounded"
-                    title="確認"
-                  >
-                    <Check size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowCustomTopicInput(false);
-                      setCustomTopicTag('');
-                    }}
-                    className="p-1 text-red-600 hover:bg-red-100 rounded"
-                    title="取消"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              )}
+                      }}
+                      className="p-1 text-red-600 hover:bg-red-100 rounded"
+                      title="取消"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
+
+                {/* 管理自訂標籤按鈕 */}
+                <button
+                  type="button"
+                  className="text-sm text-gray-600 hover:text-gray-800 font-medium flex items-center gap-1"
+                  onClick={() => setShowManageTagsModal(true)}
+                  title="管理我的自訂標籤"
+                >
+                  <Settings size={14} />
+                  管理自訂標籤
+                </button>
+              </div>
             </div>
+
+            {/* 用戶自訂標籤 */}
+            {userCustomTags.length > 0 && (
+              <div>
+                <div className="text-xs font-medium text-gray-600 mb-2">我的自訂標籤:</div>
+                <div className="flex flex-wrap gap-2">
+                  {userCustomTags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => toggleTag(tag)}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors border ${
+                        selectedTags.includes(tag)
+                          ? 'bg-purple-500 text-white border-purple-500'
+                          : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
+                      }`}
+                      disabled={!selectedTags.includes(tag) && selectedTags.length >= 5}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 描述 */}
@@ -577,7 +674,15 @@ export default function PublishToCommunityModal({
           </div>
         </form>
       </div>
+
+      {/* 管理自訂標籤模態框 */}
+      <ManageCustomTagsModal
+        isOpen={showManageTagsModal}
+        onClose={() => setShowManageTagsModal(false)}
+        onTagsUpdated={(tags) => {
+          setUserCustomTags(tags);
+        }}
+      />
     </div>
   );
 }
-
