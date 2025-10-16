@@ -85,6 +85,50 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   const [isDragging, setIsDragging] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [newTitle, setNewTitle] = useState(activity.title);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  // 動態更新菜單位置
+  React.useEffect(() => {
+    if (showMenu && menuRef.current) {
+      const menuElement = menuRef.current;
+      const rect = menuElement.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let newX = menuPosition.x;
+      let newY = menuPosition.y;
+      let needsUpdate = false;
+
+      // 檢查右側邊界
+      if (rect.right > viewportWidth - 8) {
+        newX = Math.max(8, viewportWidth - rect.width - 8);
+        needsUpdate = true;
+      }
+
+      // 檢查左側邊界
+      if (rect.left < 8) {
+        newX = 8;
+        needsUpdate = true;
+      }
+
+      // 檢查底部邊界
+      if (rect.bottom > viewportHeight - 8) {
+        newY = Math.max(8, viewportHeight - rect.height - 8);
+        needsUpdate = true;
+      }
+
+      // 檢查頂部邊界
+      if (rect.top < 8) {
+        newY = 8;
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        setMenuPosition({ x: newX, y: newY });
+      }
+    }
+  }, [showMenu, menuPosition.x, menuPosition.y]);
 
 
 
@@ -125,6 +169,49 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
     } finally {
       setLoadingVocabulary(false);
     }
+  };
+
+  // 動態計算菜單位置
+  const calculateMenuPosition = (buttonElement: HTMLElement) => {
+    const rect = buttonElement.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // 預估菜單尺寸
+    const menuWidth = 200; // 預估寬度
+    const menuHeight = 300; // 預估高度
+
+    let x = rect.right - menuWidth; // 默認右對齊
+    let y = rect.bottom + 4; // 默認在按鈕下方
+
+    // 如果右側空間不足，改為左對齊
+    if (x < 8) {
+      x = 8;
+    }
+
+    // 如果右側超出視窗，調整到左側
+    if (rect.right + menuWidth > viewportWidth - 8) {
+      x = Math.max(8, viewportWidth - menuWidth - 8);
+    }
+
+    // 如果下方空間不足，顯示在按鈕上方
+    if (y + menuHeight > viewportHeight - 8) {
+      y = Math.max(8, rect.top - menuHeight - 4);
+    }
+
+    return { x, y };
+  };
+
+  // 處理菜單開關
+  const handleMenuToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    if (!showMenu) {
+      const position = calculateMenuPosition(e.currentTarget);
+      setMenuPosition(position);
+    }
+
+    setShowMenu(!showMenu);
   };
 
   // 處理重新命名
@@ -378,117 +465,134 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
 
               <div className="relative">
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMenu(!showMenu);
-                  }}
+                  onClick={handleMenuToggle}
                   className="p-1.5 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
                   title="更多選項"
                 >
                   <MoreVertical className="w-4 h-4" />
                 </button>
 
-                {/* 下拉菜單 */}
-                {showMenu && (
-                  <div className="absolute right-0 top-8 bg-white rounded-lg shadow-lg border py-1 z-[10] min-w-[120px]">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRename();
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                      重新命名
-                    </button>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onCopy?.(activity);
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                    >
-                      <Copy className="w-3 h-3" />
-                      複製
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onShare?.(activity);
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                    >
-                      <Share2 className="w-3 h-3" />
-                      分享
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAssignment?.(activity);
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                    >
-                      <BookOpen className="w-3 h-3" />
-                      課業分配
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEditContent?.(activity);
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                    >
-                      <FileEdit className="w-3 h-3" />
-                      編輯內容
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onMove?.(activity);
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
-                    >
-                      <Folder className="w-3 h-3" />
-                      移動到資料夾
-                    </button>
-
-                    <hr className="my-1" />
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete?.(activity);
-                        setShowMenu(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left text-red-600"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      刪除
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* 點擊外部關閉菜單 */}
+      {/* 響應式下拉菜單 */}
       {showMenu && (
-        <div
-          className="fixed inset-0 z-[5]"
-          onClick={() => setShowMenu(false)}
-        />
+        <>
+          {/* 背景遮罩 - 手機版更明顯 */}
+          <div
+            className="fixed inset-0 z-40 bg-black/10 sm:bg-transparent"
+            onClick={() => setShowMenu(false)}
+          />
+
+          <div
+            ref={menuRef}
+            className="fixed z-50 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[160px] sm:min-w-[180px] max-w-[90vw] sm:max-w-[280px] max-h-[80vh] overflow-y-auto"
+            style={{
+              left: menuPosition.x,
+              top: menuPosition.y
+            }}
+          >
+            {/* 菜單標題 - 響應式 */}
+            <div className="px-3 py-2 border-b border-gray-100">
+              <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">
+                {activity.title}
+              </p>
+              <p className="text-xs text-gray-400 truncate">
+                {activity.gameType}
+              </p>
+            </div>
+
+            {/* 菜單項目 - 響應式 */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRename();
+              }}
+              className="w-full flex items-center px-3 py-2 text-xs sm:text-sm hover:bg-gray-50 transition-colors text-gray-700"
+            >
+              <Edit2 className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="truncate">重新命名</span>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onCopy?.(activity);
+                setShowMenu(false);
+              }}
+              className="w-full flex items-center px-3 py-2 text-xs sm:text-sm hover:bg-gray-50 transition-colors text-gray-700"
+            >
+              <Copy className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="truncate">複製</span>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onShare?.(activity);
+                setShowMenu(false);
+              }}
+              className="w-full flex items-center px-3 py-2 text-xs sm:text-sm hover:bg-gray-50 transition-colors text-gray-700"
+            >
+              <Share2 className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="truncate">分享</span>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAssignment?.(activity);
+                setShowMenu(false);
+              }}
+              className="w-full flex items-center px-3 py-2 text-xs sm:text-sm hover:bg-gray-50 transition-colors text-gray-700"
+            >
+              <BookOpen className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="truncate">課業分配</span>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditContent?.(activity);
+                setShowMenu(false);
+              }}
+              className="w-full flex items-center px-3 py-2 text-xs sm:text-sm hover:bg-gray-50 transition-colors text-gray-700"
+            >
+              <FileEdit className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="truncate">編輯內容</span>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onMove?.(activity);
+                setShowMenu(false);
+              }}
+              className="w-full flex items-center px-3 py-2 text-xs sm:text-sm hover:bg-gray-50 transition-colors text-gray-700"
+            >
+              <Folder className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="truncate">移動到資料夾</span>
+            </button>
+
+            <hr className="my-1 border-gray-100" />
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(activity);
+                setShowMenu(false);
+              }}
+              className="w-full flex items-center px-3 py-2 text-xs sm:text-sm hover:bg-red-50 transition-colors text-red-600"
+            >
+              <Trash2 className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="truncate">刪除</span>
+            </button>
+          </div>
+        </>
       )}
 
       {/* 詞彙詳情模態框 */}
