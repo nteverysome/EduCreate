@@ -84,19 +84,34 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as {
+      name?: string;
+      description?: string;
+      color?: string;
+      icon?: string;
+      type?: string;
+    };
     const { name, description, color, icon, type } = body;
 
+    // 🔍 調試日誌
+    console.log('🔍 [API DEBUG] POST /api/folders 被調用');
+    console.log('🔍 [API DEBUG] 請求 body:', body);
+    console.log('🔍 [API DEBUG] 用戶 ID:', session.user.id);
+    console.log('🔍 [API DEBUG] 資料夾名稱:', name);
+    console.log('🔍 [API DEBUG] 資料夾類型:', type);
+
     if (!name || !name.trim()) {
+      console.error('❌ [API ERROR] 資料夾名稱為空');
       return NextResponse.json({ error: '資料夾名稱不能為空' }, { status: 400 });
     }
 
     const folderType = type === 'results' ? 'RESULTS' : 'ACTIVITIES';
+    console.log('🔍 [API DEBUG] 轉換後的資料夾類型:', folderType);
 
     // 檢查是否已存在同名同類型資料夾（未删除的）
     const existingFolder = await prisma.folder.findFirst({
@@ -108,8 +123,18 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    console.log('🔍 [API DEBUG] 查詢現有資料夾結果:', existingFolder);
+
     if (existingFolder) {
-      return NextResponse.json({ error: '資料夾名稱已存在' }, { status: 400 });
+      console.error('❌ [API ERROR] 資料夾名稱已存在:', existingFolder);
+      return NextResponse.json({
+        error: '資料夾名稱已存在',
+        existingFolder: {
+          id: existingFolder.id,
+          name: existingFolder.name,
+          type: existingFolder.type
+        }
+      }, { status: 400 });
     }
 
     // 用户反馈：希望可以同颜色重复创建，所以移除颜色重复检查
@@ -146,12 +171,18 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await request.json() as {
+      id?: string;
+      name?: string;
+      description?: string;
+      color?: string;
+      icon?: string;
+    };
     const { id, name, description, color, icon } = body;
 
     if (!id) {
