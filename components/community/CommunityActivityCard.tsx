@@ -128,7 +128,7 @@ export default function CommunityActivityCard({
 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
-      <Link href={`/community/activity/${activity.id}`} className="block">
+      <Link href={`/community/activity/${activity.shareToken}`} className="block">
         {/* 縮圖 */}
         <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
           {activity.thumbnailUrl ? (

@@ -138,6 +138,7 @@ export function validateCommunityData(data: CommunityActivityData): CommunityDat
  */
 export interface FormattedCommunityActivity {
   id: string;
+  shareToken: string;
   title: string;
   description: string | null;
   thumbnailUrl: string | null;
@@ -177,6 +178,7 @@ export function formatActivityForCommunity(
 ): FormattedCommunityActivity {
   return {
     id: activity.id,
+    shareToken: activity.shareToken,
     title: activity.title,
     description: activity.communityDescription || activity.description || null,
     thumbnailUrl: activity.communityThumbnail || null,
