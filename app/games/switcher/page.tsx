@@ -121,18 +121,19 @@ const GameSwitcherPage: React.FC = () => {
 
   // 快速操作按鈕處理函數
   const handleCopyLink = useCallback(async () => {
-    if (!activityId) return;
+    if (!activityId || !assignmentId) return;
 
-    const gameLink = `${window.location.origin}/games/switcher?game=${currentGameId}&activityId=${activityId}`;
+    // 複製學生遊戲連結
+    const studentLink = `${window.location.origin}/play/${activityId}/${assignmentId}`;
     try {
-      await navigator.clipboard.writeText(gameLink);
+      await navigator.clipboard.writeText(studentLink);
       setShowCopySuccess(true);
       setTimeout(() => setShowCopySuccess(false), 2000);
-      console.log('✅ 遊戲連結已複製:', gameLink);
+      console.log('✅ 學生遊戲連結已複製:', studentLink);
     } catch (error) {
       console.error('❌ 複製失敗:', error);
     }
-  }, [activityId, currentGameId]);
+  }, [activityId, assignmentId]);
 
   const handleShowQRCode = useCallback(() => {
     if (!activityId) return;
