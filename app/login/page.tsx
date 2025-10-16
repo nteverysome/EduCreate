@@ -83,24 +83,30 @@ export default function LoginPage() {
   const handleDemoLogin = async () => {
     setIsLoading(true);
     setError('');
-    
+
     try {
-      // 創建演示會話
-      const demoSession = {
-        user: {
-          id: 'demo-user',
-          name: '演示用戶',
-          email: 'demo@educreate.com',
-          role: 'USER'
+      // 使用真實的 NextAuth 登入流程
+      // 演示帳號: demo@educreate.com / demo123
+      const result = await signIn('credentials', {
+        email: 'demo@educreate.com',
+        password: 'demo123',
+        callbackUrl,
+        redirect: false
+      });
+
+      if (result?.error) {
+        if (result.error === 'CredentialsSignin') {
+          setError('演示登入失敗：演示帳號未設置，請聯繫管理員');
+        } else {
+          setError('演示登入失敗，請稍後再試');
         }
-      };
-      
-      // 存儲到 localStorage 作為演示
-      localStorage.setItem('demo-session', JSON.stringify(demoSession));
-      
-      // 直接跳轉到目標頁面
-      router.push(callbackUrl);
+      } else if (result?.url) {
+        // 清除舊的演示 session（如果有）
+        localStorage.removeItem('demo-session');
+        router.push(result.url);
+      }
     } catch (error) {
+      console.error('演示登入錯誤:', error);
       setError('演示登入失敗');
     } finally {
       setIsLoading(false);
