@@ -38,6 +38,8 @@ interface GameSwitcherProps {
   currentGeptLevel?: string;
   customVocabulary?: any[];
   activityId?: string | null;
+  shareToken?: string | null;
+  isShared?: boolean;
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -319,7 +321,9 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   hideGeptSelector = false,
   currentGeptLevel: propGeptLevel = 'elementary',
   customVocabulary = [],
-  activityId = null
+  activityId = null,
+  shareToken = null,
+  isShared = false
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -350,6 +354,12 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     if (customVocabulary.length > 0 && activityId) {
       const separator = url.includes('?') ? '&' : '?';
       url += `${separator}activityId=${activityId}&customVocabulary=true`;
+
+      // 如果是分享模式，添加 shareToken 參數
+      if (isShared && shareToken) {
+        url += `&shareToken=${shareToken}&isShared=true`;
+      }
+
       console.log('🎯 使用自定義詞彙 URL:', url);
     }
 

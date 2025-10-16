@@ -39,6 +39,8 @@ const GameSwitcherPage: React.FC = () => {
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [customVocabulary, setCustomVocabulary] = useState<any[]>([]);
   const [activityId, setActivityId] = useState<string | null>(null);
+  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [isShared, setIsShared] = useState<boolean>(false);
   
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -115,10 +117,15 @@ const GameSwitcherPage: React.FC = () => {
 
     if (activityIdParam) {
       setActivityId(activityIdParam);
-      // 載入自定義詞彙（根據是否為分享模式使用不同的 API）
+
+      // 設置分享模式狀態
       if (isSharedParam === 'true' && shareTokenParam) {
+        setIsShared(true);
+        setShareToken(shareTokenParam);
         loadSharedVocabulary(activityIdParam, shareTokenParam);
       } else {
+        setIsShared(false);
+        setShareToken(null);
         loadCustomVocabulary(activityIdParam);
       }
     }
@@ -570,6 +577,8 @@ const GameSwitcherPage: React.FC = () => {
             currentGeptLevel={currentGeptLevel}
             customVocabulary={customVocabulary}
             activityId={activityId}
+            shareToken={shareToken}
+            isShared={isShared}
           />
         </div>
 
