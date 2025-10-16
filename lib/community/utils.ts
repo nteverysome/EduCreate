@@ -260,16 +260,16 @@ export function calculateTrendingScore(
  * 預定義的活動分類
  */
 export const ACTIVITY_CATEGORIES = [
-  'English',
-  'Math',
-  'Science',
-  'History',
-  'Geography',
-  'Art',
-  'Music',
-  'Physical Education',
-  'Computer Science',
-  'Other',
+  '英文',
+  '數學',
+  '科學',
+  '歷史',
+  '地理',
+  '藝術',
+  '音樂',
+  '體育',
+  '電腦科學',
+  '其他',
 ] as const;
 
 /**

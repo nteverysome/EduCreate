@@ -12,7 +12,7 @@
 
 import { useState } from 'react';
 import { Search, Filter, X } from 'lucide-react';
-import { ACTIVITY_CATEGORIES, COMMON_TAGS } from '@/lib/community/utils';
+import { ACTIVITY_CATEGORIES, SUBJECT_TAGS } from '@/lib/community/utils';
 
 interface CommunityFiltersProps {
   onFilterChange: (filters: FilterState) => void;
@@ -154,9 +154,9 @@ export default function CommunityFilters({ onFilterChange, initialFilters }: Com
 
           {/* 標籤 */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">標籤</h4>
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">科目標籤</h4>
             <div className="flex flex-wrap gap-2">
-              {COMMON_TAGS.slice(0, 15).map((tag) => (
+              {SUBJECT_TAGS.map((tag) => (
                 <button
                   key={tag}
                   onClick={() => toggleTag(tag)}
