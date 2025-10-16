@@ -11,7 +11,7 @@ import { MoveActivityModal } from './MoveActivityModal';
 import { BatchMoveModal } from './BatchMoveModal';
 import AssignmentModal, { AssignmentConfig } from './AssignmentModal';
 import AssignmentSetModal from './AssignmentSetModal';
-import CommunityShareModal from './CommunityShareModal';
+import PublishToCommunityModal from './PublishToCommunityModal';
 import ActivityQRCodeModal from './ActivityQRCodeModal';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
@@ -1172,16 +1172,18 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         onGoToResults={handleGoToResults}
       />
 
-      {/* 社區分享模態框 */}
-      {selectedActivity && (
-        <CommunityShareModal
+      {/* 發布到社區模態框 */}
+      {selectedActivity && showCommunityShareModal && (
+        <PublishToCommunityModal
           activity={selectedActivity}
-          isOpen={showCommunityShareModal}
           onClose={() => {
             setShowCommunityShareModal(false);
             setSelectedActivity(null);
           }}
-          onUpdate={handleActivityUpdate}
+          onSuccess={() => {
+            // 重新載入活動列表
+            loadActivities();
+          }}
         />
       )}
 
