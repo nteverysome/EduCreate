@@ -167,49 +167,101 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
         </div>
       </div>
 
-      {/* 選擇模式工具欄 */}
+      {/* 選擇模式工具欄 - 響應式設計 */}
       {selectionMode && (
-        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-blue-700">
-              已選擇 {selectedCount} / {totalCount} 個活動
-            </span>
-            <button
-              onClick={onSelectAll}
-              className="text-sm text-blue-600 hover:text-blue-800 underline"
-            >
-              全選
-            </button>
-            <button
-              onClick={onClearSelection}
-              className="text-sm text-blue-600 hover:text-blue-800 underline"
-            >
-              清除選擇
-            </button>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4">
+          {/* 桌面版：水平佈局 */}
+          <div className="hidden sm:flex items-center justify-between">
+            <div className="flex items-center gap-3 lg:gap-4">
+              <span className="text-sm lg:text-base text-blue-700 font-medium">
+                已選擇 {selectedCount} / {totalCount} 個活動
+              </span>
+              <button
+                onClick={onSelectAll}
+                className="text-sm lg:text-base text-blue-600 hover:text-blue-800 underline transition-colors"
+              >
+                全選
+              </button>
+              <button
+                onClick={onClearSelection}
+                className="text-sm lg:text-base text-blue-600 hover:text-blue-800 underline transition-colors"
+              >
+                清除選擇
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 lg:gap-3">
+              <button
+                onClick={onBatchCopy}
+                disabled={selectedCount === 0}
+                className="px-3 py-1.5 lg:px-4 lg:py-2 bg-blue-500 text-white rounded text-sm lg:text-base hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                複製 ({selectedCount})
+              </button>
+              <button
+                onClick={onBatchMove}
+                disabled={selectedCount === 0}
+                className="px-3 py-1.5 lg:px-4 lg:py-2 bg-green-500 text-white rounded text-sm lg:text-base hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                移動 ({selectedCount})
+              </button>
+              <button
+                onClick={onBatchDelete}
+                disabled={selectedCount === 0}
+                className="px-3 py-1.5 lg:px-4 lg:py-2 bg-red-500 text-white rounded text-sm lg:text-base hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                刪除 ({selectedCount})
+              </button>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onBatchCopy}
-              disabled={selectedCount === 0}
-              className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              複製 ({selectedCount})
-            </button>
-            <button
-              onClick={onBatchMove}
-              disabled={selectedCount === 0}
-              className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              移動 ({selectedCount})
-            </button>
-            <button
-              onClick={onBatchDelete}
-              disabled={selectedCount === 0}
-              className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              刪除 ({selectedCount})
-            </button>
+
+          {/* 手機版：垂直佈局 */}
+          <div className="sm:hidden space-y-3">
+            {/* 選擇狀態和控制 */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-blue-700 font-medium">
+                已選擇 {selectedCount} / {totalCount} 個活動
+              </span>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={onSelectAll}
+                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  全選
+                </button>
+                <button
+                  onClick={onClearSelection}
+                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  清除選擇
+                </button>
+              </div>
+            </div>
+
+            {/* 批量操作按鈕 */}
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={onBatchCopy}
+                disabled={selectedCount === 0}
+                className="px-2 py-2 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                複製 ({selectedCount})
+              </button>
+              <button
+                onClick={onBatchMove}
+                disabled={selectedCount === 0}
+                className="px-2 py-2 bg-green-500 text-white rounded text-xs hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                移動 ({selectedCount})
+              </button>
+              <button
+                onClick={onBatchDelete}
+                disabled={selectedCount === 0}
+                className="px-2 py-2 bg-red-500 text-white rounded text-xs hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                刪除 ({selectedCount})
+              </button>
+            </div>
           </div>
         </div>
       )}
