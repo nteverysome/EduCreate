@@ -44,6 +44,8 @@ interface Activity {
   isPublicShared?: boolean; // 社區分享狀態
   shareToken?: string; // 分享 token
   communityPlays?: number; // 社區遊玩次數
+  communityTags?: string[]; // 社區標籤
+  communityCategory?: string; // 社區分類
 }
 
 interface WordwallStyleActivityCardProps {
@@ -445,6 +447,30 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
             </div>
           )}
         </div>
+
+        {/* 社區標籤 - 只在公開發布時顯示 */}
+        {activity.isPublicShared && (activity.communityTags || activity.communityCategory) && (
+          <div className="mb-3">
+            <div className="flex flex-wrap gap-1.5">
+              {/* 分類標籤 */}
+              {activity.communityCategory && (
+                <span className="px-2.5 py-1 bg-blue-500 text-white text-xs rounded-full font-medium">
+                  {activity.communityCategory}
+                </span>
+              )}
+
+              {/* 社區標籤 */}
+              {activity.communityTags && activity.communityTags.slice(0, 5).map((tag, index) => (
+                <span
+                  key={index}
+                  className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs rounded-full font-medium border border-gray-200 hover:bg-gray-200 transition-colors"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 最後修改時間 */}
         <div className="flex items-center justify-between">
