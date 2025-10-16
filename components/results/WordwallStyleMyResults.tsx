@@ -766,6 +766,26 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             result={result}
             onClick={handleResultClick}
             onMenuClick={handleResultMenuClick}
+            onCopyLink={(result, event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              const studentLink = `${window.location.origin}/play/${result.activityId}/${result.assignmentId}`;
+              navigator.clipboard.writeText(studentLink).then(() => {
+                console.log('✅ 學生分享連結已複製:', studentLink);
+              }).catch(err => {
+                console.error('❌ 複製失敗:', err);
+              });
+            }}
+            onShowQRCode={(result, event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              handleQRCode(result);
+            }}
+            onDelete={(result, event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              handleDeleteResult(result);
+            }}
           />
         ))}
 
