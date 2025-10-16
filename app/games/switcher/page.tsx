@@ -110,6 +110,7 @@ const GameSwitcherPage: React.FC = () => {
     const activityIdParam = searchParams?.get('activityId');
     const shareTokenParam = searchParams?.get('shareToken');
     const isSharedParam = searchParams?.get('isShared');
+    const assignmentIdParam = searchParams?.get('assignmentId');
 
     if (gameParam) {
       setCurrentGameId(gameParam);
@@ -118,12 +119,19 @@ const GameSwitcherPage: React.FC = () => {
     if (activityIdParam) {
       setActivityId(activityIdParam);
 
-      // 設置分享模式狀態
-      if (isSharedParam === 'true' && shareTokenParam) {
+      // 優先檢查是否為學生遊戲模式（有 assignmentId）
+      if (assignmentIdParam) {
+        console.log('🎓 學生遊戲模式:', { activityIdParam, assignmentIdParam });
+        loadStudentVocabulary(activityIdParam, assignmentIdParam);
+      }
+      // 其次檢查是否為社區分享模式
+      else if (isSharedParam === 'true' && shareTokenParam) {
         setIsShared(true);
         setShareToken(shareTokenParam);
         loadSharedVocabulary(activityIdParam, shareTokenParam);
-      } else {
+      }
+      // 最後是正常模式（需要登入）
+      else {
         setIsShared(false);
         setShareToken(null);
         loadCustomVocabulary(activityIdParam);
@@ -167,6 +175,26 @@ const GameSwitcherPage: React.FC = () => {
       }
     } catch (error) {
       console.error('❌ 載入分享遊戲詞彙時出錯:', error);
+      setCustomVocabulary([]);
+    }
+  };
+
+  // 載入學生遊戲的詞彙（不需要身份驗證）
+  const loadStudentVocabulary = async (activityId: string, assignmentId: string) => {
+    try {
+      console.log('🎓 載入學生遊戲詞彙:', { activityId, assignmentId });
+      const response = await fetch(`/api/play/${activityId}/${assignmentId}`);
+
+      if (response.ok) {
+        const data = await response.json() as { activity?: { vocabularyItems?: any[] } };
+        console.log('✅ 成功載入學生遊戲詞彙:', data.activity?.vocabularyItems);
+        setCustomVocabulary(data.activity?.vocabularyItems || []);
+      } else {
+        console.error('❌ 載入學生遊戲詞彙失敗:', response.status);
+        setCustomVocabulary([]);
+      }
+    } catch (error) {
+      console.error('❌ 載入學生遊戲詞彙時出錯:', error);
       setCustomVocabulary([]);
     }
   };
