@@ -96,8 +96,8 @@ export default function AssignmentPlayPage() {
         localStorage.setItem('studentName', studentName.trim());
       }
 
-      // 跳轉到實際的遊戲頁面
-      const gameUrl = `/create/${getGameTemplateId(activity?.gameType)}?activityId=${activityId}&assignmentId=${assignmentId}&studentName=${encodeURIComponent(studentName.trim())}`;
+      // 跳轉到遊戲頁面（學生模式，無需登入）
+      const gameUrl = `/games/switcher?game=${getGameTemplateId(activity?.gameType)}&activityId=${activityId}&assignmentId=${assignmentId}&studentName=${encodeURIComponent(studentName.trim())}`;
       console.log('🎯 跳轉到遊戲頁面:', gameUrl);
       router.push(gameUrl);
       
