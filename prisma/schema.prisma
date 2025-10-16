@@ -31,6 +31,12 @@ model User {
   subscription         Subscription?
   learningProgress     LearningProgress[]
   vocabularySets       VocabularySet[]
+
+  // 社區功能關聯
+  activityLikes        ActivityLike[]
+  activityBookmarks    ActivityBookmark[]
+  activityComments     ActivityComment[]
+  communityReports     CommunityReport[]
 }
 
 model Account {
@@ -98,10 +104,24 @@ model Activity {
   geptLevel       GEPTLevel?           @default(ELEMENTARY)
   totalWords      Int                  @default(0)
 
-  // 社區分享功能
+  // 社區分享功能（基礎）
   isPublicShared  Boolean              @default(false)
   shareToken      String?              @unique
   communityPlays  Int                  @default(0)
+
+  // 社區功能（擴展）
+  publishedToCommunityAt DateTime?
+  communityCategory      String?
+  communityTags          String[]             @default([])
+  communityDescription   String?
+  communityThumbnail     String?
+  communityViews         Int                  @default(0)
+  communityLikes         Int                  @default(0)
+  communityBookmarks     Int                  @default(0)
+  communityComments      Int                  @default(0)
+  isFeatured             Boolean              @default(false)
+  featuredAt             DateTime?
+
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
   deletedAt       DateTime?
@@ -118,6 +138,20 @@ model Activity {
   assignments     Assignment[]
   gameSettings    GameSettings?
   vocabularyItems VocabularyItem[]
+
+  // 社區功能關聯
+  likes           ActivityLike[]
+  bookmarks       ActivityBookmark[]
+  comments        ActivityComment[]
+  reports         CommunityReport[]
+
+  // 索引優化
+  @@index([isPublicShared, publishedToCommunityAt])
+  @@index([communityCategory])
+  @@index([communityLikes])
+  @@index([communityViews])
+  @@index([isFeatured, featuredAt])
+  @@index([userId, isPublicShared])
 }
 
 model Template {
@@ -611,4 +645,110 @@ enum AssignmentStatus {
 enum ResultStatus {
   ACTIVE
   ARCHIVED
+}
+
+// ==================== 社區功能模型 ====================
+
+// 活動喜歡模型
+model ActivityLike {
+  id         String   @id @default(cuid())
+  activityId String
+  userId     String
+  createdAt  DateTime @default(now())
+
+  // 關聯
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 唯一約束：每個用戶只能喜歡一次
+  @@unique([activityId, userId])
+  @@index([userId])
+  @@index([activityId])
+  @@index([createdAt])
+}
+
+// 活動收藏模型
+model ActivityBookmark {
+  id         String   @id @default(cuid())
+  activityId String
+  userId     String
+  folderId   String?  // 可選：收藏到特定資料夾
+  createdAt  DateTime @default(now())
+
+  // 關聯
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 唯一約束：每個用戶只能收藏一次
+  @@unique([activityId, userId])
+  @@index([userId])
+  @@index([activityId])
+  @@index([folderId])
+  @@index([createdAt])
+}
+
+// 活動評論模型
+model ActivityComment {
+  id         String    @id @default(cuid())
+  activityId String
+  userId     String
+  content    String
+  parentId   String?   // 父評論ID（用於回覆）
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime? // 軟刪除
+
+  // 關聯
+  activity   Activity          @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent     ActivityComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    ActivityComment[] @relation("CommentReplies")
+
+  // 索引
+  @@index([activityId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+// 社區舉報模型
+model CommunityReport {
+  id         String       @id @default(cuid())
+  activityId String
+  userId     String
+  reason     ReportReason
+  details    String?
+  status     ReportStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  resolvedAt DateTime?
+  resolvedBy String?      // 處理人員ID
+
+  // 關聯
+  activity   Activity     @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 索引
+  @@index([activityId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// 舉報原因枚舉
+enum ReportReason {
+  INAPPROPRIATE_CONTENT
+  SPAM
+  COPYRIGHT_VIOLATION
+  MISLEADING
+  OTHER
+}
+
+// 舉報狀態枚舉
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  REJECTED
 }
