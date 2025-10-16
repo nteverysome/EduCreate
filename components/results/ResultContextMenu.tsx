@@ -69,6 +69,21 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const [showMoveSubmenu, setShowMoveSubmenu] = React.useState(false);
   const [menuPosition, setMenuPosition] = React.useState({ x, y });
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  // 检测屏幕尺寸
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
 
   // 处理点击外部关闭菜单
   useEffect(() => {
@@ -221,14 +236,18 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
                 <span className="truncate">{item.label}</span>
               </div>
               {(item as any).hasSubmenu && (
-                <ChevronRightIcon className="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" />
+                <ChevronRightIcon
+                  className={`w-4 h-4 text-gray-400 flex-shrink-0 ml-2 transition-transform ${
+                    showMoveSubmenu && isMobile ? 'rotate-90' : ''
+                  }`}
+                />
               )}
             </button>
 
-            {/* 移動到資料夾子菜單 - 響應式 */}
-            {(item as any).hasSubmenu && showMoveSubmenu && (
-              <div className="absolute left-full top-0 ml-1 bg-white rounded-md shadow-lg border border-gray-200 py-1 min-w-[160px] sm:min-w-[180px] max-w-[80vw] max-h-[50vh] sm:max-h-[300px] overflow-y-auto z-10">
-                {/* 移動到根目錄 - 響應式 */}
+            {/* 手機版：內嵌展開的資料夾選項 */}
+            {(item as any).hasSubmenu && showMoveSubmenu && isMobile && (
+              <div className="bg-gray-50 border-l-2 border-purple-200">
+                {/* 移動到根目錄 */}
                 {result.folderId && (
                   <button
                     onClick={(e) => {
@@ -237,21 +256,21 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
                       onMove?.(null);
                       onClose();
                     }}
-                    className="w-full flex items-center px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center px-6 py-2 text-xs text-gray-700 hover:bg-gray-100 transition-colors"
                   >
-                    <FolderIcon className="w-4 h-4 mr-2 sm:mr-3 text-gray-400 flex-shrink-0" />
+                    <FolderIcon className="w-3 h-3 mr-2 text-gray-400 flex-shrink-0" />
                     <span>根目錄</span>
                   </button>
                 )}
 
-                {/* 資料夾列表 - 響應式 */}
+                {/* 資料夾列表 */}
                 {folders.length === 0 ? (
-                  <div className="px-3 py-2 text-xs sm:text-sm text-gray-400">
+                  <div className="px-6 py-2 text-xs text-gray-400">
                     沒有可用的資料夾
                   </div>
                 ) : (
                   folders
-                    .filter(folder => folder.id !== result.folderId) // 過濾掉當前所在的資料夾
+                    .filter(folder => folder.id !== result.folderId)
                     .map((folder) => (
                       <button
                         key={folder.id}
@@ -261,10 +280,66 @@ export const ResultContextMenu: React.FC<ResultContextMenuProps> = ({
                           onMove?.(folder.id);
                           onClose();
                         }}
-                        className="w-full flex items-center px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="w-full flex items-center px-6 py-2 text-xs text-gray-700 hover:bg-gray-100 transition-colors"
                       >
                         <FolderIcon
-                          className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0"
+                          className="w-3 h-3 mr-2 flex-shrink-0"
+                          style={{ color: folder.color || '#3B82F6' }}
+                        />
+                        <span className="truncate">{folder.name}</span>
+                      </button>
+                    ))
+                )}
+              </div>
+            )}
+
+            {/* 桌面版：智能定位的子菜單 */}
+            {(item as any).hasSubmenu && showMoveSubmenu && !isMobile && (
+              <div
+                className={`absolute top-0 ml-1 bg-white rounded-md shadow-lg border border-gray-200 py-1 min-w-[180px] max-w-[280px] max-h-[300px] overflow-y-auto z-10 ${
+                  // 智能定位：檢測是否會超出右邊界
+                  typeof window !== 'undefined' && (x + 400) > window.innerWidth
+                    ? 'right-full mr-1'
+                    : 'left-full'
+                }`}
+              >
+                {/* 移動到根目錄 */}
+                {result.folderId && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onMove?.(null);
+                      onClose();
+                    }}
+                    className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <FolderIcon className="w-4 h-4 mr-3 text-gray-400 flex-shrink-0" />
+                    <span>根目錄</span>
+                  </button>
+                )}
+
+                {/* 資料夾列表 */}
+                {folders.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-gray-400">
+                    沒有可用的資料夾
+                  </div>
+                ) : (
+                  folders
+                    .filter(folder => folder.id !== result.folderId)
+                    .map((folder) => (
+                      <button
+                        key={folder.id}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onMove?.(folder.id);
+                          onClose();
+                        }}
+                        className="w-full flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <FolderIcon
+                          className="w-4 h-4 mr-3 flex-shrink-0"
                           style={{ color: folder.color || '#3B82F6' }}
                         />
                         <span className="truncate">{folder.name}</span>
