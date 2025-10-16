@@ -12,7 +12,13 @@
 
 import { useState } from 'react';
 import { X, Globe, Tag, FileText, Image as ImageIcon, Loader2, Check } from 'lucide-react';
-import { ACTIVITY_CATEGORIES, COMMON_TAGS } from '@/lib/community/utils';
+import {
+  ACTIVITY_CATEGORIES,
+  GRADE_TAGS,
+  EDUCATION_LEVEL_TAGS,
+  SUBJECT_TAGS,
+  THEME_TAGS
+} from '@/lib/community/utils';
 
 interface PublishToCommunityModalProps {
   activity: {
@@ -290,29 +296,113 @@ export default function PublishToCommunityModal({
           </div>
 
           {/* 標籤 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              標籤 <span className="text-red-500">*</span>
-              <span className="text-xs text-gray-500 ml-2">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-medium text-gray-700">
+                標籤 <span className="text-red-500">*</span>
+              </label>
+              <span className="text-xs text-gray-500">
                 (已選擇 {selectedTags.length}/5)
               </span>
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {COMMON_TAGS.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => toggleTag(tag)}
-                  className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                    selectedTags.includes(tag)
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                  disabled={!selectedTags.includes(tag) && selectedTags.length >= 5}
-                >
-                  {tag}
-                </button>
-              ))}
+            </div>
+
+            {/* 年級標籤 */}
+            <div>
+              <div className="flex flex-wrap gap-2">
+                {GRADE_TAGS.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      selectedTags.includes(tag)
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                    }`}
+                    disabled={!selectedTags.includes(tag) && selectedTags.length >= 5}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 教育階段標籤 */}
+            <div>
+              <div className="flex flex-wrap gap-2">
+                {EDUCATION_LEVEL_TAGS.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      selectedTags.includes(tag)
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                    }`}
+                    disabled={!selectedTags.includes(tag) && selectedTags.length >= 5}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 主題標籤 */}
+            <div>
+              <div className="flex flex-wrap gap-2">
+                {THEME_TAGS.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      selectedTags.includes(tag)
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                    }`}
+                    disabled={!selectedTags.includes(tag) && selectedTags.length >= 5}
+                  >
+                    {selectedTags.includes(tag) && <Check size={14} className="inline mr-1" />}
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 科目標籤 */}
+            <div>
+              <div className="flex flex-wrap gap-2">
+                {SUBJECT_TAGS.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors border ${
+                      selectedTags.includes(tag)
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+                    disabled={!selectedTags.includes(tag) && selectedTags.length >= 5}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 添加主題連結 */}
+            <div>
+              <button
+                type="button"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                onClick={() => {
+                  // TODO: 實現自定義標籤功能
+                  alert('自定義標籤功能即將推出！');
+                }}
+              >
+                + 添加主題
+              </button>
             </div>
           </div>
 

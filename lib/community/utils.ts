@@ -271,29 +271,72 @@ export const ACTIVITY_CATEGORIES = [
 ] as const;
 
 /**
- * 預定義的常用標籤
+ * 預定義的常用標籤 - 按照圖片分類
  */
+
+// 年級標籤（藍色背景）
+export const GRADE_TAGS = [
+  '1年級',
+  '2年級',
+  '3年級',
+  '4年級',
+  '5年級',
+  '6年級',
+  '7年級',
+  '8年級',
+  '9年級',
+  '10年級',
+  '11年級',
+  '12年級',
+] as const;
+
+// 教育階段標籤（藍色背景）
+export const EDUCATION_LEVEL_TAGS = [
+  '初等教育',
+  '中等教育',
+  '初中',
+  '高中',
+  '技術職業等',
+  '高等教育',
+  '特殊教育',
+] as const;
+
+// 科目標籤（白色背景帶邊框）
+export const SUBJECT_TAGS = [
+  'English',
+  '入文學科',
+  '經濟',
+  '公民',
+  '化學',
+  '歷史',
+  '數學',
+  '翻譯',
+  '國語',
+  '日語',
+  '物理',
+  '生理',
+  '社會研究',
+  '科學',
+  '自然',
+  '地理',
+  '藝術',
+  '體育',
+  '國際',
+  '英文',
+] as const;
+
+// 主題標籤（藍色背景）
+export const THEME_TAGS = [
+  '英文學習',
+  '生活教育',
+] as const;
+
+// 所有標籤（用於驗證）
 export const COMMON_TAGS = [
-  'vocabulary',
-  'grammar',
-  'reading',
-  'writing',
-  'listening',
-  'speaking',
-  'beginner',
-  'intermediate',
-  'advanced',
-  'kids',
-  'elementary',
-  'middle school',
-  'high school',
-  'fun',
-  'interactive',
-  'quiz',
-  'game',
-  'practice',
-  'review',
-  'test',
+  ...GRADE_TAGS,
+  ...EDUCATION_LEVEL_TAGS,
+  ...SUBJECT_TAGS,
+  ...THEME_TAGS,
 ] as const;
 
 /**
