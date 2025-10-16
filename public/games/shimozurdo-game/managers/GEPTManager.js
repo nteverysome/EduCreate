@@ -52,12 +52,21 @@ class GEPTManager {
       // 檢查 URL 參數中是否有 activityId
       const urlParams = new URLSearchParams(window.location.search);
       const activityId = urlParams.get('activityId');
+      const shareToken = urlParams.get('shareToken');
+      const isShared = urlParams.get('isShared') === 'true';
 
       let apiUrl = '/api/vocabulary/sets';
       if (activityId) {
-        // 如果有 activityId，只載入該活動的詞彙
-        apiUrl = `/api/activities/${activityId}/vocabulary`;
-        console.log('🎯 載入特定活動的詞彙:', activityId);
+        // 檢查是否為分享模式
+        if (isShared && shareToken) {
+          // 分享模式：使用無需身份驗證的 API
+          apiUrl = `/api/share/${activityId}/${shareToken}`;
+          console.log('🌍 載入分享活動的詞彙 (匿名模式):', activityId);
+        } else {
+          // 正常模式：使用需要身份驗證的 API
+          apiUrl = `/api/activities/${activityId}/vocabulary`;
+          console.log('🎯 載入特定活動的詞彙:', activityId);
+        }
       }
 
       const response = await fetch(apiUrl);
@@ -68,7 +77,40 @@ class GEPTManager {
       const result = await response.json();
       console.log('📡 雲端 API 響應:', result);
 
-      // 檢查是否是單個活動的響應格式
+      // 處理分享模式的響應格式 { activity: { vocabularyItems: [...] } }
+      if (activityId && isShared && result.activity && result.activity.vocabularyItems) {
+        const vocabularyItems = result.activity.vocabularyItems;
+        console.log(`🌍 載入分享活動詞彙: ${result.activity.title} (${vocabularyItems.length} 個詞彙)`);
+
+        // 清空現有詞彙數據庫
+        this.wordDatabase.clear();
+
+        // 將所有詞彙設為初級（因為是用戶自定義的）
+        const customWords = vocabularyItems.map(item => ({
+          id: item.id,
+          english: item.english,
+          chinese: item.chinese,
+          level: 'elementary',
+          difficulty: item.difficultyLevel || 1,
+          frequency: 100 - (item.difficultyLevel || 1) * 10,
+          category: 'custom',
+          partOfSpeech: item.partOfSpeech || 'NOUN',
+          image: item.imageUrl,
+          phonetic: item.phonetic
+        }));
+
+        // 只設置初級詞彙，其他級別為空
+        this.wordDatabase.set('elementary', customWords);
+        this.wordDatabase.set('intermediate', []);
+        this.wordDatabase.set('high-intermediate', []);
+
+        console.log(`✅ 分享活動詞彙載入完成，總共 ${customWords.length} 個詞彙`);
+        console.log('📊 自定義詞彙數據庫統計:');
+        console.log(`  - 自定義: ${customWords.length} 個詞彙`);
+        return true;
+      }
+
+      // 檢查是否是單個活動的響應格式 (正常模式)
       if (activityId && result.vocabularyItems) {
         // 處理單個活動的詞彙
         console.log(`🎯 載入活動詞彙: ${result.activity.title} (${result.vocabularyItems.length} 個詞彙)`);
