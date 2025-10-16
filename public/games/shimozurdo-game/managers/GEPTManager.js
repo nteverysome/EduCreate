@@ -54,15 +54,24 @@ class GEPTManager {
       const activityId = urlParams.get('activityId');
       const shareToken = urlParams.get('shareToken');
       const isShared = urlParams.get('isShared') === 'true';
+      const assignmentId = urlParams.get('assignmentId');
 
       let apiUrl = '/api/vocabulary/sets';
       if (activityId) {
-        // 檢查是否為分享模式
-        if (isShared && shareToken) {
-          // 分享模式：使用無需身份驗證的 API
+        // 優先檢查是否為學生遊戲模式（有 assignmentId）
+        if (assignmentId) {
+          // 學生遊戲模式：使用無需身份驗證的 API
+          apiUrl = `/api/play/${activityId}/${assignmentId}`;
+          console.log('🎓 載入學生遊戲詞彙 (匿名模式):', { activityId, assignmentId });
+        }
+        // 其次檢查是否為社區分享模式
+        else if (isShared && shareToken) {
+          // 社區分享模式：使用無需身份驗證的 API
           apiUrl = `/api/share/${activityId}/${shareToken}`;
           console.log('🌍 載入分享活動的詞彙 (匿名模式):', activityId);
-        } else {
+        }
+        // 最後是正常模式
+        else {
           // 正常模式：使用需要身份驗證的 API
           apiUrl = `/api/activities/${activityId}/vocabulary`;
           console.log('🎯 載入特定活動的詞彙:', activityId);
@@ -77,10 +86,11 @@ class GEPTManager {
       const result = await response.json();
       console.log('📡 雲端 API 響應:', result);
 
-      // 處理分享模式的響應格式 { activity: { vocabularyItems: [...] } }
-      if (activityId && isShared && result.activity && result.activity.vocabularyItems) {
+      // 處理學生遊戲模式或社區分享模式的響應格式 { activity: { vocabularyItems: [...] } }
+      if (activityId && result.activity && result.activity.vocabularyItems) {
         const vocabularyItems = result.activity.vocabularyItems;
-        console.log(`🌍 載入分享活動詞彙: ${result.activity.title} (${vocabularyItems.length} 個詞彙)`);
+        const mode = assignmentId ? '學生遊戲' : '分享活動';
+        console.log(`🎓 載入${mode}詞彙: ${result.activity.title} (${vocabularyItems.length} 個詞彙)`);
 
         // 清空現有詞彙數據庫
         this.wordDatabase.clear();
@@ -104,7 +114,7 @@ class GEPTManager {
         this.wordDatabase.set('intermediate', []);
         this.wordDatabase.set('high-intermediate', []);
 
-        console.log(`✅ 分享活動詞彙載入完成，總共 ${customWords.length} 個詞彙`);
+        console.log(`✅ ${mode}詞彙載入完成，總共 ${customWords.length} 個詞彙`);
         console.log('📊 自定義詞彙數據庫統計:');
         console.log(`  - 自定義: ${customWords.length} 個詞彙`);
         return true;
