@@ -41,6 +41,7 @@ const GameSwitcherPage: React.FC = () => {
   const [activityId, setActivityId] = useState<string | null>(null);
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [isShared, setIsShared] = useState<boolean>(false);
+  const [assignmentId, setAssignmentId] = useState<string | null>(null);
   
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -122,18 +123,21 @@ const GameSwitcherPage: React.FC = () => {
       // 優先檢查是否為學生遊戲模式（有 assignmentId）
       if (assignmentIdParam) {
         console.log('🎓 學生遊戲模式:', { activityIdParam, assignmentIdParam });
+        setAssignmentId(assignmentIdParam);
         loadStudentVocabulary(activityIdParam, assignmentIdParam);
       }
       // 其次檢查是否為社區分享模式
       else if (isSharedParam === 'true' && shareTokenParam) {
         setIsShared(true);
         setShareToken(shareTokenParam);
+        setAssignmentId(null);
         loadSharedVocabulary(activityIdParam, shareTokenParam);
       }
       // 最後是正常模式（需要登入）
       else {
         setIsShared(false);
         setShareToken(null);
+        setAssignmentId(null);
         loadCustomVocabulary(activityIdParam);
       }
     }
@@ -607,6 +611,7 @@ const GameSwitcherPage: React.FC = () => {
             activityId={activityId}
             shareToken={shareToken}
             isShared={isShared}
+            assignmentId={assignmentId}
           />
         </div>
 

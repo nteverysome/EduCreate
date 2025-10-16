@@ -40,6 +40,7 @@ interface GameSwitcherProps {
   activityId?: string | null;
   shareToken?: string | null;
   isShared?: boolean;
+  assignmentId?: string | null; // 學生遊戲模式
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -323,7 +324,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   customVocabulary = [],
   activityId = null,
   shareToken = null,
-  isShared = false
+  isShared = false,
+  assignmentId = null
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -355,12 +357,20 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       const separator = url.includes('?') ? '&' : '?';
       url += `${separator}activityId=${activityId}&customVocabulary=true`;
 
-      // 如果是分享模式，添加 shareToken 參數
-      if (isShared && shareToken) {
-        url += `&shareToken=${shareToken}&isShared=true`;
+      // 優先檢查是否為學生遊戲模式（有 assignmentId）
+      if (assignmentId) {
+        url += `&assignmentId=${assignmentId}`;
+        console.log('🎓 學生遊戲模式 URL:', url);
       }
-
-      console.log('🎯 使用自定義詞彙 URL:', url);
+      // 其次檢查是否為社區分享模式
+      else if (isShared && shareToken) {
+        url += `&shareToken=${shareToken}&isShared=true`;
+        console.log('🌍 社區分享模式 URL:', url);
+      }
+      // 正常模式
+      else {
+        console.log('🎯 正常模式 URL:', url);
+      }
     }
 
     return url;
