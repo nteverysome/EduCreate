@@ -106,6 +106,8 @@ const GameSwitcherPage: React.FC = () => {
   useEffect(() => {
     const gameParam = searchParams?.get('game');
     const activityIdParam = searchParams?.get('activityId');
+    const shareTokenParam = searchParams?.get('shareToken');
+    const isSharedParam = searchParams?.get('isShared');
 
     if (gameParam) {
       setCurrentGameId(gameParam);
@@ -113,12 +115,16 @@ const GameSwitcherPage: React.FC = () => {
 
     if (activityIdParam) {
       setActivityId(activityIdParam);
-      // 載入自定義詞彙
-      loadCustomVocabulary(activityIdParam);
+      // 載入自定義詞彙（根據是否為分享模式使用不同的 API）
+      if (isSharedParam === 'true' && shareTokenParam) {
+        loadSharedVocabulary(activityIdParam, shareTokenParam);
+      } else {
+        loadCustomVocabulary(activityIdParam);
+      }
     }
   }, [searchParams]);
 
-  // 載入自定義詞彙的函數
+  // 載入自定義詞彙的函數（需要身份驗證）
   const loadCustomVocabulary = async (activityId: string) => {
     try {
       console.log('🔄 載入活動詞彙:', activityId);
@@ -134,6 +140,26 @@ const GameSwitcherPage: React.FC = () => {
       }
     } catch (error) {
       console.error('❌ 載入詞彙時出錯:', error);
+      setCustomVocabulary([]);
+    }
+  };
+
+  // 載入分享遊戲的詞彙（不需要身份驗證）
+  const loadSharedVocabulary = async (activityId: string, shareToken: string) => {
+    try {
+      console.log('🔄 載入分享遊戲詞彙:', activityId);
+      const response = await fetch(`/api/share/${activityId}/${shareToken}`);
+
+      if (response.ok) {
+        const data = await response.json() as { activity?: { vocabularyItems?: any[] } };
+        console.log('✅ 成功載入分享遊戲詞彙:', data.activity?.vocabularyItems);
+        setCustomVocabulary(data.activity?.vocabularyItems || []);
+      } else {
+        console.error('❌ 載入分享遊戲詞彙失敗:', response.status);
+        setCustomVocabulary([]);
+      }
+    } catch (error) {
+      console.error('❌ 載入分享遊戲詞彙時出錯:', error);
       setCustomVocabulary([]);
     }
   };
