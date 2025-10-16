@@ -19,18 +19,19 @@ interface CommunityShareModalProps {
   onUpdate?: (activity: Activity) => void;
 }
 
-export default function CommunityShareModal({ 
-  activity, 
-  isOpen, 
-  onClose, 
-  onUpdate 
+export default function CommunityShareModal({
+  activity,
+  isOpen,
+  onClose,
+  onUpdate
 }: CommunityShareModalProps) {
   const [isSharing, setIsSharing] = useState(activity.isPublicShared || false);
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  
-  const shareUrl = activity.shareToken
-    ? `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/share/${activity.id}/${activity.shareToken}`
+  const [currentShareToken, setCurrentShareToken] = useState(activity.shareToken || '');
+
+  const shareUrl = currentShareToken
+    ? `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/share/${activity.id}/${currentShareToken}`
     : '';
 
   const handleToggleSharing = async () => {
@@ -45,15 +46,23 @@ export default function CommunityShareModal({
 
       if (response.ok) {
         const data = await response.json();
-        setIsSharing(!isSharing);
-        
+        const newSharingState = !isSharing;
+        setIsSharing(newSharingState);
+
+        // 更新 shareToken 狀態
+        if (newSharingState && data.shareToken) {
+          setCurrentShareToken(data.shareToken);
+        } else {
+          setCurrentShareToken('');
+        }
+
         // 更新活動數據
         const updatedActivity = {
           ...activity,
-          isPublicShared: !isSharing,
-          shareToken: !isSharing ? data.shareToken : null,
+          isPublicShared: newSharingState,
+          shareToken: newSharingState ? data.shareToken : null,
         };
-        
+
         onUpdate?.(updatedActivity);
       } else {
         console.error('Failed to toggle community sharing');

@@ -142,7 +142,10 @@ export async function GET(request: NextRequest) {
           tags: activity.tags,
           vocabularyInfo: vocabularyInfo,
           _count: activity._count,
-          folderId: activity.folderId // ✅ 添加 folderId 字段
+          folderId: activity.folderId, // ✅ 添加 folderId 字段
+          isPublicShared: activity.isPublicShared, // ✅ 社區分享狀態
+          shareToken: activity.shareToken, // ✅ 分享 token
+          communityPlays: activity.communityPlays // ✅ 社區遊玩次數
         };
       });
 

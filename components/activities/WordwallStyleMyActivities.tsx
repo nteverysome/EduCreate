@@ -188,7 +188,10 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           geptLevel: activity.vocabularyInfo?.geptLevel || 'ELEMENTARY',
           tags: activity.tags || ['vocabulary', 'cloud', activity.vocabularyInfo?.geptLevel?.toLowerCase() || 'elementary'],
           folderId: activity.folderId || null, // ✅ 修復：使用實際的 folderId
-          userId: userId
+          userId: userId,
+          isPublicShared: activity.isPublicShared || false, // ✅ 社區分享狀態
+          shareToken: activity.shareToken || null, // ✅ 分享 token
+          communityPlays: activity.communityPlays || 0 // ✅ 社區遊玩次數
         }));
       }
 
