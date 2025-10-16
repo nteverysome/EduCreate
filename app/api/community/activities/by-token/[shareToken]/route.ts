@@ -1,7 +1,7 @@
 /**
  * 社區活動詳情 API
  * 
- * GET /api/community/activities/[shareToken]
+ * GET /api/community/activities/by-token/[shareToken]
  * 
  * 功能：
  * - 獲取單個社區活動的詳細信息
@@ -136,7 +136,7 @@ export async function GET(
 /**
  * 更新社區活動信息 API
  * 
- * PATCH /api/community/activities/[shareToken]
+ * PATCH /api/community/activities/by-token/[shareToken]
  * 
  * 功能：
  * - 更新社區活動的分類、標籤、描述等

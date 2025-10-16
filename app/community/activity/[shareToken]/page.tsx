@@ -45,7 +45,7 @@ export default function CommunityActivityDetailPage() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/community/activities/${shareToken}`);
+        const response = await fetch(`/api/community/activities/by-token/${shareToken}`);
         
         if (!response.ok) {
           if (response.status === 404) {
