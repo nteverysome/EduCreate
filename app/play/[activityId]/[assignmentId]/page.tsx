@@ -40,33 +40,34 @@ export default function AssignmentPlayPage() {
   const loadAssignmentData = async () => {
     try {
       setLoading(true);
-      
-      // 載入活動數據
-      const activityResponse = await fetch(`/api/activities/${activityId}`);
-      if (!activityResponse.ok) {
+
+      // 使用公開 API 載入課業數據（無需身份驗證）
+      const response = await fetch(`/api/play/${activityId}/${assignmentId}`);
+      if (!response.ok) {
         throw new Error('活動不存在');
       }
-      const activityData = await activityResponse.json();
-      
-      // 模擬課業數據（實際應該從後端 API 載入）
-      const mockAssignment: Assignment = {
-        id: assignmentId as string,
-        activityId: activityId as string,
-        title: `"${activityData.title}"的結果`,
-        registrationType: 'name',
-        status: 'active'
-      };
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || '載入失敗');
+      }
 
       setActivity({
-        id: activityData.id,
-        title: activityData.title || '無標題活動',
-        description: activityData.description,
+        id: data.activity.id,
+        title: data.activity.title || '無標題活動',
+        description: data.activity.description,
         gameType: '飛機碰撞遊戲',
-        vocabularyData: activityData.vocabularyItems
+        vocabularyData: data.activity.vocabularyItems
       });
-      
-      setAssignment(mockAssignment);
-      
+
+      setAssignment({
+        id: data.assignment.id,
+        activityId: data.assignment.activityId,
+        title: data.assignment.title,
+        registrationType: data.assignment.registrationType,
+        status: data.assignment.status
+      });
+
     } catch (error) {
       console.error('載入課業數據失敗:', error);
       setError('載入課業數據失敗，請稍後再試');
