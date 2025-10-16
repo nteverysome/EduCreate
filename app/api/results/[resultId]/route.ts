@@ -615,3 +615,80 @@ export async function PATCH(
     );
   }
 }
+
+/**
+ * 刪除結果
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { resultId: string } }
+) {
+  try {
+    const { resultId } = params;
+
+    // 驗證用戶權限
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: '未授權' }, { status: 401 });
+    }
+
+    console.log('🗑️ 刪除結果:', resultId);
+
+    // 檢查結果是否存在並驗證權限
+    const existingResult = await prisma.assignmentResult.findUnique({
+      where: { id: resultId },
+      include: {
+        assignment: {
+          include: {
+            activity: true
+          }
+        },
+        participants: true
+      }
+    });
+
+    if (!existingResult) {
+      return NextResponse.json({ error: '結果不存在' }, { status: 404 });
+    }
+
+    // 檢查用戶權限
+    if (existingResult.assignment.activity.userId !== session.user.id) {
+      return NextResponse.json({ error: '無權限刪除此結果' }, { status: 403 });
+    }
+
+    // 使用事務刪除結果及其相關數據
+    await prisma.$transaction(async (tx) => {
+      // 1. 刪除所有參與者記錄
+      await tx.gameParticipant.deleteMany({
+        where: { resultId: resultId }
+      });
+
+      // 2. 刪除結果記錄
+      await tx.assignmentResult.delete({
+        where: { id: resultId }
+      });
+    });
+
+    console.log('✅ 結果刪除成功:', {
+      resultId,
+      participantCount: existingResult.participants.length
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: '結果已成功刪除',
+      deletedResult: {
+        id: existingResult.id,
+        title: existingResult.customTitle || `"${existingResult.assignment.activity.title}"的結果${existingResult.resultNumber}`,
+        participantCount: existingResult.participants.length
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ 刪除結果失敗:', error);
+    return NextResponse.json(
+      { error: '刪除結果失敗' },
+      { status: 500 }
+    );
+  }
+}

@@ -424,10 +424,39 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     window.open(`/my-results/${result.id}`, '_blank');
   };
 
-  // 處理刪除結果（暫時只是日志，可以后续实现）
-  const handleDeleteResult = (result: AssignmentResult) => {
-    console.log('刪除結果:', result);
-    // TODO: 實現結果刪除功能
+  // 處理刪除結果
+  const handleDeleteResult = async (result: AssignmentResult) => {
+    const confirmed = window.confirm(`確定要刪除結果「${result.title}」嗎？\n\n此操作無法復原。`);
+
+    if (!confirmed) return;
+
+    try {
+      console.log('🗑️ 刪除結果:', result);
+
+      const response = await fetch(`/api/results/${result.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '刪除結果失敗');
+      }
+
+      // 刪除成功，重新加載結果列表
+      await loadResults();
+
+      console.log('✅ 結果刪除成功');
+
+      // 可以添加成功提示
+      // toast.success('結果已成功刪除');
+
+    } catch (error) {
+      console.error('❌ 刪除結果失敗:', error);
+      alert(`刪除失敗：${error instanceof Error ? error.message : '未知錯誤'}`);
+    }
   };
 
   // 處理設置截止日期
