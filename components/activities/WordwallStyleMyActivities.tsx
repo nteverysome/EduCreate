@@ -8,6 +8,7 @@ import TrashModal from './TrashModal';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
 import ActivitySearchAndFilter from './ActivitySearchAndFilter';
 import { MoveActivityModal } from './MoveActivityModal';
+import { BatchMoveModal } from './BatchMoveModal';
 import AssignmentModal, { AssignmentConfig } from './AssignmentModal';
 import AssignmentSetModal from './AssignmentSetModal';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
@@ -106,6 +107,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [showMoveModal, setShowMoveModal] = useState(false);
   const [moveActivityId, setMoveActivityId] = useState<string | null>(null);
   const [moveActivityTitle, setMoveActivityTitle] = useState('');
+  const [showBatchMoveModal, setShowBatchMoveModal] = useState(false);
   const [folders, setFolders] = useState<Array<{id: string, name: string, activityCount: number}>>([]);
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [activityToAssign, setActivityToAssign] = useState<Activity | null>(null);
@@ -769,30 +771,26 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
-  // 批量移動活動
+  // 批量移動活動 - 打開模態框
   const handleBatchMove = async () => {
     if (selectedActivities.length === 0) {
       alert('請先選擇要移動的活動');
       return;
     }
 
-    // 這裡可以打開一個資料夾選擇對話框
-    // 暫時使用簡單的 prompt 來選擇目標資料夾
-    const folderOptions = folders.map(f => `${f.id}: ${f.name}`).join('\n');
-    const targetFolderId = prompt(`選擇目標資料夾 (輸入資料夾ID，或留空移動到根目錄):\n\n可用資料夾:\n${folderOptions}\n\n輸入 'root' 或留空表示移動到根目錄`);
+    setShowBatchMoveModal(true);
+  };
 
-    if (targetFolderId === null) return; // 用戶取消
-
-    const finalTargetFolderId = (targetFolderId === '' || targetFolderId === 'root') ? null : targetFolderId;
-
+  // 執行批量移動操作
+  const handleBatchMoveToFolder = async (activityIds: string[], targetFolderId: string | null) => {
     try {
-      console.log('📁 開始批量移動活動:', selectedActivities, '到資料夾:', finalTargetFolderId);
+      console.log('📁 開始批量移動活動:', activityIds, '到資料夾:', targetFolderId);
 
       let successCount = 0;
       let failCount = 0;
       const errors: string[] = [];
 
-      for (const activityId of selectedActivities) {
+      for (const activityId of activityIds) {
         try {
           const response = await fetch(`/api/activities/${activityId}`, {
             method: 'PUT',
@@ -800,7 +798,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              folderId: finalTargetFolderId,
+              folderId: targetFolderId,
             }),
           });
 
@@ -832,6 +830,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     } catch (error: any) {
       console.error('❌ 批量移動活動失敗:', error);
       alert(`批量移動失敗: ${error.message}`);
+      throw error; // 重新拋出錯誤，讓模態框處理
     }
   };
 
@@ -1108,6 +1107,20 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           setMoveActivityId(null);
           setMoveActivityTitle('');
         }}
+      />
+
+      {/* 批量移動模態框 */}
+      <BatchMoveModal
+        isOpen={showBatchMoveModal}
+        selectedActivityIds={selectedActivities}
+        selectedActivityTitles={selectedActivities.map(id => {
+          const activity = activities.find(a => a.id === id);
+          return activity ? activity.title : '未知活動';
+        })}
+        folders={folders}
+        currentFolderId={currentFolderId}
+        onMove={handleBatchMoveToFolder}
+        onClose={() => setShowBatchMoveModal(false)}
       />
 
       {activityToAssign && (
