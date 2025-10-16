@@ -13,24 +13,29 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FormattedCommunityActivity } from '@/lib/community/utils';
 import { Eye, Heart, Bookmark, Play, User, Calendar, ArrowLeft, ExternalLink } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
+import ActivityComments from '@/components/community/ActivityComments';
 
 export default function CommunityActivityDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const shareToken = params.shareToken as string;
 
   const [activity, setActivity] = useState<FormattedCommunityActivity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userInteraction, setUserInteraction] = useState({
-    isLiked: false,
-    isBookmarked: false,
-  });
+  const [isLiked, setIsLiked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [bookmarkCount, setBookmarkCount] = useState(0);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isBookmarking, setIsBookmarking] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
 
   // 載入活動詳情
@@ -50,9 +55,12 @@ export default function CommunityActivityDetailPage() {
         }
 
         const data = await response.json();
-        
+
         setActivity(data.activity);
-        setUserInteraction(data.activity.userInteraction || { isLiked: false, isBookmarked: false });
+        setIsLiked(data.activity.userInteraction?.isLiked || false);
+        setIsBookmarked(data.activity.userInteraction?.isBookmarked || false);
+        setLikeCount(data.activity.stats.likes);
+        setBookmarkCount(data.activity.stats.bookmarks);
         setIsOwner(data.activity.isOwner || false);
       } catch (err) {
         console.error('載入活動失敗:', err);
@@ -66,6 +74,86 @@ export default function CommunityActivityDetailPage() {
       loadActivity();
     }
   }, [shareToken]);
+
+  // 處理喜歡
+  const handleLike = async () => {
+    if (!session) {
+      alert('請先登入');
+      return;
+    }
+
+    if (isLiking) return;
+
+    setIsLiking(true);
+    const newIsLiked = !isLiked;
+    const newCount = newIsLiked ? likeCount + 1 : likeCount - 1;
+
+    // 樂觀更新
+    setIsLiked(newIsLiked);
+    setLikeCount(newCount);
+
+    try {
+      const response = await fetch(`/api/community/activities/${activity?.id}/like`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('操作失敗');
+      }
+
+      const data = await response.json();
+      setLikeCount(data.likeCount);
+    } catch (error) {
+      // 回滾
+      setIsLiked(!newIsLiked);
+      setLikeCount(likeCount);
+      console.error('喜歡操作失敗:', error);
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  // 處理收藏
+  const handleBookmark = async () => {
+    if (!session) {
+      alert('請先登入');
+      return;
+    }
+
+    if (isBookmarking) return;
+
+    setIsBookmarking(true);
+    const newIsBookmarked = !isBookmarked;
+    const newCount = newIsBookmarked ? bookmarkCount + 1 : bookmarkCount - 1;
+
+    // 樂觀更新
+    setIsBookmarked(newIsBookmarked);
+    setBookmarkCount(newCount);
+
+    try {
+      const response = await fetch(`/api/community/activities/${activity?.id}/bookmark`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        throw new Error('操作失敗');
+      }
+
+      const data = await response.json();
+      setBookmarkCount(data.bookmarkCount);
+    } catch (error) {
+      // 回滾
+      setIsBookmarked(!newIsBookmarked);
+      setBookmarkCount(bookmarkCount);
+      console.error('收藏操作失敗:', error);
+    } finally {
+      setIsBookmarking(false);
+    }
+  };
 
   // 載入狀態
   if (loading) {
@@ -174,27 +262,58 @@ export default function CommunityActivityDetailPage() {
                     </div>
                   )}
 
-                  {/* 統計數據 */}
-                  <div className="grid grid-cols-4 gap-4 py-6 border-t border-b border-gray-200">
-                    <div className="text-center">
-                      <Eye size={24} className="text-gray-400 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">{formatNumber(activity.stats.views)}</div>
-                      <div className="text-sm text-gray-600">瀏覽</div>
+                  {/* 統計數據和互動按鈕 */}
+                  <div className="py-6 border-t border-b border-gray-200">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="text-center">
+                        <Eye size={24} className="text-gray-400 mx-auto mb-2" />
+                        <div className="text-2xl font-bold text-gray-900">{formatNumber(activity.stats.views)}</div>
+                        <div className="text-sm text-gray-600">瀏覽</div>
+                      </div>
+                      <div className="text-center">
+                        <Play size={24} className="text-green-400 mx-auto mb-2" />
+                        <div className="text-2xl font-bold text-gray-900">{formatNumber(activity.stats.plays)}</div>
+                        <div className="text-sm text-gray-600">遊戲</div>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <Heart size={24} className="text-red-400 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">{formatNumber(activity.stats.likes)}</div>
-                      <div className="text-sm text-gray-600">喜歡</div>
-                    </div>
-                    <div className="text-center">
-                      <Bookmark size={24} className="text-yellow-400 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">{formatNumber(activity.stats.bookmarks)}</div>
-                      <div className="text-sm text-gray-600">收藏</div>
-                    </div>
-                    <div className="text-center">
-                      <Play size={24} className="text-green-400 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">{formatNumber(activity.stats.plays)}</div>
-                      <div className="text-sm text-gray-600">遊戲</div>
+
+                    {/* 互動按鈕 */}
+                    <div className="flex gap-3 justify-center">
+                      <button
+                        onClick={handleLike}
+                        disabled={isLiking}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                          isLiked
+                            ? 'bg-red-50 text-red-600 border-2 border-red-200'
+                            : 'bg-gray-50 text-gray-700 border-2 border-gray-200 hover:bg-gray-100'
+                        } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        title={isLiked ? '取消喜歡' : '喜歡'}
+                      >
+                        <Heart
+                          size={20}
+                          className={isLiked ? 'fill-current' : ''}
+                        />
+                        <span>{formatNumber(likeCount)}</span>
+                        <span className="text-sm">{isLiked ? '已喜歡' : '喜歡'}</span>
+                      </button>
+
+                      <button
+                        onClick={handleBookmark}
+                        disabled={isBookmarking}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                          isBookmarked
+                            ? 'bg-yellow-50 text-yellow-600 border-2 border-yellow-200'
+                            : 'bg-gray-50 text-gray-700 border-2 border-gray-200 hover:bg-gray-100'
+                        } ${isBookmarking ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        title={isBookmarked ? '取消收藏' : '收藏'}
+                      >
+                        <Bookmark
+                          size={20}
+                          className={isBookmarked ? 'fill-current' : ''}
+                        />
+                        <span>{formatNumber(bookmarkCount)}</span>
+                        <span className="text-sm">{isBookmarked ? '已收藏' : '收藏'}</span>
+                      </button>
                     </div>
                   </div>
 
@@ -252,6 +371,14 @@ export default function CommunityActivityDetailPage() {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* 評論區 */}
+          <div className="max-w-6xl mx-auto mt-6">
+            <ActivityComments
+              activityId={activity.id}
+              initialCommentCount={activity.stats.comments || 0}
+            />
           </div>
         </div>
       </div>
