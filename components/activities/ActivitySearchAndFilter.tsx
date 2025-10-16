@@ -33,6 +33,10 @@ interface SearchAndFilterProps {
   totalCount: number;
   onSelectAll: () => void;
   onClearSelection: () => void;
+  // 批量操作回調函數
+  onBatchCopy?: () => void;
+  onBatchMove?: () => void;
+  onBatchDelete?: () => void;
 }
 
 export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
@@ -51,7 +55,10 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
   selectedCount,
   totalCount,
   onSelectAll,
-  onClearSelection
+  onClearSelection,
+  onBatchCopy,
+  onBatchMove,
+  onBatchDelete
 }) => {
   const [showFilters, setShowFilters] = useState(false);
 
@@ -182,14 +189,26 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
           </div>
           
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
-              複製
+            <button
+              onClick={onBatchCopy}
+              disabled={selectedCount === 0}
+              className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              複製 ({selectedCount})
             </button>
-            <button className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">
-              移動
+            <button
+              onClick={onBatchMove}
+              disabled={selectedCount === 0}
+              className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              移動 ({selectedCount})
             </button>
-            <button className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">
-              刪除
+            <button
+              onClick={onBatchDelete}
+              disabled={selectedCount === 0}
+              className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              刪除 ({selectedCount})
             </button>
           </div>
         </div>

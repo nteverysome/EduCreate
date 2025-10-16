@@ -712,6 +712,183 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     setSelectedActivities([]);
   };
 
+  // 批量複製活動
+  const handleBatchCopy = async () => {
+    if (selectedActivities.length === 0) {
+      alert('請先選擇要複製的活動');
+      return;
+    }
+
+    const confirmed = confirm(`確定要複製 ${selectedActivities.length} 個活動嗎？`);
+    if (!confirmed) return;
+
+    try {
+      console.log('🔄 開始批量複製活動:', selectedActivities);
+
+      let successCount = 0;
+      let failCount = 0;
+      const errors: string[] = [];
+
+      for (const activityId of selectedActivities) {
+        try {
+          const response = await fetch(`/api/activities/${activityId}/copy`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || '複製活動失敗');
+          }
+
+          successCount++;
+        } catch (error: any) {
+          failCount++;
+          errors.push(`複製活動失敗: ${error.message}`);
+          console.error('❌ 複製活動失敗:', error);
+        }
+      }
+
+      // 顯示結果
+      if (successCount > 0) {
+        alert(`成功複製 ${successCount} 個活動${failCount > 0 ? `，失敗 ${failCount} 個` : ''}`);
+        // 重新載入活動列表
+        await loadActivities();
+        // 清除選擇
+        setSelectedActivities([]);
+        setSelectionMode(false);
+      } else {
+        alert('所有活動複製失敗');
+      }
+
+    } catch (error: any) {
+      console.error('❌ 批量複製活動失敗:', error);
+      alert(`批量複製失敗: ${error.message}`);
+    }
+  };
+
+  // 批量移動活動
+  const handleBatchMove = async () => {
+    if (selectedActivities.length === 0) {
+      alert('請先選擇要移動的活動');
+      return;
+    }
+
+    // 這裡可以打開一個資料夾選擇對話框
+    // 暫時使用簡單的 prompt 來選擇目標資料夾
+    const folderOptions = folders.map(f => `${f.id}: ${f.name}`).join('\n');
+    const targetFolderId = prompt(`選擇目標資料夾 (輸入資料夾ID，或留空移動到根目錄):\n\n可用資料夾:\n${folderOptions}\n\n輸入 'root' 或留空表示移動到根目錄`);
+
+    if (targetFolderId === null) return; // 用戶取消
+
+    const finalTargetFolderId = (targetFolderId === '' || targetFolderId === 'root') ? null : targetFolderId;
+
+    try {
+      console.log('📁 開始批量移動活動:', selectedActivities, '到資料夾:', finalTargetFolderId);
+
+      let successCount = 0;
+      let failCount = 0;
+      const errors: string[] = [];
+
+      for (const activityId of selectedActivities) {
+        try {
+          const response = await fetch(`/api/activities/${activityId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              folderId: finalTargetFolderId,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || '移動活動失敗');
+          }
+
+          successCount++;
+        } catch (error: any) {
+          failCount++;
+          errors.push(`移動活動失敗: ${error.message}`);
+          console.error('❌ 移動活動失敗:', error);
+        }
+      }
+
+      // 顯示結果
+      if (successCount > 0) {
+        alert(`成功移動 ${successCount} 個活動${failCount > 0 ? `，失敗 ${failCount} 個` : ''}`);
+        // 重新載入活動列表
+        await loadActivities();
+        // 清除選擇
+        setSelectedActivities([]);
+        setSelectionMode(false);
+      } else {
+        alert('所有活動移動失敗');
+      }
+
+    } catch (error: any) {
+      console.error('❌ 批量移動活動失敗:', error);
+      alert(`批量移動失敗: ${error.message}`);
+    }
+  };
+
+  // 批量刪除活動
+  const handleBatchDelete = async () => {
+    if (selectedActivities.length === 0) {
+      alert('請先選擇要刪除的活動');
+      return;
+    }
+
+    const confirmed = confirm(`確定要刪除 ${selectedActivities.length} 個活動嗎？\n\n此操作無法復原！`);
+    if (!confirmed) return;
+
+    try {
+      console.log('🗑️ 開始批量刪除活動:', selectedActivities);
+
+      let successCount = 0;
+      let failCount = 0;
+      const errors: string[] = [];
+
+      for (const activityId of selectedActivities) {
+        try {
+          const response = await fetch(`/api/activities/${activityId}`, {
+            method: 'DELETE',
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || '刪除活動失敗');
+          }
+
+          successCount++;
+        } catch (error: any) {
+          failCount++;
+          errors.push(`刪除活動失敗: ${error.message}`);
+          console.error('❌ 刪除活動失敗:', error);
+        }
+      }
+
+      // 顯示結果
+      if (successCount > 0) {
+        alert(`成功刪除 ${successCount} 個活動${failCount > 0 ? `，失敗 ${failCount} 個` : ''}`);
+        // 重新載入活動列表
+        await loadActivities();
+        // 清除選擇
+        setSelectedActivities([]);
+        setSelectionMode(false);
+      } else {
+        alert('所有活動刪除失敗');
+      }
+
+    } catch (error: any) {
+      console.error('❌ 批量刪除活動失敗:', error);
+      alert(`批量刪除失敗: ${error.message}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -826,6 +1003,9 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           totalCount={filteredAndSortedActivities.length}
           onSelectAll={handleSelectAll}
           onClearSelection={handleClearSelection}
+          onBatchCopy={handleBatchCopy}
+          onBatchMove={handleBatchMove}
+          onBatchDelete={handleBatchDelete}
         />
 
         {/* 資料夾管理 - 參考 Wordwall 佈局，資料夾在搜索下方靠近卡片 */}
