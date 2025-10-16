@@ -133,7 +133,7 @@ export default function CreateGamePage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const templateId = params.templateId as string;
+  const templateId = (params?.templateId as string) || 'default';
 
   // 獲取遊戲配置
   const gameConfig = gameTemplateConfig[templateId as keyof typeof gameTemplateConfig] || gameTemplateConfig.default;
@@ -182,11 +182,41 @@ export default function CreateGamePage() {
       setIsLoading(true);
       const response = await fetch(`/api/activities/${activityId}`);
       if (response.ok) {
-        const activity = await response.json();
-        setActivityTitle(activity.title);
+        const activity = await response.json() as {
+          title?: string;
+          vocabularyItems?: Array<{
+            english?: string;
+            word?: string;
+            chinese?: string;
+            translation?: string;
+            phonetic?: string;
+            imageUrl?: string;
+            audioUrl?: string;
+          }>;
+          content?: {
+            vocabularyItems?: Array<{
+              english?: string;
+              word?: string;
+              chinese?: string;
+              translation?: string;
+              phonetic?: string;
+              imageUrl?: string;
+              audioUrl?: string;
+            }>;
+          };
+        };
+        setActivityTitle(activity.title || '無標題活動');
 
         // 載入詞彙數據 - 支援新舊架構
-        let vocabularyData = [];
+        let vocabularyData: Array<{
+          english?: string;
+          word?: string;
+          chinese?: string;
+          translation?: string;
+          phonetic?: string;
+          imageUrl?: string;
+          audioUrl?: string;
+        }> = [];
 
         if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems)) {
           // 新架構：從關聯表中獲取詞彙數據
@@ -199,7 +229,7 @@ export default function CreateGamePage() {
         }
 
         if (vocabularyData.length > 0) {
-          const loadedVocabulary = vocabularyData.map((item: any, index: number) => ({
+          const loadedVocabulary = vocabularyData.map((item, index: number) => ({
             id: (index + 1).toString(),
             english: item.english || item.word || '',
             chinese: item.chinese || item.translation || '',
@@ -366,7 +396,7 @@ export default function CreateGamePage() {
         });
 
         if (response.ok) {
-          const activity = await response.json();
+          const activity = await response.json() as { id?: string };
           alert('活動更新成功！');
           // 跳轉到遊戲頁面，並傳遞活動 ID
           router.push(`/games/switcher?game=${templateId}&activityId=${activity.id}`);
@@ -390,7 +420,7 @@ export default function CreateGamePage() {
         });
 
         if (response.ok) {
-          const activity = await response.json();
+          const activity = await response.json() as { id?: string };
           // 跳轉到遊戲頁面，並傳遞活動 ID
           router.push(`/games/switcher?game=${templateId}&activityId=${activity.id}`);
         } else {
