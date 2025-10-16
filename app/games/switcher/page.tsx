@@ -7,6 +7,10 @@ import GameSwitcher from '@/components/games/GameSwitcher';
 import ShimozurdoGameContainer from '@/components/games/ShimozurdoGameContainer';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import QRCodeModal from '@/components/results/QRCodeModal';
+import ActivityToolbar from '@/components/games/ActivityToolbar';
+import RenameActivityModal from '@/components/games/RenameActivityModal';
+import EmbedCodeModal from '@/components/games/EmbedCodeModal';
+import PublishToCommunityModal from '@/components/activities/PublishToCommunityModal';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
 
@@ -48,6 +52,11 @@ const GameSwitcherPage: React.FC = () => {
   const [showCopySuccess, setShowCopySuccess] = useState<boolean>(false);
   const [showQRCodeModal, setShowQRCodeModal] = useState<boolean>(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+
+  // 新增模態框狀態
+  const [showRenameModal, setShowRenameModal] = useState<boolean>(false);
+  const [showEmbedModal, setShowEmbedModal] = useState<boolean>(false);
+  const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
 
   // 活動信息狀態
   const [activityInfo, setActivityInfo] = useState<{
@@ -177,6 +186,48 @@ const GameSwitcherPage: React.FC = () => {
       setShowDeleteConfirm(false);
     }
   }, [activityId]);
+
+  // 工具欄處理函數
+  const handleRename = useCallback(() => {
+    setShowRenameModal(true);
+  }, []);
+
+  const handleRenameSuccess = useCallback((newTitle: string) => {
+    if (activityInfo) {
+      setActivityInfo({ ...activityInfo, title: newTitle });
+    }
+  }, [activityInfo]);
+
+  const handlePrint = useCallback(() => {
+    window.print();
+  }, []);
+
+  const handleEmbed = useCallback(() => {
+    setShowEmbedModal(true);
+  }, []);
+
+  const handleAssign = useCallback(() => {
+    // TODO: 實現分配功能
+    alert('分配功能開發中');
+  }, []);
+
+  const handlePublishToCommunity = useCallback(() => {
+    setShowPublishModal(true);
+  }, []);
+
+  const handleShare = useCallback(async () => {
+    if (!activityId) return;
+
+    const shareUrl = `${window.location.origin}/games/switcher?game=${currentGameId}&activityId=${activityId}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShowCopySuccess(true);
+      setTimeout(() => setShowCopySuccess(false), 2000);
+      console.log('✅ 分享連結已複製:', shareUrl);
+    } catch (error) {
+      console.error('❌ 複製失敗:', error);
+    }
+  }, [activityId, currentGameId]);
 
   // 載入活動信息
   const loadActivityInfo = useCallback(async (activityId: string) => {
@@ -730,6 +781,21 @@ const GameSwitcherPage: React.FC = () => {
       {/* 主要內容 - 手機優化佈局 */}
       <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-2">
 
+        {/* 活動工具欄 - 只在有 activityId 且不是學生模式時顯示 */}
+        {activityId && !assignmentId && !isShared && activityInfo && (
+          <ActivityToolbar
+            activityId={activityId}
+            activityTitle={activityInfo.title}
+            onRename={handleRename}
+            onPrint={handlePrint}
+            onEmbed={handleEmbed}
+            onAssign={handleAssign}
+            onPublishToCommunity={handlePublishToCommunity}
+            onShowQRCode={handleShowQRCode}
+            onShare={handleShare}
+          />
+        )}
+
         {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
         <div className="mb-1 sm:mb-2" data-testid="game-container">
           <GameSwitcher
@@ -1020,6 +1086,45 @@ const GameSwitcherPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 重新命名模態框 */}
+      {showRenameModal && activityId && activityInfo && (
+        <RenameActivityModal
+          isOpen={showRenameModal}
+          onClose={() => setShowRenameModal(false)}
+          activityId={activityId}
+          currentTitle={activityInfo.title}
+          onSuccess={handleRenameSuccess}
+        />
+      )}
+
+      {/* 嵌入代碼模態框 */}
+      {showEmbedModal && activityId && activityInfo && (
+        <EmbedCodeModal
+          isOpen={showEmbedModal}
+          onClose={() => setShowEmbedModal(false)}
+          activityId={activityId}
+          activityTitle={activityInfo.title}
+        />
+      )}
+
+      {/* 發布到社區模態框 */}
+      {showPublishModal && activityId && activityInfo && (
+        <PublishToCommunityModal
+          activity={{
+            id: activityId,
+            title: activityInfo.title,
+            description: '',
+            isPublicShared: false,
+            shareToken: shareToken || undefined,
+          }}
+          onClose={() => setShowPublishModal(false)}
+          onSuccess={() => {
+            setShowPublishModal(false);
+            // 可以在這裡添加成功後的處理
+          }}
+        />
       )}
     </div>
   );
