@@ -56,6 +56,17 @@ const GameSwitcherPage: React.FC = () => {
     createdAt: string;
     deadline?: string;
   } | null>(null);
+
+  // 排行榜狀態
+  const [leaderboard, setLeaderboard] = useState<Array<{
+    rank: number;
+    studentName: string;
+    score: number;
+    timeSpent: number;
+    correctAnswers: number;
+    totalQuestions: number;
+  }>>([]);
+  const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
   
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -186,6 +197,26 @@ const GameSwitcherPage: React.FC = () => {
     }
   }, []);
 
+  // 載入排行榜數據
+  const loadLeaderboard = useCallback(async (assignmentId: string) => {
+    try {
+      const response = await fetch(`/api/leaderboard/${assignmentId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.leaderboard) {
+          setLeaderboard(data.leaderboard);
+          setShowLeaderboard(true);
+          console.log('✅ 排行榜數據已載入:', {
+            totalParticipants: data.totalParticipants,
+            topScore: data.leaderboard[0]?.score || 0
+          });
+        }
+      }
+    } catch (error) {
+      console.error('❌ 載入排行榜時出錯:', error);
+    }
+  }, []);
+
   // 處理 URL 參數和載入自定義詞彙
   useEffect(() => {
     const gameParam = searchParams?.get('game');
@@ -209,6 +240,8 @@ const GameSwitcherPage: React.FC = () => {
         console.log('🎓 學生遊戲模式:', { activityIdParam, assignmentIdParam });
         setAssignmentId(assignmentIdParam);
         loadStudentVocabulary(activityIdParam, assignmentIdParam);
+        // 載入排行榜數據
+        loadLeaderboard(assignmentIdParam);
       }
       // 其次檢查是否為社區分享模式
       else if (isSharedParam === 'true' && shareTokenParam) {
@@ -779,6 +812,61 @@ const GameSwitcherPage: React.FC = () => {
                 <span>刪除</span>
               </button>
             </div>
+          </div>
+        )}
+
+        {/* 排行榜區域 - 只在學生遊戲模式顯示 */}
+        {showLeaderboard && assignmentId && leaderboard.length > 0 && (
+          <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-900">排行榜</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">排名</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名字</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">得分</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">時間</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {leaderboard.slice(0, 5).map((participant) => (
+                    <tr key={`${participant.rank}-${participant.studentName}`} className={participant.rank <= 3 ? 'bg-yellow-50' : ''}>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                        {participant.rank === 1 && '🥇 '}
+                        {participant.rank === 2 && '🥈 '}
+                        {participant.rank === 3 && '🥉 '}
+                        第{participant.rank}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{participant.studentName}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{participant.score}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        {Math.floor(participant.timeSpent / 60)}:{(participant.timeSpent % 60).toString().padStart(2, '0')}
+                      </td>
+                    </tr>
+                  ))}
+                  {leaderboard.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-500">
+                        還沒有學生完成遊戲
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {leaderboard.length > 5 && (
+              <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 text-center">
+                <button
+                  onClick={() => {/* TODO: 顯示完整排行榜 */}}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  顯示更多 ({leaderboard.length - 5} 位學生)
+                </button>
+              </div>
+            )}
           </div>
         )}
 
