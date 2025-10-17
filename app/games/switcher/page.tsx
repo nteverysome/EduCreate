@@ -51,6 +51,7 @@ const GameSwitcherPage: React.FC = () => {
   const [isShared, setIsShared] = useState<boolean>(false);
   const [assignmentId, setAssignmentId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | null>(null);
+  const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
 
   // 快速操作按鈕狀態
   const [showCopySuccess, setShowCopySuccess] = useState<boolean>(false);
@@ -371,6 +372,7 @@ const GameSwitcherPage: React.FC = () => {
     const isSharedParam = searchParams?.get('isShared');
     const assignmentIdParam = searchParams?.get('assignmentId');
     const studentNameParam = searchParams?.get('studentName');
+    const anonymousParam = searchParams?.get('anonymous');
 
     if (gameParam) {
       setCurrentGameId(gameParam);
@@ -384,8 +386,10 @@ const GameSwitcherPage: React.FC = () => {
 
       // 優先檢查是否為學生遊戲模式（有 assignmentId）
       if (assignmentIdParam) {
-        console.log('🎓 學生遊戲模式:', { activityIdParam, assignmentIdParam, studentName: studentNameParam });
+        const isAnon = anonymousParam === 'true';
+        console.log('🎓 學生遊戲模式:', { activityIdParam, assignmentIdParam, studentName: studentNameParam, anonymous: isAnon });
         setAssignmentId(assignmentIdParam);
+        setIsAnonymous(isAnon);
         if (studentNameParam) {
           setStudentName(studentNameParam);
         }
@@ -880,6 +884,7 @@ const GameSwitcherPage: React.FC = () => {
             isShared={isShared}
             assignmentId={assignmentId}
             studentName={studentName}
+            isAnonymous={isAnonymous}
           />
         </div>
 
