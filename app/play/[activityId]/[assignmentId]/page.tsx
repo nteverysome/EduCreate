@@ -56,7 +56,7 @@ export default function AssignmentPlayPage() {
         id: data.activity.id,
         title: data.activity.title || '無標題活動',
         description: data.activity.description,
-        gameType: '飛機碰撞遊戲',
+        gameType: data.activity.type || 'shimozurdo-game',
         vocabularyData: data.activity.vocabularyItems
       };
 
@@ -127,6 +127,11 @@ export default function AssignmentPlayPage() {
   };
 
   const getGameTemplateId = (gameType?: string): string => {
+    // 如果已經是模板 ID 格式（包含 '-game'），直接返回
+    if (gameType && gameType.includes('-game')) {
+      return gameType;
+    }
+
     // 根據遊戲類型返回對應的模板 ID
     switch (gameType) {
       case '飛機碰撞遊戲':
