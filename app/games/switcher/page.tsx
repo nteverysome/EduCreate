@@ -53,10 +53,7 @@ const GameSwitcherPage: React.FC = () => {
   const [studentName, setStudentName] = useState<string | null>(null);
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
 
-  // 快速操作按鈕狀態
-  const [showCopySuccess, setShowCopySuccess] = useState<boolean>(false);
-  const [showQRCodeModal, setShowQRCodeModal] = useState<boolean>(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+
 
   // 新增模態框狀態
   const [showRenameModal, setShowRenameModal] = useState<boolean>(false);
@@ -184,53 +181,7 @@ const GameSwitcherPage: React.FC = () => {
     });
   }, []);
 
-  // 快速操作按鈕處理函數
-  const handleCopyLink = useCallback(async () => {
-    if (!activityId || !assignmentId) return;
 
-    // 複製學生遊戲連結
-    const studentLink = `${window.location.origin}/play/${activityId}/${assignmentId}`;
-    try {
-      await navigator.clipboard.writeText(studentLink);
-      setShowCopySuccess(true);
-      setTimeout(() => setShowCopySuccess(false), 2000);
-      console.log('✅ 學生遊戲連結已複製:', studentLink);
-    } catch (error) {
-      console.error('❌ 複製失敗:', error);
-    }
-  }, [activityId, assignmentId]);
-
-  const handleShowQRCode = useCallback(() => {
-    if (!activityId) return;
-    setShowQRCodeModal(true);
-  }, [activityId]);
-
-  const handleDelete = useCallback(() => {
-    if (!activityId) return;
-    setShowDeleteConfirm(true);
-  }, [activityId]);
-
-  const handleConfirmDelete = useCallback(async () => {
-    if (!activityId) return;
-
-    try {
-      const response = await fetch(`/api/activities/${activityId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        console.log('✅ 活動已刪除');
-        // 重定向到我的活動頁面
-        window.location.href = '/my-activities';
-      } else {
-        console.error('❌ 刪除失敗');
-      }
-    } catch (error) {
-      console.error('❌ 刪除時出錯:', error);
-    } finally {
-      setShowDeleteConfirm(false);
-    }
-  }, [activityId]);
 
   // 工具欄處理函數
   const handleRename = useCallback(() => {
@@ -1107,49 +1058,7 @@ const GameSwitcherPage: React.FC = () => {
           </div>
         )}
 
-        {/* 快速操作按鈕區域 - 只在有 activityId 且不是學生模式時顯示 */}
-        {activityId && !assignmentId && !isShared && activityInfo && (
-          <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            {/* 快速操作按鈕 */}
-            <div className="px-4 py-3 bg-gray-50 flex flex-wrap gap-2">
-              {/* 複製連結按鈕 */}
-              <button
-                onClick={handleCopyLink}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-              >
-                {showCopySuccess ? (
-                  <>
-                    <span className="text-green-600">✓</span>
-                    <span className="text-green-600">已複製</span>
-                  </>
-                ) : (
-                  <>
-                    <LinkIcon className="w-4 h-4" />
-                    <span>複製連結</span>
-                  </>
-                )}
-              </button>
 
-              {/* QR Code 按鈕 */}
-              <button
-                onClick={handleShowQRCode}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-              >
-                <QrCodeIcon className="w-4 h-4" />
-                <span>QR 代碼</span>
-              </button>
-
-              {/* 刪除按鈕 */}
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded hover:bg-red-50 transition-colors"
-              >
-                <TrashIcon className="w-4 h-4" />
-                <span>刪除</span>
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* 排行榜區域 - 只在學生遊戲模式顯示 */}
         {showLeaderboard && assignmentId && (
@@ -1298,24 +1207,6 @@ const GameSwitcherPage: React.FC = () => {
         </div>
       </div>
 
-      {/* QR Code 模態框 */}
-      {showQRCodeModal && activityId && (
-        <QRCodeModal
-          isOpen={showQRCodeModal}
-          onClose={() => setShowQRCodeModal(false)}
-          result={{
-            id: activityId,
-            title: `${getGameName(currentGameId)} 遊戲`,
-            activityName: getGameName(currentGameId),
-            participantCount: 0,
-            createdAt: new Date().toISOString(),
-            status: 'active' as const,
-            assignmentId: assignmentId || activityId,
-            activityId: activityId
-          }}
-        />
-      )}
-
       {/* 結果 QR Code 模態框 */}
       {selectedResultForQR && (
         <QRCodeModal
@@ -1332,32 +1223,6 @@ const GameSwitcherPage: React.FC = () => {
             activityId: selectedResultForQR.activityId
           }}
         />
-      )}
-
-      {/* 刪除活動確認對話框 */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">確認刪除</h3>
-            <p className="text-gray-600 mb-6">
-              確定要刪除這個活動嗎？此操作無法復原。
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
-              >
-                取消
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
-              >
-                確認刪除
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
       {/* 刪除結果確認對話框 */}
