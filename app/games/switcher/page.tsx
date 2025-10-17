@@ -8,8 +8,10 @@ import ShimozurdoGameContainer from '@/components/games/ShimozurdoGameContainer'
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import QRCodeModal from '@/components/results/QRCodeModal';
 import ActivityToolbar from '@/components/games/ActivityToolbar';
+import EnhancedActivityInfoBox from '@/components/games/EnhancedActivityInfoBox';
 import RenameActivityModal from '@/components/games/RenameActivityModal';
 import EmbedCodeModal from '@/components/games/EmbedCodeModal';
+import EditVocabularyModal from '@/components/games/EditVocabularyModal';
 import PublishToCommunityModal from '@/components/activities/PublishToCommunityModal';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
@@ -57,6 +59,7 @@ const GameSwitcherPage: React.FC = () => {
   const [showRenameModal, setShowRenameModal] = useState<boolean>(false);
   const [showEmbedModal, setShowEmbedModal] = useState<boolean>(false);
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
+  const [showEditVocabularyModal, setShowEditVocabularyModal] = useState<boolean>(false);
 
   // 活動信息狀態
   const [activityInfo, setActivityInfo] = useState<{
@@ -64,6 +67,15 @@ const GameSwitcherPage: React.FC = () => {
     participantCount: number;
     createdAt: string;
     deadline?: string;
+    author?: {
+      id: string;
+      name: string;
+      avatar?: string;
+    };
+    tags?: string[];
+    category?: string;
+    geptLevel?: string;
+    description?: string;
   } | null>(null);
 
   // 排行榜狀態
@@ -229,6 +241,17 @@ const GameSwitcherPage: React.FC = () => {
     }
   }, [activityId, currentGameId]);
 
+  const handleEditVocabulary = useCallback(() => {
+    setShowEditVocabularyModal(true);
+  }, []);
+
+  const handleEditVocabularySuccess = useCallback(() => {
+    // 重新載入詞彙
+    if (activityId) {
+      loadCustomVocabulary(activityId);
+    }
+  }, [activityId]);
+
   // 載入活動信息
   const loadActivityInfo = useCallback(async (activityId: string) => {
     try {
@@ -239,12 +262,29 @@ const GameSwitcherPage: React.FC = () => {
           participantCount?: number;
           createdAt?: string;
           deadline?: string;
+          description?: string;
+          tags?: string[];
+          geptLevel?: string;
+          user?: {
+            id: string;
+            name: string;
+            image?: string;
+          };
         };
         setActivityInfo({
           title: data.title || '未命名活動',
           participantCount: data.participantCount || 0,
           createdAt: data.createdAt || new Date().toISOString(),
-          deadline: data.deadline
+          deadline: data.deadline,
+          description: data.description,
+          tags: data.tags || [],
+          geptLevel: data.geptLevel,
+          author: data.user ? {
+            id: data.user.id,
+            name: data.user.name,
+            avatar: data.user.image,
+          } : undefined,
+          category: '教育', // 可以從 API 獲取
         });
         console.log('✅ 活動信息已載入:', data);
       }
@@ -781,18 +821,23 @@ const GameSwitcherPage: React.FC = () => {
       {/* 主要內容 - 手機優化佈局 */}
       <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-2">
 
-        {/* 活動工具欄 - 只在有 activityId 且不是學生模式時顯示 */}
+        {/* 增強版活動信息框 - 只在有 activityId 且不是學生模式時顯示 */}
         {activityId && !assignmentId && !isShared && activityInfo && (
-          <ActivityToolbar
+          <EnhancedActivityInfoBox
             activityId={activityId}
             activityTitle={activityInfo.title}
-            onRename={handleRename}
+            author={activityInfo.author}
+            tags={activityInfo.tags}
+            category={activityInfo.category}
+            geptLevel={activityInfo.geptLevel}
+            description={activityInfo.description}
+            createdAt={activityInfo.createdAt}
+            onEditVocabulary={handleEditVocabulary}
+            onEditContent={() => {}}
             onPrint={handlePrint}
             onEmbed={handleEmbed}
             onAssign={handleAssign}
-            onPublishToCommunity={handlePublishToCommunity}
-            onShowQRCode={handleShowQRCode}
-            onShare={handleShare}
+            onRename={handleRename}
           />
         )}
 
@@ -1124,6 +1169,16 @@ const GameSwitcherPage: React.FC = () => {
             setShowPublishModal(false);
             // 可以在這裡添加成功後的處理
           }}
+        />
+      )}
+
+      {/* 編輯單字模態框 */}
+      {showEditVocabularyModal && activityId && (
+        <EditVocabularyModal
+          isOpen={showEditVocabularyModal}
+          onClose={() => setShowEditVocabularyModal(false)}
+          activityId={activityId}
+          onSuccess={handleEditVocabularySuccess}
         />
       )}
     </div>
