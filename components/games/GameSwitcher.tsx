@@ -41,6 +41,7 @@ interface GameSwitcherProps {
   shareToken?: string | null;
   isShared?: boolean;
   assignmentId?: string | null; // 學生遊戲模式
+  studentName?: string | null; // 學生姓名
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -325,7 +326,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   activityId = null,
   shareToken = null,
   isShared = false,
-  assignmentId = null
+  assignmentId = null,
+  studentName = null
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -360,6 +362,9 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       // 優先檢查是否為學生遊戲模式（有 assignmentId）
       if (assignmentId) {
         url += `&assignmentId=${assignmentId}`;
+        if (studentName) {
+          url += `&studentName=${encodeURIComponent(studentName)}`;
+        }
         console.log('🎓 學生遊戲模式 URL:', url);
       }
       // 其次檢查是否為社區分享模式

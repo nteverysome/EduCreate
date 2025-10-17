@@ -50,6 +50,7 @@ const GameSwitcherPage: React.FC = () => {
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [isShared, setIsShared] = useState<boolean>(false);
   const [assignmentId, setAssignmentId] = useState<string | null>(null);
+  const [studentName, setStudentName] = useState<string | null>(null);
 
   // 快速操作按鈕狀態
   const [showCopySuccess, setShowCopySuccess] = useState<boolean>(false);
@@ -369,6 +370,7 @@ const GameSwitcherPage: React.FC = () => {
     const shareTokenParam = searchParams?.get('shareToken');
     const isSharedParam = searchParams?.get('isShared');
     const assignmentIdParam = searchParams?.get('assignmentId');
+    const studentNameParam = searchParams?.get('studentName');
 
     if (gameParam) {
       setCurrentGameId(gameParam);
@@ -382,8 +384,11 @@ const GameSwitcherPage: React.FC = () => {
 
       // 優先檢查是否為學生遊戲模式（有 assignmentId）
       if (assignmentIdParam) {
-        console.log('🎓 學生遊戲模式:', { activityIdParam, assignmentIdParam });
+        console.log('🎓 學生遊戲模式:', { activityIdParam, assignmentIdParam, studentName: studentNameParam });
         setAssignmentId(assignmentIdParam);
+        if (studentNameParam) {
+          setStudentName(studentNameParam);
+        }
         loadStudentVocabulary(activityIdParam, assignmentIdParam);
         // 載入排行榜數據
         loadLeaderboard(assignmentIdParam);
@@ -874,6 +879,7 @@ const GameSwitcherPage: React.FC = () => {
             shareToken={shareToken}
             isShared={isShared}
             assignmentId={assignmentId}
+            studentName={studentName}
           />
         </div>
 
