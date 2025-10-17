@@ -72,10 +72,10 @@ export async function GET(
           audioUrl: item.audioUrl
         }));
       }
-    } else if (content?.vocabularyItems) {
+    } else if (content?.vocabularyItems && content.vocabularyItems.length > 0) {
       // 從活動內容中直接獲取詞彙（向後兼容）
       vocabularyItems = content.vocabularyItems;
-    } else if (activity.elements) {
+    } else if (activity.elements && Array.isArray(activity.elements) && activity.elements.length > 0) {
       // 從 elements 字段獲取詞彙（向後兼容）
       vocabularyItems = activity.elements as any[];
     }
