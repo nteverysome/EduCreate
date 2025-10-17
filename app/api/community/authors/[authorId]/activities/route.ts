@@ -27,7 +27,7 @@ export async function GET(
     // 排序參數
     const sortBy = searchParams.get('sortBy') || 'latest';
 
-    // 檢查作者是否存在
+    // 檢查作者是否存在並獲取完整信息
     const author = await prisma.user.findUnique({
       where: { id: authorId },
       select: {
@@ -35,6 +35,10 @@ export async function GET(
         name: true,
         email: true,
         image: true,
+        country: true,
+        bio: true,
+        socialLinks: true,
+        createdAt: true,
       },
     });
 
@@ -44,6 +48,16 @@ export async function GET(
         { status: 404 }
       );
     }
+
+    // 獲取粉絲和關注數量
+    const [followersCount, followingCount] = await Promise.all([
+      prisma.userFollow.count({
+        where: { followingId: authorId },
+      }),
+      prisma.userFollow.count({
+        where: { followerId: authorId },
+      }),
+    ]);
 
     // 構建排序條件
     let orderBy: any = {};
@@ -131,6 +145,8 @@ export async function GET(
         totalLikes: stats._sum.communityLikes || 0,
         totalBookmarks: stats._sum.communityBookmarks || 0,
         totalPlays: stats._sum.communityPlays || 0,
+        followersCount,
+        followingCount,
       },
       pagination: {
         page,

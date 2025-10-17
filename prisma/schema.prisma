@@ -19,6 +19,11 @@ model User {
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   role                 Role                  @default(USER)
+
+  // 社區個人資料
+  bio                  String?               // 個人簡介
+  socialLinks          Json?                 // 社交媒體連結 {twitter, facebook, linkedin, website}
+
   accounts             Account[]
   activities           Activity[]
   activityVersions     ActivityVersion[]
@@ -38,6 +43,10 @@ model User {
   activityBookmarks    ActivityBookmark[]
   activityComments     ActivityComment[]
   communityReports     CommunityReport[]
+
+  // 粉絲/關注關係
+  following            UserFollow[]          @relation("UserFollowing")
+  followers            UserFollow[]          @relation("UserFollowers")
 
   // 自訂標籤
   customTags           String[]              @default([])
@@ -747,6 +756,24 @@ enum ReportReason {
   COPYRIGHT_VIOLATION
   MISLEADING
   OTHER
+}
+
+// 用戶關注模型
+model UserFollow {
+  id          String   @id @default(cuid())
+  followerId  String   // 關注者ID
+  followingId String   // 被關注者ID
+  createdAt   DateTime @default(now())
+
+  // 關聯
+  follower    User     @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  // 索引和唯一約束
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@index([createdAt])
 }
 
 // 舉報狀態枚舉
