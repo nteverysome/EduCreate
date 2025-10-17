@@ -2,7 +2,7 @@
 
 ## 概述
 
-本文檔詳細說明 EduCreate 平台的 7 種主要 API 端點，包括用途、權限要求、使用場景和請求/響應格式。
+本文檔詳細說明 EduCreate 平台的 8 種主要 API 端點，包括用途、權限要求、使用場景和請求/響應格式。
 
 ---
 
@@ -13,10 +13,11 @@
 | 1 | GET /api/activities/{activityId} | 載入活動信息和元數據 | ❌ 否 | 所有模式 |
 | 2 | GET /api/activities/{activityId}/vocabulary | 載入活動詞彙（教師模式） | ✅ 是 | 教師預覽和測試 |
 | 3 | GET /api/share/{activityId}/{shareToken} | 載入公開分享的活動詞彙 | ❌ 否 | 社區分享模式 |
-| 4 | GET /api/play/{activityId}/{assignmentId} | 載入課業分配的活動詞彙 | ❌ 否 | 學生遊戲模式 |
+| 4 | **GET /api/play/{activityId}/{assignmentId}** | **載入課業分配的活動詞彙** | ❌ 否 | **學生遊戲模式** |
 | 5 | GET /api/leaderboard/{assignmentId} | 載入排行榜數據 | ❌ 否 | 學生遊戲模式 |
 | 6 | POST /api/assignments | 創建課業分配 | ✅ 是 | 教師創建課業 |
 | 7 | DELETE /api/activities/{activityId} | 刪除活動 | ✅ 是 | 教師刪除活動 |
+| 8 | **POST /api/results** | **學生提交遊戲結果** | ❌ 否 | **學生遊戲模式** |
 
 ---
 
@@ -417,7 +418,7 @@ Authorization: Bearer {session_token}
 
 ---
 
-## 額外 API：POST /api/results
+## 8. POST /api/results
 
 ### 用途
 學生提交遊戲結果（最重要的 API 之一）。

@@ -282,7 +282,7 @@ npm run dev
 ## 📚 完整文檔系統
 
 ### � **API 文檔** 🆕
-- **[📄 完整 API 文檔](docs/API_DOCUMENTATION.md)** - 7 種主要 API 端點的完整說明
+- **[📄 完整 API 文檔](docs/API_DOCUMENTATION.md)** - 8 種主要 API 端點的完整說明
   - API 列表和權限要求
   - 詳細的請求/響應格式
   - 匿名模式 vs 姓名模式的區別
