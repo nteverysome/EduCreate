@@ -494,7 +494,7 @@ export async function GET(
 
     const formattedResult: AssignmentResult = {
       id: updatedResult.id,
-      title: `"${updatedResult.assignment.activity.title}"的結果${updatedResult.resultNumber}`,
+      title: updatedResult.customTitle || `"${updatedResult.assignment.activity.title}"的結果${updatedResult.resultNumber}`,
       activityName: updatedResult.assignment.activity.title,
       activityId: updatedResult.assignment.activityId,
       assignmentId: updatedResult.assignmentId,
