@@ -478,6 +478,9 @@ export async function GET(
     // 使用修正後的參與者數據
     const correctedParticipants = statisticsResult.correctedParticipants;
 
+    // 生成分享連結
+    const shareLink = `https://edu-create.vercel.app/play/${result.assignment.activityId}/${result.assignmentId}`;
+
     // 從 activity 中獲取遊戲類型，映射到實際的遊戲 ID
     const getGameId = (activityType?: string): string => {
       // 根據活動類型返回對應的遊戲 ID
@@ -488,10 +491,6 @@ export async function GET(
           return 'shimozurdo-game';
       }
     };
-
-    // 🎯 生成帶排行榜的遊戲分享連結（而非學生入口頁面）
-    const gameId = getGameId(result.assignment.activity.type);
-    const shareLink = `https://edu-create.vercel.app/games/switcher?game=${gameId}&activityId=${result.assignment.activityId}&assignmentId=${result.assignmentId}&leaderboard=true`;
 
     const formattedResult: AssignmentResult = {
       id: updatedResult.id,
