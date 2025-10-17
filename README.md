@@ -312,6 +312,44 @@ npm run dev
   - 遊戲結束後，成績**不會**被記錄
   - 教師無法查看個人成績
 
+### 🔧 **詞彙載入工具函數** 🆕
+- **[📚 使用文檔](docs/VOCABULARY_LOADING_UTILS_USAGE.md)** - 詞彙載入工具函數完整使用指南
+  - API 參考和類型定義
+  - 使用場景和示例代碼
+  - 最佳實踐和常見問題
+  - 快速開始指南
+- **[🔄 重構文檔](docs/VOCABULARY_LOADING_REFACTORING.md)** - 詞彙載入邏輯重構文檔
+  - 重構目標和背景
+  - 重構前後對比
+  - 代碼簡化統計
+  - DRY 原則實踐
+- **[🐛 Bug 分析報告](docs/VOCABULARY_LOADING_BUG_ANALYSIS.md)** - 詞彙載入 Bug 分析和修復
+  - 問題描述和根本原因
+  - JavaScript 空數組陷阱
+  - 修復方案和測試計劃
+  - 經驗教訓總結
+
+#### 核心工具函數
+| 函數名稱 | 用途 | 返回值 |
+|---------|------|--------|
+| `loadVocabularyData(activity)` | 從活動載入詞彙數據 | `{ vocabularyItems, source, count }` |
+| `normalizeVocabularyItem(item, index)` | 標準化詞彙項目格式 | `VocabularyItem` |
+| `loadAndNormalizeVocabularyData(activity)` | 載入並標準化詞彙 | `{ vocabularyItems, source, count }` |
+| `hasVocabularyData(activity)` | 檢查是否有詞彙數據 | `boolean` |
+| `getSourceDisplayName(source)` | 獲取數據來源友好名稱 | `string` |
+
+#### 支援的數據源
+- **`vocabularyItems`** - 新架構（關聯表）
+- **`elements`** - 中間架構（JSON 字段）
+- **`content.vocabularyItems`** - 舊架構（嵌套在 content 中）
+
+#### 重構成果
+- ✅ 代碼行數減少 **50+ 行**（減少 50-73%）
+- ✅ 統一的詞彙載入邏輯
+- ✅ 完整的 TypeScript 類型定義
+- ✅ 遵循 DRY 原則（Don't Repeat Yourself）
+- ✅ 易於維護和擴展
+
 ### �🎮 **AirplaneCollisionGame 專用文檔**
 - **[📄 技術文檔](docs/airplane-collision-game-technical-documentation.md)** - 完整的架構設計和技術規格
 - **[📄 API 文檔](docs/airplane-collision-game-api-documentation.md)** - 詳細的 TypeScript API 接口
