@@ -5,15 +5,10 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
+import { loadAndNormalizeVocabularyData, getSourceDisplayName } from '@/lib/vocabulary/loadVocabularyData';
 
-interface VocabularyItem {
-  id: string;
-  english: string;
-  chinese: string;
-  phonetic?: string;
-  imageUrl?: string;
-  audioUrl?: string;
-}
+// 使用統一的詞彙項目接口
+import type { VocabularyItem } from '@/lib/vocabulary/loadVocabularyData';
 
 // 實際遊戲配置（來自 /games/switcher）
 const gameTemplateConfig = {
@@ -208,40 +203,12 @@ export default function CreateGamePage() {
         setActivityTitle(activity.title || '無標題活動');
 
         // 載入詞彙數據 - 支援新舊架構
-        let vocabularyData: Array<{
-          english?: string;
-          word?: string;
-          chinese?: string;
-          translation?: string;
-          phonetic?: string;
-          imageUrl?: string;
-          audioUrl?: string;
-        }> = [];
+        // 使用統一的詞彙載入工具函數
+        const { vocabularyItems: loadedVocabulary, source, count } = loadAndNormalizeVocabularyData(activity);
 
-        if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems) && activity.vocabularyItems.length > 0) {
-          // 新架構：從關聯表中獲取詞彙數據
-          vocabularyData = activity.vocabularyItems;
-          console.log('📝 從關聯表載入詞彙數據:', vocabularyData.length, '個詞彙');
-        } else if ((activity as any).elements && Array.isArray((activity as any).elements) && (activity as any).elements.length > 0) {
-          // 從 elements 字段載入詞彙數據
-          vocabularyData = (activity as any).elements;
-          console.log('📝 從 elements 字段載入詞彙數據:', vocabularyData.length, '個詞彙');
-        } else if (activity.content && activity.content.vocabularyItems && Array.isArray(activity.content.vocabularyItems) && activity.content.vocabularyItems.length > 0) {
-          // 舊架構：從 content 中獲取詞彙數據
-          vocabularyData = activity.content.vocabularyItems;
-          console.log('📝 從 content 載入詞彙數據:', vocabularyData.length, '個詞彙');
-        }
-
-        if (vocabularyData.length > 0) {
-          const loadedVocabulary = vocabularyData.map((item, index: number) => ({
-            id: (index + 1).toString(),
-            english: item.english || item.word || '',
-            chinese: item.chinese || item.translation || '',
-            phonetic: item.phonetic || '',
-            imageUrl: item.imageUrl || '',
-            audioUrl: item.audioUrl || ''
-          }));
+        if (count > 0) {
           setVocabularyItems(loadedVocabulary);
+          console.log(`✅ 從 ${getSourceDisplayName(source)} 載入詞彙數據:`, count, '個詞彙');
           console.log('✅ 詞彙數據載入成功:', loadedVocabulary);
         } else {
           console.log('⚠️ 未找到詞彙數據');

@@ -21,6 +21,7 @@ import {
   BookOpen,
   QrCode
 } from 'lucide-react';
+import { loadVocabularyData, getSourceDisplayName } from '@/lib/vocabulary/loadVocabularyData';
 
 interface Activity {
   id: string;
@@ -142,8 +143,8 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
 
 
 
-  // 載入詞彙數據
-  const loadVocabularyData = async () => {
+  // 載入詞彙數據（使用統一的工具函數）
+  const loadVocabularyDataFromAPI = async () => {
     if (vocabularyData || loadingVocabulary) return; // 避免重複載入
 
     setLoadingVocabulary(true);
@@ -155,28 +156,13 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
 
       const activityData = await response.json();
 
-      // 檢查詞彙數據的多個可能位置（三層檢查機制）
-      let vocabularyItems = [];
-      let dataSource = 'unknown';
-
-      if (activityData?.vocabularyItems && Array.isArray(activityData.vocabularyItems) && activityData.vocabularyItems.length > 0) {
-        // 從關聯表中獲取詞彙數據（新架構）
-        vocabularyItems = activityData.vocabularyItems;
-        dataSource = 'vocabularyItems關聯表';
-      } else if (activityData?.elements && Array.isArray(activityData.elements) && activityData.elements.length > 0) {
-        // 從 elements 字段獲取詞彙數據（中間架構）
-        vocabularyItems = activityData.elements;
-        dataSource = 'elements字段';
-      } else if (activityData?.content?.vocabularyItems && Array.isArray(activityData.content.vocabularyItems) && activityData.content.vocabularyItems.length > 0) {
-        // 從 content 中獲取詞彙數據（舊架構）
-        vocabularyItems = activityData.content.vocabularyItems;
-        dataSource = 'content.vocabularyItems';
-      }
+      // 使用統一的詞彙載入工具函數
+      const { vocabularyItems, source, count } = loadVocabularyData(activityData);
 
       console.log('📝 載入詞彙數據:', {
         activityId: activity.id,
-        vocabularyCount: vocabularyItems.length,
-        source: dataSource
+        vocabularyCount: count,
+        source: getSourceDisplayName(source)
       });
 
       setVocabularyData(vocabularyItems);
@@ -437,7 +423,7 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
               className="flex items-center gap-1 cursor-pointer hover:text-blue-600 hover:bg-blue-50 px-1 py-0.5 rounded transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
-                loadVocabularyData();
+                loadVocabularyDataFromAPI();
                 setShowVocabularyModal(true);
               }}
               title="點擊查看詞彙列表"
