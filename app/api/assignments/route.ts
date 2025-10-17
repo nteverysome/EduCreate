@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
       data: {
         assignmentId: assignment.id,
         resultNumber: existingResults + 1,
+        customTitle: title,  // 使用用戶設置的標題
         status: 'ACTIVE'
       }
     });
