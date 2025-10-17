@@ -821,6 +821,24 @@ const GameSwitcherPage: React.FC = () => {
       {/* 主要內容 - 手機優化佈局 */}
       <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-2">
 
+        {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
+        <div className="mb-1 sm:mb-2" data-testid="game-container">
+          <GameSwitcher
+            defaultGame={currentGameId}
+            geptLevel={currentGeptLevel as 'elementary' | 'intermediate' | 'advanced'}
+            onGameChange={handleGameChange}
+            onGameStateUpdate={handleGameStateUpdate}
+            className="w-full"
+            hideGeptSelector={true}
+            currentGeptLevel={currentGeptLevel}
+            customVocabulary={customVocabulary}
+            activityId={activityId}
+            shareToken={shareToken}
+            isShared={isShared}
+            assignmentId={assignmentId}
+          />
+        </div>
+
         {/* 增強版活動信息框 - 只在有 activityId 且不是學生模式時顯示 */}
         {activityId && !assignmentId && !isShared && activityInfo && (
           <EnhancedActivityInfoBox
@@ -840,24 +858,6 @@ const GameSwitcherPage: React.FC = () => {
             onRename={handleRename}
           />
         )}
-
-        {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
-        <div className="mb-1 sm:mb-2" data-testid="game-container">
-          <GameSwitcher
-            defaultGame={currentGameId}
-            geptLevel={currentGeptLevel as 'elementary' | 'intermediate' | 'advanced'}
-            onGameChange={handleGameChange}
-            onGameStateUpdate={handleGameStateUpdate}
-            className="w-full"
-            hideGeptSelector={true}
-            currentGeptLevel={currentGeptLevel}
-            customVocabulary={customVocabulary}
-            activityId={activityId}
-            shareToken={shareToken}
-            isShared={isShared}
-            assignmentId={assignmentId}
-          />
-        </div>
 
         {/* 作業信息區域 - 只在有 activityId 時顯示 */}
         {activityId && activityInfo && (
