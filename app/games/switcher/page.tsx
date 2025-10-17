@@ -95,7 +95,20 @@ const GameSwitcherPage: React.FC = () => {
     totalQuestions: number;
   }>>([]);
   const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
-  
+
+  // 活動結果狀態
+  const [activityResults, setActivityResults] = useState<Array<{
+    id: string;
+    title: string;
+    activityName: string;
+    participantCount: number;
+    createdAt: string;
+    deadline?: string;
+    status: 'active' | 'completed' | 'expired';
+    assignmentId: string;
+    activityId: string;
+  }>>([]);
+
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
     totalGamesPlayed: 0,
@@ -364,6 +377,30 @@ const GameSwitcherPage: React.FC = () => {
     }
   }, []);
 
+  // 載入活動結果（作業）
+  const loadActivityResults = useCallback(async (activityId: string) => {
+    try {
+      const response = await fetch(`/api/activities/${activityId}/results`);
+      if (response.ok) {
+        const data = await response.json() as Array<{
+          id: string;
+          title: string;
+          activityName: string;
+          participantCount: number;
+          createdAt: string;
+          deadline?: string;
+          status: 'active' | 'completed' | 'expired';
+          assignmentId: string;
+          activityId: string;
+        }>;
+        setActivityResults(data);
+        console.log('✅ 活動結果已載入:', { count: data.length });
+      }
+    } catch (error) {
+      console.error('❌ 載入活動結果時出錯:', error);
+    }
+  }, []);
+
   // 處理 URL 參數和載入自定義詞彙
   useEffect(() => {
     const gameParam = searchParams?.get('game');
@@ -383,6 +420,11 @@ const GameSwitcherPage: React.FC = () => {
 
       // 載入活動信息
       loadActivityInfo(activityIdParam);
+
+      // 載入活動結果（作業）- 只在非學生模式下載入
+      if (!assignmentIdParam) {
+        loadActivityResults(activityIdParam);
+      }
 
       // 優先檢查是否為學生遊戲模式（有 assignmentId）
       if (assignmentIdParam) {
@@ -907,8 +949,8 @@ const GameSwitcherPage: React.FC = () => {
           />
         )}
 
-        {/* 作業信息區域 - 只在有 activityId 時顯示 */}
-        {activityId && activityInfo && (
+        {/* 作業信息區域 - 只在有 activityId 且不是學生模式時顯示 */}
+        {activityId && !assignmentId && !isShared && activityResults.length > 0 && (
           <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
               <h3 className="text-sm font-semibold text-gray-900">作業</h3>
@@ -924,33 +966,47 @@ const GameSwitcherPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-4 py-3 text-sm text-gray-900">{activityInfo.title}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{activityInfo.participantCount}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {new Date(activityInfo.createdAt).toLocaleDateString('zh-TW', {
-                        day: 'numeric',
-                        month: 'long',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {activityInfo.deadline
-                        ? new Date(activityInfo.deadline).toLocaleDateString('zh-TW', {
-                            day: 'numeric',
-                            month: 'long'
-                          })
-                        : '無截止日期'
-                      }
-                    </td>
-                  </tr>
+                  {activityResults.map((result) => (
+                    <tr key={result.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-sm">
+                        <Link
+                          href={`/my-results/${result.id}`}
+                          className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                        >
+                          {result.title}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{result.participantCount}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        {new Date(result.createdAt).toLocaleDateString('zh-TW', {
+                          day: 'numeric',
+                          month: 'long',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900">
+                        {result.deadline
+                          ? new Date(result.deadline).toLocaleDateString('zh-TW', {
+                              day: 'numeric',
+                              month: 'long'
+                            })
+                          : '無截止日期'
+                        }
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
 
+        {/* 快速操作按鈕區域 - 只在有 activityId 且不是學生模式時顯示 */}
+        {activityId && !assignmentId && !isShared && activityInfo && (
+          <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             {/* 快速操作按鈕 */}
-            <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex flex-wrap gap-2">
+            <div className="px-4 py-3 bg-gray-50 flex flex-wrap gap-2">
               {/* 複製連結按鈕 */}
               <button
                 onClick={handleCopyLink}
