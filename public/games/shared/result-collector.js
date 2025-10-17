@@ -30,19 +30,31 @@ class ResultCollector {
         this.assignmentId = urlParams.get('assignmentId');
         this.activityId = urlParams.get('activityId');
         this.studentName = urlParams.get('studentName');
-        
+        this.isAnonymous = urlParams.get('anonymous') === 'true';
+
         // 如果是課業分配模式，記錄遊戲開始時間
-        if (this.assignmentId && this.activityId && this.studentName) {
+        if (this.assignmentId && this.activityId) {
             this.gameStartTime = Date.now();
-            console.log('📊 課業分配模式啟動，開始記錄遊戲數據');
+            if (this.isAnonymous) {
+                console.log('🎮 匿名遊戲模式啟動 - 不記錄個人成績');
+            } else if (this.studentName) {
+                console.log('📊 課業分配模式啟動，開始記錄遊戲數據');
+            }
         }
     }
-    
+
     /**
      * 檢查是否為課業分配模式
      */
     isAssignmentMode() {
-        return !!(this.assignmentId && this.activityId && this.studentName);
+        return !!(this.assignmentId && this.activityId && (this.studentName || this.isAnonymous));
+    }
+
+    /**
+     * 檢查是否為匿名模式
+     */
+    isAnonymousMode() {
+        return this.isAnonymous === true;
     }
     
     /**
@@ -72,10 +84,20 @@ class ResultCollector {
             console.log('⚠️ 非課業分配模式，跳過結果提交');
             return { success: false, reason: 'not_assignment_mode' };
         }
-        
+
+        // 🎮 匿名模式：不提交個人成績，但返回成功以顯示遊戲結束畫面
+        if (this.isAnonymousMode()) {
+            console.log('🎮 匿名模式 - 不記錄個人成績');
+            return {
+                success: true,
+                reason: 'anonymous_mode',
+                message: '匿名模式：遊戲結果不會被記錄'
+            };
+        }
+
         try {
             const timeSpent = Math.floor((Date.now() - this.gameStartTime) / 1000);
-            
+
             const resultData = {
                 assignmentId: this.assignmentId,
                 activityId: this.activityId,
@@ -91,9 +113,9 @@ class ResultCollector {
                     totalTimeSpent: timeSpent
                 }
             };
-            
+
             console.log('📤 提交遊戲結果:', resultData);
-            
+
             const response = await fetch(`${this.apiBaseUrl}/api/results`, {
                 method: 'POST',
                 headers: {
