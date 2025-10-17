@@ -155,21 +155,28 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
 
       const activityData = await response.json();
 
-      // 檢查詞彙數據的多個可能位置
+      // 檢查詞彙數據的多個可能位置（三層檢查機制）
       let vocabularyItems = [];
+      let dataSource = 'unknown';
 
-      if (activityData?.vocabularyItems && Array.isArray(activityData.vocabularyItems)) {
+      if (activityData?.vocabularyItems && Array.isArray(activityData.vocabularyItems) && activityData.vocabularyItems.length > 0) {
         // 從關聯表中獲取詞彙數據（新架構）
         vocabularyItems = activityData.vocabularyItems;
-      } else if (activityData?.content?.vocabularyItems && Array.isArray(activityData.content.vocabularyItems)) {
+        dataSource = 'vocabularyItems關聯表';
+      } else if (activityData?.elements && Array.isArray(activityData.elements) && activityData.elements.length > 0) {
+        // 從 elements 字段獲取詞彙數據（中間架構）
+        vocabularyItems = activityData.elements;
+        dataSource = 'elements字段';
+      } else if (activityData?.content?.vocabularyItems && Array.isArray(activityData.content.vocabularyItems) && activityData.content.vocabularyItems.length > 0) {
         // 從 content 中獲取詞彙數據（舊架構）
         vocabularyItems = activityData.content.vocabularyItems;
+        dataSource = 'content.vocabularyItems';
       }
 
       console.log('📝 載入詞彙數據:', {
         activityId: activity.id,
         vocabularyCount: vocabularyItems.length,
-        source: activityData?.vocabularyItems ? 'vocabularyItems關聯表' : 'content.vocabularyItems'
+        source: dataSource
       });
 
       setVocabularyData(vocabularyItems);
