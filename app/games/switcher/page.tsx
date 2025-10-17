@@ -109,6 +109,19 @@ const GameSwitcherPage: React.FC = () => {
     activityId: string;
   }>>([]);
 
+  // 作業區操作狀態
+  const [copySuccessMap, setCopySuccessMap] = useState<Record<string, boolean>>({});
+  const [selectedResultForQR, setSelectedResultForQR] = useState<{
+    id: string;
+    title: string;
+    activityId: string;
+    assignmentId: string;
+  } | null>(null);
+  const [selectedResultForDelete, setSelectedResultForDelete] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+
   // 遊戲統計狀態
   const [gameStats, setGameStats] = useState<GameStats>({
     totalGamesPlayed: 0,
@@ -400,6 +413,55 @@ const GameSwitcherPage: React.FC = () => {
       console.error('❌ 載入活動結果時出錯:', error);
     }
   }, []);
+
+  // 作業區操作處理函數
+  const handleCopyStudentLink = useCallback(async (result: { id: string; activityId: string; assignmentId: string }) => {
+    const studentLink = `${window.location.origin}/play/${result.activityId}/${result.assignmentId}`;
+    try {
+      await navigator.clipboard.writeText(studentLink);
+      setCopySuccessMap(prev => ({ ...prev, [result.id]: true }));
+      setTimeout(() => {
+        setCopySuccessMap(prev => ({ ...prev, [result.id]: false }));
+      }, 2000);
+      console.log('✅ 學生分享連結已複製:', studentLink);
+    } catch (error) {
+      console.error('❌ 複製失敗:', error);
+    }
+  }, []);
+
+  const handleShowResultQRCode = useCallback((result: { id: string; title: string; activityId: string; assignmentId: string }) => {
+    setSelectedResultForQR(result);
+  }, []);
+
+  const handleDeleteResult = useCallback((result: { id: string; title: string }) => {
+    setSelectedResultForDelete(result);
+  }, []);
+
+  const confirmDeleteResult = useCallback(async () => {
+    if (!selectedResultForDelete) return;
+
+    try {
+      const response = await fetch(`/api/results/${selectedResultForDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        console.log('✅ 結果已刪除:', selectedResultForDelete.id);
+        // 重新載入活動結果
+        if (activityId) {
+          loadActivityResults(activityId);
+        }
+        setSelectedResultForDelete(null);
+      } else {
+        const error = await response.json();
+        console.error('❌ 刪除失敗:', error);
+        alert('刪除失敗：' + (error.error || '未知錯誤'));
+      }
+    } catch (error) {
+      console.error('❌ 刪除時出錯:', error);
+      alert('刪除時出錯，請稍後再試');
+    }
+  }, [selectedResultForDelete, activityId, loadActivityResults]);
 
   // 處理 URL 參數和載入自定義詞彙
   useEffect(() => {
@@ -963,6 +1025,7 @@ const GameSwitcherPage: React.FC = () => {
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">反應</th>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">創建</th>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">最後期限</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -993,6 +1056,48 @@ const GameSwitcherPage: React.FC = () => {
                             })
                           : '無截止日期'
                         }
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <div className="flex items-center gap-2">
+                          {/* 複製學生分享連結按鈕 */}
+                          <button
+                            onClick={() => handleCopyStudentLink(result)}
+                            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                            title="複製學生分享連結"
+                          >
+                            {copySuccessMap[result.id] ? (
+                              <>
+                                <span className="text-green-600">✓</span>
+                                <span className="text-green-600">已複製</span>
+                              </>
+                            ) : (
+                              <>
+                                <LinkIcon className="w-3 h-3" />
+                                <span>連結</span>
+                              </>
+                            )}
+                          </button>
+
+                          {/* QR Code 按鈕 */}
+                          <button
+                            onClick={() => handleShowResultQRCode(result)}
+                            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                            title="顯示 QR Code"
+                          >
+                            <QrCodeIcon className="w-3 h-3" />
+                            <span>QR</span>
+                          </button>
+
+                          {/* 刪除按鈕 */}
+                          <button
+                            onClick={() => handleDeleteResult(result)}
+                            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-600 bg-white border border-red-300 rounded hover:bg-red-50 transition-colors"
+                            title="刪除作業"
+                          >
+                            <TrashIcon className="w-3 h-3" />
+                            <span>刪除</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1211,7 +1316,25 @@ const GameSwitcherPage: React.FC = () => {
         />
       )}
 
-      {/* 刪除確認對話框 */}
+      {/* 結果 QR Code 模態框 */}
+      {selectedResultForQR && (
+        <QRCodeModal
+          isOpen={true}
+          onClose={() => setSelectedResultForQR(null)}
+          result={{
+            id: selectedResultForQR.id,
+            title: selectedResultForQR.title,
+            activityName: selectedResultForQR.title,
+            participantCount: 0,
+            createdAt: new Date().toISOString(),
+            status: 'active' as const,
+            assignmentId: selectedResultForQR.assignmentId,
+            activityId: selectedResultForQR.activityId
+          }}
+        />
+      )}
+
+      {/* 刪除活動確認對話框 */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -1228,6 +1351,38 @@ const GameSwitcherPage: React.FC = () => {
               </button>
               <button
                 onClick={handleConfirmDelete}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
+              >
+                確認刪除
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 刪除結果確認對話框 */}
+      {selectedResultForDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">確認刪除作業</h3>
+            <p className="text-gray-600 mb-2">
+              確定要刪除以下作業嗎？
+            </p>
+            <p className="text-gray-900 font-medium mb-4">
+              「{selectedResultForDelete.title}」
+            </p>
+            <p className="text-sm text-red-600 mb-6">
+              ⚠️ 此操作將刪除所有相關的學生成績記錄，且無法復原。
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setSelectedResultForDelete(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+              >
+                取消
+              </button>
+              <button
+                onClick={confirmDeleteResult}
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
               >
                 確認刪除
