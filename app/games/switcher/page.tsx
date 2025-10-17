@@ -11,7 +11,6 @@ import ActivityToolbar from '@/components/games/ActivityToolbar';
 import EnhancedActivityInfoBox from '@/components/games/EnhancedActivityInfoBox';
 import RenameActivityModal from '@/components/games/RenameActivityModal';
 import EmbedCodeModal from '@/components/games/EmbedCodeModal';
-import EditVocabularyModal from '@/components/games/EditVocabularyModal';
 import PublishToCommunityModal from '@/components/activities/PublishToCommunityModal';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
@@ -59,7 +58,6 @@ const GameSwitcherPage: React.FC = () => {
   const [showRenameModal, setShowRenameModal] = useState<boolean>(false);
   const [showEmbedModal, setShowEmbedModal] = useState<boolean>(false);
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
-  const [showEditVocabularyModal, setShowEditVocabularyModal] = useState<boolean>(false);
 
   // 活動信息狀態
   const [activityInfo, setActivityInfo] = useState<{
@@ -67,6 +65,7 @@ const GameSwitcherPage: React.FC = () => {
     participantCount: number;
     createdAt: string;
     deadline?: string;
+    templateType?: string;
     author?: {
       id: string;
       name: string;
@@ -218,39 +217,7 @@ const GameSwitcherPage: React.FC = () => {
     setShowEmbedModal(true);
   }, []);
 
-  const handleAssign = useCallback(() => {
-    // TODO: 實現分配功能
-    alert('分配功能開發中');
-  }, []);
 
-  const handlePublishToCommunity = useCallback(() => {
-    setShowPublishModal(true);
-  }, []);
-
-  const handleShare = useCallback(async () => {
-    if (!activityId) return;
-
-    const shareUrl = `${window.location.origin}/games/switcher?game=${currentGameId}&activityId=${activityId}`;
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setShowCopySuccess(true);
-      setTimeout(() => setShowCopySuccess(false), 2000);
-      console.log('✅ 分享連結已複製:', shareUrl);
-    } catch (error) {
-      console.error('❌ 複製失敗:', error);
-    }
-  }, [activityId, currentGameId]);
-
-  const handleEditVocabulary = useCallback(() => {
-    setShowEditVocabularyModal(true);
-  }, []);
-
-  const handleEditVocabularySuccess = useCallback(() => {
-    // 重新載入詞彙
-    if (activityId) {
-      loadCustomVocabulary(activityId);
-    }
-  }, [activityId]);
 
   // 載入活動信息
   const loadActivityInfo = useCallback(async (activityId: string) => {
@@ -265,6 +232,7 @@ const GameSwitcherPage: React.FC = () => {
           description?: string;
           tags?: string[];
           geptLevel?: string;
+          templateType?: string;
           user?: {
             id: string;
             name: string;
@@ -279,6 +247,7 @@ const GameSwitcherPage: React.FC = () => {
           description: data.description,
           tags: data.tags || [],
           geptLevel: data.geptLevel,
+          templateType: data.templateType,
           author: data.user ? {
             id: data.user.id,
             name: data.user.name,
@@ -844,17 +813,15 @@ const GameSwitcherPage: React.FC = () => {
           <EnhancedActivityInfoBox
             activityId={activityId}
             activityTitle={activityInfo.title}
+            templateType={activityInfo.templateType}
             author={activityInfo.author}
             tags={activityInfo.tags}
             category={activityInfo.category}
             geptLevel={activityInfo.geptLevel}
             description={activityInfo.description}
             createdAt={activityInfo.createdAt}
-            onEditVocabulary={handleEditVocabulary}
-            onEditContent={() => {}}
             onPrint={handlePrint}
             onEmbed={handleEmbed}
-            onAssign={handleAssign}
             onRename={handleRename}
           />
         )}
@@ -1172,15 +1139,6 @@ const GameSwitcherPage: React.FC = () => {
         />
       )}
 
-      {/* 編輯單字模態框 */}
-      {showEditVocabularyModal && activityId && (
-        <EditVocabularyModal
-          isOpen={showEditVocabularyModal}
-          onClose={() => setShowEditVocabularyModal(false)}
-          activityId={activityId}
-          onSuccess={handleEditVocabularySuccess}
-        />
-      )}
     </div>
   );
 };

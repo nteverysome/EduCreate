@@ -17,6 +17,7 @@ import {
 interface EnhancedActivityInfoBoxProps {
   activityId: string;
   activityTitle: string;
+  templateType?: string; // 遊戲類型（例如：shimozurdo-game）
   author?: {
     id: string;
     name: string;
@@ -27,28 +28,23 @@ interface EnhancedActivityInfoBoxProps {
   geptLevel?: string;
   description?: string;
   createdAt?: string;
-  onEditVocabulary?: () => void;
-  onEditContent?: () => void;
   onPrint?: () => void;
   onEmbed?: () => void;
-  onAssign?: () => void;
   onRename?: () => void;
 }
 
 const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
   activityId,
   activityTitle,
+  templateType,
   author,
   tags = [],
   category,
   geptLevel,
   description,
   createdAt,
-  onEditVocabulary,
-  onEditContent,
   onPrint,
   onEmbed,
-  onAssign,
   onRename,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -146,14 +142,14 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
           {/* 右側：操作按鈕（桌面版） */}
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
             {/* 編輯單字 */}
-            <button
-              onClick={onEditVocabulary}
+            <Link
+              href={`/create/${templateType || 'shimozurdo-game'}?edit=${activityId}`}
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
               title="編輯單字"
             >
               <BookOpenIcon className="w-4 h-4" />
               <span>編輯單字</span>
-            </button>
+            </Link>
 
             {/* 編輯內容 */}
             <Link
@@ -185,15 +181,15 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
               <span>嵌入</span>
             </button>
 
-            {/* 設定分配 */}
-            <button
-              onClick={onAssign}
+            {/* 課業分配 */}
+            <Link
+              href="/my-activities"
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-              title="設定分配"
+              title="課業分配"
             >
               <UserGroupIcon className="w-4 h-4" />
-              <span>設定分配</span>
-            </button>
+              <span>課業分配</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -202,13 +198,13 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
       <div className="md:hidden px-4 py-3 border-t border-gray-200">
         <div className="grid grid-cols-3 gap-2">
           {/* 編輯單字 */}
-          <button
-            onClick={onEditVocabulary}
+          <Link
+            href={`/create/${templateType || 'shimozurdo-game'}?edit=${activityId}`}
             className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
           >
             <BookOpenIcon className="w-5 h-5" />
             <span>編輯單字</span>
-          </button>
+          </Link>
 
           {/* 編輯內容 */}
           <Link
@@ -237,14 +233,14 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
             <span>嵌入</span>
           </button>
 
-          {/* 設定分配 */}
-          <button
-            onClick={onAssign}
+          {/* 課業分配 */}
+          <Link
+            href="/my-activities"
             className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors col-span-2"
           >
             <UserGroupIcon className="w-5 h-5" />
-            <span>設定分配</span>
-          </button>
+            <span>課業分配</span>
+          </Link>
         </div>
       </div>
     </div>
