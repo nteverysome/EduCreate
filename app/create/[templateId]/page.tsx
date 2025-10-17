@@ -218,7 +218,7 @@ export default function CreateGamePage() {
           audioUrl?: string;
         }> = [];
 
-        if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems)) {
+        if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems) && activity.vocabularyItems.length > 0) {
           // 新架構：從關聯表中獲取詞彙數據
           vocabularyData = activity.vocabularyItems;
           console.log('📝 從關聯表載入詞彙數據:', vocabularyData.length, '個詞彙');
@@ -226,7 +226,7 @@ export default function CreateGamePage() {
           // 從 elements 字段載入詞彙數據
           vocabularyData = (activity as any).elements;
           console.log('📝 從 elements 字段載入詞彙數據:', vocabularyData.length, '個詞彙');
-        } else if (activity.content && activity.content.vocabularyItems) {
+        } else if (activity.content && activity.content.vocabularyItems && Array.isArray(activity.content.vocabularyItems) && activity.content.vocabularyItems.length > 0) {
           // 舊架構：從 content 中獲取詞彙數據
           vocabularyData = activity.content.vocabularyItems;
           console.log('📝 從 content 載入詞彙數據:', vocabularyData.length, '個詞彙');
