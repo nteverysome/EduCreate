@@ -111,20 +111,6 @@ export default function AssignmentModal({
                 </div>
               </label>
 
-              <label className="flex items-start gap-3">
-                <input
-                  type="radio"
-                  name="registration"
-                  value="google-classroom"
-                  checked={config.registrationType === 'google-classroom'}
-                  onChange={(e) => setConfig({ ...config, registrationType: e.target.value as 'google-classroom' })}
-                  className="mt-1"
-                />
-                <div>
-                  <div className="font-medium">Google課堂</div>
-                  <div className="text-sm text-gray-500">在Google課堂上分享此活動</div>
-                </div>
-              </label>
             </div>
           </div>
 
