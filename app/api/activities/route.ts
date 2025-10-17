@@ -145,7 +145,9 @@ export async function GET(request: NextRequest) {
           folderId: activity.folderId, // ✅ 添加 folderId 字段
           isPublicShared: activity.isPublicShared, // ✅ 社區分享狀態
           shareToken: activity.shareToken, // ✅ 分享 token
-          communityPlays: activity.communityPlays // ✅ 社區遊玩次數
+          communityPlays: activity.communityPlays, // ✅ 社區遊玩次數
+          elements: activity.elements, // ✅ 添加 elements 字段（詞彙數據）
+          vocabularyItems: activity.vocabularyItems // ✅ 添加 vocabularyItems 關聯數據
         };
       });
 
