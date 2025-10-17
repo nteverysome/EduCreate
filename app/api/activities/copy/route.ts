@@ -44,9 +44,6 @@ export async function POST(request: NextRequest) {
     // 獲取源活動
     const sourceActivity = await prisma.activity.findUnique({
       where: { id: sourceActivityId },
-      include: {
-        vocabularyItems: true,
-      },
     });
 
     if (!sourceActivity) {
@@ -61,24 +58,17 @@ export async function POST(request: NextRequest) {
       data: {
         title: `${sourceActivity.title} (副本)`,
         description: sourceActivity.description,
+        content: sourceActivity.content,
+        elements: sourceActivity.elements, // 複製詞彙數據
         type: sourceActivity.type,
         templateType: sourceActivity.templateType,
         geptLevel: sourceActivity.geptLevel,
         tags: sourceActivity.tags,
+        difficulty: sourceActivity.difficulty,
+        estimatedTime: sourceActivity.estimatedTime,
+        totalWords: sourceActivity.totalWords,
         userId: currentUser.id,
         shareToken: generateShareToken(),
-        // 複製詞彙項目
-        vocabularyItems: {
-          create: sourceActivity.vocabularyItems.map((item) => ({
-            word: item.word,
-            translation: item.translation,
-            pronunciation: item.pronunciation,
-            example: item.example,
-            imageUrl: item.imageUrl,
-            audioUrl: item.audioUrl,
-            order: item.order,
-          })),
-        },
       },
     });
 
