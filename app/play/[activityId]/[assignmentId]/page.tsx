@@ -52,21 +52,31 @@ export default function AssignmentPlayPage() {
         throw new Error(data.error || '載入失敗');
       }
 
-      setActivity({
+      const activityData = {
         id: data.activity.id,
         title: data.activity.title || '無標題活動',
         description: data.activity.description,
         gameType: '飛機碰撞遊戲',
         vocabularyData: data.activity.vocabularyItems
-      });
+      };
 
-      setAssignment({
+      const assignmentData = {
         id: data.assignment.id,
         activityId: data.assignment.activityId,
         title: data.assignment.title,
         registrationType: data.assignment.registrationType,
         status: data.assignment.status
-      });
+      };
+
+      setActivity(activityData);
+      setAssignment(assignmentData);
+
+      // 🎯 如果是匿名模式，直接跳轉到遊戲頁面
+      if (assignmentData.registrationType === 'anonymous') {
+        console.log('🎮 匿名模式 - 直接跳轉到遊戲');
+        const gameUrl = `/games/switcher?game=${getGameTemplateId(activityData.gameType)}&activityId=${activityId}&assignmentId=${assignmentId}&anonymous=true`;
+        router.push(gameUrl);
+      }
 
     } catch (error) {
       console.error('載入課業數據失敗:', error);
@@ -77,7 +87,8 @@ export default function AssignmentPlayPage() {
   };
 
   const handleStartGame = async () => {
-    if (!studentName.trim()) {
+    // 匿名模式不需要檢查姓名
+    if (assignment?.registrationType !== 'anonymous' && !studentName.trim()) {
       setError('請輸入您的姓名');
       return;
     }
@@ -87,20 +98,28 @@ export default function AssignmentPlayPage() {
       console.log('學生開始遊戲:', {
         assignmentId,
         activityId,
-        studentName: studentName.trim(),
+        studentName: assignment?.registrationType === 'anonymous' ? '匿名' : studentName.trim(),
+        registrationType: assignment?.registrationType,
         timestamp: new Date().toISOString()
       });
 
-      // 如果選擇記住我，保存到 localStorage
-      if (rememberMe) {
+      // 如果選擇記住我，保存到 localStorage（僅限非匿名模式）
+      if (rememberMe && assignment?.registrationType !== 'anonymous') {
         localStorage.setItem('studentName', studentName.trim());
       }
 
       // 跳轉到遊戲頁面（學生模式，無需登入）
-      const gameUrl = `/games/switcher?game=${getGameTemplateId(activity?.gameType)}&activityId=${activityId}&assignmentId=${assignmentId}&studentName=${encodeURIComponent(studentName.trim())}`;
+      let gameUrl = `/games/switcher?game=${getGameTemplateId(activity?.gameType)}&activityId=${activityId}&assignmentId=${assignmentId}`;
+
+      if (assignment?.registrationType === 'anonymous') {
+        gameUrl += '&anonymous=true';
+      } else {
+        gameUrl += `&studentName=${encodeURIComponent(studentName.trim())}`;
+      }
+
       console.log('🎯 跳轉到遊戲頁面:', gameUrl);
       router.push(gameUrl);
-      
+
     } catch (error) {
       console.error('開始遊戲失敗:', error);
       setError('開始遊戲失敗，請稍後再試');

@@ -33,14 +33,37 @@ export async function GET(
       );
     }
 
-    // TODO: 驗證 assignmentId 是否有效（當實現課業系統後）
-    // 目前先返回活動數據
+    // 載入課業分配數據
+    const assignment = await prisma.assignment.findFirst({
+      where: {
+        id: assignmentId,
+        activityId: activityId
+      }
+    });
 
-    console.log('✅ 成功載入活動數據:', {
+    if (!assignment) {
+      console.log('❌ 課業分配不存在:', assignmentId);
+      return NextResponse.json(
+        { error: '課業分配不存在' },
+        { status: 404 }
+      );
+    }
+
+    console.log('✅ 成功載入活動和課業數據:', {
       activityId: activity.id,
       title: activity.title,
-      vocabularyCount: activity.vocabularyItems.length
+      vocabularyCount: activity.vocabularyItems.length,
+      assignmentId: assignment.id,
+      registrationType: assignment.registrationType
     });
+
+    // 將 registrationType 轉換為小寫格式
+    let registrationType: 'name' | 'anonymous' | 'google-classroom' = 'name';
+    if (assignment.registrationType === 'ANONYMOUS') {
+      registrationType = 'anonymous';
+    } else if (assignment.registrationType === 'GOOGLE') {
+      registrationType = 'google-classroom';
+    }
 
     return NextResponse.json({
       success: true,
@@ -54,11 +77,12 @@ export async function GET(
         geptLevel: activity.geptLevel
       },
       assignment: {
-        id: assignmentId,
-        activityId: activityId,
-        title: `"${activity.title}"的結果`,
-        registrationType: 'name',
-        status: 'active'
+        id: assignment.id,
+        activityId: assignment.activityId,
+        title: assignment.title,
+        registrationType: registrationType,
+        deadline: assignment.deadline?.toISOString(),
+        status: assignment.status.toLowerCase()
       }
     });
 
