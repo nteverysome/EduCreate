@@ -12,6 +12,8 @@ import EnhancedActivityInfoBox from '@/components/games/EnhancedActivityInfoBox'
 import RenameActivityModal from '@/components/games/RenameActivityModal';
 import EmbedCodeModal from '@/components/games/EmbedCodeModal';
 import PublishToCommunityModal from '@/components/activities/PublishToCommunityModal';
+import AssignmentModal, { AssignmentConfig } from '@/components/activities/AssignmentModal';
+import AssignmentSetModal from '@/components/activities/AssignmentSetModal';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
 
@@ -58,6 +60,10 @@ const GameSwitcherPage: React.FC = () => {
   const [showRenameModal, setShowRenameModal] = useState<boolean>(false);
   const [showEmbedModal, setShowEmbedModal] = useState<boolean>(false);
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
+  const [showAssignmentModal, setShowAssignmentModal] = useState<boolean>(false);
+  const [showAssignmentSetModal, setShowAssignmentSetModal] = useState<boolean>(false);
+  const [assignmentShareUrl, setAssignmentShareUrl] = useState<string>('');
+  const [assignmentTitle, setAssignmentTitle] = useState<string>('');
 
   // 活動信息狀態
   const [activityInfo, setActivityInfo] = useState<{
@@ -216,6 +222,69 @@ const GameSwitcherPage: React.FC = () => {
   const handleEmbed = useCallback(() => {
     setShowEmbedModal(true);
   }, []);
+
+  const handleAssignment = useCallback(() => {
+    setShowAssignmentModal(true);
+  }, []);
+
+  const handleStartAssignment = useCallback(async (assignmentConfig: AssignmentConfig) => {
+    if (!activityId || !activityInfo) return;
+
+    try {
+      console.log('🚀 開始課業分配:', {
+        activity: activityInfo.title,
+        config: assignmentConfig
+      });
+
+      // 準備課業分配數據
+      const assignmentData = {
+        activityId: activityId,
+        title: assignmentConfig.resultTitle,
+        registrationType: assignmentConfig.registrationType === 'name' ? 'NAME' :
+                         assignmentConfig.registrationType === 'anonymous' ? 'ANONYMOUS' : 'GOOGLE',
+        deadline: assignmentConfig.hasDeadline ?
+                 new Date(`${assignmentConfig.deadlineDate} ${assignmentConfig.deadlineTime}`).toISOString() : null,
+        gameEndSettings: {
+          showAnswers: assignmentConfig.showAnswers,
+          showLeaderboard: assignmentConfig.showLeaderboard,
+          allowRestart: assignmentConfig.allowRestart
+        }
+      };
+
+      // 調用後端 API 創建課業分配
+      const response = await fetch('/api/assignments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(assignmentData)
+      });
+
+      if (!response.ok) {
+        throw new Error('創建課業分配失敗');
+      }
+
+      const result = await response.json() as { assignment: { id: string } };
+      console.log('✅ 課業分配創建成功:', result);
+
+      // 生成分享連結
+      const shareUrl = `${window.location.origin}/play/${activityId}/${result.assignment.id}`;
+
+      // 設置課業集模態對話框的數據
+      setAssignmentShareUrl(shareUrl);
+      setAssignmentTitle(assignmentConfig.resultTitle);
+
+      // 關閉課業分配模態對話框
+      setShowAssignmentModal(false);
+
+      // 顯示課業集模態對話框
+      setShowAssignmentSetModal(true);
+
+    } catch (error) {
+      console.error('課業分配設置失敗:', error);
+      alert('課業分配設置失敗，請稍後再試');
+    }
+  }, [activityId, activityInfo]);
 
 
 
@@ -823,6 +892,7 @@ const GameSwitcherPage: React.FC = () => {
             onPrint={handlePrint}
             onEmbed={handleEmbed}
             onRename={handleRename}
+            onAssignment={handleAssignment}
           />
         )}
 
@@ -1135,6 +1205,35 @@ const GameSwitcherPage: React.FC = () => {
           onSuccess={() => {
             setShowPublishModal(false);
             // 可以在這裡添加成功後的處理
+          }}
+        />
+      )}
+
+      {/* 課業分配模態框 */}
+      {showAssignmentModal && activityId && activityInfo && (
+        <AssignmentModal
+          activity={{
+            id: activityId,
+            title: activityInfo.title,
+            type: 'vocabulary',
+            gameType: currentGameId,
+          }}
+          isOpen={showAssignmentModal}
+          onClose={() => setShowAssignmentModal(false)}
+          onStartAssignment={handleStartAssignment}
+        />
+      )}
+
+      {/* 課業集模態框 */}
+      {showAssignmentSetModal && (
+        <AssignmentSetModal
+          isOpen={showAssignmentSetModal}
+          onClose={() => setShowAssignmentSetModal(false)}
+          shareUrl={assignmentShareUrl}
+          assignmentTitle={assignmentTitle}
+          onGoToResults={() => {
+            setShowAssignmentSetModal(false);
+            window.location.href = '/my-results';
           }}
         />
       )}

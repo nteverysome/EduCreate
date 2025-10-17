@@ -31,6 +31,7 @@ interface EnhancedActivityInfoBoxProps {
   onPrint?: () => void;
   onEmbed?: () => void;
   onRename?: () => void;
+  onAssignment?: () => void; // 課業分配回調
 }
 
 const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
@@ -46,6 +47,7 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
   onPrint,
   onEmbed,
   onRename,
+  onAssignment,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -172,14 +174,14 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
             </button>
 
             {/* 課業分配 */}
-            <Link
-              href="/my-activities"
+            <button
+              onClick={onAssignment}
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
               title="課業分配"
             >
               <UserGroupIcon className="w-4 h-4" />
               <span>課業分配</span>
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -215,13 +217,13 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
           </button>
 
           {/* 課業分配 */}
-          <Link
-            href="/my-activities"
+          <button
+            onClick={onAssignment}
             className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
           >
             <UserGroupIcon className="w-5 h-5" />
             <span>課業分配</span>
-          </Link>
+          </button>
         </div>
       </div>
     </div>
