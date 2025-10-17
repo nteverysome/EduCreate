@@ -85,23 +85,20 @@ class ResultCollector {
             return { success: false, reason: 'not_assignment_mode' };
         }
 
-        // 🎮 匿名模式：不提交個人成績，但返回成功以顯示遊戲結束畫面
-        if (this.isAnonymousMode()) {
-            console.log('🎮 匿名模式 - 不記錄個人成績');
-            return {
-                success: true,
-                reason: 'anonymous_mode',
-                message: '匿名模式：遊戲結果不會被記錄'
-            };
-        }
-
         try {
             const timeSpent = Math.floor((Date.now() - this.gameStartTime) / 1000);
+
+            // 🎮 匿名模式：使用固定名稱「匿名使用者」提交成績
+            const studentName = this.isAnonymousMode() ? '匿名使用者' : this.studentName;
+
+            if (this.isAnonymousMode()) {
+                console.log('🎮 匿名模式 - 使用「匿名使用者」名稱提交成績');
+            }
 
             const resultData = {
                 assignmentId: this.assignmentId,
                 activityId: this.activityId,
-                studentName: this.studentName,
+                studentName: studentName,
                 score: gameResult.score || 0,
                 timeSpent: timeSpent,
                 correctAnswers: gameResult.correctAnswers || 0,
