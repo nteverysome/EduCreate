@@ -11,6 +11,7 @@ import {
   TagIcon,
   UserIcon,
   FolderIcon,
+  AcademicCapIcon,
 } from '@heroicons/react/24/outline';
 
 interface EnhancedActivityInfoBoxProps {
@@ -90,7 +91,7 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
               {/* GEPT 等級 */}
               {geptLevel && (
                 <div className="flex items-center gap-1">
-                  <BookOpenIcon className="w-4 h-4" />
+                  <AcademicCapIcon className="w-4 h-4" />
                   <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">
                     {geptLevel}
                   </span>
