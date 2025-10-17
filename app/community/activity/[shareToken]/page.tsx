@@ -367,7 +367,7 @@ export default function CommunityActivityDetailPage() {
               <div className="bg-white rounded-lg shadow-xl p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">開始遊戲</h3>
                 <Link
-                  href={activity.shareUrl}
+                  href={`/games/switcher?game=${activity.gameType}&activityId=${activity.id}`}
                   target="_blank"
                   className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all font-semibold"
                 >
@@ -376,7 +376,7 @@ export default function CommunityActivityDetailPage() {
                   <ExternalLink size={16} />
                 </Link>
                 <p className="text-xs text-gray-500 text-center mt-2">
-                  點擊開始遊戲體驗
+                  點擊開始遊戲體驗，可以編輯內容並複製到您的活動列表
                 </p>
               </div>
             </div>

@@ -12,6 +12,7 @@ import {
   UserIcon,
   FolderIcon,
   AcademicCapIcon,
+  DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';
 
 interface EnhancedActivityInfoBoxProps {
@@ -28,10 +29,13 @@ interface EnhancedActivityInfoBoxProps {
   geptLevel?: string;
   description?: string;
   createdAt?: string;
+  isOwner?: boolean; // 是否是活動所有者
   onPrint?: () => void;
   onEmbed?: () => void;
   onRename?: () => void;
   onAssignment?: () => void; // 課業分配回調
+  onCopy?: () => void; // 複製活動回調
+  isCopying?: boolean; // 是否正在複製
 }
 
 const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
@@ -44,10 +48,13 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
   geptLevel,
   description,
   createdAt,
+  isOwner = true,
   onPrint,
   onEmbed,
   onRename,
   onAssignment,
+  onCopy,
+  isCopying = false,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -143,15 +150,30 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
 
           {/* 右側：操作按鈕（桌面版） */}
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
-            {/* 編輯內容 */}
-            <Link
-              href={`/create/${templateType || 'shimozurdo-game'}?edit=${activityId}`}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              title="編輯內容"
-            >
-              <PencilIcon className="w-4 h-4" />
-              <span>編輯內容</span>
-            </Link>
+            {/* 如果不是所有者，顯示複製並編輯按鈕 */}
+            {!isOwner && onCopy && (
+              <button
+                onClick={onCopy}
+                disabled={isCopying}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="複製並編輯"
+              >
+                <DocumentDuplicateIcon className="w-4 h-4" />
+                <span>{isCopying ? '複製中...' : '複製並編輯'}</span>
+              </button>
+            )}
+
+            {/* 如果是所有者，顯示編輯內容按鈕 */}
+            {isOwner && (
+              <Link
+                href={`/create/${templateType || 'shimozurdo-game'}?edit=${activityId}`}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                title="編輯內容"
+              >
+                <PencilIcon className="w-4 h-4" />
+                <span>編輯內容</span>
+              </Link>
+            )}
 
             {/* 列印 */}
             <button
@@ -173,15 +195,17 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
               <span>嵌入</span>
             </button>
 
-            {/* 課業分配 */}
-            <button
-              onClick={onAssignment}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-              title="課業分配"
-            >
-              <UserGroupIcon className="w-4 h-4" />
-              <span>課業分配</span>
-            </button>
+            {/* 課業分配 - 只有所有者可以分配 */}
+            {isOwner && (
+              <button
+                onClick={onAssignment}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                title="課業分配"
+              >
+                <UserGroupIcon className="w-4 h-4" />
+                <span>課業分配</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -189,14 +213,28 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
       {/* 手機版操作按鈕 */}
       <div className="md:hidden px-4 py-3 border-t border-gray-200">
         <div className="grid grid-cols-2 gap-2">
-          {/* 編輯內容 */}
-          <Link
-            href={`/create/${templateType || 'shimozurdo-game'}?edit=${activityId}`}
-            className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            <PencilIcon className="w-5 h-5" />
-            <span>編輯內容</span>
-          </Link>
+          {/* 如果不是所有者，顯示複製並編輯按鈕 */}
+          {!isOwner && onCopy && (
+            <button
+              onClick={onCopy}
+              disabled={isCopying}
+              className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed col-span-2"
+            >
+              <DocumentDuplicateIcon className="w-5 h-5" />
+              <span>{isCopying ? '複製中...' : '複製並編輯'}</span>
+            </button>
+          )}
+
+          {/* 如果是所有者，顯示編輯內容按鈕 */}
+          {isOwner && (
+            <Link
+              href={`/create/${templateType || 'shimozurdo-game'}?edit=${activityId}`}
+              className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              <PencilIcon className="w-5 h-5" />
+              <span>編輯內容</span>
+            </Link>
+          )}
 
           {/* 列印 */}
           <button
@@ -216,14 +254,16 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
             <span>嵌入</span>
           </button>
 
-          {/* 課業分配 */}
-          <button
-            onClick={onAssignment}
-            className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-          >
-            <UserGroupIcon className="w-5 h-5" />
-            <span>課業分配</span>
-          </button>
+          {/* 課業分配 - 只有所有者可以分配 */}
+          {isOwner && (
+            <button
+              onClick={onAssignment}
+              className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              <UserGroupIcon className="w-5 h-5" />
+              <span>課業分配</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import GameSwitcher from '@/components/games/GameSwitcher';
 import ShimozurdoGameContainer from '@/components/games/ShimozurdoGameContainer';
@@ -14,7 +15,7 @@ import EmbedCodeModal from '@/components/games/EmbedCodeModal';
 import PublishToCommunityModal from '@/components/activities/PublishToCommunityModal';
 import AssignmentModal, { AssignmentConfig } from '@/components/activities/AssignmentModal';
 import AssignmentSetModal from '@/components/activities/AssignmentSetModal';
-import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
 
 // 遊戲統計類型
@@ -39,6 +40,8 @@ interface GameState {
 
 const GameSwitcherPage: React.FC = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { data: session } = useSession();
   const [currentGameId, setCurrentGameId] = useState<string>('shimozurdo-game');
   const [showStats, setShowStats] = useState<boolean>(false);
   const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
@@ -52,6 +55,8 @@ const GameSwitcherPage: React.FC = () => {
   const [assignmentId, setAssignmentId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | null>(null);
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [isCopying, setIsCopying] = useState<boolean>(false);
 
 
 
@@ -206,6 +211,50 @@ const GameSwitcherPage: React.FC = () => {
     setShowAssignmentModal(true);
   }, []);
 
+  // 複製活動到我的活動列表
+  const handleCopyActivity = useCallback(async () => {
+    if (!activityId || !activityInfo || !session?.user?.email) {
+      alert('請先登入才能複製活動');
+      return;
+    }
+
+    if (isCopying) return;
+
+    try {
+      setIsCopying(true);
+      console.log('🔄 開始複製活動:', activityId);
+
+      // 調用複製 API
+      const response = await fetch('/api/activities/copy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sourceActivityId: activityId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ 活動複製成功:', data);
+        alert('活動已成功複製到您的活動列表！');
+
+        // 跳轉到新複製的活動編輯頁面
+        router.push(`/create/${activityInfo.templateType}?edit=${data.newActivityId}`);
+      } else {
+        const error = await response.json();
+        console.error('❌ 複製失敗:', error);
+        alert('複製失敗：' + (error.error || '未知錯誤'));
+      }
+    } catch (error) {
+      console.error('❌ 複製時出錯:', error);
+      alert('複製時發生錯誤，請稍後再試');
+    } finally {
+      setIsCopying(false);
+    }
+  }, [activityId, activityInfo, session, isCopying, router]);
+
   const handleStartAssignment = useCallback(async (assignmentConfig: AssignmentConfig) => {
     if (!activityId || !activityInfo) return;
 
@@ -303,12 +352,23 @@ const GameSwitcherPage: React.FC = () => {
           } : undefined,
           category: '教育', // 可以從 API 獲取
         });
+
+        // 判斷是否是所有者
+        if (session?.user?.email && data.user?.id) {
+          // 需要通過 API 獲取當前用戶的 ID 來比較
+          const currentUserResponse = await fetch('/api/user/profile');
+          if (currentUserResponse.ok) {
+            const currentUser = await currentUserResponse.json();
+            setIsOwner(currentUser.id === data.user.id);
+          }
+        }
+
         console.log('✅ 活動信息已載入:', data);
       }
     } catch (error) {
       console.error('❌ 載入活動信息時出錯:', error);
     }
-  }, []);
+  }, [session]);
 
   // 載入排行榜數據
   const loadLeaderboard = useCallback(async (assignmentId: string) => {
@@ -955,10 +1015,13 @@ const GameSwitcherPage: React.FC = () => {
             geptLevel={activityInfo.geptLevel}
             description={activityInfo.description}
             createdAt={activityInfo.createdAt}
+            isOwner={isOwner}
             onPrint={handlePrint}
             onEmbed={handleEmbed}
             onRename={handleRename}
             onAssignment={handleAssignment}
+            onCopy={handleCopyActivity}
+            isCopying={isCopying}
           />
         )}
 
