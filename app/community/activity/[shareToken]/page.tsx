@@ -352,6 +352,15 @@ export default function CommunityActivityDetailPage() {
                     )}
                   </div>
                 </div>
+
+                {/* 查看作者更多活動按鈕 */}
+                <Link
+                  href={`/community/author/${activity.author.id}`}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  <User size={18} />
+                  查看作者的更多活動
+                </Link>
               </div>
 
               {/* 遊戲入口 */}
