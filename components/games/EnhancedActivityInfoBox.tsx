@@ -8,7 +8,6 @@ import {
   CodeBracketIcon,
   UserGroupIcon,
   PencilSquareIcon,
-  BookOpenIcon,
   TagIcon,
   UserIcon,
   FolderIcon,
@@ -141,16 +140,6 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
 
           {/* 右側：操作按鈕（桌面版） */}
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
-            {/* 編輯單字 */}
-            <Link
-              href={`/create/${templateType || 'shimozurdo-game'}?edit=${activityId}`}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              title="編輯單字"
-            >
-              <BookOpenIcon className="w-4 h-4" />
-              <span>編輯單字</span>
-            </Link>
-
             {/* 編輯內容 */}
             <Link
               href={`/create/${activityId}`}
@@ -196,16 +185,7 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
 
       {/* 手機版操作按鈕 */}
       <div className="md:hidden px-4 py-3 border-t border-gray-200">
-        <div className="grid grid-cols-3 gap-2">
-          {/* 編輯單字 */}
-          <Link
-            href={`/create/${templateType || 'shimozurdo-game'}?edit=${activityId}`}
-            className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            <BookOpenIcon className="w-5 h-5" />
-            <span>編輯單字</span>
-          </Link>
-
+        <div className="grid grid-cols-2 gap-2">
           {/* 編輯內容 */}
           <Link
             href={`/create/${activityId}`}
@@ -236,7 +216,7 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
           {/* 課業分配 */}
           <Link
             href="/my-activities"
-            className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors col-span-2"
+            className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
           >
             <UserGroupIcon className="w-5 h-5" />
             <span>課業分配</span>
