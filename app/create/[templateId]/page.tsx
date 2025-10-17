@@ -222,6 +222,10 @@ export default function CreateGamePage() {
           // 新架構：從關聯表中獲取詞彙數據
           vocabularyData = activity.vocabularyItems;
           console.log('📝 從關聯表載入詞彙數據:', vocabularyData.length, '個詞彙');
+        } else if ((activity as any).elements && Array.isArray((activity as any).elements) && (activity as any).elements.length > 0) {
+          // 從 elements 字段載入詞彙數據
+          vocabularyData = (activity as any).elements;
+          console.log('📝 從 elements 字段載入詞彙數據:', vocabularyData.length, '個詞彙');
         } else if (activity.content && activity.content.vocabularyItems) {
           // 舊架構：從 content 中獲取詞彙數據
           vocabularyData = activity.content.vocabularyItems;
@@ -272,6 +276,10 @@ export default function CreateGamePage() {
           // 新架構：從關聯表中獲取詞彙數據
           vocabularyData = activity.vocabularyItems;
           console.log('📝 從關聯表載入詞彙數據:', vocabularyData.length, '個詞彙');
+        } else if (activity.elements && Array.isArray(activity.elements) && activity.elements.length > 0) {
+          // 從 elements 字段載入詞彙數據
+          vocabularyData = activity.elements;
+          console.log('📝 從 elements 字段載入詞彙數據:', vocabularyData.length, '個詞彙');
         } else if (activity.content && activity.content.vocabularyItems) {
           // 舊架構：從 content 中獲取詞彙數據
           vocabularyData = activity.content.vocabularyItems;
