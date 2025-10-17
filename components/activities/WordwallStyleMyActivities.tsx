@@ -13,6 +13,7 @@ import AssignmentModal, { AssignmentConfig } from './AssignmentModal';
 import AssignmentSetModal from './AssignmentSetModal';
 import PublishToCommunityModal from './PublishToCommunityModal';
 import ActivityQRCodeModal from './ActivityQRCodeModal';
+import PublicProfileBanner from './PublicProfileBanner';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 interface Activity {
@@ -34,6 +35,7 @@ interface Activity {
 
 interface WordwallStyleMyActivitiesProps {
   userId: string;
+  userEmail?: string;
 }
 
 // 拖拽回根級別的目標組件
@@ -91,7 +93,8 @@ const DropToRootTarget: React.FC<DropToRootTargetProps> = ({ onDropToRoot, onCli
 };
 
 export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps> = ({
-  userId
+  userId,
+  userEmail
 }) => {
   // 狀態管理
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -924,6 +927,13 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
 
   return (
     <div className="wordwall-style-activities min-h-screen bg-gray-50">
+      {/* 公開頁面橫幅 */}
+      {userEmail && (
+        <div className="max-w-7xl mx-auto px-6 pt-6">
+          <PublicProfileBanner userId={userId} userEmail={userEmail} />
+        </div>
+      )}
+
       {/* 頁面標題 - 優化版 */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-6">
         <div className="max-w-7xl mx-auto">

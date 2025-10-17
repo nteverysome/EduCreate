@@ -75,7 +75,7 @@ export default function MyActivitiesPage() {
           </div>
         </div>
       )}
-      <WordwallStyleMyActivities userId={currentUser.id} />
+      <WordwallStyleMyActivities userId={currentUser.id} userEmail={currentUser.email} />
     </div>
   );
 }
