@@ -53,23 +53,56 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('📋 源活動數據:', {
+      id: sourceActivity.id,
+      title: sourceActivity.title,
+      hasContent: !!sourceActivity.content,
+      hasElements: !!sourceActivity.elements,
+      elementsType: typeof sourceActivity.elements,
+      elementsLength: Array.isArray(sourceActivity.elements) ? sourceActivity.elements.length : 'not array',
+    });
+
+    // 準備複製的數據
+    const copyData: any = {
+      title: `${sourceActivity.title} (副本)`,
+      description: sourceActivity.description,
+      type: sourceActivity.type,
+      templateType: sourceActivity.templateType,
+      geptLevel: sourceActivity.geptLevel,
+      tags: sourceActivity.tags,
+      difficulty: sourceActivity.difficulty,
+      estimatedTime: sourceActivity.estimatedTime,
+      totalWords: sourceActivity.totalWords,
+      userId: currentUser.id,
+      shareToken: generateShareToken(),
+    };
+
+    // 複製 content（如果存在）
+    if (sourceActivity.content) {
+      copyData.content = sourceActivity.content;
+    }
+
+    // 複製 elements（如果存在）
+    if (sourceActivity.elements) {
+      copyData.elements = sourceActivity.elements;
+    }
+
+    console.log('📝 準備複製的數據:', {
+      title: copyData.title,
+      hasContent: !!copyData.content,
+      hasElements: !!copyData.elements,
+    });
+
     // 創建新活動（複製）
     const newActivity = await prisma.activity.create({
-      data: {
-        title: `${sourceActivity.title} (副本)`,
-        description: sourceActivity.description,
-        content: sourceActivity.content,
-        elements: sourceActivity.elements, // 複製詞彙數據
-        type: sourceActivity.type,
-        templateType: sourceActivity.templateType,
-        geptLevel: sourceActivity.geptLevel,
-        tags: sourceActivity.tags,
-        difficulty: sourceActivity.difficulty,
-        estimatedTime: sourceActivity.estimatedTime,
-        totalWords: sourceActivity.totalWords,
-        userId: currentUser.id,
-        shareToken: generateShareToken(),
-      },
+      data: copyData,
+    });
+
+    console.log('✅ 新活動已創建:', {
+      id: newActivity.id,
+      title: newActivity.title,
+      hasContent: !!newActivity.content,
+      hasElements: !!newActivity.elements,
     });
 
     return NextResponse.json({
