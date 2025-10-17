@@ -281,7 +281,38 @@ npm run dev
 
 ## 📚 完整文檔系統
 
-### 🎮 **AirplaneCollisionGame 專用文檔**
+### � **API 文檔** 🆕
+- **[📄 完整 API 文檔](docs/API_DOCUMENTATION.md)** - 7 種主要 API 端點的完整說明
+  - API 列表和權限要求
+  - 詳細的請求/響應格式
+  - 匿名模式 vs 姓名模式的區別
+  - 使用流程圖
+  - 常見問題解答
+
+#### 主要 API 端點
+| API 端點 | 用途 | 需要登入 |
+|---------|------|---------|
+| GET /api/activities/{activityId} | 載入活動信息和元數據 | ❌ 否 |
+| GET /api/activities/{activityId}/vocabulary | 載入活動詞彙（教師模式） | ✅ 是 |
+| GET /api/share/{activityId}/{shareToken} | 載入公開分享的活動詞彙 | ❌ 否 |
+| **GET /api/play/{activityId}/{assignmentId}** | **載入課業分配的活動詞彙** | ❌ 否 |
+| GET /api/leaderboard/{assignmentId} | 載入排行榜數據 | ❌ 否 |
+| POST /api/assignments | 創建課業分配 | ✅ 是 |
+| DELETE /api/activities/{activityId} | 刪除活動 | ✅ 是 |
+| **POST /api/results** | **學生提交遊戲結果** | ❌ 否 |
+
+#### 學生遊戲模式說明
+- **姓名模式** (`registrationType: 'name'`)
+  - 學生必須輸入姓名才能開始遊戲
+  - 遊戲結束後，成績會被記錄到數據庫
+  - 教師可以在 `/my-results` 查看學生成績
+
+- **匿名模式** (`registrationType: 'anonymous'`)
+  - 學生無需輸入姓名，直接開始遊戲
+  - 遊戲結束後，成績**不會**被記錄
+  - 教師無法查看個人成績
+
+### �🎮 **AirplaneCollisionGame 專用文檔**
 - **[📄 技術文檔](docs/airplane-collision-game-technical-documentation.md)** - 完整的架構設計和技術規格
 - **[📄 API 文檔](docs/airplane-collision-game-api-documentation.md)** - 詳細的 TypeScript API 接口
 - **[📄 使用指南](docs/airplane-collision-game-user-guide.md)** - 遊戲操作和學習功能說明
