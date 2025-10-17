@@ -980,7 +980,7 @@ const GameSwitcherPage: React.FC = () => {
         )}
 
         {/* 排行榜區域 - 只在學生遊戲模式顯示 */}
-        {showLeaderboard && assignmentId && leaderboard.length > 0 && (
+        {showLeaderboard && assignmentId && (
           <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
               <h3 className="text-sm font-semibold text-gray-900">排行榜</h3>
