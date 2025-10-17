@@ -16,17 +16,18 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  User, 
-  Mail, 
-  Globe, 
-  Calendar, 
-  Save, 
-  X, 
+import {
+  User,
+  Mail,
+  Globe,
+  Calendar,
+  Save,
+  X,
   Upload,
   ArrowLeft,
   Loader2
 } from 'lucide-react';
+import PublicProfileSection from '@/components/account/PublicProfileSection';
 
 interface UserProfile {
   id: string;
@@ -238,6 +239,9 @@ export default function PersonalDetailsPage() {
             管理您的個人資料和帳戶設定
           </p>
         </div>
+
+        {/* 公開頁面區塊 */}
+        {profile && <PublicProfileSection userId={profile.id} />}
 
         {/* 錯誤訊息 */}
         {error && (
