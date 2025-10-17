@@ -143,7 +143,7 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
           <div className="hidden md:flex items-center gap-2 flex-shrink-0">
             {/* 編輯內容 */}
             <Link
-              href={`/create/${activityId}`}
+              href={`/create/${templateType || 'shimozurdo-game'}?edit=${activityId}`}
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
               title="編輯內容"
             >
@@ -189,7 +189,7 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
         <div className="grid grid-cols-2 gap-2">
           {/* 編輯內容 */}
           <Link
-            href={`/create/${activityId}`}
+            href={`/create/${templateType || 'shimozurdo-game'}?edit=${activityId}`}
             className="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
           >
             <PencilIcon className="w-5 h-5" />
