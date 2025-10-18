@@ -3,7 +3,7 @@
 
 FROM node:18-alpine
 
-# 安裝 Chromium 和相關依賴
+# 安裝 Chromium、中文字體和相關依賴
 # Puppeteer 需要這些系統庫才能運行 Chromium
 RUN apk add --no-cache \
     chromium \
@@ -11,7 +11,9 @@ RUN apk add --no-cache \
     freetype \
     harfbuzz \
     ca-certificates \
-    ttf-freefont
+    ttf-freefont \
+    font-noto-cjk \
+    font-wqy-zenhei
 
 # 設置 Puppeteer 使用系統安裝的 Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
