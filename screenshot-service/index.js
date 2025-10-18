@@ -34,10 +34,10 @@ app.post('/screenshot', async (req, res) => {
     console.log(`  等待時間: ${waitTime}ms`);
     console.log(`  選擇器: ${selector || '無（全頁面截圖）'}`);
 
-    // 啟動瀏覽器
+    // 啟動瀏覽器（優化配置以提升速度）
     const startTime = Date.now();
     browser = await puppeteer.launch({
-      headless: true,
+      headless: 'new',  // 使用新的 headless 模式（更快）
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -45,7 +45,29 @@ app.post('/screenshot', async (req, res) => {
         '--disable-accelerated-2d-canvas',
         '--disable-gpu',
         '--disable-web-security',
-        '--disable-features=IsolateOrigins,site-per-process'
+        '--disable-features=IsolateOrigins,site-per-process',
+        '--no-first-run',  // 跳過首次運行設置
+        '--no-zygote',  // 減少進程開銷
+        '--single-process',  // 單進程模式（更快啟動）
+        '--disable-extensions',  // 禁用擴展
+        '--disable-background-networking',  // 禁用背景網絡
+        '--disable-default-apps',  // 禁用默認應用
+        '--disable-sync',  // 禁用同步
+        '--metrics-recording-only',  // 僅記錄指標
+        '--mute-audio',  // 靜音
+        '--no-default-browser-check',  // 跳過默認瀏覽器檢查
+        '--autoplay-policy=user-gesture-required',  // 自動播放策略
+        '--disable-background-timer-throttling',  // 禁用背景計時器節流
+        '--disable-backgrounding-occluded-windows',  // 禁用背景窗口
+        '--disable-breakpad',  // 禁用崩潰報告
+        '--disable-component-extensions-with-background-pages',  // 禁用背景頁面擴展
+        '--disable-features=TranslateUI,BlinkGenPropertyTrees',  // 禁用翻譯和其他功能
+        '--disable-ipc-flooding-protection',  // 禁用 IPC 洪水保護
+        '--disable-renderer-backgrounding',  // 禁用渲染器背景
+        '--enable-features=NetworkService,NetworkServiceInProcess',  // 啟用網絡服務
+        '--force-color-profile=srgb',  // 強制顏色配置
+        '--hide-scrollbars',  // 隱藏滾動條
+        '--disable-blink-features=AutomationControlled'  // 禁用自動化控制標記
       ]
     });
 
@@ -71,8 +93,84 @@ app.post('/screenshot', async (req, res) => {
     const navigationTime = Date.now() - navigationStart;
     console.log(`  頁面載入時間: ${navigationTime}ms`);
 
-    // 等待遊戲載入
-    await page.waitForTimeout(parseInt(waitTime));
+    // ===== 智能等待機制（替代固定等待時間）=====
+    console.log(`  開始智能等待遊戲載入...`);
+    const smartWaitStart = Date.now();
+
+    if (selector) {
+      // 如果有選擇器，等待該元素出現並穩定
+      console.log(`  等待元素: ${selector}`);
+      await page.waitForSelector(selector, { timeout: 15000 });
+
+      // 等待元素完全載入（檢查是否有 loaded 類或屬性）
+      try {
+        await page.waitForFunction(
+          (sel) => {
+            const element = document.querySelector(sel);
+            if (!element) return false;
+
+            // 檢查 iframe 是否完全載入
+            if (element.tagName === 'IFRAME') {
+              try {
+                // 檢查 iframe 的 contentWindow 是否可訪問
+                return element.contentWindow &&
+                       element.contentWindow.document &&
+                       element.contentWindow.document.readyState === 'complete';
+              } catch (e) {
+                // 跨域 iframe，檢查 load 事件
+                return element.complete || element.readyState === 'complete';
+              }
+            }
+
+            // 檢查元素是否有 loaded 類或完成狀態
+            return element.classList.contains('loaded') ||
+                   element.classList.contains('ready') ||
+                   element.getAttribute('data-loaded') === 'true' ||
+                   element.complete === true;
+          },
+          { timeout: 5000 },
+          selector
+        );
+        console.log(`  元素已完全載入`);
+      } catch (e) {
+        // 如果智能等待失敗，回退到短暫的固定等待
+        console.log(`  智能等待超時，使用回退等待 (2秒)`);
+        await page.waitForTimeout(2000);
+      }
+    } else {
+      // 沒有選擇器，等待頁面完全載入
+      try {
+        await page.waitForFunction(
+          () => {
+            // 檢查頁面是否有遊戲容器並已載入
+            const gameContainer = document.querySelector('#game-container, .game-container, canvas, iframe');
+            if (!gameContainer) return false;
+
+            // 檢查是否有 Phaser 遊戲實例
+            if (window.game && window.game.scene) {
+              return window.game.scene.isActive();
+            }
+
+            // 檢查 canvas 是否已渲染
+            if (gameContainer.tagName === 'CANVAS') {
+              const ctx = gameContainer.getContext('2d');
+              return ctx && gameContainer.width > 0 && gameContainer.height > 0;
+            }
+
+            return true;
+          },
+          { timeout: 5000 }
+        );
+        console.log(`  頁面遊戲已完全載入`);
+      } catch (e) {
+        // 如果智能等待失敗，回退到短暫的固定等待
+        console.log(`  智能等待超時，使用回退等待 (2秒)`);
+        await page.waitForTimeout(2000);
+      }
+    }
+
+    const smartWaitTime = Date.now() - smartWaitStart;
+    console.log(`  智能等待時間: ${smartWaitTime}ms（節省了 ${parseInt(waitTime) - smartWaitTime}ms）`);
 
     // 截圖
     const screenshotStart = Date.now();
@@ -80,9 +178,6 @@ app.post('/screenshot', async (req, res) => {
 
     if (selector) {
       // 截取特定元素
-      console.log(`  等待元素: ${selector}`);
-      await page.waitForSelector(selector, { timeout: 10000 });
-
       const element = await page.$(selector);
       if (!element) {
         throw new Error(`找不到元素: ${selector}`);

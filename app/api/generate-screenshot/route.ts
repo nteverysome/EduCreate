@@ -127,7 +127,8 @@ export async function POST(request: NextRequest) {
 
       // 7. 調用 Railway 截圖服務
       // 截圖預覽頁面已經是 100% 遊戲內容，直接截取整個頁面
-      console.log('[Production Mode] Sending screenshot request...');
+      // 使用智能等待機制，大幅減少等待時間（從 8 秒降至 2-3 秒）
+      console.log('[Production Mode] Sending screenshot request with smart waiting...');
       const screenshotResponse = await fetch(`${RAILWAY_SCREENSHOT_SERVICE_URL}/screenshot`, {
         method: 'POST',
         headers: {
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
           url: gameUrl,
           width: 1200,
           height: 630,
-          waitTime: 8000, // 等待 8 秒讓遊戲完全載入（iframe 需要更多時間）
+          waitTime: 3000, // 回退等待時間（智能等待會更快完成）
           selector: 'iframe', // 截取 iframe 遊戲容器（100% 遊戲內容）
         }),
       });
