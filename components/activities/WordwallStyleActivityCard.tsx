@@ -41,6 +41,7 @@ interface Activity {
   wordCount?: number;
   geptLevel?: string;
   tags?: string[];
+  content?: any; // ✅ 添加 content 字段，包含 gameTemplateId 等信息
   vocabularyItems?: Array<{
     id: string;
     english: string;
