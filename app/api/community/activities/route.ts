@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
     const where: any = {
       isPublicShared: true,
       publishedToCommunityAt: { not: null },
+      deletedAt: null,  // 過濾已刪除的活動
     };
 
     // 分類篩選
