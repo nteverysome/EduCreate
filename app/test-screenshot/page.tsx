@@ -56,7 +56,15 @@ export default function TestScreenshotPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || data.details || 'Failed to generate screenshot');
+        // 顯示完整的錯誤信息
+        const errorMessage = [
+          data.error || 'Failed to generate screenshot',
+          data.details ? `\n詳細信息: ${data.details}` : '',
+          data.stack ? `\n堆棧: ${data.stack}` : '',
+          data.timestamp ? `\n時間: ${data.timestamp}` : '',
+        ].filter(Boolean).join('');
+
+        throw new Error(errorMessage);
       }
 
       setResult(data);
@@ -143,7 +151,7 @@ export default function TestScreenshotPage() {
           {error && (
             <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-md">
               <h3 className="font-semibold text-red-900 mb-2">錯誤：</h3>
-              <p className="text-red-700">{error}</p>
+              <pre className="text-red-700 whitespace-pre-wrap text-sm">{error}</pre>
             </div>
           )}
 
