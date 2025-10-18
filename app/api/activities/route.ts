@@ -163,7 +163,8 @@ export async function GET(request: NextRequest) {
           shareToken: activity.shareToken, // ✅ 分享 token
           communityPlays: activity.communityPlays, // ✅ 社區遊玩次數
           elements: activity.elements, // ✅ 添加 elements 字段（詞彙數據）
-          vocabularyItems: activity.vocabularyItems // ✅ 添加 vocabularyItems 關聯數據
+          vocabularyItems: activity.vocabularyItems, // ✅ 添加 vocabularyItems 關聯數據
+          thumbnailUrl: activity.thumbnailUrl // ✅ 添加 thumbnailUrl 字段（活動截圖）
         };
       });
 
