@@ -7,6 +7,7 @@ import {
   ClockIcon,
   EllipsisVerticalIcon
 } from '@heroicons/react/24/outline';
+import { useDragDrop } from './DragDropContext';
 
 interface AssignmentResult {
   id: string;
@@ -32,18 +33,20 @@ export const WordwallStyleResultCard: React.FC<WordwallStyleResultCardProps> = (
   onClick,
   onMenuClick
 }) => {
+  const { startDrag, isDragging, dragItem } = useDragDrop();
+
   // 格式化時間顯示
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 24) {
       return `${date.getDate()} ${date.toLocaleDateString('zh-TW', { month: 'short' })} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
     }
-    
-    return date.toLocaleDateString('zh-TW', { 
-      month: 'short', 
+
+    return date.toLocaleDateString('zh-TW', {
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -63,10 +66,31 @@ export const WordwallStyleResultCard: React.FC<WordwallStyleResultCardProps> = (
     onClick(result);
   };
 
+  const handleMouseDown = (event: React.MouseEvent) => {
+    // 如果点击的是菜单按钮，不启动拖移
+    if ((event.target as HTMLElement).closest('button')) {
+      return;
+    }
+
+    event.preventDefault();
+    startDrag({
+      id: result.id,
+      type: 'result',
+      data: result
+    }, event);
+  };
+
+  // 检查当前项目是否正在被拖移
+  const isBeingDragged = isDragging && dragItem?.id === result.id;
+
   return (
     <div
       onClick={handleCardClick}
-      className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer hover:border-gray-300"
+      onMouseDown={handleMouseDown}
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 cursor-move hover:border-gray-300 select-none ${
+        isBeingDragged ? 'opacity-50 scale-95' : ''
+      }`}
+      style={{ userSelect: 'none' }}
     >
       {/* 卡片頭部 - 縮略圖區域（使用 aspect-video 保持一致比例） */}
       <div className="relative">
