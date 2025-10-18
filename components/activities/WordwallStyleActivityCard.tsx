@@ -22,6 +22,7 @@ import {
   QrCode
 } from 'lucide-react';
 import { loadVocabularyData, getSourceDisplayName } from '@/lib/vocabulary/loadVocabularyData';
+import GameThumbnailPreview from './GameThumbnailPreview';
 
 interface Activity {
   id: string;
@@ -351,15 +352,17 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
       <div className="relative">
         <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center overflow-hidden">
           {activity.thumbnail ? (
-            <img 
-              src={activity.thumbnail} 
+            <img
+              src={activity.thumbnail}
               alt={activity.title}
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="text-4xl">
-              {getGameTypeIcon(activity.gameType)}
-            </div>
+            <GameThumbnailPreview
+              gameType={activity.gameType}
+              vocabularyItems={activity.vocabularyItems}
+              activityTitle={activity.title}
+            />
           )}
         </div>
 
