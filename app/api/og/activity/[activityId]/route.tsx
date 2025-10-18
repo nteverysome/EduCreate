@@ -127,16 +127,26 @@ export async function GET(
               alignItems: 'center',
               justifyContent: 'center',
               background: previewImage
-                ? `url(${previewImage})`
+                ? '#1e293b'  // 深色背景作為圖片載入前的佔位
                 : `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
               position: 'relative',
               overflow: 'hidden',
             }}
           >
-            {/* 如果沒有預覽圖，顯示遊戲圖標 */}
-            {!previewImage && (
+            {/* 如果有預覽圖，使用 img 標籤（@vercel/og 需要） */}
+            {previewImage ? (
+              <img
+                src={previewImage}
+                alt={displayName}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                }}
+              />
+            ) : (
+              /* 如果沒有預覽圖，顯示遊戲圖標 */
               <div
                 style={{
                   fontSize: 80,
