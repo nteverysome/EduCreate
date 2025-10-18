@@ -105,12 +105,15 @@ export async function POST(request: NextRequest) {
     } else {
       // ===== 生產模式：調用 Railway 截圖服務 =====
       console.log('[Production Mode] Calling Railway screenshot service');
+      console.log('[Production Mode] Railway URL:', RAILWAY_SCREENSHOT_SERVICE_URL);
 
       // 6. 構建遊戲 URL
       const gameUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/play/${activityId}`;
+      console.log('[Production Mode] Game URL:', gameUrl);
 
       // 7. 調用 Railway 截圖服務
       // 使用 iframe 選擇器來截取遊戲容器（100% 遊戲內容）
+      console.log('[Production Mode] Sending screenshot request...');
       const screenshotResponse = await fetch(`${RAILWAY_SCREENSHOT_SERVICE_URL}/screenshot`, {
         method: 'POST',
         headers: {
@@ -125,15 +128,23 @@ export async function POST(request: NextRequest) {
         }),
       });
 
+      console.log('[Production Mode] Screenshot response status:', screenshotResponse.status);
+
       if (!screenshotResponse.ok) {
-        throw new Error(`Screenshot service failed: ${screenshotResponse.statusText}`);
+        const errorText = await screenshotResponse.text();
+        console.error('[Production Mode] Screenshot service error:', errorText);
+        throw new Error(`Screenshot service failed: ${screenshotResponse.status} ${screenshotResponse.statusText} - ${errorText}`);
       }
 
       // 8. 獲取截圖 Buffer
+      console.log('[Production Mode] Getting screenshot buffer...');
       const screenshotBuffer = await screenshotResponse.arrayBuffer();
+      console.log('[Production Mode] Screenshot buffer size:', screenshotBuffer.byteLength);
+
       const screenshotBlob = new Blob([screenshotBuffer], { type: 'image/png' });
 
       // 9. 上傳到 Vercel Blob Storage
+      console.log('[Production Mode] Uploading to Vercel Blob...');
       const filename = `activity-${activityId}-${Date.now()}.png`;
       const blob = await put(filename, screenshotBlob, {
         access: 'public',
@@ -162,10 +173,29 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('[Generate Screenshot Error]', error);
+
+    // 提取詳細錯誤信息
+    let errorMessage = 'Unknown error';
+    let errorStack = '';
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorStack = error.stack || '';
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    } else {
+      errorMessage = JSON.stringify(error);
+    }
+
+    console.error('[Generate Screenshot Error] Message:', errorMessage);
+    console.error('[Generate Screenshot Error] Stack:', errorStack);
+
     return NextResponse.json(
       {
         error: 'Failed to generate screenshot',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: errorMessage,
+        stack: process.env.NODE_ENV === 'development' ? errorStack : undefined,
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );
