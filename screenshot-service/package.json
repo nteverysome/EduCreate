@@ -1,0 +1,30 @@
+{
+  "name": "screenshot-service",
+  "version": "1.0.0",
+  "description": "Screenshot service for EduCreate using Puppeteer",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "screenshot",
+    "puppeteer",
+    "express",
+    "railway"
+  ],
+  "author": "EduCreate Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "puppeteer": "^21.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
