@@ -255,20 +255,61 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
     return date.toLocaleDateString('zh-TW');
   };
 
-  const getGameTypeIcon = (gameType: string) => {
-    // 根據遊戲類型返回對應的 emoji 或圖標
-    const gameIcons: { [key: string]: string } = {
-      '飛機遊戲': '✈️',
-      '匹配遊戲': '🔗',
-      '測驗': '❓',
-      '問答遊戲': '🎯',
-      '開箱遊戲': '📦',
-      '迷宮追逐': '🏃',
-      'vocabulary': '📝',
-      'flashcard': '📚',
-      'matching': '🔗'
+  // 遊戲類型映射（包含圖標和中文名稱）
+  const getGameTypeInfo = (gameType: string): { icon: string; name: string } => {
+    const gameTypeMap: { [key: string]: { icon: string; name: string } } = {
+      // 基礎遊戲類型
+      'quiz': { icon: '❓', name: '測驗' },
+      'matching': { icon: '🔗', name: '配對遊戲' },
+      'flashcards': { icon: '📚', name: '單字卡片' },
+      'flashcard': { icon: '📚', name: '單字卡片' },
+      'vocabulary': { icon: '📝', name: '詞彙遊戲' },
+
+      // Wordwall 風格遊戲
+      'hangman': { icon: '🎯', name: '猜字遊戲' },
+      'image-quiz': { icon: '🖼️', name: '圖片問答' },
+      'true-false': { icon: '✅', name: '是非題' },
+      'whack-a-mole': { icon: '🔨', name: '打地鼠' },
+      'spin-wheel': { icon: '🎡', name: '轉盤' },
+      'memory-cards': { icon: '🧠', name: '記憶卡片' },
+      'crossword': { icon: '📋', name: '填字遊戲' },
+      'wordsearch': { icon: '🔍', name: '找字遊戲' },
+      'anagram': { icon: '🔤', name: '字母重組' },
+      'group-sort': { icon: '📊', name: '分類遊戲' },
+      'rank-order': { icon: '📈', name: '排序遊戲' },
+      'match-up': { icon: '🎯', name: '配對' },
+      'airplane': { icon: '✈️', name: '飛機遊戲' },
+      'balloon-pop': { icon: '🎈', name: '氣球遊戲' },
+      'maze-chase': { icon: '🏃', name: '迷宮追逐' },
+      'open-box': { icon: '📦', name: '開箱遊戲' },
+      'gameshow-quiz': { icon: '🎬', name: '競賽測驗' },
+      'random-wheel': { icon: '🎰', name: '隨機轉盤' },
+      'random-cards': { icon: '🃏', name: '隨機卡片' },
+      'flip-tiles': { icon: '🔲', name: '翻轉方塊' },
+      'speaking-cards': { icon: '🗣️', name: '語音卡片' },
+
+      // 中文名稱映射
+      '飛機遊戲': { icon: '✈️', name: '飛機遊戲' },
+      '匹配遊戲': { icon: '🔗', name: '配對遊戲' },
+      '測驗': { icon: '❓', name: '測驗' },
+      '問答遊戲': { icon: '🎯', name: '問答遊戲' },
+      '開箱遊戲': { icon: '📦', name: '開箱遊戲' },
+      '迷宮追逐': { icon: '🏃', name: '迷宮追逐' },
+      '詞彙遊戲': { icon: '📝', name: '詞彙遊戲' },
+      '單字卡片': { icon: '📚', name: '單字卡片' },
+      '猜字遊戲': { icon: '🎯', name: '猜字遊戲' },
+      '圖片問答': { icon: '🖼️', name: '圖片問答' },
+      '是非題': { icon: '✅', name: '是非題' },
+      '打地鼠': { icon: '🔨', name: '打地鼠' },
+      '轉盤': { icon: '🎡', name: '轉盤' },
+      '記憶卡片': { icon: '🧠', name: '記憶卡片' },
     };
-    return gameIcons[gameType] || '🎮';
+
+    return gameTypeMap[gameType] || { icon: '🎮', name: gameType || '遊戲' };
+  };
+
+  const getGameTypeIcon = (gameType: string) => {
+    return getGameTypeInfo(gameType).icon;
   };
 
   const handleCardClick = () => {
@@ -368,10 +409,11 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
           </div>
         </div>
 
-        {/* 遊戲類型標籤 */}
+        {/* 遊戲類型標籤 - Wordwall 風格 */}
         <div className="absolute bottom-2 left-2">
-          <div className="bg-black/70 text-white px-2 py-1 rounded text-xs font-medium">
-            {activity.gameType}
+          <div className="bg-white/95 backdrop-blur-sm text-gray-800 px-2.5 py-1.5 rounded shadow-sm border border-gray-200 flex items-center gap-1.5">
+            <span className="text-base leading-none">{getGameTypeInfo(activity.gameType).icon}</span>
+            <span className="text-xs font-medium">{getGameTypeInfo(activity.gameType).name}</span>
           </div>
         </div>
       </div>
