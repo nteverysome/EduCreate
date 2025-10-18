@@ -84,7 +84,8 @@ export async function GET(request: NextRequest) {
           status: status,
           assignmentId: result.assignmentId,
           activityId: result.assignment.activityId,
-          folderId: result.folderId  // 添加 folderId 字段
+          folderId: result.folderId,  // 添加 folderId 字段
+          thumbnailUrl: result.assignment.activity.thumbnailUrl  // 添加活動截圖 URL
         };
       });
 

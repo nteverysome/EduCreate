@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { 
+import Image from 'next/image';
+import {
   UserIcon,
   ClockIcon,
   EllipsisVerticalIcon
@@ -18,6 +19,7 @@ interface AssignmentResult {
   status: 'active' | 'completed' | 'expired';
   assignmentId: string;
   activityId: string;
+  thumbnailUrl?: string | null;  // 添加截圖 URL 欄位
 }
 
 interface DraggableResultCardProps {
@@ -86,52 +88,68 @@ export const DraggableResultCard: React.FC<DraggableResultCardProps> = ({
       href={`/my-results/${result.id}`}
       onClick={handleCardClick}
       onMouseDown={handleMouseDown}
-      className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-all cursor-move select-none ${
+      className={`block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all cursor-move select-none ${
         isBeingDragged ? 'opacity-50 scale-95' : ''
       }`}
       style={{ userSelect: 'none' }}
     >
-      <div className="flex items-center justify-between gap-2 sm:gap-3">
-        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
-          {/* 結果圖標 */}
-          <div className="flex-shrink-0">
-            <span className="text-xl sm:text-2xl">📊</span>
-          </div>
+      {/* 活動截圖 */}
+      {result.thumbnailUrl && (
+        <div className="relative h-24 sm:h-32 bg-gradient-to-br from-blue-100 to-purple-100">
+          <Image
+            src={result.thumbnailUrl}
+            alt={result.activityName}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
 
-          {/* 結果信息 */}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-base sm:text-lg font-medium text-gray-900 truncate">
-              {result.title}
-            </h2>
-
-            {/* 參與者數量和時間信息 - 響應式佈局 */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1">
-              <div className="flex items-center text-xs sm:text-sm text-gray-500">
-                <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                <span>{result.participantCount}</span>
+      <div className="p-3 sm:p-4">
+        <div className="flex items-center justify-between gap-2 sm:gap-3">
+          <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+            {/* 結果圖標（只在沒有截圖時顯示） */}
+            {!result.thumbnailUrl && (
+              <div className="flex-shrink-0">
+                <span className="text-xl sm:text-2xl">📊</span>
               </div>
+            )}
 
-              <div className="flex items-center text-xs sm:text-sm text-gray-500">
-                <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                <span className="truncate">
-                  {formatDateTime(result.createdAt)}
-                  <span className="hidden sm:inline">
-                    {result.deadline ? ` – ${result.deadline === 'no-deadline' ? '無截止日期' : formatDateTime(result.deadline)}` : ' – 無截止日期'}
+            {/* 結果信息 */}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-medium text-gray-900 truncate">
+                {result.title}
+              </h2>
+
+              {/* 參與者數量和時間信息 - 響應式佈局 */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1">
+                <div className="flex items-center text-xs sm:text-sm text-gray-500">
+                  <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <span>{result.participantCount}</span>
+                </div>
+
+                <div className="flex items-center text-xs sm:text-sm text-gray-500">
+                  <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <span className="truncate">
+                    {formatDateTime(result.createdAt)}
+                    <span className="hidden sm:inline">
+                      {result.deadline ? ` – ${result.deadline === 'no-deadline' ? '無截止日期' : formatDateTime(result.deadline)}` : ' – 無截止日期'}
+                    </span>
                   </span>
-                </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* 更多選項按鈕 */}
-        <button
-          onClick={handleMenuClick}
-          className="flex-shrink-0 p-1 sm:p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
-          aria-label="更多選項"
-        >
-          <EllipsisVerticalIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
+          {/* 更多選項按鈕 */}
+          <button
+            onClick={handleMenuClick}
+            className="flex-shrink-0 p-1 sm:p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+            aria-label="更多選項"
+          >
+            <EllipsisVerticalIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+        </div>
       </div>
     </a>
   );

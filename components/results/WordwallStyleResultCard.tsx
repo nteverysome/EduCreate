@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { 
+import Image from 'next/image';
+import {
   UserIcon,
   ClockIcon,
   EllipsisVerticalIcon
@@ -17,6 +18,7 @@ interface AssignmentResult {
   status: 'active' | 'completed' | 'expired';
   assignmentId: string;
   activityId: string;
+  thumbnailUrl?: string | null;  // 添加截圖 URL 欄位
 }
 
 interface WordwallStyleResultCardProps {
@@ -65,44 +67,60 @@ export const WordwallStyleResultCard: React.FC<WordwallStyleResultCardProps> = (
     <a
       href={`/my-results/${result.id}`}
       onClick={handleCardClick}
-      className="block bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow"
+      className="block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          {/* 結果圖標 */}
-          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-            <span className="text-blue-600 font-semibold">📊</span>
-          </div>
-          
-          {/* 結果信息 */}
-          <div className="flex-1">
-            <h2 className="text-lg font-medium text-gray-900 mb-1">{result.title}</h2>
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
-              {/* 參與人數 */}
-              <div className="flex items-center">
-                <UserIcon className="w-4 h-4 mr-1" />
-                <span>{result.participantCount}</span>
+      {/* 活動截圖 */}
+      {result.thumbnailUrl && (
+        <div className="relative h-32 bg-gradient-to-br from-blue-100 to-purple-100">
+          <Image
+            src={result.thumbnailUrl}
+            alt={result.activityName}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
+
+      <div className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center flex-1 min-w-0">
+            {/* 結果圖標（只在沒有截圖時顯示） */}
+            {!result.thumbnailUrl && (
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+                <span className="text-blue-600 font-semibold">📊</span>
               </div>
-              
-              {/* 時間和截止日期 */}
-              <div className="flex items-center">
-                <ClockIcon className="w-4 h-4 mr-1" />
-                <span>
-                  {formatDateTime(result.createdAt)} – {result.deadline ? '有截止日期' : '無截止日期'}
-                </span>
+            )}
+
+            {/* 結果信息 */}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-medium text-gray-900 mb-1 truncate">{result.title}</h2>
+              <div className="flex items-center space-x-4 text-sm text-gray-500">
+                {/* 參與人數 */}
+                <div className="flex items-center">
+                  <UserIcon className="w-4 h-4 mr-1" />
+                  <span>{result.participantCount}</span>
+                </div>
+
+                {/* 時間和截止日期 */}
+                <div className="flex items-center">
+                  <ClockIcon className="w-4 h-4 mr-1" />
+                  <span className="truncate">
+                    {formatDateTime(result.createdAt)} – {result.deadline ? '有截止日期' : '無截止日期'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* 菜單按鈕 */}
+          <button
+            onClick={handleMenuClick}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 ml-2"
+            aria-label="更多選項"
+          >
+            <span className="text-gray-400 text-lg">⋮</span>
+          </button>
         </div>
-        
-        {/* 菜單按鈕 */}
-        <button
-          onClick={handleMenuClick}
-          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-          aria-label="更多選項"
-        >
-          <span className="text-gray-400 text-lg">⋮</span>
-        </button>
       </div>
     </a>
   );
