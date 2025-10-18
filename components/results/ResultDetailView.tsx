@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ArrowLeftIcon,
   ShareIcon,
@@ -9,10 +9,17 @@ import {
   UserIcon,
   ClockIcon,
   CalendarIcon,
-  LinkIcon
+  LinkIcon,
+  PencilIcon,
+  TrashIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline';
 import ScoreDistributionChart from './ScoreDistributionChart';
 import QuestionAccuracyChart from './QuestionAccuracyChart';
+import RenameResultModal from './RenameResultModal';
+import SetDeadlineModal from './SetDeadlineModal';
+import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { useRouter } from 'next/navigation';
 
 interface GameParticipant {
   id: string;
@@ -71,12 +78,40 @@ interface ResultDetailViewProps {
 }
 
 export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) => {
+  const router = useRouter();
   const [participantSort, setParticipantSort] = useState<'submitted' | 'name' | 'correct_time'>('submitted');
   const [questionSort, setQuestionSort] = useState<'number' | 'correct' | 'incorrect'>('number');
   const [showFilter, setShowFilter] = useState<'all' | 'best' | 'first'>('all');
   const [expandedParticipant, setExpandedParticipant] = useState<string | null>(null);
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
+
+  // 下拉菜單狀態
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 模態框狀態
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [showSetDeadlineModal, setShowSetDeadlineModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // 點擊外部關閉下拉菜單
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
 
   // 修正學生分享連結的域名
   const getCorrectedShareLink = () => {
@@ -151,6 +186,75 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   const openGameLink = () => {
     if (correctedShareLink) {
       window.open(correctedShareLink, '_blank');
+    }
+  };
+
+  // 處理重新命名
+  const handleRename = async (resultId: string, newTitle: string) => {
+    try {
+      const response = await fetch(`/api/results/${resultId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title: newTitle }),
+      });
+
+      if (!response.ok) {
+        throw new Error('重命名失敗');
+      }
+
+      // 重新載入頁面以更新標題
+      window.location.reload();
+    } catch (error) {
+      console.error('重命名結果失敗:', error);
+      throw error;
+    }
+  };
+
+  // 處理設置截止日期
+  const handleSetDeadline = async (assignmentId: string, deadline: string | null) => {
+    try {
+      const response = await fetch(`/api/assignments/${assignmentId}/deadline`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ deadline }),
+      });
+
+      if (!response.ok) {
+        throw new Error('設置截止日期失敗');
+      }
+
+      // 重新載入頁面以更新截止日期
+      window.location.reload();
+    } catch (error) {
+      console.error('設置截止日期失敗:', error);
+      throw error;
+    }
+  };
+
+  // 處理刪除結果
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/results/${result.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('刪除失敗');
+      }
+
+      // 刪除成功後跳轉到結果列表頁面
+      router.push('/my-results');
+    } catch (error) {
+      console.error('刪除結果失敗:', error);
+      alert('刪除失敗，請稍後重試');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -320,9 +424,82 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
             </a>
 
             {!result.isSharedView && (
-              <button className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full">
-                <EllipsisVerticalIcon className="w-5 h-5 text-gray-400" />
-              </button>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <EllipsisVerticalIcon className="w-5 h-5 text-gray-400" />
+                </button>
+
+                {/* 下拉菜單 */}
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    {/* 重新命名 */}
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        setShowRenameModal(true);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <PencilIcon className="w-4 h-4 text-gray-400" />
+                      <span>重新命名</span>
+                    </button>
+
+                    {/* 設置截止日期 */}
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        setShowSetDeadlineModal(true);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <CalendarIcon className="w-4 h-4 text-gray-400" />
+                      <span>設置截止日期</span>
+                    </button>
+
+                    {/* 分享連結 */}
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        copyStudentShareLink();
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <ShareIcon className="w-4 h-4 text-gray-400" />
+                      <span>複製分享連結</span>
+                    </button>
+
+                    {/* 查看統計 */}
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        // 滾動到統計區域
+                        document.getElementById('statistics-section')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                    >
+                      <ChartBarIcon className="w-4 h-4 text-gray-400" />
+                      <span>查看統計</span>
+                    </button>
+
+                    <hr className="my-1" />
+
+                    {/* 刪除結果 */}
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        setShowDeleteModal(true);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                    >
+                      <TrashIcon className="w-4 h-4 text-red-500" />
+                      <span>刪除結果</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -453,7 +630,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
       </div>
 
       {/* 總結 - 響應式 */}
-      <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">總結</h2>
+      <h2 id="statistics-section" className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">總結</h2>
 
       {/* 統計數據總結區域 - 響應式網格 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
@@ -914,6 +1091,34 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
           </div>
         )}
       </div>
+
+      {/* 重新命名模態框 */}
+      <RenameResultModal
+        isOpen={showRenameModal}
+        result={result}
+        onClose={() => setShowRenameModal(false)}
+        onRename={handleRename}
+      />
+
+      {/* 設置截止日期模態框 */}
+      <SetDeadlineModal
+        isOpen={showSetDeadlineModal}
+        result={result}
+        onClose={() => setShowSetDeadlineModal(false)}
+        onDeadlineSet={handleSetDeadline}
+      />
+
+      {/* 刪除確認模態框 */}
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        title="刪除結果"
+        message={`確定要刪除「${result.title}」嗎？此操作無法撤銷，將永久刪除此結果及其所有相關數據。`}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+        confirmText="刪除"
+        cancelText="取消"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };
