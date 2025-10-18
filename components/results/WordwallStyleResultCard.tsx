@@ -64,65 +64,74 @@ export const WordwallStyleResultCard: React.FC<WordwallStyleResultCardProps> = (
   };
 
   return (
-    <a
-      href={`/my-results/${result.id}`}
+    <div
       onClick={handleCardClick}
-      className="block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+      className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer hover:border-gray-300"
     >
-      {/* 活動截圖 */}
-      {result.thumbnailUrl && (
-        <div className="relative h-32 bg-gradient-to-br from-blue-100 to-purple-100">
-          <Image
-            src={result.thumbnailUrl}
-            alt={result.activityName}
-            fill
-            className="object-cover"
-          />
-        </div>
-      )}
-
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center flex-1 min-w-0">
-            {/* 結果圖標（只在沒有截圖時顯示） */}
-            {!result.thumbnailUrl && (
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
-                <span className="text-blue-600 font-semibold">📊</span>
-              </div>
-            )}
-
-            {/* 結果信息 */}
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-medium text-gray-900 mb-1 truncate">{result.title}</h2>
-              <div className="flex items-center space-x-4 text-sm text-gray-500">
-                {/* 參與人數 */}
-                <div className="flex items-center">
-                  <UserIcon className="w-4 h-4 mr-1" />
-                  <span>{result.participantCount}</span>
-                </div>
-
-                {/* 時間和截止日期 */}
-                <div className="flex items-center">
-                  <ClockIcon className="w-4 h-4 mr-1" />
-                  <span className="truncate">
-                    {formatDateTime(result.createdAt)} – {result.deadline ? '有截止日期' : '無截止日期'}
-                  </span>
-                </div>
-              </div>
+      {/* 卡片頭部 - 縮略圖區域（使用 aspect-video 保持一致比例） */}
+      <div className="relative">
+        <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center overflow-hidden">
+          {result.thumbnailUrl ? (
+            <Image
+              src={result.thumbnailUrl}
+              alt={result.activityName}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center">
+              <span className="text-4xl">📊</span>
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* 卡片內容 */}
+      <div className="p-4">
+        {/* 標題 */}
+        <h2 className="text-base font-medium text-gray-900 mb-2 truncate" title={result.title}>
+          {result.title}
+        </h2>
+
+        {/* 統計信息 */}
+        <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+          <div className="flex items-center gap-1">
+            <UserIcon className="w-3 h-3" />
+            <span>{result.participantCount}</span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <ClockIcon className="w-3 h-3" />
+            <span className="truncate">{formatDateTime(result.createdAt)}</span>
+          </div>
+        </div>
+
+        {/* 底部操作區 */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+          <div className="flex items-center gap-2">
+            {/* 狀態標籤 */}
+            <span className={`text-xs px-2 py-1 rounded ${
+              result.status === 'active' ? 'bg-green-100 text-green-700' :
+              result.status === 'expired' ? 'bg-gray-100 text-gray-700' :
+              'bg-blue-100 text-blue-700'
+            }`}>
+              {result.status === 'active' ? '進行中' :
+               result.status === 'expired' ? '已過期' :
+               '已完成'}
+            </span>
           </div>
 
           {/* 菜單按鈕 */}
           <button
             onClick={handleMenuClick}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 ml-2"
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             aria-label="更多選項"
           >
-            <span className="text-gray-400 text-lg">⋮</span>
+            <EllipsisVerticalIcon className="w-5 h-5 text-gray-400" />
           </button>
         </div>
       </div>
-    </a>
+    </div>
   );
 };
 

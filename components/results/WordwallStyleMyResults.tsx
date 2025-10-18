@@ -747,8 +747,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       {/* 拖拽到根目录区域 */}
       <DragToRootArea currentFolderId={currentFolderId} onBackToRoot={handleBackToRoot} />
 
-      {/* 內容區域 - 簡化的列表佈局 */}
-      <div className="space-y-2">
+      {/* 內容區域 - 網格佈局（參考我的活動頁面） */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {/* 資料夾 - 只在根目录显示 */}
         {!currentFolderId && filteredFolders.map(folder => (
           <DroppableFolderCard
@@ -761,7 +761,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
         {/* 結果項目 */}
         {filteredAndSortedResults.map(result => (
-          <DraggableResultCard
+          <WordwallStyleResultCard
             key={result.id}
             result={result}
             onClick={handleResultClick}
