@@ -37,17 +37,34 @@ export async function DELETE(
       return NextResponse.json({ error: '活動不存在或無權限刪除' }, { status: 404 });
     }
 
-    // 軟刪除 - 設置 deletedAt 時間戳
+    // 軟刪除 - 設置 deletedAt 時間戳，並同步取消社區發布
     console.log('🗑️ 軟刪除活動:', activityId);
+
+    // 檢查活動是否已發布到社區
+    if (activity.isPublicShared) {
+      console.log('📢 活動已發布到社區，將同步取消發布');
+    }
 
     const deletedActivity = await prisma.activity.update({
       where: { id: activityId },
       data: {
-        deletedAt: new Date()  // 設置刪除時間戳
+        deletedAt: new Date(),  // 設置刪除時間戳
+        // 如果活動已發布到社區，同步取消發布
+        ...(activity.isPublicShared ? {
+          isPublicShared: false,
+          publishedToCommunityAt: null,
+          communityCategory: null,
+          communityTags: [],
+          communityDescription: null,
+          communityThumbnail: null,
+        } : {})
       }
     });
 
     console.log('✅ 活動已移至回收桶');
+    if (activity.isPublicShared) {
+      console.log('✅ 已同步取消社區發布');
+    }
 
     return NextResponse.json({
       message: '活動已移至回收桶',
