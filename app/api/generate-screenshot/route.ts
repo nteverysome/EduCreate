@@ -3,6 +3,7 @@ import { put } from '@vercel/blob';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { pushScreenshotUpdate } from '@/lib/pusher';
 
 /**
  * 生成活動截圖 API
@@ -92,6 +93,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // 7. 推送實時更新：開始生成
+    await pushScreenshotUpdate(session.user.id, activityId, 'generating');
+
     let thumbnailUrl: string;
 
     if (USE_MOCK_MODE) {
@@ -175,7 +179,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 11. 返回成功響應
+    // 11. 推送實時更新：生成完成
+    await pushScreenshotUpdate(session.user.id, activityId, 'completed', {
+      thumbnailUrl,
+    });
+
+    // 12. 返回成功響應
     return NextResponse.json({
       success: true,
       thumbnailUrl,
@@ -217,6 +226,14 @@ export async function POST(request: NextRequest) {
             screenshotError: errorMessage,
           },
         });
+
+        // 推送實時更新：生成失敗
+        const session = await getServerSession(authOptions);
+        if (session?.user?.id) {
+          await pushScreenshotUpdate(session.user.id, activityId, 'failed', {
+            error: errorMessage,
+          });
+        }
       }
     } catch (updateError) {
       console.error('[Update Screenshot Status Error]', updateError);

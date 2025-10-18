@@ -8,6 +8,7 @@ import TrashModal from './TrashModal';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
 import ActivitySearchAndFilter from './ActivitySearchAndFilter';
 import { MoveActivityModal } from './MoveActivityModal';
+import { useScreenshotUpdates } from '@/hooks/useScreenshotUpdates';
 import { BatchMoveModal } from './BatchMoveModal';
 import AssignmentModal, { AssignmentConfig } from './AssignmentModal';
 import AssignmentSetModal from './AssignmentSetModal';
@@ -122,6 +123,27 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [showAssignmentSetModal, setShowAssignmentSetModal] = useState(false);
   const [assignmentShareUrl, setAssignmentShareUrl] = useState('');
   const [assignmentTitle, setAssignmentTitle] = useState('');
+
+  // 使用實時截圖更新
+  const handleScreenshotUpdate = useCallback((update: any) => {
+    console.log('[Real-time] Screenshot update received:', update);
+
+    setActivities((prevActivities) =>
+      prevActivities.map((activity) =>
+        activity.id === update.activityId
+          ? {
+              ...activity,
+              thumbnail: update.thumbnailUrl || activity.thumbnail,
+              screenshotStatus: update.status,
+              screenshotError: update.error,
+              screenshotRetryCount: update.retryCount,
+            }
+          : activity
+      )
+    );
+  }, []);
+
+  const { isConnected } = useScreenshotUpdates(userId, handleScreenshotUpdate);
 
   // 載入活動數據
   useEffect(() => {
@@ -955,6 +977,13 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              {/* 實時連接狀態指示器 */}
+              {isConnected && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-green-700 font-medium">實時更新已連接</span>
+                </div>
+              )}
               <button
                 onClick={() => window.open('/create', '_blank')}
                 className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
