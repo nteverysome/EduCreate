@@ -91,6 +91,22 @@ export async function POST(
       vocabularyCount: copiedActivity.vocabularyItems.length
     });
 
+    // 異步生成截圖（不等待完成，避免阻塞響應）
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app';
+    fetch(`${baseUrl}/api/generate-screenshot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || '' // 傳遞 session cookie
+      },
+      body: JSON.stringify({ activityId: copiedActivity.id })
+    }).catch(err => {
+      // 靜默處理錯誤，不影響活動複製
+      console.error('⚠️ 截圖生成失敗（不影響活動複製）:', err.message);
+    });
+
+    console.log(`✅ 已觸發截圖生成: ${copiedActivity.id}`);
+
     return NextResponse.json({
       id: copiedActivity.id,
       title: copiedActivity.title,
