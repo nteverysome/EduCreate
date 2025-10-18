@@ -145,6 +145,7 @@ export interface FormattedCommunityActivity {
   category: string | null;
   tags: string[];
   gameType: string;
+  content?: any; // ✅ 添加 content 字段，包含 gameTemplateId 等信息
   author: {
     id: string;
     name: string;
@@ -186,6 +187,7 @@ export function formatActivityForCommunity(
     category: activity.communityCategory || null,
     tags: activity.communityTags || [],
     gameType: activity.templateType || activity.type || 'Unknown',
+    content: activity.content, // ✅ 傳遞 content 字段，包含 gameTemplateId
     author: {
       id: activity.user?.id || activity.userId,
       name: activity.user?.name || 'Anonymous',

@@ -38,6 +38,47 @@ export default function CommunityActivityCard({
   const [isLiking, setIsLiking] = useState(false);
   const [isBookmarking, setIsBookmarking] = useState(false);
 
+  // 遊戲類型映射（包含圖標和中文名稱）
+  const getGameTypeInfo = (gameType: string): { icon: string; name: string } => {
+    // 優先使用 activity.content.gameTemplateId 獲取具體的遊戲名稱
+    const gameTemplateId = activity.content?.gameTemplateId;
+
+    const gameTypeMap: { [key: string]: { icon: string; name: string } } = {
+      // 具體遊戲模板 ID
+      'shimozurdo-game': { icon: '☁️', name: 'Shimozurdo 雲朵遊戲' },
+      'airplane-vite': { icon: '✈️', name: '飛機遊戲 (Vite版)' },
+      'matching-pairs': { icon: '🔗', name: '配對記憶' },
+      'flash-cards': { icon: '📚', name: '閃卡記憶' },
+      'whack-mole': { icon: '🔨', name: '打地鼠' },
+      'spin-wheel': { icon: '🎡', name: '轉盤選擇' },
+      'memory-cards': { icon: '🧠', name: '記憶卡片' },
+      'complete-sentence': { icon: '📝', name: '完成句子' },
+      'spell-word': { icon: '✍️', name: '拼寫單詞' },
+      'labelled-diagram': { icon: '🏷️', name: '標籤圖表' },
+      'watch-memorize': { icon: '👁️', name: '觀察記憶' },
+      'rank-order': { icon: '📈', name: '排序遊戲' },
+      'math-generator': { icon: '🔢', name: '數學生成器' },
+      'word-magnets': { icon: '🧲', name: '單詞磁鐵' },
+      'group-sort': { icon: '📊', name: '分類遊戲' },
+      'image-quiz': { icon: '🖼️', name: '圖片問答' },
+      'maze-chase': { icon: '🏃', name: '迷宮追逐' },
+      'crossword-puzzle': { icon: '📋', name: '填字遊戲' },
+      'flying-fruit': { icon: '🍎', name: '飛行水果' },
+      'flip-tiles': { icon: '🔲', name: '翻轉方塊' },
+      'type-answer': { icon: '⌨️', name: '輸入答案' },
+      'anagram': { icon: '🔤', name: '字母重組' },
+
+      // 通用類型備用
+      'vocabulary': { icon: '📝', name: '詞彙遊戲' },
+      'quiz': { icon: '❓', name: '問答遊戲' },
+      'matching': { icon: '🔗', name: '配對遊戲' },
+    };
+
+    // 優先使用 gameTemplateId，如果沒有則使用 gameType
+    const lookupKey = gameTemplateId || gameType;
+    return gameTypeMap[lookupKey] || { icon: '🎮', name: lookupKey || '遊戲' };
+  };
+
   // 處理喜歡
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -143,17 +184,18 @@ export default function CommunityActivityCard({
               <div className="text-6xl opacity-50">🎮</div>
             </div>
           )}
-          
-          {/* 遊戲類型標籤 */}
-          <div className="absolute top-3 left-3">
-            <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-gray-700">
-              {activity.gameType}
-            </span>
-          </div>
         </div>
 
         {/* 內容 */}
         <div className="p-4">
+          {/* 遊戲類型標籤 - 移到卡片內容區域 */}
+          <div className="mb-3">
+            <div className="inline-flex bg-gradient-to-r from-blue-50 to-purple-50 text-gray-800 px-2.5 py-1 rounded-full shadow-sm border border-gray-200 items-center gap-1.5">
+              <span className="text-sm leading-none">{getGameTypeInfo(activity.gameType).icon}</span>
+              <span className="text-xs font-normal">{getGameTypeInfo(activity.gameType).name}</span>
+            </div>
+          </div>
+
           {/* 標題 */}
           <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
             {activity.title}
