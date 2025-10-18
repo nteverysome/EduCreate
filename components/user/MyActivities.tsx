@@ -270,8 +270,7 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
         learningEffectiveness: 0.95,
         usageCount: 1,
         tags: ['vocabulary', 'railway', set.geptLevel?.toLowerCase() || 'elementary'],
-        // 移除硬編碼的 thumbnail，讓 WordwallStyleActivityCard 使用 OG Image API
-        // thumbnail: undefined
+        thumbnail: set.thumbnailUrl, // 使用資料庫中的 thumbnailUrl
         vocabularyItems: set.items || [] // 添加詞彙項目以支持 OG Image API
       }));
 

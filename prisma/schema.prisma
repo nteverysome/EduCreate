@@ -134,6 +134,7 @@ model Activity {
   communityComments      Int                  @default(0)
   isFeatured             Boolean              @default(false)
   featuredAt             DateTime?
+  thumbnailUrl           String?              // 活動縮圖 URL（Vercel Blob Storage）
 
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
