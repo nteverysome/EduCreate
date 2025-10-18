@@ -6,14 +6,20 @@ import { authOptions } from '@/lib/auth';
 
 /**
  * 生成活動截圖 API
- *
+ * 
  * 流程：
  * 1. 接收 activityId
- * 2. 根據活動的 templateType 選擇對應的遊戲截圖
- * 3. 使用現有的遊戲截圖作為 thumbnailUrl（100% 遊戲內容）
+ * 2. 調用 Railway 截圖服務生成截圖
+ * 3. 上傳截圖到 Vercel Blob Storage
  * 4. 更新 Activity 記錄的 thumbnailUrl
  * 5. 返回成功響應
  */
+
+// Railway 截圖服務 URL（從環境變量獲取）
+const RAILWAY_SCREENSHOT_SERVICE_URL = process.env.RAILWAY_SCREENSHOT_SERVICE_URL || '';
+
+// 是否使用 Mock 模式（開發階段）
+const USE_MOCK_MODE = !RAILWAY_SCREENSHOT_SERVICE_URL || process.env.USE_MOCK_SCREENSHOTS === 'true';
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,7 +50,6 @@ export async function POST(request: NextRequest) {
         id: true,
         title: true,
         type: true,
-        templateType: true, // 添加 templateType 字段
         userId: true,
         thumbnailUrl: true,
       },
@@ -77,27 +82,67 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ===== 使用現有的遊戲截圖（100% 遊戲內容）=====
-    console.log('[Static Screenshot Mode] Using existing game screenshot');
+    let thumbnailUrl: string;
 
-    // 根據 templateType 選擇對應的遊戲截圖
-    const gameScreenshots: Record<string, string> = {
-      'shimozurdo-game': '/game-screenshots/shimozurdo.png',
-      'airplane-game': '/game-screenshots/airplane-preview.png',
-      'quiz': '/game-screenshots/quiz-preview.png',
-      'flashcards': '/game-screenshots/flashcards-preview.png',
-      'matching': '/game-screenshots/matching-preview.png',
-      'default': '/game-screenshots/default-preview.png',
-    };
+    if (USE_MOCK_MODE) {
+      // ===== Mock 模式：使用現有的遊戲截圖 =====
+      console.log('[Mock Mode] Using existing game screenshot');
+      
+      // 根據遊戲類型選擇對應的截圖
+      const mockScreenshots: Record<string, string> = {
+        'shimozurdo': '/game-screenshots/shimozurdo.png',
+        'quiz': '/game-screenshots/quiz-preview.png',
+        'flashcards': '/game-screenshots/flashcards-preview.png',
+        'matching': '/game-screenshots/matching-preview.png',
+        'default': '/game-screenshots/default-preview.png',
+      };
 
-    // 使用 templateType 或 type 來選擇截圖
-    const gameType = activity.templateType || activity.type;
-    const screenshotPath = gameScreenshots[gameType] || gameScreenshots['default'];
-    const thumbnailUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}${screenshotPath}`;
+      // 使用活動類型或默認截圖
+      const mockPath = mockScreenshots[activity.type] || mockScreenshots['default'];
+      thumbnailUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}${mockPath}`;
 
-    console.log('[Static Screenshot Mode] Game type:', gameType);
-    console.log('[Static Screenshot Mode] Screenshot path:', screenshotPath);
-    console.log('[Static Screenshot Mode] Thumbnail URL:', thumbnailUrl);
+      console.log('[Mock Mode] Mock thumbnail URL:', thumbnailUrl);
+    } else {
+      // ===== 生產模式：調用 Railway 截圖服務 =====
+      console.log('[Production Mode] Calling Railway screenshot service');
+
+      // 6. 構建遊戲 URL
+      const gameUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/play/${activityId}`;
+
+      // 7. 調用 Railway 截圖服務
+      // 使用 iframe 選擇器來截取遊戲容器（100% 遊戲內容）
+      const screenshotResponse = await fetch(`${RAILWAY_SCREENSHOT_SERVICE_URL}/screenshot`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: gameUrl,
+          width: 1200,
+          height: 630,
+          waitTime: 5000, // 等待 5 秒讓遊戲完全載入
+          selector: 'iframe', // 只截取 iframe 遊戲容器（100% 遊戲內容）
+        }),
+      });
+
+      if (!screenshotResponse.ok) {
+        throw new Error(`Screenshot service failed: ${screenshotResponse.statusText}`);
+      }
+
+      // 8. 獲取截圖 Buffer
+      const screenshotBuffer = await screenshotResponse.arrayBuffer();
+      const screenshotBlob = new Blob([screenshotBuffer], { type: 'image/png' });
+
+      // 9. 上傳到 Vercel Blob Storage
+      const filename = `activity-${activityId}-${Date.now()}.png`;
+      const blob = await put(filename, screenshotBlob, {
+        access: 'public',
+        addRandomSuffix: false,
+      });
+
+      thumbnailUrl = blob.url;
+      console.log('[Production Mode] Uploaded to Vercel Blob:', thumbnailUrl);
+    }
 
     // 10. 更新 Activity 記錄
     await prisma.activity.update({
@@ -109,9 +154,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       thumbnailUrl,
-      mode: 'static',
-      gameType,
-      message: 'Static game screenshot assigned successfully',
+      mode: USE_MOCK_MODE ? 'mock' : 'production',
+      message: USE_MOCK_MODE 
+        ? 'Mock thumbnail generated successfully' 
+        : 'Screenshot generated and uploaded successfully',
     });
 
   } catch (error) {
@@ -141,20 +187,28 @@ export async function GET(request: NextRequest) {
 
     // 檢查配置
     const config = {
-      mode: 'static',
-      description: 'Using existing game screenshots (100% game content)',
-      availableGames: [
-        'shimozurdo-game',
-        'airplane-game',
-        'quiz',
-        'flashcards',
-        'matching',
-      ],
+      railwayServiceUrl: RAILWAY_SCREENSHOT_SERVICE_URL || 'Not configured',
+      mockMode: USE_MOCK_MODE,
+      blobConfigured: !!process.env.BLOB_READ_WRITE_TOKEN,
     };
+
+    // 如果不是 Mock 模式，檢查 Railway 服務健康狀態
+    let railwayHealth = null;
+    if (!USE_MOCK_MODE) {
+      try {
+        const healthResponse = await fetch(`${RAILWAY_SCREENSHOT_SERVICE_URL}/health`, {
+          method: 'GET',
+        });
+        railwayHealth = await healthResponse.json();
+      } catch (error) {
+        railwayHealth = { error: 'Failed to connect to Railway service' };
+      }
+    }
 
     return NextResponse.json({
       status: 'ok',
       config,
+      railwayHealth,
     });
 
   } catch (error) {
