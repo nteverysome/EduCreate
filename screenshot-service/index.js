@@ -102,40 +102,53 @@ app.post('/screenshot', async (req, res) => {
       console.log(`  等待元素: ${selector}`);
       await page.waitForSelector(selector, { timeout: 15000 });
 
-      // 等待元素完全載入（檢查是否有 loaded 類或屬性）
-      try {
-        await page.waitForFunction(
-          (sel) => {
-            const element = document.querySelector(sel);
-            if (!element) return false;
+      // 對於 iframe，使用簡化的等待策略
+      if (selector.toLowerCase().includes('iframe')) {
+        console.log(`  檢測到 iframe，使用優化等待策略`);
 
-            // 檢查 iframe 是否完全載入
-            if (element.tagName === 'IFRAME') {
-              try {
-                // 檢查 iframe 的 contentWindow 是否可訪問
-                return element.contentWindow &&
-                       element.contentWindow.document &&
-                       element.contentWindow.document.readyState === 'complete';
-              } catch (e) {
-                // 跨域 iframe，檢查 load 事件
-                return element.complete || element.readyState === 'complete';
-              }
-            }
+        // 等待 iframe 元素存在並有尺寸
+        try {
+          await page.waitForFunction(
+            (sel) => {
+              const iframe = document.querySelector(sel);
+              return iframe &&
+                     iframe.offsetWidth > 0 &&
+                     iframe.offsetHeight > 0;
+            },
+            { timeout: 3000 },
+            selector
+          );
+          console.log(`  iframe 元素已渲染`);
+        } catch (e) {
+          console.log(`  iframe 尺寸檢查超時，繼續...`);
+        }
 
-            // 檢查元素是否有 loaded 類或完成狀態
-            return element.classList.contains('loaded') ||
-                   element.classList.contains('ready') ||
-                   element.getAttribute('data-loaded') === 'true' ||
-                   element.complete === true;
-          },
-          { timeout: 5000 },
-          selector
-        );
-        console.log(`  元素已完全載入`);
-      } catch (e) {
-        // 如果智能等待失敗，回退到短暫的固定等待
-        console.log(`  智能等待超時，使用回退等待 (2秒)`);
-        await page.waitForTimeout(2000);
+        // 額外等待 iframe 內容載入（固定 3 秒）
+        console.log(`  等待 iframe 內容載入 (3秒)...`);
+        await page.waitForTimeout(3000);
+        console.log(`  iframe 內容載入完成`);
+      } else {
+        // 非 iframe 元素，使用智能等待
+        try {
+          await page.waitForFunction(
+            (sel) => {
+              const element = document.querySelector(sel);
+              if (!element) return false;
+
+              // 檢查元素是否有 loaded 類或完成狀態
+              return element.classList.contains('loaded') ||
+                     element.classList.contains('ready') ||
+                     element.getAttribute('data-loaded') === 'true' ||
+                     (element.offsetWidth > 0 && element.offsetHeight > 0);
+            },
+            { timeout: 3000 },
+            selector
+          );
+          console.log(`  元素已完全載入`);
+        } catch (e) {
+          console.log(`  智能等待超時，使用回退等待 (2秒)`);
+          await page.waitForTimeout(2000);
+        }
       }
     } else {
       // 沒有選擇器，等待頁面完全載入
@@ -146,31 +159,20 @@ app.post('/screenshot', async (req, res) => {
             const gameContainer = document.querySelector('#game-container, .game-container, canvas, iframe');
             if (!gameContainer) return false;
 
-            // 檢查是否有 Phaser 遊戲實例
-            if (window.game && window.game.scene) {
-              return window.game.scene.isActive();
-            }
-
-            // 檢查 canvas 是否已渲染
-            if (gameContainer.tagName === 'CANVAS') {
-              const ctx = gameContainer.getContext('2d');
-              return ctx && gameContainer.width > 0 && gameContainer.height > 0;
-            }
-
-            return true;
+            // 檢查元素是否有尺寸
+            return gameContainer.offsetWidth > 0 && gameContainer.offsetHeight > 0;
           },
-          { timeout: 5000 }
+          { timeout: 3000 }
         );
         console.log(`  頁面遊戲已完全載入`);
       } catch (e) {
-        // 如果智能等待失敗，回退到短暫的固定等待
         console.log(`  智能等待超時，使用回退等待 (2秒)`);
         await page.waitForTimeout(2000);
       }
     }
 
     const smartWaitTime = Date.now() - smartWaitStart;
-    console.log(`  智能等待時間: ${smartWaitTime}ms（節省了 ${parseInt(waitTime) - smartWaitTime}ms）`);
+    console.log(`  智能等待時間: ${smartWaitTime}ms`);
 
     // 截圖
     const screenshotStart = Date.now();
