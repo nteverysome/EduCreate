@@ -107,12 +107,12 @@ export async function POST(request: NextRequest) {
       console.log('[Production Mode] Calling Railway screenshot service');
       console.log('[Production Mode] Railway URL:', RAILWAY_SCREENSHOT_SERVICE_URL);
 
-      // 6. 構建遊戲 URL
-      const gameUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/play/${activityId}`;
-      console.log('[Production Mode] Game URL:', gameUrl);
+      // 6. 構建截圖預覽頁面 URL（專門用於截圖，包含完整的遊戲 iframe）
+      const gameUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/screenshot-preview/${activityId}`;
+      console.log('[Production Mode] Screenshot preview URL:', gameUrl);
 
       // 7. 調用 Railway 截圖服務
-      // 使用 iframe 選擇器來截取遊戲容器（100% 遊戲內容）
+      // 截圖預覽頁面已經是 100% 遊戲內容，直接截取整個頁面
       console.log('[Production Mode] Sending screenshot request...');
       const screenshotResponse = await fetch(`${RAILWAY_SCREENSHOT_SERVICE_URL}/screenshot`, {
         method: 'POST',
@@ -123,8 +123,8 @@ export async function POST(request: NextRequest) {
           url: gameUrl,
           width: 1200,
           height: 630,
-          waitTime: 5000, // 等待 5 秒讓遊戲完全載入
-          selector: 'iframe', // 只截取 iframe 遊戲容器（100% 遊戲內容）
+          waitTime: 8000, // 等待 8 秒讓遊戲完全載入（iframe 需要更多時間）
+          selector: 'iframe', // 截取 iframe 遊戲容器（100% 遊戲內容）
         }),
       });
 
