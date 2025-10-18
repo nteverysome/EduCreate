@@ -532,7 +532,16 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
             <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 mr-1 mt-0.5 sm:mt-0 flex-shrink-0" />
             <div>
               <div className="text-xs sm:text-sm text-gray-500">截止日期</div>
-              <div className="font-medium text-sm sm:text-base">{result.deadline ? formatDateTime(result.deadline) : '無截止日期'}</div>
+              {result.deadline ? (
+                <div className="font-medium text-sm sm:text-base">{formatDateTime(result.deadline)}</div>
+              ) : (
+                <button
+                  onClick={() => setShowSetDeadlineModal(true)}
+                  className="font-medium text-sm sm:text-base text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                >
+                  無截止日期（點擊設置）
+                </button>
+              )}
             </div>
           </div>
         </div>
