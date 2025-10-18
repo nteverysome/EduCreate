@@ -13,6 +13,7 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { getGamePreviewConfig } from '@/lib/og/gamePreviewImages';
+import { imageUrlToBase64 } from '@/lib/og/imageToBase64';
 
 // 啟用 Edge Runtime（關鍵！）
 export const runtime = 'edge';
@@ -102,6 +103,17 @@ export async function GET(
     const gamePreviewConfig = getGamePreviewConfig(gameType);
     const { previewImage, icon, gradient, displayName } = gamePreviewConfig;
 
+    // 如果有預覽圖，轉換為 base64（Satori 需要）
+    let previewImageBase64: string | null = null;
+    if (previewImage) {
+      try {
+        previewImageBase64 = await imageUrlToBase64(previewImage);
+      } catch (error) {
+        console.error('Failed to convert preview image to base64:', error);
+        // 如果轉換失敗，繼續使用漸變背景
+      }
+    }
+
     // 計算詞彙數量
     const vocabularyCount = vocabulary.length;
 
@@ -126,17 +138,17 @@ export async function GET(
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: previewImage
+              background: previewImageBase64
                 ? '#1e293b'  // 深色背景作為圖片載入前的佔位
                 : `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
               position: 'relative',
               overflow: 'hidden',
             }}
           >
-            {/* 如果有預覽圖，使用 img 標籤（@vercel/og 需要） */}
-            {previewImage ? (
+            {/* 如果有預覽圖，使用 base64 圖片（@vercel/og 需要） */}
+            {previewImageBase64 ? (
               <img
-                src={previewImage}
+                src={previewImageBase64}
                 alt={displayName}
                 style={{
                   width: '100%',
