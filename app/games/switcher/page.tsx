@@ -363,6 +363,13 @@ const GameSwitcherPage: React.FC = () => {
           }
         }
 
+        // 增加瀏覽次數（異步執行，不阻塞頁面載入）
+        fetch(`/api/activities/${activityId}/view`, {
+          method: 'POST',
+        }).catch(error => {
+          console.error('❌ 增加瀏覽次數失敗:', error);
+        });
+
         console.log('✅ 活動信息已載入:', data);
       }
     } catch (error) {
