@@ -238,10 +238,22 @@ export default function ActivityShare() {
       <Head>
         <title>{activity.title} - EduCreate</title>
         <meta name="description" content={activity.description || `EduCreate 互動式教育活動: ${activity.title}`} />
+
+        {/* Open Graph Meta Tags - 使用動態生成的預覽圖 */}
         <meta property="og:title" content={`${activity.title} - EduCreate`} />
         <meta property="og:description" content={activity.description || `EduCreate 互動式教育活動: ${activity.title}`} />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="/images/og-image.jpg" />
+        <meta property="og:url" content={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/activity/${id}`} />
+        <meta property="og:image" content={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/api/og/activity/${id}?title=${encodeURIComponent(activity.title)}&gameType=${activity.templateType || 'vocabulary'}`} />
+        <meta property="og:image:width" content="400" />
+        <meta property="og:image:height" content="300" />
+        <meta property="og:image:alt" content={`${activity.title} - 遊戲預覽`} />
+
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${activity.title} - EduCreate`} />
+        <meta name="twitter:description" content={activity.description || `EduCreate 互動式教育活動: ${activity.title}`} />
+        <meta name="twitter:image" content={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/api/og/activity/${id}?title=${encodeURIComponent(activity.title)}&gameType=${activity.templateType || 'vocabulary'}`} />
       </Head>
 
       <header className="bg-white shadow-sm sticky top-0 z-10">

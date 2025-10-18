@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { loadVocabularyData, getSourceDisplayName } from '@/lib/vocabulary/loadVocabularyData';
 import GameThumbnailPreview from './GameThumbnailPreview';
+import { generateOGImageUrlFromActivity } from '@/lib/og/generateOGImageUrl';
 
 interface Activity {
   id: string;
@@ -358,10 +359,24 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
               className="w-full h-full object-cover"
             />
           ) : (
-            <GameThumbnailPreview
-              gameType={activity.gameType}
-              vocabularyItems={activity.vocabularyItems}
-              activityTitle={activity.title}
+            // 使用 OG Image API 生成動態預覽圖
+            <img
+              src={generateOGImageUrlFromActivity(activity)}
+              alt={activity.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                // 如果 OG Image 載入失敗，回退到 GameThumbnailPreview 組件
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  const fallback = document.createElement('div');
+                  fallback.className = 'w-full h-full';
+                  parent.appendChild(fallback);
+                  // 這裡可以渲染 GameThumbnailPreview 作為後備方案
+                }
+              }}
             />
           )}
         </div>
