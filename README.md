@@ -54,6 +54,8 @@ EduCreate 是一個基於記憶科學原理的智能教育遊戲平台，專注�
 - **GEPT 分級系統**: 支援初級(1000字)、中級(2000字)、高級(3000字)詞彙分級
 - **統一遊戲管理**: GameSwitcher 提供無縫遊戲切換和學習追蹤 🆕
 - **TouchControls 整合**: 完整的移動設備觸摸控制支援 🆕📱
+- **智能截圖服務**: Railway + Puppeteer 自動生成活動截圖，5-7 秒快速生成 🆕
+- **社區分享功能**: 活動卡片顯示具體遊戲名稱，支援社區分享和瀏覽 🆕
 - **世界級性能**: 60fps 穩定運行，記憶體使用 < 5.5%，切換時間 < 100ms
 - **完整測試覆蓋**: E2E、性能、功能測試 100% 覆蓋
 - **無障礙設計**: 支援多種輸入方式和視覺輔助
@@ -281,6 +283,15 @@ npm run dev
 
 ## 📚 完整文檔系統
 
+### 📄 **技術交接文檔** 🆕
+- **[📄 社區頁面遊戲名稱顯示](docs/HANDOVER_COMMUNITY_GAME_NAME_DISPLAY.md)** - 完整的技術實現和交接文檔
+  - 社區頁面活動卡片顯示具體遊戲名稱
+  - Railway 截圖服務完整文檔
+  - 技術架構和數據流程
+  - 性能優化（截圖生成速度提升 50-60%）
+  - 測試驗證和部署記錄
+  - 未來優化建議
+
 ### � **API 文檔** 🆕
 - **[📄 完整 API 文檔](docs/API_DOCUMENTATION.md)** - 8 種主要 API 端點的完整說明
   - API 列表和權限要求
@@ -403,6 +414,16 @@ npm run dev
 - **[📋 實施缺口分析](docs/cdn-implementation-gap-analysis.md)** - 可行性分析
 - **[📋 實施行動計劃](docs/cdn-implementation-action-plan.md)** - 分階段實施計劃
 
+### 🖼️ **截圖服務文檔** 🆕
+- **[📄 截圖服務優化指南](screenshot-service/OPTIMIZATION_GUIDE.md)** - Railway 截圖服務完整文檔
+  - Puppeteer 配置優化（瀏覽器啟動時間提升 40%）
+  - 智能等待機制（等待時間提升 60%）
+  - 總生成時間從 12-15 秒降至 5-7 秒（提升 50-60%）
+  - 監控指標和故障排除
+  - 未來優化建議（CDN 快取、並行處理）
+- **[🔗 Railway 管理面板](https://railway.com/project/16c38d77-105a-4507-be9f-c44039bc1292)** - 截圖服務部署管理
+- **[🔗 服務健康檢查](https://screenshot-service-production-5e5e.up.railway.app/health)** - 實時服務狀態
+
 ## 🧪 測試
 
 ### 運行測試
@@ -457,6 +478,8 @@ scripts\setup-cdn-quick-start.bat   # Windows
 - [x] **統一全棧架構** - Railway → Vercel 完整遷移 🆕🚀
 - [x] **環境隔離架構** - Production / Preview / Development 完全隔離 🆕✨
 - [x] **雙認證系統** - NextAuth + JWT 智能路由 🆕
+- [x] **智能截圖服務** - Railway + Puppeteer 自動截圖生成（5-7 秒） 🆕
+- [x] **社區分享功能** - 活動卡片顯示具體遊戲名稱 🆕
 - [x] **記憶科學整合** - 主動回憶、視覺記憶、即時反饋
 - [x] **GEPT 詞彙系統** - 三級分級詞彙管理
 - [x] **高性能架構** - 60fps 穩定運行，記憶體使用 < 5.5%
@@ -487,6 +510,8 @@ scripts\setup-cdn-quick-start.bat   # Windows
 - **🚀 統一架構革命**: Railway → Vercel 完整遷移，開發效率提升 300% 🆕
 - **🔒 環境隔離架構**: Production / Preview / Development 完全隔離，數據安全提升 100% 🆕✨
 - **⚡ 智能 API 路由**: NextAuth + JWT 雙認證系統，自動選擇最佳路由 🆕
+- **🖼️ 智能截圖服務**: Railway + Puppeteer 自動截圖，生成速度提升 50-60% 🆕
+- **🎮 社區分享功能**: 活動卡片顯示具體遊戲名稱，提升用戶體驗 🆕
 - **🏗️ 創新架構**: 統一全棧架構，支援高並發和全球化部署
 - **🧪 完整測試**: 100% 功能覆蓋，詳細的性能基準測試
 - **📚 完整文檔**: 業界標準的技術文檔和 API 文檔
@@ -534,11 +559,13 @@ scripts\setup-cdn-quick-start.bat   # Windows
 2. **🚀 統一架構遷移** - Railway → Vercel 完整統一，開發效率提升 300%
 3. **⚡ 智能 API 路由** - NextAuth + JWT 雙認證系統，自動選擇最佳路由
 4. **🔧 架構版本升級** - v1.0 分離架構 → v2.0.0-unified 統一架構
-5. **📱 TouchControls 整合** - Phaser 遊戲與觸摸控制的完美整合
-6. **🛡️ 統一認證系統** - 解決 Google 登入保存失敗問題
-7. **🎯 真實 Google OAuth** - 驗證並確認真實的 Google 認證流程
-8. **💾 Neon PostgreSQL** - 統一的雲端資料庫解決方案
-9. **🔄 智能客戶端** - 自動路由到正確的 API 端點
+5. **�️ 智能截圖服務** - Railway + Puppeteer 自動截圖，生成速度提升 50-60% 🆕
+6. **🎮 社區分享功能** - 活動卡片顯示具體遊戲名稱，提升用戶體驗 🆕
+7. **�📱 TouchControls 整合** - Phaser 遊戲與觸摸控制的完美整合
+8. **🛡️ 統一認證系統** - 解決 Google 登入保存失敗問題
+9. **🎯 真實 Google OAuth** - 驗證並確認真實的 Google 認證流程
+10. **💾 Neon PostgreSQL** - 統一的雲端資料庫解決方案
+11. **🔄 智能客戶端** - 自動路由到正確的 API 端點
 
 ### 🏆 **歷史重要成就**
 1. **🧠 技術創新** - 記憶科學與遊戲化學習的完美結合
