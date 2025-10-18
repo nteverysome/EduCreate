@@ -781,9 +781,6 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {!result.isSharedView && (
-                  <th className="w-12 px-2 py-2 sm:py-3"></th>
-                )}
                 <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   學生姓名
                 </th>
@@ -799,6 +796,11 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
                 <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                   完成時間
                 </th>
+                {!result.isSharedView && (
+                  <th className="w-20 px-2 py-2 sm:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    操作
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -808,37 +810,12 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
 
                 return (
                   <React.Fragment key={participant.id}>
-                    <tr className="group hover:bg-gray-50">
-                      {!result.isSharedView && (
-                        <td className="w-12 px-2 py-3 sm:py-4">
-                          <div className="flex items-center gap-1">
-                            {/* 刪除按鈕 */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteParticipant(participant);
-                              }}
-                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 rounded"
-                              title="刪除記錄"
-                            >
-                              <TrashIcon className="w-4 h-4 text-gray-400 hover:text-red-600" />
-                            </button>
-
-                            {/* 展開/收起按鈕 */}
-                            <button
-                              onClick={() => toggleParticipantExpansion(participant.id)}
-                              className="p-1"
-                            >
-                              <span className="text-xs">{isExpanded ? '▼' : '▶'}</span>
-                            </button>
-                          </div>
-                        </td>
-                      )}
-                      <td
-                        className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-900 cursor-pointer"
-                        onClick={() => toggleParticipantExpansion(participant.id)}
-                      >
-                        <span className="truncate">{participant.studentName}</span>
+                    <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => toggleParticipantExpansion(participant.id)}>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-900">
+                        <div className="flex items-center">
+                          <span className="mr-1 sm:mr-2 text-xs">{isExpanded ? '▼' : '▶'}</span>
+                          <span className="truncate">{participant.studentName}</span>
+                        </div>
                       </td>
                       <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                         {(participant as any).calculatedScore || participant.score}%
@@ -852,12 +829,26 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
                       <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 hidden lg:table-cell">
                         {formatDateTime(participant.completedAt)}
                       </td>
+                      {!result.isSharedView && (
+                        <td className="w-20 px-2 py-3 sm:py-4 text-center">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteParticipant(participant);
+                            }}
+                            className="p-1.5 hover:bg-red-50 rounded transition-colors"
+                            title="刪除記錄"
+                          >
+                            <TrashIcon className="w-4 h-4 text-gray-400 hover:text-red-600" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
 
                     {/* 展開的詳細答案行 */}
                     {isExpanded && studentAnswers.length > 0 && (
                       <tr>
-                        <td colSpan={result.isSharedView ? 5 : 6} className="px-6 py-4 bg-gray-50">
+                        <td colSpan={6} className="px-6 py-4 bg-gray-50">
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium text-gray-900 mb-3">詳細答案：</h4>
                             {/* 舊數據提示 */}
