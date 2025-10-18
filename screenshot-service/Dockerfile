@@ -26,8 +26,13 @@ COPY package*.json ./
 # 安裝依賴
 RUN npm ci --only=production
 
-# 複製應用代碼
-COPY . .
+# 複製應用代碼（明確指定文件）
+COPY index.js ./
+COPY test.js ./
+COPY README.md ./
+
+# 調試：查看文件列表
+RUN ls -la /app && echo "=== index.js content check ===" && head -n 5 /app/index.js
 
 # 暴露端口
 EXPOSE 3000
