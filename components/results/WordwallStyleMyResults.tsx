@@ -679,14 +679,6 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           {/* 操作按鈕區域 */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <button
-              onClick={() => setShowNewFolderModal(true)}
-              className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <FolderIcon className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">新資料夾</span>
-            </button>
-
-            <button
               onClick={handleRecycleBinClick}
               className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
@@ -747,18 +739,32 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       {/* 拖拽到根目录区域 */}
       <DragToRootArea currentFolderId={currentFolderId} onBackToRoot={handleBackToRoot} />
 
-      {/* 內容區域 - 網格佈局（參考我的活動頁面） */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {/* 資料夾 - 只在根目录显示 */}
-        {!currentFolderId && filteredFolders.map(folder => (
-          <DroppableFolderCard
-            key={folder.id}
-            folder={folder}
-            onClick={handleFolderClick}
-            onMenuClick={handleFolderMenuClick}
-          />
-        ))}
+      {/* 資料夾區域 - 獨立的橫向滾動（參考我的活動頁面） */}
+      {!currentFolderId && (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
+          {/* 新增資料夾按鈕 */}
+          <button
+            onClick={() => setShowNewFolderModal(true)}
+            className="folder-card bg-white border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center min-h-[120px] hover:border-blue-400 hover:bg-blue-50 transition-colors group"
+          >
+            <FolderIcon className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-2" />
+            <span className="text-sm text-gray-600 group-hover:text-blue-600">新增資料夾</span>
+          </button>
 
+          {/* 現有資料夾 */}
+          {filteredFolders.map(folder => (
+            <DroppableFolderCard
+              key={folder.id}
+              folder={folder}
+              onClick={handleFolderClick}
+              onMenuClick={handleFolderMenuClick}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* 結果網格 - 5列（參考我的活動頁面） */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {/* 結果項目 */}
         {filteredAndSortedResults.map(result => (
           <WordwallStyleResultCard
@@ -771,7 +777,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
         {/* 空狀態 */}
         {filteredAndSortedResults.length === 0 && folders.length === 0 && (
-          <div className="text-center py-12">
+          <div className="col-span-full text-center py-12">
             <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
               <span className="text-4xl">📊</span>
             </div>
