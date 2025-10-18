@@ -69,6 +69,22 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // 異步生成截圖（不等待完成，避免阻塞響應）
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app';
+    fetch(`${baseUrl}/api/generate-screenshot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || '' // 傳遞 session cookie
+      },
+      body: JSON.stringify({ activityId: activity.id })
+    }).catch(err => {
+      // 靜默處理錯誤，不影響活動創建
+      console.error('⚠️ 截圖生成失敗（不影響活動創建）:', err.message);
+    });
+
+    console.log(`✅ 活動創建成功，已觸發截圖生成: ${activity.id}`);
+
     return NextResponse.json({
       id: activity.id,
       title: activity.title,
