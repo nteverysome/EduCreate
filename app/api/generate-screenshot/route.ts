@@ -23,6 +23,10 @@ const RAILWAY_SCREENSHOT_SERVICE_URL = process.env.RAILWAY_SCREENSHOT_SERVICE_UR
 const USE_MOCK_MODE = !RAILWAY_SCREENSHOT_SERVICE_URL || process.env.USE_MOCK_SCREENSHOTS === 'true';
 
 export async function POST(request: NextRequest) {
+  // 在最外層保存 activityId，避免在錯誤處理中重複讀取 request body
+  let activityId: string | undefined;
+  let userId: string | undefined;
+
   try {
     // 1. 驗證用戶身份
     const session = await getServerSession(authOptions);
@@ -33,9 +37,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    userId = session.user.id;
+
     // 2. 解析請求參數
     const body = await request.json();
-    const { activityId, isRetry = false } = body;
+    const { activityId: requestActivityId, isRetry = false } = body;
+    activityId = requestActivityId;
 
     if (!activityId) {
       return NextResponse.json(
@@ -83,7 +90,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 6. 更新狀態為 generating
+    // 6. 構建截圖預覽頁面 URL（用於快取檢查）
+    const gameUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/screenshot-preview/${activityId}`;
+
+    // 7. 🚀 CDN 快取檢查：查找是否有相同 gameUrl 的成功截圖
+    if (!USE_MOCK_MODE && !isRetry) {
+      console.log('[CDN Cache] Checking for cached screenshot...');
+      const cachedActivity = await prisma.activity.findFirst({
+        where: {
+          thumbnailUrl: { not: null },
+          screenshotStatus: 'completed',
+          // 注意：這裡我們假設相同類型的活動可以共享截圖
+          // 如果需要更精確的快取，可以添加更多條件
+          type: activity.type,
+        },
+        select: {
+          thumbnailUrl: true,
+          id: true,
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+      });
+
+      if (cachedActivity?.thumbnailUrl) {
+        console.log('[CDN Cache] Found cached screenshot:', cachedActivity.thumbnailUrl);
+        console.log('[CDN Cache] From activity:', cachedActivity.id);
+
+        // 直接使用快取的截圖 URL
+        await prisma.activity.update({
+          where: { id: activityId },
+          data: {
+            thumbnailUrl: cachedActivity.thumbnailUrl,
+            screenshotStatus: 'completed',
+            screenshotError: null,
+          },
+        });
+
+        // 推送實時更新：使用快取
+        await pushScreenshotUpdate(userId, activityId, 'completed', {
+          thumbnailUrl: cachedActivity.thumbnailUrl,
+        });
+
+        console.log('[CDN Cache] Screenshot cached successfully');
+
+        return NextResponse.json({
+          success: true,
+          thumbnailUrl: cachedActivity.thumbnailUrl,
+          cached: true,
+          message: 'Using cached screenshot (instant)',
+          status: 'completed',
+        });
+      }
+
+      console.log('[CDN Cache] No cached screenshot found, generating new one...');
+    }
+
+    // 8. 更新狀態為 generating
     await prisma.activity.update({
       where: { id: activityId },
       data: {
@@ -93,8 +156,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 7. 推送實時更新：開始生成
-    await pushScreenshotUpdate(session.user.id, activityId, 'generating');
+    // 9. 推送實時更新：開始生成
+    await pushScreenshotUpdate(userId, activityId, 'generating');
 
     let thumbnailUrl: string;
 
@@ -120,12 +183,9 @@ export async function POST(request: NextRequest) {
       // ===== 生產模式：調用 Railway 截圖服務 =====
       console.log('[Production Mode] Calling Railway screenshot service');
       console.log('[Production Mode] Railway URL:', RAILWAY_SCREENSHOT_SERVICE_URL);
-
-      // 6. 構建截圖預覽頁面 URL（專門用於截圖，包含完整的遊戲 iframe）
-      const gameUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/screenshot-preview/${activityId}`;
       console.log('[Production Mode] Screenshot preview URL:', gameUrl);
 
-      // 7. 調用 Railway 截圖服務
+      // 10. 調用 Railway 截圖服務
       // 截圖預覽頁面已經是 100% 遊戲內容，直接截取整個頁面
       // 使用智能等待機制，大幅減少等待時間（從 8 秒降至 2-3 秒）
       console.log('[Production Mode] Sending screenshot request with smart waiting...');
@@ -151,14 +211,14 @@ export async function POST(request: NextRequest) {
         throw new Error(`Screenshot service failed: ${screenshotResponse.status} ${screenshotResponse.statusText} - ${errorText}`);
       }
 
-      // 8. 獲取截圖 Buffer
+      // 11. 獲取截圖 Buffer
       console.log('[Production Mode] Getting screenshot buffer...');
       const screenshotBuffer = await screenshotResponse.arrayBuffer();
       console.log('[Production Mode] Screenshot buffer size:', screenshotBuffer.byteLength);
 
       const screenshotBlob = new Blob([screenshotBuffer], { type: 'image/png' });
 
-      // 9. 上傳到 Vercel Blob Storage
+      // 12. 上傳到 Vercel Blob Storage
       console.log('[Production Mode] Uploading to Vercel Blob...');
       const filename = `activity-${activityId}-${Date.now()}.png`;
       const blob = await put(filename, screenshotBlob, {
@@ -170,7 +230,7 @@ export async function POST(request: NextRequest) {
       console.log('[Production Mode] Uploaded to Vercel Blob:', thumbnailUrl);
     }
 
-    // 10. 更新 Activity 記錄（成功）
+    // 13. 更新 Activity 記錄（成功）
     await prisma.activity.update({
       where: { id: activityId },
       data: {
@@ -180,15 +240,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 11. 推送實時更新：生成完成
-    await pushScreenshotUpdate(session.user.id, activityId, 'completed', {
+    // 14. 推送實時更新：生成完成
+    await pushScreenshotUpdate(userId, activityId, 'completed', {
       thumbnailUrl,
     });
 
-    // 12. 返回成功響應
+    // 15. 返回成功響應
     return NextResponse.json({
       success: true,
       thumbnailUrl,
+      cached: false,
       mode: USE_MOCK_MODE ? 'mock' : 'production',
       message: USE_MOCK_MODE
         ? 'Mock thumbnail generated successfully'
@@ -216,9 +277,8 @@ export async function POST(request: NextRequest) {
     console.error('[Generate Screenshot Error] Stack:', errorStack);
 
     // 更新活動記錄（失敗）
+    // 使用外層保存的 activityId 和 userId，避免重複讀取 request body
     try {
-      const body = await request.json();
-      const { activityId } = body;
       if (activityId) {
         await prisma.activity.update({
           where: { id: activityId },
@@ -229,9 +289,8 @@ export async function POST(request: NextRequest) {
         });
 
         // 推送實時更新：生成失敗
-        const session = await getServerSession(authOptions);
-        if (session?.user?.id) {
-          await pushScreenshotUpdate(session.user.id, activityId, 'failed', {
+        if (userId) {
+          await pushScreenshotUpdate(userId, activityId, 'failed', {
             error: errorMessage,
           });
         }
