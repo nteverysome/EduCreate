@@ -500,18 +500,18 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
             )}
           </div>
         </div>
-
-        {/* 遊戲類型標籤 - Wordwall 風格 */}
-        <div className="absolute bottom-2 left-2">
-          <div className="bg-white/95 backdrop-blur-sm text-gray-800 px-2.5 py-1.5 rounded shadow-sm border border-gray-200 flex items-center gap-1.5">
-            <span className="text-base leading-none">{getGameTypeInfo(activity.gameType).icon}</span>
-            <span className="text-xs font-medium">{getGameTypeInfo(activity.gameType).name}</span>
-          </div>
-        </div>
       </div>
 
       {/* 卡片內容 */}
       <div className="p-4">
+        {/* 遊戲類型標籤 - 移到卡片內容區域 */}
+        <div className="mb-3">
+          <div className="inline-flex bg-gradient-to-r from-blue-50 to-purple-50 text-gray-800 px-3 py-1.5 rounded-full shadow-sm border border-gray-200 items-center gap-2">
+            <span className="text-lg leading-none">{getGameTypeInfo(activity.gameType).icon}</span>
+            <span className="text-sm font-semibold">{getGameTypeInfo(activity.gameType).name}</span>
+          </div>
+        </div>
+
         {/* 標題 */}
         {isRenaming ? (
           <div className="mb-2 min-h-[2.5rem] flex items-center gap-2">
