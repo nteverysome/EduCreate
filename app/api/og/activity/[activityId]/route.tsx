@@ -1,16 +1,18 @@
 /**
  * Open Graph Image Generation API Route
  * 使用 Next.js 14 原生的 @vercel/og 功能動態生成遊戲預覽圖
- * 
+ *
  * 特性：
  * - Edge Runtime（極快）
  * - 自動緩存
  * - 無需資料庫存儲
  * - 完美支援社交分享和 SEO
+ * - 混合佈局：80% 遊戲預覽圖 + 20% 活動信息
  */
 
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { getGamePreviewConfig } from '@/lib/og/gamePreviewImages';
 
 // 啟用 Edge Runtime（關鍵！）
 export const runtime = 'edge';
@@ -96,12 +98,14 @@ export async function GET(
       ];
     }
 
-    // 獲取遊戲類型相關信息
-    const gameIcon = getGameIcon(gameType);
-    const gameTypeName = getGameTypeName(gameType);
-    const gradient = getGameGradient(gameType);
+    // 獲取遊戲預覽配置
+    const gamePreviewConfig = getGamePreviewConfig(gameType);
+    const { previewImage, icon, gradient, displayName } = gamePreviewConfig;
 
-    // 使用 JSX 渲染預覽圖
+    // 計算詞彙數量
+    const vocabularyCount = vocabulary.length;
+
+    // 使用 JSX 渲染混合佈局預覽圖
     return new ImageResponse(
       (
         <div
@@ -110,160 +114,93 @@ export async function GET(
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
-            padding: '40px',
             fontFamily: 'system-ui, -apple-system, sans-serif',
             position: 'relative',
           }}
         >
-          {/* 背景裝飾 */}
+          {/* 80% 空間：遊戲預覽圖 */}
           <div
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              opacity: 0.1,
+              width: '100%',
+              height: '240px', // 80% of 300px
               display: 'flex',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                top: '-50px',
-                left: '-50px',
-                width: '150px',
-                height: '150px',
-                background: 'white',
-                borderRadius: '50%',
-                filter: 'blur(40px)',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '-50px',
-                right: '-50px',
-                width: '150px',
-                height: '150px',
-                background: 'white',
-                borderRadius: '50%',
-                filter: 'blur(40px)',
-              }}
-            />
-          </div>
-
-          {/* 主要內容 */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              background: previewImage
+                ? `url(${previewImage})`
+                : `linear-gradient(135deg, ${gradient.from} 0%, ${gradient.to} 100%)`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
               position: 'relative',
-              zIndex: 1,
+              overflow: 'hidden',
             }}
           >
-            {/* 遊戲類型圖標 */}
-            <div
-              style={{
-                fontSize: 60,
-                marginBottom: 15,
-                filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))',
-              }}
-            >
-              {gameIcon}
-            </div>
-
-            {/* 遊戲類型標籤 */}
-            <div
-              style={{
-                fontSize: 14,
-                color: 'rgba(255, 255, 255, 0.95)',
-                marginBottom: 25,
-                fontWeight: 600,
-                letterSpacing: '0.5px',
-                textTransform: 'uppercase',
-              }}
-            >
-              {gameTypeName}
-            </div>
-
-            {/* 詞彙列表 */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-                width: '100%',
-                maxWidth: 320,
-              }}
-            >
-              {vocabulary.slice(0, 3).map((word, index) => (
-                <div
-                  key={index}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.95)',
-                    padding: '10px 18px',
-                    borderRadius: 8,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontWeight: 600,
-                      color: '#1f2937',
-                      fontSize: 13,
-                    }}
-                  >
-                    {word.english}
-                  </span>
-                  <span
-                    style={{
-                      color: '#6b7280',
-                      fontSize: 13,
-                    }}
-                  >
-                    {word.chinese}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* 詞彙數量提示 */}
-            {vocabulary.length > 3 && (
+            {/* 如果沒有預覽圖，顯示遊戲圖標 */}
+            {!previewImage && (
               <div
                 style={{
-                  marginTop: 12,
-                  fontSize: 11,
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  fontWeight: 500,
+                  fontSize: 80,
+                  filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))',
                 }}
               >
-                +{vocabulary.length - 3} 個詞彙
+                {icon}
               </div>
             )}
           </div>
 
-          {/* 底部品牌標識 */}
+          {/* 20% 空間：活動信息欄 */}
           <div
             style={{
-              position: 'absolute',
-              bottom: 15,
-              right: 20,
-              fontSize: 10,
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontWeight: 500,
-              letterSpacing: '0.5px',
+              width: '100%',
+              height: '60px', // 20% of 300px
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              padding: '0 20px',
+              background: 'rgba(0, 0, 0, 0.75)',
+              color: 'white',
             }}
           >
-            EduCreate
+            {/* 第一行：遊戲圖標 + 活動標題 */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: 4,
+              }}
+            >
+              <span style={{ fontSize: 18, marginRight: 8 }}>{icon}</span>
+              <span
+                style={{
+                  fontSize: 16,
+                  fontWeight: 600,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '300px',
+                }}
+              >
+                {title}
+              </span>
+            </div>
+
+            {/* 第二行：詞彙數量 + 遊戲類型 */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: 12,
+                color: 'rgba(255, 255, 255, 0.85)',
+              }}
+            >
+              <span style={{ marginRight: 12 }}>
+                📝 {vocabularyCount} 個詞彙
+              </span>
+              <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>|</span>
+              <span style={{ marginLeft: 12 }}>
+                {displayName}
+              </span>
+            </div>
           </div>
         </div>
       ),
