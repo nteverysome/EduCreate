@@ -96,6 +96,11 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // 刪除參與者狀態
+  const [showDeleteParticipantModal, setShowDeleteParticipantModal] = useState(false);
+  const [participantToDelete, setParticipantToDelete] = useState<GameParticipant | null>(null);
+  const [isDeletingParticipant, setIsDeletingParticipant] = useState(false);
+
   // 點擊外部關閉下拉菜單
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -255,6 +260,38 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
     } finally {
       setIsDeleting(false);
       setShowDeleteModal(false);
+    }
+  };
+
+  // 處理刪除參與者
+  const handleDeleteParticipant = async (participant: GameParticipant) => {
+    setParticipantToDelete(participant);
+    setShowDeleteParticipantModal(true);
+  };
+
+  // 確認刪除參與者
+  const confirmDeleteParticipant = async () => {
+    if (!participantToDelete) return;
+
+    setIsDeletingParticipant(true);
+    try {
+      const response = await fetch(`/api/participants/${participantToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('刪除失敗');
+      }
+
+      // 刪除成功後刷新頁面
+      window.location.reload();
+    } catch (error) {
+      console.error('刪除參與者失敗:', error);
+      alert('刪除失敗，請稍後再試');
+    } finally {
+      setIsDeletingParticipant(false);
+      setShowDeleteParticipantModal(false);
+      setParticipantToDelete(null);
     }
   };
 
@@ -744,6 +781,9 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                {!result.isSharedView && (
+                  <th className="w-12 px-2 py-2 sm:py-3"></th>
+                )}
                 <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   學生姓名
                 </th>
@@ -768,15 +808,37 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
 
                 return (
                   <React.Fragment key={participant.id}>
-                    <tr
-                      className="hover:bg-gray-50 cursor-pointer"
-                      onClick={() => toggleParticipantExpansion(participant.id)}
-                    >
-                      <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-900">
-                        <div className="flex items-center">
-                          <span className="mr-1 sm:mr-2 text-xs">{isExpanded ? '▼' : '▶'}</span>
-                          <span className="truncate">{participant.studentName}</span>
-                        </div>
+                    <tr className="group hover:bg-gray-50">
+                      {!result.isSharedView && (
+                        <td className="w-12 px-2 py-3 sm:py-4">
+                          <div className="flex items-center gap-1">
+                            {/* 刪除按鈕 */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteParticipant(participant);
+                              }}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 rounded"
+                              title="刪除記錄"
+                            >
+                              <TrashIcon className="w-4 h-4 text-gray-400 hover:text-red-600" />
+                            </button>
+
+                            {/* 展開/收起按鈕 */}
+                            <button
+                              onClick={() => toggleParticipantExpansion(participant.id)}
+                              className="p-1"
+                            >
+                              <span className="text-xs">{isExpanded ? '▼' : '▶'}</span>
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                      <td
+                        className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-900 cursor-pointer"
+                        onClick={() => toggleParticipantExpansion(participant.id)}
+                      >
+                        <span className="truncate">{participant.studentName}</span>
                       </td>
                       <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                         {(participant as any).calculatedScore || participant.score}%
@@ -795,7 +857,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
                     {/* 展開的詳細答案行 */}
                     {isExpanded && studentAnswers.length > 0 && (
                       <tr>
-                        <td colSpan={5} className="px-6 py-4 bg-gray-50">
+                        <td colSpan={result.isSharedView ? 5 : 6} className="px-6 py-4 bg-gray-50">
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium text-gray-900 mb-3">詳細答案：</h4>
                             {/* 舊數據提示 */}
@@ -1117,7 +1179,7 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
         onDeadlineSet={handleSetDeadline}
       />
 
-      {/* 刪除確認模態框 */}
+      {/* 刪除結果確認模態框 */}
       <DeleteConfirmModal
         isOpen={showDeleteModal}
         title="刪除結果"
@@ -1127,6 +1189,21 @@ export const ResultDetailView: React.FC<ResultDetailViewProps> = ({ result }) =>
         confirmText="刪除"
         cancelText="取消"
         isLoading={isDeleting}
+      />
+
+      {/* 刪除參與者確認模態框 */}
+      <DeleteConfirmModal
+        isOpen={showDeleteParticipantModal}
+        title="刪除學生記錄"
+        message={`確定要刪除 ${participantToDelete?.studentName} 的提交記錄嗎？此操作無法撤銷。`}
+        onConfirm={confirmDeleteParticipant}
+        onCancel={() => {
+          setShowDeleteParticipantModal(false);
+          setParticipantToDelete(null);
+        }}
+        confirmText="刪除"
+        cancelText="取消"
+        isLoading={isDeletingParticipant}
       />
     </div>
   );
