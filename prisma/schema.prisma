@@ -135,6 +135,9 @@ model Activity {
   isFeatured             Boolean              @default(false)
   featuredAt             DateTime?
   thumbnailUrl           String?              // 活動縮圖 URL（Vercel Blob Storage）
+  screenshotStatus       String?              @default("pending") // pending, generating, completed, failed
+  screenshotError        String?              // 截圖生成錯誤信息
+  screenshotRetryCount   Int                  @default(0) // 重試次數
 
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt

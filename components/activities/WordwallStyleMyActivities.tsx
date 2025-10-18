@@ -187,6 +187,9 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           lastModified: new Date(activity.updatedAt),
           createdAt: new Date(activity.createdAt),
           thumbnail: activity.thumbnailUrl || undefined, // ✅ 使用 API 返回的 thumbnailUrl
+          screenshotStatus: activity.screenshotStatus, // ✅ 截圖狀態
+          screenshotError: activity.screenshotError, // ✅ 截圖錯誤信息
+          screenshotRetryCount: activity.screenshotRetryCount, // ✅ 重試次數
           vocabularyItems: activity.vocabularyItems || [], // 添加詞彙項目以支持 OG Image API
           wordCount: activity.vocabularyInfo?.totalWords || 0,
           geptLevel: activity.vocabularyInfo?.geptLevel || 'ELEMENTARY',

@@ -164,7 +164,10 @@ export async function GET(request: NextRequest) {
           communityPlays: activity.communityPlays, // ✅ 社區遊玩次數
           elements: activity.elements, // ✅ 添加 elements 字段（詞彙數據）
           vocabularyItems: activity.vocabularyItems, // ✅ 添加 vocabularyItems 關聯數據
-          thumbnailUrl: activity.thumbnailUrl // ✅ 添加 thumbnailUrl 字段（活動截圖）
+          thumbnailUrl: activity.thumbnailUrl, // ✅ 添加 thumbnailUrl 字段（活動截圖）
+          screenshotStatus: activity.screenshotStatus, // ✅ 截圖狀態
+          screenshotError: activity.screenshotError, // ✅ 截圖錯誤信息
+          screenshotRetryCount: activity.screenshotRetryCount // ✅ 重試次數
         };
       });
 

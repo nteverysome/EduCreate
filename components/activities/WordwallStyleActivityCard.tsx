@@ -35,6 +35,9 @@ interface Activity {
   lastModified: Date;
   createdAt: Date;
   thumbnail?: string; // ✅ 改為可選，因為截圖可能尚未生成
+  screenshotStatus?: string; // pending, generating, completed, failed
+  screenshotError?: string; // 截圖生成錯誤信息
+  screenshotRetryCount?: number; // 重試次數
   wordCount?: number;
   geptLevel?: string;
   tags?: string[];
@@ -98,6 +101,7 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
   const [isRenaming, setIsRenaming] = useState(false);
   const [newTitle, setNewTitle] = useState(activity.title);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [retryingScreenshot, setRetryingScreenshot] = useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   // 動態更新菜單位置
@@ -244,6 +248,39 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
     }
   };
 
+  // 處理重試截圖
+  const handleRetryScreenshot = async () => {
+    if (retryingScreenshot) return;
+
+    setRetryingScreenshot(true);
+    try {
+      const response = await fetch('/api/retry-screenshot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          activityId: activity.id,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // 成功：刷新頁面或更新狀態
+        window.location.reload();
+      } else {
+        // 失敗：顯示錯誤信息
+        alert(result.message || result.error || '重試失敗');
+      }
+    } catch (error) {
+      console.error('重試截圖失敗:', error);
+      alert('重試失敗，請稍後再試');
+    } finally {
+      setRetryingScreenshot(false);
+    }
+  };
+
   const formatDate = (date: Date) => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
@@ -358,11 +395,41 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
               className="w-full h-full object-cover"
             />
           ) : (
-            // 沒有截圖時顯示佔位符
+            // 根據截圖狀態顯示不同的佔位符
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
-                <div className="text-6xl mb-2">🎮</div>
-                <div className="text-sm text-gray-500">截圖生成中...</div>
+                {activity.screenshotStatus === 'generating' ? (
+                  <>
+                    <div className="text-6xl mb-2 animate-pulse">📸</div>
+                    <div className="text-sm text-gray-500">正在生成截圖...</div>
+                  </>
+                ) : activity.screenshotStatus === 'failed' ? (
+                  <>
+                    <div className="text-6xl mb-2">❌</div>
+                    <div className="text-sm text-red-500">截圖生成失敗</div>
+                    {activity.screenshotError && (
+                      <div className="text-xs text-gray-400 mt-1 max-w-xs truncate">
+                        {activity.screenshotError}
+                      </div>
+                    )}
+                    {activity.screenshotRetryCount !== undefined && activity.screenshotRetryCount < 3 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRetryScreenshot();
+                        }}
+                        className="mt-2 px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                      >
+                        重試 ({activity.screenshotRetryCount}/3)
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="text-6xl mb-2">🎮</div>
+                    <div className="text-sm text-gray-500">等待生成截圖...</div>
+                  </>
+                )}
               </div>
             </div>
           )}

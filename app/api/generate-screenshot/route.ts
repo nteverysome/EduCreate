@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     // 2. 解析請求參數
     const body = await request.json();
-    const { activityId } = body;
+    const { activityId, isRetry = false } = body;
 
     if (!activityId) {
       return NextResponse.json(
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. 如果已有截圖，詢問是否覆蓋
-    if (activity.thumbnailUrl && !body.force) {
+    if (activity.thumbnailUrl && !body.force && !isRetry) {
       return NextResponse.json(
         {
           message: 'Thumbnail already exists',
@@ -81,6 +81,16 @@ export async function POST(request: NextRequest) {
         { status: 200 }
       );
     }
+
+    // 6. 更新狀態為 generating
+    await prisma.activity.update({
+      where: { id: activityId },
+      data: {
+        screenshotStatus: 'generating',
+        screenshotError: null,
+        screenshotRetryCount: isRetry ? { increment: 1 } : 0,
+      },
+    });
 
     let thumbnailUrl: string;
 
@@ -155,10 +165,14 @@ export async function POST(request: NextRequest) {
       console.log('[Production Mode] Uploaded to Vercel Blob:', thumbnailUrl);
     }
 
-    // 10. 更新 Activity 記錄
+    // 10. 更新 Activity 記錄（成功）
     await prisma.activity.update({
       where: { id: activityId },
-      data: { thumbnailUrl },
+      data: {
+        thumbnailUrl,
+        screenshotStatus: 'completed',
+        screenshotError: null,
+      },
     });
 
     // 11. 返回成功響應
@@ -166,9 +180,10 @@ export async function POST(request: NextRequest) {
       success: true,
       thumbnailUrl,
       mode: USE_MOCK_MODE ? 'mock' : 'production',
-      message: USE_MOCK_MODE 
-        ? 'Mock thumbnail generated successfully' 
+      message: USE_MOCK_MODE
+        ? 'Mock thumbnail generated successfully'
         : 'Screenshot generated and uploaded successfully',
+      status: 'completed',
     });
 
   } catch (error) {
@@ -190,12 +205,30 @@ export async function POST(request: NextRequest) {
     console.error('[Generate Screenshot Error] Message:', errorMessage);
     console.error('[Generate Screenshot Error] Stack:', errorStack);
 
+    // 更新活動記錄（失敗）
+    try {
+      const body = await request.json();
+      const { activityId } = body;
+      if (activityId) {
+        await prisma.activity.update({
+          where: { id: activityId },
+          data: {
+            screenshotStatus: 'failed',
+            screenshotError: errorMessage,
+          },
+        });
+      }
+    } catch (updateError) {
+      console.error('[Update Screenshot Status Error]', updateError);
+    }
+
     return NextResponse.json(
       {
         error: 'Failed to generate screenshot',
         details: errorMessage,
         stack: process.env.NODE_ENV === 'development' ? errorStack : undefined,
         timestamp: new Date().toISOString(),
+        status: 'failed',
       },
       { status: 500 }
     );
