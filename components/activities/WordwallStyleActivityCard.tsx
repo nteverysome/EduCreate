@@ -506,9 +506,9 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
       <div className="p-4">
         {/* 遊戲類型標籤 - 移到卡片內容區域 */}
         <div className="mb-3">
-          <div className="inline-flex bg-gradient-to-r from-blue-50 to-purple-50 text-gray-800 px-3 py-1.5 rounded-full shadow-sm border border-gray-200 items-center gap-2">
-            <span className="text-lg leading-none">{getGameTypeInfo(activity.gameType).icon}</span>
-            <span className="text-sm font-semibold">{getGameTypeInfo(activity.gameType).name}</span>
+          <div className="inline-flex bg-gradient-to-r from-blue-50 to-purple-50 text-gray-800 px-2.5 py-1 rounded-full shadow-sm border border-gray-200 items-center gap-1.5">
+            <span className="text-sm leading-none">{getGameTypeInfo(activity.gameType).icon}</span>
+            <span className="text-xs font-normal">{getGameTypeInfo(activity.gameType).name}</span>
           </div>
         </div>
 
