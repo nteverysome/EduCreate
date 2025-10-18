@@ -44,7 +44,7 @@ export const GAME_PREVIEW_CONFIGS: { [key: string]: GamePreviewConfig } = {
     id: 'shimozurdo',
     name: 'shimozurdo',
     displayName: 'Shimozurdo 雲朵遊戲',
-    previewImage: '/game-screenshots/shimozurdo.png', // 使用實際遊戲截圖
+    previewImage: 'https://edu-create.vercel.app/game-screenshots/shimozurdo.png', // 使用完整 URL（Edge Runtime 需要）
     icon: '☁️',
     gradient: { from: '#1e293b', to: '#475569' }
   },
@@ -52,7 +52,7 @@ export const GAME_PREVIEW_CONFIGS: { [key: string]: GamePreviewConfig } = {
     id: 'shimozurdo-game',
     name: 'shimozurdo',
     displayName: 'Shimozurdo 雲朵遊戲',
-    previewImage: '/game-screenshots/shimozurdo.png', // 使用實際遊戲截圖
+    previewImage: 'https://edu-create.vercel.app/game-screenshots/shimozurdo.png', // 使用完整 URL（Edge Runtime 需要）
     icon: '☁️',
     gradient: { from: '#1e293b', to: '#475569' }
   },
