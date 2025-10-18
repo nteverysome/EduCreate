@@ -31,6 +31,7 @@ export default async function ScreenshotPreviewPage({ params }: PageProps) {
       title: true,
       type: true,
       templateType: true,
+      content: true, // 需要 content.gameTemplateId
     },
   });
 
@@ -40,6 +41,12 @@ export default async function ScreenshotPreviewPage({ params }: PageProps) {
 
   // 根據活動類型確定遊戲 URL
   const getGameUrl = () => {
+    // 優先檢查 content.gameTemplateId（最準確）
+    const content = activity.content as any;
+    if (content && content.gameTemplateId) {
+      return `/games/${content.gameTemplateId}/?activityId=${activityId}&customVocabulary=true`;
+    }
+
     // 如果 type 已經是遊戲模板 ID 格式（包含 '-game'）
     if (activity.type && activity.type.includes('-game')) {
       return `/games/${activity.type}/?activityId=${activityId}&customVocabulary=true`;
@@ -47,16 +54,16 @@ export default async function ScreenshotPreviewPage({ params }: PageProps) {
 
     // 根據 templateType 或 type 確定遊戲
     const gameType = activity.templateType || activity.type;
-    
+
     switch (gameType) {
       case 'shimozurdo':
       case '飛機碰撞遊戲':
         return `/games/shimozurdo-game/?activityId=${activityId}&customVocabulary=true`;
-      
+
       case 'vocabulary':
       case '詞彙遊戲':
         return `/games/vocabulary-game/?activityId=${activityId}&customVocabulary=true`;
-      
+
       default:
         // 默認使用 shimozurdo 遊戲
         return `/games/shimozurdo-game/?activityId=${activityId}&customVocabulary=true`;
