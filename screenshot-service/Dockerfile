@@ -20,18 +20,18 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 # 設置工作目錄
 WORKDIR /app
 
-# 複製 package.json 和 package-lock.json
-COPY package*.json ./
+# 複製 package.json 和 package-lock.json（從倉庫根目錄的 screenshot-service 子目錄）
+COPY screenshot-service/package*.json ./
 
 # 安裝依賴
 RUN npm ci --only=production
 
-# 複製應用代碼（明確指定文件）
-COPY index.js ./
-COPY test.js ./
-COPY README.md ./
+# 複製應用代碼（從倉庫根目錄的 screenshot-service 子目錄）
+COPY screenshot-service/index.js ./
+COPY screenshot-service/test.js ./
+COPY screenshot-service/README.md ./
 
-# 調試：查看文件列表
+# 調試：查看文件列表和內容
 RUN ls -la /app && echo "=== index.js content check ===" && head -n 5 /app/index.js
 
 # 暴露端口
