@@ -23,6 +23,7 @@ interface Activity {
   description?: string;
   type: 'vocabulary' | 'system';
   gameType: string;
+  content?: any; // ✅ 添加 content 字段，包含 gameTemplateId 等信息
   isPublic: boolean;
   playCount: number;
   lastModified: Date;
@@ -203,7 +204,8 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           title: activity.title || '無標題活動',
           description: activity.description || `包含 ${activity.vocabularyInfo?.totalWords || 0} 個詞彙的學習活動`,
           type: 'vocabulary' as const,
-          gameType: '詞彙遊戲',
+          gameType: activity.type || 'vocabulary', // ✅ 使用 API 返回的 type，而不是硬編碼
+          content: activity.content, // ✅ 傳遞 content 字段，包含 gameTemplateId
           isPublic: activity.isPublic || false,
           playCount: activity.playCount || Math.floor(Math.random() * 50),
           lastModified: new Date(activity.updatedAt),
