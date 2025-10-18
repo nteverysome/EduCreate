@@ -17,10 +17,10 @@ app.get('/health', (req, res) => {
 // 截圖端點
 app.post('/screenshot', async (req, res) => {
   let browser = null;
-  
+
   try {
-    const { url, width = 400, height = 300, waitTime = 2000 } = req.body;
-    
+    const { url, width = 400, height = 300, waitTime = 2000, selector = null } = req.body;
+
     // 驗證輸入
     if (!url) {
       return res.status(400).json({
@@ -28,11 +28,12 @@ app.post('/screenshot', async (req, res) => {
         message: 'url 參數是必需的'
       });
     }
-    
+
     console.log(`[${new Date().toISOString()}] 截圖請求: ${url}`);
     console.log(`  尺寸: ${width}x${height}`);
     console.log(`  等待時間: ${waitTime}ms`);
-    
+    console.log(`  選擇器: ${selector || '無（全頁面截圖）'}`);
+
     // 啟動瀏覽器
     const startTime = Date.now();
     browser = await puppeteer.launch({
@@ -47,59 +48,79 @@ app.post('/screenshot', async (req, res) => {
         '--disable-features=IsolateOrigins,site-per-process'
       ]
     });
-    
+
     const launchTime = Date.now() - startTime;
     console.log(`  瀏覽器啟動時間: ${launchTime}ms`);
-    
+
     const page = await browser.newPage();
-    
+
     // 設置視窗大小
-    await page.setViewport({ 
-      width: parseInt(width), 
+    await page.setViewport({
+      width: parseInt(width),
       height: parseInt(height),
       deviceScaleFactor: 1
     });
-    
+
     // 訪問頁面
     const navigationStart = Date.now();
     await page.goto(url, {
       waitUntil: 'networkidle0',
       timeout: 30000
     });
-    
+
     const navigationTime = Date.now() - navigationStart;
     console.log(`  頁面載入時間: ${navigationTime}ms`);
-    
+
     // 等待遊戲載入
     await page.waitForTimeout(parseInt(waitTime));
-    
+
     // 截圖
     const screenshotStart = Date.now();
-    const screenshot = await page.screenshot({
-      type: 'png',
-      fullPage: false
-    });
-    
+    let screenshot;
+
+    if (selector) {
+      // 截取特定元素
+      console.log(`  等待元素: ${selector}`);
+      await page.waitForSelector(selector, { timeout: 10000 });
+
+      const element = await page.$(selector);
+      if (!element) {
+        throw new Error(`找不到元素: ${selector}`);
+      }
+
+      console.log(`  截取元素: ${selector}`);
+      screenshot = await element.screenshot({
+        type: 'png'
+      });
+    } else {
+      // 截取整個頁面
+      console.log(`  截取整個頁面`);
+      screenshot = await page.screenshot({
+        type: 'png',
+        fullPage: false
+      });
+    }
+
     const screenshotTime = Date.now() - screenshotStart;
     const totalTime = Date.now() - startTime;
-    
+
     console.log(`  截圖時間: ${screenshotTime}ms`);
     console.log(`  總時間: ${totalTime}ms`);
     console.log(`  截圖大小: ${screenshot.length} bytes`);
     console.log(`[${new Date().toISOString()}] 截圖成功`);
-    
+
     await browser.close();
     browser = null;
-    
+
     // 返回截圖
     res.set('Content-Type', 'image/png');
     res.set('X-Screenshot-Time', totalTime.toString());
     res.set('X-Screenshot-Size', screenshot.length.toString());
     res.send(screenshot);
-    
+
   } catch (error) {
     console.error(`[${new Date().toISOString()}] 截圖失敗:`, error);
-    
+
     // 確保瀏覽器關閉
     if (browser) {
       try {
@@ -108,7 +129,7 @@ app.post('/screenshot', async (req, res) => {
         console.error('關閉瀏覽器失敗:', closeError);
       }
     }
-    
+
     res.status(500).json({
       error: '截圖失敗',
       message: error.message,

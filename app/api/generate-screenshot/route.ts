@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
       const gameUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://edu-create.vercel.app'}/play/${activityId}`;
 
       // 7. 調用 Railway 截圖服務
+      // 使用 iframe 選擇器來截取遊戲容器（100% 遊戲內容）
       const screenshotResponse = await fetch(`${RAILWAY_SCREENSHOT_SERVICE_URL}/screenshot`, {
         method: 'POST',
         headers: {
@@ -119,7 +120,8 @@ export async function POST(request: NextRequest) {
           url: gameUrl,
           width: 1200,
           height: 630,
-          waitTime: 3000, // 等待 3 秒讓遊戲完全載入
+          waitTime: 5000, // 等待 5 秒讓遊戲完全載入
+          selector: 'iframe', // 只截取 iframe 遊戲容器（100% 遊戲內容）
         }),
       });
 
