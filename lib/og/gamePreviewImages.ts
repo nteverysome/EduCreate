@@ -44,7 +44,7 @@ export const GAME_PREVIEW_CONFIGS: { [key: string]: GamePreviewConfig } = {
     id: 'shimozurdo',
     name: 'shimozurdo',
     displayName: 'Shimozurdo 雲朵遊戲',
-    previewImage: '/games/shimozurdo-game/index.html',
+    previewImage: '/game-screenshots/shimozurdo.png', // 使用實際遊戲截圖
     icon: '☁️',
     gradient: { from: '#1e293b', to: '#475569' }
   },
@@ -52,7 +52,7 @@ export const GAME_PREVIEW_CONFIGS: { [key: string]: GamePreviewConfig } = {
     id: 'shimozurdo-game',
     name: 'shimozurdo',
     displayName: 'Shimozurdo 雲朵遊戲',
-    previewImage: '/games/shimozurdo-game/index.html',
+    previewImage: '/game-screenshots/shimozurdo.png', // 使用實際遊戲截圖
     icon: '☁️',
     gradient: { from: '#1e293b', to: '#475569' }
   },
