@@ -181,7 +181,8 @@ export function formatActivityForCommunity(
     shareToken: activity.shareToken,
     title: activity.title,
     description: activity.communityDescription || activity.description || null,
-    thumbnailUrl: activity.communityThumbnail || null,
+    // 優先使用自動生成的截圖（thumbnailUrl），如果沒有則使用手動設置的社區縮圖
+    thumbnailUrl: activity.thumbnailUrl || activity.communityThumbnail || null,
     category: activity.communityCategory || null,
     tags: activity.communityTags || [],
     gameType: activity.templateType || activity.type || 'Unknown',
