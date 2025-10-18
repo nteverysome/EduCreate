@@ -26,7 +26,7 @@ interface Activity {
   playCount: number;
   lastModified: Date;
   createdAt: Date;
-  thumbnail: string;
+  thumbnail?: string; // ✅ 改為可選，因為截圖可能尚未生成
   wordCount?: number;
   geptLevel?: string;
   tags?: string[];
