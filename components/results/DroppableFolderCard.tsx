@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FolderIcon } from '@heroicons/react/24/outline';
+import { Folder, MoreVertical } from 'lucide-react';
 import { useDragDrop } from './DragDropContext';
 
 interface ResultFolder {
@@ -83,11 +83,16 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
     }
   };
 
-  // 获取资料夹颜色，默认为蓝色
-  const getFolderIconStyle = () => {
-    const color = folder.color || '#3B82F6'; // 默认蓝色
-    return { color };
+  // 將十六進制顏色轉換為 RGB 並調整透明度（參考我的活動頁面）
+  const getBackgroundColor = (color: string) => {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    return `rgba(${r}, ${g}, ${b}, 0.1)`;
   };
+
+  const folderColor = folder.color || '#3B82F6'; // 默认蓝色
 
   // 检查是否可以接收拖移
   const canAcceptDrop = isDragging && dragItem?.type === 'result';
@@ -98,50 +103,49 @@ export const DroppableFolderCard: React.FC<DroppableFolderCardProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseUp={handleMouseUp}
-      className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-all cursor-pointer ${
-        isDropTarget
-          ? 'border-blue-500 bg-blue-50 shadow-lg scale-105'
-          : canAcceptDrop
-            ? 'border-gray-300 hover:border-blue-300'
-            : ''
-      }`}
+      className={`
+        relative bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer group
+        ${isDropTarget ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50' : ''}
+      `}
+      style={{ backgroundColor: isDropTarget ? '#EBF8FF' : getBackgroundColor(folderColor) }}
     >
-      <div className="flex items-center justify-between gap-2 sm:gap-3">
-        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
-          {/* 資料夾圖標 */}
-          <div className="flex-shrink-0">
-            <FolderIcon
-              className="w-6 h-6 sm:w-8 sm:h-8"
-              style={getFolderIconStyle()}
-            />
+      {/* 資料夾內容（參考我的活動頁面的垂直居中佈局） */}
+      <div className="p-4">
+        {/* 資料夾圖標和標題 */}
+        <div className="flex flex-col items-center text-center mb-3">
+          <div
+            className="w-12 h-12 rounded-lg flex items-center justify-center mb-2"
+            style={{ backgroundColor: folderColor }}
+          >
+            <Folder className="w-6 h-6 text-white" />
           </div>
 
-          {/* 資料夾信息 */}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-base sm:text-lg font-medium text-gray-900 truncate">
-              {folder.name}
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-500">
-              {folder.resultCount}結果
-            </p>
-          </div>
+          <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">
+            {folder.name}
+          </h3>
+
+          <p className="text-xs text-gray-500">
+            {folder.resultCount} 個結果
+          </p>
         </div>
 
-        {/* 更多選項按鈕 */}
-        <button
-          onClick={handleMenuClick}
-          className="flex-shrink-0 p-1 sm:p-1.5 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 text-lg sm:text-xl"
-          aria-label="更多選項"
-        >
-          ⋮
-        </button>
+        {/* 更多選項按鈕（參考我的活動頁面的右上角位置） */}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={handleMenuClick}
+            className="p-1 rounded-full hover:bg-white/80 transition-colors"
+            aria-label="更多選項"
+          >
+            <MoreVertical className="w-4 h-4 text-gray-600" />
+          </button>
+        </div>
       </div>
 
       {/* 拖移提示 */}
       {isDropTarget && (
-        <div className="mt-2 text-center">
-          <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            <span className="mr-1">📁</span>
+        <div className="absolute inset-0 flex items-center justify-center bg-blue-50/90 rounded-lg">
+          <div className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+            <span className="mr-2">📁</span>
             放入此資料夾
           </div>
         </div>
