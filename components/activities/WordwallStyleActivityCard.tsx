@@ -295,6 +295,9 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
 
   // 遊戲類型映射（包含圖標和中文名稱）
   const getGameTypeInfo = (gameType: string): { icon: string; name: string } => {
+    // 優先使用 activity.content.gameTemplateId 獲取具體的遊戲名稱
+    const gameTemplateId = (activity as any).content?.gameTemplateId;
+
     const gameTypeMap: { [key: string]: { icon: string; name: string } } = {
       // 基礎遊戲類型
       'quiz': { icon: '❓', name: '測驗' },
@@ -303,27 +306,41 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
       'flashcard': { icon: '📚', name: '單字卡片' },
       'vocabulary': { icon: '📝', name: '詞彙遊戲' },
 
+      // 具體遊戲模板 ID
+      'shimozurdo-game': { icon: '☁️', name: 'Shimozurdo 雲朵遊戲' },
+      'airplane-vite': { icon: '✈️', name: '飛機遊戲 (Vite版)' },
+      'matching-pairs': { icon: '🔗', name: '配對記憶' },
+      'flash-cards': { icon: '📚', name: '閃卡記憶' },
+      'whack-mole': { icon: '🔨', name: '打地鼠' },
+      'spin-wheel': { icon: '🎡', name: '轉盤選擇' },
+      'memory-cards': { icon: '🧠', name: '記憶卡片' },
+      'complete-sentence': { icon: '📝', name: '完成句子' },
+      'spell-word': { icon: '✍️', name: '拼寫單詞' },
+      'labelled-diagram': { icon: '🏷️', name: '標籤圖表' },
+      'watch-memorize': { icon: '👁️', name: '觀察記憶' },
+      'rank-order': { icon: '📈', name: '排序遊戲' },
+      'math-generator': { icon: '🔢', name: '數學生成器' },
+      'word-magnets': { icon: '🧲', name: '單詞磁鐵' },
+      'group-sort': { icon: '📊', name: '分類遊戲' },
+      'image-quiz': { icon: '🖼️', name: '圖片問答' },
+      'maze-chase': { icon: '🏃', name: '迷宮追逐' },
+      'crossword-puzzle': { icon: '📋', name: '填字遊戲' },
+      'flying-fruit': { icon: '🍎', name: '飛行水果' },
+      'flip-tiles': { icon: '🔲', name: '翻轉方塊' },
+      'type-answer': { icon: '⌨️', name: '輸入答案' },
+      'anagram': { icon: '🔤', name: '字母重組' },
+
       // Wordwall 風格遊戲
       'hangman': { icon: '🎯', name: '猜字遊戲' },
-      'image-quiz': { icon: '🖼️', name: '圖片問答' },
       'true-false': { icon: '✅', name: '是非題' },
-      'whack-a-mole': { icon: '🔨', name: '打地鼠' },
-      'spin-wheel': { icon: '🎡', name: '轉盤' },
-      'memory-cards': { icon: '🧠', name: '記憶卡片' },
-      'crossword': { icon: '📋', name: '填字遊戲' },
       'wordsearch': { icon: '🔍', name: '找字遊戲' },
-      'anagram': { icon: '🔤', name: '字母重組' },
-      'group-sort': { icon: '📊', name: '分類遊戲' },
-      'rank-order': { icon: '📈', name: '排序遊戲' },
       'match-up': { icon: '🎯', name: '配對' },
       'airplane': { icon: '✈️', name: '飛機遊戲' },
       'balloon-pop': { icon: '🎈', name: '氣球遊戲' },
-      'maze-chase': { icon: '🏃', name: '迷宮追逐' },
       'open-box': { icon: '📦', name: '開箱遊戲' },
       'gameshow-quiz': { icon: '🎬', name: '競賽測驗' },
       'random-wheel': { icon: '🎰', name: '隨機轉盤' },
       'random-cards': { icon: '🃏', name: '隨機卡片' },
-      'flip-tiles': { icon: '🔲', name: '翻轉方塊' },
       'speaking-cards': { icon: '🗣️', name: '語音卡片' },
 
       // 中文名稱映射
@@ -343,7 +360,9 @@ export const WordwallStyleActivityCard: React.FC<WordwallStyleActivityCardProps>
       '記憶卡片': { icon: '🧠', name: '記憶卡片' },
     };
 
-    return gameTypeMap[gameType] || { icon: '🎮', name: gameType || '遊戲' };
+    // 優先使用 gameTemplateId，如果沒有則使用 gameType
+    const lookupKey = gameTemplateId || gameType;
+    return gameTypeMap[lookupKey] || { icon: '🎮', name: lookupKey || '遊戲' };
   };
 
   const getGameTypeIcon = (gameType: string) => {
