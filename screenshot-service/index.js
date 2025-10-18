@@ -47,27 +47,17 @@ app.post('/screenshot', async (req, res) => {
         '--disable-web-security',
         '--disable-features=IsolateOrigins,site-per-process',
         '--no-first-run',  // 跳過首次運行設置
-        '--no-zygote',  // 減少進程開銷
-        '--single-process',  // 單進程模式（更快啟動）
         '--disable-extensions',  // 禁用擴展
         '--disable-background-networking',  // 禁用背景網絡
         '--disable-default-apps',  // 禁用默認應用
         '--disable-sync',  // 禁用同步
-        '--metrics-recording-only',  // 僅記錄指標
         '--mute-audio',  // 靜音
         '--no-default-browser-check',  // 跳過默認瀏覽器檢查
-        '--autoplay-policy=user-gesture-required',  // 自動播放策略
         '--disable-background-timer-throttling',  // 禁用背景計時器節流
         '--disable-backgrounding-occluded-windows',  // 禁用背景窗口
         '--disable-breakpad',  // 禁用崩潰報告
-        '--disable-component-extensions-with-background-pages',  // 禁用背景頁面擴展
-        '--disable-features=TranslateUI,BlinkGenPropertyTrees',  // 禁用翻譯和其他功能
-        '--disable-ipc-flooding-protection',  // 禁用 IPC 洪水保護
         '--disable-renderer-backgrounding',  // 禁用渲染器背景
-        '--enable-features=NetworkService,NetworkServiceInProcess',  // 啟用網絡服務
-        '--force-color-profile=srgb',  // 強制顏色配置
-        '--hide-scrollbars',  // 隱藏滾動條
-        '--disable-blink-features=AutomationControlled'  // 禁用自動化控制標記
+        '--hide-scrollbars'  // 隱藏滾動條
       ]
     });
 
