@@ -186,7 +186,9 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           playCount: activity.playCount || Math.floor(Math.random() * 50),
           lastModified: new Date(activity.updatedAt),
           createdAt: new Date(activity.createdAt),
-          thumbnail: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23dbeafe"/><text x="50" y="55" font-size="30" text-anchor="middle">📝</text></svg>',
+          // 移除硬編碼的 thumbnail，讓 WordwallStyleActivityCard 使用 OG Image API
+          // thumbnail: undefined
+          vocabularyItems: activity.vocabularyItems || [], // 添加詞彙項目以支持 OG Image API
           wordCount: activity.vocabularyInfo?.totalWords || 0,
           geptLevel: activity.vocabularyInfo?.geptLevel || 'ELEMENTARY',
           tags: activity.tags || ['vocabulary', 'cloud', activity.vocabularyInfo?.geptLevel?.toLowerCase() || 'elementary'],

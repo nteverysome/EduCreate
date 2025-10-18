@@ -259,6 +259,7 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
         title: set.title || '無標題詞彙活動',
         description: set.description || `包含 ${set.totalWords || 0} 個詞彙的學習活動`,
         type: 'vocabulary',
+        gameType: 'vocabulary', // 添加 gameType 以支持 OG Image API
         folderId: undefined,
         createdAt: new Date(set.createdAt),
         updatedAt: new Date(set.updatedAt),
@@ -269,7 +270,9 @@ export const MyActivities: React.FC<MyActivitiesProps> = ({
         learningEffectiveness: 0.95,
         usageCount: 1,
         tags: ['vocabulary', 'railway', set.geptLevel?.toLowerCase() || 'elementary'],
-        thumbnail: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23dbeafe"/><text x="50" y="55" font-size="30" text-anchor="middle">🚀</text></svg>'
+        // 移除硬編碼的 thumbnail，讓 WordwallStyleActivityCard 使用 OG Image API
+        // thumbnail: undefined
+        vocabularyItems: set.items || [] // 添加詞彙項目以支持 OG Image API
       }));
 
       console.log(`🚀 從 Railway API 載入 ${vocabularyActivities.length} 個詞彙活動`);
