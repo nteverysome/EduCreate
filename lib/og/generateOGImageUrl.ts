@@ -133,10 +133,34 @@ export function generateOGImageUrlFromActivity(activity: any): string {
     }
   }
 
+  // 提取遊戲類型，優先使用 gameTemplateId
+  let gameType = 'vocabulary'; // 默認值
+
+  // 優先級 1: content.gameTemplateId（最準確）
+  if (activity.content?.gameTemplateId) {
+    gameType = activity.content.gameTemplateId;
+  }
+  // 優先級 2: gameTemplateId（直接字段）
+  else if (activity.gameTemplateId) {
+    gameType = activity.gameTemplateId;
+  }
+  // 優先級 3: tags 中的遊戲類型（從 tags 數組中查找）
+  else if (activity.tags && Array.isArray(activity.tags)) {
+    // 查找包含 '-game' 的 tag
+    const gameTag = activity.tags.find((tag: string) => tag.includes('-game'));
+    if (gameTag) {
+      gameType = gameTag;
+    }
+  }
+  // 優先級 4: type 或 gameType（最不準確）
+  else if (activity.type || activity.gameType) {
+    gameType = activity.type || activity.gameType;
+  }
+
   return generateOGImageUrl({
     activityId: activity.id,
     title: activity.title || '未命名活動',
-    gameType: activity.type || activity.gameType || 'vocabulary',
+    gameType,
     vocabulary
   });
 }
