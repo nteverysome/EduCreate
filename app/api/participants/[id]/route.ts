@@ -11,7 +11,7 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: '未授權' },
         { status: 401 }
@@ -22,7 +22,7 @@ export async function DELETE(
 
     console.log('🗑️ 刪除參與者記錄:', {
       participantId,
-      userEmail: session.user.email
+      userId: session.user.id
     });
 
     // 查找參與者記錄
@@ -54,10 +54,10 @@ export async function DELETE(
     }
 
     // 驗證權限：只有活動創建者可以刪除參與者記錄
-    if (participant.result.assignment.activity.userId !== session.user.email) {
+    if (participant.result.assignment.activity.userId !== session.user.id) {
       console.log('❌ 無權限刪除參與者記錄:', {
         activityOwner: participant.result.assignment.activity.userId,
-        currentUser: session.user.email
+        currentUser: session.user.id
       });
       return NextResponse.json(
         { error: '無權限刪除此參與者記錄' },
