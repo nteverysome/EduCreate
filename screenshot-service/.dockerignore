@@ -1,0 +1,21 @@
+# Screenshot Service .dockerignore
+# 只排除開發和測試文件
+
+# Node modules (會在 Docker 中重新安裝)
+node_modules
+
+# 測試文件
+test.js
+*.test.js
+
+# 文檔
+README.md
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+
