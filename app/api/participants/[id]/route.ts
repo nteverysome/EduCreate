@@ -29,11 +29,15 @@ export async function DELETE(
     const participant = await prisma.gameParticipant.findUnique({
       where: { id: participantId },
       include: {
-        assignment: {
+        result: {
           include: {
-            activity: {
-              select: {
-                userId: true
+            assignment: {
+              include: {
+                activity: {
+                  select: {
+                    userId: true
+                  }
+                }
               }
             }
           }
@@ -50,9 +54,9 @@ export async function DELETE(
     }
 
     // 驗證權限：只有活動創建者可以刪除參與者記錄
-    if (participant.assignment.activity.userId !== session.user.email) {
+    if (participant.result.assignment.activity.userId !== session.user.email) {
       console.log('❌ 無權限刪除參與者記錄:', {
-        activityOwner: participant.assignment.activity.userId,
+        activityOwner: participant.result.assignment.activity.userId,
         currentUser: session.user.email
       });
       return NextResponse.json(
