@@ -15,10 +15,11 @@ export async function GET(
     console.log('🎮 學生訪問課業遊戲:', { activityId, assignmentId });
 
     // 載入活動數據（不需要驗證用戶身份）
+    // 注意：即使活動已刪除，學生仍應能訪問已分配的作業
     const activity = await prisma.activity.findFirst({
       where: {
-        id: activityId,
-        deletedAt: null  // 只載入未刪除的活動
+        id: activityId
+        // 移除 deletedAt 檢查，允許學生訪問已刪除活動的作業
       },
       include: {
         vocabularyItems: true
@@ -26,7 +27,7 @@ export async function GET(
     });
 
     if (!activity) {
-      console.log('❌ 活動不存在或已刪除:', activityId);
+      console.log('❌ 活動不存在:', activityId);
       return NextResponse.json(
         { error: '活動不存在' },
         { status: 404 }
