@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Folder, MoreVertical, Edit2, Trash2, Palette } from 'lucide-react';
+import { Folder, MoreVertical, Edit2, Trash2, Palette, Move } from 'lucide-react';
 
 interface FolderData {
   id: string;
@@ -20,6 +20,7 @@ interface FolderCardProps {
   onEdit?: (folder: FolderData) => void;
   onDelete?: (folderId: string) => void;
   onChangeColor?: (folder: FolderData) => void; // 變更顏色
+  onMove?: (folder: FolderData) => void; // 移動資料夾
   // 拖拽相關
   onDrop?: (activityId: string, folderId: string) => void;
   onFolderDrop?: (draggedFolderId: string, targetFolderId: string) => void; // 資料夾拖移到資料夾
@@ -32,6 +33,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
   onEdit,
   onDelete,
   onChangeColor,
+  onMove,
   onDrop,
   onFolderDrop,
   draggable = true
@@ -66,6 +68,12 @@ export const FolderCard: React.FC<FolderCardProps> = ({
     e.stopPropagation();
     setShowMenu(false);
     onChangeColor?.(folder);
+  };
+
+  const handleMove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu(false);
+    onMove?.(folder);
   };
 
   // 資料夾拖移源事件處理
@@ -207,6 +215,16 @@ export const FolderCard: React.FC<FolderCardProps> = ({
                     >
                       <Palette className="w-3 h-3" />
                       變更顏色
+                    </button>
+                  )}
+
+                  {onMove && (
+                    <button
+                      onClick={handleMove}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
+                    >
+                      <Move className="w-3 h-3" />
+                      移動
                     </button>
                   )}
 

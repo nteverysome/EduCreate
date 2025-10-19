@@ -5,6 +5,7 @@ import { Plus, Folder, MoreVertical, Edit2, Trash2, Move } from 'lucide-react';
 import FolderCard from './FolderCard';
 import CreateFolderModal from './CreateFolderModal';
 import EditFolderColorModal from './EditFolderColorModal';
+import MoveFolderModal from './MoveFolderModal';
 import { folderApi, FolderData as ApiFolderData } from '../../lib/api/folderApiManager';
 
 interface FolderData {
@@ -45,6 +46,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   const [editingFolder, setEditingFolder] = useState<FolderData | null>(null);
   const [showColorModal, setShowColorModal] = useState(false);
   const [colorEditingFolder, setColorEditingFolder] = useState<FolderData | null>(null);
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [movingFolder, setMovingFolder] = useState<FolderData | null>(null);
 
   // 載入資料夾數據
   useEffect(() => {
@@ -163,6 +166,37 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
     }
   };
 
+  const handleMoveFolder = (folder: FolderData) => {
+    setMovingFolder(folder);
+    setShowMoveModal(true);
+  };
+
+  const handleMoveFolderSubmit = async (folderId: string, targetParentId: string | null) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}/move`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ targetParentId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '移動資料夾失敗');
+      }
+
+      // 重新載入資料夾列表
+      await loadFolders();
+
+      // 關閉模態框
+      setShowMoveModal(false);
+      setMovingFolder(null);
+    } catch (error: any) {
+      throw error; // 讓模態框處理錯誤顯示
+    }
+  };
+
   if (loading) {
     return (
       <div className="folder-manager mb-6">
@@ -229,6 +263,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
             onEdit={handleUpdateFolder}
             onDelete={handleDeleteFolder}
             onChangeColor={handleChangeColor}
+            onMove={handleMoveFolder}
             onDrop={onActivityDropToFolder}
             onFolderDrop={onFolderDropToFolder}
             draggable={true}
@@ -252,6 +287,18 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
         }}
         onUpdateColor={handleUpdateColor}
         folder={colorEditingFolder}
+      />
+
+      {/* 移動資料夾模態框 */}
+      <MoveFolderModal
+        isOpen={showMoveModal}
+        onClose={() => {
+          setShowMoveModal(false);
+          setMovingFolder(null);
+        }}
+        onMoveFolder={handleMoveFolderSubmit}
+        folder={movingFolder}
+        currentFolderId={currentFolderId || null}
       />
     </div>
   );
