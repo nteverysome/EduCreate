@@ -18,13 +18,14 @@ interface FolderData {
 }
 
 interface FolderManagerProps {
-  currentFolderId?: string;
+  currentFolderId?: string | null;
   onFolderSelect: (folderId: string | null) => void;
   onFolderCreate?: (name: string, color: string) => Promise<void>;
   onFolderUpdate?: (id: string, name: string, color?: string) => Promise<void>;
   onFolderDelete?: (id: string) => Promise<void>;
   // 拖拽相關
   onActivityDropToFolder?: (activityId: string, folderId: string) => Promise<void>;
+  onFolderDropToFolder?: (draggedFolderId: string, targetFolderId: string) => Promise<void>;
 }
 
 export const FolderManager: React.FC<FolderManagerProps> = ({
@@ -33,7 +34,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   onFolderCreate,
   onFolderUpdate,
   onFolderDelete,
-  onActivityDropToFolder
+  onActivityDropToFolder,
+  onFolderDropToFolder
 }) => {
   const [folders, setFolders] = useState<FolderData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,15 +46,23 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   // 載入資料夾數據
   useEffect(() => {
     loadFolders();
-  }, []);
+  }, [currentFolderId]); // 當 currentFolderId 改變時重新載入
 
   const loadFolders = async () => {
     try {
       setLoading(true);
       setError('');
 
-      // 🚀 使用统一的 API 管理器，确保类型安全
-      const foldersData = await folderApi.getFolders('activities');
+      // 🚀 載入當前資料夾的子資料夾
+      const response = await fetch(
+        `/api/folders?type=activities&parentId=${currentFolderId || ''}`
+      );
+
+      if (!response.ok) {
+        throw new Error('載入資料夾失敗');
+      }
+
+      const foldersData = await response.json();
       setFolders(foldersData);
     } catch (error: any) {
       console.error('載入資料夾失敗:', error);
@@ -69,7 +79,12 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, color }),
+        body: JSON.stringify({
+          name,
+          color,
+          type: 'activities',
+          parentId: currentFolderId || null // 在當前資料夾下創建子資料夾
+        }),
       });
 
       if (!response.ok) {
@@ -181,6 +196,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
             onEdit={handleUpdateFolder}
             onDelete={handleDeleteFolder}
             onDrop={onActivityDropToFolder}
+            onFolderDrop={onFolderDropToFolder}
+            draggable={true}
           />
         ))}
       </div>

@@ -21,6 +21,8 @@ interface FolderCardProps {
   onDelete?: (folderId: string) => void;
   // 拖拽相關
   onDrop?: (activityId: string, folderId: string) => void;
+  onFolderDrop?: (draggedFolderId: string, targetFolderId: string) => void; // 資料夾拖移到資料夾
+  draggable?: boolean; // 是否可拖移
 }
 
 export const FolderCard: React.FC<FolderCardProps> = ({
@@ -28,7 +30,9 @@ export const FolderCard: React.FC<FolderCardProps> = ({
   onClick,
   onEdit,
   onDelete,
-  onDrop
+  onDrop,
+  onFolderDrop,
+  draggable = true
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -56,24 +60,49 @@ export const FolderCard: React.FC<FolderCardProps> = ({
     }
   };
 
+  // 資料夾拖移源事件處理
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('folder/id', folder.id); // 使用特殊的 MIME 類型標識資料夾
+    console.log('🔵 開始拖移資料夾:', folder.name);
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    console.log('🔵 結束拖移資料夾:', folder.name);
+  };
+
   // 拖拽目標事件處理
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     setIsDragOver(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(false);
 
+    // 檢查是活動還是資料夾
     const activityId = e.dataTransfer.getData('text/plain');
-    if (activityId && onDrop) {
+    const folderId = e.dataTransfer.getData('folder/id');
+
+    if (folderId) {
+      // 資料夾拖移到資料夾
+      if (folderId !== folder.id && onFolderDrop) {
+        console.log('📁 資料夾拖移到資料夾:', folderId, '->', folder.id);
+        onFolderDrop(folderId, folder.id);
+      }
+    } else if (activityId && onDrop) {
+      // 活動拖移到資料夾
+      console.log('📄 活動拖移到資料夾:', activityId, '->', folder.id);
       onDrop(activityId, folder.id);
     }
   };
@@ -101,9 +130,13 @@ export const FolderCard: React.FC<FolderCardProps> = ({
       className={`
         relative bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer group
         ${isDragOver ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50' : ''}
+        ${draggable ? 'cursor-move' : ''}
       `}
       onClick={handleCardClick}
       style={{ backgroundColor: isDragOver ? '#EBF8FF' : getBackgroundColor(folder.color) }}
+      draggable={draggable}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

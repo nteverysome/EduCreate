@@ -43,10 +43,15 @@ interface WordwallStyleMyActivitiesProps {
 // 拖拽回根級別的目標組件
 interface DropToRootTargetProps {
   onDropToRoot: (activityId: string) => void;
+  onFolderDropToRoot?: (folderId: string) => void; // 資料夾拖移回根目錄
   onClickToRoot: () => void;  // 添加點擊回到根級別的處理函數
 }
 
-const DropToRootTarget: React.FC<DropToRootTargetProps> = ({ onDropToRoot, onClickToRoot }) => {
+const DropToRootTarget: React.FC<DropToRootTargetProps> = ({
+  onDropToRoot,
+  onFolderDropToRoot,
+  onClickToRoot
+}) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -64,8 +69,17 @@ const DropToRootTarget: React.FC<DropToRootTargetProps> = ({ onDropToRoot, onCli
     e.preventDefault();
     setIsDragOver(false);
 
+    // 檢查是活動還是資料夾
     const activityId = e.dataTransfer.getData('text/plain');
-    if (activityId && onDropToRoot) {
+    const folderId = e.dataTransfer.getData('folder/id');
+
+    if (folderId && onFolderDropToRoot) {
+      // 資料夾拖移回根目錄
+      console.log('📁 資料夾拖移回根目錄:', folderId);
+      onFolderDropToRoot(folderId);
+    } else if (activityId && onDropToRoot) {
+      // 活動拖移回根目錄
+      console.log('📄 活動拖移回根目錄:', activityId);
       onDropToRoot(activityId);
     }
   };
@@ -348,6 +362,66 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     // 🚀 重新載入數據以確保狀態同步
     await loadActivities();
     console.log('✅ 資料夾刪除後數據重新載入完成');
+  };
+
+  // 處理資料夾拖移到資料夾
+  const handleFolderDropToFolder = async (draggedFolderId: string, targetFolderId: string) => {
+    console.log('📁 資料夾拖移到資料夾:', draggedFolderId, '->', targetFolderId);
+
+    try {
+      const response = await fetch(`/api/folders/${draggedFolderId}/move`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          targetParentId: targetFolderId
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error((errorData as any).error || '移動資料夾失敗');
+      }
+
+      console.log('✅ 資料夾移動成功');
+
+      // 重新載入資料夾列表
+      await loadFolders();
+    } catch (error: any) {
+      console.error('❌ 移動資料夾失敗:', error);
+      alert(error.message || '移動資料夾失敗');
+    }
+  };
+
+  // 處理資料夾拖移回根目錄
+  const handleFolderDropToRoot = async (folderId: string) => {
+    console.log('🏠 資料夾拖移回根目錄:', folderId);
+
+    try {
+      const response = await fetch(`/api/folders/${folderId}/move`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          targetParentId: null // null 表示移動到根目錄
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error((errorData as any).error || '移動資料夾失敗');
+      }
+
+      console.log('✅ 資料夾移動到根目錄成功');
+
+      // 重新載入資料夾列表
+      await loadFolders();
+    } catch (error: any) {
+      console.error('❌ 移動資料夾失敗:', error);
+      alert(error.message || '移動資料夾失敗');
+    }
   };
 
   const handleActivitySelect = (activity: Activity) => {
@@ -1086,12 +1160,14 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           onFolderUpdate={handleFolderUpdate}
           onFolderDelete={handleFolderDelete}
           onActivityDropToFolder={handleActivityDropToFolder}
+          onFolderDropToFolder={handleFolderDropToFolder}
         />
 
         {/* 在資料夾視圖中顯示拖拽回根級別的目標區域 */}
         {currentFolderId && (
           <DropToRootTarget
             onDropToRoot={handleActivityDropToRoot}
+            onFolderDropToRoot={handleFolderDropToRoot}
             onClickToRoot={handleClickToRoot}
           />
         )}
