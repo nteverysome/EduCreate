@@ -386,8 +386,9 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
 
       console.log('✅ 資料夾移動成功');
 
-      // 重新載入資料夾列表
-      await loadFolders();
+      // 🔧 修復：重新載入活動和資料夾列表以即時更新 UI
+      // 使用 loadActivities() 會觸發 FolderManager 的 useEffect 重新載入資料夾
+      await loadActivities();
     } catch (error: any) {
       console.error('❌ 移動資料夾失敗:', error);
       alert(error.message || '移動資料夾失敗');
@@ -416,8 +417,9 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
 
       console.log('✅ 資料夾移動到根目錄成功');
 
-      // 重新載入資料夾列表
-      await loadFolders();
+      // 🔧 修復：重新載入活動和資料夾列表以即時更新 UI
+      // 使用 loadActivities() 會觸發 FolderManager 的 useEffect 重新載入資料夾
+      await loadActivities();
     } catch (error: any) {
       console.error('❌ 移動資料夾失敗:', error);
       alert(error.message || '移動資料夾失敗');
