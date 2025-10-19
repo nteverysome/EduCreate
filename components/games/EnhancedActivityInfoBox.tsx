@@ -158,12 +158,13 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
               <div className="flex flex-wrap items-center gap-2 mt-2">
                 <TagIcon className="w-4 h-4 text-gray-400" />
                 {tags.map((tag, index) => (
-                  <span
+                  <Link
                     key={index}
-                    className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs rounded-full font-medium border border-gray-200 hover:bg-gray-200 transition-colors"
+                    href={`/community?search=${encodeURIComponent(tag)}`}
+                    className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs rounded-full font-medium border border-gray-200 hover:bg-gray-200 hover:border-blue-300 transition-colors cursor-pointer"
                   >
                     {tag}
-                  </span>
+                  </Link>
                 ))}
                 {/* 編輯標籤按鈕 - 只有所有者可以編輯 */}
                 {isOwner && onEditTags && (
