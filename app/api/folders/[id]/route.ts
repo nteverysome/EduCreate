@@ -48,6 +48,9 @@ export async function GET(
       description: folder.description,
       color: folder.color,
       icon: folder.icon,
+      parentId: folder.parentId, // 🔧 添加 parentId 字段以支持層級導航
+      depth: folder.depth, // 🔧 添加 depth 字段
+      path: folder.path, // 🔧 添加 path 字段
       createdAt: folder.createdAt.toISOString(),
       updatedAt: folder.updatedAt.toISOString(),
       resultCount: resultCount
