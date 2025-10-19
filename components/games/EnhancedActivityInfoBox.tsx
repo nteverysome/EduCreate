@@ -136,8 +136,8 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
                     {tag}
                   </span>
                 ))}
-                {/* 編輯標籤按鈕 - 只有所有者可以編輯 */}
-                {isOwner && onEditTags && (
+                {/* 編輯標籤按鈕 */}
+                {onEditTags && (
                   <button
                     onClick={onEditTags}
                     className="px-2.5 py-1 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
@@ -149,8 +149,8 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
               </div>
             )}
 
-            {/* 如果沒有標籤但是所有者，顯示添加標籤按鈕 */}
-            {tags.length === 0 && isOwner && onEditTags && (
+            {/* 如果沒有標籤，顯示添加標籤按鈕 */}
+            {tags.length === 0 && onEditTags && (
               <div className="mt-2">
                 <button
                   onClick={onEditTags}
