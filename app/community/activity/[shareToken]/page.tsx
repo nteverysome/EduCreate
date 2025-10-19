@@ -21,6 +21,54 @@ import { Eye, Heart, Bookmark, Play, User, Calendar, ArrowLeft, ExternalLink } f
 import { Loader2 } from 'lucide-react';
 import ActivityComments from '@/components/community/ActivityComments';
 
+// 遊戲類型映射函數
+function getGameDisplayName(gameType: string, gameTemplateId?: string): string {
+  const gameTypeMap: { [key: string]: string } = {
+    'shimozurdo-game': 'Shimozurdo 雲朵遊戲',
+    'airplane-vite': '飛機遊戲 (Vite版)',
+    'matching-pairs': '配對記憶',
+    'flash-cards': '閃卡記憶',
+    'whack-mole': '打地鼠',
+    'spin-wheel': '轉盤選擇',
+    'memory-cards': '記憶卡片',
+    'complete-sentence': '完成句子',
+    'spell-word': '拼寫單詞',
+    'labelled-diagram': '標籤圖表',
+    'watch-memorize': '觀察記憶',
+    'rank-order': '排序遊戲',
+    'math-generator': '數學生成器',
+    'word-magnets': '單詞磁鐵',
+    'group-sort': '分類遊戲',
+    'image-quiz': '圖片問答',
+    'maze-chase': '迷宮追逐',
+    'crossword-puzzle': '填字遊戲',
+    'flying-fruit': '飛行水果',
+    'flip-tiles': '翻轉方塊',
+    'type-answer': '輸入答案',
+    'anagram': '字母重組',
+    'hangman': '猜字遊戲',
+    'true-false': '是非題',
+    'wordsearch': '找字遊戲',
+    'match-up': '配對',
+    'airplane': '飛機遊戲',
+    'balloon-pop': '氣球遊戲',
+    'open-box': '開箱遊戲',
+    'gameshow-quiz': '競賽測驗',
+    'random-wheel': '隨機轉盤',
+    'random-cards': '隨機卡片',
+    'speaking-cards': '語音卡片',
+    'quiz': '測驗',
+    'matching': '配對遊戲',
+    'flashcards': '單字卡片',
+    'flashcard': '單字卡片',
+    'vocabulary': '詞彙遊戲',
+  };
+
+  // 優先使用 gameTemplateId，如果沒有則使用 gameType
+  const lookupKey = gameTemplateId || gameType;
+  return gameTypeMap[lookupKey] || lookupKey;
+}
+
 export default function CommunityActivityDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -223,7 +271,7 @@ export default function CommunityActivityDetailPage() {
                   {/* 遊戲類型標籤 */}
                   <div className="absolute top-4 left-4">
                     <span className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium text-gray-700">
-                      {activity.gameType}
+                      {getGameDisplayName(activity.gameType, (activity as any).content?.gameTemplateId)}
                     </span>
                   </div>
                 </div>
