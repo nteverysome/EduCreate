@@ -43,16 +43,17 @@ export async function GET(request: NextRequest) {
 
     // 🔍 調試日誌
     console.log('🔍 [API DEBUG] parentId 參數:', parentId);
-    console.log('🔍 [API DEBUG] parentId === undefined:', parentId === undefined);
+    console.log('🔍 [API DEBUG] parentId === null:', parentId === null);
     console.log('🔍 [API DEBUG] typeof parentId:', typeof parentId);
 
     // 只有當 parentId 參數存在時才過濾
-    // 如果 parentId 不存在，返回所有資料夾（用於移動資料夾模態框）
-    if (parentId !== undefined) {
+    // 如果 parentId 不存在（null），返回所有資料夾（用於移動資料夾模態框）
+    // 注意：searchParams.get() 返回 null（不是 undefined）當參數不存在時
+    if (parentId !== null) {
       console.log('✅ [API DEBUG] parentId 參數存在，添加過濾條件');
       whereCondition.parentId = parentId || null;
     } else {
-      console.log('✅ [API DEBUG] parentId 參數不存在，不過濾 parentId');
+      console.log('✅ [API DEBUG] parentId 參數不存在（null），不過濾 parentId');
     }
 
     console.log('🔍 [API DEBUG] 最終查詢條件:', JSON.stringify(whereCondition, null, 2));
@@ -65,11 +66,14 @@ export async function GET(request: NextRequest) {
         description: true,
         color: true,
         icon: true,
+        type: true,
         parentId: true,
         depth: true,
         path: true,
         createdAt: true,
         updatedAt: true,
+        deletedAt: true,
+        userId: true,
         activities: {
           select: {
             id: true
