@@ -60,30 +60,9 @@ export async function GET(request: NextRequest) {
 
     const folders = await prisma.folder.findMany({
       where: whereCondition,
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        color: true,
-        icon: true,
-        type: true,
-        parentId: true,
-        depth: true,
-        path: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-        userId: true,
-        activities: type === 'activities' ? {
-          select: {
-            id: true
-          }
-        } : false,
-        results: type === 'results' ? {
-          select: {
-            id: true
-          }
-        } : false
+      include: {
+        activities: type === 'activities',
+        results: type === 'results'
       },
       orderBy: {
         createdAt: 'desc'
