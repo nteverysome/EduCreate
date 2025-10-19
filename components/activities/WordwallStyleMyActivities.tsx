@@ -140,6 +140,16 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [assignmentShareUrl, setAssignmentShareUrl] = useState('');
   const [assignmentTitle, setAssignmentTitle] = useState('');
 
+  // 從 URL 參數初始化 currentFolderId
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const folderIdFromUrl = urlParams.get('folderId');
+    if (folderIdFromUrl) {
+      console.log('📂 從 URL 參數設置資料夾 ID:', folderIdFromUrl);
+      setCurrentFolderId(folderIdFromUrl);
+    }
+  }, []);
+
   // 使用實時截圖更新
   const handleScreenshotUpdate = useCallback((update: any) => {
     console.log('[Real-time] Screenshot update received:', update);
