@@ -193,6 +193,9 @@ model Folder {
   color       String?
   icon        String?
   type        FolderType         @default(ACTIVITIES) // 資料夾類型：ACTIVITIES 或 RESULTS
+  parentId    String?            // 父資料夾 ID（null 表示根目錄）
+  depth       Int                @default(0) // 資料夾深度（0 = 根目錄）
+  path        String?            // 資料夾路徑（例如：/folder1/folder2）
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
   deletedAt   DateTime?
@@ -200,8 +203,12 @@ model Folder {
   activities  Activity[]
   results     AssignmentResult[] // 資料夾中的結果
   user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent      Folder?            @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Folder[]           @relation("FolderHierarchy")
 
-  @@unique([name, userId, type]) // 同一用戶在同一類型下不能有重名資料夾
+  @@unique([name, userId, type, parentId]) // 同一用戶在同一父資料夾下不能有重名資料夾
+  @@index([userId, type, parentId]) // 優化查詢性能
+  @@index([userId, type, deletedAt]) // 優化查詢性能
 }
 
 model Subscription {

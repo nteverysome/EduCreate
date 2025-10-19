@@ -16,10 +16,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type'); // 'activities' 或 'results'
+    const parentId = searchParams.get('parentId'); // 父資料夾 ID（null 表示根目錄）
 
     // 🔍 深度调试：记录所有请求
     console.log('🔍 [API DEBUG] GET /api/folders 被调用');
     console.log('🔍 [API DEBUG] type 参数:', type);
+    console.log('🔍 [API DEBUG] parentId 参数:', parentId);
     console.log('🔍 [API DEBUG] 完整 URL:', request.url);
     console.log('🔍 [API DEBUG] 用户 ID:', session.user.id);
 
@@ -36,7 +38,8 @@ export async function GET(request: NextRequest) {
       where: {
         userId: session.user.id,
         deletedAt: null, // 只获取未删除的资料夹
-        type: type === 'results' ? 'RESULTS' : 'ACTIVITIES' // 根据类型过滤
+        type: type === 'results' ? 'RESULTS' : 'ACTIVITIES', // 根据类型过滤
+        parentId: parentId || null // 根據 parentId 過濾（null 表示根目錄）
       },
       include: {
         activities: {
@@ -44,6 +47,18 @@ export async function GET(request: NextRequest) {
             id: true
           }
         },
+        children: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        parent: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
         // 暂时不查询 results，因为可能导致 500 错误
       },
       orderBy: {
@@ -95,8 +110,9 @@ export async function POST(request: NextRequest) {
       color?: string;
       icon?: string;
       type?: string;
+      parentId?: string;
     };
-    const { name, description, color, icon, type } = body;
+    const { name, description, color, icon, type, parentId } = body;
 
     // 🔍 調試日誌
     console.log('🔍 [API DEBUG] POST /api/folders 被調用');
@@ -104,6 +120,7 @@ export async function POST(request: NextRequest) {
     console.log('🔍 [API DEBUG] 用戶 ID:', session.user.id);
     console.log('🔍 [API DEBUG] 資料夾名稱:', name);
     console.log('🔍 [API DEBUG] 資料夾類型:', type);
+    console.log('🔍 [API DEBUG] 父資料夾 ID:', parentId);
 
     if (!name || !name.trim()) {
       console.error('❌ [API ERROR] 資料夾名稱為空');
@@ -113,12 +130,44 @@ export async function POST(request: NextRequest) {
     const folderType = type === 'results' ? 'RESULTS' : 'ACTIVITIES';
     console.log('🔍 [API DEBUG] 轉換後的資料夾類型:', folderType);
 
-    // 檢查是否已存在同名同類型資料夾（未删除的）
+    // 如果有 parentId，驗證父資料夾
+    let parentFolder = null;
+    let depth = 0;
+    let path = '/';
+
+    if (parentId) {
+      parentFolder = await prisma.folder.findUnique({
+        where: { id: parentId }
+      });
+
+      if (!parentFolder) {
+        return NextResponse.json({ error: '父資料夾不存在' }, { status: 404 });
+      }
+
+      if (parentFolder.userId !== session.user.id) {
+        return NextResponse.json({ error: '無權訪問此資料夾' }, { status: 403 });
+      }
+
+      if (parentFolder.type !== folderType) {
+        return NextResponse.json({ error: '資料夾類型不匹配' }, { status: 400 });
+      }
+
+      // 檢查深度限制
+      if (parentFolder.depth >= 9) { // 最大深度 10 層（0-9）
+        return NextResponse.json({ error: '資料夾嵌套深度不能超過 10 層' }, { status: 400 });
+      }
+
+      depth = parentFolder.depth + 1;
+      path = `${parentFolder.path}/${parentId}`;
+    }
+
+    // 檢查是否已存在同名同類型資料夾（在同一父資料夾下）
     const existingFolder = await prisma.folder.findFirst({
       where: {
         userId: session.user.id,
         name: name.trim(),
         type: folderType,
+        parentId: parentId || null,
         deletedAt: null
       }
     });
@@ -147,6 +196,9 @@ export async function POST(request: NextRequest) {
         color: folderColor, // 使用已验证的颜色
         icon: icon || 'folder',
         type: folderType,
+        parentId: parentId || null,
+        depth,
+        path,
         userId: session.user.id
       }
     });
