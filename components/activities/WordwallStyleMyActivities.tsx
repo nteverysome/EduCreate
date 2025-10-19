@@ -633,9 +633,8 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   // 🔧 修復：處理點擊導航回上一層（而不是根級別）
   const handleClickToParent = () => {
     console.log('⬆️  點擊導航回上一層:', { currentFolderId, parentFolderId: currentFolderParentId });
-    setCurrentFolderId(currentFolderParentId);
-    setSelectedActivities([]);
-    setSelectionMode(false);
+    // 🔧 修復：調用 handleFolderSelect 來更新父資料夾 ID
+    handleFolderSelect(currentFolderParentId);
   };
 
   const handleActivityEdit = (activity: Activity) => {
