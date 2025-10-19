@@ -59,6 +59,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [results, setResults] = useState<AssignmentResult[]>([]);
   const [folders, setFolders] = useState<ResultFolder[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [currentFolder, setCurrentFolder] = useState<ResultFolder | null>(null); // 🆕 當前資料夾信息
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'created' | 'deadline' | 'name'>('created');
   const [loading, setLoading] = useState(true);
@@ -200,6 +201,41 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     }
   }, []);
 
+  // 🆕 載入當前資料夾信息（用於麵包屑導航）
+  const loadCurrentFolder = useCallback(async () => {
+    if (!currentFolderId) {
+      setCurrentFolder(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/folders/${currentFolderId}`);
+      if (response.ok) {
+        const folderData = await response.json();
+        setCurrentFolder({
+          id: folderData.id,
+          name: folderData.name,
+          resultCount: folderData.resultCount || 0,
+          createdAt: folderData.createdAt,
+          color: folderData.color
+        });
+        console.log('📂 載入當前資料夾信息:', folderData.name);
+      }
+    } catch (error) {
+      console.error('載入當前資料夾信息失敗:', error);
+    }
+  }, [currentFolderId]);
+
+  // 🆕 從 URL 參數初始化 currentFolderId
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const folderIdFromUrl = urlParams.get('folderId');
+    if (folderIdFromUrl) {
+      console.log('📂 從 URL 參數設置資料夾 ID:', folderIdFromUrl);
+      setCurrentFolderId(folderIdFromUrl);
+    }
+  }, []);
+
   // 🔍 全局 fetch 拦截器（仅用于调试）
   useEffect(() => {
     const originalFetch = window.fetch;
@@ -223,6 +259,11 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     console.log('🚀 初始化加载资料夹数据...');
     loadFolders();
   }, []); // 空依赖数组，只在组件挂载时执行一次
+
+  // 🆕 當 currentFolderId 改變時載入當前資料夾信息
+  useEffect(() => {
+    loadCurrentFolder();
+  }, [currentFolderId, loadCurrentFolder]);
 
   // 资料夹变化时重新加载结果数据
   useEffect(() => {
@@ -670,7 +711,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
               <>
                 <span className="mx-2 text-xl sm:text-2xl text-gray-400">/</span>
                 <span className="text-xl sm:text-3xl font-bold text-gray-900">
-                  {folders.find(f => f.id === currentFolderId)?.name || '未知資料夾'}
+                  {currentFolder?.name || '載入中...'}
                 </span>
               </>
             )}

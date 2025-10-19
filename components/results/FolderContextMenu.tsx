@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, PencilIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 
 interface ResultFolder {
   id: string;
@@ -99,6 +99,19 @@ export const FolderContextMenu: React.FC<FolderContextMenuProps> = ({
           top: position.y,
         }}
       >
+        {/* 在新分頁開啟選項 - 響應式 */}
+        <button
+          onClick={() => {
+            const url = `/my-results?folderId=${folder.id}`;
+            window.open(url, '_blank');
+            onClose();
+          }}
+          className="w-full px-3 sm:px-4 py-2 text-left text-xs sm:text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+        >
+          <ArrowTopRightOnSquareIcon className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+          <span className="truncate">在新分頁開啟</span>
+        </button>
+
         {/* 重命名選項 - 響應式 */}
         <button
           onClick={() => {
