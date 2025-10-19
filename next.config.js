@@ -16,7 +16,7 @@ const nextConfig = {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
-    FORCE_REBUILD: '2025-10-11-21-40-CSS-FIX',
+    FORCE_REBUILD: '2025-10-19-21-52-FOLDER-TREE-FIX',
   },
 
   // 構建配置 - 更寬鬆的錯誤處理
