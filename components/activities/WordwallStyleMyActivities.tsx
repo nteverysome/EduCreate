@@ -115,6 +115,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   // 狀態管理
   const [activities, setActivities] = useState<Activity[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [currentFolderParentId, setCurrentFolderParentId] = useState<string | null>(null); // 新增：當前資料夾的父資料夾 ID
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('modified');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -300,10 +301,27 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   }, [activities, searchQuery, filterType, sortBy, sortOrder]);
 
   // 事件處理函數
-  const handleFolderSelect = (folderId: string | null) => {
+  const handleFolderSelect = async (folderId: string | null) => {
     setCurrentFolderId(folderId);
     setSelectedActivities([]);
     setSelectionMode(false);
+
+    // 🔧 獲取當前資料夾的父資料夾 ID
+    if (folderId) {
+      try {
+        const response = await fetch(`/api/folders/${folderId}`);
+        if (response.ok) {
+          const folderData = await response.json();
+          setCurrentFolderParentId(folderData.parentId || null);
+          console.log('📁 當前資料夾的父資料夾 ID:', folderData.parentId);
+        }
+      } catch (error) {
+        console.error('❌ 獲取資料夾信息失敗:', error);
+        setCurrentFolderParentId(null);
+      }
+    } else {
+      setCurrentFolderParentId(null);
+    }
   };
 
   const handleFolderCreate = async (name: string, color: string) => {
@@ -395,9 +413,9 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
-  // 處理資料夾拖移回根目錄
-  const handleFolderDropToRoot = async (folderId: string) => {
-    console.log('🏠 資料夾拖移回根目錄:', folderId);
+  // 🔧 修復：處理資料夾拖移回上一層（而不是根目錄）
+  const handleFolderDropToParent = async (folderId: string) => {
+    console.log('⬆️  資料夾拖移回上一層:', { folderId, targetParentId: currentFolderParentId });
 
     try {
       const response = await fetch(`/api/folders/${folderId}/move`, {
@@ -406,7 +424,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          targetParentId: null // null 表示移動到根目錄
+          targetParentId: currentFolderParentId // 移動到父資料夾（可能是 null，表示根目錄）
         }),
       });
 
@@ -415,7 +433,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         throw new Error((errorData as any).error || '移動資料夾失敗');
       }
 
-      console.log('✅ 資料夾移動到根目錄成功');
+      console.log('✅ 資料夾移動到上一層成功');
 
       // 🔧 修復：重新載入活動和資料夾列表以即時更新 UI
       // 使用 loadActivities() 會觸發 FolderManager 的 useEffect 重新載入資料夾
@@ -564,10 +582,10 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
-  // 處理從資料夾拖拽回根級別
-  const handleActivityDropToRoot = async (activityId: string) => {
+  // 🔧 修復：處理從資料夾拖拽回上一層（而不是根級別）
+  const handleActivityDropToParent = async (activityId: string) => {
     try {
-      console.log('🏠 將活動移動回根級別:', { activityId });
+      console.log('⬆️  將活動移動回上一層:', { activityId, targetFolderId: currentFolderParentId });
       console.log('🚀 [新方案] 开始API调用，不使用乐观更新...');
 
       const response = await fetch(`/api/activities/${activityId}`, {
@@ -576,22 +594,22 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          folderId: null // 設為 null 表示移回根級別
+          folderId: currentFolderParentId // 移動到父資料夾（可能是 null，表示根目錄）
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || '移動活動失敗');
+        throw new Error((errorData as any).error || '移動活動失敗');
       }
 
       const responseData = await response.json();
       console.log('✅ API 调用成功:', responseData);
 
       // 🚀 [新方案] 如果API返回了资料夹数据，直接使用
-      if (responseData.folders) {
-        console.log('🚀 [新方案] 使用API返回的资料夹数据:', responseData.folders);
-        const formattedFolders = responseData.folders.map((folder: any) => ({
+      if ((responseData as any).folders) {
+        console.log('🚀 [新方案] 使用API返回的资料夹数据:', (responseData as any).folders);
+        const formattedFolders = (responseData as any).folders.map((folder: any) => ({
           id: folder.id,
           name: folder.name,
           activityCount: folder.activityCount || 0
@@ -600,7 +618,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
         console.log('✅ [新方案] 资料夹状态已直接更新为API返回的准确数据');
       }
 
-      console.log('✅ 活動移回根級別成功');
+      console.log('✅ 活動移回上一層成功');
 
       // 重新載入活動列表
       await loadActivities();
@@ -612,10 +630,10 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
     }
   };
 
-  // 處理點擊導航回根級別
-  const handleClickToRoot = () => {
-    console.log('🏠 點擊導航回根級別');
-    setCurrentFolderId(null);
+  // 🔧 修復：處理點擊導航回上一層（而不是根級別）
+  const handleClickToParent = () => {
+    console.log('⬆️  點擊導航回上一層:', { currentFolderId, parentFolderId: currentFolderParentId });
+    setCurrentFolderId(currentFolderParentId);
     setSelectedActivities([]);
     setSelectionMode(false);
   };
@@ -1165,12 +1183,12 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           onFolderDropToFolder={handleFolderDropToFolder}
         />
 
-        {/* 在資料夾視圖中顯示拖拽回根級別的目標區域 */}
+        {/* 🔧 修復：在資料夾視圖中顯示拖拽回上一層的目標區域 */}
         {currentFolderId && (
           <DropToRootTarget
-            onDropToRoot={handleActivityDropToRoot}
-            onFolderDropToRoot={handleFolderDropToRoot}
-            onClickToRoot={handleClickToRoot}
+            onDropToRoot={handleActivityDropToParent}
+            onFolderDropToRoot={handleFolderDropToParent}
+            onClickToRoot={handleClickToParent}
           />
         )}
 
