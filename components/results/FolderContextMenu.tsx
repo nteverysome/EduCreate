@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import { TrashIcon, PencilIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, PencilIcon, ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon, PaintBrushIcon } from '@heroicons/react/24/outline';
 
 interface ResultFolder {
   id: string;
@@ -18,6 +18,8 @@ interface FolderContextMenuProps {
   onClose: () => void;
   onDelete: () => void;
   onRename?: () => void;
+  onMove?: () => void;
+  onChangeColor?: () => void;
 }
 
 export const FolderContextMenu: React.FC<FolderContextMenuProps> = ({
@@ -26,7 +28,9 @@ export const FolderContextMenu: React.FC<FolderContextMenuProps> = ({
   y,
   onClose,
   onDelete,
-  onRename
+  onRename,
+  onMove,
+  onChangeColor
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuPosition, setMenuPosition] = React.useState({ x, y });
@@ -125,6 +129,34 @@ export const FolderContextMenu: React.FC<FolderContextMenuProps> = ({
           <PencilIcon className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
           <span className="truncate">重新命名</span>
         </button>
+
+        {/* 移動資料夾選項 - 響應式 */}
+        {onMove && (
+          <button
+            onClick={() => {
+              onMove();
+              onClose();
+            }}
+            className="w-full px-3 sm:px-4 py-2 text-left text-xs sm:text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+          >
+            <ArrowsRightLeftIcon className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+            <span className="truncate">移動資料夾</span>
+          </button>
+        )}
+
+        {/* 變更顏色選項 - 響應式 */}
+        {onChangeColor && (
+          <button
+            onClick={() => {
+              onChangeColor();
+              onClose();
+            }}
+            className="w-full px-3 sm:px-4 py-2 text-left text-xs sm:text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+          >
+            <PaintBrushIcon className="w-4 h-4 mr-2 sm:mr-3 flex-shrink-0" />
+            <span className="truncate">變更顏色</span>
+          </button>
+        )}
 
         {/* 分隔線 */}
         <div className="border-t border-gray-100 my-1" />

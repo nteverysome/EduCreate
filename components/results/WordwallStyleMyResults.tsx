@@ -24,6 +24,8 @@ import ShareResultModal from './ShareResultModal';
 import StudentShareLinkModal from './StudentShareLinkModal';
 import QRCodeModal from './QRCodeModal';
 import MoveToFolderModal from './MoveToFolderModal';
+import MoveFolderModal from './MoveFolderModal';
+import EditFolderColorModal from './EditFolderColorModal';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
 
 
@@ -109,6 +111,14 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 移動到資料夾相關狀態
   const [showMoveToFolderModal, setShowMoveToFolderModal] = useState(false);
   const [resultToMove, setResultToMove] = useState<AssignmentResult | null>(null);
+
+  // 移動資料夾相關狀態
+  const [showMoveFolderModal, setShowMoveFolderModal] = useState(false);
+  const [folderToMove, setFolderToMove] = useState<ResultFolder | null>(null);
+
+  // 變更資料夾顏色相關狀態
+  const [showEditFolderColorModal, setShowEditFolderColorModal] = useState(false);
+  const [folderToEditColor, setFolderToEditColor] = useState<ResultFolder | null>(null);
 
 
 
@@ -412,6 +422,67 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const handleFolderRename = (folder: ResultFolder) => {
     setRenamingFolder(folder);
     setShowRenameFolderModal(true);
+  };
+
+  // 處理移動資料夾
+  const handleMoveFolder = async (folderId: string, targetParentId: string | null) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}/move`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ targetParentId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '移動資料夾失敗');
+      }
+
+      // 重新載入資料夾
+      await loadFolders();
+      await loadCurrentFolder();
+    } catch (error) {
+      console.error('移動資料夾失敗:', error);
+      throw error;
+    }
+  };
+
+  // 處理資料夾移動點擊
+  const handleFolderMove = (folder: ResultFolder) => {
+    setFolderToMove(folder);
+    setShowMoveFolderModal(true);
+  };
+
+  // 處理變更資料夾顏色
+  const handleUpdateFolderColor = async (folderId: string, color: string) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ color }),
+      });
+
+      if (!response.ok) {
+        throw new Error('變更顏色失敗');
+      }
+
+      // 重新載入資料夾
+      await loadFolders();
+      await loadCurrentFolder();
+    } catch (error) {
+      console.error('變更資料夾顏色失敗:', error);
+      throw error;
+    }
+  };
+
+  // 處理資料夾顏色變更點擊
+  const handleFolderChangeColor = (folder: ResultFolder) => {
+    setFolderToEditColor(folder);
+    setShowEditFolderColorModal(true);
   };
 
   // 處理結果重命名
@@ -857,6 +928,14 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             handleFolderRename(contextMenu.folder);
             setContextMenu(null);
           }}
+          onMove={() => {
+            handleFolderMove(contextMenu.folder);
+            setContextMenu(null);
+          }}
+          onChangeColor={() => {
+            handleFolderChangeColor(contextMenu.folder);
+            setContextMenu(null);
+          }}
         />
       )}
 
@@ -998,6 +1077,29 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           }}
         />
       )}
+
+      {/* 移動資料夾模態框 */}
+      <MoveFolderModal
+        isOpen={showMoveFolderModal}
+        folder={folderToMove}
+        currentFolderId={currentFolderId}
+        onClose={() => {
+          setShowMoveFolderModal(false);
+          setFolderToMove(null);
+        }}
+        onMoveFolder={handleMoveFolder}
+      />
+
+      {/* 變更資料夾顏色模態框 */}
+      <EditFolderColorModal
+        isOpen={showEditFolderColorModal}
+        folder={folderToEditColor}
+        onClose={() => {
+          setShowEditFolderColorModal(false);
+          setFolderToEditColor(null);
+        }}
+        onUpdateColor={handleUpdateFolderColor}
+      />
 
       {/* 回收桶模態框 */}
       <RecycleBinModal
