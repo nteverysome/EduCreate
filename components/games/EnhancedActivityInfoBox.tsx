@@ -60,6 +60,14 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // 調試日誌
+  console.log('🔍 EnhancedActivityInfoBox props:', {
+    isOwner,
+    onEditTags: !!onEditTags,
+    tagsLength: tags.length,
+    tags,
+  });
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-4">
       {/* 頂部信息欄 */}
