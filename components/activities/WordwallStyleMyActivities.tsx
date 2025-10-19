@@ -201,9 +201,21 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   // 載入資料夾數據 - 使用统一的 API 管理器
   const loadFolders = async () => {
     try {
+      console.log('🔍 [DEBUG] loadFolders 被调用 - 使用统一 API 管理器');
+      console.log('🔍 [DEBUG] 当前资料夹 ID:', currentFolderId);
+
       // 🚀 使用统一的 API 管理器，确保类型安全
       const foldersData = await folderApi.getFolders('activities');
-      setFolders(foldersData.map((folder: FolderData) => ({
+      console.log('🔍 [DEBUG] 统一 API 管理器响应数据:', foldersData);
+
+      // 🆕 根據 currentFolderId 過濾資料夾
+      const filteredFolders = foldersData.filter((folder: FolderData) =>
+        folder.parentId === currentFolderId
+      );
+      console.log('🔍 [DEBUG] 过滤后的资料夹数量:', filteredFolders.length);
+      console.log('🔍 [DEBUG] 过滤后的资料夹:', filteredFolders.map((f: FolderData) => ({ name: f.name, parentId: f.parentId })));
+
+      setFolders(filteredFolders.map((folder: FolderData) => ({
         id: folder.id,
         name: folder.name,
         activityCount: folder.activityCount || 0

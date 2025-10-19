@@ -11,6 +11,9 @@ export interface FolderData {
   description?: string;
   color?: string;
   icon?: string;
+  parentId?: string | null; // 🆕 父資料夾 ID（null 表示根目錄）
+  depth?: number; // 🆕 資料夾深度（0 = 根目錄）
+  path?: string; // 🆕 資料夾路徑
   activityCount?: number;
   resultCount?: number;
   createdAt: string;
