@@ -106,6 +106,13 @@ export async function GET(
         versions: {
           orderBy: { createdAt: 'desc' }
         },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        },
         _count: {
           select: {
             versions: true
