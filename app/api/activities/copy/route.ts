@@ -41,9 +41,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 獲取源活動
+    // 獲取源活動（包含作者信息）
     const sourceActivity = await prisma.activity.findUnique({
       where: { id: sourceActivityId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!sourceActivity) {
@@ -75,6 +83,10 @@ export async function POST(request: NextRequest) {
       totalWords: sourceActivity.totalWords,
       userId: currentUser.id,
       shareToken: generateShareToken(),
+      // 保存原作者信息
+      originalAuthorId: sourceActivity.originalAuthorId || sourceActivity.userId,
+      originalAuthorName: sourceActivity.originalAuthorName || sourceActivity.user.name,
+      copiedFromActivityId: sourceActivityId,
     };
 
     // 複製 content（如果存在）

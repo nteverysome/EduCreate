@@ -26,14 +26,20 @@ export async function POST(
       return NextResponse.json({ error: '用戶不存在' }, { status: 404 });
     }
 
-    // 獲取要複製的原始活動（包含詞彙項目）
+    // 獲取要複製的原始活動（包含詞彙項目和作者信息）
     const originalActivity = await prisma.activity.findFirst({
       where: {
         id: activityId,
         deletedAt: null  // 只能複製未刪除的活動
       },
       include: {
-        vocabularyItems: true
+        vocabularyItems: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       }
     });
 
@@ -68,6 +74,11 @@ export async function POST(
         geptLevel: originalActivity.geptLevel,
         totalWords: originalActivity.totalWords,
         folderId: null,    // 複製的活動放在根級別
+
+        // 保存原作者信息
+        originalAuthorId: originalActivity.originalAuthorId || originalActivity.userId,
+        originalAuthorName: originalActivity.originalAuthorName || originalActivity.user.name,
+        copiedFromActivityId: activityId,
 
         // 複製詞彙項目
         vocabularyItems: {

@@ -24,6 +24,11 @@ interface EnhancedActivityInfoBoxProps {
     name: string;
     avatar?: string;
   };
+  originalAuthor?: {
+    id: string;
+    name: string;
+  };
+  copiedFromActivityId?: string;
   tags?: string[];
   category?: string;
   geptLevel?: string;
@@ -44,6 +49,8 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
   activityTitle,
   templateType,
   author,
+  originalAuthor,
+  copiedFromActivityId,
   tags = [],
   category,
   geptLevel,
@@ -95,12 +102,26 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
               {author && (
                 <div className="flex items-center gap-1">
                   <UserIcon className="w-4 h-4" />
-                  <Link
-                    href={`/community/author/${author.id}`}
-                    className="hover:text-blue-600 transition-colors"
-                  >
-                    by {author.name}
-                  </Link>
+                  <div className="flex items-center gap-1">
+                    <Link
+                      href={`/community/author/${author.id}`}
+                      className="hover:text-blue-600 transition-colors"
+                    >
+                      by {author.name}
+                    </Link>
+                    {originalAuthor && (
+                      <span className="text-gray-500">
+                        （改編自{' '}
+                        <Link
+                          href={`/community/author/${originalAuthor.id}`}
+                          className="hover:text-blue-600 transition-colors"
+                        >
+                          {originalAuthor.name}
+                        </Link>
+                        ）
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
 

@@ -83,6 +83,11 @@ const GameSwitcherPage: React.FC = () => {
       name: string;
       avatar?: string;
     };
+    originalAuthor?: {
+      id: string;
+      name: string;
+    };
+    copiedFromActivityId?: string;
     tags?: string[];
     category?: string;
     geptLevel?: string;
@@ -351,6 +356,9 @@ const GameSwitcherPage: React.FC = () => {
             name: string;
             image?: string;
           };
+          originalAuthorId?: string;
+          originalAuthorName?: string;
+          copiedFromActivityId?: string;
         };
         setActivityInfo({
           title: data.title || '未命名活動',
@@ -366,6 +374,11 @@ const GameSwitcherPage: React.FC = () => {
             name: data.user.name,
             avatar: data.user.image,
           } : undefined,
+          originalAuthor: data.originalAuthorId && data.originalAuthorName ? {
+            id: data.originalAuthorId,
+            name: data.originalAuthorName,
+          } : undefined,
+          copiedFromActivityId: data.copiedFromActivityId,
           category: data.communityCategory || undefined,
         });
 
@@ -1059,6 +1072,8 @@ const GameSwitcherPage: React.FC = () => {
             activityTitle={activityInfo.title}
             templateType={activityInfo.templateType}
             author={activityInfo.author}
+            originalAuthor={activityInfo.originalAuthor}
+            copiedFromActivityId={activityInfo.copiedFromActivityId}
             tags={activityInfo.tags}
             category={activityInfo.category}
             geptLevel={activityInfo.geptLevel}

@@ -139,6 +139,11 @@ model Activity {
   screenshotError        String?              // 截圖生成錯誤信息
   screenshotRetryCount   Int                  @default(0) // 重試次數
 
+  // 原作者追蹤（用於複製活動）
+  originalAuthorId       String?              // 原作者 ID
+  originalAuthorName     String?              // 原作者名稱
+  copiedFromActivityId   String?              // 原活動 ID
+
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
   deletedAt       DateTime?
