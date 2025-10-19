@@ -17,6 +17,9 @@ interface FolderData {
   activityCount: number;
   createdAt: string;
   updatedAt: string;
+  parentId?: string | null;
+  depth?: number;
+  path?: string;
 }
 
 interface FolderManagerProps {

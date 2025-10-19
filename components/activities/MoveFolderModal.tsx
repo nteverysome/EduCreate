@@ -18,6 +18,7 @@ interface MoveFolderModalProps {
     id: string;
     name: string;
     parentId: string | null;
+    depth?: number;
   } | null;
   currentFolderId: string | null; // 當前所在的資料夾 ID
 }
@@ -142,7 +143,18 @@ export const MoveFolderModal: React.FC<MoveFolderModalProps> = ({
           <div className="flex items-center gap-2">
             <Folder className="w-4 h-4 text-gray-500" />
             <p className="text-base font-medium text-gray-900">{folder.name}</p>
+            <span className="text-xs text-gray-500 ml-2">
+              第 {(folder.depth || 0) + 1} 層
+            </span>
           </div>
+          <p className="text-xs text-gray-500 mt-2">
+            當前位置：{folder.parentId ? (
+              (() => {
+                const parentFolder = availableFolders.find(f => f.id === folder.parentId);
+                return parentFolder ? `${parentFolder.name} (第 ${parentFolder.depth + 1} 層)` : '未知';
+              })()
+            ) : '根目錄'}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
@@ -190,6 +202,7 @@ export const MoveFolderModal: React.FC<MoveFolderModalProps> = ({
                   >
                     <Folder className="w-4 h-4 text-gray-600" />
                     <span className="text-gray-900">{folderOption.name}</span>
+                    <span className="text-xs text-gray-500 ml-2">第 {folderOption.depth + 1} 層</span>
                     {selectedTargetId === folderOption.id && (
                       <ChevronRight className="w-4 h-4 text-blue-500 ml-auto" />
                     )}
