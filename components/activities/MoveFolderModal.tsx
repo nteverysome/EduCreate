@@ -125,6 +125,10 @@ export const MoveFolderModal: React.FC<MoveFolderModalProps> = ({
 
   // 構建資料夾樹狀結構
   const buildFolderTree = () => {
+    console.log('🌳 [MoveFolderModal] 開始構建資料夾樹');
+    console.log('📁 [MoveFolderModal] 可用資料夾數量:', availableFolders.length);
+    console.log('📁 [MoveFolderModal] 可用資料夾:', availableFolders.map(f => ({ id: f.id, name: f.name, parentId: f.parentId, depth: f.depth })));
+
     const folderMap = new Map<string, FolderOption & { children: FolderOption[] }>();
 
     // 初始化所有資料夾
@@ -137,11 +141,16 @@ export const MoveFolderModal: React.FC<MoveFolderModalProps> = ({
     availableFolders.forEach(f => {
       const folderWithChildren = folderMap.get(f.id)!;
       if (f.parentId && folderMap.has(f.parentId)) {
+        console.log(`📂 [MoveFolderModal] 添加子資料夾: ${f.name} (${f.id}) 到父資料夾 ${f.parentId}`);
         folderMap.get(f.parentId)!.children.push(folderWithChildren);
       } else {
+        console.log(`🏠 [MoveFolderModal] 添加根資料夾: ${f.name} (${f.id}), parentId: ${f.parentId}`);
         rootFolders.push(folderWithChildren);
       }
     });
+
+    console.log('🌲 [MoveFolderModal] 根資料夾數量:', rootFolders.length);
+    console.log('🌲 [MoveFolderModal] 根資料夾:', rootFolders.map(f => ({ name: f.name, childrenCount: f.children.length })));
 
     return rootFolders;
   };
