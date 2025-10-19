@@ -3,6 +3,52 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+// 遊戲類型映射函數
+function getGameDisplayName(gameTemplateId: string): string {
+  const gameTypeMap: { [key: string]: string } = {
+    'shimozurdo-game': 'Shimozurdo 雲朵遊戲',
+    'airplane-vite': '飛機遊戲 (Vite版)',
+    'matching-pairs': '配對記憶',
+    'flash-cards': '閃卡記憶',
+    'whack-mole': '打地鼠',
+    'spin-wheel': '轉盤選擇',
+    'memory-cards': '記憶卡片',
+    'complete-sentence': '完成句子',
+    'spell-word': '拼寫單詞',
+    'labelled-diagram': '標籤圖表',
+    'watch-memorize': '觀察記憶',
+    'rank-order': '排序遊戲',
+    'math-generator': '數學生成器',
+    'word-magnets': '單詞磁鐵',
+    'group-sort': '分類遊戲',
+    'image-quiz': '圖片問答',
+    'maze-chase': '迷宮追逐',
+    'crossword-puzzle': '填字遊戲',
+    'flying-fruit': '飛行水果',
+    'flip-tiles': '翻轉方塊',
+    'type-answer': '輸入答案',
+    'anagram': '字母重組',
+    'hangman': '猜字遊戲',
+    'true-false': '是非題',
+    'wordsearch': '找字遊戲',
+    'match-up': '配對',
+    'airplane': '飛機遊戲',
+    'balloon-pop': '氣球遊戲',
+    'open-box': '開箱遊戲',
+    'gameshow-quiz': '競賽測驗',
+    'random-wheel': '隨機轉盤',
+    'random-cards': '隨機卡片',
+    'speaking-cards': '語音卡片',
+    'quiz': '測驗',
+    'matching': '配對遊戲',
+    'flashcards': '單字卡片',
+    'flashcard': '單字卡片',
+    'vocabulary': '詞彙遊戲',
+  };
+
+  return gameTypeMap[gameTemplateId] || gameTemplateId;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -33,7 +79,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: user.id,
         title: title,
-        description: `使用 ${gameTemplateId} 遊戲學習詞彙`,
+        description: `使用 ${getGameDisplayName(gameTemplateId)} 遊戲學習詞彙`,
         type: type || 'vocabulary_game',
         templateType: templateType || 'vocabulary',
         content: {
