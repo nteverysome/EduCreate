@@ -34,32 +34,37 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([]);
     }
 
+    // 構建查詢條件
+    const whereCondition: any = {
+      userId: session.user.id,
+      deletedAt: null, // 只获取未删除的资料夹
+      type: type === 'results' ? 'RESULTS' : 'ACTIVITIES', // 根据类型过滤
+    };
+
+    // 只有當 parentId 參數存在時才過濾
+    // 如果 parentId 不存在，返回所有資料夾（用於移動資料夾模態框）
+    if (parentId !== undefined) {
+      whereCondition.parentId = parentId || null;
+    }
+
     const folders = await prisma.folder.findMany({
-      where: {
-        userId: session.user.id,
-        deletedAt: null, // 只获取未删除的资料夹
-        type: type === 'results' ? 'RESULTS' : 'ACTIVITIES', // 根据类型过滤
-        parentId: parentId || null // 根據 parentId 過濾（null 表示根目錄）
-      },
-      include: {
+      where: whereCondition,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        color: true,
+        icon: true,
+        parentId: true,
+        depth: true,
+        path: true,
+        createdAt: true,
+        updatedAt: true,
         activities: {
           select: {
             id: true
           }
-        },
-        children: {
-          select: {
-            id: true,
-            name: true
-          }
-        },
-        parent: {
-          select: {
-            id: true,
-            name: true
-          }
         }
-        // 暂时不查询 results，因为可能导致 500 错误
       },
       orderBy: {
         createdAt: 'desc'
