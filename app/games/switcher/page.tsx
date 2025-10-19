@@ -370,13 +370,31 @@ const GameSwitcherPage: React.FC = () => {
         });
 
         // 判斷是否是所有者
+        console.log('🔍 檢查所有者身份:', {
+          hasSession: !!session,
+          sessionUserEmail: session?.user?.email,
+          activityUserId: data.user?.id,
+        });
+
         if (session?.user?.email && data.user?.id) {
           // 需要通過 API 獲取當前用戶的 ID 來比較
           const currentUserResponse = await fetch('/api/user/profile');
+          console.log('🔍 用戶資料 API 響應:', currentUserResponse.ok);
+
           if (currentUserResponse.ok) {
             const currentUser = await currentUserResponse.json();
-            setIsOwner(currentUser.id === data.user.id);
+            const isOwnerResult = currentUser.id === data.user.id;
+            console.log('🔍 所有者檢查結果:', {
+              currentUserId: currentUser.id,
+              activityUserId: data.user.id,
+              isOwner: isOwnerResult,
+            });
+            setIsOwner(isOwnerResult);
+          } else {
+            console.log('❌ 無法獲取用戶資料');
           }
+        } else {
+          console.log('❌ 缺少 session 或活動所有者信息');
         }
 
         // 增加瀏覽次數（異步執行，不阻塞頁面載入）
