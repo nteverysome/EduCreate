@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Folder, MoreVertical, Edit2, Trash2, Palette, Move } from 'lucide-react';
+import { Folder, MoreVertical, Edit2, Trash2, Palette, Move, ExternalLink } from 'lucide-react';
 
 interface FolderData {
   id: string;
@@ -74,6 +74,14 @@ export const FolderCard: React.FC<FolderCardProps> = ({
     e.stopPropagation();
     setShowMenu(false);
     onMove?.(folder);
+  };
+
+  const handleOpenInNewTab = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu(false);
+    // 在新分頁開啟資料夾
+    const url = `/my-activities?folderId=${folder.id}`;
+    window.open(url, '_blank');
   };
 
   // 資料夾拖移源事件處理
@@ -197,7 +205,15 @@ export const FolderCard: React.FC<FolderCardProps> = ({
                 />
                 
                 {/* 菜單內容 */}
-                <div className="absolute right-0 top-6 bg-white rounded-lg shadow-lg border py-1 z-20 min-w-[120px]">
+                <div className="absolute right-0 top-6 bg-white rounded-lg shadow-lg border py-1 z-20 min-w-[160px]">
+                  <button
+                    onClick={handleOpenInNewTab}
+                    className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    在新分頁開啟
+                  </button>
+
                   {onEdit && (
                     <button
                       onClick={handleEdit}
