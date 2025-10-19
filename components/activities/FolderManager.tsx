@@ -44,6 +44,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   onFolderDropToFolder
 }) => {
   const [folders, setFolders] = useState<FolderData[]>([]);
+  const [currentFolder, setCurrentFolder] = useState<FolderData | null>(null); // 當前資料夾信息
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -57,6 +58,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   // 載入資料夾數據
   useEffect(() => {
     loadFolders();
+    loadCurrentFolder(); // 載入當前資料夾信息
   }, [currentFolderId]); // 當 currentFolderId 改變時重新載入
 
   const loadFolders = async () => {
@@ -80,6 +82,25 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
       setError(error.message || '載入資料夾失敗');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 載入當前資料夾信息（用於麵包屑導航）
+  const loadCurrentFolder = async () => {
+    if (!currentFolderId) {
+      setCurrentFolder(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/folders/${currentFolderId}`);
+      if (response.ok) {
+        const folderData = await response.json();
+        setCurrentFolder(folderData);
+        console.log('📂 載入當前資料夾信息:', folderData.name);
+      }
+    } catch (error) {
+      console.error('載入當前資料夾信息失敗:', error);
     }
   };
 
@@ -268,7 +289,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
           <>
             <span className="mx-2 text-gray-400">/</span>
             <span className="text-gray-700">
-              {folders.find(f => f.id === currentFolderId)?.name || '未知資料夾'}
+              {currentFolder?.name || '載入中...'}
             </span>
           </>
         )}
