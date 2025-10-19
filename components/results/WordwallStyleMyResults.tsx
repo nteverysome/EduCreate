@@ -192,13 +192,21 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const loadFolders = useCallback(async () => {
     try {
       console.log('🔍 [DEBUG] loadFolders 被调用 - 使用统一 API 管理器');
+      console.log('🔍 [DEBUG] 当前资料夹 ID:', currentFolderId);
       console.log('🔍 [DEBUG] 调用堆栈:', new Error().stack);
 
       // 🚀 使用统一的 API 管理器，确保类型安全
       const foldersData = await folderApi.getFolders('results');
       console.log('🔍 [DEBUG] 统一 API 管理器响应数据:', foldersData);
 
-      setFolders(foldersData.map((folder: FolderData) => ({
+      // 🆕 根據 currentFolderId 過濾資料夾
+      const filteredFolders = foldersData.filter((folder: FolderData) =>
+        folder.parentId === currentFolderId
+      );
+      console.log('🔍 [DEBUG] 过滤后的资料夹数量:', filteredFolders.length);
+      console.log('🔍 [DEBUG] 过滤后的资料夹:', filteredFolders.map((f: FolderData) => ({ name: f.name, parentId: f.parentId })));
+
+      setFolders(filteredFolders.map((folder: FolderData) => ({
         id: folder.id,
         name: folder.name,
         resultCount: folder.resultCount || 0,
@@ -209,7 +217,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       console.error('❌ 載入資料夾失敗:', error);
       setFolders([]);
     }
-  }, []);
+  }, [currentFolderId]);
 
   // 🆕 載入當前資料夾信息（用於麵包屑導航）
   const loadCurrentFolder = useCallback(async () => {
