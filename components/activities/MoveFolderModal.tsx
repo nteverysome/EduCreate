@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Move, Folder, ChevronRight, Home } from 'lucide-react';
+import { X, Move, Folder, ChevronRight, ChevronDown, Home } from 'lucide-react';
 
 interface FolderOption {
   id: string;
@@ -35,6 +35,7 @@ export const MoveFolderModal: React.FC<MoveFolderModalProps> = ({
   const [isMoving, setIsMoving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
   // 載入可用的目標資料夾
   useEffect(() => {
@@ -107,17 +108,102 @@ export const MoveFolderModal: React.FC<MoveFolderModalProps> = ({
     if (!isMoving) {
       setError('');
       setSelectedTargetId(null);
+      setExpandedFolders(new Set());
       onClose();
     }
   };
 
+  const toggleFolder = (folderId: string) => {
+    const newExpanded = new Set(expandedFolders);
+    if (newExpanded.has(folderId)) {
+      newExpanded.delete(folderId);
+    } else {
+      newExpanded.add(folderId);
+    }
+    setExpandedFolders(newExpanded);
+  };
+
+  // 構建資料夾樹狀結構
+  const buildFolderTree = () => {
+    const folderMap = new Map<string, FolderOption & { children: FolderOption[] }>();
+
+    // 初始化所有資料夾
+    availableFolders.forEach(f => {
+      folderMap.set(f.id, { ...f, children: [] });
+    });
+
+    // 建立父子關係
+    const rootFolders: (FolderOption & { children: FolderOption[] })[] = [];
+    availableFolders.forEach(f => {
+      const folderWithChildren = folderMap.get(f.id)!;
+      if (f.parentId && folderMap.has(f.parentId)) {
+        folderMap.get(f.parentId)!.children.push(folderWithChildren);
+      } else {
+        rootFolders.push(folderWithChildren);
+      }
+    });
+
+    return rootFolders;
+  };
+
+  // 遞歸渲染資料夾樹
+  const renderFolderTree = (folders: (FolderOption & { children: FolderOption[] })[], depth: number = 0) => {
+    return folders.map((folderOption) => {
+      const hasChildren = folderOption.children.length > 0;
+      const isExpanded = expandedFolders.has(folderOption.id);
+      const isSelected = selectedTargetId === folderOption.id;
+
+      return (
+        <div key={folderOption.id}>
+          <button
+            type="button"
+            onClick={() => setSelectedTargetId(folderOption.id)}
+            disabled={isMoving}
+            className={`
+              w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors text-left border-t border-gray-100
+              ${isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''}
+              disabled:opacity-50 disabled:cursor-not-allowed
+            `}
+            style={{ paddingLeft: `${16 + depth * 20}px` }}
+          >
+            {hasChildren && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFolder(folderOption.id);
+                }}
+                className="p-0.5 hover:bg-gray-200 rounded"
+              >
+                {isExpanded ? (
+                  <ChevronDown className="w-3 h-3 text-gray-600" />
+                ) : (
+                  <ChevronRight className="w-3 h-3 text-gray-600" />
+                )}
+              </button>
+            )}
+            {!hasChildren && <div className="w-4" />}
+            <Folder className="w-4 h-4 text-gray-600" />
+            <span className="text-gray-900">{folderOption.name}</span>
+            <span className="text-xs text-gray-500 ml-2">第 {folderOption.depth + 1} 層</span>
+            {isSelected && (
+              <ChevronRight className="w-4 h-4 text-blue-500 ml-auto" />
+            )}
+          </button>
+
+          {hasChildren && isExpanded && (
+            <div>
+              {renderFolderTree(folderOption.children, depth + 1)}
+            </div>
+          )}
+        </div>
+      );
+    });
+  };
+
   if (!isOpen || !folder) return null;
 
-  // 按深度排序資料夾，並添加縮進
-  const sortedFolders = [...availableFolders].sort((a, b) => {
-    if (a.depth !== b.depth) return a.depth - b.depth;
-    return a.name.localeCompare(b.name);
-  });
+  const folderTree = buildFolderTree();
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -186,30 +272,10 @@ export const MoveFolderModal: React.FC<MoveFolderModalProps> = ({
                   )}
                 </button>
 
-                {/* 其他資料夾選項 */}
-                {sortedFolders.map((folderOption) => (
-                  <button
-                    key={folderOption.id}
-                    type="button"
-                    onClick={() => setSelectedTargetId(folderOption.id)}
-                    disabled={isMoving}
-                    className={`
-                      w-full px-4 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors text-left border-t border-gray-100
-                      ${selectedTargetId === folderOption.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''}
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                    `}
-                    style={{ paddingLeft: `${16 + folderOption.depth * 20}px` }}
-                  >
-                    <Folder className="w-4 h-4 text-gray-600" />
-                    <span className="text-gray-900">{folderOption.name}</span>
-                    <span className="text-xs text-gray-500 ml-2">第 {folderOption.depth + 1} 層</span>
-                    {selectedTargetId === folderOption.id && (
-                      <ChevronRight className="w-4 h-4 text-blue-500 ml-auto" />
-                    )}
-                  </button>
-                ))}
+                {/* 其他資料夾選項 - 樹狀結構 */}
+                {renderFolderTree(folderTree)}
 
-                {sortedFolders.length === 0 && (
+                {folderTree.length === 0 && (
                   <div className="px-4 py-8 text-center text-gray-500">
                     沒有其他可用的資料夾
                   </div>
