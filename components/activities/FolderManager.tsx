@@ -95,10 +95,9 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
       const newFolder = await response.json();
       setFolders(prev => [newFolder, ...prev]);
 
-      // 調用父組件的回調
-      if (onFolderCreate) {
-        await onFolderCreate(name, color);
-      }
+      // 🔧 修復：移除重複的 onFolderCreate 調用
+      // 資料夾已經在上面創建成功，不需要再次調用父組件的回調
+      // 這會導致重複創建資料夾的問題
     } catch (error: any) {
       throw error; // 讓模態框處理錯誤顯示
     }
