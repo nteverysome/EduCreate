@@ -96,7 +96,7 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
                 <div className="flex items-center gap-1">
                   <UserIcon className="w-4 h-4" />
                   <Link
-                    href={`/profile/${author.id}`}
+                    href={`/community/author/${author.id}`}
                     className="hover:text-blue-600 transition-colors"
                   >
                     by {author.name}
