@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Folder, MoreVertical, Edit2, Trash2, Move } from 'lucide-react';
 import FolderCard from './FolderCard';
 import CreateFolderModal from './CreateFolderModal';
+import RenameFolderModal from './RenameFolderModal';
 import EditFolderColorModal from './EditFolderColorModal';
 import MoveFolderModal from './MoveFolderModal';
 import { folderApi, FolderData as ApiFolderData } from '../../lib/api/folderApiManager';
@@ -46,7 +47,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingFolder, setEditingFolder] = useState<FolderData | null>(null);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renamingFolder, setRenamingFolder] = useState<FolderData | null>(null);
   const [showColorModal, setShowColorModal] = useState(false);
   const [colorEditingFolder, setColorEditingFolder] = useState<FolderData | null>(null);
   const [showMoveModal, setShowMoveModal] = useState(false);
@@ -113,8 +115,34 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   };
 
   const handleUpdateFolder = async (folder: FolderData) => {
-    // 這裡可以實現編輯功能，暫時先設置編輯狀態
-    setEditingFolder(folder);
+    setRenamingFolder(folder);
+    setShowRenameModal(true);
+  };
+
+  const handleRenameFolder = async (folderId: string, newName: string) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newName }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '重新命名失敗');
+      }
+
+      // 重新載入資料夾列表
+      await loadFolders();
+
+      // 關閉模態框
+      setShowRenameModal(false);
+      setRenamingFolder(null);
+    } catch (error: any) {
+      throw error; // 讓模態框處理錯誤顯示
+    }
   };
 
   const handleDeleteFolder = async (id: string) => {
@@ -279,6 +307,17 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onCreateFolder={handleCreateFolder}
+      />
+
+      {/* 重新命名資料夾模態框 */}
+      <RenameFolderModal
+        isOpen={showRenameModal}
+        onClose={() => {
+          setShowRenameModal(false);
+          setRenamingFolder(null);
+        }}
+        onRenameFolder={handleRenameFolder}
+        folder={renamingFolder}
       />
 
       {/* 變更顏色模態框 */}
