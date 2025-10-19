@@ -74,11 +74,16 @@ export async function GET(request: NextRequest) {
         updatedAt: true,
         deletedAt: true,
         userId: true,
-        activities: {
+        activities: type === 'activities' ? {
           select: {
             id: true
           }
-        }
+        } : false,
+        results: type === 'results' ? {
+          select: {
+            id: true
+          }
+        } : false
       },
       orderBy: {
         createdAt: 'desc'
@@ -86,13 +91,14 @@ export async function GET(request: NextRequest) {
     });
 
     // 計算每個資料夾的活動數量和結果數量
-    const foldersWithCount = await Promise.all(folders.map(async folder => {
-      // 手动查询每个资料夹的结果数量
-      const resultCount = await prisma.assignmentResult.count({
-        where: {
-          folderId: folder.id
-        }
-      });
+    const foldersWithCount = folders.map(folder => {
+      // 🔧 修復：根據類型計算數量
+      const activityCount = type === 'activities' && folder.activities
+        ? folder.activities.length
+        : 0;
+      const resultCount = type === 'results' && folder.results
+        ? folder.results.length
+        : 0;
 
       return {
         id: folder.id,
@@ -105,10 +111,10 @@ export async function GET(request: NextRequest) {
         path: folder.path,
         createdAt: folder.createdAt,
         updatedAt: folder.updatedAt,
-        activityCount: folder.activities.length,
+        activityCount: activityCount,
         resultCount: resultCount
       };
-    }));
+    });
 
     return NextResponse.json(foldersWithCount);
   } catch (error) {
