@@ -162,12 +162,23 @@ export async function POST(request: NextRequest) {
     }
 
     // 檢查是否已存在同名同類型資料夾（在同一父資料夾下）
+    const normalizedParentId = parentId || null;
+
+    console.log('🔍 [API DEBUG] 準備查詢現有資料夾');
+    console.log('🔍 [API DEBUG] 查詢條件:', {
+      userId: session.user.id,
+      name: name.trim(),
+      type: folderType,
+      parentId: normalizedParentId,
+      deletedAt: null
+    });
+
     const existingFolder = await prisma.folder.findFirst({
       where: {
         userId: session.user.id,
         name: name.trim(),
         type: folderType,
-        parentId: parentId || null,
+        parentId: normalizedParentId,
         deletedAt: null
       }
     });
@@ -175,13 +186,29 @@ export async function POST(request: NextRequest) {
     console.log('🔍 [API DEBUG] 查詢現有資料夾結果:', existingFolder);
 
     if (existingFolder) {
-      console.error('❌ [API ERROR] 資料夾名稱已存在:', existingFolder);
+      console.error('❌ [API ERROR] 資料夾名稱已存在');
+      console.error('❌ [API ERROR] 現有資料夾詳情:', {
+        id: existingFolder.id,
+        name: existingFolder.name,
+        type: existingFolder.type,
+        parentId: existingFolder.parentId,
+        depth: existingFolder.depth,
+        path: existingFolder.path
+      });
+      console.error('❌ [API ERROR] 嘗試創建的資料夾:', {
+        name: name.trim(),
+        type: folderType,
+        parentId: normalizedParentId,
+        depth,
+        path
+      });
       return NextResponse.json({
         error: '資料夾名稱已存在',
         existingFolder: {
           id: existingFolder.id,
           name: existingFolder.name,
-          type: existingFolder.type
+          type: existingFolder.type,
+          parentId: existingFolder.parentId
         }
       }, { status: 400 });
     }
