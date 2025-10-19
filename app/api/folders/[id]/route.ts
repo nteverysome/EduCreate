@@ -67,14 +67,14 @@ export async function GET(
   }
 }
 
-// PATCH - 更新资料夹（重命名）
+// PATCH - 更新资料夹（重命名或變更顏色）
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: '未授权访问' },
@@ -84,9 +84,18 @@ export async function PATCH(
 
     const { id } = params;
     const body = await request.json();
-    const { name } = body;
+    const { name, color } = body;
 
-    if (!name || typeof name !== 'string' || !name.trim()) {
+    // 檢查是否至少提供了一個要更新的字段
+    if (!name && !color) {
+      return NextResponse.json(
+        { error: '請提供要更新的資料夾名稱或顏色' },
+        { status: 400 }
+      );
+    }
+
+    // 如果提供了名稱，驗證名稱
+    if (name && (typeof name !== 'string' || !name.trim())) {
       return NextResponse.json(
         { error: '资料夹名称不能为空' },
         { status: 400 }
@@ -109,30 +118,42 @@ export async function PATCH(
       );
     }
 
-    // 检查同名资料夹
-    const duplicateFolder = await prisma.folder.findFirst({
-      where: {
-        name: name.trim(),
-        userId: session.user.id,
-        deletedAt: null,
-        id: { not: id }
-      }
-    });
+    // 如果提供了名稱，檢查同名資料夾
+    if (name) {
+      const duplicateFolder = await prisma.folder.findFirst({
+        where: {
+          name: name.trim(),
+          userId: session.user.id,
+          deletedAt: null,
+          id: { not: id }
+        }
+      });
 
-    if (duplicateFolder) {
-      return NextResponse.json(
-        { error: '已存在同名资料夹' },
-        { status: 409 }
-      );
+      if (duplicateFolder) {
+        return NextResponse.json(
+          { error: '已存在同名资料夹' },
+          { status: 409 }
+        );
+      }
     }
 
-    // 更新资料夹名称
+    // 準備更新數據
+    const updateData: any = {
+      updatedAt: new Date()
+    };
+
+    if (name) {
+      updateData.name = name.trim();
+    }
+
+    if (color) {
+      updateData.color = color;
+    }
+
+    // 更新资料夹
     const updatedFolder = await prisma.folder.update({
       where: { id },
-      data: {
-        name: name.trim(),
-        updatedAt: new Date()
-      }
+      data: updateData
     });
 
     return NextResponse.json({
@@ -141,7 +162,7 @@ export async function PATCH(
     });
 
   } catch (error) {
-    console.error('重命名资料夹失败:', error);
+    console.error('更新资料夹失败:', error);
     return NextResponse.json(
       { error: '服务器内部错误' },
       { status: 500 }

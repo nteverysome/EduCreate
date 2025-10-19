@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Folder, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { Folder, MoreVertical, Edit2, Trash2, Palette } from 'lucide-react';
 
 interface FolderData {
   id: string;
@@ -19,6 +19,7 @@ interface FolderCardProps {
   onClick: (folderId: string) => void;
   onEdit?: (folder: FolderData) => void;
   onDelete?: (folderId: string) => void;
+  onChangeColor?: (folder: FolderData) => void; // 變更顏色
   // 拖拽相關
   onDrop?: (activityId: string, folderId: string) => void;
   onFolderDrop?: (draggedFolderId: string, targetFolderId: string) => void; // 資料夾拖移到資料夾
@@ -30,6 +31,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
   onClick,
   onEdit,
   onDelete,
+  onChangeColor,
   onDrop,
   onFolderDrop,
   draggable = true
@@ -58,6 +60,12 @@ export const FolderCard: React.FC<FolderCardProps> = ({
     if (confirm(`確定要刪除資料夾「${folder.name}」嗎？資料夾內的活動將移至根目錄。`)) {
       onDelete?.(folder.id);
     }
+  };
+
+  const handleChangeColor = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu(false);
+    onChangeColor?.(folder);
   };
 
   // 資料夾拖移源事件處理
@@ -191,7 +199,17 @@ export const FolderCard: React.FC<FolderCardProps> = ({
                       重新命名
                     </button>
                   )}
-                  
+
+                  {onChangeColor && (
+                    <button
+                      onClick={handleChangeColor}
+                      className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 w-full text-left"
+                    >
+                      <Palette className="w-3 h-3" />
+                      變更顏色
+                    </button>
+                  )}
+
                   {onDelete && (
                     <button
                       onClick={handleDelete}

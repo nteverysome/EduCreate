@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Folder, MoreVertical, Edit2, Trash2, Move } from 'lucide-react';
 import FolderCard from './FolderCard';
 import CreateFolderModal from './CreateFolderModal';
+import EditFolderColorModal from './EditFolderColorModal';
 import { folderApi, FolderData as ApiFolderData } from '../../lib/api/folderApiManager';
 
 interface FolderData {
@@ -42,6 +43,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingFolder, setEditingFolder] = useState<FolderData | null>(null);
+  const [showColorModal, setShowColorModal] = useState(false);
+  const [colorEditingFolder, setColorEditingFolder] = useState<FolderData | null>(null);
 
   // 載入資料夾數據
   useEffect(() => {
@@ -120,12 +123,43 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
       }
 
       // 🚀 調用父組件的回調來處理數據重新載入
-      // 不再直接修改本地狀態，讓父組件重新載入數據確保一致性
+      // 不再直接修改本地狀態,讓父組件重新載入數據確保一致性
       if (onFolderDelete) {
         await onFolderDelete(id);
       }
     } catch (error: any) {
       alert(error.message || '刪除資料夾失敗');
+    }
+  };
+
+  const handleChangeColor = (folder: FolderData) => {
+    setColorEditingFolder(folder);
+    setShowColorModal(true);
+  };
+
+  const handleUpdateColor = async (folderId: string, color: string) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ color }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '變更顏色失敗');
+      }
+
+      // 重新載入資料夾列表
+      await loadFolders();
+
+      // 關閉模態框
+      setShowColorModal(false);
+      setColorEditingFolder(null);
+    } catch (error: any) {
+      throw error; // 讓模態框處理錯誤顯示
     }
   };
 
@@ -194,6 +228,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
             onClick={onFolderSelect}
             onEdit={handleUpdateFolder}
             onDelete={handleDeleteFolder}
+            onChangeColor={handleChangeColor}
             onDrop={onActivityDropToFolder}
             onFolderDrop={onFolderDropToFolder}
             draggable={true}
@@ -206,6 +241,17 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onCreateFolder={handleCreateFolder}
+      />
+
+      {/* 變更顏色模態框 */}
+      <EditFolderColorModal
+        isOpen={showColorModal}
+        onClose={() => {
+          setShowColorModal(false);
+          setColorEditingFolder(null);
+        }}
+        onUpdateColor={handleUpdateColor}
+        folder={colorEditingFolder}
       />
     </div>
   );
