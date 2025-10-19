@@ -10,6 +10,9 @@ const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: 'jwt', // 使用 JWT 策略以支持 CredentialsProvider
+  },
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -119,11 +122,23 @@ export const authOptions: NextAuthOptions = {
       });
       return true;
     },
-    async session({ session, user }) {
-      // 使用數據庫會話策略時，user 來自數據庫
-      if (user && session.user) {
-        session.user.id = user.id;
-        session.user.role = user.role;
+    async jwt({ token, user }) {
+      // 當用戶首次登入時，將用戶信息添加到 token
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // 使用 JWT 策略時，從 token 獲取用戶信息
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        session.user.role = token.role as string;
       }
       return session;
     }
