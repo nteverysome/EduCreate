@@ -13,6 +13,7 @@ import EnhancedActivityInfoBox from '@/components/games/EnhancedActivityInfoBox'
 import RenameActivityModal from '@/components/games/RenameActivityModal';
 import EmbedCodeModal from '@/components/games/EmbedCodeModal';
 import PublishToCommunityModal from '@/components/activities/PublishToCommunityModal';
+import EditActivityTagsModal from '@/components/activities/EditActivityTagsModal';
 import AssignmentModal, { AssignmentConfig } from '@/components/activities/AssignmentModal';
 import AssignmentSetModal from '@/components/activities/AssignmentSetModal';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
@@ -64,6 +65,7 @@ const GameSwitcherPage: React.FC = () => {
   const [showRenameModal, setShowRenameModal] = useState<boolean>(false);
   const [showEmbedModal, setShowEmbedModal] = useState<boolean>(false);
   const [showPublishModal, setShowPublishModal] = useState<boolean>(false);
+  const [showEditTagsModal, setShowEditTagsModal] = useState<boolean>(false);
   const [showAssignmentModal, setShowAssignmentModal] = useState<boolean>(false);
   const [showAssignmentSetModal, setShowAssignmentSetModal] = useState<boolean>(false);
   const [assignmentShareUrl, setAssignmentShareUrl] = useState<string>('');
@@ -211,6 +213,17 @@ const GameSwitcherPage: React.FC = () => {
     setShowAssignmentModal(true);
   }, []);
 
+  const handleEditTags = useCallback(() => {
+    setShowEditTagsModal(true);
+  }, []);
+
+  const handleEditTagsSuccess = useCallback(() => {
+    // 重新載入活動信息以獲取更新後的標籤
+    if (activityId) {
+      loadActivityInfo(activityId);
+    }
+  }, [activityId]);
+
   // 複製活動到我的活動列表
   const handleCopyActivity = useCallback(async () => {
     if (!activityId || !activityInfo || !session?.user?.email) {
@@ -327,7 +340,10 @@ const GameSwitcherPage: React.FC = () => {
           createdAt?: string;
           deadline?: string;
           description?: string;
+          communityDescription?: string;
           tags?: string[];
+          communityTags?: string[];
+          communityCategory?: string;
           geptLevel?: string;
           templateType?: string;
           user?: {
@@ -341,8 +357,8 @@ const GameSwitcherPage: React.FC = () => {
           participantCount: data.participantCount || 0,
           createdAt: data.createdAt || new Date().toISOString(),
           deadline: data.deadline,
-          description: data.description,
-          tags: data.tags || [],
+          description: data.communityDescription || data.description,
+          tags: data.communityTags || data.tags || [],
           geptLevel: data.geptLevel,
           templateType: data.templateType,
           author: data.user ? {
@@ -350,7 +366,7 @@ const GameSwitcherPage: React.FC = () => {
             name: data.user.name,
             avatar: data.user.image,
           } : undefined,
-          category: '教育', // 可以從 API 獲取
+          category: data.communityCategory || undefined,
         });
 
         // 判斷是否是所有者
@@ -1029,6 +1045,7 @@ const GameSwitcherPage: React.FC = () => {
             onAssignment={handleAssignment}
             onCopy={handleCopyActivity}
             isCopying={isCopying}
+            onEditTags={handleEditTags}
           />
         )}
 
@@ -1392,6 +1409,21 @@ const GameSwitcherPage: React.FC = () => {
             setShowAssignmentSetModal(false);
             window.location.href = '/my-results';
           }}
+        />
+      )}
+
+      {/* 編輯標籤模態框 */}
+      {showEditTagsModal && activityId && activityInfo && (
+        <EditActivityTagsModal
+          activity={{
+            id: activityId,
+            title: activityInfo.title,
+            communityCategory: activityInfo.category,
+            communityTags: activityInfo.tags,
+            communityDescription: activityInfo.description,
+          }}
+          onClose={() => setShowEditTagsModal(false)}
+          onSuccess={handleEditTagsSuccess}
         />
       )}
 

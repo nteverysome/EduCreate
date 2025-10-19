@@ -36,6 +36,7 @@ interface EnhancedActivityInfoBoxProps {
   onAssignment?: () => void; // 課業分配回調
   onCopy?: () => void; // 複製活動回調
   isCopying?: boolean; // 是否正在複製
+  onEditTags?: () => void; // 編輯標籤回調
 }
 
 const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
@@ -55,6 +56,7 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
   onAssignment,
   onCopy,
   isCopying = false,
+  onEditTags,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -85,7 +87,12 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
               {author && (
                 <div className="flex items-center gap-1">
                   <UserIcon className="w-4 h-4" />
-                  <span>by {author.name}</span>
+                  <Link
+                    href={`/profile/${author.id}`}
+                    className="hover:text-blue-600 transition-colors"
+                  >
+                    by {author.name}
+                  </Link>
                 </div>
               )}
 
@@ -93,7 +100,9 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
               {category && (
                 <div className="flex items-center gap-1">
                   <FolderIcon className="w-4 h-4" />
-                  <span>{category}</span>
+                  <span className="px-2.5 py-1 bg-blue-500 text-white text-xs rounded-full font-medium">
+                    {category}
+                  </span>
                 </div>
               )}
 
@@ -122,11 +131,34 @@ const EnhancedActivityInfoBox: React.FC<EnhancedActivityInfoBoxProps> = ({
                 {tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
+                    className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs rounded-full font-medium border border-gray-200 hover:bg-gray-200 transition-colors"
                   >
                     {tag}
                   </span>
                 ))}
+                {/* 編輯標籤按鈕 - 只有所有者可以編輯 */}
+                {isOwner && onEditTags && (
+                  <button
+                    onClick={onEditTags}
+                    className="px-2.5 py-1 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                    title="編輯標籤"
+                  >
+                    編輯
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* 如果沒有標籤但是所有者，顯示添加標籤按鈕 */}
+            {tags.length === 0 && isOwner && onEditTags && (
+              <div className="mt-2">
+                <button
+                  onClick={onEditTags}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs text-gray-600 hover:text-blue-600 border border-gray-300 hover:border-blue-300 rounded-md transition-colors"
+                >
+                  <TagIcon className="w-3 h-3" />
+                  添加標籤
+                </button>
               </div>
             )}
 

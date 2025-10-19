@@ -174,12 +174,36 @@ export async function PATCH(
       updateData.title = body.title;
     }
 
+    // 如果有 communityTags，更新社區標籤
+    if (body.communityTags !== undefined) {
+      updateData.communityTags = body.communityTags;
+    }
+
+    // 如果有 communityCategory，更新社區分類
+    if (body.communityCategory !== undefined) {
+      updateData.communityCategory = body.communityCategory;
+    }
+
+    // 如果有 communityDescription，更新社區描述
+    if (body.communityDescription !== undefined) {
+      updateData.communityDescription = body.communityDescription;
+    }
+
     // 更新活動
     const updatedActivity = await prisma.activity.update({
       where: {
         id: activityId
       },
-      data: updateData
+      data: updateData,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            image: true
+          }
+        }
+      }
     });
 
     console.log('✅ 活動部分更新成功:', updatedActivity.title);
