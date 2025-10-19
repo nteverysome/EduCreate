@@ -76,6 +76,15 @@ export default function Register() {
       return;
     }
 
+    // 驗證密碼強度：至少一個大寫字母、一個小寫字母
+    const hasUpperCase = /[A-Z]/.test(formData.password);
+    const hasLowerCase = /[a-z]/.test(formData.password);
+
+    if (!hasUpperCase || !hasLowerCase) {
+      setError('密碼必須包含至少一個大寫字母和一個小寫字母');
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -274,6 +283,9 @@ export default function Register() {
                 onChange={handleChange}
                 className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
+              <p className="mt-2 text-xs text-gray-500">
+                密碼要求：至少8個字符，包含至少一個大寫字母和一個小寫字母
+              </p>
             </div>
 
             <div>
