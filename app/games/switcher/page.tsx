@@ -570,6 +570,14 @@ const GameSwitcherPage: React.FC = () => {
     }
   }, [searchParams, loadActivityInfo]);
 
+  // 當 session 載入完成後，重新檢查 isOwner
+  useEffect(() => {
+    if (session && activityId) {
+      console.log('🔄 Session 已載入，重新檢查所有者身份');
+      loadActivityInfo(activityId);
+    }
+  }, [session, activityId, loadActivityInfo]);
+
   // 載入自定義詞彙的函數（需要身份驗證）
   const loadCustomVocabulary = async (activityId: string) => {
     try {
