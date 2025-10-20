@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma';
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
 
+// 強制動態渲染
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '');

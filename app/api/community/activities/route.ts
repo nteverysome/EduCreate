@@ -14,6 +14,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { formatActivityForCommunity, calculateTrendingScore } from '@/lib/community/utils';
 
+// 強制動態渲染
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     // 1. 解析查詢參數
