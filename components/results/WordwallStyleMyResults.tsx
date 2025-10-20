@@ -857,29 +857,27 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       {/* 拖拽到根目录区域 */}
       <DragToRootArea currentFolderId={currentFolderId} onBackToRoot={handleBackToRoot} />
 
-      {/* 資料夾區域 - 獨立的橫向滾動（參考我的活動頁面） */}
-      {!currentFolderId && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
-          {/* 新增資料夾按鈕 */}
-          <button
-            onClick={() => setShowNewFolderModal(true)}
-            className="folder-card bg-white border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center min-h-[120px] hover:border-blue-400 hover:bg-blue-50 transition-colors group"
-          >
-            <FolderIcon className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-2" />
-            <span className="text-sm text-gray-600 group-hover:text-blue-600">新增資料夾</span>
-          </button>
+      {/* 資料夾區域 - 在所有層級都顯示（與 my-activities 一致） */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
+        {/* 新增資料夾按鈕 - 在所有層級都顯示 */}
+        <button
+          onClick={() => setShowNewFolderModal(true)}
+          className="folder-card bg-white border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center min-h-[120px] hover:border-blue-400 hover:bg-blue-50 transition-colors group"
+        >
+          <FolderIcon className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-2" />
+          <span className="text-sm text-gray-600 group-hover:text-blue-600">新增資料夾</span>
+        </button>
 
-          {/* 現有資料夾 */}
-          {filteredFolders.map(folder => (
-            <DroppableFolderCard
-              key={folder.id}
-              folder={folder}
-              onClick={handleFolderClick}
-              onMenuClick={handleFolderMenuClick}
-            />
-          ))}
-        </div>
-      )}
+        {/* 現有資料夾 */}
+        {filteredFolders.map(folder => (
+          <DroppableFolderCard
+            key={folder.id}
+            folder={folder}
+            onClick={handleFolderClick}
+            onMenuClick={handleFolderMenuClick}
+          />
+        ))}
+      </div>
 
       {/* 結果網格 - 5列（參考我的活動頁面） */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
