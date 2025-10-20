@@ -23,9 +23,15 @@ http://localhost:3000
 ```
 components/activities/WordwallStyleActivityCard.tsx    # 活動卡片
 components/activities/GameThumbnailPreview.tsx         # 遊戲預覽
+components/activities/WordwallStyleMyActivities.tsx    # 我的活動頁面組件
+components/results/WordwallStyleMyResults.tsx          # 我的結果頁面組件
+components/activities/FolderManager.tsx                # 資料夾管理組件
 app/games/switcher/page.tsx                            # 遊戲頁面
 app/my-activities/page.tsx                             # 我的活動頁面
+app/my-results/page.tsx                                # 我的結果頁面
+app/community/author/[authorId]/page.tsx               # 社區作者頁面
 lib/vocabulary/loadVocabularyData.ts                   # 詞彙工具
+lib/api/folderApiManager.ts                            # 資料夾 API 管理器
 ```
 
 ### API 路由
@@ -34,6 +40,8 @@ app/api/activities/[id]/route.ts                       # 活動 CRUD
 app/api/activities/[id]/view/route.ts                  # 瀏覽追蹤
 app/api/assignments/route.ts                           # 課業分配
 app/api/play/[activityId]/[assignmentId]/route.ts     # 遊戲數據
+app/api/folders/route.ts                               # 資料夾 CRUD
+app/api/community/authors/[authorId]/activities/route.ts  # 社區作者活動
 ```
 
 ### 文檔
@@ -130,6 +138,58 @@ DELETE  // 刪除
 /games/switcher?game=xxx&activityId=xxx
 ```
 
+### 資料夾系統架構
+```typescript
+// 自引用關係
+model Folder {
+  parentId String?  // 父資料夾 ID
+  depth    Int      // 層級深度（0-9）
+  path     String?  // 完整路徑
+
+  parent   Folder?  @relation("FolderHierarchy")
+  children Folder[] @relation("FolderHierarchy")
+}
+
+// 遞歸計數
+function getActivityCount(folderId) {
+  return directCount + sum(children.count)
+}
+```
+
+### Next.js URL 參數處理
+```typescript
+// ❌ 錯誤：使用 window.location.search
+const [id, setId] = useState(null);
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  setId(params.get('id'));
+}, []);
+
+// ✅ 正確：使用 useSearchParams
+import { useSearchParams } from 'next/navigation';
+const searchParams = useSearchParams();
+const id = searchParams?.get('id') || null;
+const [currentId, setCurrentId] = useState(id);
+```
+
+### 麵包屑導航模式
+```typescript
+// 1. 請求包含麵包屑的數據
+const data = await folderApi.getFolders('activities', folderId, !!folderId);
+
+// 2. 檢查響應類型
+if (folderId && 'folders' in data) {
+  const { folders, breadcrumbs } = data as FoldersWithBreadcrumbs;
+  setFolders(folders);
+  setBreadcrumbs(breadcrumbs);
+}
+
+// 3. 渲染麵包屑
+{breadcrumbs.map(crumb => (
+  <button onClick={() => navigate(crumb.id)}>{crumb.name}</button>
+))}
+```
+
 ---
 
 ## 🎮 遊戲類型映射
@@ -209,6 +269,66 @@ import GameThumbnailPreview from './GameThumbnailPreview';
   gameType={activity.gameType}
   vocabularyItems={activity.vocabularyItems}
 />
+```
+
+### 資料夾數量不正確
+```typescript
+// 1. 檢查是否使用正確的字段
+// ❌ 錯誤：在 results 頁面使用 activityCount
+folder.activityCount
+
+// ✅ 正確：在 results 頁面使用 resultCount
+folder.resultCount
+
+// 2. 檢查 API 是否使用遞歸計數
+// 文件：app/api/folders/route.ts
+async function getActivityCount(folderId) {
+  return directCount + sum(children.count);
+}
+```
+
+### 麵包屑導航不顯示
+```typescript
+// 1. 檢查是否請求麵包屑
+// ❌ 錯誤
+await folderApi.getFolders('activities', folderId, false);
+
+// ✅ 正確
+await folderApi.getFolders('activities', folderId, !!folderId);
+
+// 2. 檢查響應類型
+if (folderId && 'folders' in data) {
+  const { folders, breadcrumbs } = data as FoldersWithBreadcrumbs;
+  setBreadcrumbs(breadcrumbs);
+}
+
+// 3. 檢查 currentFolderId 初始化
+// ❌ 錯誤：使用 window.location.search
+const [id, setId] = useState(null);
+
+// ✅ 正確：使用 useSearchParams
+const searchParams = useSearchParams();
+const id = searchParams?.get('folderId') || null;
+const [currentId, setCurrentId] = useState(id);
+```
+
+### 新分頁開啟不工作
+```typescript
+// 問題：新視窗打開到根目錄，有閃爍
+
+// 解決方案：使用 useSearchParams
+import { useSearchParams } from 'next/navigation';
+
+const searchParams = useSearchParams();
+const folderIdFromUrl = searchParams?.get('folderId') || null;
+const [currentFolderId, setCurrentFolderId] = useState(folderIdFromUrl);
+
+// 移除舊的 useEffect
+// ❌ 刪除這段代碼
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  setCurrentFolderId(params.get('folderId'));
+}, []);
 ```
 
 ---
@@ -393,6 +513,24 @@ A: 訪問 `/games/switcher?game=xxx&activityId=xxx`（不帶 assignmentId）
 ### Q: 瀏覽次數在哪裡追蹤？
 A: `app/api/activities/[id]/view/route.ts` + 遊戲頁面自動調用
 
+### Q: 資料夾系統支援多少層嵌套？
+A: 最多 10 層（depth 0-9），使用 Prisma 自引用關係實現
+
+### Q: 為什麼資料夾數量不包含子資料夾？
+A: 檢查 API 是否使用遞歸計數函數（`getActivityCount` 或 `getResultCount`）
+
+### Q: 為什麼麵包屑導航不顯示？
+A: 確保：1) 請求麵包屑數據（第三個參數是 `!!currentFolderId`）2) 檢查響應類型 3) 使用 `useSearchParams` 初始化 `currentFolderId`
+
+### Q: 為什麼「在新分頁開啟」不工作？
+A: 使用 `useSearchParams` 而不是 `window.location.search`，直接從 URL 參數初始化狀態
+
+### Q: 如何在新頁面添加資料夾功能？
+A: 參考 `WordwallStyleMyActivities.tsx` 或 `WordwallStyleMyResults.tsx`，使用 `folderApi` 管理器
+
+### Q: 資料夾 API 返回什麼格式？
+A: 根據 `includeBreadcrumbs` 參數返回不同格式：`FolderData[]` 或 `{ folders, breadcrumbs, currentFolder }`
+
 ---
 
 ## 🎓 學習路徑
@@ -420,7 +558,11 @@ A: `app/api/activities/[id]/view/route.ts` + 遊戲頁面自動調用
 
 ---
 
-**快速參考版本**：1.0  
-**最後更新**：2025-01-18  
+**快速參考版本**：2.0
+**最後更新**：2025-10-20
 **提示**：將此文檔加入書籤，隨時查閱！
+
+**更新日誌**：
+- 2.0 (2025-10-20)：添加資料夾系統相關文件、核心概念、故障排除和 FAQ
+- 1.0 (2025-01-18)：初始版本
 
