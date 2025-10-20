@@ -585,9 +585,10 @@ export default function AuthorProfilePage() {
                 </div>
               )}
             </>
+          )}
 
-              {/* 分頁 */}
-              {totalPages > 1 && (
+          {/* 分頁 */}
+          {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-2">
                   <button
                     onClick={() => handlePageChange(page - 1)}
