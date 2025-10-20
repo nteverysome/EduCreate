@@ -420,7 +420,7 @@ const UnifiedNavigation = ({
                     </Link>
                     <div className="border-t border-gray-100 my-1"></div>
                     <Link
-                      href="/account/profile"
+                      href="/account/personal-details"
                       className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
                       onClick={() => setIsOpen(false)}
                     >
