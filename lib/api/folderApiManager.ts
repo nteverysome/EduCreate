@@ -20,6 +20,21 @@ export interface FolderData {
   updatedAt?: string;
 }
 
+export interface Breadcrumb {
+  id: string;
+  name: string;
+}
+
+export interface FoldersWithBreadcrumbs {
+  folders: FolderData[];
+  breadcrumbs: Breadcrumb[];
+  currentFolder: {
+    id: string;
+    name: string;
+    parentId: string | null;
+  } | null;
+}
+
 export interface CreateFolderRequest {
   name: string;
   color?: string;
@@ -45,20 +60,33 @@ export class FolderApiManager {
   /**
    * 获取指定类型的资料夹列表
    */
-  async getFolders(type: FolderType): Promise<FolderData[]> {
-    console.log(`🔍 [FolderApiManager] 获取 ${type} 类型的资料夹`);
-    
+  async getFolders(type: FolderType, parentId?: string | null, includeBreadcrumbs?: boolean): Promise<FolderData[] | FoldersWithBreadcrumbs> {
+    console.log(`🔍 [FolderApiManager] 获取 ${type} 类型的资料夹`, { parentId, includeBreadcrumbs });
+
     try {
-      const response = await fetch(`/api/folders?type=${type}`);
-      
+      const params = new URLSearchParams({ type });
+      if (parentId !== undefined) {
+        params.append('parentId', parentId || '');
+      }
+      if (includeBreadcrumbs) {
+        params.append('includeBreadcrumbs', 'true');
+      }
+
+      const response = await fetch(`/api/folders?${params.toString()}`);
+
       if (!response.ok) {
         throw new Error(`获取资料夹失败: ${response.status}`);
       }
-      
-      const folders = await response.json();
-      console.log(`✅ [FolderApiManager] 成功获取 ${folders.length} 个 ${type} 资料夹`);
-      
-      return folders;
+
+      const data = await response.json();
+
+      if (includeBreadcrumbs && parentId) {
+        console.log(`✅ [FolderApiManager] 成功获取 ${data.folders.length} 个 ${type} 资料夹和麵包屑`);
+        return data as FoldersWithBreadcrumbs;
+      } else {
+        console.log(`✅ [FolderApiManager] 成功获取 ${data.length} 个 ${type} 资料夹`);
+        return data as FolderData[];
+      }
     } catch (error) {
       console.error(`❌ [FolderApiManager] 获取 ${type} 资料夹失败:`, error);
       throw error;

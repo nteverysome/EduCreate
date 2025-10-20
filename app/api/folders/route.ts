@@ -53,11 +53,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type'); // 'activities' 或 'results'
     const parentId = searchParams.get('parentId'); // 父資料夾 ID（null 表示根目錄）
+    const includeBreadcrumbs = searchParams.get('includeBreadcrumbs') === 'true'; // 是否包含麵包屑導航
 
     // 🔍 深度调试：记录所有请求
     console.log('🔍 [API DEBUG] GET /api/folders 被调用');
     console.log('🔍 [API DEBUG] type 参数:', type);
     console.log('🔍 [API DEBUG] parentId 参数:', parentId);
+    console.log('🔍 [API DEBUG] includeBreadcrumbs 参数:', includeBreadcrumbs);
     console.log('🔍 [API DEBUG] 完整 URL:', request.url);
     console.log('🔍 [API DEBUG] 用户 ID:', session.user.id);
 
@@ -143,6 +145,56 @@ export async function GET(request: NextRequest) {
         };
       })
     );
+
+    // 如果需要包含麵包屑導航，構建麵包屑路徑
+    if (includeBreadcrumbs && parentId) {
+      const breadcrumbs: Array<{ id: string; name: string }> = [];
+
+      // 獲取當前資料夾信息
+      const currentFolder = await prisma.folder.findUnique({
+        where: { id: parentId },
+        select: {
+          id: true,
+          name: true,
+          parentId: true,
+        },
+      });
+
+      if (currentFolder) {
+        let folder: { id: string; name: string; parentId: string | null } = currentFolder;
+        breadcrumbs.unshift({ id: folder.id, name: folder.name });
+
+        // 遞歸構建麵包屑路徑
+        while (folder.parentId) {
+          const parentFolder = await prisma.folder.findUnique({
+            where: { id: folder.parentId },
+            select: {
+              id: true,
+              name: true,
+              parentId: true,
+            },
+          });
+
+          if (parentFolder) {
+            breadcrumbs.unshift({ id: parentFolder.id, name: parentFolder.name });
+            folder = parentFolder;
+          } else {
+            break;
+          }
+        }
+      }
+
+      // 返回包含麵包屑的對象
+      return NextResponse.json({
+        folders: foldersWithCount,
+        breadcrumbs,
+        currentFolder: currentFolder ? {
+          id: currentFolder.id,
+          name: currentFolder.name,
+          parentId: currentFolder.parentId,
+        } : null,
+      });
+    }
 
     return NextResponse.json(foldersWithCount);
   } catch (error) {
