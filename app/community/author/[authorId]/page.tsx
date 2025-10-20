@@ -533,50 +533,58 @@ export default function AuthorProfilePage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                {/* 返回上一層卡片 */}
-                {currentFolderId && (
-                  <div
-                    onClick={handleBackToParent}
-                    className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-all duration-200 border-2 border-dashed border-gray-300 hover:border-gray-400"
-                  >
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <ArrowLeft size={48} className="text-gray-400 mb-2" />
-                      <span className="text-gray-600 font-medium">返回上一層</span>
-                    </div>
-                  </div>
-                )}
+              {/* 資料夾區域 */}
+              {(folders.length > 0 || currentFolderId) && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">資料夾</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                    {/* 返回上一層卡片 */}
+                    {currentFolderId && (
+                      <div
+                        onClick={handleBackToParent}
+                        className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-dashed border-gray-300 hover:border-gray-400 flex flex-col items-center justify-center aspect-square"
+                      >
+                        <ArrowLeft size={32} className="text-gray-400 mb-2" />
+                        <span className="text-xs text-gray-600 font-medium text-center">返回上一層</span>
+                      </div>
+                    )}
 
-                {/* 資料夾卡片 */}
-                {folders.map((folder) => (
-                  <div
-                    key={folder.id}
-                    onClick={() => handleFolderClick(folder.id)}
-                    className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-all duration-200 border-2 border-transparent hover:border-purple-300"
-                  >
-                    <div className="flex items-center gap-4 mb-3">
-                      <Folder
-                        size={48}
-                        style={{ color: folder.color || '#8B5CF6' }}
-                        className="flex-shrink-0"
-                      />
-                      <div className="flex-grow min-w-0">
-                        <h3 className="font-bold text-lg text-gray-900 truncate">
+                    {/* 資料夾卡片 */}
+                    {folders.map((folder) => (
+                      <div
+                        key={folder.id}
+                        onClick={() => handleFolderClick(folder.id)}
+                        className="bg-white rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-transparent hover:border-purple-300 flex flex-col items-center justify-center aspect-square"
+                      >
+                        <Folder
+                          size={40}
+                          style={{ color: folder.color || '#8B5CF6' }}
+                          className="mb-2"
+                        />
+                        <h3 className="font-semibold text-sm text-gray-900 truncate w-full text-center">
                           {folder.name}
                         </h3>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs text-gray-600 mt-1">
                           {folder.activityCount} {folder.activityCount === 1 ? 'activity' : 'activities'}
                         </p>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+              )}
 
-                {/* 活動卡片 */}
-                {activities.map((activity) => (
-                  <CommunityActivityCard key={activity.id} activity={activity} />
-                ))}
-              </div>
+              {/* 活動區域 */}
+              {activities.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">活動</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {activities.map((activity) => (
+                      <CommunityActivityCard key={activity.id} activity={activity} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
 
               {/* 分頁 */}
               {totalPages > 1 && (
