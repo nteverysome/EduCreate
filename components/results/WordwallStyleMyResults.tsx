@@ -202,10 +202,14 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     try {
       console.log('🔍 [DEBUG] loadFolders 被调用 - 使用统一 API 管理器');
       console.log('🔍 [DEBUG] 当前资料夹 ID:', currentFolderId);
+      console.log('🔍 [DEBUG] !!currentFolderId:', !!currentFolderId);
+      console.log('🔍 [DEBUG] 將請求麵包屑:', !!currentFolderId);
 
       // 🚀 使用统一的 API 管理器，如果有 currentFolderId，請求包含麵包屑的數據
       const foldersData = await folderApi.getFolders('results', currentFolderId, !!currentFolderId);
       console.log('🔍 [DEBUG] 统一 API 管理器响应数据:', foldersData);
+      console.log('🔍 [DEBUG] 響應數據類型:', typeof foldersData);
+      console.log('🔍 [DEBUG] 是否包含 folders 字段:', 'folders' in foldersData);
 
       // 檢查返回的數據類型
       if (currentFolderId && 'folders' in foldersData) {
