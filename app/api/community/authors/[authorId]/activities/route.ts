@@ -131,7 +131,7 @@ export async function GET(
     // 構建麵包屑路徑
     const breadcrumbs: Array<{ id: string; name: string }> = [];
     if (currentFolder) {
-      let folder = currentFolder;
+      let folder: { id: string; name: string; parentId: string | null } = currentFolder;
       breadcrumbs.unshift({ id: folder.id, name: folder.name });
 
       while (folder.parentId) {
