@@ -28,26 +28,31 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
   const [folderName, setFolderName] = useState('');
   const [selectedColor, setSelectedColor] = useState(FOLDER_COLORS[0].value);
   const [isCreating, setIsCreating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!folderName.trim()) {
       return;
     }
 
     setIsCreating(true);
-    
+    setErrorMessage(''); // 清除之前的錯誤信息
+
     try {
       await onCreateFolder(folderName.trim(), selectedColor);
-      
+
       // 重置表單
       setFolderName('');
       setSelectedColor(FOLDER_COLORS[0].value);
+      setErrorMessage('');
       onClose();
     } catch (error) {
       console.error('創建資料夾失敗:', error);
-      // TODO: 顯示錯誤提示
+      // 顯示錯誤提示
+      const errorMsg = error instanceof Error ? error.message : '創建資料夾失敗，請稍後再試';
+      setErrorMessage(errorMsg);
     } finally {
       setIsCreating(false);
     }
@@ -57,6 +62,7 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
     if (!isCreating) {
       setFolderName('');
       setSelectedColor(FOLDER_COLORS[0].value);
+      setErrorMessage('');
       onClose();
     }
   };
@@ -88,6 +94,13 @@ export const NewFolderModal: React.FC<NewFolderModalProps> = ({
           
           {/* 表單內容 */}
           <form onSubmit={handleSubmit} className="p-6">
+            {/* 錯誤提示 */}
+            {errorMessage && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{errorMessage}</p>
+              </div>
+            )}
+
             {/* 資料夾名稱 */}
             <div className="mb-6">
               <h2 className="text-sm font-medium text-gray-700 mb-3">資料夾名稱</h2>
