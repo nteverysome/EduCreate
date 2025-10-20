@@ -277,24 +277,6 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
 
   return (
     <div className="folder-manager mb-4">
-      {/* 麵包屑導航 */}
-      <div className="breadcrumb mb-4">
-        <button
-          onClick={() => onFolderSelect(null)}
-          className="text-blue-600 hover:text-blue-800 font-medium"
-        >
-          我的活動
-        </button>
-        {currentFolderId && (
-          <>
-            <span className="mx-2 text-gray-400">/</span>
-            <span className="text-gray-700">
-              {currentFolder?.name || '載入中...'}
-            </span>
-          </>
-        )}
-      </div>
-
       {/* 資料夾網格 - 參考 Wordwall 佈局，減少底部間距更靠近活動卡片 */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
         {/* 創建新資料夾按鈕 */}
