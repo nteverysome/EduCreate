@@ -293,6 +293,16 @@ npm run dev
   - 在其他頁面實現相同功能（5 步驟指南）
   - 關鍵技術點和最佳實踐
 
+- **[📚 My Activities 資料夾系統實施文檔](docs/my-activities-folder-system-implementation.md)** - 完整的實施過程與技術細節 🆕
+  - 項目概述和技術架構（1322 行完整文檔）
+  - 數據庫設計（Prisma Schema、自引用關係、5 個設計決策）
+  - API 端點設計（GET/POST/PATCH/DELETE 完整實現）
+  - 前端組件設計（狀態管理、資料夾導航、麵包屑）
+  - 實施步驟（4 個階段詳細步驟）
+  - 測試與驗證（13 項功能測試、3 類邊界測試）
+  - 性能優化（數據庫索引、前端緩存、懶加載）
+  - 後續擴展（拖放支援、批量操作、自定義功能）
+
 ### �📄 **技術交接文檔** 🆕
 - **[📄 社區頁面遊戲名稱顯示](docs/HANDOVER_COMMUNITY_GAME_NAME_DISPLAY.md)** - 完整的技術實現和交接文檔
   - 社區頁面活動卡片顯示具體遊戲名稱
@@ -487,6 +497,8 @@ scripts\setup-cdn-quick-start.bat   # Windows
 - [x] **TouchControls 整合** - Starshake 遊戲移動設備觸摸控制 🆕📱
 - [x] **統一全棧架構** - Railway → Vercel 完整遷移 🆕🚀
 - [x] **環境隔離架構** - Production / Preview / Development 完全隔離 🆕✨
+- [x] **資料夾嵌套系統** - 10 層資料夾嵌套，完整的資料夾管理功能 🆕📁
+- [x] **社區作者頁面資料夾** - 類似 Wordwall 的資料夾系統實現 🆕
 - [x] **雙認證系統** - NextAuth + JWT 智能路由 🆕
 - [x] **智能截圖服務** - Railway + Puppeteer 自動截圖生成（5-7 秒） 🆕
 - [x] **社區分享功能** - 活動卡片顯示具體遊戲名稱 🆕
@@ -565,10 +577,12 @@ scripts\setup-cdn-quick-start.bat   # Windows
 **TouchControls 移動設備整合完成！Starshake 遊戲支援完整觸摸控制！** 📱🎮
 
 ### 🏆 **最新重要成就** 🆕
-1. **🔒 環境隔離架構** - Production / Preview / Development 完全隔離，數據安全提升 100% ✨
-2. **🚀 統一架構遷移** - Railway → Vercel 完整統一，開發效率提升 300%
-3. **⚡ 智能 API 路由** - NextAuth + JWT 雙認證系統，自動選擇最佳路由
-4. **🔧 架構版本升級** - v1.0 分離架構 → v2.0.0-unified 統一架構
+1. **📁 資料夾嵌套系統** - 10 層資料夾嵌套，完整的資料夾管理功能 🆕
+2. **🎯 社區作者頁面資料夾** - 類似 Wordwall 的資料夾系統實現 🆕
+3. **🔒 環境隔離架構** - Production / Preview / Development 完全隔離，數據安全提升 100% ✨
+4. **🚀 統一架構遷移** - Railway → Vercel 完整統一，開發效率提升 300%
+5. **⚡ 智能 API 路由** - NextAuth + JWT 雙認證系統，自動選擇最佳路由
+6. **🔧 架構版本升級** - v1.0 分離架構 → v2.0.0-unified 統一架構
 5. **�️ 智能截圖服務** - Railway + Puppeteer 自動截圖，生成速度提升 50-60% 🆕
 6. **🎮 社區分享功能** - 活動卡片顯示具體遊戲名稱，提升用戶體驗 🆕
 7. **�📱 TouchControls 整合** - Phaser 遊戲與觸摸控制的完美整合
