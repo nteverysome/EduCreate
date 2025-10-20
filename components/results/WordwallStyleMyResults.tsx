@@ -376,12 +376,13 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   // 處理創建新資料夾 - 使用统一的 API 管理器
   const handleCreateFolder = async (name: string, color: string) => {
     try {
-      // 🚀 使用统一的 API 管理器
+      // 🚀 使用统一的 API 管理器，傳遞 currentFolderId 作為 parentId
       const createdFolder = await folderApi.createFolder('results', {
         name,
         color,
         description: '',
-        icon: 'folder'
+        icon: 'folder',
+        parentId: currentFolderId // ✅ 傳遞當前資料夾 ID 作為父資料夾
       });
 
       const newFolder: ResultFolder = {
@@ -394,6 +395,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
       setFolders(prev => [...prev, newFolder]);
       console.log('✅ 創建資料夾成功:', newFolder);
+      console.log('✅ 父資料夾 ID:', currentFolderId);
     } catch (error) {
       console.error('❌ 創建資料夾失敗:', error);
       throw error;

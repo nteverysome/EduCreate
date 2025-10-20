@@ -349,16 +349,19 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const handleFolderCreate = async (name: string, color: string) => {
     try {
       console.log('🚀 創建資料夾:', name, color);
+      console.log('🚀 當前資料夾 ID (parentId):', currentFolderId);
 
-      // 🚀 使用统一的 API 管理器
+      // 🚀 使用统一的 API 管理器，傳遞 currentFolderId 作為 parentId
       const newFolder = await folderApi.createFolder('activities', {
         name: name.trim(),
         color: color,
         description: '',
-        icon: 'folder'
+        icon: 'folder',
+        parentId: currentFolderId // ✅ 傳遞當前資料夾 ID 作為父資料夾
       });
 
       console.log('✅ 資料夾創建成功:', newFolder);
+      console.log('✅ 父資料夾 ID:', currentFolderId);
 
       // 重新載入活動列表以顯示新資料夾
       await loadActivities();

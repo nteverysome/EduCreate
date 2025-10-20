@@ -25,6 +25,7 @@ export interface CreateFolderRequest {
   color?: string;
   description?: string;
   icon?: string;
+  parentId?: string | null; // 父資料夾 ID（null 表示根目錄）
 }
 
 /**
