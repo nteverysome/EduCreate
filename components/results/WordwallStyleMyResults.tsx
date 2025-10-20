@@ -6,7 +6,7 @@ import {
   TrashIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
-import { FolderPlus, Trash2 } from 'lucide-react';
+import { FolderPlus, Trash2, ChevronRight } from 'lucide-react';
 import WordwallStyleResultCard from './WordwallStyleResultCard';
 import WordwallStyleFolderCard from './WordwallStyleFolderCard';
 import DraggableResultCard from './DraggableResultCard';
@@ -27,7 +27,7 @@ import QRCodeModal from './QRCodeModal';
 import MoveToFolderModal from './MoveToFolderModal';
 import MoveFolderModal from './MoveFolderModal';
 import EditFolderColorModal from './EditFolderColorModal';
-import { folderApi, FolderData } from '../../lib/api/folderApiManager';
+import { folderApi, FolderData, Breadcrumb, FoldersWithBreadcrumbs } from '../../lib/api/folderApiManager';
 import ResultSearchAndFilter from './ResultSearchAndFilter';
 
 
@@ -65,6 +65,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [currentFolderParentId, setCurrentFolderParentId] = useState<string | null>(null); // 🆕 當前資料夾的父資料夾 ID
   const [currentFolder, setCurrentFolder] = useState<ResultFolder | null>(null); // 🆕 當前資料夾信息
+  const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]); // 🆕 麵包屑導航
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'created' | 'deadline' | 'name'>('created');
   const [loading, setLoading] = useState(true);
@@ -196,26 +197,45 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     try {
       console.log('🔍 [DEBUG] loadFolders 被调用 - 使用统一 API 管理器');
       console.log('🔍 [DEBUG] 当前资料夹 ID:', currentFolderId);
-      console.log('🔍 [DEBUG] 调用堆栈:', new Error().stack);
 
-      // 🚀 使用统一的 API 管理器，确保类型安全
-      const foldersData = await folderApi.getFolders('results');
+      // 🚀 使用统一的 API 管理器，如果有 currentFolderId，請求包含麵包屑的數據
+      const foldersData = await folderApi.getFolders('results', currentFolderId, !!currentFolderId);
       console.log('🔍 [DEBUG] 统一 API 管理器响应数据:', foldersData);
 
-      // 🆕 根據 currentFolderId 過濾資料夾
-      const filteredFolders = foldersData.filter((folder: FolderData) =>
-        folder.parentId === currentFolderId
-      );
-      console.log('🔍 [DEBUG] 过滤后的资料夹数量:', filteredFolders.length);
-      console.log('🔍 [DEBUG] 过滤后的资料夹:', filteredFolders.map((f: FolderData) => ({ name: f.name, parentId: f.parentId })));
+      // 檢查返回的數據類型
+      if (currentFolderId && 'folders' in foldersData) {
+        // 包含麵包屑的響應
+        const { folders: foldersList, breadcrumbs: breadcrumbsList } = foldersData as FoldersWithBreadcrumbs;
+        console.log('🔍 [DEBUG] 包含麵包屑的響應:', { folders: foldersList.length, breadcrumbs: breadcrumbsList.length });
 
-      setFolders(filteredFolders.map((folder: FolderData) => ({
-        id: folder.id,
-        name: folder.name,
-        resultCount: folder.resultCount || 0,
-        createdAt: folder.createdAt,
-        color: folder.color
-      })));
+        setFolders(foldersList.map((folder: FolderData) => ({
+          id: folder.id,
+          name: folder.name,
+          resultCount: folder.resultCount || 0,
+          createdAt: folder.createdAt,
+          color: folder.color
+        })));
+        setBreadcrumbs(breadcrumbsList);
+      } else {
+        // 普通的資料夾列表響應
+        const foldersList = foldersData as FolderData[];
+        console.log('🔍 [DEBUG] 普通資料夾列表響應:', foldersList.length);
+
+        // 🆕 根據 currentFolderId 過濾資料夾
+        const filteredFolders = foldersList.filter((folder: FolderData) =>
+          folder.parentId === currentFolderId
+        );
+        console.log('🔍 [DEBUG] 过滤后的资料夹数量:', filteredFolders.length);
+
+        setFolders(filteredFolders.map((folder: FolderData) => ({
+          id: folder.id,
+          name: folder.name,
+          resultCount: folder.activityCount || 0,
+          createdAt: folder.createdAt,
+          color: folder.color
+        })));
+        setBreadcrumbs([]);
+      }
     } catch (error) {
       console.error('❌ 載入資料夾失敗:', error);
       setFolders([]);
@@ -895,6 +915,29 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             sortBy={sortBy}
             onSortChange={setSortBy}
           />
+
+          {/* 麵包屑導航 */}
+          {breadcrumbs.length > 0 && (
+            <div className="flex items-center gap-2 mb-6 text-sm bg-white rounded-lg shadow-sm p-4">
+              <button
+                onClick={() => handleFolderSelect(null)}
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              >
+                我的結果
+              </button>
+              {breadcrumbs.map((crumb) => (
+                <div key={crumb.id} className="flex items-center gap-2">
+                  <ChevronRight size={16} className="text-gray-400" />
+                  <button
+                    onClick={() => handleFolderSelect(crumb.id)}
+                    className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                  >
+                    {crumb.name}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
       {/* 🔧 修復：拖拽到上一層區域（傳遞 currentFolderParentId） */}
       <DragToRootArea
