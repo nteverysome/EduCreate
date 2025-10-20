@@ -6,6 +6,7 @@ import {
   TrashIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
+import { FolderPlus, Trash2 } from 'lucide-react';
 import WordwallStyleResultCard from './WordwallStyleResultCard';
 import WordwallStyleFolderCard from './WordwallStyleFolderCard';
 import DraggableResultCard from './DraggableResultCard';
@@ -27,6 +28,7 @@ import MoveToFolderModal from './MoveToFolderModal';
 import MoveFolderModal from './MoveFolderModal';
 import EditFolderColorModal from './EditFolderColorModal';
 import { folderApi, FolderData } from '../../lib/api/folderApiManager';
+import ResultSearchAndFilter from './ResultSearchAndFilter';
 
 
 interface AssignmentResult {
@@ -773,88 +775,84 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
   return (
     <DragDropProvider onMoveResult={handleMoveResult}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-      {/* 頁面標題和操作按鈕 */}
-      <div className="mb-6 sm:mb-8">
-        {/* 標題和按鈕 - 響應式佈局 */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          {/* 面包屑导航 */}
-          <div className="breadcrumb">
-            <button
-              onClick={() => handleFolderSelect(null)}
-              className={`text-2xl sm:text-3xl font-bold ${currentFolderId ? 'text-blue-600 hover:text-blue-800' : 'text-gray-900'}`}
-            >
-              我的結果
-            </button>
-            {currentFolderId && (
-              <>
-                <span className="mx-2 text-xl sm:text-2xl text-gray-400">/</span>
-                <span className="text-xl sm:text-3xl font-bold text-gray-900">
-                  {currentFolder?.name || '載入中...'}
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* 操作按鈕區域 */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            <button
-              onClick={handleRecycleBinClick}
-              className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <TrashIcon className="w-4 h-4 sm:mr-2" />
-              <span className="hidden sm:inline">回收箱</span>
-            </button>
-
-            <div className="relative flex-1 sm:flex-initial sm:w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+      <div className="wordwall-style-results min-h-screen bg-gray-50">
+        {/* 頁面標題 - 優化版（與 my-activities 一致）*/}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-6">
+          <div className="max-w-7xl mx-auto">
+            {/* 桌面版布局 */}
+            <div className="hidden md:flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">我的結果</h1>
+                  <p className="text-sm text-gray-600 mt-1">管理您的課業分配結果和學生表現數據</p>
+                </div>
               </div>
-              <input
-                type="text"
-                placeholder="搜尋..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-              />
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setShowNewFolderModal(true)}
+                  className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"
+                >
+                  <FolderPlus className="w-5 h-5" />
+                  <span className="font-medium">新增資料夾</span>
+                </button>
+                <button
+                  onClick={handleRecycleBinClick}
+                  className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-200 shadow-sm hover:shadow-md"
+                  title="回收桶"
+                >
+                  <Trash2 className="w-5 h-5" />
+                  <span className="font-medium">回收桶</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 手機版布局 */}
+            <div className="md:hidden">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">我的結果</h1>
+                  <p className="text-sm text-gray-600">管理您的結果</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setShowNewFolderModal(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
+                >
+                  <FolderPlus className="w-4 h-4" />
+                  <span className="font-medium text-sm">新增資料夾</span>
+                </button>
+                <button
+                  onClick={handleRecycleBinClick}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all duration-200 shadow-sm"
+                  title="回收桶"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span className="font-medium text-sm">回收桶</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 排序選項 - 響應式 */}
-      <div className="mb-4 sm:mb-6">
-        <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-sm">
-          <span className="text-gray-500 text-xs sm:text-sm">訂購者：</span>
-          <button
-            onClick={() => setSortBy('created')}
-            className={`flex items-center space-x-1 text-xs sm:text-sm ${
-              sortBy === 'created' ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
-            }`}
-          >
-            <span>創建</span>
-            <span className="text-xs">▼</span>
-          </button>
-          <button
-            onClick={() => setSortBy('deadline')}
-            className={`flex items-center space-x-1 text-xs sm:text-sm ${
-              sortBy === 'deadline' ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
-            }`}
-          >
-            <span>最後期限</span>
-            <span className="text-xs">▼</span>
-          </button>
-          <button
-            onClick={() => setSortBy('name')}
-            className={`flex items-center space-x-1 text-xs sm:text-sm ${
-              sortBy === 'name' ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
-            }`}
-          >
-            <span>名字</span>
-            <span className="text-xs">▼</span>
-          </button>
-        </div>
-      </div>
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          {/* 搜索和篩選 - 參考 my-activities 佈局 */}
+          <ResultSearchAndFilter
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+          />
 
       {/* 拖拽到根目录区域 */}
       <DragToRootArea currentFolderId={currentFolderId} onBackToRoot={handleBackToRoot} />
@@ -1119,6 +1117,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           loadFolders();
         }}
       />
+        </div>
       </div>
     </DragDropProvider>
   );
