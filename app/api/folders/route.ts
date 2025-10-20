@@ -5,6 +5,42 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// 遞歸計算資料夾中的活動數量（包括所有子資料夾）
+async function getRecursiveActivityCount(folderId: string, type: 'activities' | 'results'): Promise<number> {
+  // 計算直接在該資料夾中的活動/結果數量
+  const directCount = type === 'activities'
+    ? await prisma.activity.count({
+        where: {
+          folderId: folderId,
+          deletedAt: null,
+        },
+      })
+    : await prisma.assignmentResult.count({
+        where: {
+          folderId: folderId,
+        },
+      });
+
+  // 獲取所有子資料夾
+  const subfolders = await prisma.folder.findMany({
+    where: {
+      parentId: folderId,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  // 遞歸計算所有子資料夾的活動/結果數量
+  let totalCount = directCount;
+  for (const subfolder of subfolders) {
+    totalCount += await getRecursiveActivityCount(subfolder.id, type);
+  }
+
+  return totalCount;
+}
+
 // GET - 獲取用戶的所有資料夾
 export async function GET(request: NextRequest) {
   try {
@@ -71,39 +107,42 @@ export async function GET(request: NextRequest) {
         path: true,
         createdAt: true,
         updatedAt: true,
-        activities: type === 'activities' ? { select: { id: true } } : false,
-        results: type === 'results' ? { select: { id: true } } : false
       },
       orderBy: {
         createdAt: 'desc'
       }
     });
 
-    // 計算每個資料夾的活動數量和結果數量
-    const foldersWithCount = folders.map(folder => {
-      // 🔧 修復：根據類型計算數量
-      const activityCount = type === 'activities' && folder.activities
-        ? folder.activities.length
-        : 0;
-      const resultCount = type === 'results' && folder.results
-        ? folder.results.length
-        : 0;
+    // 計算每個資料夾的活動數量和結果數量（遞歸計算包括所有子資料夾）
+    const foldersWithCount = await Promise.all(
+      folders.map(async (folder) => {
+        const activityCount = type === 'activities'
+          ? await getRecursiveActivityCount(folder.id, 'activities')
+          : 0;
+        const resultCount = type === 'results'
+          ? await getRecursiveActivityCount(folder.id, 'results')
+          : 0;
 
-      return {
-        id: folder.id,
-        name: folder.name,
-        description: folder.description,
-        color: folder.color,
-        icon: folder.icon,
-        parentId: folder.parentId,
-        depth: folder.depth,
-        path: folder.path,
-        createdAt: folder.createdAt,
-        updatedAt: folder.updatedAt,
-        activityCount: activityCount,
-        resultCount: resultCount
-      };
-    });
+        return {
+          id: folder.id,
+          name: folder.name,
+          description: folder.description,
+          color: folder.color,
+          icon: folder.icon,
+          parentId: folder.parentId,
+          depth: folder.depth,
+          path: folder.path,
+          createdAt: folder.createdAt,
+          updatedAt: folder.updatedAt,
+          activityCount: activityCount,
+          resultCount: resultCount,
+          _count: {
+            activities: activityCount,
+            results: resultCount,
+          },
+        };
+      })
+    );
 
     return NextResponse.json(foldersWithCount);
   } catch (error) {
