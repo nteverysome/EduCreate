@@ -11,6 +11,78 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { formatActivityForCommunity } from '@/lib/community/utils';
 
+// 遞歸計算資料夾中已發布活動的數量（包括所有子資料夾）
+async function getRecursivePublishedActivityCount(folderId: string): Promise<number> {
+  // 計算直接在該資料夾中的已發布活動數量
+  const directCount = await prisma.activity.count({
+    where: {
+      folderId: folderId,
+      publishedToCommunityAt: {
+        not: null,
+      },
+      deletedAt: null,
+    },
+  });
+
+  // 獲取所有子資料夾
+  const subfolders = await prisma.folder.findMany({
+    where: {
+      parentId: folderId,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  // 遞歸計算所有子資料夾的已發布活動數量
+  let totalCount = directCount;
+  for (const subfolder of subfolders) {
+    totalCount += await getRecursivePublishedActivityCount(subfolder.id);
+  }
+
+  return totalCount;
+}
+
+// 檢查資料夾或其子資料夾中是否有已發布活動
+async function hasPublishedActivitiesRecursive(folderId: string): Promise<boolean> {
+  // 檢查直接在該資料夾中是否有已發布活動
+  const directCount = await prisma.activity.count({
+    where: {
+      folderId: folderId,
+      publishedToCommunityAt: {
+        not: null,
+      },
+      deletedAt: null,
+    },
+  });
+
+  if (directCount > 0) {
+    return true;
+  }
+
+  // 獲取所有子資料夾
+  const subfolders = await prisma.folder.findMany({
+    where: {
+      parentId: folderId,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  // 遞歸檢查所有子資料夾
+  for (const subfolder of subfolders) {
+    const hasActivities = await hasPublishedActivitiesRecursive(subfolder.id);
+    if (hasActivities) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { authorId: string } }
@@ -81,39 +153,44 @@ export async function GET(
         orderBy = { publishedToCommunityAt: 'desc' };
     }
 
-    // 獲取當前資料夾的子資料夾（只顯示有已發布活動的）
-    const subfolders = await prisma.folder.findMany({
+    // 獲取當前資料夾的所有子資料夾
+    const allSubfolders = await prisma.folder.findMany({
       where: {
         userId: authorId,
         type: 'ACTIVITIES',
         parentId: folderId,
-        activities: {
-          some: {
-            publishedToCommunityAt: {
-              not: null,
-            },
-            deletedAt: null,
-          },
-        },
+        deletedAt: null,
       },
-      include: {
-        _count: {
-          select: {
-            activities: {
-              where: {
-                publishedToCommunityAt: {
-                  not: null,
-                },
-                deletedAt: null,
-              },
-            },
-          },
-        },
+      select: {
+        id: true,
+        name: true,
+        color: true,
       },
       orderBy: {
         name: 'asc',
       },
     });
+
+    // 過濾出包含已發布活動的資料夾（遞歸檢查）
+    const subfoldersWithActivities = await Promise.all(
+      allSubfolders.map(async (folder) => {
+        const hasActivities = await hasPublishedActivitiesRecursive(folder.id);
+        if (!hasActivities) {
+          return null;
+        }
+
+        const activityCount = await getRecursivePublishedActivityCount(folder.id);
+        return {
+          id: folder.id,
+          name: folder.name,
+          color: folder.color,
+          activityCount,
+        };
+      })
+    );
+
+    // 移除 null 值（沒有已發布活動的資料夾）
+    const subfolders = subfoldersWithActivities.filter((folder): folder is NonNullable<typeof folder> => folder !== null);
 
     // 獲取當前資料夾信息
     const currentFolder = folderId
@@ -213,13 +290,8 @@ export async function GET(
       formatActivityForCommunity(activity, baseUrl)
     );
 
-    // 格式化資料夾數據
-    const formattedFolders = subfolders.map(folder => ({
-      id: folder.id,
-      name: folder.name,
-      color: folder.color,
-      activityCount: folder._count.activities,
-    }));
+    // 資料夾數據已經格式化完成（包含遞歸計算的活動數量）
+    const formattedFolders = subfolders;
 
     return NextResponse.json({
       author,
