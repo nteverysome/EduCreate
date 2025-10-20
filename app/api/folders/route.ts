@@ -60,9 +60,19 @@ export async function GET(request: NextRequest) {
 
     const folders = await prisma.folder.findMany({
       where: whereCondition,
-      include: {
-        activities: type === 'activities',
-        results: type === 'results'
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        color: true,
+        icon: true,
+        parentId: true,
+        depth: true,
+        path: true,
+        createdAt: true,
+        updatedAt: true,
+        activities: type === 'activities' ? { select: { id: true } } : false,
+        results: type === 'results' ? { select: { id: true } } : false
       },
       orderBy: {
         createdAt: 'desc'
@@ -98,7 +108,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(foldersWithCount);
   } catch (error) {
     console.error('獲取資料夾失敗:', error);
-    return NextResponse.json({ error: '獲取資料夾失敗' }, { status: 500 });
+    // 返回詳細錯誤信息以便調試
+    const errorMessage = error instanceof Error ? error.message : '未知錯誤';
+    const errorStack = error instanceof Error ? error.stack : '';
+    return NextResponse.json({
+      error: '獲取資料夾失敗',
+      details: errorMessage,
+      stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
+    }, { status: 500 });
   }
 }
 
