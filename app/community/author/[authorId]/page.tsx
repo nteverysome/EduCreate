@@ -626,8 +626,6 @@ export default function AuthorProfilePage() {
                   </button>
                 </div>
               )}
-            </>
-          )}
         </div>
       </div>
     </div>
