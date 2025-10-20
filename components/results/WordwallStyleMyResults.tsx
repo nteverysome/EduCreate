@@ -230,7 +230,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         setFolders(filteredFolders.map((folder: FolderData) => ({
           id: folder.id,
           name: folder.name,
-          resultCount: folder.activityCount || 0,
+          resultCount: folder.resultCount || 0, // 🔧 修復：使用 resultCount 而不是 activityCount
           createdAt: folder.createdAt,
           color: folder.color
         })));
