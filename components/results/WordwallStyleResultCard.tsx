@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { memo } from 'react';
 import Image from 'next/image';
 import {
   UserIcon,
@@ -28,7 +28,7 @@ interface WordwallStyleResultCardProps {
   onMenuClick?: (result: AssignmentResult, event: React.MouseEvent) => void;
 }
 
-export const WordwallStyleResultCard: React.FC<WordwallStyleResultCardProps> = ({
+const WordwallStyleResultCardComponent: React.FC<WordwallStyleResultCardProps> = ({
   result,
   onClick,
   onMenuClick
@@ -158,5 +158,18 @@ export const WordwallStyleResultCard: React.FC<WordwallStyleResultCardProps> = (
     </div>
   );
 };
+
+// 使用 React.memo 優化性能
+export const WordwallStyleResultCard = memo(WordwallStyleResultCardComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.result.id === nextProps.result.id &&
+    prevProps.result.title === nextProps.result.title &&
+    prevProps.result.participantCount === nextProps.result.participantCount &&
+    prevProps.result.deadline === nextProps.result.deadline &&
+    prevProps.result.status === nextProps.result.status
+  );
+});
+
+WordwallStyleResultCard.displayName = 'WordwallStyleResultCard';
 
 export default WordwallStyleResultCard;

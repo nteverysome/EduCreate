@@ -38,39 +38,46 @@ export const DragToRootArea: React.FC<DragToRootAreaProps> = ({
 
     console.log('🔍 当前拖拽状态:', currentDragState);
 
-    // 🔧 修復：如果正在拖拽，执行拖拽到上一層操作（而不是根目錄）
-    if (currentDragState.hasOnDrop && currentDragState.isDragging && currentDragState.dragItemType === 'result') {
-      try {
-        console.log('🚀 执行拖拽到上一層操作...', {
-          dragItemId: currentDragState.dragItemId,
-          targetFolderId: currentFolderParentId,
-          targetType: currentFolderParentId ? 'parent-folder' : 'root',
-          eventType
-        });
+    // 🔧 修復：如果正在拖拽，执行拖拽到上一層操作（支援結果和資料夾）
+    if (currentDragState.hasOnDrop && currentDragState.isDragging) {
+      // 支援結果和資料夾的拖放
+      const isValidDragType = currentDragState.dragItemType === 'result' ||
+                              currentDragState.dragItemType === 'folder';
 
-        // 🔧 修復：移動到父資料夾（可能是 null，表示根目錄）
-        await dragDropContext.onDrop(currentFolderParentId || null, 'folder');
-        console.log('✅ 拖拽到上一層成功');
+      if (isValidDragType) {
+        try {
+          console.log('🚀 执行拖拽到上一層操作...', {
+            dragItemId: currentDragState.dragItemId,
+            dragItemType: currentDragState.dragItemType,
+            targetFolderId: currentFolderParentId,
+            targetType: currentFolderParentId ? 'parent-folder' : 'root',
+            eventType
+          });
 
-        // 拖拽成功后，导航回上一層
-        console.log('🔄 拖拽成功，导航回上一層...');
-        onBackToRoot();
-        console.log('✅ 已导航回上一層');
+          // 🔧 修復：移動到父資料夾（可能是 null，表示根目錄）
+          await dragDropContext.onDrop(currentFolderParentId || null, 'folder');
+          console.log('✅ 拖拽到上一層成功');
 
-        return true; // 表示拖拽操作成功
+          // 拖拽成功后，导航回上一層
+          console.log('🔄 拖拽成功，导航回上一層...');
+          onBackToRoot();
+          console.log('✅ 已导航回上一層');
 
-      } catch (error) {
-        console.error('❌ 拖拽到上一層失敗:', error);
-        return false;
+          return true; // 表示拖拽操作成功
+
+        } catch (error) {
+          console.error('❌ 拖拽到上一層失敗:', error);
+          return false;
+        }
       }
-    } else {
-      console.log('🔄 没有拖拽状态，跳过拖拽操作', {
-        reason: !currentDragState.isDragging ? '没有拖拽状态' :
-                !currentDragState.hasOnDrop ? '没有onDrop函数' :
-                currentDragState.dragItemType !== 'result' ? '拖拽项类型不是result' : '未知原因'
-      });
-      return false;
     }
+
+    console.log('🔄 没有拖拽状态，跳过拖拽操作', {
+      reason: !currentDragState.isDragging ? '没有拖拽状态' :
+              !currentDragState.hasOnDrop ? '没有onDrop函数' :
+              !['result', 'folder'].includes(currentDragState.dragItemType || '') ? '拖拽项类型無效' : '未知原因'
+    });
+    return false;
   };
 
   // 点击事件处理器
@@ -136,7 +143,7 @@ export const DragToRootArea: React.FC<DragToRootAreaProps> = ({
         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
         </svg>
-        拖拽結果到此處以移回上一層
+        拖拽結果或資料夾到此處以移回上一層
       </div>
     </div>
   );

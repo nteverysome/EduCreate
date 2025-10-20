@@ -12,20 +12,28 @@ interface ResultFolder {
   color?: string;
 }
 
-interface DroppableFolderCardProps {
+interface DraggableFolderCardProps {
   folder: ResultFolder;
   onClick: (folder: ResultFolder) => void;
   onMenuClick?: (folder: ResultFolder, event: React.MouseEvent) => void;
 }
 
-const DroppableFolderCardComponent: React.FC<DroppableFolderCardProps> = ({
+/**
+ * 可拖放的資料夾卡片組件
+ * 支援：
+ * 1. 拖放資料夾到其他資料夾（嵌套）
+ * 2. 接收結果拖放
+ * 3. 點擊進入資料夾
+ */
+const DraggableFolderCardComponent: React.FC<DraggableFolderCardProps> = ({
   folder,
   onClick,
   onMenuClick
 }) => {
-  const { isDragging, dragItem, onDrop } = useDragDrop();
+  const { isDragging, dragItem, onDrop, startDrag } = useDragDrop();
   const [isDropTarget, setIsDropTarget] = useState(false);
 
+  // 處理菜單點擊
   const handleMenuClick = (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
@@ -34,18 +42,37 @@ const DroppableFolderCardComponent: React.FC<DroppableFolderCardProps> = ({
     }
   };
 
+  // 處理卡片點擊
   const handleCardClick = (event: React.MouseEvent) => {
-    // 如果正在拖拽，不处理点击事件
+    // 如果正在拖拽，不處理點擊事件
     if (isDragging) {
-      console.log(`🚫 [${folder.name}] 拖拽状态中，忽略点击事件`);
+      console.log(`🚫 [${folder.name}] 拖拽狀態中，忽略點擊事件`);
       event.preventDefault();
       return;
     }
 
-    console.log(`🖱️ [${folder.name}] 处理点击事件`);
+    console.log(`🖱️ [${folder.name}] 處理點擊事件`);
     onClick(folder);
   };
 
+  // 開始拖放資料夾
+  const handleMouseDown = (event: React.MouseEvent) => {
+    // 如果點擊的是菜單按鈕，不啟動拖放
+    if ((event.target as HTMLElement).closest('button')) {
+      return;
+    }
+
+    event.preventDefault();
+    console.log(`🚀 [${folder.name}] 開始拖放資料夾`);
+    
+    startDrag({
+      id: folder.id,
+      type: 'folder',
+      data: folder
+    }, event);
+  };
+
+  // 滑鼠進入（可能是放置目標）
   const handleMouseEnter = () => {
     console.log(`🎯 [${folder.name}] handleMouseEnter:`, {
       isDragging,
@@ -67,10 +94,12 @@ const DroppableFolderCardComponent: React.FC<DroppableFolderCardProps> = ({
     }
   };
 
+  // 滑鼠離開
   const handleMouseLeave = () => {
     setIsDropTarget(false);
   };
 
+  // 滑鼠釋放（執行放置）
   const handleMouseUp = async () => {
     console.log(`🎯 [${folder.name}] handleMouseUp:`, {
       isDropTarget,
@@ -87,7 +116,7 @@ const DroppableFolderCardComponent: React.FC<DroppableFolderCardProps> = ({
     }
   };
 
-  // 將十六進制顏色轉換為 RGB 並調整透明度（參考我的活動頁面）
+  // 將十六進制顏色轉換為 RGB 並調整透明度
   const getBackgroundColor = (color: string) => {
     const hex = color.replace('#', '');
     const r = parseInt(hex.substr(0, 2), 16);
@@ -96,7 +125,10 @@ const DroppableFolderCardComponent: React.FC<DroppableFolderCardProps> = ({
     return `rgba(${r}, ${g}, ${b}, 0.1)`;
   };
 
-  const folderColor = folder.color || '#3B82F6'; // 默认蓝色
+  const folderColor = folder.color || '#3B82F6'; // 默認藍色
+
+  // 檢查當前資料夾是否正在被拖放
+  const isBeingDragged = isDragging && dragItem?.id === folder.id;
 
   // 檢查是否可以接收拖放
   const canAcceptDrop = isDragging && (
@@ -107,16 +139,21 @@ const DroppableFolderCardComponent: React.FC<DroppableFolderCardProps> = ({
   return (
     <div
       onClick={handleCardClick}
+      onMouseDown={handleMouseDown}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseUp={handleMouseUp}
       className={`
-        relative bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer group
+        relative bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 cursor-move group
         ${isDropTarget ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50' : ''}
+        ${isBeingDragged ? 'opacity-50 scale-95' : ''}
       `}
-      style={{ backgroundColor: isDropTarget ? '#EBF8FF' : getBackgroundColor(folderColor) }}
+      style={{ 
+        backgroundColor: isDropTarget ? '#EBF8FF' : getBackgroundColor(folderColor),
+        userSelect: 'none'
+      }}
     >
-      {/* 資料夾內容（參考我的活動頁面的垂直居中佈局） */}
+      {/* 資料夾內容 */}
       <div className="p-4">
         {/* 資料夾圖標和標題 */}
         <div className="flex flex-col items-center text-center mb-3">
@@ -136,7 +173,7 @@ const DroppableFolderCardComponent: React.FC<DroppableFolderCardProps> = ({
           </p>
         </div>
 
-        {/* 更多選項按鈕（參考我的活動頁面的右上角位置） */}
+        {/* 更多選項按鈕 */}
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={handleMenuClick}
@@ -159,12 +196,23 @@ const DroppableFolderCardComponent: React.FC<DroppableFolderCardProps> = ({
           </div>
         </div>
       )}
+
+      {/* 正在拖放指示器 */}
+      {isBeingDragged && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100/90 rounded-lg">
+          <div className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-700">
+            <span className="mr-2">📁</span>
+            拖放中...
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// 使用 React.memo 優化性能
-export const DroppableFolderCard = memo(DroppableFolderCardComponent, (prevProps, nextProps) => {
+// 使用 React.memo 優化性能，避免不必要的重新渲染
+export const DraggableFolderCard = memo(DraggableFolderCardComponent, (prevProps, nextProps) => {
+  // 只有當這些屬性改變時才重新渲染
   return (
     prevProps.folder.id === nextProps.folder.id &&
     prevProps.folder.name === nextProps.folder.name &&
@@ -173,6 +221,7 @@ export const DroppableFolderCard = memo(DroppableFolderCardComponent, (prevProps
   );
 });
 
-DroppableFolderCard.displayName = 'DroppableFolderCard';
+DraggableFolderCard.displayName = 'DraggableFolderCard';
 
-export default DroppableFolderCard;
+export default DraggableFolderCard;
+

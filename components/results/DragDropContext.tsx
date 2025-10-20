@@ -15,7 +15,7 @@ interface DragDropContextType {
   startDrag: (item: DragItem, event: React.MouseEvent) => void;
   endDrag: () => void;
   updateDragPreview: (x: number, y: number) => void;
-  onDrop: (targetId: string, targetType: 'folder' | 'root') => Promise<void>;
+  onDrop: (targetId: string | null, targetType: 'folder' | 'root') => Promise<void>;
 }
 
 const DragDropContext = createContext<DragDropContextType | null>(null);
@@ -23,11 +23,13 @@ const DragDropContext = createContext<DragDropContextType | null>(null);
 interface DragDropProviderProps {
   children: ReactNode;
   onMoveResult: (resultId: string, folderId: string | null) => Promise<void>;
+  onMoveFolder?: (folderId: string, targetParentId: string | null) => Promise<void>;
 }
 
 export const DragDropProvider: React.FC<DragDropProviderProps> = ({
   children,
-  onMoveResult
+  onMoveResult,
+  onMoveFolder
 }) => {
   const [dragItem, setDragItem] = useState<DragItem | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -104,7 +106,7 @@ export const DragDropProvider: React.FC<DragDropProviderProps> = ({
     setDragPreview(prev => ({ ...prev, x, y }));
   }, []);
 
-  const onDrop = useCallback(async (targetId: string, targetType: 'folder' | 'root') => {
+  const onDrop = useCallback(async (targetId: string | null, targetType: 'folder' | 'root') => {
     console.log('🎯 DragDropContext onDrop 被调用:', {
       targetId,
       targetType,
@@ -113,12 +115,8 @@ export const DragDropProvider: React.FC<DragDropProviderProps> = ({
       timestamp: Date.now()
     });
 
-    if (!dragItem || dragItem.type !== 'result') {
-      console.log('❌ onDrop 条件检查失败:', {
-        hasDragItem: !!dragItem,
-        dragItemType: dragItem?.type,
-        expectedType: 'result'
-      });
+    if (!dragItem) {
+      console.log('❌ onDrop 条件检查失败: 没有拖拽项');
       return;
     }
 
@@ -131,20 +129,41 @@ export const DragDropProvider: React.FC<DragDropProviderProps> = ({
     try {
       console.log('🚀 开始执行拖拽操作:', {
         dragItemId: dragItemInfo.id,
+        dragItemType: dragItemInfo.type,
         targetType,
         targetId
       });
 
-      const folderId = targetType === 'folder' ? targetId : null;
+      // 根據拖拽項類型執行不同的操作
+      if (dragItemInfo.type === 'result') {
+        // 移動結果
+        const folderId = targetType === 'folder' ? targetId : null;
 
-      console.log('📡 调用 onMoveResult:', {
-        resultId: dragItemInfo.id,
-        folderId
-      });
+        console.log('📡 调用 onMoveResult:', {
+          resultId: dragItemInfo.id,
+          folderId
+        });
 
-      await onMoveResult(dragItemInfo.id, folderId);
+        await onMoveResult(dragItemInfo.id, folderId);
+        console.log('✅ 結果移動成功');
 
-      console.log('✅ 拖拽操作成功完成');
+      } else if (dragItemInfo.type === 'folder') {
+        // 移動資料夾
+        if (!onMoveFolder) {
+          console.error('❌ onMoveFolder 回調未定義');
+          return;
+        }
+
+        const targetParentId = targetType === 'folder' ? targetId : null;
+
+        console.log('📡 调用 onMoveFolder:', {
+          folderId: dragItemInfo.id,
+          targetParentId
+        });
+
+        await onMoveFolder(dragItemInfo.id, targetParentId);
+        console.log('✅ 資料夾移動成功');
+      }
 
     } catch (error) {
       console.error('❌ 拖移失败:', error);
@@ -153,7 +172,7 @@ export const DragDropProvider: React.FC<DragDropProviderProps> = ({
       console.log('🔄 结束拖拽状态');
       endDrag();
     }
-  }, [dragItem, onMoveResult, endDrag, isDragging]);
+  }, [dragItem, onMoveResult, onMoveFolder, endDrag, isDragging]);
 
   const value: DragDropContextType = {
     dragItem,

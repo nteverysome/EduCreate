@@ -12,6 +12,7 @@ import WordwallStyleResultCard from './WordwallStyleResultCard';
 import WordwallStyleFolderCard from './WordwallStyleFolderCard';
 import DraggableResultCard from './DraggableResultCard';
 import DroppableFolderCard from './DroppableFolderCard';
+import DraggableFolderCard from './DraggableFolderCard';
 import { DragDropProvider } from './DragDropContext';
 import DragToRootArea from './DragToRootArea';
 import NewFolderModal from './NewFolderModal';
@@ -381,14 +382,14 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     folder.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // 處理結果項目點擊
-  const handleResultClick = (result: AssignmentResult) => {
+  // 處理結果項目點擊 - 使用 useCallback 優化
+  const handleResultClick = useCallback((result: AssignmentResult) => {
     // 導航到結果詳情頁面
     window.location.href = `/my-results/${result.id}`;
-  };
+  }, []);
 
-  // 處理資料夾點擊
-  const handleFolderClick = async (folder: ResultFolder) => {
+  // 處理資料夾點擊 - 使用 useCallback 優化
+  const handleFolderClick = useCallback(async (folder: ResultFolder) => {
     // 導航到資料夾頁面
     setCurrentFolderId(folder.id);
 
@@ -404,7 +405,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       console.error('❌ 獲取資料夾父 ID 失敗:', error);
       setCurrentFolderParentId(null);
     }
-  };
+  }, []);
 
   // 處理創建新資料夾 - 使用统一的 API 管理器
   const handleCreateFolder = async (name: string, color: string) => {
@@ -744,8 +745,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     }
   };
 
-  // 處理資料夾菜單點擊
-  const handleFolderMenuClick = (folder: ResultFolder, event: React.MouseEvent) => {
+  // 處理資料夾菜單點擊 - 使用 useCallback 優化
+  const handleFolderMenuClick = useCallback((folder: ResultFolder, event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -754,19 +755,19 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       x: event.clientX,
       y: event.clientY
     });
-  };
+  }, []);
 
-  // 關閉菜單
-  const handleCloseContextMenu = () => {
+  // 關閉菜單 - 使用 useCallback 優化
+  const handleCloseContextMenu = useCallback(() => {
     setContextMenu(null);
-  };
+  }, []);
 
-  // 處理刪除資料夾
-  const handleDeleteFolder = async (folder: ResultFolder) => {
+  // 處理刪除資料夾 - 使用 useCallback 優化
+  const handleDeleteFolder = useCallback(async (folder: ResultFolder) => {
     setFolderToDelete(folder);
     setShowDeleteModal(true);
     setContextMenu(null);
-  };
+  }, []);
 
   // 確認刪除資料夾 - 使用统一的 API 管理器
   const handleConfirmDelete = async () => {
@@ -835,7 +836,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
 
   return (
-    <DragDropProvider onMoveResult={handleMoveResult}>
+    <DragDropProvider onMoveResult={handleMoveResult} onMoveFolder={handleMoveFolder}>
       <div className="wordwall-style-results min-h-screen bg-gray-50">
         {/* 頁面標題 - 優化版（與 my-activities 一致）*/}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-6">
@@ -956,9 +957,9 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           <span className="text-sm text-gray-600 group-hover:text-blue-600">新增資料夾</span>
         </button>
 
-        {/* 現有資料夾 */}
+        {/* 現有資料夾 - 使用可拖放的資料夾卡片 */}
         {filteredFolders.map(folder => (
-          <DroppableFolderCard
+          <DraggableFolderCard
             key={folder.id}
             folder={folder}
             onClick={handleFolderClick}
