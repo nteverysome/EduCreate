@@ -534,6 +534,31 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setShowMoveFolderModal(true);
   };
 
+  // 處理移動資料夾（用於模態框）
+  const handleMoveFolder = async (folderId: string, targetParentId: string | null) => {
+    try {
+      const response = await fetch(`/api/folders/${folderId}/move`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ targetParentId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '移動資料夾失敗');
+      }
+
+      // 重新載入資料夾
+      await loadFolders();
+      await loadCurrentFolder();
+    } catch (error) {
+      console.error('移動資料夾失敗:', error);
+      throw error;
+    }
+  };
+
   // 處理變更資料夾顏色
   const handleUpdateFolderColor = async (folderId: string, color: string) => {
     try {
