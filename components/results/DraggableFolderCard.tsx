@@ -32,11 +32,15 @@ const DraggableFolderCardComponent: React.FC<DraggableFolderCardProps> = ({
 }) => {
   const { isDragging, dragItem, onDrop, startDrag } = useDragDrop();
   const [isDropTarget, setIsDropTarget] = useState(false);
+  const [dragStartPos, setDragStartPos] = useState<{ x: number; y: number } | null>(null);
+  const [isDragReady, setIsDragReady] = useState(false);
 
   // 當拖放結束時，重置 isDropTarget 狀態
   useEffect(() => {
     if (!isDragging) {
       setIsDropTarget(false);
+      setDragStartPos(null);
+      setIsDragReady(false);
     }
   }, [isDragging]);
 
@@ -62,7 +66,7 @@ const DraggableFolderCardComponent: React.FC<DraggableFolderCardProps> = ({
     onClick(folder);
   };
 
-  // 開始拖放資料夾
+  // 記錄滑鼠按下位置
   const handleMouseDown = (event: React.MouseEvent) => {
     // 如果點擊的是菜單按鈕，不啟動拖放
     if ((event.target as HTMLElement).closest('button')) {
@@ -70,13 +74,30 @@ const DraggableFolderCardComponent: React.FC<DraggableFolderCardProps> = ({
     }
 
     event.preventDefault();
-    console.log(`🚀 [${folder.name}] 開始拖放資料夾`);
-    
-    startDrag({
-      id: folder.id,
-      type: 'folder',
-      data: folder
-    }, event);
+    setDragStartPos({ x: event.clientX, y: event.clientY });
+    setIsDragReady(true);
+    console.log(`📍 [${folder.name}] 記錄滑鼠按下位置: (${event.clientX}, ${event.clientY})`);
+  };
+
+  // 滑鼠移動時檢查是否開始拖放
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (!isDragReady || !dragStartPos) return;
+
+    const deltaX = Math.abs(event.clientX - dragStartPos.x);
+    const deltaY = Math.abs(event.clientY - dragStartPos.y);
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+    // 只有移動超過 5 像素才開始拖放
+    if (distance > 5) {
+      console.log(`🚀 [${folder.name}] 開始拖放資料夾 (移動距離: ${distance.toFixed(2)}px)`);
+      setIsDragReady(false);
+
+      startDrag({
+        id: folder.id,
+        type: 'folder',
+        data: folder
+      }, event);
+    }
   };
 
   // 滑鼠進入（可能是放置目標）
@@ -147,6 +168,7 @@ const DraggableFolderCardComponent: React.FC<DraggableFolderCardProps> = ({
     <div
       onClick={handleCardClick}
       onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseUp={handleMouseUp}
@@ -155,7 +177,7 @@ const DraggableFolderCardComponent: React.FC<DraggableFolderCardProps> = ({
         ${isDropTarget ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50' : ''}
         ${isBeingDragged ? 'opacity-50 scale-95' : ''}
       `}
-      style={{ 
+      style={{
         backgroundColor: isDropTarget ? '#EBF8FF' : getBackgroundColor(folderColor),
         userSelect: 'none'
       }}
