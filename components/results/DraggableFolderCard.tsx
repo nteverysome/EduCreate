@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useEffect } from 'react';
 import { Folder, MoreVertical } from 'lucide-react';
 import { useDragDrop } from './DragDropContext';
 
@@ -32,6 +32,13 @@ const DraggableFolderCardComponent: React.FC<DraggableFolderCardProps> = ({
 }) => {
   const { isDragging, dragItem, onDrop, startDrag } = useDragDrop();
   const [isDropTarget, setIsDropTarget] = useState(false);
+
+  // 當拖放結束時，重置 isDropTarget 狀態
+  useEffect(() => {
+    if (!isDragging) {
+      setIsDropTarget(false);
+    }
+  }, [isDragging]);
 
   // 處理菜單點擊
   const handleMenuClick = (event: React.MouseEvent) => {
