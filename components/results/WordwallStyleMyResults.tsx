@@ -63,6 +63,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [results, setResults] = useState<AssignmentResult[]>([]);
   const [folders, setFolders] = useState<ResultFolder[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [currentFolderParentId, setCurrentFolderParentId] = useState<string | null>(null); // 🆕 當前資料夾的父資料夾 ID
   const [currentFolder, setCurrentFolder] = useState<ResultFolder | null>(null); // 🆕 當前資料夾信息
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'created' | 'deadline' | 'name'>('created');
@@ -368,9 +369,22 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   };
 
   // 處理資料夾點擊
-  const handleFolderClick = (folder: ResultFolder) => {
+  const handleFolderClick = async (folder: ResultFolder) => {
     // 導航到資料夾頁面
     setCurrentFolderId(folder.id);
+
+    // 🔧 獲取當前資料夾的父資料夾 ID
+    try {
+      const response = await fetch(`/api/folders/${folder.id}`);
+      if (response.ok) {
+        const folderData = await response.json();
+        setCurrentFolderParentId(folderData.parentId || null);
+        console.log('✅ 獲取資料夾父 ID:', folderData.parentId);
+      }
+    } catch (error) {
+      console.error('❌ 獲取資料夾父 ID 失敗:', error);
+      setCurrentFolderParentId(null);
+    }
   };
 
   // 處理創建新資料夾 - 使用统一的 API 管理器
@@ -680,9 +694,35 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setCurrentFolderId(folderId);
   };
 
-  // 處理點擊返回根目錄
-  const handleBackToRoot = () => {
-    setCurrentFolderId(null);
+  // 🔧 修復：處理點擊返回上一層（而不是根目錄）
+  const handleBackToRoot = async () => {
+    console.log('⬆️  點擊導航回上一層:', { currentFolderId, parentFolderId: currentFolderParentId });
+
+    // 🔧 修復：保存當前的父資料夾 ID，因為 handleFolderClick 會更新它
+    const targetFolderId = currentFolderParentId;
+
+    // 設置當前資料夾為父資料夾
+    setCurrentFolderId(targetFolderId);
+
+    // 如果目標是根目錄，清空父資料夾 ID
+    if (!targetFolderId) {
+      setCurrentFolderParentId(null);
+      console.log('✅ 已回到根目錄');
+      return;
+    }
+
+    // 獲取新的父資料夾 ID
+    try {
+      const response = await fetch(`/api/folders/${targetFolderId}`);
+      if (response.ok) {
+        const folderData = await response.json();
+        setCurrentFolderParentId(folderData.parentId || null);
+        console.log('✅ 已回到上一層，新的父資料夾 ID:', folderData.parentId);
+      }
+    } catch (error) {
+      console.error('❌ 獲取父資料夾 ID 失敗:', error);
+      setCurrentFolderParentId(null);
+    }
   };
 
   // 處理資料夾菜單點擊
@@ -856,8 +896,12 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             onSortChange={setSortBy}
           />
 
-      {/* 拖拽到根目录区域 */}
-      <DragToRootArea currentFolderId={currentFolderId} onBackToRoot={handleBackToRoot} />
+      {/* 🔧 修復：拖拽到上一層區域（傳遞 currentFolderParentId） */}
+      <DragToRootArea
+        currentFolderId={currentFolderId}
+        currentFolderParentId={currentFolderParentId}
+        onBackToRoot={handleBackToRoot}
+      />
 
       {/* 資料夾區域 - 在所有層級都顯示（與 my-activities 一致） */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">

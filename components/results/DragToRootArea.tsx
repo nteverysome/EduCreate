@@ -5,11 +5,13 @@ import { useDragDrop } from './DragDropContext';
 
 interface DragToRootAreaProps {
   currentFolderId: string | null;
+  currentFolderParentId?: string | null; // 🆕 當前資料夾的父資料夾 ID
   onBackToRoot: () => void;
 }
 
 export const DragToRootArea: React.FC<DragToRootAreaProps> = ({
   currentFolderId,
+  currentFolderParentId,
   onBackToRoot
 }) => {
   const dragDropContext = useDragDrop();
@@ -36,27 +38,29 @@ export const DragToRootArea: React.FC<DragToRootAreaProps> = ({
 
     console.log('🔍 当前拖拽状态:', currentDragState);
 
-    // 如果正在拖拽，执行拖拽到根目录操作
+    // 🔧 修復：如果正在拖拽，执行拖拽到上一層操作（而不是根目錄）
     if (currentDragState.hasOnDrop && currentDragState.isDragging && currentDragState.dragItemType === 'result') {
       try {
-        console.log('🚀 执行拖拽到根目录操作...', {
+        console.log('🚀 执行拖拽到上一層操作...', {
           dragItemId: currentDragState.dragItemId,
-          targetType: 'root',
+          targetFolderId: currentFolderParentId,
+          targetType: currentFolderParentId ? 'parent-folder' : 'root',
           eventType
         });
 
-        await dragDropContext.onDrop(null, 'root');
-        console.log('✅ 拖拽到根目录成功');
+        // 🔧 修復：移動到父資料夾（可能是 null，表示根目錄）
+        await dragDropContext.onDrop(currentFolderParentId || null, 'folder');
+        console.log('✅ 拖拽到上一層成功');
 
-        // 拖拽成功后，导航回根目录
-        console.log('🔄 拖拽成功，导航回根目录...');
+        // 拖拽成功后，导航回上一層
+        console.log('🔄 拖拽成功，导航回上一層...');
         onBackToRoot();
-        console.log('✅ 已导航回根目录');
+        console.log('✅ 已导航回上一層');
 
         return true; // 表示拖拽操作成功
 
       } catch (error) {
-        console.error('❌ 拖拽到根目錄失敗:', error);
+        console.error('❌ 拖拽到上一層失敗:', error);
         return false;
       }
     } else {
@@ -76,8 +80,8 @@ export const DragToRootArea: React.FC<DragToRootAreaProps> = ({
     const dragSuccess = await handleDragToRoot('click');
 
     if (!dragSuccess) {
-      // 如果没有拖拽操作，执行普通的返回根目录操作
-      console.log('🔄 执行普通的返回根目录操作...');
+      // 🔧 修復：如果没有拖拽操作，执行普通的返回上一層操作
+      console.log('🔄 执行普通的返回上一層操作...');
       onBackToRoot();
     }
   };
