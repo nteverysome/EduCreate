@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authenticateToken, createAuthResponse } from '@/lib/auth-middleware';
 import { prisma } from '@/lib/prisma';
 
+// 強制動態渲染
+export const dynamic = 'force-dynamic';
+
 // 獲取用戶統計
 export async function GET(request: NextRequest) {
   try {
