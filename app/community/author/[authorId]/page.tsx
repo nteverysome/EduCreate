@@ -19,14 +19,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { 
-  User, 
-  MapPin, 
-  Calendar, 
-  Eye, 
-  Heart, 
-  Bookmark, 
-  Play, 
+import {
+  User,
+  MapPin,
+  Calendar,
+  Eye,
+  Heart,
+  Bookmark,
+  Play,
   Users,
   ArrowLeft,
   Loader2,
@@ -35,7 +35,9 @@ import {
   Globe,
   Twitter,
   Facebook,
-  Linkedin
+  Linkedin,
+  Folder,
+  ChevronRight
 } from 'lucide-react';
 import CommunityActivityCard from '@/components/community/CommunityActivityCard';
 import { FormattedCommunityActivity } from '@/lib/community/utils';
@@ -66,6 +68,25 @@ interface AuthorStats {
   followingCount: number;
 }
 
+interface FolderData {
+  id: string;
+  name: string;
+  color: string | null;
+  activityCount: number;
+}
+
+interface Breadcrumb {
+  id: string;
+  name: string;
+}
+
+interface CurrentFolder {
+  id: string;
+  name: string;
+  color: string | null;
+  parentId: string | null;
+}
+
 export default function AuthorProfilePage() {
   const params = useParams();
   const router = useRouter();
@@ -84,10 +105,23 @@ export default function AuthorProfilePage() {
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
 
+  // 資料夾相關狀態
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [folders, setFolders] = useState<FolderData[]>([]);
+  const [currentFolder, setCurrentFolder] = useState<CurrentFolder | null>(null);
+  const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]);
+
+  // 從 URL 讀取 folderId
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const folderIdFromUrl = params.get('folderId');
+    setCurrentFolderId(folderIdFromUrl);
+  }, []);
+
   // 載入作者信息和活動
   useEffect(() => {
     loadAuthorData();
-  }, [authorId, sortBy, page]);
+  }, [authorId, sortBy, page, currentFolderId]);
 
   // 檢查是否為作者本人
   useEffect(() => {
@@ -101,9 +135,20 @@ export default function AuthorProfilePage() {
       setLoading(true);
       setError(null);
 
+      // 構建 URL 參數
+      const params = new URLSearchParams({
+        sortBy,
+        page: page.toString(),
+        limit: '12',
+      });
+
+      if (currentFolderId) {
+        params.append('folderId', currentFolderId);
+      }
+
       // 載入作者活動和統計數據
       const response = await fetch(
-        `/api/community/authors/${authorId}/activities?sortBy=${sortBy}&page=${page}&limit=12`
+        `/api/community/authors/${authorId}/activities?${params.toString()}`
       );
 
       if (!response.ok) {
@@ -115,6 +160,9 @@ export default function AuthorProfilePage() {
       setAuthor(data.author);
       setStats(data.stats);
       setActivities(data.activities);
+      setFolders(data.folders || []);
+      setCurrentFolder(data.currentFolder);
+      setBreadcrumbs(data.breadcrumbs || []);
       setTotalPages(data.pagination.totalPages);
 
       // 如果已登入，檢查是否已關注
@@ -183,6 +231,30 @@ export default function AuthorProfilePage() {
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleFolderClick = (folderId: string | null) => {
+    setCurrentFolderId(folderId);
+    setPage(1);
+
+    // 更新 URL 查詢參數
+    const params = new URLSearchParams(window.location.search);
+    if (folderId) {
+      params.set('folderId', folderId);
+    } else {
+      params.delete('folderId');
+    }
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({}, '', newUrl);
+  };
+
+  const handleBackToParent = () => {
+    if (currentFolder?.parentId) {
+      handleFolderClick(currentFolder.parentId);
+    } else {
+      handleFolderClick(null);
+    }
   };
 
   if (loading) {
@@ -393,9 +465,34 @@ export default function AuthorProfilePage() {
 
         {/* 活動列表 */}
         <div className="bg-white rounded-lg shadow-md p-6">
+          {/* 麵包屑導航 */}
+          {breadcrumbs.length > 0 && (
+            <div className="flex items-center gap-2 mb-6 text-sm">
+              <button
+                onClick={() => handleFolderClick(null)}
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              >
+                {author.name || '作者'}
+              </button>
+              {breadcrumbs.map((crumb) => (
+                <div key={crumb.id} className="flex items-center gap-2">
+                  <ChevronRight size={16} className="text-gray-400" />
+                  <button
+                    onClick={() => handleFolderClick(crumb.id)}
+                    className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                  >
+                    {crumb.name}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* 排序選項 */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">已發布的活動</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {currentFolder ? currentFolder.name : '已發布的活動'}
+            </h2>
             <div className="flex gap-2">
               {(['latest', 'popular', 'views', 'plays'] as const).map((sort) => (
                 <button
@@ -417,19 +514,65 @@ export default function AuthorProfilePage() {
           </div>
 
           {/* 活動網格 */}
-          {activities.length === 0 ? (
+          {folders.length === 0 && activities.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📭</div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                還沒有發布活動
+                {currentFolder ? '此資料夾是空的' : '還沒有發布活動'}
               </h3>
               <p className="text-gray-600">
-                {isOwner ? '開始創建並發布您的第一個活動吧！' : '這位作者還沒有發布任何活動'}
+                {isOwner
+                  ? currentFolder
+                    ? '此資料夾中沒有已發布的活動'
+                    : '開始創建並發布您的第一個活動吧！'
+                  : currentFolder
+                    ? '此資料夾中沒有已發布的活動'
+                    : '這位作者還沒有發布任何活動'
+                }
               </p>
             </div>
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                {/* 返回上一層卡片 */}
+                {currentFolderId && (
+                  <div
+                    onClick={handleBackToParent}
+                    className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-all duration-200 border-2 border-dashed border-gray-300 hover:border-gray-400"
+                  >
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <ArrowLeft size={48} className="text-gray-400 mb-2" />
+                      <span className="text-gray-600 font-medium">返回上一層</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 資料夾卡片 */}
+                {folders.map((folder) => (
+                  <div
+                    key={folder.id}
+                    onClick={() => handleFolderClick(folder.id)}
+                    className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-all duration-200 border-2 border-transparent hover:border-purple-300"
+                  >
+                    <div className="flex items-center gap-4 mb-3">
+                      <Folder
+                        size={48}
+                        style={{ color: folder.color || '#8B5CF6' }}
+                        className="flex-shrink-0"
+                      />
+                      <div className="flex-grow min-w-0">
+                        <h3 className="font-bold text-lg text-gray-900 truncate">
+                          {folder.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {folder.activityCount} {folder.activityCount === 1 ? 'activity' : 'activities'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* 活動卡片 */}
                 {activities.map((activity) => (
                   <CommunityActivityCard key={activity.id} activity={activity} />
                 ))}

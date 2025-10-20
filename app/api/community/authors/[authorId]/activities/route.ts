@@ -27,6 +27,9 @@ export async function GET(
     // 排序參數
     const sortBy = searchParams.get('sortBy') || 'latest';
 
+    // 資料夾參數
+    const folderId = searchParams.get('folderId') || null;
+
     // 檢查作者是否存在並獲取完整信息
     const author = await prisma.user.findUnique({
       where: { id: authorId },
@@ -78,7 +81,79 @@ export async function GET(
         orderBy = { publishedToCommunityAt: 'desc' };
     }
 
-    // 獲取活動列表
+    // 獲取當前資料夾的子資料夾（只顯示有已發布活動的）
+    const subfolders = await prisma.folder.findMany({
+      where: {
+        userId: authorId,
+        type: 'ACTIVITIES',
+        parentId: folderId,
+        activities: {
+          some: {
+            publishedToCommunityAt: {
+              not: null,
+            },
+            deletedAt: null,
+          },
+        },
+      },
+      include: {
+        _count: {
+          select: {
+            activities: {
+              where: {
+                publishedToCommunityAt: {
+                  not: null,
+                },
+                deletedAt: null,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    // 獲取當前資料夾信息
+    const currentFolder = folderId
+      ? await prisma.folder.findUnique({
+          where: { id: folderId },
+          select: {
+            id: true,
+            name: true,
+            color: true,
+            parentId: true,
+          },
+        })
+      : null;
+
+    // 構建麵包屑路徑
+    const breadcrumbs: Array<{ id: string; name: string }> = [];
+    if (currentFolder) {
+      let folder = currentFolder;
+      breadcrumbs.unshift({ id: folder.id, name: folder.name });
+
+      while (folder.parentId) {
+        const parentFolder = await prisma.folder.findUnique({
+          where: { id: folder.parentId },
+          select: {
+            id: true,
+            name: true,
+            parentId: true,
+          },
+        });
+
+        if (parentFolder) {
+          breadcrumbs.unshift({ id: parentFolder.id, name: parentFolder.name });
+          folder = parentFolder;
+        } else {
+          break;
+        }
+      }
+    }
+
+    // 獲取活動列表（根據 folderId 過濾）
     const activities = await prisma.activity.findMany({
       where: {
         userId: authorId,
@@ -86,6 +161,7 @@ export async function GET(
           not: null,
         },
         deletedAt: null,
+        folderId: folderId,
       },
       include: {
         user: {
@@ -102,7 +178,7 @@ export async function GET(
       take: limit,
     });
 
-    // 獲取總數
+    // 獲取總數（根據 folderId 過濾）
     const total = await prisma.activity.count({
       where: {
         userId: authorId,
@@ -110,6 +186,7 @@ export async function GET(
           not: null,
         },
         deletedAt: null,
+        folderId: folderId,
       },
     });
 
@@ -136,9 +213,25 @@ export async function GET(
       formatActivityForCommunity(activity, baseUrl)
     );
 
+    // 格式化資料夾數據
+    const formattedFolders = subfolders.map(folder => ({
+      id: folder.id,
+      name: folder.name,
+      color: folder.color,
+      activityCount: folder._count.activities,
+    }));
+
     return NextResponse.json({
       author,
       activities: formattedActivities,
+      folders: formattedFolders,
+      currentFolder: currentFolder ? {
+        id: currentFolder.id,
+        name: currentFolder.name,
+        color: currentFolder.color,
+        parentId: currentFolder.parentId,
+      } : null,
+      breadcrumbs,
       stats: {
         totalActivities: total,
         totalViews: stats._sum.communityViews || 0,
