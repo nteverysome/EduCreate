@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   FolderIcon,
   TrashIcon,
@@ -59,10 +60,14 @@ interface WordwallStyleMyResultsProps {
 export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   userId
 }) => {
+  // 🆕 使用 Next.js 的 useSearchParams hook 讀取 URL 參數
+  const searchParams = useSearchParams();
+  const folderIdFromUrl = searchParams.get('folderId');
+
   // 狀態管理
   const [results, setResults] = useState<AssignmentResult[]>([]);
   const [folders, setFolders] = useState<ResultFolder[]>([]);
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(folderIdFromUrl); // 🔧 修復：直接從 URL 參數初始化
   const [currentFolderParentId, setCurrentFolderParentId] = useState<string | null>(null); // 🆕 當前資料夾的父資料夾 ID
   const [currentFolder, setCurrentFolder] = useState<ResultFolder | null>(null); // 🆕 當前資料夾信息
   const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]); // 🆕 麵包屑導航
@@ -266,16 +271,6 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       console.error('載入當前資料夾信息失敗:', error);
     }
   }, [currentFolderId]);
-
-  // 🆕 從 URL 參數初始化 currentFolderId
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const folderIdFromUrl = urlParams.get('folderId');
-    if (folderIdFromUrl) {
-      console.log('📂 從 URL 參數設置資料夾 ID:', folderIdFromUrl);
-      setCurrentFolderId(folderIdFromUrl);
-    }
-  }, []);
 
   // 🔍 全局 fetch 拦截器（仅用于调试）
   useEffect(() => {
