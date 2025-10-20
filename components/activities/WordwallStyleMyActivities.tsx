@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Plus, FolderPlus, ArrowUp, Trash2, ChevronRight } from 'lucide-react';
 import FolderManager from './FolderManager';
 import CreateFolderModal from './CreateFolderModal';
@@ -112,9 +113,13 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   userId,
   userEmail
 }) => {
+  // 🆕 使用 Next.js 的 useSearchParams hook 讀取 URL 參數
+  const searchParams = useSearchParams();
+  const folderIdFromUrl = searchParams?.get('folderId') || null;
+
   // 狀態管理
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(folderIdFromUrl); // 🔧 修復：直接從 URL 參數初始化
   const [currentFolderParentId, setCurrentFolderParentId] = useState<string | null>(null); // 新增：當前資料夾的父資料夾 ID
   const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]); // 新增：麵包屑導航
   const [searchQuery, setSearchQuery] = useState('');
@@ -140,16 +145,6 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [showAssignmentSetModal, setShowAssignmentSetModal] = useState(false);
   const [assignmentShareUrl, setAssignmentShareUrl] = useState('');
   const [assignmentTitle, setAssignmentTitle] = useState('');
-
-  // 從 URL 參數初始化 currentFolderId
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const folderIdFromUrl = urlParams.get('folderId');
-    if (folderIdFromUrl) {
-      console.log('📂 從 URL 參數設置資料夾 ID:', folderIdFromUrl);
-      setCurrentFolderId(folderIdFromUrl);
-    }
-  }, []);
 
   // 使用實時截圖更新
   const handleScreenshotUpdate = useCallback((update: any) => {
