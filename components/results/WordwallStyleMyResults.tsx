@@ -8,13 +8,9 @@ import {
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import { FolderPlus, Trash2, ChevronRight } from 'lucide-react';
-import WordwallStyleResultCard from './WordwallStyleResultCard';
-import WordwallStyleFolderCard from './WordwallStyleFolderCard';
-import DraggableResultCard from './DraggableResultCard';
-import DroppableFolderCard from './DroppableFolderCard';
-import DraggableFolderCard from './DraggableFolderCard';
-import { DragDropProvider } from './DragDropContext';
-import DragToRootArea from './DragToRootArea';
+import ResultFolderCard from './ResultFolderCard';
+import DraggableResultCardNative from './DraggableResultCardNative';
+import DropToParentTarget from './DropToParentTarget';
 import NewFolderModal from './NewFolderModal';
 import FolderContextMenu from './FolderContextMenu';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -470,15 +466,19 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setShowRenameFolderModal(true);
   };
 
-  // 處理移動資料夾
-  const handleMoveFolder = async (folderId: string, targetParentId: string | null) => {
+  // 處理資料夾拖移到資料夾
+  const handleFolderDropToFolder = async (draggedFolderId: string, targetFolderId: string) => {
+    console.log('📁 資料夾拖移到資料夾:', draggedFolderId, '->', targetFolderId);
+
     try {
-      const response = await fetch(`/api/folders/${folderId}/move`, {
+      const response = await fetch(`/api/folders/${draggedFolderId}/move`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ targetParentId }),
+        body: JSON.stringify({
+          targetParentId: targetFolderId
+        }),
       });
 
       if (!response.ok) {
@@ -486,12 +486,45 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         throw new Error(errorData.error || '移動資料夾失敗');
       }
 
-      // 重新載入資料夾
+      console.log('✅ 資料夾移動成功');
+
+      // 重新載入資料夾和結果列表
       await loadFolders();
       await loadCurrentFolder();
-    } catch (error) {
-      console.error('移動資料夾失敗:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('❌ 移動資料夾失敗:', error);
+      alert(error.message || '移動資料夾失敗');
+    }
+  };
+
+  // 處理資料夾拖移回上一層
+  const handleFolderDropToParent = async (folderId: string) => {
+    console.log('⬆️  資料夾拖移回上一層:', { folderId, targetParentId: currentFolderParentId });
+
+    try {
+      const response = await fetch(`/api/folders/${folderId}/move`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          targetParentId: currentFolderParentId // 移動到父資料夾（可能是 null，表示根目錄）
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '移動資料夾失敗');
+      }
+
+      console.log('✅ 資料夾移動到上一層成功');
+
+      // 重新載入資料夾和結果列表
+      await loadFolders();
+      await loadCurrentFolder();
+    } catch (error: any) {
+      console.error('❌ 移動資料夾失敗:', error);
+      alert(error.message || '移動資料夾失敗');
     }
   };
 
@@ -664,19 +697,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     setShowQRCodeModal(true);
   };
 
-  // 處理移動結果到資料夾 - 支持模態框
-  const handleMoveResult = async (resultId: string, folderId: string | null) => {
-    // 如果是特殊標識，打開移動模態框
-    if (folderId === 'OPEN_MODAL') {
-      const result = results.find(r => r.id === resultId);
-      if (result) {
-        setResultToMove(result);
-        setShowMoveToFolderModal(true);
-      }
-      return;
-    }
-
-    // 執行實際的移動操作
+  // 處理結果拖移到資料夾
+  const handleResultDropToFolder = async (resultId: string, folderId: string) => {
     try {
       console.log('📁 將結果移動到資料夾:', { resultId, folderId });
 
@@ -695,7 +717,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
       console.log('✅ 結果移動成功');
 
-      // 🚀 簡單方案：重新載入所有數據（與 /my-activities 一致）
+      // 重新載入所有數據
       await loadResults();
       await loadFolders();
 
@@ -703,6 +725,54 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       console.error('❌ 移動結果失敗:', error);
       alert(`移動結果失敗: ${error.message}`);
     }
+  };
+
+  // 處理結果拖移回上一層
+  const handleResultDropToParent = async (resultId: string) => {
+    try {
+      console.log('⬆️  將結果移動回上一層:', { resultId, targetFolderId: currentFolderParentId });
+
+      const response = await fetch(`/api/results/${resultId}/move`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          folderId: currentFolderParentId // 移動到父資料夾（可能是 null，表示根目錄）
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '移動結果失敗');
+      }
+
+      console.log('✅ 結果移動到上一層成功');
+
+      // 重新載入所有數據
+      await loadResults();
+      await loadFolders();
+
+    } catch (error: any) {
+      console.error('❌ 移動結果失敗:', error);
+      alert(`移動結果失敗: ${error.message}`);
+    }
+  };
+
+  // 處理移動結果到資料夾 - 支持模態框（保留給菜單使用）
+  const handleMoveResult = async (resultId: string, folderId: string | null) => {
+    // 如果是特殊標識，打開移動模態框
+    if (folderId === 'OPEN_MODAL') {
+      const result = results.find(r => r.id === resultId);
+      if (result) {
+        setResultToMove(result);
+        setShowMoveToFolderModal(true);
+      }
+      return;
+    }
+
+    // 執行實際的移動操作
+    await handleResultDropToFolder(resultId, folderId || '');
   };
 
 
@@ -836,8 +906,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
 
 
   return (
-    <DragDropProvider onMoveResult={handleMoveResult} onMoveFolder={handleMoveFolder}>
-      <div className="wordwall-style-results min-h-screen bg-gray-50">
+    <div className="wordwall-style-results min-h-screen bg-gray-50">
         {/* 頁面標題 - 優化版（與 my-activities 一致）*/}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-6 py-6">
           <div className="max-w-7xl mx-auto">
@@ -939,12 +1008,14 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             </div>
           )}
 
-      {/* 🔧 修復：拖拽到上一層區域（傳遞 currentFolderParentId） */}
-      <DragToRootArea
-        currentFolderId={currentFolderId}
-        currentFolderParentId={currentFolderParentId}
-        onBackToRoot={handleBackToRoot}
-      />
+      {/* 🔧 修復：在資料夾視圖中顯示拖拽回上一層的目標區域 */}
+      {currentFolderId && (
+        <DropToParentTarget
+          onResultDropToParent={handleResultDropToParent}
+          onFolderDropToParent={handleFolderDropToParent}
+          onClickToParent={handleBackToRoot}
+        />
+      )}
 
       {/* 資料夾區域 - 在所有層級都顯示（與 my-activities 一致） */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
@@ -957,22 +1028,25 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
           <span className="text-sm text-gray-600 group-hover:text-blue-600">新增資料夾</span>
         </button>
 
-        {/* 現有資料夾 - 使用可拖放的資料夾卡片 */}
+        {/* 現有資料夾 - 使用原生 HTML5 拖放 API */}
         {filteredFolders.map(folder => (
-          <DraggableFolderCard
+          <ResultFolderCard
             key={folder.id}
             folder={folder}
             onClick={handleFolderClick}
             onMenuClick={handleFolderMenuClick}
+            onResultDrop={handleResultDropToFolder}
+            onFolderDrop={handleFolderDropToFolder}
+            draggable={true}
           />
         ))}
       </div>
 
       {/* 結果網格 - 5列（參考我的活動頁面） */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {/* 結果項目 */}
+        {/* 結果項目 - 使用原生 HTML5 拖放 API */}
         {filteredAndSortedResults.map(result => (
-          <WordwallStyleResultCard
+          <DraggableResultCardNative
             key={result.id}
             result={result}
             onClick={handleResultClick}
@@ -1206,7 +1280,6 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       />
         </div>
       </div>
-    </DragDropProvider>
   );
 };
 
