@@ -274,11 +274,11 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
     };
   }, []);
 
-  // 初始化时加载资料夹数据（只执行一次）
+  // 當 currentFolderId 改變時重新加載資料夾數據
   useEffect(() => {
     console.log('🚀 初始化加载资料夹数据...');
     loadFolders();
-  }, []); // 空依赖数组，只在组件挂载时执行一次
+  }, [currentFolderId, loadFolders]); // 添加 currentFolderId 和 loadFolders 到依賴數組
 
   // 🆕 當 currentFolderId 改變時載入當前資料夾信息
   useEffect(() => {
