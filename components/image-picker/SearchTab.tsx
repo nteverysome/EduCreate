@@ -102,12 +102,26 @@ export default function SearchTab({ onSelect, isSelected }: SearchTabProps) {
       // 從 UserImage 中獲取 sourceId（即 Unsplash photo ID）
       const photoId = userImage.sourceId;
 
+      console.log('handlePhotoSelect called with:', {
+        photoId,
+        userImage,
+        photosLength: photos.length,
+        photosIds: photos.map(p => p.id),
+      });
+
       if (!photoId) {
         throw new Error('圖片 ID 不可用');
       }
 
       // 從原始 photos 數組中查找對應的 UnsplashPhoto
       const originalPhoto = photos.find(p => p.id === photoId);
+
+      console.log('Found originalPhoto:', {
+        found: !!originalPhoto,
+        hasLinks: !!originalPhoto?.links,
+        hasDownloadLocation: !!originalPhoto?.links?.downloadLocation,
+        links: originalPhoto?.links,
+      });
 
       if (!originalPhoto) {
         throw new Error('找不到原始圖片數據');
