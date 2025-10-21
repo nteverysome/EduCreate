@@ -111,6 +111,17 @@ export default function ImageGallery({
     }
   };
 
+  const handleConfirmSelection = () => {
+    if (selectedIds.size === 0) return;
+
+    const selectedImages = images.filter(img => selectedIds.has(img.id));
+    if (multiple) {
+      onSelect?.(selectedImages);
+    } else {
+      onSelect?.(selectedImages[0]);
+    }
+  };
+
   const handleBatchDelete = async () => {
     if (selectedIds.size === 0) return;
 
@@ -273,6 +284,14 @@ export default function ImageGallery({
             >
               取消選擇
             </button>
+            {selectable && onSelect && (
+              <button
+                onClick={handleConfirmSelection}
+                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                確認選擇
+              </button>
+            )}
             <button
               onClick={handleBatchDelete}
               className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
