@@ -105,11 +105,77 @@ export default function TestImageComponentsPage() {
   };
 
   // Handle ImageEditor save
-  const handleImageEditorSave = (editedImageBlob: Blob, editedImageUrl: string) => {
+  const handleImageEditorSave = async (editedImageBlob: Blob, editedImageUrl: string) => {
     console.log('Image edited:', { blob: editedImageBlob, url: editedImageUrl });
-    updateTestResult('ImageEditor', 'pass', '成功編輯並保存圖片');
-    setShowImageEditor(false);
-    setImageToEdit(null);
+
+    if (!imageToEdit) {
+      console.error('No image to edit');
+      return;
+    }
+
+    try {
+      // 1. Upload edited image to Vercel Blob
+      const formData = new FormData();
+      formData.append('file', editedImageBlob, `edited-${Date.now()}.jpg`);
+
+      const uploadResponse = await fetch('/api/images/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const uploadData = await uploadResponse.json();
+
+      if (!uploadData.success) {
+        throw new Error(uploadData.error || '上傳失敗');
+      }
+
+      console.log('Image uploaded successfully:', uploadData.image);
+
+      // 2. Create version record for the original image
+      const versionResponse = await fetch(`/api/images/${imageToEdit.id}/versions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: uploadData.image.url,
+          blobPath: uploadData.image.blobPath,
+          changes: {
+            type: 'edit',
+            timestamp: new Date().toISOString(),
+            description: '圖片編輯',
+          },
+        }),
+      });
+
+      const versionData = await versionResponse.json();
+
+      if (!versionData.success) {
+        throw new Error(versionData.error || '創建版本失敗');
+      }
+
+      console.log('Version created successfully:', versionData.version);
+
+      // Update the selected image with the new URL
+      setSelectedImages(prev =>
+        prev.map(img =>
+          img.id === imageToEdit.id
+            ? { ...img, url: uploadData.image.url }
+            : img
+        )
+      );
+
+      setImageToEdit({ ...imageToEdit, url: uploadData.image.url });
+
+      updateTestResult('ImageEditor', 'pass', `成功編輯並保存圖片（版本 ${versionData.version.version}）`);
+      alert(`圖片已保存！版本號：${versionData.version.version}`);
+    } catch (error) {
+      console.error('Error saving image:', error);
+      alert('保存圖片失敗: ' + (error instanceof Error ? error.message : String(error)));
+    } finally {
+      setShowImageEditor(false);
+      setImageToEdit(null);
+    }
   };
 
   return (
