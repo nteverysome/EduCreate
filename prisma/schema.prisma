@@ -8,21 +8,21 @@ datasource db {
 }
 
 model User {
-  id                   String                @id @default(cuid())
-  name                 String?
-  email                String                @unique
-  password             String?
-  emailVerified        DateTime?
-  image                String?
-  country              String?               @default("TW")
-  language             String?               @default("zh-TW") // 用戶界面語言
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  role                 Role                  @default(USER)
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String?
+  emailVerified DateTime?
+  image         String?
+  country       String?   @default("TW")
+  language      String?   @default("zh-TW") // 用戶界面語言
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          Role      @default(USER)
 
   // 社區個人資料
-  bio                  String?               // 個人簡介
-  socialLinks          Json?                 // 社交媒體連結 {twitter, facebook, linkedin, website}
+  bio         String? // 個人簡介
+  socialLinks Json? // 社交媒體連結 {twitter, facebook, linkedin, website}
 
   accounts             Account[]
   activities           Activity[]
@@ -39,17 +39,22 @@ model User {
   vocabularySets       VocabularySet[]
 
   // 社區功能關聯
-  activityLikes        ActivityLike[]
-  activityBookmarks    ActivityBookmark[]
-  activityComments     ActivityComment[]
-  communityReports     CommunityReport[]
+  activityLikes     ActivityLike[]
+  activityBookmarks ActivityBookmark[]
+  activityComments  ActivityComment[]
+  communityReports  CommunityReport[]
 
   // 粉絲/關注關係
-  following            UserFollow[]          @relation("UserFollowing")
-  followers            UserFollow[]          @relation("UserFollowers")
+  following UserFollow[] @relation("UserFollowing")
+  followers UserFollow[] @relation("UserFollowers")
 
   // 自訂標籤
-  customTags           String[]              @default([])
+  customTags String[] @default([])
+
+  // 圖片管理
+  images        UserImage[]    @relation("UserImages")
+  imageTags     ImageTag[]     @relation("UserImageTags")
+  imageVersions ImageVersion[] @relation("ImageVersions")
 }
 
 model Account {
@@ -95,54 +100,54 @@ model PasswordReset {
 }
 
 model Activity {
-  id              String               @id @default(cuid())
-  title           String
-  description     String?
-  content         Json?
-  elements        Json                 @default("[]")
-  type            String
-  templateType    String?
-  published       Boolean              @default(false)
-  isPublic        Boolean              @default(false)
-  isDraft         Boolean              @default(false)
-  folderId        String?
-  lastPlayed      DateTime?
-  playCount       Int                  @default(0)
-  shareCount      Int                  @default(0)
-  gameTemplateId  String?
-  aiGenerated     Boolean              @default(false)
-  difficulty      DifficultyLevel?
-  estimatedTime   String?
-  tags            String[]
-  geptLevel       GEPTLevel?           @default(ELEMENTARY)
-  totalWords      Int                  @default(0)
+  id             String           @id @default(cuid())
+  title          String
+  description    String?
+  content        Json?
+  elements       Json             @default("[]")
+  type           String
+  templateType   String?
+  published      Boolean          @default(false)
+  isPublic       Boolean          @default(false)
+  isDraft        Boolean          @default(false)
+  folderId       String?
+  lastPlayed     DateTime?
+  playCount      Int              @default(0)
+  shareCount     Int              @default(0)
+  gameTemplateId String?
+  aiGenerated    Boolean          @default(false)
+  difficulty     DifficultyLevel?
+  estimatedTime  String?
+  tags           String[]
+  geptLevel      GEPTLevel?       @default(ELEMENTARY)
+  totalWords     Int              @default(0)
 
   // 社區分享功能（基礎）
-  isPublicShared  Boolean              @default(false)
-  shareToken      String?              @unique
-  communityPlays  Int                  @default(0)
+  isPublicShared Boolean @default(false)
+  shareToken     String? @unique
+  communityPlays Int     @default(0)
 
   // 社區功能（擴展）
   publishedToCommunityAt DateTime?
   communityCategory      String?
-  communityTags          String[]             @default([])
+  communityTags          String[]  @default([])
   communityDescription   String?
   communityThumbnail     String?
-  communityViews         Int                  @default(0)
-  communityLikes         Int                  @default(0)
-  communityBookmarks     Int                  @default(0)
-  communityComments      Int                  @default(0)
-  isFeatured             Boolean              @default(false)
+  communityViews         Int       @default(0)
+  communityLikes         Int       @default(0)
+  communityBookmarks     Int       @default(0)
+  communityComments      Int       @default(0)
+  isFeatured             Boolean   @default(false)
   featuredAt             DateTime?
-  thumbnailUrl           String?              // 活動縮圖 URL（Vercel Blob Storage）
-  screenshotStatus       String?              @default("pending") // pending, generating, completed, failed
-  screenshotError        String?              // 截圖生成錯誤信息
-  screenshotRetryCount   Int                  @default(0) // 重試次數
+  thumbnailUrl           String? // 活動縮圖 URL（Vercel Blob Storage）
+  screenshotStatus       String?   @default("pending") // pending, generating, completed, failed
+  screenshotError        String? // 截圖生成錯誤信息
+  screenshotRetryCount   Int       @default(0) // 重試次數
 
   // 原作者追蹤（用於複製活動）
-  originalAuthorId       String?              // 原作者 ID
-  originalAuthorName     String?              // 原作者名稱
-  copiedFromActivityId   String?              // 原活動 ID
+  originalAuthorId     String? // 原作者 ID
+  originalAuthorName   String? // 原作者名稱
+  copiedFromActivityId String? // 原活動 ID
 
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
@@ -162,10 +167,13 @@ model Activity {
   vocabularyItems VocabularyItem[]
 
   // 社區功能關聯
-  likes           ActivityLike[]
-  bookmarks       ActivityBookmark[]
-  comments        ActivityComment[]
-  reports         CommunityReport[]
+  likes     ActivityLike[]
+  bookmarks ActivityBookmark[]
+  comments  ActivityComment[]
+  reports   CommunityReport[]
+
+  // 圖片管理
+  activityImages ActivityImage[] @relation("ActivityImages")
 
   // 索引優化
   @@index([isPublicShared, publishedToCommunityAt])
@@ -193,9 +201,9 @@ model Folder {
   color       String?
   icon        String?
   type        FolderType         @default(ACTIVITIES) // 資料夾類型：ACTIVITIES 或 RESULTS
-  parentId    String?            // 父資料夾 ID（null 表示根目錄）
+  parentId    String? // 父資料夾 ID（null 表示根目錄）
   depth       Int                @default(0) // 資料夾深度（0 = 根目錄）
-  path        String?            // 資料夾路徑（例如：/folder1/folder2）
+  path        String? // 資料夾路徑（例如：/folder1/folder2）
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
   deletedAt   DateTime?
@@ -590,8 +598,8 @@ enum GEPTLevel {
 }
 
 enum FolderType {
-  ACTIVITIES  // 活動資料夾
-  RESULTS     // 結果資料夾
+  ACTIVITIES // 活動資料夾
+  RESULTS // 結果資料夾
 }
 
 enum PartOfSpeech {
@@ -609,53 +617,53 @@ enum PartOfSpeech {
 
 // 課業分配模型
 model Assignment {
-  id                String             @id @default(cuid())
-  activityId        String
-  title             String
-  registrationType  RegistrationType   @default(NAME)
-  deadline          DateTime?
-  gameEndSettings   Json?              // 遊戲結束設置
-  status            AssignmentStatus   @default(ACTIVE)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  id               String           @id @default(cuid())
+  activityId       String
+  title            String
+  registrationType RegistrationType @default(NAME)
+  deadline         DateTime?
+  gameEndSettings  Json? // 遊戲結束設置
+  status           AssignmentStatus @default(ACTIVE)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   // 關聯
-  activity          Activity           @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  results           AssignmentResult[]
+  activity Activity           @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  results  AssignmentResult[]
 }
 
 // 課業結果模型
 model AssignmentResult {
-  id           String               @id @default(cuid())
+  id           String       @id @default(cuid())
   assignmentId String
-  resultNumber Int                  // 結果編號（如：結果1、結果2）
-  customTitle  String?              // 自定義標題，用於重命名功能
-  shareToken   String?              @unique // 可共用結果連結的 token
-  status       ResultStatus         @default(ACTIVE)
-  folderId     String?              // 資料夾ID，用於組織結果
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
+  resultNumber Int // 結果編號（如：結果1、結果2）
+  customTitle  String? // 自定義標題，用於重命名功能
+  shareToken   String?      @unique // 可共用結果連結的 token
+  status       ResultStatus @default(ACTIVE)
+  folderId     String? // 資料夾ID，用於組織結果
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   // 關聯
-  assignment   Assignment           @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  folder       Folder?              @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  assignment   Assignment        @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  folder       Folder?           @relation(fields: [folderId], references: [id], onDelete: SetNull)
   participants GameParticipant[]
 }
 
 // 遊戲參與者模型
 model GameParticipant {
-  id             String           @id @default(cuid())
+  id             String   @id @default(cuid())
   resultId       String
   studentName    String
-  score          Int              @default(0)
-  timeSpent      Int              @default(0)  // 遊戲時間（秒）
-  correctAnswers Int              @default(0)
-  totalQuestions Int              @default(0)
-  gameData       Json?            // 詳細遊戲數據
-  completedAt    DateTime         @default(now())
+  score          Int      @default(0)
+  timeSpent      Int      @default(0) // 遊戲時間（秒）
+  correctAnswers Int      @default(0)
+  totalQuestions Int      @default(0)
+  gameData       Json? // 詳細遊戲數據
+  completedAt    DateTime @default(now())
 
   // 關聯
-  result         AssignmentResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  result AssignmentResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
 }
 
 // 註冊類型枚舉
@@ -686,8 +694,8 @@ model ActivityLike {
   createdAt  DateTime @default(now())
 
   // 關聯
-  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // 唯一約束：每個用戶只能喜歡一次
   @@unique([activityId, userId])
@@ -701,12 +709,12 @@ model ActivityBookmark {
   id         String   @id @default(cuid())
   activityId String
   userId     String
-  folderId   String?  // 可選：收藏到特定資料夾
+  folderId   String? // 可選：收藏到特定資料夾
   createdAt  DateTime @default(now())
 
   // 關聯
-  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // 唯一約束：每個用戶只能收藏一次
   @@unique([activityId, userId])
@@ -722,16 +730,16 @@ model ActivityComment {
   activityId String
   userId     String
   content    String
-  parentId   String?   // 父評論ID（用於回覆）
+  parentId   String? // 父評論ID（用於回覆）
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   deletedAt  DateTime? // 軟刪除
 
   // 關聯
-  activity   Activity          @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent     ActivityComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies    ActivityComment[] @relation("CommentReplies")
+  activity Activity          @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent   ActivityComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  ActivityComment[] @relation("CommentReplies")
 
   // 索引
   @@index([activityId])
@@ -752,11 +760,11 @@ model CommunityReport {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   resolvedAt DateTime?
-  resolvedBy String?      // 處理人員ID
+  resolvedBy String? // 處理人員ID
 
   // 關聯
-  activity   Activity     @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // 索引
   @@index([activityId])
@@ -777,13 +785,13 @@ enum ReportReason {
 // 用戶關注模型
 model UserFollow {
   id          String   @id @default(cuid())
-  followerId  String   // 關注者ID
-  followingId String   // 被關注者ID
+  followerId  String // 關注者ID
+  followingId String // 被關注者ID
   createdAt   DateTime @default(now())
 
   // 關聯
-  follower    User     @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
-  following   User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
 
   // 索引和唯一約束
   @@unique([followerId, followingId])
@@ -798,4 +806,99 @@ enum ReportStatus {
   REVIEWING
   RESOLVED
   REJECTED
+}
+
+// ==================== 圖片管理功能模型 ====================
+
+// 用戶圖片表
+model UserImage {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation("UserImages", fields: [userId], references: [id], onDelete: Cascade)
+
+  // 圖片信息
+  url      String // Vercel Blob URL
+  blobPath String // Blob 存儲路徑
+  fileName String // 原始文件名
+  fileSize Int // 文件大小（bytes）
+  mimeType String // MIME 類型
+  width    Int? // 圖片寬度
+  height   Int? // 圖片高度
+
+  // 元數據
+  source   String   @default("upload") // upload | unsplash
+  sourceId String? // Unsplash 圖片 ID（如果來自 Unsplash）
+  alt      String? // 替代文字（可訪問性）
+  tags     String[] // 標籤
+
+  // 使用統計
+  usageCount Int       @default(0) // 使用次數
+  lastUsedAt DateTime? // 最後使用時間
+
+  // 時間戳
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 關聯
+  activities ActivityImage[]
+  versions   ImageVersion[]
+
+  @@index([userId])
+  @@index([source])
+  @@index([createdAt])
+}
+
+// 活動圖片關聯表
+model ActivityImage {
+  id         String    @id @default(cuid())
+  activityId String
+  activity   Activity  @relation("ActivityImages", fields: [activityId], references: [id], onDelete: Cascade)
+  imageId    String
+  image      UserImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  // 圖片在活動中的位置
+  position Int // 圖片順序
+  context  String? // 圖片上下文（例如：問題文字）
+
+  createdAt DateTime @default(now())
+
+  @@unique([activityId, imageId, position])
+  @@index([activityId])
+  @@index([imageId])
+}
+
+// 圖片標籤表
+model ImageTag {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  userId String? // null 表示系統標籤
+  user   User?   @relation("UserImageTags", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// 圖片版本表
+model ImageVersion {
+  id        String   @id @default(cuid())
+  imageId   String
+  image     UserImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  // 版本信息
+  version   Int      // 版本號（從 1 開始）
+  url       String   // 版本圖片 URL
+  blobPath  String   // Blob 存儲路徑
+
+  // 變更記錄
+  changes   Json     // 記錄變更內容（裁剪、旋轉、濾鏡等）
+
+  // 創建信息
+  createdAt DateTime @default(now())
+  createdBy String
+  user      User     @relation("ImageVersions", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@unique([imageId, version])
+  @@index([imageId])
+  @@index([createdBy])
 }
