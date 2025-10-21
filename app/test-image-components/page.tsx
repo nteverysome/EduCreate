@@ -303,7 +303,10 @@ export default function TestImageComponentsPage() {
               測試圖片管理的列表、篩選和刪除功能
             </p>
             <button
-              onClick={() => setShowImageGallery(true)}
+              onClick={() => {
+                setShowImageGallery(true);
+                updateTestResult('ImageGallery', 'pass', '成功打開圖片庫');
+              }}
               className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors"
             >
               打開 ImageGallery
@@ -392,7 +395,6 @@ export default function TestImageComponentsPage() {
               <h2 className="text-2xl font-bold">ContentItemWithImage 測試</h2>
               <button
                 onClick={() => {
-                  updateTestResult('ContentItemWithImage', 'pass', '成功測試內容編輯器');
                   setShowContentEditor(false);
                 }}
                 className="text-gray-500 hover:text-gray-700"
@@ -406,12 +408,16 @@ export default function TestImageComponentsPage() {
                 onChange={(newValue) => {
                   console.log('Content changed:', newValue);
                   setContentItem(newValue);
-                  updateTestResult('ContentItemWithImage', 'pass', '成功編輯內容');
                 }}
                 onRemove={() => {
                   console.log('Content removed');
                 }}
-                autoSave={false}
+                autoSave={true}
+                onSave={async (value) => {
+                  console.log('Content saved:', value);
+                  updateTestResult('ContentItemWithImage', 'pass', '成功保存內容');
+                  return true;
+                }}
               />
             </div>
           </div>
