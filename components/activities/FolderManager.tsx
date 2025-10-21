@@ -286,7 +286,7 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
       {/* 小網格視圖：手機版垂直布局，平板以上水平堆疊（列表式卡片） */}
       <div className={`mb-4 ${
         viewMode === 'small-grid'
-          ? 'space-y-2 sm:grid sm:grid-cols-3 sm:gap-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+          ? 'space-y-2 sm:grid sm:grid-cols-3 sm:gap-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5'
           : 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'
       }`}>
         {/* 創建新資料夾按鈕 */}
