@@ -44,6 +44,14 @@ export default function ContentItemWithImage({
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Text overlay states
+  const [textPosition, setTextPosition] = useState({ x: 50, y: 50 }); // percentage
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
+  const [textColor, setTextColor] = useState<'white' | 'black'>('white');
+  const [showBg, setShowBg] = useState(true);
+
   // Track changes
   useEffect(() => {
     setHasChanges(JSON.stringify(localValue) !== JSON.stringify(value));
@@ -105,6 +113,40 @@ export default function ContentItemWithImage({
     });
   };
 
+  // Text dragging handlers
+  const handleTextMouseDown = (e: React.MouseEvent) => {
+    if (!localValue.imageUrl) return;
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - (textPosition.x * e.currentTarget.parentElement!.offsetWidth / 100),
+      y: e.clientY - (textPosition.y * e.currentTarget.parentElement!.offsetHeight / 100),
+    });
+  };
+
+  const handleTextMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !localValue.imageUrl) return;
+    const container = e.currentTarget as HTMLElement;
+    const rect = container.getBoundingClientRect();
+    const x = ((e.clientX - dragStart.x) / rect.width) * 100;
+    const y = ((e.clientY - dragStart.y) / rect.height) * 100;
+    setTextPosition({
+      x: Math.max(0, Math.min(100, x)),
+      y: Math.max(0, Math.min(100, y)),
+    });
+  };
+
+  const handleTextMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const getFontSizeClass = () => {
+    switch (fontSize) {
+      case 'small': return 'text-lg';
+      case 'medium': return 'text-2xl';
+      case 'large': return 'text-4xl';
+    }
+  };
+
   return (
     <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
       {/* Header */}
@@ -129,17 +171,41 @@ export default function ContentItemWithImage({
         )}
       </div>
 
-      {/* Image Section */}
+      {/* Image Section with Draggable Text */}
       <div className="mb-4">
         {localValue.imageUrl ? (
-          <div className="relative group">
+          <div
+            className="relative group select-none"
+            onMouseMove={handleTextMouseMove}
+            onMouseUp={handleTextMouseUp}
+            onMouseLeave={handleTextMouseUp}
+          >
             <img
               src={localValue.imageUrl}
               alt={localValue.text || '內容圖片'}
-              className="w-full h-64 object-cover rounded-lg"
+              className="w-full h-96 object-contain rounded-lg bg-gray-100"
             />
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity rounded-lg" />
-            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+
+            {/* Draggable Text Overlay */}
+            <div
+              className={`absolute cursor-move ${getFontSizeClass()} font-bold ${
+                textColor === 'white' ? 'text-white' : 'text-black'
+              } ${showBg ? 'bg-black/50 px-4 py-2 rounded-lg' : ''}`}
+              style={{
+                left: `${textPosition.x}%`,
+                top: `${textPosition.y}%`,
+                transform: 'translate(-50%, -50%)',
+                maxWidth: '80%',
+                wordWrap: 'break-word',
+              }}
+              onMouseDown={handleTextMouseDown}
+            >
+              {localValue.text || '點擊下方編輯文字'}
+            </div>
+
+            {/* Control Buttons */}
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity rounded-lg pointer-events-none" />
+            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
               <button
                 onClick={() => setShowImagePicker(true)}
                 className="p-2 bg-white rounded-lg shadow-lg hover:bg-gray-100 transition-colors"
@@ -171,6 +237,77 @@ export default function ContentItemWithImage({
           </button>
         )}
       </div>
+
+      {/* Text Style Controls (only show when image exists) */}
+      {localValue.imageUrl && (
+        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            文字樣式
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {/* Font Size */}
+            <div className="flex gap-1">
+              <button
+                onClick={() => setFontSize('small')}
+                className={`px-3 py-1 text-xs rounded ${
+                  fontSize === 'small' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                小
+              </button>
+              <button
+                onClick={() => setFontSize('medium')}
+                className={`px-3 py-1 text-xs rounded ${
+                  fontSize === 'medium' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                中
+              </button>
+              <button
+                onClick={() => setFontSize('large')}
+                className={`px-3 py-1 text-xs rounded ${
+                  fontSize === 'large' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                大
+              </button>
+            </div>
+
+            {/* Text Color */}
+            <div className="flex gap-1">
+              <button
+                onClick={() => setTextColor('white')}
+                className={`px-3 py-1 text-xs rounded ${
+                  textColor === 'white' ? 'bg-white text-black border-2 border-blue-600' : 'bg-white text-black hover:bg-gray-100'
+                }`}
+              >
+                白色
+              </button>
+              <button
+                onClick={() => setTextColor('black')}
+                className={`px-3 py-1 text-xs rounded ${
+                  textColor === 'black' ? 'bg-black text-white border-2 border-blue-600' : 'bg-black text-white hover:bg-gray-800'
+                }`}
+              >
+                黑色
+              </button>
+            </div>
+
+            {/* Background Toggle */}
+            <button
+              onClick={() => setShowBg(!showBg)}
+              className={`px-3 py-1 text-xs rounded ${
+                showBg ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              {showBg ? '有背景' : '無背景'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            💡 拖動圖片上的文字可以調整位置
+          </p>
+        </div>
+      )}
 
       {/* Text Section */}
       <div>
