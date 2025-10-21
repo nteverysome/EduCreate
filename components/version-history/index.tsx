@@ -109,20 +109,20 @@ export default function VersionHistory({ imageId, onRestore, onClose }: VersionH
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col relative">
-        {/* Header - Fixed at top with highest z-index */}
-        <div className="flex items-center justify-between p-4 border-b bg-white sticky top-0 z-50 rounded-t-lg">
+      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+        {/* Header - Absolutely positioned to stay on top */}
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 border-b bg-white z-50 rounded-t-lg">
           <h2 className="text-xl font-semibold">版本歷史</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors relative z-10"
+            className="text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-hidden flex">
+        {/* Content - Add top and bottom padding to account for header and footer */}
+        <div className="flex-1 overflow-hidden flex pt-[73px] pb-[73px]">
           {/* Version List */}
           <div className="w-1/3 border-r overflow-y-auto">
             {loading ? (
@@ -218,8 +218,8 @@ export default function VersionHistory({ imageId, onRestore, onClose }: VersionH
           </div>
         </div>
 
-        {/* Footer - Fixed at bottom with highest z-index */}
-        <div className="p-4 border-t bg-gray-50 sticky bottom-0 z-50 rounded-b-lg">
+        {/* Footer - Absolutely positioned to stay on bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-gray-50 z-50 rounded-b-lg">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <span>共 {versions.length} 個版本</span>
             <button
