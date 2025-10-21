@@ -145,17 +145,13 @@ export const WordwallStyleActivityCardCompact: React.FC<WordwallStyleActivityCar
           ${isDragging ? 'opacity-50 transform rotate-2' : ''}
         `}
         onClick={handleCardClick}
-        style={{
-          width: '239px',
-          height: '258px'
-        }}
         draggable={!selectionMode}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        {/* 縮略圖 - 固定尺寸 237px × 178px */}
-        <div className="relative" style={{ width: '237px', height: '178px' }}>
-          <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center overflow-hidden">
+        {/* 縮略圖 */}
+        <div className="relative">
+          <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-t-lg flex items-center justify-center overflow-hidden">
             {activity.thumbnail ? (
               <img
                 src={activity.thumbnail}
@@ -218,53 +214,46 @@ export const WordwallStyleActivityCardCompact: React.FC<WordwallStyleActivityCar
           </div>
         </div>
 
-        {/* 標題和信息 */}
-        <div className="px-2 py-2">
+        {/* 標題和按鈕 */}
+        <div className="p-2">
           {/* 標題 - 單行 */}
-          <h3 className="font-medium text-gray-900 text-sm truncate mb-1" title={activity.title}>
+          <h3 className="font-medium text-gray-900 text-xs mb-2 truncate" title={activity.title}>
             {activity.title}
           </h3>
 
-          {/* 遊戲類型 */}
-          <p className="text-xs text-gray-500 truncate mb-2">
-            {activity.gameType}
-          </p>
-
-          {/* 狀態信息 - 橫向排列 */}
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <div className="flex items-center gap-1">
-              {activity.isPublicShared ? (
-                <>
-                  <Users className="w-3 h-3" />
-                  <span>社區</span>
-                </>
-              ) : activity.isPublic ? (
-                <>
-                  <Globe className="w-3 h-3" />
-                  <span>公開</span>
-                </>
-              ) : (
-                <>
-                  <Lock className="w-3 h-3" />
-                  <span>私人</span>
-                </>
-              )}
-            </div>
-            <div className="flex items-center gap-1">
+          {/* 功能按鈕 - 橫向排列 */}
+          <div className="flex items-center justify-between gap-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onPlay?.(activity);
+              }}
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-xs"
+              title="播放"
+            >
               <Play className="w-3 h-3" />
-              <span>{activity.playCount || 0}</span>
-            </div>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(activity);
+              }}
+              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-xs"
+              title="編輯"
+            >
+              <Edit2 className="w-3 h-3" />
+            </button>
+
+            <button
+              onClick={handleMenuToggle}
+              className="flex items-center justify-center px-2 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+              title="更多"
+            >
+              <MoreVertical className="w-3 h-3" />
+            </button>
           </div>
         </div>
-
-        {/* 更多按鈕 - 右下角 */}
-        <button
-          onClick={handleMenuToggle}
-          className="absolute bottom-2 right-2 p-1 hover:bg-gray-100 rounded transition-colors"
-          title="更多"
-        >
-          <MoreVertical className="w-4 h-4 text-gray-600" />
-        </button>
       </div>
 
       {/* 更多選項菜單 */}
