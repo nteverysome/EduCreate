@@ -1248,6 +1248,7 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           onFolderDelete={handleFolderDelete}
           onActivityDropToFolder={handleActivityDropToFolder}
           onFolderDropToFolder={handleFolderDropToFolder}
+          viewMode={viewMode}
         />
 
         {/* 🔧 修復：在資料夾視圖中顯示拖拽回上一層的目標區域 */}

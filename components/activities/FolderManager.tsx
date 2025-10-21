@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Folder, MoreVertical, Edit2, Trash2, Move } from 'lucide-react';
 import FolderCard from './FolderCard';
+import FolderCardCompact from './FolderCardCompact';
 import CreateFolderModal from './CreateFolderModal';
 import RenameFolderModal from './RenameFolderModal';
 import EditFolderColorModal from './EditFolderColorModal';
@@ -32,6 +33,8 @@ interface FolderManagerProps {
   // 拖拽相關
   onActivityDropToFolder?: (activityId: string, folderId: string) => Promise<void>;
   onFolderDropToFolder?: (draggedFolderId: string, targetFolderId: string) => Promise<void>;
+  // 視圖模式
+  viewMode?: 'grid' | 'small-grid' | 'list';
 }
 
 export const FolderManager: React.FC<FolderManagerProps> = ({
@@ -41,7 +44,8 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   onFolderUpdate,
   onFolderDelete,
   onActivityDropToFolder,
-  onFolderDropToFolder
+  onFolderDropToFolder,
+  viewMode = 'grid'
 }) => {
   const [folders, setFolders] = useState<FolderData[]>([]);
   const [currentFolder, setCurrentFolder] = useState<FolderData | null>(null); // 當前資料夾信息
@@ -289,20 +293,27 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
         </button>
 
         {/* 現有資料夾 */}
-        {folders.map((folder) => (
-          <FolderCard
-            key={folder.id}
-            folder={folder}
-            onClick={onFolderSelect}
-            onEdit={handleUpdateFolder}
-            onDelete={handleDeleteFolder}
-            onChangeColor={handleChangeColor}
-            onMove={handleMoveFolder}
-            onDrop={onActivityDropToFolder}
-            onFolderDrop={onFolderDropToFolder}
-            draggable={true}
-          />
-        ))}
+        {folders.map((folder) => {
+          // 根據 viewMode 選擇使用哪個資料夾卡片組件
+          const FolderCardComponent = viewMode === 'small-grid'
+            ? FolderCardCompact
+            : FolderCard;
+
+          return (
+            <FolderCardComponent
+              key={folder.id}
+              folder={folder}
+              onClick={onFolderSelect}
+              onEdit={handleUpdateFolder}
+              onDelete={handleDeleteFolder}
+              onChangeColor={handleChangeColor}
+              onMove={handleMoveFolder}
+              onDrop={onActivityDropToFolder}
+              onFolderDrop={onFolderDropToFolder}
+              draggable={true}
+            />
+          );
+        })}
       </div>
 
       {/* 創建資料夾模態框 */}
