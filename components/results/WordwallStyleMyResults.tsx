@@ -73,7 +73,16 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]); // 🆕 麵包屑導航
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'created' | 'deadline' | 'name'>('created');
-  const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>('grid'); // 🆕 視圖模式狀態
+  const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>(() => {
+    // 從 localStorage 讀取用戶的視圖模式偏好
+    if (typeof window !== 'undefined') {
+      const savedViewMode = localStorage.getItem('myResultsViewMode');
+      if (savedViewMode === 'grid' || savedViewMode === 'small-grid' || savedViewMode === 'list') {
+        return savedViewMode;
+      }
+    }
+    return 'grid'; // 默認值
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
@@ -130,9 +139,13 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [showEditFolderColorModal, setShowEditFolderColorModal] = useState(false);
   const [folderToEditColor, setFolderToEditColor] = useState<ResultFolder | null>(null);
 
-
-
-
+  // 保存視圖模式到 localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('myResultsViewMode', viewMode);
+      console.log('💾 保存視圖模式偏好 (my-results):', viewMode);
+    }
+  }, [viewMode]);
 
   // 載入結果數據
   const loadResults = useCallback(async () => {

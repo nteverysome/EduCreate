@@ -120,7 +120,24 @@ export default function AuthorProfilePage() {
 
   // 搜尋和視圖狀態
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>(() => {
+    // 從 localStorage 讀取用戶的視圖模式偏好
+    if (typeof window !== 'undefined') {
+      const savedViewMode = localStorage.getItem('communityAuthorViewMode');
+      if (savedViewMode === 'grid' || savedViewMode === 'small-grid' || savedViewMode === 'list') {
+        return savedViewMode;
+      }
+    }
+    return 'grid'; // 默認值
+  });
+
+  // 保存視圖模式到 localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('communityAuthorViewMode', viewMode);
+      console.log('💾 保存視圖模式偏好 (community-author):', viewMode);
+    }
+  }, [viewMode]);
 
   // 從 URL 讀取 folderId
   useEffect(() => {
