@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Filter, 
-  SortAsc, 
-  SortDesc, 
-  Grid3X3, 
+import {
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Grid3X3,
+  Grid2X2,
   List,
   CheckSquare,
   Square,
@@ -25,8 +26,8 @@ interface SearchAndFilterProps {
   onSortOrderChange: (order: 'asc' | 'desc') => void;
   filterType: string;
   onFilterTypeChange: (type: string) => void;
-  viewMode: 'grid' | 'list';
-  onViewModeChange: (mode: 'grid' | 'list') => void;
+  viewMode: 'grid' | 'small-grid' | 'list';
+  onViewModeChange: (mode: 'grid' | 'small-grid' | 'list') => void;
   selectionMode: boolean;
   onSelectionModeChange: (enabled: boolean) => void;
   selectedCount: number;
@@ -120,7 +121,7 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
             <span>篩選</span>
           </button>
 
-          {/* 視圖模式切換 - 優化版 */}
+          {/* 視圖模式切換 - 優化版（3個選項）*/}
           <div className="flex bg-gray-100 rounded-xl p-1">
             <button
               onClick={() => onViewModeChange('grid')}
@@ -134,6 +135,19 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
               title="網格視圖"
             >
               <Grid3X3 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onViewModeChange('small-grid')}
+              className={`
+                p-2.5 rounded-lg transition-all duration-200
+                ${viewMode === 'small-grid'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+                }
+              `}
+              title="小網格視圖"
+            >
+              <Grid2X2 className="w-4 h-4" />
             </button>
             <button
               onClick={() => onViewModeChange('list')}
