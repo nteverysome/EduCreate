@@ -109,20 +109,20 @@ export default function VersionHistory({ imageId, onRestore, onClose }: VersionH
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col relative">
+      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b relative z-10">
+        <div className="flex items-center justify-between p-4 border-b bg-white relative z-30 rounded-t-lg">
           <h2 className="text-xl font-semibold">版本歷史</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors relative z-20"
+            className="text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden flex relative z-0">
+        <div className="flex-1 overflow-hidden flex relative z-10">
           {/* Version List */}
           <div className="w-1/3 border-r overflow-y-auto">
             {loading ? (
@@ -219,7 +219,7 @@ export default function VersionHistory({ imageId, onRestore, onClose }: VersionH
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t bg-gray-50">
+        <div className="p-4 border-t bg-gray-50 relative z-30 rounded-b-lg">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <span>共 {versions.length} 個版本</span>
             <button
