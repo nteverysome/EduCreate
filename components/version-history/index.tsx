@@ -200,18 +200,18 @@ export default function VersionHistory({ imageId, onRestore, onClose }: VersionH
           </div>
 
           {/* Preview */}
-          <div className="flex-1 p-4 flex items-center justify-center bg-gray-50 overflow-hidden">
+          <div className="flex-1 p-4 flex items-center justify-center bg-gray-50 overflow-hidden pointer-events-none">
             {selectedVersion ? (
               <div className="max-w-full max-h-full flex items-center justify-center">
                 <img
                   src={selectedVersion.url}
                   alt={`版本 ${selectedVersion.version}`}
-                  className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                  className="max-w-full max-h-full object-contain rounded-lg shadow-lg pointer-events-auto"
                   style={{ maxHeight: 'calc(90vh - 200px)' }}
                 />
               </div>
             ) : (
-              <div className="text-center text-gray-500">
+              <div className="text-center text-gray-500 pointer-events-auto">
                 <p>選擇一個版本以預覽</p>
               </div>
             )}
