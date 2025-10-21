@@ -114,9 +114,19 @@ export default function TestImageComponentsPage() {
     }
 
     try {
+      // 獲取圖片尺寸
+      const img = new Image();
+      const imageSize = await new Promise<{ width: number; height: number }>((resolve, reject) => {
+        img.onload = () => resolve({ width: img.width, height: img.height });
+        img.onerror = reject;
+        img.src = editedImageUrl;
+      });
+
       // 1. Upload edited image to Vercel Blob
       const formData = new FormData();
       formData.append('file', editedImageBlob, `edited-${Date.now()}.jpg`);
+      formData.append('width', imageSize.width.toString());
+      formData.append('height', imageSize.height.toString());
 
       const uploadResponse = await fetch('/api/images/upload', {
         method: 'POST',

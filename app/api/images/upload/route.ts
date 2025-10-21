@@ -7,11 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { put } from '@vercel/blob';
-import sharp from 'sharp';
 import prisma from '@/lib/prisma';
-
-// 強制使用 Node.js runtime 以支持 sharp
-export const runtime = 'nodejs';
 
 // 允許的圖片類型
 const ALLOWED_IMAGE_TYPES = [
@@ -64,6 +60,8 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
     const alt = formData.get('alt') as string | null;
     const tagsStr = formData.get('tags') as string | null;
+    const widthStr = formData.get('width') as string | null;
+    const heightStr = formData.get('height') as string | null;
 
     // 驗證文件
     if (!file) {
@@ -109,42 +107,9 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // 使用 sharp 處理圖片
-    let imageBuffer = buffer;
-    let metadata = await sharp(buffer).metadata();
-
-    // 驗證圖片尺寸
-    if (!metadata.width || !metadata.height) {
-      return NextResponse.json(
-        { error: '無法讀取圖片尺寸' },
-        { status: 400 }
-      );
-    }
-
-    if (metadata.width > MAX_WIDTH || metadata.height > MAX_HEIGHT) {
-      return NextResponse.json(
-        { error: `圖片尺寸超過限制。最大: ${MAX_WIDTH}x${MAX_HEIGHT}` },
-        { status: 400 }
-      );
-    }
-
-    // 壓縮圖片（如果是 JPEG 或 PNG）
-    if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
-      imageBuffer = await sharp(buffer)
-        .jpeg({ quality: 85, progressive: true })
-        .toBuffer();
-    } else if (file.type === 'image/png') {
-      imageBuffer = await sharp(buffer)
-        .png({ compressionLevel: 9 })
-        .toBuffer();
-    } else if (file.type === 'image/webp') {
-      imageBuffer = await sharp(buffer)
-        .webp({ quality: 85 })
-        .toBuffer();
-    }
-
-    // 重新獲取元數據（壓縮後）
-    metadata = await sharp(imageBuffer).metadata();
+    // 前端已經處理好圖片（裁剪、旋轉、壓縮等）
+    // 服務器端只需要接收並上傳到 Vercel Blob
+    const imageBuffer = buffer;
 
     // 生成唯一文件名
     const timestamp = Date.now();
@@ -159,6 +124,10 @@ export async function POST(request: NextRequest) {
       contentType: file.type,
     });
 
+    // 解析寬度和高度（從前端傳遞）
+    const width = widthStr ? parseInt(widthStr, 10) : 0;
+    const height = heightStr ? parseInt(heightStr, 10) : 0;
+
     // 保存到數據庫
     const userImage = await prisma.userImage.create({
       data: {
@@ -168,8 +137,8 @@ export async function POST(request: NextRequest) {
         fileName: file.name,
         fileSize: imageBuffer.length,
         mimeType: file.type,
-        width: metadata.width || 0,
-        height: metadata.height || 0,
+        width,
+        height,
         source: 'upload',
         alt: alt || null,
         tags,
