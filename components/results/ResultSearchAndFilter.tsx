@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Filter, 
-  SortAsc, 
-  SortDesc, 
-  Grid3X3, 
+import {
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Grid3X3,
+  Grid2X2,
   List,
   CheckSquare,
   Square,
@@ -23,8 +24,8 @@ interface ResultSearchAndFilterProps {
   onSortChange: (sortBy: 'created' | 'deadline' | 'name') => void;
   sortOrder?: 'asc' | 'desc';
   onSortOrderChange?: (order: 'asc' | 'desc') => void;
-  viewMode?: 'grid' | 'list';
-  onViewModeChange?: (mode: 'grid' | 'list') => void;
+  viewMode?: 'grid' | 'small-grid' | 'list';
+  onViewModeChange?: (mode: 'grid' | 'small-grid' | 'list') => void;
 }
 
 export const ResultSearchAndFilter: React.FC<ResultSearchAndFilterProps> = ({
@@ -103,6 +104,19 @@ export const ResultSearchAndFilter: React.FC<ResultSearchAndFilterProps> = ({
                 title="網格視圖"
               >
                 <Grid3X3 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onViewModeChange('small-grid')}
+                className={`
+                  p-2.5 rounded-lg transition-all duration-200
+                  ${viewMode === 'small-grid'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                  }
+                `}
+                title="小網格視圖"
+              >
+                <Grid2X2 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => onViewModeChange('list')}

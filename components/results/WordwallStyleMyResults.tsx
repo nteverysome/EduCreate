@@ -70,6 +70,7 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
   const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]); // 🆕 麵包屑導航
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'created' | 'deadline' | 'name'>('created');
+  const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>('grid'); // 🆕 視圖模式狀態
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
@@ -1008,6 +1009,8 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
             onSearchChange={setSearchQuery}
             sortBy={sortBy}
             onSortChange={setSortBy}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
 
           {/* 麵包屑導航 */}
@@ -1043,7 +1046,11 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
       )}
 
       {/* 資料夾區域 - 在所有層級都顯示（與 my-activities 一致） */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
+      <div className={`mb-4 ${
+        viewMode === 'small-grid'
+          ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2'
+          : 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'
+      }`}>
         {/* 新增資料夾按鈕 - 在所有層級都顯示 */}
         <button
           onClick={() => setShowNewFolderModal(true)}
@@ -1067,8 +1074,15 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         ))}
       </div>
 
-      {/* 結果網格 - 5列（參考我的活動頁面） */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      {/* 結果網格/列表 */}
+      <div className={`
+        ${viewMode === 'grid'
+          ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
+          : viewMode === 'small-grid'
+          ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2'
+          : 'space-y-4'
+        }
+      `}>
         {/* 結果項目 - 使用原生 HTML5 拖放 API */}
         {filteredAndSortedResults.map(result => (
           <DraggableResultCardNative
