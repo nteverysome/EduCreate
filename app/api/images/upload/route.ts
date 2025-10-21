@@ -10,6 +10,9 @@ import { put } from '@vercel/blob';
 import sharp from 'sharp';
 import prisma from '@/lib/prisma';
 
+// 強制使用 Node.js runtime 以支持 sharp
+export const runtime = 'nodejs';
+
 // 允許的圖片類型
 const ALLOWED_IMAGE_TYPES = [
   'image/jpeg',
