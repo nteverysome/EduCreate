@@ -290,10 +290,13 @@ export default function TestImageComponentsPage() {
 
       {showImageGallery && (
         <ImageGallery
+          selectable={true}
+          multiple={true}
           onClose={() => setShowImageGallery(false)}
           onSelect={(images) => {
-            setSelectedImages(images);
-            updateTestResult('ImageGallery', 'pass', `從圖片庫選擇 ${images.length} 張圖片`);
+            const imageArray = Array.isArray(images) ? images : [images];
+            setSelectedImages(imageArray);
+            updateTestResult('ImageGallery', 'pass', `從圖片庫選擇 ${imageArray.length} 張圖片`);
             setShowImageGallery(false);
           }}
         />
