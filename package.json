@@ -104,12 +104,14 @@
     "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^1.8.11",
     "react-window-infinite-loader": "^1.0.10",
-    "sharp": "^0.34.4",
     "stripe": "^14.3.0",
     "unsplash-js": "^7.0.20",
     "uuid": "^9.0.1",
     "web-vitals": "^5.0.1",
     "zustand": "^5.0.5"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.34.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
