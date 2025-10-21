@@ -1,8 +1,16 @@
 # 圖片功能整合指南
 
+**最後更新**: 2025-10-21
+**版本**: v2.0 (包含 UI 修復)
+
 ## 📋 概述
 
 本指南介紹如何將圖片管理功能整合到 EduCreate 的現有系統中。
+
+**重要更新**:
+- ✅ VersionHistory 關閉按鈕遮擋問題已修復（使用絕對定位解決方案）
+- ✅ ImageGallery 批量刪除確認對話框已改進（自定義 React 組件）
+- 📄 詳細測試報告: [UI 修復測試報告](./ui-fixes-test-report.md)
 
 ---
 
@@ -493,10 +501,113 @@ const validateActivity = (data: any) => {
 - [ ] Unsplash 搜索功能正常
 - [ ] 圖片編輯功能正常
 - [ ] 版本控制功能正常
+- [ ] VersionHistory 關閉按鈕可正常點擊 ⭐ **新增**
+- [ ] ImageGallery 刪除確認對話框正常顯示 ⭐ **新增**
 
 ---
 
-**文檔版本**: 1.0  
-**最後更新**: 2025-10-21  
+## 🔧 UI 修復和最佳實踐
+
+### VersionHistory 組件使用注意事項
+
+**重要**: VersionHistory 組件已修復關閉按鈕遮擋問題，使用時請注意：
+
+1. **必須傳遞 onClose prop**:
+```typescript
+<VersionHistory
+  imageId={imageId}
+  onRestore={(versionId) => {
+    // 處理恢復邏輯
+  }}
+  onClose={() => {
+    // 關閉對話框
+    setShowVersionHistory(false);
+  }}
+/>
+```
+
+2. **技術實現**: 使用絕對定位（Absolute Positioning）解決方案
+   - Header 和 Footer 使用 `absolute` 定位脫離文檔流
+   - Content 區域添加 `pt-[73px] pb-[73px]` 補償空間
+   - 確保關閉按鈕始終可點擊
+
+3. **避免的做法**:
+   - ❌ 不要只依賴 z-index 解決層級問題
+   - ❌ 不要使用 pointer-events-none（會影響交互）
+   - ❌ 不要忘記傳遞 onClose prop
+
+### ImageGallery 組件使用注意事項
+
+**改進**: ImageGallery 現在使用自定義確認對話框替代原生 `confirm()`
+
+1. **自動顯示確認對話框**: 點擊刪除按鈕時自動顯示
+2. **視覺警告**: 紅色垃圾桶圖標和警告文字
+3. **詳細信息**: 顯示刪除數量和後果說明
+4. **加載狀態**: 刪除過程中顯示"刪除中..."
+
+**使用示例**:
+```typescript
+<ImageGallery
+  onSelect={(images) => {
+    // 處理選擇的圖片
+  }}
+  onClose={() => {
+    setShowGallery(false);
+  }}
+  multiple={true}
+  maxSelection={10}
+/>
+```
+
+### 處理 UI 層級問題的最佳實踐
+
+當遇到類似的 UI 層級和點擊事件問題時：
+
+1. **首選絕對定位**: 對於需要始終可見且可交互的 header/footer
+   ```typescript
+   <div className="absolute top-0 left-0 right-0 z-50">
+   ```
+
+2. **添加 Padding 補償**: 為下層內容留出空間
+   ```typescript
+   <div className="flex-1 pt-[73px] pb-[73px]">
+   ```
+
+3. **確保 z-index 足夠高**: 但不要過度依賴
+   ```typescript
+   className="... z-50"
+   ```
+
+4. **避免的方案**:
+   - ❌ 過度依賴 z-index（只控制視覺，不控制交互）
+   - ❌ pointer-events-none（可能導致副作用）
+   - ❌ sticky positioning（仍在文檔流中，可能被遮擋）
+
+### 自定義確認對話框設計指南
+
+創建用戶友好的確認對話框：
+
+1. **視覺警告**: 使用紅色圖標和文字表示危險操作
+2. **清晰信息**: 說明操作後果和影響範圍
+3. **加載狀態**: 顯示操作進度，防止重複點擊
+4. **模態遮罩**: 半透明背景突出對話框
+5. **響應式設計**: 適配不同屏幕尺寸
+
+---
+
+## 📚 相關文檔
+
+- [API 文檔](./API_DOCUMENTATION.md)
+- [部署指南](./deployment-guide.md)
+- [環境設置](./environment-setup-complete.md)
+- [圖片組件使用指南](./image-components-usage-guide.md)
+- [圖片功能最終總結](./image-feature-final-summary.md)
+- [UI 修復測試報告](./ui-fixes-test-report.md) ⭐ **新增**
+
+---
+
+**文檔版本**: v2.0
+**最後更新**: 2025-10-21
+**包含 UI 修復**: ✅ VersionHistory 關閉按鈕 + ImageGallery 刪除對話框
 **維護者**: EduCreate Team
 
