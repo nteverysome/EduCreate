@@ -283,10 +283,10 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   return (
     <div className="folder-manager mb-4">
       {/* 資料夾網格 - 參考 Wordwall 佈局，減少底部間距更靠近活動卡片 */}
-      {/* 小網格視圖：響應式水平堆疊（列表式卡片） */}
+      {/* 小網格視圖：手機版垂直布局，平板以上水平堆疊（列表式卡片） */}
       <div className={`mb-4 ${
         viewMode === 'small-grid'
-          ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2'
+          ? 'space-y-2 sm:grid sm:grid-cols-3 sm:gap-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
           : 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'
       }`}>
         {/* 創建新資料夾按鈕 */}
