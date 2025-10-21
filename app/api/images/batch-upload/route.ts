@@ -15,7 +15,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { put } from '@vercel/blob';
-import sharp from 'sharp';
 import { prisma } from '@/lib/prisma';
 
 // 允許的圖片類型
@@ -77,13 +76,26 @@ export async function POST(request: NextRequest) {
     // 3. 獲取表單數據
     const formData = await request.formData();
     const files: File[] = [];
+    const fileDimensions: Map<string, { width: number; height: number }> = new Map();
     const alt = formData.get('alt') as string | null;
     const tagsStr = formData.get('tags') as string | null;
 
-    // 收集所有文件
+    // 收集所有文件和尺寸信息
     for (const [key, value] of formData.entries()) {
       if (key.startsWith('file') && value instanceof File) {
         files.push(value);
+
+        // 獲取對應的尺寸信息（格式：width_0, height_0, width_1, height_1, ...）
+        const fileIndex = key.replace('file', '');
+        const widthStr = formData.get(`width${fileIndex}`) as string | null;
+        const heightStr = formData.get(`height${fileIndex}`) as string | null;
+
+        if (widthStr && heightStr) {
+          fileDimensions.set(value.name, {
+            width: parseInt(widthStr, 10),
+            height: parseInt(heightStr, 10),
+          });
+        }
       }
     }
 
@@ -148,44 +160,31 @@ export async function POST(request: NextRequest) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // 使用 sharp 處理圖片
-        let imageBuffer = buffer;
-        let metadata = await sharp(buffer).metadata();
+        // 前端已經處理好圖片（裁剪、旋轉、壓縮等）
+        // 服務器端只需要接收並上傳到 Vercel Blob
+        const imageBuffer = buffer;
+
+        // 獲取圖片尺寸（從前端傳遞或使用默認值）
+        const dimensions = fileDimensions.get(file.name);
+        const width = dimensions?.width || 0;
+        const height = dimensions?.height || 0;
 
         // 驗證圖片尺寸
-        if (!metadata.width || !metadata.height) {
+        if (width === 0 || height === 0) {
           result.failed.push({
             fileName: file.name,
-            reason: '無法讀取圖片尺寸',
+            reason: '缺少圖片尺寸信息',
           });
           continue;
         }
 
-        if (metadata.width > MAX_WIDTH || metadata.height > MAX_HEIGHT) {
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
           result.failed.push({
             fileName: file.name,
             reason: `圖片尺寸超過限制（最大 ${MAX_WIDTH}x${MAX_HEIGHT}）`,
           });
           continue;
         }
-
-        // 壓縮圖片
-        if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
-          imageBuffer = await sharp(buffer)
-            .jpeg({ quality: 85, progressive: true })
-            .toBuffer();
-        } else if (file.type === 'image/png') {
-          imageBuffer = await sharp(buffer)
-            .png({ compressionLevel: 9 })
-            .toBuffer();
-        } else if (file.type === 'image/webp') {
-          imageBuffer = await sharp(buffer)
-            .webp({ quality: 85 })
-            .toBuffer();
-        }
-
-        // 重新獲取元數據
-        metadata = await sharp(imageBuffer).metadata();
 
         // 生成唯一文件名
         const timestamp = Date.now();
@@ -209,8 +208,8 @@ export async function POST(request: NextRequest) {
             fileName: file.name,
             fileSize: imageBuffer.length,
             mimeType: file.type,
-            width: metadata.width || 0,
-            height: metadata.height || 0,
+            width,
+            height,
             source: 'upload',
             alt: alt || null,
             tags,
