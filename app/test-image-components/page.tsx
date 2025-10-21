@@ -98,7 +98,8 @@ export default function TestImageComponentsPage() {
   };
 
   // Handle ImageEditor save
-  const handleImageEditorSave = (editedImage: UserImage) => {
+  const handleImageEditorSave = (editedImageBlob: Blob, editedImageUrl: string) => {
+    console.log('Image edited:', { blob: editedImageBlob, url: editedImageUrl });
     updateTestResult('ImageEditor', 'pass', '成功編輯並保存圖片');
     setShowImageEditor(false);
     setImageToEdit(null);
@@ -278,7 +279,7 @@ export default function TestImageComponentsPage() {
 
       {showImageEditor && imageToEdit && (
         <ImageEditor
-          image={imageToEdit}
+          imageUrl={imageToEdit.url}
           onSave={handleImageEditorSave}
           onClose={() => {
             setShowImageEditor(false);
