@@ -42,6 +42,7 @@ interface AssignmentResult {
   folderId?: string;
   assignmentId: string;
   activityId: string;
+  thumbnailUrl?: string | null;  // 添加活動截圖 URL 欄位
 }
 
 interface ResultFolder {

@@ -8,9 +8,9 @@ interface ResultCardMobileProps {
   result: {
     id: string;
     title: string;
-    thumbnail?: string;
+    thumbnailUrl?: string | null;  // 修改為 thumbnailUrl
     status: string;
-    submissionCount: number;
+    participantCount: number;  // 修改為 participantCount（與 AssignmentResult 一致）
     createdAt: Date | string;
   };
   onClick: (result: any) => void;
@@ -49,9 +49,9 @@ export const ResultCardMobile: React.FC<ResultCardMobileProps> = ({
       >
         {/* 縮略圖 */}
         <div className="w-16 h-16 rounded overflow-hidden bg-gray-100 flex-shrink-0 relative">
-          {result.thumbnail ? (
+          {result.thumbnailUrl ? (
             <Image
-              src={result.thumbnail}
+              src={result.thumbnailUrl}
               alt={result.title}
               fill
               className="object-cover"
@@ -69,7 +69,7 @@ export const ResultCardMobile: React.FC<ResultCardMobileProps> = ({
             {result.title}
           </h3>
           <p className="text-xs text-gray-500 truncate">
-            {result.submissionCount} 個提交
+            {result.participantCount} 個提交
           </p>
         </div>
 

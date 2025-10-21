@@ -30,19 +30,7 @@ const DraggableFolderCardComponent: React.FC<DraggableFolderCardProps> = ({
   onClick,
   onMenuClick
 }) => {
-  const { isDragging, dragItem, onDrop, startDrag } = useDragDrop();
-  const [isDropTarget, setIsDropTarget] = useState(false);
-  const [dragStartPos, setDragStartPos] = useState<{ x: number; y: number } | null>(null);
-  const [isDragReady, setIsDragReady] = useState(false);
-
-  // 當拖放結束時，重置 isDropTarget 狀態
-  useEffect(() => {
-    if (!isDragging) {
-      setIsDropTarget(false);
-      setDragStartPos(null);
-      setIsDragReady(false);
-    }
-  }, [isDragging]);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // 處理菜單點擊
   const handleMenuClick = (event: React.MouseEvent) => {
@@ -54,50 +42,19 @@ const DraggableFolderCardComponent: React.FC<DraggableFolderCardProps> = ({
   };
 
   // 處理卡片點擊
-  const handleCardClick = (event: React.MouseEvent) => {
-    // 如果正在拖拽，不處理點擊事件
-    if (isDragging) {
-      console.log(`🚫 [${folder.name}] 拖拽狀態中，忽略點擊事件`);
-      event.preventDefault();
-      return;
-    }
-
-    console.log(`🖱️ [${folder.name}] 處理點擊事件`);
+  const handleCardClick = () => {
     onClick(folder);
   };
 
-  // 記錄滑鼠按下位置
-  const handleMouseDown = (event: React.MouseEvent) => {
-    // 如果點擊的是菜單按鈕，不啟動拖放
-    if ((event.target as HTMLElement).closest('button')) {
-      return;
-    }
-
-    event.preventDefault();
-    setDragStartPos({ x: event.clientX, y: event.clientY });
-    setIsDragReady(true);
-    console.log(`📍 [${folder.name}] 記錄滑鼠按下位置: (${event.clientX}, ${event.clientY})`);
+  // 資料夾拖移源事件處理（使用原生 HTML5 拖放 API）
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('folder/id', folder.id); // 使用特殊的 MIME 類型標識資料夾
+    console.log('🔵 開始拖移資料夾:', folder.name);
   };
 
-  // 滑鼠移動時檢查是否開始拖放
-  const handleMouseMove = (event: React.MouseEvent) => {
-    if (!isDragReady || !dragStartPos) return;
-
-    const deltaX = Math.abs(event.clientX - dragStartPos.x);
-    const deltaY = Math.abs(event.clientY - dragStartPos.y);
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-    // 只有移動超過 5 像素才開始拖放
-    if (distance > 5) {
-      console.log(`🚀 [${folder.name}] 開始拖放資料夾 (移動距離: ${distance.toFixed(2)}px)`);
-      setIsDragReady(false);
-
-      startDrag({
-        id: folder.id,
-        type: 'folder',
-        data: folder
-      }, event);
-    }
+  const handleDragEnd = (e: React.DragEvent) => {
+    console.log('🔵 結束拖移資料夾:', folder.name);
   };
 
   // 滑鼠進入（可能是放置目標）
