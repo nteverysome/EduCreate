@@ -215,23 +215,23 @@ export const WordwallStyleActivityCardCompact: React.FC<WordwallStyleActivityCar
         </div>
 
         {/* 標題和按鈕 */}
-        <div className="p-2">
+        <div className="p-1.5">
           {/* 標題 - 單行 */}
-          <h3 className="font-medium text-gray-900 text-xs mb-2 truncate" title={activity.title}>
+          <h3 className="font-medium text-gray-900 text-xs mb-1.5 truncate" title={activity.title}>
             {activity.title}
           </h3>
 
           {/* 功能按鈕 - 橫向排列 */}
-          <div className="flex items-center justify-between gap-1">
+          <div className="flex items-center justify-between gap-0.5">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onPlay?.(activity);
               }}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-xs"
+              className="flex-1 flex items-center justify-center gap-0.5 px-1.5 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-xs"
               title="播放"
             >
-              <Play className="w-3 h-3" />
+              <Play className="w-2.5 h-2.5" />
             </button>
 
             <button
@@ -239,18 +239,18 @@ export const WordwallStyleActivityCardCompact: React.FC<WordwallStyleActivityCar
                 e.stopPropagation();
                 onEdit?.(activity);
               }}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-xs"
+              className="flex-1 flex items-center justify-center gap-0.5 px-1.5 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-xs"
               title="編輯"
             >
-              <Edit2 className="w-3 h-3" />
+              <Edit2 className="w-2.5 h-2.5" />
             </button>
 
             <button
               onClick={handleMenuToggle}
-              className="flex items-center justify-center px-2 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+              className="flex items-center justify-center px-1.5 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
               title="更多"
             >
-              <MoreVertical className="w-3 h-3" />
+              <MoreVertical className="w-2.5 h-2.5" />
             </button>
           </div>
         </div>
