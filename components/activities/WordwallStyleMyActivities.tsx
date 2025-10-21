@@ -8,7 +8,6 @@ import CreateFolderModal from './CreateFolderModal';
 import TrashModal from './TrashModal';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
 import { WordwallStyleActivityCardCompact } from './WordwallStyleActivityCardCompact';
-import { ActivityCardMobile } from './ActivityCardMobile';
 import ActivitySearchAndFilter from './ActivitySearchAndFilter';
 import { MoveActivityModal } from './MoveActivityModal';
 import { useScreenshotUpdates } from '@/hooks/useScreenshotUpdates';
@@ -1266,52 +1265,36 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           ${viewMode === 'grid'
             ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
             : viewMode === 'small-grid'
-            ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 lg:block lg:space-y-2'
+            ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'
             : 'space-y-4'
           }
         `}
         >
           {filteredAndSortedActivities.map((activity) => {
             // 根據 viewMode 選擇使用哪個卡片組件
-            // 小網格視圖：手機和平板用網格式卡片，桌面用列表式卡片
+            // 小網格視圖：所有螢幕尺寸都用網格式卡片
             if (viewMode === 'small-grid') {
               return (
-                <React.Fragment key={activity.id}>
-                  {/* 手機和平板：網格式卡片 */}
-                  <div className="lg:hidden">
-                    <WordwallStyleActivityCardCompact
-                      activity={activity}
-                      isSelected={selectedActivities.includes(activity.id)}
-                      onSelect={handleActivitySelect}
-                      onPlay={handleActivityPlay}
-                      onEdit={handleActivityEdit}
-                      onCopy={handleActivityCopy}
-                      onDelete={handleActivityDelete}
-                      onShare={handleActivityShare}
-                      onRename={handleActivityRename}
-                      onMove={handleMoveActivity}
-                      onEditContent={handleEditContent}
-                      onAssignment={handleAssignment}
-                      onCommunityShare={handleCommunityShare}
-                      onQRCode={handleQRCode}
-                      selectionMode={selectionMode}
-                      onDragStart={handleActivityDragStart}
-                      onDragEnd={handleActivityDragEnd}
-                    />
-                  </div>
-                  {/* 桌面：列表式卡片 */}
-                  <div className="hidden lg:block">
-                    <ActivityCardMobile
-                      activity={activity}
-                      onClick={handleActivityPlay}
-                      onEdit={handleActivityEdit}
-                      onDelete={handleActivityDelete}
-                      onDuplicate={handleActivityCopy}
-                      onMove={handleMoveActivity}
-                      draggable={true}
-                    />
-                  </div>
-                </React.Fragment>
+                <WordwallStyleActivityCardCompact
+                  key={activity.id}
+                  activity={activity}
+                  isSelected={selectedActivities.includes(activity.id)}
+                  onSelect={handleActivitySelect}
+                  onPlay={handleActivityPlay}
+                  onEdit={handleActivityEdit}
+                  onCopy={handleActivityCopy}
+                  onDelete={handleActivityDelete}
+                  onShare={handleActivityShare}
+                  onRename={handleActivityRename}
+                  onMove={handleMoveActivity}
+                  onEditContent={handleEditContent}
+                  onAssignment={handleAssignment}
+                  onCommunityShare={handleCommunityShare}
+                  onQRCode={handleQRCode}
+                  selectionMode={selectionMode}
+                  onDragStart={handleActivityDragStart}
+                  onDragEnd={handleActivityDragEnd}
+                />
               );
             }
 

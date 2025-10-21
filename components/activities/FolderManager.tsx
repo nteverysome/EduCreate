@@ -283,10 +283,10 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   return (
     <div className="folder-manager mb-4">
       {/* 資料夾網格 - 參考 Wordwall 佈局，減少底部間距更靠近活動卡片 */}
-      {/* 小網格視圖：手機和平板用網格佈局（a3aa450），桌面用列表式佈局 */}
+      {/* 小網格視圖：手機和平板用網格佈局（a3aa450），桌面用 5 列網格佈局 */}
       <div className={`mb-4 ${
         viewMode === 'small-grid'
-          ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 lg:block lg:space-y-2'
+          ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'
           : 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'
       }`}>
         {/* 創建新資料夾按鈕 */}
@@ -294,50 +294,32 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
           onClick={() => setShowCreateModal(true)}
           className={`folder-card bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-blue-400 hover:bg-blue-50 transition-colors group ${
             viewMode === 'small-grid'
-              ? 'p-4 flex-col min-h-[120px] lg:p-3 lg:flex-row lg:gap-3 lg:min-h-0'
+              ? 'p-4 flex-col min-h-[120px]'
               : 'p-4 flex-col min-h-[120px]'
           }`}
         >
-          <Plus className={`w-8 h-8 text-gray-400 group-hover:text-blue-500 ${viewMode === 'small-grid' ? 'mb-2 lg:mb-0' : 'mb-2'}`} />
+          <Plus className={`w-8 h-8 text-gray-400 group-hover:text-blue-500 ${viewMode === 'small-grid' ? 'mb-2' : 'mb-2'}`} />
           <span className="text-sm text-gray-600 group-hover:text-blue-600">新增資料夾</span>
         </button>
 
         {/* 現有資料夾 */}
         {folders.map((folder) => {
           // 根據 viewMode 選擇使用哪個資料夾卡片組件
-          // 小網格視圖：手機和平板用網格式卡片，桌面用列表式卡片
+          // 小網格視圖：所有螢幕尺寸都用網格式卡片
           if (viewMode === 'small-grid') {
             return (
-              <React.Fragment key={folder.id}>
-                {/* 手機和平板：網格式卡片 */}
-                <div className="lg:hidden">
-                  <FolderCardCompact
-                    folder={folder}
-                    onClick={onFolderSelect}
-                    onEdit={handleUpdateFolder}
-                    onDelete={handleDeleteFolder}
-                    onChangeColor={handleChangeColor}
-                    onMove={handleMoveFolder}
-                    onDrop={onActivityDropToFolder}
-                    onFolderDrop={onFolderDropToFolder}
-                    draggable={true}
-                  />
-                </div>
-                {/* 桌面：列表式卡片 */}
-                <div className="hidden lg:block">
-                  <FolderCardMobile
-                    folder={folder}
-                    onClick={onFolderSelect}
-                    onEdit={handleUpdateFolder}
-                    onDelete={handleDeleteFolder}
-                    onChangeColor={handleChangeColor}
-                    onMove={handleMoveFolder}
-                    onDrop={onActivityDropToFolder}
-                    onFolderDrop={onFolderDropToFolder}
-                    draggable={true}
-                  />
-                </div>
-              </React.Fragment>
+              <FolderCardCompact
+                key={folder.id}
+                folder={folder}
+                onClick={onFolderSelect}
+                onEdit={handleUpdateFolder}
+                onDelete={handleDeleteFolder}
+                onChangeColor={handleChangeColor}
+                onMove={handleMoveFolder}
+                onDrop={onActivityDropToFolder}
+                onFolderDrop={onFolderDropToFolder}
+                draggable={true}
+              />
             );
           }
 
