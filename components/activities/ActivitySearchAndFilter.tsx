@@ -105,20 +105,21 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
         </div>
 
         {/* 控制按鈕組 - 優化版 */}
-        <div className="flex items-center gap-3 w-full lg:w-auto">
-          {/* 篩選按鈕 */}
+        <div className="flex items-center gap-2 w-full lg:w-auto">
+          {/* 篩選按鈕 - 手機版本只顯示圖標 */}
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`
-              flex items-center gap-2 px-5 py-3 rounded-xl transition-all duration-200 font-medium
+              flex items-center gap-2 px-3 py-2.5 lg:px-5 lg:py-3 rounded-xl transition-all duration-200 font-medium
               ${showFilters
                 ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
               }
             `}
+            title="篩選"
           >
             <Filter className="w-4 h-4" />
-            <span>篩選</span>
+            <span className="hidden sm:inline">篩選</span>
           </button>
 
           {/* 視圖模式切換 - 優化版（3個選項）*/}
@@ -164,19 +165,20 @@ export const ActivitySearchAndFilter: React.FC<SearchAndFilterProps> = ({
             </button>
           </div>
 
-          {/* 選擇模式按鈕 - 優化版 */}
+          {/* 選擇模式按鈕 - 手機版本只顯示圖標 */}
           <button
             onClick={() => onSelectionModeChange(!selectionMode)}
             className={`
-              flex items-center gap-2 px-5 py-3 rounded-xl transition-all duration-200 font-medium
+              flex items-center gap-2 px-3 py-2.5 lg:px-5 lg:py-3 rounded-xl transition-all duration-200 font-medium
               ${selectionMode
                 ? 'bg-green-500 text-white shadow-lg shadow-green-500/25'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
               }
             `}
+            title="選擇"
           >
             {selectionMode ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-            <span>選擇</span>
+            <span className="hidden sm:inline">選擇</span>
           </button>
         </div>
       </div>
