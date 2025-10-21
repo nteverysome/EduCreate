@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
-import { X, RotateCw, RotateCcw, ZoomIn, ZoomOut, Check } from 'lucide-react';
+import { X, RotateCw, RotateCcw, ZoomIn, ZoomOut, Check, Lock, Unlock } from 'lucide-react';
 
 export interface ImageEditorProps {
   imageUrl: string;
@@ -18,6 +18,17 @@ interface CropArea {
   height: number;
 }
 
+// Aspect ratio presets
+const ASPECT_RATIOS = {
+  free: { value: undefined, label: '自由', ratio: '自由比例' },
+  square: { value: 1, label: '1:1', ratio: '正方形' },
+  landscape: { value: 4 / 3, label: '4:3', ratio: '橫向' },
+  widescreen: { value: 16 / 9, label: '16:9', ratio: '寬螢幕' },
+  portrait: { value: 3 / 4, label: '3:4', ratio: '直向' },
+} as const;
+
+type AspectRatioKey = keyof typeof ASPECT_RATIOS;
+
 export default function ImageEditor({ imageUrl, onSave, onClose, onCancel }: ImageEditorProps) {
   // Support both onClose and onCancel for backward compatibility
   const handleCancel = onClose || onCancel || (() => {});
@@ -27,6 +38,7 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel }: Ima
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropArea | null>(null);
   const [filter, setFilter] = useState('none');
   const [saving, setSaving] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<AspectRatioKey>('free');
 
   const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: CropArea) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -185,22 +197,49 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel }: Ima
       </div>
 
       {/* Cropper */}
-      <div className="absolute top-16 left-0 right-0 bottom-48 md:bottom-40">
+      <div className="absolute top-16 left-0 right-0 bottom-48 md:bottom-64">
         <Cropper
           image={imageUrl}
           crop={crop}
           zoom={zoom}
           rotation={rotation}
-          aspect={undefined}
+          aspect={ASPECT_RATIOS[aspectRatio].value}
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onRotationChange={setRotation}
           onCropComplete={onCropComplete}
         />
+        {/* Crop hint overlay */}
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg text-sm pointer-events-none">
+          💡 拖動圖片移動位置，捏合縮放調整大小
+        </div>
       </div>
 
       {/* Controls */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white p-4 space-y-4">
+      <div className="absolute bottom-0 left-0 right-0 bg-white p-4 space-y-4 overflow-y-auto max-h-64">
+        {/* Aspect Ratio */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">裁剪比例</span>
+            <span className="text-xs text-gray-500">{ASPECT_RATIOS[aspectRatio].ratio}</span>
+          </div>
+          <div className="grid grid-cols-5 gap-2">
+            {(Object.keys(ASPECT_RATIOS) as AspectRatioKey[]).map((key) => (
+              <button
+                key={key}
+                onClick={() => setAspectRatio(key)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  aspectRatio === key
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {ASPECT_RATIOS[key].label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Zoom */}
         <div className="flex items-center gap-3">
           <ZoomOut className="w-5 h-5 text-gray-600" />
@@ -214,6 +253,7 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel }: Ima
             className="flex-1"
           />
           <ZoomIn className="w-5 h-5 text-gray-600" />
+          <span className="text-sm text-gray-600 w-12 text-right">{zoom.toFixed(1)}x</span>
         </div>
 
         {/* Rotation */}
