@@ -183,6 +183,40 @@ export default function ContentItemWithImage({
       }
 
       const uploadData = await uploadResponse.json();
+      console.log('Image uploaded successfully:', uploadData);
+
+      // Create version record for the newly uploaded image
+      // This ensures that when users select the generated image in ImageGallery,
+      // they can see its version history
+      const versionResponse = await fetch(`/api/images/${uploadData.image.id}/versions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: uploadData.image.url,
+          blobPath: uploadData.image.blobPath,
+          changes: {
+            type: 'text-overlay',
+            timestamp: new Date().toISOString(),
+            description: '添加文字疊加',
+            textContent: localValue.text,
+            textPosition: textPosition,
+            fontSize: fontSize,
+            textColor: textColor,
+            showBackground: showBg,
+            originalImageId: localValue.imageId, // Track the original image
+          },
+        }),
+      });
+
+      if (!versionResponse.ok) {
+        console.error('Failed to create version record');
+        // Don't throw error, just log it - version creation is not critical
+      } else {
+        const versionData = await versionResponse.json();
+        console.log('Version created successfully:', versionData);
+      }
 
       // Update local value with new image URL
       const newValue = {
@@ -200,7 +234,14 @@ export default function ContentItemWithImage({
         onChange(newValue);
       }
 
-      alert('✅ 圖片已生成並保存！您可以在圖片庫中查看。');
+      // Get version number for display
+      let versionNumber = 1;
+      if (versionResponse.ok) {
+        const versionData = await versionResponse.json();
+        versionNumber = versionData.version?.version || 1;
+      }
+
+      alert(`✅ 圖片已生成並保存！版本號：${versionNumber}\n您可以在圖片庫中查看。`);
     } catch (error) {
       console.error('Generate image error:', error);
       alert(error instanceof Error ? error.message : '生成圖片失敗');

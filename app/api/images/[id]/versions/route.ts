@@ -141,9 +141,32 @@ export async function POST(
       },
     });
 
+    // Auto-cleanup old versions if needed
+    // Keep the most recent 10 versions by default
+    const MAX_VERSIONS = 10;
+    const versionCount = await prisma.imageVersion.count({
+      where: { imageId },
+    });
+
+    if (versionCount > MAX_VERSIONS) {
+      // Trigger cleanup in the background (don't wait for it)
+      // This ensures version creation is fast
+      fetch(`${request.nextUrl.origin}/api/images/${imageId}/versions/cleanup?maxVersions=${MAX_VERSIONS}`, {
+        method: 'DELETE',
+        headers: {
+          'Cookie': request.headers.get('Cookie') || '',
+        },
+      }).catch(error => {
+        console.error('Background version cleanup failed:', error);
+        // Don't throw error - cleanup failure shouldn't affect version creation
+      });
+    }
+
     return NextResponse.json({
       success: true,
       version,
+      versionCount,
+      autoCleanupTriggered: versionCount > MAX_VERSIONS,
     });
   } catch (error) {
     console.error('Error creating image version:', error);
