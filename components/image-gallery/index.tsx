@@ -15,13 +15,15 @@ import { Search, Filter, Trash2, Tag, Loader2, Grid, List } from 'lucide-react';
 import { UserImage } from '../image-picker';
 
 export interface ImageGalleryProps {
-  onSelect?: (image: UserImage) => void;
+  onSelect?: (image: UserImage | UserImage[]) => void;
+  onClose?: () => void;
   selectable?: boolean;
   multiple?: boolean;
 }
 
 export default function ImageGallery({
   onSelect,
+  onClose,
   selectable = false,
   multiple = false,
 }: ImageGalleryProps) {

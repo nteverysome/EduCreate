@@ -1,0 +1,53 @@
+{
+  "timestamp": "2025-10-21T12:01:44.786Z",
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "successRate": "100.0%"
+  },
+  "results": [
+    {
+      "component": "ImagePicker",
+      "status": "pass",
+      "message": "組件結構完整，包含所有必要功能",
+      "details": {
+        "features": 7,
+        "subComponents": 3
+      }
+    },
+    {
+      "component": "ImageEditor",
+      "status": "pass",
+      "message": "組件結構完整，包含裁剪和編輯功能",
+      "details": {
+        "features": 6
+      }
+    },
+    {
+      "component": "ImageGallery",
+      "status": "pass",
+      "message": "組件結構完整，包含圖片管理功能",
+      "details": {
+        "features": 5
+      }
+    },
+    {
+      "component": "ContentItemWithImage",
+      "status": "pass",
+      "message": "組件結構完整，包含圖片整合功能",
+      "details": {
+        "features": 5
+      }
+    },
+    {
+      "component": "VersionHistory",
+      "status": "pass",
+      "message": "組件結構完整，包含版本管理功能",
+      "details": {
+        "features": 5
+      }
+    }
+  ]
+}

@@ -7,7 +7,8 @@ import { X, RotateCw, RotateCcw, ZoomIn, ZoomOut, Check } from 'lucide-react';
 export interface ImageEditorProps {
   imageUrl: string;
   onSave: (editedImageBlob: Blob, editedImageUrl: string) => void;
-  onCancel: () => void;
+  onClose: () => void;
+  onCancel?: () => void; // Deprecated: use onClose instead
 }
 
 interface CropArea {
@@ -17,7 +18,9 @@ interface CropArea {
   height: number;
 }
 
-export default function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
+export default function ImageEditor({ imageUrl, onSave, onClose, onCancel }: ImageEditorProps) {
+  // Support both onClose and onCancel for backward compatibility
+  const handleCancel = onClose || onCancel || (() => {});
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
@@ -168,7 +171,7 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorP
       <div className="absolute top-0 left-0 right-0 z-10 bg-black/80 p-4 flex items-center justify-between">
         <h2 className="text-white text-lg font-semibold">編輯圖片</h2>
         <button
-          onClick={onCancel}
+          onClick={handleCancel}
           className="text-white hover:text-gray-300 transition-colors"
         >
           <X className="w-6 h-6" />
@@ -252,7 +255,7 @@ export default function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorP
         {/* Actions */}
         <div className="flex gap-3 pt-2">
           <button
-            onClick={onCancel}
+            onClick={handleCancel}
             className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
           >
             取消
