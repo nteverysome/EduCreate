@@ -114,13 +114,11 @@ export const ResultFolderCardMobile: React.FC<ResultFolderCardMobileProps> = ({
         onDrop={handleDrop}
       >
         {/* 資料夾圖標 */}
-        <div className="flex-shrink-0">
-          <Folder
-            className="w-12 h-12"
-            style={{ color: folder.color || '#3B82F6' }}
-            fill={folder.color || '#3B82F6'}
-            fillOpacity={0.2}
-          />
+        <div
+          className="w-12 h-12 rounded flex items-center justify-center flex-shrink-0"
+          style={{ backgroundColor: folder.color || '#3B82F6' }}
+        >
+          <Folder className="w-6 h-6 text-white" />
         </div>
 
         {/* 資料夾信息 */}
