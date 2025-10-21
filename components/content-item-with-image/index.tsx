@@ -210,12 +210,17 @@ export default function ContentItemWithImage({
         }),
       });
 
+      // Get version data and number for display
+      let versionNumber = 1;
+      let versionData = null;
+
       if (!versionResponse.ok) {
         console.error('Failed to create version record');
         // Don't throw error, just log it - version creation is not critical
       } else {
-        const versionData = await versionResponse.json();
+        versionData = await versionResponse.json();
         console.log('Version created successfully:', versionData);
+        versionNumber = versionData.version?.version || 1;
       }
 
       // Update local value with new image URL
@@ -232,13 +237,6 @@ export default function ContentItemWithImage({
         await onSave(newValue);
       } else {
         onChange(newValue);
-      }
-
-      // Get version number for display
-      let versionNumber = 1;
-      if (versionResponse.ok) {
-        const versionData = await versionResponse.json();
-        versionNumber = versionData.version?.version || 1;
       }
 
       alert(`✅ 圖片已生成並保存！版本號：${versionNumber}\n您可以在圖片庫中查看。`);
