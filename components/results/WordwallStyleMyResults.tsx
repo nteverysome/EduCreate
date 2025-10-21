@@ -12,6 +12,7 @@ import ResultFolderCard from './ResultFolderCard';
 import DraggableResultCardNative from './DraggableResultCardNative';
 import DropToParentTarget from './DropToParentTarget';
 import { ResultCardMobile } from './ResultCardMobile';
+import { ResultFolderCardMobile } from './ResultFolderCardMobile';
 import NewFolderModal from './NewFolderModal';
 import FolderContextMenu from './FolderContextMenu';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -1062,17 +1063,36 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         </button>
 
         {/* 現有資料夾 - 使用原生 HTML5 拖放 API */}
-        {filteredFolders.map(folder => (
-          <ResultFolderCard
-            key={folder.id}
-            folder={folder}
-            onClick={handleFolderClick}
-            onMenuClick={handleFolderMenuClick}
-            onResultDrop={handleResultDropToFolder}
-            onFolderDrop={handleFolderDropToFolder}
-            draggable={true}
-          />
-        ))}
+        {filteredFolders.map(folder => {
+          // 根據 viewMode 選擇使用哪個資料夾卡片組件
+          // 小網格視圖：使用列表式卡片（ResultFolderCardMobile）
+          if (viewMode === 'small-grid') {
+            return (
+              <ResultFolderCardMobile
+                key={folder.id}
+                folder={folder}
+                onClick={handleFolderClick}
+                onMenuClick={handleFolderMenuClick}
+                onResultDrop={handleResultDropToFolder}
+                onFolderDrop={handleFolderDropToFolder}
+                draggable={true}
+              />
+            );
+          }
+
+          // 網格視圖和列表視圖使用完整版卡片
+          return (
+            <ResultFolderCard
+              key={folder.id}
+              folder={folder}
+              onClick={handleFolderClick}
+              onMenuClick={handleFolderMenuClick}
+              onResultDrop={handleResultDropToFolder}
+              onFolderDrop={handleFolderDropToFolder}
+              draggable={true}
+            />
+          );
+        })}
       </div>
 
       {/* 結果網格/列表 */}
