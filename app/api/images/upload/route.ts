@@ -150,6 +150,7 @@ export async function POST(request: NextRequest) {
       image: {
         id: userImage.id,
         url: userImage.url,
+        blobPath: userImage.blobPath,
         fileName: userImage.fileName,
         fileSize: userImage.fileSize,
         mimeType: userImage.mimeType,
