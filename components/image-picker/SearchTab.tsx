@@ -97,14 +97,24 @@ export default function SearchTab({ onSelect, isSelected }: SearchTabProps) {
     searchPhotos();
   };
 
-  const handlePhotoSelect = async (photo: UnsplashPhoto) => {
+  const handlePhotoSelect = async (userImage: UserImage) => {
     try {
-      // 驗證圖片數據完整性
-      if (!photo || !photo.id) {
-        throw new Error('圖片數據不完整');
+      // 從 UserImage 中獲取 sourceId（即 Unsplash photo ID）
+      const photoId = userImage.sourceId;
+
+      if (!photoId) {
+        throw new Error('圖片 ID 不可用');
       }
 
-      if (!photo.links || !photo.links.downloadLocation) {
+      // 從原始 photos 數組中查找對應的 UnsplashPhoto
+      const originalPhoto = photos.find(p => p.id === photoId);
+
+      if (!originalPhoto) {
+        throw new Error('找不到原始圖片數據');
+      }
+
+      // 驗證圖片數據完整性
+      if (!originalPhoto.links || !originalPhoto.links.downloadLocation) {
         throw new Error('圖片下載鏈接不可用');
       }
 
@@ -115,9 +125,9 @@ export default function SearchTab({ onSelect, isSelected }: SearchTabProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          photoId: photo.id,
-          downloadLocation: photo.links.downloadLocation,
-          alt: photo.description || `Photo by ${photo.user.name}`,
+          photoId: originalPhoto.id,
+          downloadLocation: originalPhoto.links.downloadLocation,
+          alt: originalPhoto.description || `Photo by ${originalPhoto.user.name}`,
           tags: ['unsplash'],
         }),
       });
