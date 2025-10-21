@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         id: { in: imageIds },
       },
       include: {
-        activityImages: {
+        activities: {
           include: {
             activity: {
               select: {
@@ -106,10 +106,10 @@ export async function POST(request: NextRequest) {
       }
 
       // 檢查是否被活動使用
-      if (image.activityImages.length > 0) {
+      if (image.activities.length > 0) {
         result.skipped.push({
           id: imageId,
-          reason: `正在被 ${image.activityImages.length} 個活動使用`,
+          reason: `正在被 ${image.activities.length} 個活動使用`,
         });
         continue;
       }
