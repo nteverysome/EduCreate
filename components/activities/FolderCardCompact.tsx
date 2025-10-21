@@ -176,7 +176,11 @@ export const FolderCardCompact: React.FC<FolderCardCompactProps> = ({
           ${draggable ? 'cursor-move' : ''}
         `}
         onClick={handleCardClick}
-        style={{ backgroundColor: isDragOver ? '#EBF8FF' : 'white' }}
+        style={{
+          backgroundColor: isDragOver ? '#EBF8FF' : 'white',
+          width: '239px',
+          height: '115px'
+        }}
         draggable={draggable}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -184,59 +188,34 @@ export const FolderCardCompact: React.FC<FolderCardCompactProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {/* 內容區域 - 緊湊佈局 */}
-        <div className="p-3">
-          {/* 資料夾圖標和名稱 */}
-          <div className="flex items-center gap-2 mb-2">
-            <div
-              className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: folder.color }}
-            >
-              <Folder className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 text-xs truncate" title={folder.name}>
-                {folder.name}
-              </h3>
-              <p className="text-xs text-gray-500">
-                {folder.activityCount} 個活動
-              </p>
-            </div>
-          </div>
-
-          {/* 功能按鈕 - 橫向排列 */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick(folder.id);
-              }}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-xs"
-              title="開啟"
-            >
-              <Folder className="w-3 h-3" />
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit?.(folder);
-              }}
-              className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors text-xs"
-              title="重新命名"
-            >
-              <Edit2 className="w-3 h-3" />
-            </button>
-
-            <button
-              onClick={handleMenuClick}
-              className="flex items-center justify-center px-2 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
-              title="更多"
-            >
-              <MoreVertical className="w-3 h-3" />
-            </button>
+        {/* 資料夾圖標區域 */}
+        <div className="flex items-center justify-center pt-4 pb-2">
+          <div
+            className="w-12 h-12 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: folder.color }}
+          >
+            <Folder className="w-6 h-6 text-white" />
           </div>
         </div>
+
+        {/* 資料夾信息 */}
+        <div className="px-3 pb-2">
+          <h3 className="font-medium text-gray-900 text-sm truncate text-center mb-1" title={folder.name}>
+            {folder.name}
+          </h3>
+          <p className="text-xs text-gray-500 text-center">
+            {folder.activityCount} 個活動
+          </p>
+        </div>
+
+        {/* 更多按鈕 - 右上角 */}
+        <button
+          onClick={handleMenuClick}
+          className="absolute top-2 right-2 p-1 hover:bg-gray-100 rounded transition-colors"
+          title="更多"
+        >
+          <MoreVertical className="w-4 h-4 text-gray-600" />
+        </button>
       </div>
 
       {/* 更多選項菜單 */}

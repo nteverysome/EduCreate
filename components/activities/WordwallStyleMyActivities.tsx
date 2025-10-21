@@ -1265,10 +1265,12 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           ${viewMode === 'grid'
             ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
             : viewMode === 'small-grid'
-            ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3'
+            ? 'flex flex-wrap'
             : 'space-y-4'
           }
-        `}>
+        `}
+        style={viewMode === 'small-grid' ? { gap: '6.28px' } : {}}
+        >
           {filteredAndSortedActivities.map((activity) => {
             // 根據 viewMode 選擇使用哪個卡片組件
             const CardComponent = viewMode === 'small-grid'
