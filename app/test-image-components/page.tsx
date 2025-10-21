@@ -141,8 +141,10 @@ export default function TestImageComponentsPage() {
 
       console.log('Image uploaded successfully:', uploadData.image);
 
-      // 2. Create version record for the original image
-      const versionResponse = await fetch(`/api/images/${imageToEdit.id}/versions`, {
+      // 2. Create version record for the newly uploaded image
+      // This ensures that when users select the edited image in ImageGallery,
+      // they can see its version history
+      const versionResponse = await fetch(`/api/images/${uploadData.image.id}/versions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -154,6 +156,7 @@ export default function TestImageComponentsPage() {
             type: 'edit',
             timestamp: new Date().toISOString(),
             description: '圖片編輯',
+            originalImageId: imageToEdit.id, // Track the original image
           },
         }),
       });
