@@ -440,6 +440,10 @@ export default function TestImageComponentsPage() {
                   console.log('Restore version:', version);
                   updateTestResult('VersionHistory', 'pass', '成功恢復版本');
                 }}
+                onClose={() => {
+                  updateTestResult('VersionHistory', 'pass', '成功查看版本歷史');
+                  setShowVersionHistory(false);
+                }}
               />
             </div>
           </div>
