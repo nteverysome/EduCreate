@@ -146,13 +146,19 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel }: Ima
   };
 
   const handleSave = async () => {
-    if (!croppedAreaPixels) return;
-
     setSaving(true);
     try {
+      // If no crop area is set, use the entire image
+      const cropArea = croppedAreaPixels || {
+        x: 0,
+        y: 0,
+        width: 1000, // Default width, will be adjusted by getCroppedImg
+        height: 1000, // Default height, will be adjusted by getCroppedImg
+      };
+
       const { blob, url } = await getCroppedImg(
         imageUrl,
-        croppedAreaPixels,
+        cropArea,
         rotation,
         filter
       );
