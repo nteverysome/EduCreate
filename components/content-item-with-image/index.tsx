@@ -26,6 +26,7 @@ export interface ContentItemWithImageProps {
   value: ContentItem;
   onChange: (value: ContentItem) => void;
   onRemove?: () => void;
+  onSave?: (value: ContentItem) => Promise<boolean>;
   autoSave?: boolean;
   autoSaveDelay?: number;
 }
@@ -34,12 +35,19 @@ export default function ContentItemWithImage({
   value,
   onChange,
   onRemove,
+  onSave,
   autoSave = true,
   autoSaveDelay = 1000,
 }: ContentItemWithImageProps) {
   const [localValue, setLocalValue] = useState(value);
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Track changes
+  useEffect(() => {
+    setHasChanges(JSON.stringify(localValue) !== JSON.stringify(value));
+  }, [localValue, value]);
 
   // Auto-save effect
   useEffect(() => {
@@ -55,6 +63,24 @@ export default function ContentItemWithImage({
 
     return () => clearTimeout(timer);
   }, [localValue, autoSave, autoSaveDelay]);
+
+  const handleManualSave = async () => {
+    if (!hasChanges) return;
+
+    setIsSaving(true);
+    try {
+      if (onSave) {
+        const success = await onSave(localValue);
+        if (success) {
+          onChange(localValue);
+        }
+      } else {
+        onChange(localValue);
+      }
+    } finally {
+      setTimeout(() => setIsSaving(false), 500);
+    }
+  };
 
   const handleTextChange = (text: string) => {
     setLocalValue({ ...localValue, text });
@@ -162,10 +188,22 @@ export default function ContentItemWithImage({
           <span className="text-xs text-gray-500">
             {localValue.text.length} 字
           </span>
-          {autoSave && (
+          {autoSave ? (
             <span className="text-xs text-gray-500">
               自動保存已啟用
             </span>
+          ) : (
+            <button
+              onClick={handleManualSave}
+              disabled={!hasChanges || isSaving}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                hasChanges && !isSaving
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {isSaving ? '保存中...' : hasChanges ? '保存' : '已保存'}
+            </button>
           )}
         </div>
       </div>

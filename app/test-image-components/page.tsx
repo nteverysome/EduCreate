@@ -412,7 +412,7 @@ export default function TestImageComponentsPage() {
                 onRemove={() => {
                   console.log('Content removed');
                 }}
-                autoSave={true}
+                autoSave={false}
                 onSave={async (value) => {
                   console.log('Content saved:', value);
                   updateTestResult('ContentItemWithImage', 'pass', '成功保存內容');
