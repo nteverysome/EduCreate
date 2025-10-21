@@ -474,6 +474,65 @@ async function getActivityCount(folderId: string, userId: string, onlyPublished:
 - 62b49db：修復 /my-results 頁面「在新分頁開啟」功能
 - 8226666：修復 /my-activities 頁面「在新分頁開啟」功能
 
+### 5. 視圖模式偏好記錄功能
+
+**功能描述**：
+- 記錄用戶選擇的視圖模式（網格/小網格/列表）
+- 刷新頁面後自動恢復用戶的偏好設置
+- 每個頁面獨立記錄，互不干擾
+
+**實施範圍**：
+- `/my-activities` 頁面
+- `/my-results` 頁面
+- `/community/author/[authorId]` 頁面
+
+**技術實現**：
+使用瀏覽器原生 `localStorage` API 保存用戶偏好
+
+**localStorage 鍵名**：
+| 頁面 | localStorage 鍵名 |
+|------|------------------|
+| 我的活動 | `myActivitiesViewMode` |
+| 我的結果 | `myResultsViewMode` |
+| 社區作者 | `communityAuthorViewMode` |
+
+**實現模式**：
+```typescript
+// 1. 狀態初始化（讀取偏好）
+const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>(() => {
+  if (typeof window !== 'undefined') {
+    const savedViewMode = localStorage.getItem('myActivitiesViewMode');
+    if (savedViewMode === 'grid' || savedViewMode === 'small-grid' || savedViewMode === 'list') {
+      return savedViewMode;
+    }
+  }
+  return 'grid'; // 默認值
+});
+
+// 2. 保存偏好（監聽變化）
+useEffect(() => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('myActivitiesViewMode', viewMode);
+    console.log('💾 保存視圖模式偏好:', viewMode);
+  }
+}, [viewMode]);
+```
+
+**關鍵點**：
+- ✅ 使用 `useState` 的初始化函數（只執行一次）
+- ✅ SSR 安全檢查：`typeof window !== 'undefined'`
+- ✅ 類型守衛：驗證讀取的值是否有效
+- ✅ 默認值：無效值時使用 `'grid'`
+- ✅ 控制台日誌：方便調試和驗證
+
+**相關提交**：
+- bea4509：我的活動頁面視圖模式記錄
+- cbd231a：我的結果和社區作者頁面視圖模式記錄
+- 7d6d5f8：添加完整實施文檔
+
+**詳細文檔**：
+參見 `docs/VIEW_MODE_PREFERENCE_IMPLEMENTATION.md`
+
 ---
 
 ## 📝 重要代碼模式
@@ -605,7 +664,36 @@ npm run dev
 
 ### 最新提交（按時間倒序）
 
-1. **8226666** - fix: 修復 /my-activities 頁面「在新分頁開啟」功能
+1. **7d6d5f8** - docs: 添加視圖模式偏好記錄功能實施文檔
+   - 創建完整的實施文檔（552 行）
+   - 記錄三個頁面的視圖模式記錄功能
+   - 包含技術實現、測試驗證、使用指南
+   - 提供故障排除和下一步優化建議
+
+2. **cbd231a** - feat: 為 /my-results 和社區作者頁面添加視圖模式記錄功能
+   - /my-results 使用 localStorage 保存視圖模式（myResultsViewMode）
+   - 社區作者頁面使用 localStorage 保存視圖模式（communityAuthorViewMode）
+   - 頁面載入時自動恢復用戶的視圖模式偏好
+   - 視圖模式變化時自動保存到 localStorage
+   - 支援 'grid', 'small-grid', 'list' 三種模式
+
+3. **bea4509** - feat: 記錄用戶的視圖模式偏好設置
+   - 使用 localStorage 保存用戶選擇的視圖模式（網格/小網格/列表）
+   - 頁面載入時自動恢復用戶的視圖模式偏好
+   - 視圖模式變化時自動保存到 localStorage
+   - 添加 console.log 記錄保存操作
+   - 默認值為 'grid'（網格視圖）
+
+4. **da0e71d** - fix: 修復手機版本按鈕溢出問題
+   - 篩選和選擇按鈕在手機版本只顯示圖標
+   - 減少按鈕內邊距和間距
+   - 添加 title 屬性提供提示信息
+
+5. **ae7da2a** - fix: 優化社區作者頁面手機版本排版
+   - 將搜索/視圖控制與排序按鈕分為兩行
+   - 改善手機版本的佈局和可用性
+
+6. **8226666** - fix: 修復 /my-activities 頁面「在新分頁開啟」功能
    - 使用 useSearchParams 替代 window.location.search
    - 直接從 URL 參數初始化 currentFolderId
    - 避免閃爍和跳轉，提升用戶體驗
@@ -763,11 +851,12 @@ npm run dev
 
 ---
 
-**文檔版本**：2.0
-**最後更新**：2025-10-20
+**文檔版本**：2.1
+**最後更新**：2025-10-21
 **維護者**：EduCreate Team
 
 **更新日誌**：
+- 2.1 (2025-10-21)：添加視圖模式偏好記錄功能，更新最新提交記錄，添加手機版本優化說明
 - 2.0 (2025-10-20)：添加資料夾系統完整文檔，更新最新提交記錄，添加「在新分頁開啟」功能修復說明
 - 1.0 (2025-01-18)：初始版本
 

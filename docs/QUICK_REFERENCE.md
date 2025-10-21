@@ -190,6 +190,33 @@ if (folderId && 'folders' in data) {
 ))}
 ```
 
+### 視圖模式偏好記錄
+```typescript
+// 1. 狀態初始化（讀取偏好）
+const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>(() => {
+  if (typeof window !== 'undefined') {
+    const savedViewMode = localStorage.getItem('myActivitiesViewMode');
+    if (savedViewMode === 'grid' || savedViewMode === 'small-grid' || savedViewMode === 'list') {
+      return savedViewMode;
+    }
+  }
+  return 'grid'; // 默認值
+});
+
+// 2. 保存偏好（監聽變化）
+useEffect(() => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('myActivitiesViewMode', viewMode);
+    console.log('💾 保存視圖模式偏好:', viewMode);
+  }
+}, [viewMode]);
+
+// localStorage 鍵名規範
+myActivitiesViewMode    // 我的活動頁面
+myResultsViewMode       // 我的結果頁面
+communityAuthorViewMode // 社區作者頁面
+```
+
 ---
 
 ## 🎮 遊戲類型映射
@@ -329,6 +356,30 @@ useEffect(() => {
   const params = new URLSearchParams(window.location.search);
   setCurrentFolderId(params.get('folderId'));
 }, []);
+```
+
+### 視圖模式沒有記住
+```typescript
+// 問題：刷新頁面後視圖模式恢復到默認值
+
+// 1. 檢查 localStorage 是否被禁用
+if (typeof window !== 'undefined') {
+  console.log('localStorage 可用:', !!window.localStorage);
+}
+
+// 2. 檢查 localStorage 中的值
+console.log('保存的視圖模式:', localStorage.getItem('myActivitiesViewMode'));
+
+// 3. 檢查控制台日誌
+// 應該看到：💾 保存視圖模式偏好: grid
+
+// 4. 檢查瀏覽器是否處於隱私模式
+// 隱私模式下 localStorage 可能不可用
+
+// 5. 檢查 localStorage 鍵名是否正確
+// 我的活動：myActivitiesViewMode
+// 我的結果：myResultsViewMode
+// 社區作者：communityAuthorViewMode
 ```
 
 ---
@@ -558,11 +609,12 @@ A: 根據 `includeBreadcrumbs` 參數返回不同格式：`FolderData[]` 或 `{ 
 
 ---
 
-**快速參考版本**：2.0
-**最後更新**：2025-10-20
+**快速參考版本**：2.1
+**最後更新**：2025-10-21
 **提示**：將此文檔加入書籤，隨時查閱！
 
 **更新日誌**：
+- 2.1 (2025-10-21)：添加視圖模式偏好記錄相關內容、手機版本優化故障排除
 - 2.0 (2025-10-20)：添加資料夾系統相關文件、核心概念、故障排除和 FAQ
 - 1.0 (2025-01-18)：初始版本
 

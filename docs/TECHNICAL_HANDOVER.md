@@ -274,7 +274,101 @@ const [state, setState] = useState(valueFromProps);
 - 如果狀態的初始值可以從 props 或 hooks 獲取，直接在 `useState` 中初始化
 - 避免在 `useEffect` 中設置狀態，除非是響應外部事件或副作用
 
-### 7. 麵包屑導航實現模式
+### 7. 視圖模式偏好記錄架構
+
+**設計目標**：
+- 記錄用戶選擇的視圖模式（網格/小網格/列表）
+- 刷新頁面後自動恢復用戶的偏好設置
+- 每個頁面獨立記錄，互不干擾
+- 無需後端 API 支援
+
+**技術選型**：
+使用瀏覽器原生 `localStorage` API
+
+**優點**：
+- ✅ 即時保存，無延遲
+- ✅ 跨會話持久化
+- ✅ 無需後端 API
+- ✅ 簡單可靠
+
+**實現模式**：
+
+1. **狀態初始化（讀取偏好）**：
+```typescript
+const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>(() => {
+  // 從 localStorage 讀取用戶的視圖模式偏好
+  if (typeof window !== 'undefined') {
+    const savedViewMode = localStorage.getItem('myActivitiesViewMode');
+    if (savedViewMode === 'grid' || savedViewMode === 'small-grid' || savedViewMode === 'list') {
+      return savedViewMode;
+    }
+  }
+  return 'grid'; // 默認值
+});
+```
+
+**關鍵點**：
+- 使用 `useState` 的初始化函數（只執行一次）
+- SSR 安全檢查：`typeof window !== 'undefined'`
+- 類型守衛：驗證讀取的值是否有效
+- 默認值：無效值時使用 `'grid'`
+
+2. **保存偏好（監聽變化）**：
+```typescript
+// 保存視圖模式到 localStorage
+useEffect(() => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('myActivitiesViewMode', viewMode);
+    console.log('💾 保存視圖模式偏好:', viewMode);
+  }
+}, [viewMode]);
+```
+
+**關鍵點**：
+- 使用 `useEffect` 監聽 `viewMode` 變化
+- SSR 安全檢查：`typeof window !== 'undefined'`
+- 控制台日誌：方便調試和驗證
+- 依賴數組：`[viewMode]`
+
+**localStorage 鍵名規範**：
+```
+{頁面名稱}ViewMode
+```
+
+**範例**：
+- `myActivitiesViewMode` - 我的活動頁面
+- `myResultsViewMode` - 我的結果頁面
+- `communityAuthorViewMode` - 社區作者頁面
+
+**視圖模式值規範**：
+```typescript
+type ViewMode = 'grid' | 'small-grid' | 'list';
+```
+
+**實施頁面**：
+1. `/my-activities` - `components/activities/WordwallStyleMyActivities.tsx`
+2. `/my-results` - `components/results/WordwallStyleMyResults.tsx`
+3. `/community/author/[authorId]` - `app/community/author/[authorId]/page.tsx`
+
+**測試驗證**：
+1. 切換視圖模式
+2. 檢查控制台日誌：`💾 保存視圖模式偏好: ...`
+3. 刷新頁面
+4. 驗證視圖模式自動恢復
+
+**故障排除**：
+- 如果刷新後沒有記住：檢查瀏覽器是否禁用 localStorage
+- 如果不同頁面互相影響：檢查 localStorage 鍵名是否正確
+- 如果沒有控制台日誌：檢查代碼是否正確部署
+
+**相關提交**：
+- bea4509：我的活動頁面視圖模式記錄
+- cbd231a：我的結果和社區作者頁面視圖模式記錄
+
+**詳細文檔**：
+參見 `docs/VIEW_MODE_PREFERENCE_IMPLEMENTATION.md`
+
+### 8. 麵包屑導航實現模式
 
 **設計目標**：
 - 顯示完整的資料夾路徑（例如：我的活動 > 資料夾1 > 資料夾2 > 資料夾3）
@@ -1038,11 +1132,12 @@ npx prisma db push # 同步資料庫模型
 
 ---
 
-**文檔版本**：2.0
-**最後更新**：2025-10-20
+**文檔版本**：2.1
+**最後更新**：2025-10-21
 **維護者**：EduCreate Team
 
 **更新日誌**：
+- 2.1 (2025-10-21)：添加視圖模式偏好記錄架構，更新手機版本優化相關內容
 - 2.0 (2025-10-20)：添加資料夾系統架構、Next.js URL 參數處理最佳實踐、麵包屑導航實現模式、資料夾相關開發任務和故障排除
 - 1.0 (2025-01-18)：初始版本
 
