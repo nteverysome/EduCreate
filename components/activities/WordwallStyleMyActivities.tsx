@@ -127,7 +127,16 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   const [sortBy, setSortBy] = useState('modified');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filterType, setFilterType] = useState('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>(() => {
+    // 從 localStorage 讀取用戶的視圖模式偏好
+    if (typeof window !== 'undefined') {
+      const savedViewMode = localStorage.getItem('myActivitiesViewMode');
+      if (savedViewMode === 'grid' || savedViewMode === 'small-grid' || savedViewMode === 'list') {
+        return savedViewMode;
+      }
+    }
+    return 'grid'; // 默認值
+  });
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -167,6 +176,14 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
   }, []);
 
   const { isConnected } = useScreenshotUpdates(userId, handleScreenshotUpdate);
+
+  // 保存視圖模式到 localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('myActivitiesViewMode', viewMode);
+      console.log('💾 保存視圖模式偏好:', viewMode);
+    }
+  }, [viewMode]);
 
   // 載入活動數據
   useEffect(() => {
