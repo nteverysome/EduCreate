@@ -283,10 +283,10 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   return (
     <div className="folder-manager mb-4">
       {/* 資料夾網格 - 參考 Wordwall 佈局，減少底部間距更靠近活動卡片 */}
-      {/* 小網格視圖：手機和平板用網格佈局（a3aa450），桌面用 5 列網格佈局 */}
+      {/* 小網格視圖：水平堆疊 5 個後垂直堆疊（列表式卡片） */}
       <div className={`mb-4 ${
         viewMode === 'small-grid'
-          ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'
+          ? 'grid grid-cols-5 gap-2'
           : 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'
       }`}>
         {/* 創建新資料夾按鈕 */}
@@ -305,10 +305,10 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
         {/* 現有資料夾 */}
         {folders.map((folder) => {
           // 根據 viewMode 選擇使用哪個資料夾卡片組件
-          // 小網格視圖：所有螢幕尺寸都用網格式卡片
+          // 小網格視圖：使用列表式卡片（FolderCardMobile）
           if (viewMode === 'small-grid') {
             return (
-              <FolderCardCompact
+              <FolderCardMobile
                 key={folder.id}
                 folder={folder}
                 onClick={onFolderSelect}
