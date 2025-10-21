@@ -11,8 +11,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Image as ImageIcon, X, Edit2, Trash2 } from 'lucide-react';
+import { Image as ImageIcon, X, Edit2, Trash2, Download } from 'lucide-react';
 import ImagePicker, { UserImage } from '../image-picker';
+import { overlayTextOnImage, type TextOverlayOptions } from '@/lib/image-text-overlay';
 
 export interface ContentItem {
   id: string;
@@ -144,6 +145,67 @@ export default function ContentItemWithImage({
       case 'small': return 'text-lg';
       case 'medium': return 'text-2xl';
       case 'large': return 'text-4xl';
+    }
+  };
+
+  // Generate and upload image with text overlay
+  const handleGenerateImage = async () => {
+    if (!localValue.imageUrl || !localValue.text) {
+      alert('請先選擇圖片並輸入文字');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Generate image with text overlay
+      const overlayOptions: TextOverlayOptions = {
+        text: localValue.text,
+        position: textPosition,
+        fontSize,
+        textColor,
+        showBackground: showBg,
+      };
+
+      const blob = await overlayTextOnImage(localValue.imageUrl, overlayOptions);
+
+      // Upload to server
+      const formData = new FormData();
+      formData.append('file', blob, 'content-image-with-text.png');
+      formData.append('source', 'content-item');
+
+      const uploadResponse = await fetch('/api/images/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('上傳圖片失敗');
+      }
+
+      const uploadData = await uploadResponse.json();
+
+      // Update local value with new image URL
+      const newValue = {
+        ...localValue,
+        imageId: uploadData.image.id,
+        imageUrl: uploadData.image.url,
+      };
+
+      setLocalValue(newValue);
+
+      // Call onSave if provided
+      if (onSave) {
+        await onSave(newValue);
+      } else {
+        onChange(newValue);
+      }
+
+      alert('✅ 圖片已生成並保存！您可以在圖片庫中查看。');
+    } catch (error) {
+      console.error('Generate image error:', error);
+      alert(error instanceof Error ? error.message : '生成圖片失敗');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -321,27 +383,43 @@ export default function ContentItemWithImage({
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           rows={4}
         />
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center justify-between mt-2 gap-2">
           <span className="text-xs text-gray-500">
             {localValue.text.length} 字
           </span>
-          {autoSave ? (
-            <span className="text-xs text-gray-500">
-              自動保存已啟用
-            </span>
-          ) : (
-            <button
-              onClick={handleManualSave}
-              disabled={!hasChanges || isSaving}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                hasChanges && !isSaving
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              {isSaving ? '保存中...' : hasChanges ? '保存' : '已保存'}
-            </button>
-          )}
+          <div className="flex gap-2">
+            {/* Generate Image Button (only show when image and text exist) */}
+            {localValue.imageUrl && localValue.text && (
+              <button
+                onClick={handleGenerateImage}
+                disabled={isSaving}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                title="將文字疊加到圖片上並生成新圖片"
+              >
+                <Download className="w-4 h-4" />
+                {isSaving ? '生成中...' : '生成圖片'}
+              </button>
+            )}
+
+            {/* Save Button */}
+            {autoSave ? (
+              <span className="text-xs text-gray-500">
+                自動保存已啟用
+              </span>
+            ) : (
+              <button
+                onClick={handleManualSave}
+                disabled={!hasChanges || isSaving}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  hasChanges && !isSaving
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                {isSaving ? '保存中...' : hasChanges ? '保存' : '已保存'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
