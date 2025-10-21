@@ -99,6 +99,15 @@ export default function SearchTab({ onSelect, isSelected }: SearchTabProps) {
 
   const handlePhotoSelect = async (photo: UnsplashPhoto) => {
     try {
+      // 驗證圖片數據完整性
+      if (!photo || !photo.id) {
+        throw new Error('圖片數據不完整');
+      }
+
+      if (!photo.links || !photo.links.downloadLocation) {
+        throw new Error('圖片下載鏈接不可用');
+      }
+
       // 保存 Unsplash 圖片到用戶圖片庫
       const response = await fetch('/api/unsplash/download', {
         method: 'POST',
@@ -122,6 +131,7 @@ export default function SearchTab({ onSelect, isSelected }: SearchTabProps) {
       // 調用 onSelect 回調
       onSelect(data.image);
     } catch (err) {
+      console.error('選擇圖片錯誤:', err);
       alert(err instanceof Error ? err.message : '保存圖片失敗');
     }
   };
