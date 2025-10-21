@@ -37,9 +37,16 @@ import {
   Facebook,
   Linkedin,
   Folder,
-  ChevronRight
+  ChevronRight,
+  Search,
+  Grid3X3,
+  Grid2X2,
+  List,
+  X
 } from 'lucide-react';
 import CommunityActivityCard from '@/components/community/CommunityActivityCard';
+import { CommunityActivityCardMobile } from '@/components/community/CommunityActivityCardMobile';
+import { CommunityFolderCardMobile } from '@/components/community/CommunityFolderCardMobile';
 import { FormattedCommunityActivity } from '@/lib/community/utils';
 
 interface AuthorProfile {
@@ -110,6 +117,10 @@ export default function AuthorProfilePage() {
   const [folders, setFolders] = useState<FolderData[]>([]);
   const [currentFolder, setCurrentFolder] = useState<CurrentFolder | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]);
+
+  // 搜尋和視圖狀態
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'small-grid' | 'list'>('grid');
 
   // 從 URL 讀取 folderId
   useEffect(() => {
@@ -256,6 +267,19 @@ export default function AuthorProfilePage() {
       handleFolderClick(null);
     }
   };
+
+  // 搜尋過濾活動
+  const filteredActivities = activities.filter(activity => {
+    if (!searchQuery) return true;
+    return activity.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+           activity.description?.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  // 搜尋過濾資料夾
+  const filteredFolders = folders.filter(folder => {
+    if (!searchQuery) return true;
+    return folder.name.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   if (loading) {
     return (
@@ -488,100 +512,211 @@ export default function AuthorProfilePage() {
             </div>
           )}
 
-          {/* 排序選項 */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {currentFolder ? currentFolder.name : '已發布的活動'}
-            </h2>
-            <div className="flex gap-2">
-              {(['latest', 'popular', 'views', 'plays'] as const).map((sort) => (
+          {/* 標題 */}
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            {currentFolder ? currentFolder.name : '已發布的活動'}
+          </h2>
+
+          {/* 搜尋和視圖控制 */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 mb-6">
+            {/* 搜尋框 */}
+            <div className="flex-1 lg:max-w-lg relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="搜尋活動..."
+                className="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500 outline-none"
+              />
+              {searchQuery && (
                 <button
-                  key={sort}
-                  onClick={() => handleSortChange(sort)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    sortBy === sort
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  {sort === 'latest' && '最新'}
-                  {sort === 'popular' && '熱門'}
-                  {sort === 'views' && '瀏覽'}
-                  {sort === 'plays' && '遊戲'}
+                  <X className="w-5 h-5" />
                 </button>
-              ))}
+              )}
+            </div>
+
+            {/* 視圖切換和排序 */}
+            <div className="flex items-center gap-4">
+              {/* 視圖切換按鈕 */}
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-md transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  title="網格視圖"
+                >
+                  <Grid3X3 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('small-grid')}
+                  className={`p-2 rounded-md transition-colors ${
+                    viewMode === 'small-grid'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  title="小網格視圖"
+                >
+                  <Grid2X2 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-md transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  title="列表視圖"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* 排序按鈕 */}
+              <div className="flex gap-2">
+                {(['latest', 'popular', 'views', 'plays'] as const).map((sort) => (
+                  <button
+                    key={sort}
+                    onClick={() => handleSortChange(sort)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      sortBy === sort
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {sort === 'latest' && '最新'}
+                    {sort === 'popular' && '熱門'}
+                    {sort === 'views' && '瀏覽'}
+                    {sort === 'plays' && '遊戲'}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
           {/* 活動網格 */}
-          {folders.length === 0 && activities.length === 0 ? (
+          {filteredFolders.length === 0 && filteredActivities.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📭</div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {currentFolder ? '此資料夾是空的' : '還沒有發布活動'}
+                {searchQuery ? '沒有找到匹配的結果' : currentFolder ? '此資料夾是空的' : '還沒有發布活動'}
               </h3>
               <p className="text-gray-600">
-                {isOwner
-                  ? currentFolder
-                    ? '此資料夾中沒有已發布的活動'
-                    : '開始創建並發布您的第一個活動吧！'
-                  : currentFolder
-                    ? '此資料夾中沒有已發布的活動'
-                    : '這位作者還沒有發布任何活動'
+                {searchQuery
+                  ? '請嘗試其他搜尋關鍵字'
+                  : isOwner
+                    ? currentFolder
+                      ? '此資料夾中沒有已發布的活動'
+                      : '開始創建並發布您的第一個活動吧！'
+                    : currentFolder
+                      ? '此資料夾中沒有已發布的活動'
+                      : '這位作者還沒有發布任何活動'
                 }
               </p>
             </div>
           ) : (
             <>
               {/* 資料夾區域 */}
-              {(folders.length > 0 || currentFolderId) && (
+              {(filteredFolders.length > 0 || currentFolderId) && (
                 <div className="mb-8">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">資料夾</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                    {/* 返回上一層卡片 */}
-                    {currentFolderId && (
-                      <div
-                        onClick={handleBackToParent}
-                        className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-dashed border-gray-300 hover:border-gray-400 flex flex-col items-center justify-center aspect-square"
-                      >
-                        <ArrowLeft size={32} className="text-gray-400 mb-2" />
-                        <span className="text-xs text-gray-600 font-medium text-center">返回上一層</span>
-                      </div>
-                    )}
 
-                    {/* 資料夾卡片 */}
-                    {folders.map((folder) => (
-                      <div
-                        key={folder.id}
-                        onClick={() => handleFolderClick(folder.id)}
-                        className="bg-white rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-transparent hover:border-purple-300 flex flex-col items-center justify-center aspect-square"
-                      >
-                        <Folder
-                          size={40}
-                          style={{ color: folder.color || '#8B5CF6' }}
-                          className="mb-2"
+                  {/* 小網格視圖 - 列表式佈局 */}
+                  {viewMode === 'small-grid' ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                      {/* 返回上一層卡片 */}
+                      {currentFolderId && (
+                        <div
+                          onClick={handleBackToParent}
+                          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-sm p-2 cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-dashed border-gray-300 hover:border-gray-400 flex items-center justify-center"
+                        >
+                          <ArrowLeft size={20} className="text-gray-400 mr-2" />
+                          <span className="text-xs text-gray-600 font-medium">返回</span>
+                        </div>
+                      )}
+
+                      {/* 資料夾卡片 - 手機版 */}
+                      {filteredFolders.map((folder) => (
+                        <CommunityFolderCardMobile
+                          key={folder.id}
+                          folder={folder}
+                          onClick={handleFolderClick}
                         />
-                        <h3 className="font-semibold text-sm text-gray-900 truncate w-full text-center">
-                          {folder.name}
-                        </h3>
-                        <p className="text-xs text-gray-600 mt-1">
-                          {folder.activityCount} {folder.activityCount === 1 ? 'activity' : 'activities'}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    /* 網格視圖和列表視圖 - 原有佈局 */
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                      {/* 返回上一層卡片 */}
+                      {currentFolderId && (
+                        <div
+                          onClick={handleBackToParent}
+                          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-dashed border-gray-300 hover:border-gray-400 flex flex-col items-center justify-center aspect-square"
+                        >
+                          <ArrowLeft size={32} className="text-gray-400 mb-2" />
+                          <span className="text-xs text-gray-600 font-medium text-center">返回上一層</span>
+                        </div>
+                      )}
+
+                      {/* 資料夾卡片 - 彩色方塊背景 + 白色圖標 */}
+                      {filteredFolders.map((folder) => (
+                        <div
+                          key={folder.id}
+                          onClick={() => handleFolderClick(folder.id)}
+                          className="bg-white rounded-lg shadow-sm p-4 cursor-pointer hover:shadow-md transition-all duration-200 border-2 border-transparent hover:border-purple-300 flex flex-col items-center justify-center aspect-square"
+                        >
+                          <div
+                            className="w-16 h-16 rounded-lg flex items-center justify-center mb-2"
+                            style={{ backgroundColor: folder.color || '#8B5CF6' }}
+                          >
+                            <Folder className="w-8 h-8 text-white" />
+                          </div>
+                          <h3 className="font-semibold text-sm text-gray-900 truncate w-full text-center">
+                            {folder.name}
+                          </h3>
+                          <p className="text-xs text-gray-600 mt-1">
+                            {folder.activityCount} {folder.activityCount === 1 ? 'activity' : 'activities'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* 活動區域 */}
-              {activities.length > 0 && (
+              {filteredActivities.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">活動</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {activities.map((activity) => (
-                      <CommunityActivityCard key={activity.id} activity={activity} />
-                    ))}
-                  </div>
+
+                  {/* 小網格視圖 - 列表式佈局 */}
+                  {viewMode === 'small-grid' ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                      {filteredActivities.map((activity) => (
+                        <CommunityActivityCardMobile key={activity.id} activity={activity} />
+                      ))}
+                    </div>
+                  ) : viewMode === 'list' ? (
+                    /* 列表視圖 */
+                    <div className="space-y-2">
+                      {filteredActivities.map((activity) => (
+                        <CommunityActivityCardMobile key={activity.id} activity={activity} />
+                      ))}
+                    </div>
+                  ) : (
+                    /* 網格視圖 - 原有佈局 */
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {filteredActivities.map((activity) => (
+                        <CommunityActivityCard key={activity.id} activity={activity} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </>
