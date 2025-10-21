@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createApi } from 'unsplash-js';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 
 // 創建 Unsplash API 實例
 const unsplash = createApi({
