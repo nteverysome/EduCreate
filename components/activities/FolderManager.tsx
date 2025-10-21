@@ -283,31 +283,48 @@ export const FolderManager: React.FC<FolderManagerProps> = ({
   return (
     <div className="folder-manager mb-4">
       {/* 資料夾網格 - 參考 Wordwall 佈局，減少底部間距更靠近活動卡片 */}
-      {/* 小網格視圖一橫可以放 5 個資料夾 */}
+      {/* 小網格視圖在所有螢幕尺寸都使用列表式佈局 */}
       <div className={`mb-4 ${
         viewMode === 'small-grid'
-          ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3'
+          ? 'space-y-2'
           : 'grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4'
       }`}>
         {/* 創建新資料夾按鈕 */}
         <button
           onClick={() => setShowCreateModal(true)}
-          className="folder-card bg-white border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center min-h-[120px] hover:border-blue-400 hover:bg-blue-50 transition-colors group"
+          className={`folder-card bg-white border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-blue-400 hover:bg-blue-50 transition-colors group ${
+            viewMode === 'small-grid'
+              ? 'p-3 gap-3'
+              : 'p-4 flex-col min-h-[120px]'
+          }`}
         >
-          <Plus className="w-8 h-8 text-gray-400 group-hover:text-blue-500 mb-2" />
+          <Plus className={`w-8 h-8 text-gray-400 group-hover:text-blue-500 ${viewMode !== 'small-grid' ? 'mb-2' : ''}`} />
           <span className="text-sm text-gray-600 group-hover:text-blue-600">新增資料夾</span>
         </button>
 
         {/* 現有資料夾 */}
         {folders.map((folder) => {
           // 根據 viewMode 選擇使用哪個資料夾卡片組件
-          // 小網格視圖使用簡化版卡片（一橫 5 個）
-          const FolderCardComponent = viewMode === 'small-grid'
-            ? FolderCardCompact
-            : FolderCard;
+          // 小網格視圖在所有螢幕尺寸都使用列表式佈局
+          if (viewMode === 'small-grid') {
+            return (
+              <FolderCardMobile
+                key={folder.id}
+                folder={folder}
+                onClick={onFolderSelect}
+                onEdit={handleUpdateFolder}
+                onDelete={handleDeleteFolder}
+                onChangeColor={handleChangeColor}
+                onMove={handleMoveFolder}
+                onDrop={onActivityDropToFolder}
+                onFolderDrop={onFolderDropToFolder}
+                draggable={true}
+              />
+            );
+          }
 
           return (
-            <FolderCardComponent
+            <FolderCard
               key={folder.id}
               folder={folder}
               onClick={onFolderSelect}
