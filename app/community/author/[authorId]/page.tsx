@@ -518,29 +518,29 @@ export default function AuthorProfilePage() {
           </h2>
 
           {/* 搜尋和視圖控制 */}
-          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 mb-6">
-            {/* 搜尋框 */}
-            <div className="flex-1 lg:max-w-lg relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜尋活動..."
-                className="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500 outline-none"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-            </div>
+          <div className="flex flex-col gap-4 mb-6">
+            {/* 第一行：搜尋框 + 視圖切換 */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              {/* 搜尋框 */}
+              <div className="flex-1 w-full sm:max-w-md relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="搜尋活動..."
+                  className="w-full pl-12 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-900 placeholder-gray-500 outline-none"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
 
-            {/* 視圖切換和排序 */}
-            <div className="flex items-center gap-4">
               {/* 視圖切換按鈕 */}
               <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
                 <button
@@ -577,26 +577,26 @@ export default function AuthorProfilePage() {
                   <List className="w-5 h-5" />
                 </button>
               </div>
+            </div>
 
-              {/* 排序按鈕 */}
-              <div className="flex gap-2">
-                {(['latest', 'popular', 'views', 'plays'] as const).map((sort) => (
-                  <button
-                    key={sort}
-                    onClick={() => handleSortChange(sort)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      sortBy === sort
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {sort === 'latest' && '最新'}
-                    {sort === 'popular' && '熱門'}
-                    {sort === 'views' && '瀏覽'}
-                    {sort === 'plays' && '遊戲'}
-                  </button>
-                ))}
-              </div>
+            {/* 第二行：排序按鈕 */}
+            <div className="flex flex-wrap gap-2">
+              {(['latest', 'popular', 'views', 'plays'] as const).map((sort) => (
+                <button
+                  key={sort}
+                  onClick={() => handleSortChange(sort)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    sortBy === sort
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {sort === 'latest' && '最新'}
+                  {sort === 'popular' && '熱門'}
+                  {sort === 'views' && '瀏覽'}
+                  {sort === 'plays' && '遊戲'}
+                </button>
+              ))}
             </div>
           </div>
 
