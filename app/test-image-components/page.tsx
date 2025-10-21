@@ -35,6 +35,13 @@ export default function TestImageComponentsPage() {
   const [selectedImages, setSelectedImages] = useState<UserImage[]>([]);
   const [imageToEdit, setImageToEdit] = useState<UserImage | null>(null);
 
+  // Content item for ContentItemWithImage test
+  const [contentItem, setContentItem] = useState({
+    id: 'test-content-1',
+    text: '這是測試內容，可以編輯文字並添加圖片。',
+    position: 0,
+  });
+
   // Test results
   const [testResults, setTestResults] = useState<{
     component: string;
@@ -319,12 +326,16 @@ export default function TestImageComponentsPage() {
             </div>
             <div className="flex-1 overflow-auto">
               <ContentItemWithImage
-                index={0}
-                item={{ question: '測試問題', answer: '測試答案' }}
-                onChange={(index, field, value) => {
-                  console.log('Content changed:', { index, field, value });
+                value={contentItem}
+                onChange={(newValue) => {
+                  console.log('Content changed:', newValue);
+                  setContentItem(newValue);
+                  updateTestResult('ContentItemWithImage', 'pass', '成功編輯內容');
                 }}
-                onRemove={() => {}}
+                onRemove={() => {
+                  console.log('Content removed');
+                }}
+                autoSave={false}
               />
             </div>
           </div>
