@@ -7,8 +7,6 @@ import FolderManager from './FolderManager';
 import CreateFolderModal from './CreateFolderModal';
 import TrashModal from './TrashModal';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
-import { WordwallStyleActivityCardCompact } from './WordwallStyleActivityCardCompact';
-import { FolderCardMobile } from './FolderCardMobile';
 import { ActivityCardMobile } from './ActivityCardMobile';
 import ActivitySearchAndFilter from './ActivitySearchAndFilter';
 import { MoveActivityModal } from './MoveActivityModal';
@@ -1267,60 +1265,33 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
           ${viewMode === 'grid'
             ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
             : viewMode === 'small-grid'
-            ? 'space-y-2 md:flex md:flex-wrap'
+            ? 'space-y-2'
             : 'space-y-4'
           }
         `}
-        style={viewMode === 'small-grid' ? { gap: '0 6.28px' } : {}}
         >
           {filteredAndSortedActivities.map((activity) => {
-            // 根據 viewMode 和螢幕尺寸選擇使用哪個卡片組件
-            // 手機上的小網格視圖使用列表式佈局
-            const CardComponent = viewMode === 'small-grid'
-              ? ActivityCardMobile
-              : viewMode === 'grid'
-              ? WordwallStyleActivityCard
-              : WordwallStyleActivityCard;
-
-            // 手機版列表式卡片使用簡化的 props
+            // 根據 viewMode 選擇使用哪個卡片組件
+            // 小網格視圖在所有螢幕尺寸都使用列表式佈局
             if (viewMode === 'small-grid') {
               return (
-                <div key={activity.id} className="w-full md:w-auto">
-                  <div className="md:hidden">
-                    <ActivityCardMobile
-                      activity={activity}
-                      onClick={handleActivityPlay}
-                      onEdit={handleActivityEdit}
-                      onDelete={handleActivityDelete}
-                      onDuplicate={handleActivityCopy}
-                      onMove={handleMoveActivity}
-                      draggable={true}
-                    />
-                  </div>
-                  <div className="hidden md:block">
-                    <WordwallStyleActivityCardCompact
-                      activity={activity}
-                      isSelected={selectedActivities.includes(activity.id)}
-                      onSelect={handleActivitySelect}
-                      onPlay={handleActivityPlay}
-                      onEdit={handleActivityEdit}
-                      onCopy={handleActivityCopy}
-                      onDelete={handleActivityDelete}
-                      onShare={handleActivityShare}
-                      onRename={handleActivityRename}
-                      onMove={handleMoveActivity}
-                      onEditContent={handleEditContent}
-                      onAssignment={handleAssignment}
-                      onCommunityShare={handleCommunityShare}
-                      onQRCode={handleQRCode}
-                      selectionMode={selectionMode}
-                      onDragStart={handleActivityDragStart}
-                      onDragEnd={handleActivityDragEnd}
-                    />
-                  </div>
-                </div>
+                <ActivityCardMobile
+                  key={activity.id}
+                  activity={activity}
+                  onClick={handleActivityPlay}
+                  onEdit={handleActivityEdit}
+                  onDelete={handleActivityDelete}
+                  onDuplicate={handleActivityCopy}
+                  onMove={handleMoveActivity}
+                  draggable={true}
+                />
               );
             }
+
+            // 網格視圖和列表視圖使用完整版卡片
+            const CardComponent = viewMode === 'grid'
+              ? WordwallStyleActivityCard
+              : WordwallStyleActivityCard;
 
             return (
               <CardComponent
