@@ -176,7 +176,7 @@ export const FolderCardCompact: React.FC<FolderCardCompactProps> = ({
           ${draggable ? 'cursor-move' : ''}
         `}
         onClick={handleCardClick}
-        style={{ backgroundColor: isDragOver ? '#EBF8FF' : getBackgroundColor(folder.color) }}
+        style={{ backgroundColor: isDragOver ? '#EBF8FF' : 'white' }}
         draggable={draggable}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -184,30 +184,28 @@ export const FolderCardCompact: React.FC<FolderCardCompactProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {/* 資料夾圖標區域 */}
-        <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-t-lg flex items-center justify-center overflow-hidden">
-          <div 
-            className="w-16 h-16 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: folder.color }}
-          >
-            <Folder className="w-8 h-8 text-white" />
+        {/* 內容區域 - 緊湊佈局 */}
+        <div className="p-3">
+          {/* 資料夾圖標和名稱 */}
+          <div className="flex items-center gap-2 mb-2">
+            <div
+              className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: folder.color }}
+            >
+              <Folder className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-gray-900 text-xs truncate" title={folder.name}>
+                {folder.name}
+              </h3>
+              <p className="text-xs text-gray-500">
+                {folder.activityCount} 個活動
+              </p>
+            </div>
           </div>
-        </div>
-
-        {/* 標題和按鈕 */}
-        <div className="p-2">
-          {/* 標題 - 單行 */}
-          <h3 className="font-medium text-gray-900 text-xs mb-1 truncate" title={folder.name}>
-            {folder.name}
-          </h3>
-          
-          {/* 活動數量 */}
-          <p className="text-xs text-gray-500 mb-2">
-            {folder.activityCount} 個活動
-          </p>
 
           {/* 功能按鈕 - 橫向排列 */}
-          <div className="flex items-center justify-between gap-1">
+          <div className="flex items-center gap-1">
             <button
               onClick={(e) => {
                 e.stopPropagation();
