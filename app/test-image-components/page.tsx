@@ -303,10 +303,7 @@ export default function TestImageComponentsPage() {
               測試圖片管理的列表、篩選和刪除功能
             </p>
             <button
-              onClick={() => {
-                setShowImageGallery(true);
-                updateTestResult('ImageGallery', 'pass', '成功打開圖片庫');
-              }}
+              onClick={() => setShowImageGallery(true)}
               className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors"
             >
               打開 ImageGallery
@@ -384,6 +381,9 @@ export default function TestImageComponentsPage() {
             setSelectedImages(imageArray);
             updateTestResult('ImageGallery', 'pass', `從圖片庫選擇 ${imageArray.length} 張圖片`);
             setShowImageGallery(false);
+          }}
+          onDelete={(deletedCount) => {
+            updateTestResult('ImageGallery', 'pass', `成功刪除 ${deletedCount} 張圖片`);
           }}
         />
       )}

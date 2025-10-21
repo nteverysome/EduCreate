@@ -17,6 +17,7 @@ import { UserImage } from '../image-picker';
 export interface ImageGalleryProps {
   onSelect?: (image: UserImage | UserImage[]) => void;
   onClose?: () => void;
+  onDelete?: (deletedCount: number) => void;
   selectable?: boolean;
   multiple?: boolean;
 }
@@ -24,6 +25,7 @@ export interface ImageGalleryProps {
 export default function ImageGallery({
   onSelect,
   onClose,
+  onDelete,
   selectable = false,
   multiple = false,
 }: ImageGalleryProps) {
@@ -131,6 +133,7 @@ export default function ImageGallery({
 
   const handleConfirmDelete = async () => {
     setDeleting(true);
+    const deletedCount = selectedIds.size;
     try {
       const response = await fetch('/api/images/batch-delete', {
         method: 'POST',
@@ -149,6 +152,11 @@ export default function ImageGallery({
       setShowDeleteConfirm(false);
       fetchImages();
       fetchStats();
+
+      // 通知父組件刪除成功
+      if (onDelete) {
+        onDelete(deletedCount);
+      }
     } catch (err) {
       alert(err instanceof Error ? err.message : '刪除失敗');
     } finally {
