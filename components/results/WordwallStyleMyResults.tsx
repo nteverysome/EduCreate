@@ -11,6 +11,7 @@ import { FolderPlus, Trash2, ChevronRight } from 'lucide-react';
 import ResultFolderCard from './ResultFolderCard';
 import DraggableResultCardNative from './DraggableResultCardNative';
 import DropToParentTarget from './DropToParentTarget';
+import { ResultCardMobile } from './ResultCardMobile';
 import NewFolderModal from './NewFolderModal';
 import FolderContextMenu from './FolderContextMenu';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -1084,14 +1085,30 @@ export const WordwallStyleMyResults: React.FC<WordwallStyleMyResultsProps> = ({
         }
       `}>
         {/* 結果項目 - 使用原生 HTML5 拖放 API */}
-        {filteredAndSortedResults.map(result => (
-          <DraggableResultCardNative
-            key={result.id}
-            result={result}
-            onClick={handleResultClick}
-            onMenuClick={handleResultMenuClick}
-          />
-        ))}
+        {filteredAndSortedResults.map(result => {
+          // 根據 viewMode 選擇使用哪個卡片組件
+          // 小網格視圖：使用列表式卡片（ResultCardMobile）
+          if (viewMode === 'small-grid') {
+            return (
+              <ResultCardMobile
+                key={result.id}
+                result={result}
+                onClick={handleResultClick}
+                onMenuClick={handleResultMenuClick}
+              />
+            );
+          }
+
+          // 網格視圖和列表視圖使用完整版卡片
+          return (
+            <DraggableResultCardNative
+              key={result.id}
+              result={result}
+              onClick={handleResultClick}
+              onMenuClick={handleResultMenuClick}
+            />
+          );
+        })}
 
         {/* 空狀態 */}
         {filteredAndSortedResults.length === 0 && folders.length === 0 && (
