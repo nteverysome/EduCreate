@@ -39,6 +39,8 @@ export default function ImageGallery({
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [stats, setStats] = useState<any>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchImages();
@@ -122,11 +124,13 @@ export default function ImageGallery({
     }
   };
 
-  const handleBatchDelete = async () => {
+  const handleDeleteClick = () => {
     if (selectedIds.size === 0) return;
+    setShowDeleteConfirm(true);
+  };
 
-    if (!confirm(`確定要刪除 ${selectedIds.size} 張圖片嗎？`)) return;
-
+  const handleConfirmDelete = async () => {
+    setDeleting(true);
     try {
       const response = await fetch('/api/images/batch-delete', {
         method: 'POST',
@@ -142,11 +146,18 @@ export default function ImageGallery({
 
       alert(data.message);
       setSelectedIds(new Set());
+      setShowDeleteConfirm(false);
       fetchImages();
       fetchStats();
     } catch (err) {
       alert(err instanceof Error ? err.message : '刪除失敗');
+    } finally {
+      setDeleting(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   return (
@@ -293,7 +304,7 @@ export default function ImageGallery({
               </button>
             )}
             <button
-              onClick={handleBatchDelete}
+              onClick={handleDeleteClick}
               className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
             >
               <Trash2 className="w-4 h-4" />
@@ -407,6 +418,59 @@ export default function ImageGallery({
           </>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">確認刪除</h3>
+                <p className="text-sm text-gray-600">此操作無法撤銷</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-700">
+                確定要刪除 <span className="font-semibold text-red-600">{selectedIds.size}</span> 張圖片嗎？
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                這些圖片將從您的圖片庫中永久刪除，包括所有相關的版本記錄。
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelDelete}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>刪除中...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    <span>確認刪除</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

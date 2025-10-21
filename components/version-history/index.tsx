@@ -109,20 +109,20 @@ export default function VersionHistory({ imageId, onRestore, onClose }: VersionH
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] flex flex-col relative">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b relative z-10">
           <h2 className="text-xl font-semibold">版本歷史</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-gray-500 hover:text-gray-700 transition-colors relative z-20"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden flex">
+        <div className="flex-1 overflow-hidden flex relative z-0">
           {/* Version List */}
           <div className="w-1/3 border-r overflow-y-auto">
             {loading ? (
@@ -200,13 +200,14 @@ export default function VersionHistory({ imageId, onRestore, onClose }: VersionH
           </div>
 
           {/* Preview */}
-          <div className="flex-1 p-4 flex items-center justify-center bg-gray-50">
+          <div className="flex-1 p-4 flex items-center justify-center bg-gray-50 overflow-hidden">
             {selectedVersion ? (
-              <div className="max-w-full max-h-full">
+              <div className="max-w-full max-h-full flex items-center justify-center">
                 <img
                   src={selectedVersion.url}
                   alt={`版本 ${selectedVersion.version}`}
                   className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                  style={{ maxHeight: 'calc(90vh - 200px)' }}
                 />
               </div>
             ) : (
