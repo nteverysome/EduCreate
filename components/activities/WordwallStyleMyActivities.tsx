@@ -7,6 +7,7 @@ import FolderManager from './FolderManager';
 import CreateFolderModal from './CreateFolderModal';
 import TrashModal from './TrashModal';
 import WordwallStyleActivityCard from './WordwallStyleActivityCard';
+import { WordwallStyleActivityCardCompact } from './WordwallStyleActivityCardCompact';
 import ActivitySearchAndFilter from './ActivitySearchAndFilter';
 import { MoveActivityModal } from './MoveActivityModal';
 import { useScreenshotUpdates } from '@/hooks/useScreenshotUpdates';
@@ -1267,28 +1268,35 @@ export const WordwallStyleMyActivities: React.FC<WordwallStyleMyActivitiesProps>
             : 'space-y-4'
           }
         `}>
-          {filteredAndSortedActivities.map((activity) => (
-            <WordwallStyleActivityCard
-              key={activity.id}
-              activity={activity}
-              isSelected={selectedActivities.includes(activity.id)}
-              onSelect={handleActivitySelect}
-              onPlay={handleActivityPlay}
-              onEdit={handleActivityEdit}
-              onCopy={handleActivityCopy}
-              onDelete={handleActivityDelete}
-              onShare={handleActivityShare}
-              onRename={handleActivityRename}
-              onMove={handleMoveActivity}
-              onEditContent={handleEditContent}
-              onAssignment={handleAssignment}
-              onCommunityShare={handleCommunityShare}
-              onQRCode={handleQRCode}
-              selectionMode={selectionMode}
-              onDragStart={handleActivityDragStart}
-              onDragEnd={handleActivityDragEnd}
-            />
-          ))}
+          {filteredAndSortedActivities.map((activity) => {
+            // 根據 viewMode 選擇使用哪個卡片組件
+            const CardComponent = viewMode === 'small-grid'
+              ? WordwallStyleActivityCardCompact
+              : WordwallStyleActivityCard;
+
+            return (
+              <CardComponent
+                key={activity.id}
+                activity={activity}
+                isSelected={selectedActivities.includes(activity.id)}
+                onSelect={handleActivitySelect}
+                onPlay={handleActivityPlay}
+                onEdit={handleActivityEdit}
+                onCopy={handleActivityCopy}
+                onDelete={handleActivityDelete}
+                onShare={handleActivityShare}
+                onRename={handleActivityRename}
+                onMove={handleMoveActivity}
+                onEditContent={handleEditContent}
+                onAssignment={handleAssignment}
+                onCommunityShare={handleCommunityShare}
+                onQRCode={handleQRCode}
+                selectionMode={selectionMode}
+                onDragStart={handleActivityDragStart}
+                onDragEnd={handleActivityDragEnd}
+              />
+            );
+          })}
         </div>
 
         {/* 空狀態 */}
