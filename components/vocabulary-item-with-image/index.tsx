@@ -84,12 +84,12 @@ export default function VocabularyItemWithImage({
 
   // 處理圖片編輯
   const handleImageEdit = async (editedBlob: Blob, editedUrl: string) => {
-    setBaseImageUrl(editedUrl);
     setShowImageEditor(false);
 
     // 🎯 根據勾選框決定是否疊加文字
     if (enableEnglishTextOverlay && item.english) {
       // 只疊加英文文字
+      setBaseImageUrl(editedUrl);
       await generateImageWithText(editedUrl);
     } else {
       // 🎯 不疊加文字，直接上傳編輯後的圖片
@@ -123,6 +123,9 @@ export default function VocabularyItemWithImage({
             imageUrl: imageData.url,
             imageId: imageData.id,
           });
+
+          // 🎯 清除 baseImageUrl，使用雲端 URL
+          setBaseImageUrl(null);
 
           // 釋放預覽 URL
           URL.revokeObjectURL(editedUrl);
@@ -175,12 +178,12 @@ export default function VocabularyItemWithImage({
 
   // 處理中文圖片編輯
   const handleChineseImageEdit = async (editedBlob: Blob, editedUrl: string) => {
-    setBaseChineseImageUrl(editedUrl);
     setShowChineseImageEditor(false);
 
     // 🎯 根據勾選框決定是否疊加文字
     if (enableChineseTextOverlay && item.chinese) {
       // 只疊加中文文字
+      setBaseChineseImageUrl(editedUrl);
       await generateChineseImageWithText(editedUrl);
     } else {
       // 🎯 不疊加文字，直接上傳編輯後的圖片
@@ -214,6 +217,9 @@ export default function VocabularyItemWithImage({
             chineseImageUrl: imageData.url,
             chineseImageId: imageData.id,
           });
+
+          // 🎯 清除 baseChineseImageUrl，使用雲端 URL
+          setBaseChineseImageUrl(null);
 
           // 釋放預覽 URL
           URL.revokeObjectURL(editedUrl);
