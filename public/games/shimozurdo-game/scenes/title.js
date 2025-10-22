@@ -89,16 +89,10 @@ export default class Title extends Phaser.Scene {
 
         // 如果有當前目標詞彙，重新更新其顯示位置
         if (this.currentTargetWord) {
-            const word = this.currentTargetWord;
-            const imageKey = word.imageUrl || word.chineseImageUrl;
-
-            if (imageKey) {
-                // 有圖片：更新圖片和文字位置
-                this.updateTargetImage(imageKey, word);
-            } else {
-                // 沒有圖片：更新純文字位置
-                this.updateTargetTextOnly();
-            }
+            // 五列布局會在 updateUIPositions() 中自動更新位置
+            // 這裡只需要重新載入圖片（如果需要）
+            this.updateChineseImage();
+            this.updateEnglishImage();
 
             console.log('✅ 目標單字位置已更新');
         }
@@ -692,7 +686,7 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 🆕 創建目標詞彙顯示系統 - 從 Airplane Game 移植
+     * 🆕 創建目標詞彙顯示系統 - 五列布局
      */
     createTargetWordDisplay() {
         // 🆕 使用相機視口尺寸 - 這是實際顯示的區域
@@ -713,23 +707,20 @@ export default class Title extends Phaser.Scene {
         this.wordsLearned = 0;                               // 已學習的單字數
         this.score = 0;                                      // 分數
         this.currentTargetWord = null;                       // 當前目標詞彙
-        this.targetImage = null;                             // 🖼️ 目標詞彙圖片容器
+        this.chineseImage = null;                            // 🖼️ 中文圖片容器
+        this.englishImage = null;                            // 🖼️ 英文圖片容器
 
         // 🆕 記錄詳細的問題和答案數據
         this.questionAnswerLog = [];                         // 記錄所有問題和答案
 
-        // 🆕 三列布局 - 基於相機視口計算每列的 X 座標
-        // 使用 cam.scrollX 來獲取相機當前的滾動位置
-        const leftX = cam.scrollX + visibleWidth * 0.25;     // 左列（25%）
-        const centerX = cam.scrollX + visibleWidth * 0.5;    // 中列（50%）
-        const rightX = cam.scrollX + visibleWidth * 0.75;    // 右列（75%）
-        // 🎯 調整到視差背景上方邊緣 - 使用相機滾動位置作為基準
+        // 🆕 五列布局 - 基於相機視口計算每列的 X 座標
+        // 布局：分數 | 中文圖片 | 中文 | 英文圖片 | 英文
         const topY = cam.scrollY + 20;                       // 距離視差背景上邊緣 20px
 
-        // 🆕 創建分數顯示（左列）
+        // 🆕 創建分數顯示（第一列）
         this.scoreText = this.add.text(
-            leftX,                                           // X座標（左列）
-            topY,                                            // Y座標（頂部50像素）
+            0,                                               // X座標（稍後在 updateUIPositions 中設置）
+            topY,                                            // Y座標（頂部20像素）
             '分數: 0\n單字: 0',                              // 初始文字（兩行）
             {
                 fontSize: '20px',                            // 字體大小
@@ -743,13 +734,13 @@ export default class Title extends Phaser.Scene {
         this.scoreText.setScrollFactor(1);                   // 🎯 改為世界物件，在視差背景裡面
         this.scoreText.setDepth(200);                        // 確保在最前面
 
-        // 🆕 創建黃色框大字（中列，顯示英文，可點擊發音）
+        // 🆕 創建中文文字（第三列，黃色框大字，可點擊發音）
         this.chineseText = this.add.text(
-            centerX,                                         // X座標（中列）
-            topY,                                            // Y座標（頂部50像素）
+            0,                                               // X座標（稍後在 updateUIPositions 中設置）
+            topY,                                            // Y座標（頂部20像素）
             '',                                              // 初始文字為空
             {
-                fontSize: '36px',                            // 調整字體大小適應英文
+                fontSize: '36px',                            // 調整字體大小適應中文
                 color: '#000000',                            // 黑色文字
                 fontStyle: 'bold',                           // 粗體，更好辨識
                 backgroundColor: '#ffff00',                  // 黃色背景
@@ -760,34 +751,40 @@ export default class Title extends Phaser.Scene {
         this.chineseText.setDepth(200);                      // 確保在最前面
         this.chineseText.setInteractive();                   // 設置為可互動
 
-        // 點擊黃色框播放雙語發音
+        // 點擊中文文字播放中文發音
         this.chineseText.on('pointerdown', () => {
             if (this.currentTargetWord && this.game.bilingualManager) {
-                console.log('🔊 播放雙語發音:', this.currentTargetWord.chinese, this.currentTargetWord.english);
-                this.game.bilingualManager.speakBilingual(
-                    this.currentTargetWord.english,
-                    this.currentTargetWord.chinese
-                );
+                console.log('🔊 播放中文發音:', this.currentTargetWord.chinese);
+                this.game.bilingualManager.speak(this.currentTargetWord.chinese, 'zh-TW');
             }
         });
 
-        // 🆕 創建中文文字（右列）
-        this.targetText = this.add.text(
-            rightX,                                          // X座標（右列）
-            topY,                                            // Y座標（頂部50像素）
+        // 🆕 創建英文文字（第五列，黃色文字黑色描邊，可點擊發音）
+        this.englishText = this.add.text(
+            0,                                               // X座標（稍後在 updateUIPositions 中設置）
+            topY,                                            // Y座標（頂部20像素）
             '',                                              // 初始文字為空
             {
-                fontSize: '40px',                            // 調整字體大小適應中文
+                fontSize: '36px',                            // 調整字體大小適應英文
                 color: '#ffff00',                            // 黃色
                 fontStyle: 'bold',                           // 粗體
                 stroke: '#000000',                           // 黑色描邊
                 strokeThickness: 4                           // 描邊粗細
             }
         ).setOrigin(0.5);                                    // 設置原點為中央
-        this.targetText.setScrollFactor(1);                  // 🎯 改為世界物件，在視差背景裡面
-        this.targetText.setDepth(200);                       // 確保在最前面
+        this.englishText.setScrollFactor(1);                 // 🎯 改為世界物件，在視差背景裡面
+        this.englishText.setDepth(200);                      // 確保在最前面
+        this.englishText.setInteractive();                   // 設置為可互動
 
-        console.log('🎯 目標詞彙顯示系統初始化完成');
+        // 點擊英文文字播放英文發音
+        this.englishText.on('pointerdown', () => {
+            if (this.currentTargetWord && this.game.bilingualManager) {
+                console.log('🔊 播放英文發音:', this.currentTargetWord.english);
+                this.game.bilingualManager.speak(this.currentTargetWord.english, 'en-US');
+            }
+        });
+
+        console.log('🎯 目標詞彙顯示系統初始化完成（五列布局）');
     }
 
     /**
@@ -873,7 +870,7 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 🆕 設置隨機目標詞彙 - 從 GEPT 管理器獲取新的學習目標
+     * 🆕 設置隨機目標詞彙 - 五列布局版本
      */
     setRandomTargetWord() {
         if (!this.game.geptManager) {
@@ -893,37 +890,21 @@ export default class Title extends Phaser.Scene {
             // 🆕 更新現有雲朵中匹配新目標詞彙的顏色為紅色
             this.updateTargetEnemyColors();
 
-            // 🆕 更新英文大字（中列，對換後）
-            this.chineseText.setText(this.currentTargetWord.english);
-
-            // 🆕 更新中文文字（右列，對換後）
-            this.targetText.setText(this.currentTargetWord.chinese);
-
-            // 🖼️ 更新目標詞彙圖片
-            if (this.currentTargetWord.image) {
-                const imageKey = `target-image-${this.currentTargetWord.id}`;
-
-                // 檢查圖片是否已經載入
-                if (!this.textures.exists(imageKey)) {
-                    // 動態載入圖片
-                    this.load.image(imageKey, this.currentTargetWord.image);
-                    this.load.once('complete', () => {
-                        this.updateTargetImage(imageKey, this.currentTargetWord);
-                    });
-                    this.load.start();
-                } else {
-                    // 圖片已載入，直接更新
-                    this.updateTargetImage(imageKey, this.currentTargetWord);
-                }
-            } else {
-                // 沒有圖片，隱藏圖片容器並顯示純文字
-                if (this.targetImage) {
-                    this.targetImage.setVisible(false);
-                }
-
-                // 🎯 更新文字位置（沒有圖片時，文字居中顯示）
-                this.updateTargetTextOnly();
+            // 🆕 更新中文文字（第三列）
+            if (this.chineseText) {
+                this.chineseText.setText(this.currentTargetWord.chinese);
             }
+
+            // 🆕 更新英文文字（第五列）
+            if (this.englishText) {
+                this.englishText.setText(this.currentTargetWord.english);
+            }
+
+            // 🖼️ 更新中文圖片（第二列）
+            this.updateChineseImage();
+
+            // 🖼️ 更新英文圖片（第四列）
+            this.updateEnglishImage();
 
             // 🆕 自動播放雙語發音：中文 → 英文
             if (this.game.bilingualManager) {
@@ -939,106 +920,112 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 🖼️ 更新目標詞彙圖片顯示（水平排列：圖片+英文大字）
+     * 🖼️ 更新中文圖片（第二列）
      */
-    updateTargetImage(imageKey, word) {
-        // 獲取相機視口
-        const cam = this.cameras.main;
-        const centerX = cam.scrollX + cam.width * 0.5;   // 中央位置
-        const topY = cam.worldView.top + 50;             // 🔧 修復：使用 worldView.top 而不是 scrollY
+    updateChineseImage() {
+        const chineseImageUrl = this.currentTargetWord?.chineseImageUrl || this.currentTargetWord?.imageUrl;
 
-        // 🎯 使用智能縮放系統
-        const imageSize = word?.imageSize || 'medium';
-        const maxSize = TARGET_MAX_IMAGE_SIZE[imageSize];
-        const scale = this.calculateSmartScale(imageKey, imageSize, maxSize);
+        if (chineseImageUrl) {
+            const imageKey = `chinese-image-${this.currentTargetWord.id}`;
 
-        // 🎯 計算圖片實際尺寸
-        const texture = this.textures.get(imageKey);
-        const imageWidth = texture.source[0].width * scale;
-        const imageHeight = texture.source[0].height * scale;
-
-        // 🎯 水平布局：圖片在左，文字在右
-        const hasEnglish = word?.english && word.english.trim() !== '';
-        const spacing = 20; // 圖片和文字之間的間距
-
-        let imageX, textX;
-        if (hasEnglish) {
-            // 有英文：圖片和文字水平排列
-            imageX = centerX - imageWidth / 2 - spacing;
-            textX = centerX + imageWidth / 2 + spacing;
+            // 檢查圖片是否已經載入
+            if (!this.textures.exists(imageKey)) {
+                // 動態載入圖片
+                this.load.image(imageKey, chineseImageUrl);
+                this.load.once('complete', () => {
+                    this.createOrUpdateImage('chinese', imageKey);
+                });
+                this.load.start();
+            } else {
+                // 圖片已載入，直接更新
+                this.createOrUpdateImage('chinese', imageKey);
+            }
         } else {
-            // 沒有英文：圖片居中
-            imageX = centerX;
-            textX = centerX; // 文字不顯示
+            // 沒有中文圖片，隱藏圖片容器
+            if (this.chineseImage) {
+                this.chineseImage.setVisible(false);
+            }
         }
-
-        if (this.targetImage) {
-            // 更新現有圖片
-            this.targetImage.setTexture(imageKey);
-            this.targetImage.setVisible(true);
-            this.targetImage.setPosition(imageX, topY + imageHeight / 2);
-            this.targetImage.setScale(scale);            // 使用智能縮放比例
-        } else {
-            // 創建新圖片
-            this.targetImage = this.add.image(imageX, topY + imageHeight / 2, imageKey);
-            this.targetImage.setScale(scale);            // 使用智能縮放比例
-            this.targetImage.setDepth(200);              // 在最前面
-            this.targetImage.setScrollFactor(1);         // 跟隨相機
-            this.targetImage.setOrigin(0.5);             // 中心對齊
-        }
-
-        // 🎯 更新英文文字位置（如果有英文）
-        if (hasEnglish && this.chineseText) {
-            this.chineseText.setPosition(textX, topY + imageHeight / 2);
-            this.chineseText.setVisible(true);
-        } else if (this.chineseText) {
-            this.chineseText.setVisible(false); // 沒有英文時隱藏文字
-        }
-
-        console.log(`🖼️ 更新目標圖片: ${imageKey}, size: ${imageSize}, scale: ${scale.toFixed(3)}, hasEnglish: ${hasEnglish}`);
     }
 
     /**
-     * 🎯 更新目標文字位置（沒有圖片時使用）
+     * 🖼️ 更新英文圖片（第四列）
      */
-    updateTargetTextOnly() {
-        // 獲取相機視口
-        const cam = this.cameras.main;
-        const centerX = cam.scrollX + cam.width * 0.5;   // 中央位置
-        const topY = cam.worldView.top + 50;             // 🔧 修復：使用 worldView.top 而不是 scrollY
+    updateEnglishImage() {
+        const englishImageUrl = this.currentTargetWord?.imageUrl;
 
-        // 🎯 水平布局：英文大字在左，中文在右
-        const hasEnglish = this.currentTargetWord?.english && this.currentTargetWord.english.trim() !== '';
-        const spacing = 40; // 英文和中文之間的間距
+        if (englishImageUrl) {
+            const imageKey = `english-image-${this.currentTargetWord.id}`;
 
-        if (hasEnglish) {
-            // 有英文：英文和中文水平排列
-            const englishX = centerX - spacing;
-            const chineseX = centerX + spacing;
-
-            if (this.chineseText) {
-                this.chineseText.setPosition(englishX, topY);
-                this.chineseText.setVisible(true);
-            }
-
-            if (this.targetText) {
-                this.targetText.setPosition(chineseX, topY);
-                this.targetText.setVisible(true);
+            // 檢查圖片是否已經載入
+            if (!this.textures.exists(imageKey)) {
+                // 動態載入圖片
+                this.load.image(imageKey, englishImageUrl);
+                this.load.once('complete', () => {
+                    this.createOrUpdateImage('english', imageKey);
+                });
+                this.load.start();
+            } else {
+                // 圖片已載入，直接更新
+                this.createOrUpdateImage('english', imageKey);
             }
         } else {
-            // 沒有英文：只顯示中文，居中
-            if (this.chineseText) {
-                this.chineseText.setVisible(false);
-            }
-
-            if (this.targetText) {
-                this.targetText.setPosition(centerX, topY);
-                this.targetText.setVisible(true);
+            // 沒有英文圖片，隱藏圖片容器
+            if (this.englishImage) {
+                this.englishImage.setVisible(false);
             }
         }
-
-        console.log(`📝 更新目標文字: hasEnglish: ${hasEnglish}, english: "${this.currentTargetWord?.english}", chinese: "${this.currentTargetWord?.chinese}"`);
     }
+
+    /**
+     * 🖼️ 創建或更新圖片
+     * @param {string} type - 'chinese' 或 'english'
+     * @param {string} imageKey - 圖片鍵值
+     */
+    createOrUpdateImage(type, imageKey) {
+        const cam = this.cameras.main;
+        const worldView = cam.worldView;
+        const worldTopY = worldView.top + 50;
+
+        // 🎯 使用智能縮放系統
+        const imageSize = this.currentTargetWord?.imageSize || 'medium';
+        const maxSize = TARGET_MAX_IMAGE_SIZE[imageSize];
+        const scale = this.calculateSmartScale(imageKey, imageSize, maxSize);
+
+        if (type === 'chinese') {
+            if (this.chineseImage) {
+                // 更新現有圖片
+                this.chineseImage.setTexture(imageKey);
+                this.chineseImage.setScale(scale);
+                this.chineseImage.setVisible(true);
+            } else {
+                // 創建新圖片
+                this.chineseImage = this.add.image(0, worldTopY, imageKey);
+                this.chineseImage.setScale(scale);
+                this.chineseImage.setDepth(200);
+                this.chineseImage.setScrollFactor(1);
+                this.chineseImage.setOrigin(0.5);
+            }
+            console.log(`🖼️ 更新中文圖片: ${imageKey}, scale: ${scale.toFixed(3)}`);
+        } else if (type === 'english') {
+            if (this.englishImage) {
+                // 更新現有圖片
+                this.englishImage.setTexture(imageKey);
+                this.englishImage.setScale(scale);
+                this.englishImage.setVisible(true);
+            } else {
+                // 創建新圖片
+                this.englishImage = this.add.image(0, worldTopY, imageKey);
+                this.englishImage.setScale(scale);
+                this.englishImage.setDepth(200);
+                this.englishImage.setScrollFactor(1);
+                this.englishImage.setOrigin(0.5);
+            }
+            console.log(`🖼️ 更新英文圖片: ${imageKey}, scale: ${scale.toFixed(3)}`);
+        }
+    }
+
+
 
     /**
      * 🆕 更新分數顯示 - 更新分數和單字數統計
@@ -1606,15 +1593,15 @@ export default class Title extends Phaser.Scene {
      * 場景更新函數
      */
     /**
-     * 🆕 更新 UI 元素位置 - 確保 UI 始終跟隨相機
+     * 🆕 更新 UI 元素位置 - 五列布局
      */
     updateUIPositions() {
-        if (!this.scoreText || !this.targetText) return;
+        if (!this.scoreText || !this.chineseText || !this.englishText) return;
 
         // 🎯 更新血條位置 - 血條保持在右下角
         this.updateHealthBarPositions();
 
-        // 🎯 三列布局現在是世界物件，使用世界座標
+        // 🎯 五列布局使用世界座標
         const cam = this.cameras.main;
         const worldView = cam.worldView;
 
@@ -1622,60 +1609,38 @@ export default class Title extends Phaser.Scene {
         const worldTopY = worldView.top + 50;  // 距離世界頂部 50px
         const worldCenterX = (worldView.left + worldView.right) / 2;  // 世界中心 X
 
-        // 🎯 三列布局水平位置：居中對齊，拉大間距
-        const spacing = 300;  // 三列之間的間距（最大間距）
+        // 🎯 五列布局水平位置：分數 | 中文圖片 | 中文 | 英文圖片 | 英文
+        const spacing = 150;  // 每列之間的間距
 
-        const leftX = worldCenterX - spacing;     // 左列（分數）
-        const rightX = worldCenterX + spacing;   // 右列（中文詞彙）
+        const col1X = worldCenterX - spacing * 2;  // 第一列：分數
+        const col2X = worldCenterX - spacing;      // 第二列：中文圖片
+        const col3X = worldCenterX;                // 第三列：中文文字（中心）
+        const col4X = worldCenterX + spacing;      // 第四列：英文圖片
+        const col5X = worldCenterX + spacing * 2;  // 第五列：英文文字
 
-        // 更新布局位置（世界頂部座標）
-        this.scoreText.setPosition(leftX, worldTopY);
+        // 更新分數位置（第一列）
+        this.scoreText.setPosition(col1X, worldTopY);
 
-        // 🔧 檢查是否有圖片顯示
-        const hasImage = this.targetImage && this.targetImage.visible;
+        // 更新中文文字位置（第三列）
+        if (this.chineseText) {
+            this.chineseText.setPosition(col3X, worldTopY);
+            this.chineseText.setVisible(true);
+        }
 
-        // 🎯 如果有圖片，使用圖片模式的布局；如果沒有圖片，使用純文字模式的布局
-        if (hasImage && this.currentTargetWord) {
-            // 🖼️ 圖片模式：更新圖片和文字的位置
-            const imageKey = `target-image-${this.currentTargetWord.id}`;
-            if (this.textures.exists(imageKey)) {
-                // 重新計算圖片和文字的水平布局
-                const topY = worldTopY;
-                const centerX = worldCenterX;
+        // 更新英文文字位置（第五列）
+        if (this.englishText) {
+            this.englishText.setPosition(col5X, worldTopY);
+            this.englishText.setVisible(true);
+        }
 
-                const imageSize = this.currentTargetWord?.imageSize || 'medium';
-                const maxSize = TARGET_MAX_IMAGE_SIZE[imageSize];
-                const scale = this.calculateSmartScale(imageKey, imageSize, maxSize);
+        // 更新中文圖片位置（第二列）
+        if (this.chineseImage && this.chineseImage.visible) {
+            this.chineseImage.setPosition(col2X, worldTopY);
+        }
 
-                const texture = this.textures.get(imageKey);
-                const imageWidth = texture.source[0].width * scale;
-                const imageHeight = texture.source[0].height * scale;
-
-                const hasEnglish = this.currentTargetWord?.english && this.currentTargetWord.english.trim() !== '';
-                const spacing = 20;
-
-                let imageX, textX;
-                if (hasEnglish) {
-                    imageX = centerX - imageWidth / 2 - spacing;
-                    textX = centerX + imageWidth / 2 + spacing;
-                } else {
-                    imageX = centerX;
-                    textX = centerX;
-                }
-
-                this.targetImage.setPosition(imageX, topY + imageHeight / 2);
-
-                if (hasEnglish && this.chineseText) {
-                    this.chineseText.setPosition(textX, topY + imageHeight / 2);
-                    this.chineseText.setVisible(true);
-                } else if (this.chineseText) {
-                    this.chineseText.setVisible(false);
-                }
-            }
-        } else if (this.currentTargetWord) {
-            // 📝 純文字模式：更新文字位置（由 updateTargetTextOnly 控制）
-            // 不在這裡更新 targetText 和 chineseText 的位置，避免覆蓋 updateTargetTextOnly 的設置
-            // updateTargetTextOnly 會根據是否有英文來調整布局
+        // 更新英文圖片位置（第四列）
+        if (this.englishImage && this.englishImage.visible) {
+            this.englishImage.setPosition(col4X, worldTopY);
         }
     }
 
