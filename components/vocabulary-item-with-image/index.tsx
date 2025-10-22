@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import ImageIconButton from './ImageIconButton';
-import CompactImagePreview from './CompactImagePreview';
+import InputWithImage from '../input-with-image';
 import ImagePicker, { UserImage } from '../image-picker';
 import ImageEditor from '../image-editor';
 import { overlayTextOnImage, TextOverlayOptions } from '@/lib/image-text-overlay';
@@ -25,10 +24,13 @@ interface VocabularyItemWithImageProps {
 }
 
 /**
- * VocabularyItemWithImage - Wordwall 風格的詞彙項目組件
- * 
+ * VocabularyItemWithImage - Wordwall 整合設計的詞彙項目組件
+ *
  * 特點：
- * - 簡潔的圖標按鈕（Wordwall 風格）
+ * - 圖片功能完全整合在輸入框內部（Wordwall 風格）
+ * - 圖片圖標在輸入框內部右側
+ * - 圖片縮圖在輸入框內部左側
+ * - 不佔用額外的垂直空間
  * - 完整的圖片功能（EduCreate 功能）
  * - 自動文字疊加
  * - 版本管理
@@ -186,37 +188,19 @@ export default function VocabularyItemWithImage({
         {index + 1}.
       </div>
 
-      {/* 圖標按鈕 */}
-      <div className="pt-2">
-        <ImageIconButton 
-          onClick={() => setShowImagePicker(true)}
-          hasImage={!!item.imageUrl}
-          disabled={isGenerating}
-        />
-      </div>
-
-      {/* 輸入區域 */}
+      {/* 輸入區域（使用 Wordwall 整合設計） */}
       <div className="flex-1 space-y-2">
-        {/* 英文輸入框 */}
-        <input
-          type="text"
+        {/* 英文輸入框（整合圖片功能） */}
+        <InputWithImage
           value={item.english}
-          onChange={(e) => onChange({ ...item, english: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          onChange={(value) => onChange({ ...item, english: value })}
+          imageUrl={item.imageUrl}
+          onImageIconClick={() => setShowImagePicker(true)}
+          onThumbnailClick={() => setShowImageEditor(true)}
           placeholder="輸入英文單字..."
           disabled={isGenerating}
         />
-        
-        {/* 圖片預覽 */}
-        {item.imageUrl && (
-          <CompactImagePreview
-            imageUrl={item.imageUrl}
-            alt={`${item.english} - ${item.chinese}`}
-            onEdit={() => setShowImageEditor(true)}
-            onRemove={handleImageRemove}
-          />
-        )}
-        
+
         {/* 生成狀態提示 */}
         {isGenerating && (
           <div className="flex items-center space-x-2 text-sm text-blue-600">
@@ -226,7 +210,7 @@ export default function VocabularyItemWithImage({
         )}
       </div>
 
-      {/* 中文輸入框 */}
+      {/* 中文輸入框（普通輸入框） */}
       <div className="flex-1 pt-2">
         <input
           type="text"
