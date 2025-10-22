@@ -228,10 +228,6 @@ export default function ImageEditor({
           onRotationChange={setRotation}
           onCropComplete={onCropComplete}
         />
-        {/* Crop hint overlay - 響應式文字大小 */}
-        <div className="absolute top-2 md:top-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-2 md:px-4 py-1 md:py-2 rounded-lg text-xs md:text-sm pointer-events-none max-w-[90%] text-center">
-          💡 拖動圖片移動位置，捏合縮放調整大小
-        </div>
       </div>
 
       {/* Controls - 響應式控制面板 */}
