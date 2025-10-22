@@ -371,6 +371,17 @@ export default function CreateGamePage() {
         item.english.trim() || item.chinese.trim() || item.imageUrl || item.chineseImageUrl
       );
 
+      console.log('🔍 保存活動 - 詞彙數據:', filteredVocabulary);
+      console.log('🔍 保存活動 - 圖片字段檢查:', filteredVocabulary.map(item => ({
+        id: item.id,
+        imageId: item.imageId,
+        imageUrl: item.imageUrl,
+        imageSize: item.imageSize,
+        chineseImageId: item.chineseImageId,
+        chineseImageUrl: item.chineseImageUrl,
+        chineseImageSize: item.chineseImageSize
+      })));
+
       if (isEditMode && editingActivityId) {
         // 編輯模式：更新現有活動
         const response = await fetch(`/api/activities/${editingActivityId}`, {
