@@ -404,27 +404,27 @@ export default function VocabularyItemWithImage({
     }
   };
 
-  // 當英文文字改變時，重新生成英文圖片
+  // 當英文文字改變時，重新生成英文圖片（只在勾選文字疊加時）
   useEffect(() => {
-    if (baseImageUrl && item.english) {
+    if (baseImageUrl && item.english && enableEnglishTextOverlay) {
       const timer = setTimeout(() => {
         generateImageWithText(baseImageUrl);
       }, 1000); // 延遲 1 秒，避免頻繁生成
 
       return () => clearTimeout(timer);
     }
-  }, [item.english]);
+  }, [item.english, enableEnglishTextOverlay]);
 
-  // 當中文文字改變時，重新生成中文圖片
+  // 當中文文字改變時，重新生成中文圖片（只在勾選文字疊加時）
   useEffect(() => {
-    if (baseChineseImageUrl && item.chinese) {
+    if (baseChineseImageUrl && item.chinese && enableChineseTextOverlay) {
       const timer = setTimeout(() => {
         generateChineseImageWithText(baseChineseImageUrl);
       }, 1000); // 延遲 1 秒，避免頻繁生成
 
       return () => clearTimeout(timer);
     }
-  }, [item.chinese]);
+  }, [item.chinese, enableChineseTextOverlay]);
 
   return (
     <div className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors bg-white">
