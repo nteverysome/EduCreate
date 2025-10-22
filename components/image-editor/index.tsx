@@ -10,6 +10,8 @@ export interface ImageEditorProps {
   onClose: () => void;
   onCancel?: () => void; // Deprecated: use onClose instead
   onRemove?: () => void; // Optional: callback to remove the image
+  imageSize?: 'small' | 'medium' | 'large';  // 圖片大小
+  onImageSizeChange?: (size: 'small' | 'medium' | 'large') => void;  // 大小變更回調
 }
 
 interface CropArea {
@@ -30,7 +32,15 @@ const ASPECT_RATIOS = {
 
 type AspectRatioKey = keyof typeof ASPECT_RATIOS;
 
-export default function ImageEditor({ imageUrl, onSave, onClose, onCancel, onRemove }: ImageEditorProps) {
+export default function ImageEditor({
+  imageUrl,
+  onSave,
+  onClose,
+  onCancel,
+  onRemove,
+  imageSize = 'medium',
+  onImageSizeChange
+}: ImageEditorProps) {
   // Support both onClose and onCancel for backward compatibility
   const handleCancel = onClose || onCancel || (() => {});
 
@@ -306,6 +316,57 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel, onRem
             <option value="contrast">增加對比度</option>
           </select>
         </div>
+
+        {/* 圖片大小選擇器 */}
+        {onImageSizeChange && (
+          <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
+            <span className="text-sm md:text-base text-gray-700 font-medium">圖片大小:</span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => onImageSizeChange('small')}
+                className={`
+                  px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-lg font-medium
+                  transition-all duration-200
+                  ${imageSize === 'small'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                `}
+                title="小圖片"
+              >
+                小
+              </button>
+              <button
+                type="button"
+                onClick={() => onImageSizeChange('medium')}
+                className={`
+                  px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-lg font-medium
+                  transition-all duration-200
+                  ${imageSize === 'medium'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                `}
+                title="中圖片"
+              >
+                中
+              </button>
+              <button
+                type="button"
+                onClick={() => onImageSizeChange('large')}
+                className={`
+                  px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-lg font-medium
+                  transition-all duration-200
+                  ${imageSize === 'large'
+                    ? 'bg-blue-500 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                `}
+                title="大圖片"
+              >
+                大
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Actions - 響應式按鈕 */}
         <div className="flex flex-col sm:flex-row gap-2 md:gap-3 pt-2">

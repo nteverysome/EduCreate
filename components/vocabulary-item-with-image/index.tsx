@@ -348,8 +348,6 @@ export default function VocabularyItemWithImage({
           onThumbnailClick={() => setShowImageEditor(true)}
           placeholder="輸入英文單字..."
           disabled={isGenerating}
-          imageSize={item.imageSize || 'medium'}
-          onImageSizeChange={(size) => onChange({ ...item, imageSize: size })}
         />
 
         {/* 生成狀態提示 */}
@@ -371,8 +369,6 @@ export default function VocabularyItemWithImage({
           onThumbnailClick={() => setShowChineseImageEditor(true)}
           placeholder="輸入中文翻譯..."
           disabled={isGeneratingChinese}
-          imageSize={item.chineseImageSize || 'medium'}
-          onImageSizeChange={(size) => onChange({ ...item, chineseImageSize: size })}
         />
 
         {/* 生成狀態提示 */}
@@ -412,6 +408,8 @@ export default function VocabularyItemWithImage({
           onSave={handleImageEdit}
           onClose={() => setShowImageEditor(false)}
           onRemove={handleImageRemove}
+          imageSize={item.imageSize || 'medium'}
+          onImageSizeChange={(size) => onChange({ ...item, imageSize: size })}
         />
       )}
 
@@ -430,6 +428,8 @@ export default function VocabularyItemWithImage({
           onSave={handleChineseImageEdit}
           onClose={() => setShowChineseImageEditor(false)}
           onRemove={handleChineseImageRemove}
+          imageSize={item.chineseImageSize || 'medium'}
+          onImageSizeChange={(size) => onChange({ ...item, chineseImageSize: size })}
         />
       )}
     </div>

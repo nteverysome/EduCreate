@@ -14,8 +14,6 @@ export interface InputWithImageProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
-  imageSize?: 'small' | 'medium' | 'large';  // 圖片大小
-  onImageSizeChange?: (size: 'small' | 'medium' | 'large') => void;  // 大小變更回調
 }
 
 /**
@@ -47,12 +45,10 @@ export default function InputWithImage({
   onThumbnailClick,
   placeholder,
   disabled = false,
-  className = '',
-  imageSize = 'medium',
-  onImageSizeChange
+  className = ''
 }: InputWithImageProps) {
   return (
-    <div className="relative w-full space-y-1">
+    <div className="relative w-full">
       {/* 輸入框 */}
       <input
         type="text"
@@ -115,61 +111,6 @@ export default function InputWithImage({
       >
         <span className="text-xl">🖼️</span>
       </button>
-
-      {/* 圖片大小選擇器（只在有圖片時顯示） */}
-      {imageUrl && onImageSizeChange && (
-        <div className="flex items-center gap-1 px-2 py-1">
-          <span className="text-xs text-gray-500 mr-1">圖片大小:</span>
-          <button
-            type="button"
-            onClick={() => onImageSizeChange('small')}
-            disabled={disabled}
-            className={`
-              px-2 py-0.5 text-xs rounded
-              transition-all duration-200
-              ${imageSize === 'small'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
-              ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-            `}
-            title="小圖片"
-          >
-            小
-          </button>
-          <button
-            type="button"
-            onClick={() => onImageSizeChange('medium')}
-            disabled={disabled}
-            className={`
-              px-2 py-0.5 text-xs rounded
-              transition-all duration-200
-              ${imageSize === 'medium'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
-              ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-            `}
-            title="中圖片"
-          >
-            中
-          </button>
-          <button
-            type="button"
-            onClick={() => onImageSizeChange('large')}
-            disabled={disabled}
-            className={`
-              px-2 py-0.5 text-xs rounded
-              transition-all duration-200
-              ${imageSize === 'large'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
-              ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-            `}
-            title="大圖片"
-          >
-            大
-          </button>
-        </div>
-      )}
     </div>
   );
 }
