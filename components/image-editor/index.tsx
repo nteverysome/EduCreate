@@ -317,93 +317,96 @@ export default function ImageEditor({
           </select>
         </div>
 
-        {/* 圖片大小選擇器 */}
-        {onImageSizeChange && (
-          <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
-            <span className="text-sm md:text-base text-gray-700 font-medium">圖片大小:</span>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => onImageSizeChange('small')}
-                className={`
-                  px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-lg font-medium
-                  transition-all duration-200
-                  ${imageSize === 'small'
-                    ? 'bg-blue-500 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
-                `}
-                title="小圖片"
-              >
-                小
-              </button>
-              <button
-                type="button"
-                onClick={() => onImageSizeChange('medium')}
-                className={`
-                  px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-lg font-medium
-                  transition-all duration-200
-                  ${imageSize === 'medium'
-                    ? 'bg-blue-500 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
-                `}
-                title="中圖片"
-              >
-                中
-              </button>
-              <button
-                type="button"
-                onClick={() => onImageSizeChange('large')}
-                className={`
-                  px-3 md:px-4 py-1.5 md:py-2 text-sm md:text-base rounded-lg font-medium
-                  transition-all duration-200
-                  ${imageSize === 'large'
-                    ? 'bg-blue-500 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
-                `}
-                title="大圖片"
-              >
-                大
-              </button>
+        {/* 圖片大小選擇器和操作按鈕 - 整合在一起 */}
+        <div className="space-y-2">
+          {/* 圖片大小選擇器（只在有回調時顯示） */}
+          {onImageSizeChange && (
+            <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
+              <span className="text-xs md:text-sm text-gray-700 font-medium whitespace-nowrap">圖片大小:</span>
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => onImageSizeChange('small')}
+                  className={`
+                    px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm rounded font-medium
+                    transition-all duration-200
+                    ${imageSize === 'small'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                  `}
+                  title="小圖片"
+                >
+                  小
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onImageSizeChange('medium')}
+                  className={`
+                    px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm rounded font-medium
+                    transition-all duration-200
+                    ${imageSize === 'medium'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                  `}
+                  title="中圖片"
+                >
+                  中
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onImageSizeChange('large')}
+                  className={`
+                    px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm rounded font-medium
+                    transition-all duration-200
+                    ${imageSize === 'large'
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                  `}
+                  title="大圖片"
+                >
+                  大
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* Actions - 響應式按鈕 */}
-        <div className="flex flex-col sm:flex-row gap-2 md:gap-3 pt-2">
-          <button
-            onClick={handleCancel}
-            className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium text-sm md:text-base"
-          >
-            取消
-          </button>
-          {onRemove && (
-            <button
-              onClick={handleRemove}
-              className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors font-medium flex items-center justify-center gap-1.5 md:gap-2 text-sm md:text-base"
-              title="移除圖片"
-            >
-              <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="hidden sm:inline">移除圖片</span>
-              <span className="sm:hidden">移除</span>
-            </button>
           )}
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
-          >
-            {saving ? (
-              <>
-                <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>保存中...</span>
-              </>
-            ) : (
-              <>
-                <Check className="w-4 h-4 md:w-5 md:h-5" />
-                <span>保存</span>
-              </>
+
+          {/* Actions - 響應式按鈕 */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              onClick={handleCancel}
+              className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium text-sm md:text-base"
+            >
+              取消
+            </button>
+            {onRemove && (
+              <button
+                onClick={handleRemove}
+                className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors font-medium flex items-center justify-center gap-1.5 md:gap-2 text-sm md:text-base"
+                title="移除圖片"
+              >
+                <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden sm:inline">移除圖片</span>
+                <span className="sm:hidden">移除</span>
+              </button>
             )}
-          </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
+            >
+              {saving ? (
+                <>
+                  <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>保存中...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4 md:w-5 md:h-5" />
+                  <span>保存</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
