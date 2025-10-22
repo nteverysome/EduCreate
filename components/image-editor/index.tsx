@@ -193,19 +193,20 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel, onRem
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-10 bg-black/80 p-4 flex items-center justify-between">
-        <h2 className="text-white text-lg font-semibold">編輯圖片</h2>
+      {/* Header - 響應式設計 */}
+      <div className="absolute top-0 left-0 right-0 z-10 bg-black/80 p-3 md:p-4 flex items-center justify-between">
+        <h2 className="text-white text-base md:text-lg font-semibold">編輯圖片</h2>
         <button
           onClick={handleCancel}
-          className="text-white hover:text-gray-300 transition-colors"
+          className="text-white hover:text-gray-300 transition-colors p-1"
+          aria-label="關閉"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5 md:w-6 md:h-6" />
         </button>
       </div>
 
-      {/* Cropper */}
-      <div className="absolute top-16 left-0 right-0 bottom-48 md:bottom-64">
+      {/* Cropper - 響應式高度調整 */}
+      <div className="absolute top-12 md:top-16 left-0 right-0 bottom-[280px] sm:bottom-64 md:bottom-72 lg:bottom-64">
         <Cropper
           image={imageUrl}
           crop={crop}
@@ -217,26 +218,26 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel, onRem
           onRotationChange={setRotation}
           onCropComplete={onCropComplete}
         />
-        {/* Crop hint overlay */}
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg text-sm pointer-events-none">
+        {/* Crop hint overlay - 響應式文字大小 */}
+        <div className="absolute top-2 md:top-4 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-2 md:px-4 py-1 md:py-2 rounded-lg text-xs md:text-sm pointer-events-none max-w-[90%] text-center">
           💡 拖動圖片移動位置，捏合縮放調整大小
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white p-4 space-y-4 overflow-y-auto max-h-64">
-        {/* Aspect Ratio */}
+      {/* Controls - 響應式控制面板 */}
+      <div className="absolute bottom-0 left-0 right-0 bg-white p-3 md:p-4 space-y-3 md:space-y-4 overflow-y-auto max-h-[280px] sm:max-h-64 md:max-h-72 lg:max-h-64">
+        {/* Aspect Ratio - 響應式網格 */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">裁剪比例</span>
+            <span className="text-xs md:text-sm font-medium text-gray-700">裁剪比例</span>
             <span className="text-xs text-gray-500">{ASPECT_RATIOS[aspectRatio].ratio}</span>
           </div>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 md:gap-2">
             {(Object.keys(ASPECT_RATIOS) as AspectRatioKey[]).map((key) => (
               <button
                 key={key}
                 onClick={() => setAspectRatio(key)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-all ${
                   aspectRatio === key
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -248,9 +249,9 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel, onRem
           </div>
         </div>
 
-        {/* Zoom */}
-        <div className="flex items-center gap-3">
-          <ZoomOut className="w-5 h-5 text-gray-600" />
+        {/* Zoom - 響應式縮放控制 */}
+        <div className="flex items-center gap-2 md:gap-3">
+          <ZoomOut className="w-4 h-4 md:w-5 md:h-5 text-gray-600 flex-shrink-0" />
           <input
             type="range"
             min={1}
@@ -260,42 +261,42 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel, onRem
             onChange={(e) => setZoom(Number(e.target.value))}
             className="flex-1"
           />
-          <ZoomIn className="w-5 h-5 text-gray-600" />
-          <span className="text-sm text-gray-600 w-12 text-right">{zoom.toFixed(1)}x</span>
+          <ZoomIn className="w-4 h-4 md:w-5 md:h-5 text-gray-600 flex-shrink-0" />
+          <span className="text-xs md:text-sm text-gray-600 w-10 md:w-12 text-right">{zoom.toFixed(1)}x</span>
         </div>
 
-        {/* Rotation */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600 w-16">旋轉:</span>
+        {/* Rotation - 響應式旋轉控制 */}
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <span className="text-xs md:text-sm text-gray-600 w-12 md:w-16 flex-shrink-0">旋轉:</span>
           <button
             onClick={() => setRotation((r) => r - 90)}
-            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
+            className="flex-1 px-2 md:px-3 py-1.5 md:py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center justify-center gap-1"
           >
-            <RotateCcw className="w-4 h-4" />
-            <span className="text-sm">-90°</span>
+            <RotateCcw className="w-3 h-3 md:w-4 md:h-4" />
+            <span className="text-xs md:text-sm">-90°</span>
           </button>
           <button
             onClick={() => setRotation((r) => r + 90)}
-            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
+            className="flex-1 px-2 md:px-3 py-1.5 md:py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center justify-center gap-1"
           >
-            <RotateCw className="w-4 h-4" />
-            <span className="text-sm">+90°</span>
+            <RotateCw className="w-3 h-3 md:w-4 md:h-4" />
+            <span className="text-xs md:text-sm">+90°</span>
           </button>
           <button
             onClick={() => setRotation(0)}
-            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm"
+            className="flex-1 px-2 md:px-3 py-1.5 md:py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-xs md:text-sm"
           >
             重置
           </button>
         </div>
 
-        {/* Filters */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600 w-16">濾鏡:</span>
+        {/* Filters - 響應式濾鏡選擇 */}
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <span className="text-xs md:text-sm text-gray-600 w-12 md:w-16 flex-shrink-0">濾鏡:</span>
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 px-2 md:px-3 py-1.5 md:py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="none">無濾鏡</option>
             <option value="grayscale">灰階</option>
@@ -306,37 +307,38 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel, onRem
           </select>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-3 pt-2">
+        {/* Actions - 響應式按鈕 */}
+        <div className="flex flex-col sm:flex-row gap-2 md:gap-3 pt-2">
           <button
             onClick={handleCancel}
-            className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
+            className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium text-sm md:text-base"
           >
             取消
           </button>
           {onRemove && (
             <button
               onClick={handleRemove}
-              className="flex-1 px-4 py-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+              className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors font-medium flex items-center justify-center gap-1.5 md:gap-2 text-sm md:text-base"
               title="移除圖片"
             >
-              <Trash2 className="w-5 h-5" />
-              <span>移除圖片</span>
+              <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="hidden sm:inline">移除圖片</span>
+              <span className="sm:hidden">移除</span>
             </button>
           )}
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
           >
             {saving ? (
               <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 <span>保存中...</span>
               </>
             ) : (
               <>
-                <Check className="w-5 h-5" />
+                <Check className="w-4 h-4 md:w-5 md:h-5" />
                 <span>保存</span>
               </>
             )}
