@@ -449,7 +449,17 @@ model VocabularyItem {
   difficultyLevel  Int                @default(1)
   exampleSentence  String?
   notes            String?
-  imageUrl         String?
+
+  // 英文圖片字段
+  imageId          String?            // 英文圖片 ID（關聯到 UserImage）
+  imageUrl         String?            // 英文圖片 URL
+  imageSize        String?            // 英文圖片大小 (small, medium, large)
+
+  // 中文圖片字段
+  chineseImageId   String?            // 中文圖片 ID（關聯到 UserImage）
+  chineseImageUrl  String?            // 中文圖片 URL
+  chineseImageSize String?            // 中文圖片大小 (small, medium, large)
+
   audioUrl         String?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
