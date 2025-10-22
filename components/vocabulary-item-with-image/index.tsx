@@ -10,8 +10,10 @@ export interface VocabularyItemData {
   id: string;
   english: string;
   chinese: string;
-  imageId?: string;
-  imageUrl?: string;
+  imageId?: string;           // 英文圖片 ID
+  imageUrl?: string;          // 英文圖片 URL
+  chineseImageId?: string;    // 中文圖片 ID
+  chineseImageUrl?: string;   // 中文圖片 URL
 }
 
 interface VocabularyItemWithImageProps {
@@ -43,10 +45,17 @@ export default function VocabularyItemWithImage({
   minItems,
   totalItems,
 }: VocabularyItemWithImageProps) {
+  // 英文圖片狀態
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [baseImageUrl, setBaseImageUrl] = useState<string | null>(null);
+
+  // 中文圖片狀態
+  const [showChineseImagePicker, setShowChineseImagePicker] = useState(false);
+  const [showChineseImageEditor, setShowChineseImageEditor] = useState(false);
+  const [isGeneratingChinese, setIsGeneratingChinese] = useState(false);
+  const [baseChineseImageUrl, setBaseChineseImageUrl] = useState<string | null>(null);
 
   // 處理圖片選擇
   const handleImageSelect = async (images: UserImage[]) => {
@@ -84,7 +93,7 @@ export default function VocabularyItemWithImage({
     }
   };
 
-  // 處理圖片刪除
+  // 處理英文圖片刪除
   const handleImageRemove = () => {
     onChange({
       ...item,
@@ -94,7 +103,53 @@ export default function VocabularyItemWithImage({
     setBaseImageUrl(null);
   };
 
-  // 生成帶文字的圖片
+  // 處理中文圖片選擇
+  const handleChineseImageSelect = async (images: UserImage[]) => {
+    if (images.length > 0) {
+      const selectedImage = images[0];
+      setBaseChineseImageUrl(selectedImage.url);
+
+      onChange({
+        ...item,
+        chineseImageId: selectedImage.id,
+        chineseImageUrl: selectedImage.url,
+      });
+
+      setShowChineseImagePicker(false);
+
+      // 如果有中文文字，自動生成帶文字的圖片
+      if (item.chinese) {
+        await generateChineseImageWithText(selectedImage.url);
+      }
+    }
+  };
+
+  // 處理中文圖片編輯
+  const handleChineseImageEdit = (editedBlob: Blob, editedUrl: string) => {
+    setBaseChineseImageUrl(editedUrl);
+    onChange({
+      ...item,
+      chineseImageUrl: editedUrl,
+    });
+    setShowChineseImageEditor(false);
+
+    // 重新生成帶文字的圖片
+    if (item.chinese) {
+      generateChineseImageWithText(editedUrl);
+    }
+  };
+
+  // 處理中文圖片刪除
+  const handleChineseImageRemove = () => {
+    onChange({
+      ...item,
+      chineseImageId: undefined,
+      chineseImageUrl: undefined,
+    });
+    setBaseChineseImageUrl(null);
+  };
+
+  // 生成帶英文文字的圖片
   const generateImageWithText = async (imageUrl: string) => {
     if (!item.english && !item.chinese) return;
 
@@ -187,16 +242,92 @@ export default function VocabularyItemWithImage({
     }
   };
 
-  // 當文字改變時，重新生成圖片
+  // 生成帶中文文字的圖片
+  const generateChineseImageWithText = async (imageUrl: string) => {
+    if (!item.chinese) return;
+
+    setIsGeneratingChinese(true);
+    try {
+      // 文字疊加選項
+      const options: TextOverlayOptions = {
+        text: item.chinese,
+        position: { x: 50, y: 50 }, // 中心位置
+        fontSize: 'medium',
+        textColor: 'white',
+        showBackground: true,
+      };
+
+      // 生成圖片 Blob
+      const generatedImageBlob = await overlayTextOnImage(imageUrl, options);
+
+      // 創建預覽 URL
+      const previewUrl = URL.createObjectURL(generatedImageBlob);
+
+      // 立即更新預覽
+      onChange({
+        ...item,
+        chineseImageUrl: previewUrl,
+      });
+
+      // 上傳生成的圖片到 Vercel Blob
+      const formData = new FormData();
+      formData.append('file', generatedImageBlob, `vocabulary-chinese-${item.id}-${Date.now()}.png`);
+
+      const uploadEndpoint = '/api/images/upload-test';
+      console.log(`📤 上傳中文圖片到: ${uploadEndpoint}`);
+
+      const uploadResponse = await fetch(uploadEndpoint, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (uploadResponse.ok) {
+        const uploadData = await uploadResponse.json();
+        const imageData = uploadData.image || uploadData;
+
+        // 更新為永久 URL
+        onChange({
+          ...item,
+          chineseImageUrl: imageData.url,
+          chineseImageId: imageData.id,
+        });
+
+        // 釋放預覽 URL
+        URL.revokeObjectURL(previewUrl);
+      } else {
+        console.error('中文圖片上傳失敗:', uploadResponse.status, uploadResponse.statusText);
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        console.error('錯誤詳情:', errorData);
+        alert(`中文圖片上傳失敗: ${errorData.error || '未知錯誤'}`);
+      }
+    } catch (error) {
+      console.error('生成中文圖片失敗:', error);
+    } finally {
+      setIsGeneratingChinese(false);
+    }
+  };
+
+  // 當英文文字改變時，重新生成英文圖片
   useEffect(() => {
-    if (baseImageUrl && (item.english || item.chinese)) {
+    if (baseImageUrl && item.english) {
       const timer = setTimeout(() => {
         generateImageWithText(baseImageUrl);
       }, 1000); // 延遲 1 秒，避免頻繁生成
-      
+
       return () => clearTimeout(timer);
     }
-  }, [item.english, item.chinese]);
+  }, [item.english]);
+
+  // 當中文文字改變時，重新生成中文圖片
+  useEffect(() => {
+    if (baseChineseImageUrl && item.chinese) {
+      const timer = setTimeout(() => {
+        generateChineseImageWithText(baseChineseImageUrl);
+      }, 1000); // 延遲 1 秒，避免頻繁生成
+
+      return () => clearTimeout(timer);
+    }
+  }, [item.chinese]);
 
   return (
     <div className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors bg-white">
@@ -226,17 +357,25 @@ export default function VocabularyItemWithImage({
         )}
       </div>
 
-      {/* 中文輸入框（也整合圖片功能） */}
+      {/* 中文輸入框（獨立的圖片功能） */}
       <div className="flex-1">
         <InputWithImage
           value={item.chinese}
           onChange={(value) => onChange({ ...item, chinese: value })}
-          imageUrl={item.imageUrl}
-          onImageIconClick={() => setShowImagePicker(true)}
-          onThumbnailClick={() => setShowImageEditor(true)}
+          imageUrl={item.chineseImageUrl}
+          onImageIconClick={() => setShowChineseImagePicker(true)}
+          onThumbnailClick={() => setShowChineseImageEditor(true)}
           placeholder="輸入中文翻譯..."
-          disabled={isGenerating}
+          disabled={isGeneratingChinese}
         />
+
+        {/* 生成狀態提示 */}
+        {isGeneratingChinese && (
+          <div className="flex items-center space-x-2 text-sm text-blue-600 mt-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            <span>正在生成中文圖片...</span>
+          </div>
+        )}
       </div>
 
       {/* 刪除按鈕 */}
@@ -252,7 +391,7 @@ export default function VocabularyItemWithImage({
         </button>
       )}
 
-      {/* 模態框 */}
+      {/* 英文圖片模態框 */}
       {showImagePicker && (
         <ImagePicker
           onSelect={handleImageSelect}
@@ -266,6 +405,23 @@ export default function VocabularyItemWithImage({
           imageUrl={baseImageUrl || item.imageUrl}
           onSave={handleImageEdit}
           onClose={() => setShowImageEditor(false)}
+        />
+      )}
+
+      {/* 中文圖片模態框 */}
+      {showChineseImagePicker && (
+        <ImagePicker
+          onSelect={handleChineseImageSelect}
+          onClose={() => setShowChineseImagePicker(false)}
+          multiple={false}
+        />
+      )}
+
+      {showChineseImageEditor && item.chineseImageUrl && (
+        <ImageEditor
+          imageUrl={baseChineseImageUrl || item.chineseImageUrl}
+          onSave={handleChineseImageEdit}
+          onClose={() => setShowChineseImageEditor(false)}
         />
       )}
     </div>
