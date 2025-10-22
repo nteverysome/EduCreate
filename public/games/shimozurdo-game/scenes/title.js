@@ -62,6 +62,9 @@ export default class Title extends Phaser.Scene {
         // 🆕 創建目標詞彙顯示系統 - 從 Airplane Game 移植
         this.createTargetWordDisplay()
 
+        // 🖼️ 預載入所有詞彙的圖片 - 確保第一輪就能顯示圖片
+        this.preloadVocabularyImages()
+
         // 🆕 設置隨機目標詞彙 - 初始化第一個學習目標
         this.setRandomTargetWord()
 
@@ -802,6 +805,47 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
+     * 🖼️ 預載入所有詞彙的圖片 - 確保第一輪就能顯示圖片
+     */
+    preloadVocabularyImages() {
+        if (!this.game.geptManager) {
+            console.warn('⚠️ GEPT 管理器未初始化，無法預載入圖片');
+            return;
+        }
+
+        // 獲取當前等級的所有詞彙
+        const allWords = this.game.geptManager.getCurrentLevelWords();
+        if (!allWords || allWords.length === 0) {
+            console.warn('⚠️ 沒有詞彙可以預載入圖片');
+            return;
+        }
+
+        console.log(`🖼️ 開始預載入 ${allWords.length} 個詞彙的圖片`);
+
+        // 預載入所有有圖片的詞彙
+        let loadedCount = 0;
+        allWords.forEach(word => {
+            if (word.image) {
+                const imageKey = `target-image-${word.id}`;
+                if (!this.textures.exists(imageKey)) {
+                    this.load.image(imageKey, word.image);
+                    loadedCount++;
+                }
+            }
+        });
+
+        if (loadedCount > 0) {
+            // 開始載入
+            this.load.once('complete', () => {
+                console.log(`✅ 成功預載入 ${loadedCount} 張詞彙圖片`);
+            });
+            this.load.start();
+        } else {
+            console.log('ℹ️ 所有詞彙圖片已載入或沒有圖片需要載入');
+        }
+    }
+
+    /**
      * 🆕 設置隨機目標詞彙 - 從 GEPT 管理器獲取新的學習目標
      */
     setRandomTargetWord() {
@@ -865,35 +909,63 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 🖼️ 更新目標詞彙圖片顯示
+     * 🖼️ 更新目標詞彙圖片顯示（水平排列：圖片+英文大字）
      */
     updateTargetImage(imageKey, word) {
         // 獲取相機視口
         const cam = this.cameras.main;
         const centerX = cam.scrollX + cam.width * 0.5;   // 中央位置
-        const topY = cam.scrollY + 80;                   // 在文字下方
+        const topY = cam.scrollY + 50;                   // 頂部位置
 
         // 🎯 使用智能縮放系統
         const imageSize = word?.imageSize || 'medium';
         const maxSize = TARGET_MAX_IMAGE_SIZE[imageSize];
         const scale = this.calculateSmartScale(imageKey, imageSize, maxSize);
 
+        // 🎯 計算圖片實際尺寸
+        const texture = this.textures.get(imageKey);
+        const imageWidth = texture.source[0].width * scale;
+        const imageHeight = texture.source[0].height * scale;
+
+        // 🎯 水平布局：圖片在左，文字在右
+        const hasEnglish = word?.english && word.english.trim() !== '';
+        const spacing = 20; // 圖片和文字之間的間距
+
+        let imageX, textX;
+        if (hasEnglish) {
+            // 有英文：圖片和文字水平排列
+            imageX = centerX - imageWidth / 2 - spacing;
+            textX = centerX + imageWidth / 2 + spacing;
+        } else {
+            // 沒有英文：圖片居中
+            imageX = centerX;
+            textX = centerX; // 文字不顯示
+        }
+
         if (this.targetImage) {
             // 更新現有圖片
             this.targetImage.setTexture(imageKey);
             this.targetImage.setVisible(true);
-            this.targetImage.setPosition(centerX, topY);
+            this.targetImage.setPosition(imageX, topY + imageHeight / 2);
             this.targetImage.setScale(scale);            // 使用智能縮放比例
         } else {
             // 創建新圖片
-            this.targetImage = this.add.image(centerX, topY, imageKey);
+            this.targetImage = this.add.image(imageX, topY + imageHeight / 2, imageKey);
             this.targetImage.setScale(scale);            // 使用智能縮放比例
             this.targetImage.setDepth(200);              // 在最前面
             this.targetImage.setScrollFactor(1);         // 跟隨相機
             this.targetImage.setOrigin(0.5);             // 中心對齊
         }
 
-        console.log(`🖼️ 更新目標圖片: ${imageKey}, size: ${imageSize}, scale: ${scale.toFixed(3)}`);
+        // 🎯 更新英文文字位置（如果有英文）
+        if (hasEnglish && this.chineseText) {
+            this.chineseText.setPosition(textX, topY + imageHeight / 2);
+            this.chineseText.setVisible(true);
+        } else if (this.chineseText) {
+            this.chineseText.setVisible(false); // 沒有英文時隱藏文字
+        }
+
+        console.log(`🖼️ 更新目標圖片: ${imageKey}, size: ${imageSize}, scale: ${scale.toFixed(3)}, hasEnglish: ${hasEnglish}`);
     }
 
     /**
@@ -1465,7 +1537,7 @@ export default class Title extends Phaser.Scene {
      * 🆕 更新 UI 元素位置 - 確保 UI 始終跟隨相機
      */
     updateUIPositions() {
-        if (!this.scoreText || !this.chineseText || !this.targetText) return;
+        if (!this.scoreText || !this.targetText) return;
 
         // 🎯 更新血條位置 - 血條保持在右下角
         this.updateHealthBarPositions();
@@ -1482,13 +1554,51 @@ export default class Title extends Phaser.Scene {
         const spacing = 300;  // 三列之間的間距（最大間距）
 
         const leftX = worldCenterX - spacing;     // 左列（分數）
-        const middleX = worldCenterX;             // 中列（中文詞彙）- 中心位置
-        const rightX = worldCenterX + spacing;   // 右列（英文詞彙）
+        const rightX = worldCenterX + spacing;   // 右列（中文詞彙）
 
-        // 更新三列布局位置（世界頂部座標）
+        // 更新布局位置（世界頂部座標）
         this.scoreText.setPosition(leftX, worldTopY);
-        this.chineseText.setPosition(middleX, worldTopY);
+        // 🎯 chineseText（英文大字）和 targetImage（圖片）的位置由 updateTargetImage 控制，不在這裡更新
         this.targetText.setPosition(rightX, worldTopY);
+
+        // 🎯 更新圖片和英文文字的位置（如果存在）
+        if (this.targetImage && this.targetImage.visible && this.currentTargetWord) {
+            const imageKey = `target-image-${this.currentTargetWord.id}`;
+            if (this.textures.exists(imageKey)) {
+                // 重新計算圖片和文字的水平布局
+                const topY = worldTopY;
+                const centerX = worldCenterX;
+
+                const imageSize = this.currentTargetWord?.imageSize || 'medium';
+                const maxSize = TARGET_MAX_IMAGE_SIZE[imageSize];
+                const scale = this.calculateSmartScale(imageKey, imageSize, maxSize);
+
+                const texture = this.textures.get(imageKey);
+                const imageWidth = texture.source[0].width * scale;
+                const imageHeight = texture.source[0].height * scale;
+
+                const hasEnglish = this.currentTargetWord?.english && this.currentTargetWord.english.trim() !== '';
+                const spacing = 20;
+
+                let imageX, textX;
+                if (hasEnglish) {
+                    imageX = centerX - imageWidth / 2 - spacing;
+                    textX = centerX + imageWidth / 2 + spacing;
+                } else {
+                    imageX = centerX;
+                    textX = centerX;
+                }
+
+                this.targetImage.setPosition(imageX, topY + imageHeight / 2);
+
+                if (hasEnglish && this.chineseText) {
+                    this.chineseText.setPosition(textX, topY + imageHeight / 2);
+                    this.chineseText.setVisible(true);
+                } else if (this.chineseText) {
+                    this.chineseText.setVisible(false);
+                }
+            }
+        }
     }
 
     /**
