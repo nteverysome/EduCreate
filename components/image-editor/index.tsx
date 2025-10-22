@@ -206,7 +206,7 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel, onRem
       </div>
 
       {/* Cropper - 響應式高度調整 */}
-      <div className="absolute top-12 md:top-16 left-0 right-0 bottom-[280px] sm:bottom-64 md:bottom-72 lg:bottom-64">
+      <div className="absolute top-12 md:top-16 left-0 right-0 bottom-[320px] sm:bottom-80 md:bottom-80 lg:bottom-72">
         <Cropper
           image={imageUrl}
           crop={crop}
@@ -225,7 +225,7 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel, onRem
       </div>
 
       {/* Controls - 響應式控制面板 */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white p-3 md:p-4 space-y-3 md:space-y-4 overflow-y-auto max-h-[280px] sm:max-h-64 md:max-h-72 lg:max-h-64">
+      <div className="absolute bottom-0 left-0 right-0 bg-white p-3 md:p-4 space-y-3 md:space-y-4 overflow-y-auto max-h-[320px] sm:max-h-80 md:max-h-80 lg:max-h-72">
         {/* Aspect Ratio - 響應式網格 */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
