@@ -405,6 +405,7 @@ export default function VocabularyItemWithImage({
           imageUrl={baseImageUrl || item.imageUrl}
           onSave={handleImageEdit}
           onClose={() => setShowImageEditor(false)}
+          onRemove={handleImageRemove}
         />
       )}
 
@@ -422,6 +423,7 @@ export default function VocabularyItemWithImage({
           imageUrl={baseChineseImageUrl || item.chineseImageUrl}
           onSave={handleChineseImageEdit}
           onClose={() => setShowChineseImageEditor(false)}
+          onRemove={handleChineseImageRemove}
         />
       )}
     </div>

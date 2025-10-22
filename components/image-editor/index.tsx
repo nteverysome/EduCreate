@@ -2,13 +2,14 @@
 
 import { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
-import { X, RotateCw, RotateCcw, ZoomIn, ZoomOut, Check, Lock, Unlock } from 'lucide-react';
+import { X, RotateCw, RotateCcw, ZoomIn, ZoomOut, Check, Lock, Unlock, Trash2 } from 'lucide-react';
 
 export interface ImageEditorProps {
   imageUrl: string;
   onSave: (editedImageBlob: Blob, editedImageUrl: string) => void;
   onClose: () => void;
   onCancel?: () => void; // Deprecated: use onClose instead
+  onRemove?: () => void; // Optional: callback to remove the image
 }
 
 interface CropArea {
@@ -29,9 +30,16 @@ const ASPECT_RATIOS = {
 
 type AspectRatioKey = keyof typeof ASPECT_RATIOS;
 
-export default function ImageEditor({ imageUrl, onSave, onClose, onCancel }: ImageEditorProps) {
+export default function ImageEditor({ imageUrl, onSave, onClose, onCancel, onRemove }: ImageEditorProps) {
   // Support both onClose and onCancel for backward compatibility
   const handleCancel = onClose || onCancel || (() => {});
+
+  // Handle remove image
+  const handleRemove = () => {
+    if (onRemove) {
+      onRemove();
+    }
+  };
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
@@ -306,6 +314,16 @@ export default function ImageEditor({ imageUrl, onSave, onClose, onCancel }: Ima
           >
             取消
           </button>
+          {onRemove && (
+            <button
+              onClick={handleRemove}
+              className="flex-1 px-4 py-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+              title="移除圖片"
+            >
+              <Trash2 className="w-5 h-5" />
+              <span>移除圖片</span>
+            </button>
+          )}
           <button
             onClick={handleSave}
             disabled={saving}
