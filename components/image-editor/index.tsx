@@ -12,6 +12,8 @@ export interface ImageEditorProps {
   onRemove?: () => void; // Optional: callback to remove the image
   imageSize?: 'small' | 'medium' | 'large';  // 圖片大小
   onImageSizeChange?: (size: 'small' | 'medium' | 'large') => void;  // 大小變更回調
+  enableTextOverlay?: boolean;  // 是否啟用文字疊加
+  onEnableTextOverlayChange?: (enabled: boolean) => void;  // 文字疊加變更回調
 }
 
 interface CropArea {
@@ -39,7 +41,9 @@ export default function ImageEditor({
   onCancel,
   onRemove,
   imageSize = 'medium',
-  onImageSizeChange
+  onImageSizeChange,
+  enableTextOverlay = false,
+  onEnableTextOverlayChange
 }: ImageEditorProps) {
   // Support both onClose and onCancel for backward compatibility
   const handleCancel = onClose || onCancel || (() => {});
@@ -363,6 +367,25 @@ export default function ImageEditor({
                   大
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* 文字疊加勾選框 */}
+          {onEnableTextOverlayChange && (
+            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+              <input
+                type="checkbox"
+                id="enableTextOverlay"
+                checked={enableTextOverlay}
+                onChange={(e) => onEnableTextOverlayChange(e.target.checked)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+              />
+              <label
+                htmlFor="enableTextOverlay"
+                className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+              >
+                保存時在圖片上疊加文字
+              </label>
             </div>
           )}
 

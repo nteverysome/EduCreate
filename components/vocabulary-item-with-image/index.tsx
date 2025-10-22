@@ -52,12 +52,14 @@ export default function VocabularyItemWithImage({
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [baseImageUrl, setBaseImageUrl] = useState<string | null>(null);
+  const [enableEnglishTextOverlay, setEnableEnglishTextOverlay] = useState(false);
 
   // 中文圖片狀態
   const [showChineseImagePicker, setShowChineseImagePicker] = useState(false);
   const [showChineseImageEditor, setShowChineseImageEditor] = useState(false);
   const [isGeneratingChinese, setIsGeneratingChinese] = useState(false);
   const [baseChineseImageUrl, setBaseChineseImageUrl] = useState<string | null>(null);
+  const [enableChineseTextOverlay, setEnableChineseTextOverlay] = useState(false);
 
   // 處理圖片選擇
   const handleImageSelect = async (images: UserImage[]) => {
@@ -81,18 +83,21 @@ export default function VocabularyItemWithImage({
   };
 
   // 處理圖片編輯
-  const handleImageEdit = (editedBlob: Blob, editedUrl: string) => {
+  const handleImageEdit = async (editedBlob: Blob, editedUrl: string) => {
     setBaseImageUrl(editedUrl);
-    onChange({
-      ...item,
-      imageUrl: editedUrl,
-    });
     setShowImageEditor(false);
 
-    // 🔥 移除自動生成文字功能 - 用戶不需要圖片上的文字
-    // if (item.english || item.chinese) {
-    //   generateImageWithText(editedUrl);
-    // }
+    // 🎯 根據勾選框決定是否疊加文字
+    if (enableEnglishTextOverlay && item.english) {
+      // 只疊加英文文字
+      await generateImageWithText(editedUrl);
+    } else {
+      // 不疊加文字，直接使用編輯後的圖片
+      onChange({
+        ...item,
+        imageUrl: editedUrl,
+      });
+    }
   };
 
   // 處理英文圖片刪除
@@ -127,18 +132,21 @@ export default function VocabularyItemWithImage({
   };
 
   // 處理中文圖片編輯
-  const handleChineseImageEdit = (editedBlob: Blob, editedUrl: string) => {
+  const handleChineseImageEdit = async (editedBlob: Blob, editedUrl: string) => {
     setBaseChineseImageUrl(editedUrl);
-    onChange({
-      ...item,
-      chineseImageUrl: editedUrl,
-    });
     setShowChineseImageEditor(false);
 
-    // 🔥 移除自動生成文字功能 - 用戶不需要圖片上的文字
-    // if (item.chinese) {
-    //   generateChineseImageWithText(editedUrl);
-    // }
+    // 🎯 根據勾選框決定是否疊加文字
+    if (enableChineseTextOverlay && item.chinese) {
+      // 只疊加中文文字
+      await generateChineseImageWithText(editedUrl);
+    } else {
+      // 不疊加文字，直接使用編輯後的圖片
+      onChange({
+        ...item,
+        chineseImageUrl: editedUrl,
+      });
+    }
   };
 
   // 處理中文圖片刪除
@@ -151,17 +159,14 @@ export default function VocabularyItemWithImage({
     setBaseChineseImageUrl(null);
   };
 
-  // 生成帶英文文字的圖片
+  // 🎯 生成只帶英文文字的圖片（用於英文輸入框的圖片）
   const generateImageWithText = async (imageUrl: string) => {
-    if (!item.english && !item.chinese) return;
+    if (!item.english) return;
 
     setIsGenerating(true);
     try {
-      // 構建文字內容
-      const textLines: string[] = [];
-      if (item.english) textLines.push(item.english);
-      if (item.chinese) textLines.push(item.chinese);
-      const text = textLines.join('\n');
+      // 🎯 只使用英文文字
+      const text = item.english;
 
       // 文字疊加選項
       const options: TextOverlayOptions = {
@@ -410,6 +415,8 @@ export default function VocabularyItemWithImage({
           onRemove={handleImageRemove}
           imageSize={item.imageSize || 'medium'}
           onImageSizeChange={(size) => onChange({ ...item, imageSize: size })}
+          enableTextOverlay={enableEnglishTextOverlay}
+          onEnableTextOverlayChange={setEnableEnglishTextOverlay}
         />
       )}
 
@@ -430,6 +437,8 @@ export default function VocabularyItemWithImage({
           onRemove={handleChineseImageRemove}
           imageSize={item.chineseImageSize || 'medium'}
           onImageSizeChange={(size) => onChange({ ...item, chineseImageSize: size })}
+          enableTextOverlay={enableChineseTextOverlay}
+          onEnableTextOverlayChange={setEnableChineseTextOverlay}
         />
       )}
     </div>
