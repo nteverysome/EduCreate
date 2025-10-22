@@ -106,6 +106,8 @@ class GEPTManager {
           category: 'custom',
           partOfSpeech: item.partOfSpeech || 'NOUN',
           image: item.imageUrl,
+          imageUrl: item.imageUrl,              // 🆕 保留 imageUrl 欄位（英文圖片）
+          chineseImageUrl: item.chineseImageUrl, // 🆕 保留 chineseImageUrl 欄位（中文圖片）
           phonetic: item.phonetic
         }));
 
@@ -139,6 +141,8 @@ class GEPTManager {
           category: 'custom',
           partOfSpeech: item.partOfSpeech || 'NOUN',
           image: item.imageUrl,
+          imageUrl: item.imageUrl,              // 🆕 保留 imageUrl 欄位（英文圖片）
+          chineseImageUrl: item.chineseImageUrl, // 🆕 保留 chineseImageUrl 欄位（中文圖片）
           phonetic: item.phonetic
         }));
 
@@ -182,6 +186,8 @@ class GEPTManager {
               category: 'cloud',
               partOfSpeech: item.partOfSpeech || 'NOUN',
               image: item.imageUrl,
+              imageUrl: item.imageUrl,              // 🆕 保留 imageUrl 欄位（英文圖片）
+              chineseImageUrl: item.chineseImageUrl, // 🆕 保留 chineseImageUrl 欄位（中文圖片）
               createdAt: new Date(item.createdAt),
               updatedAt: new Date(item.updatedAt)
             };
