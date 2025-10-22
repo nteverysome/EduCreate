@@ -824,12 +824,12 @@ export default class Title extends Phaser.Scene {
                     // 動態載入圖片
                     this.load.image(imageKey, this.currentTargetWord.image);
                     this.load.once('complete', () => {
-                        this.updateTargetImage(imageKey);
+                        this.updateTargetImage(imageKey, this.currentTargetWord);
                     });
                     this.load.start();
                 } else {
                     // 圖片已載入，直接更新
-                    this.updateTargetImage(imageKey);
+                    this.updateTargetImage(imageKey, this.currentTargetWord);
                 }
             } else {
                 // 沒有圖片，隱藏圖片容器
@@ -854,27 +854,36 @@ export default class Title extends Phaser.Scene {
     /**
      * 🖼️ 更新目標詞彙圖片顯示
      */
-    updateTargetImage(imageKey) {
+    updateTargetImage(imageKey, word) {
         // 獲取相機視口
         const cam = this.cameras.main;
         const centerX = cam.scrollX + cam.width * 0.5;   // 中央位置
         const topY = cam.scrollY + 80;                   // 在文字下方
+
+        // 根據 imageSize 決定縮放比例
+        let scale = 0.2;  // 預設中等大小
+        if (word && word.imageSize === 'small') {
+            scale = 0.15;  // 小圖片
+        } else if (word && word.imageSize === 'large') {
+            scale = 0.25;  // 大圖片
+        }
 
         if (this.targetImage) {
             // 更新現有圖片
             this.targetImage.setTexture(imageKey);
             this.targetImage.setVisible(true);
             this.targetImage.setPosition(centerX, topY);
+            this.targetImage.setScale(scale);            // 更新縮放
         } else {
             // 創建新圖片
             this.targetImage = this.add.image(centerX, topY, imageKey);
-            this.targetImage.setScale(0.2);              // 稍大一點
+            this.targetImage.setScale(scale);            // 根據用戶選擇的大小縮放
             this.targetImage.setDepth(200);              // 在最前面
             this.targetImage.setScrollFactor(1);         // 跟隨相機
             this.targetImage.setOrigin(0.5);             // 中心對齊
         }
 
-        console.log(`🖼️ 更新目標圖片: ${imageKey} at (${centerX}, ${topY})`);
+        console.log(`🖼️ 更新目標圖片: ${imageKey} at (${centerX}, ${topY}), size: ${word?.imageSize || 'medium'}, scale: ${scale}`);
     }
 
     /**
@@ -1050,6 +1059,14 @@ export default class Title extends Phaser.Scene {
             return;
         }
 
+        // 根據 imageSize 決定縮放比例
+        let scale = 0.15;  // 預設中等大小
+        if (word.imageSize === 'small') {
+            scale = 0.1;   // 小圖片
+        } else if (word.imageSize === 'large') {
+            scale = 0.2;   // 大圖片
+        }
+
         // 創建圖片精靈
         const wordImage = this.add.image(
             enemy.x,
@@ -1058,7 +1075,7 @@ export default class Title extends Phaser.Scene {
         );
 
         // 設置圖片屬性
-        wordImage.setScale(0.15);      // 縮小圖片
+        wordImage.setScale(scale);     // 根據用戶選擇的大小縮放
         wordImage.setDepth(-62);       // 在文字前面，雲朵後面
         wordImage.setOrigin(0.5);      // 中心對齊
         wordImage.setAlpha(0.9);       // 稍微透明
@@ -1066,7 +1083,7 @@ export default class Title extends Phaser.Scene {
         // 綁定到敵人
         enemy.setData('wordImage', wordImage);
 
-        console.log(`🖼️ 創建雲朵圖片: ${word.english} at (${enemy.x}, ${enemy.y - 40})`);
+        console.log(`🖼️ 創建雲朵圖片: ${word.english} at (${enemy.x}, ${enemy.y - 40}), size: ${word.imageSize || 'medium'}, scale: ${scale}`);
     }
 
     /**

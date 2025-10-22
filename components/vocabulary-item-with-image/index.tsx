@@ -14,6 +14,8 @@ export interface VocabularyItemData {
   imageUrl?: string;          // 英文圖片 URL
   chineseImageId?: string;    // 中文圖片 ID
   chineseImageUrl?: string;   // 中文圖片 URL
+  imageSize?: 'small' | 'medium' | 'large';        // 英文圖片大小
+  chineseImageSize?: 'small' | 'medium' | 'large'; // 中文圖片大小
 }
 
 interface VocabularyItemWithImageProps {
@@ -346,6 +348,8 @@ export default function VocabularyItemWithImage({
           onThumbnailClick={() => setShowImageEditor(true)}
           placeholder="輸入英文單字..."
           disabled={isGenerating}
+          imageSize={item.imageSize || 'medium'}
+          onImageSizeChange={(size) => onChange({ ...item, imageSize: size })}
         />
 
         {/* 生成狀態提示 */}
@@ -367,6 +371,8 @@ export default function VocabularyItemWithImage({
           onThumbnailClick={() => setShowChineseImageEditor(true)}
           placeholder="輸入中文翻譯..."
           disabled={isGeneratingChinese}
+          imageSize={item.chineseImageSize || 'medium'}
+          onImageSizeChange={(size) => onChange({ ...item, chineseImageSize: size })}
         />
 
         {/* 生成狀態提示 */}
