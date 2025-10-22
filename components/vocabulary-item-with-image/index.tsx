@@ -92,11 +92,53 @@ export default function VocabularyItemWithImage({
       // 只疊加英文文字
       await generateImageWithText(editedUrl);
     } else {
-      // 不疊加文字，直接使用編輯後的圖片
-      onChange({
-        ...item,
-        imageUrl: editedUrl,
-      });
+      // 🎯 不疊加文字，直接上傳編輯後的圖片
+      setIsGenerating(true);
+      try {
+        // 立即更新預覽
+        onChange({
+          ...item,
+          imageUrl: editedUrl,
+        });
+
+        // 上傳圖片到 Vercel Blob
+        const formData = new FormData();
+        formData.append('file', editedBlob, `vocabulary-${item.id}-${Date.now()}.png`);
+
+        const uploadEndpoint = '/api/images/upload-test';
+        console.log(`📤 上傳編輯後的圖片到: ${uploadEndpoint}`);
+
+        const uploadResponse = await fetch(uploadEndpoint, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json();
+          const imageData = uploadData.image || uploadData;
+
+          // 更新為雲端 URL
+          onChange({
+            ...item,
+            imageUrl: imageData.url,
+            imageId: imageData.id,
+          });
+
+          // 釋放預覽 URL
+          URL.revokeObjectURL(editedUrl);
+
+          console.log('✅ 編輯後的圖片上傳成功:', imageData);
+        } else {
+          console.error('圖片上傳失敗:', uploadResponse.status, uploadResponse.statusText);
+          const errorData = await uploadResponse.json().catch(() => ({}));
+          console.error('錯誤詳情:', errorData);
+          alert(`圖片上傳失敗: ${errorData.error || '未知錯誤'}`);
+        }
+      } catch (error) {
+        console.error('上傳圖片失敗:', error);
+      } finally {
+        setIsGenerating(false);
+      }
     }
   };
 
@@ -141,11 +183,53 @@ export default function VocabularyItemWithImage({
       // 只疊加中文文字
       await generateChineseImageWithText(editedUrl);
     } else {
-      // 不疊加文字，直接使用編輯後的圖片
-      onChange({
-        ...item,
-        chineseImageUrl: editedUrl,
-      });
+      // 🎯 不疊加文字，直接上傳編輯後的圖片
+      setIsGeneratingChinese(true);
+      try {
+        // 立即更新預覽
+        onChange({
+          ...item,
+          chineseImageUrl: editedUrl,
+        });
+
+        // 上傳圖片到 Vercel Blob
+        const formData = new FormData();
+        formData.append('file', editedBlob, `vocabulary-chinese-${item.id}-${Date.now()}.png`);
+
+        const uploadEndpoint = '/api/images/upload-test';
+        console.log(`📤 上傳編輯後的中文圖片到: ${uploadEndpoint}`);
+
+        const uploadResponse = await fetch(uploadEndpoint, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json();
+          const imageData = uploadData.image || uploadData;
+
+          // 更新為雲端 URL
+          onChange({
+            ...item,
+            chineseImageUrl: imageData.url,
+            chineseImageId: imageData.id,
+          });
+
+          // 釋放預覽 URL
+          URL.revokeObjectURL(editedUrl);
+
+          console.log('✅ 編輯後的中文圖片上傳成功:', imageData);
+        } else {
+          console.error('中文圖片上傳失敗:', uploadResponse.status, uploadResponse.statusText);
+          const errorData = await uploadResponse.json().catch(() => ({}));
+          console.error('錯誤詳情:', errorData);
+          alert(`中文圖片上傳失敗: ${errorData.error || '未知錯誤'}`);
+        }
+      } catch (error) {
+        console.error('上傳中文圖片失敗:', error);
+      } finally {
+        setIsGeneratingChinese(false);
+      }
     }
   };
 
