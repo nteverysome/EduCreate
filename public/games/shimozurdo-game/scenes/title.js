@@ -1106,7 +1106,7 @@ export default class Title extends Phaser.Scene {
         // 創建圖片精靈
         const wordImage = this.add.image(
             enemy.x,
-            enemy.y - 40,  // 在雲朵上方顯示
+            enemy.y + 40,  // 在雲朵下方顯示
             imageKey
         );
 
@@ -1155,11 +1155,11 @@ export default class Title extends Phaser.Scene {
                     wordText.y = enemy.y;                // 保持在敵人中心（雲朵中心）
                 }
 
-                // 🖼️ 同步移動圖片 - 讓圖片跟隨敵人移動（在雲朵上方）
+                // 🖼️ 同步移動圖片 - 讓圖片跟隨敵人移動（在雲朵下方）
                 const wordImage = enemy.getData('wordImage');
                 if (wordImage && wordImage.active) {
                     wordImage.x = enemy.x;               // 同步X座標
-                    wordImage.y = enemy.y - 40;          // 保持在雲朵上方
+                    wordImage.y = enemy.y + 40;          // 保持在雲朵下方
                 }
 
                 // 檢查與太空船的碰撞 - 碰撞檢測
