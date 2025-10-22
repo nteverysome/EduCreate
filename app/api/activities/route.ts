@@ -100,13 +100,21 @@ export async function POST(request: NextRequest) {
         geptLevel: 'ELEMENTARY',
         totalWords: vocabularyItems.length,
 
-        // 新增：直接創建詞彙項目
+        // 新增：直接創建詞彙項目（包含所有圖片字段）
         vocabularyItems: {
           create: vocabularyItems.map((item: any) => ({
             english: item.english,
             chinese: item.chinese,
             phonetic: item.phonetic || null,
-            difficultyLevel: item.difficultyLevel || 1
+            difficultyLevel: item.difficultyLevel || 1,
+            // 英文圖片字段
+            imageId: item.imageId || null,
+            imageUrl: item.imageUrl || null,
+            imageSize: item.imageSize || null,
+            // 中文圖片字段
+            chineseImageId: item.chineseImageId || null,
+            chineseImageUrl: item.chineseImageUrl || null,
+            chineseImageSize: item.chineseImageSize || null
           }))
         }
       },
