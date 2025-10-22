@@ -734,42 +734,17 @@ export default class Title extends Phaser.Scene {
         this.scoreText.setScrollFactor(1);                   // 🎯 改為世界物件，在視差背景裡面
         this.scoreText.setDepth(200);                        // 確保在最前面
 
-        // 🆕 創建中文文字（第三列，黃色框大字，可點擊發音）
-        this.chineseText = this.add.text(
-            0,                                               // X座標（稍後在 updateUIPositions 中設置）
-            topY,                                            // Y座標（頂部20像素）
-            '',                                              // 初始文字為空
-            {
-                fontSize: '36px',                            // 調整字體大小適應中文
-                color: '#000000',                            // 黑色文字
-                fontStyle: 'bold',                           // 粗體，更好辨識
-                backgroundColor: '#ffff00',                  // 黃色背景
-                padding: { x: 20, y: 10 }                    // 內邊距
-            }
-        ).setOrigin(0.5);                                    // 設置原點為中央
-        this.chineseText.setScrollFactor(1);                 // 🎯 改為世界物件，在視差背景裡面
-        this.chineseText.setDepth(200);                      // 確保在最前面
-        this.chineseText.setInteractive();                   // 設置為可互動
-
-        // 點擊中文文字播放中文發音
-        this.chineseText.on('pointerdown', () => {
-            if (this.currentTargetWord && this.game.bilingualManager) {
-                console.log('🔊 播放中文發音:', this.currentTargetWord.chinese);
-                this.game.bilingualManager.speak(this.currentTargetWord.chinese, 'zh-TW');
-            }
-        });
-
-        // 🆕 創建英文文字（第五列，黃色文字黑色描邊，可點擊發音）
+        // 🆕 創建英文文字（第三列，黃色框大字，可點擊發音）
         this.englishText = this.add.text(
             0,                                               // X座標（稍後在 updateUIPositions 中設置）
             topY,                                            // Y座標（頂部20像素）
             '',                                              // 初始文字為空
             {
                 fontSize: '36px',                            // 調整字體大小適應英文
-                color: '#ffff00',                            // 黃色
-                fontStyle: 'bold',                           // 粗體
-                stroke: '#000000',                           // 黑色描邊
-                strokeThickness: 4                           // 描邊粗細
+                color: '#000000',                            // 黑色文字
+                fontStyle: 'bold',                           // 粗體，更好辨識
+                backgroundColor: '#ffff00',                  // 黃色背景
+                padding: { x: 20, y: 10 }                    // 內邊距
             }
         ).setOrigin(0.5);                                    // 設置原點為中央
         this.englishText.setScrollFactor(1);                 // 🎯 改為世界物件，在視差背景裡面
@@ -781,6 +756,31 @@ export default class Title extends Phaser.Scene {
             if (this.currentTargetWord && this.game.bilingualManager) {
                 console.log('🔊 播放英文發音:', this.currentTargetWord.english);
                 this.game.bilingualManager.speak(this.currentTargetWord.english, 'en-US');
+            }
+        });
+
+        // 🆕 創建中文文字（第五列，黃色文字黑色描邊，可點擊發音）
+        this.chineseText = this.add.text(
+            0,                                               // X座標（稍後在 updateUIPositions 中設置）
+            topY,                                            // Y座標（頂部20像素）
+            '',                                              // 初始文字為空
+            {
+                fontSize: '36px',                            // 調整字體大小適應中文
+                color: '#ffff00',                            // 黃色
+                fontStyle: 'bold',                           // 粗體
+                stroke: '#000000',                           // 黑色描邊
+                strokeThickness: 4                           // 描邊粗細
+            }
+        ).setOrigin(0.5);                                    // 設置原點為中央
+        this.chineseText.setScrollFactor(1);                 // 🎯 改為世界物件，在視差背景裡面
+        this.chineseText.setDepth(200);                      // 確保在最前面
+        this.chineseText.setInteractive();                   // 設置為可互動
+
+        // 點擊中文文字播放中文發音
+        this.chineseText.on('pointerdown', () => {
+            if (this.currentTargetWord && this.game.bilingualManager) {
+                console.log('🔊 播放中文發音:', this.currentTargetWord.chinese);
+                this.game.bilingualManager.speak(this.currentTargetWord.chinese, 'zh-TW');
             }
         });
 
