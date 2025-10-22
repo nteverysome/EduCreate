@@ -366,7 +366,10 @@ export default function CreateGamePage() {
   const saveActivity = async () => {
     setIsLoading(true);
     try {
-      const filteredVocabulary = vocabularyItems.filter(item => item.english.trim() && item.chinese.trim());
+      // 修改過濾邏輯：只要有英文、中文或圖片任一項就算有效
+      const filteredVocabulary = vocabularyItems.filter(item =>
+        item.english.trim() || item.chinese.trim() || item.imageUrl || item.chineseImageUrl
+      );
 
       if (isEditMode && editingActivityId) {
         // 編輯模式：更新現有活動
@@ -426,8 +429,9 @@ export default function CreateGamePage() {
 
   // 驗證詞彙項目
   const validateItems = () => {
+    // 修改驗證邏輯：只要有英文、中文或圖片任一項就算有效
     const validItems = vocabularyItems.filter(item =>
-      item.english.trim() !== '' && item.chinese.trim() !== ''
+      item.english.trim() !== '' || item.chinese.trim() !== '' || item.imageUrl || item.chineseImageUrl
     );
     return validItems.length >= gameConfig.minItems;
   };
