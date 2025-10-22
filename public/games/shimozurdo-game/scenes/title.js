@@ -74,7 +74,34 @@ export default class Title extends Phaser.Scene {
 
         // 註冊響應式元素 - 將所有需要響應式調整的元素註冊到系統
         this.registerResponsiveElements();
+
+        // 🔧 監聽視口變化事件 - 確保目標單字在全螢幕模式下正確顯示
+        this.scale.on('resize', this.handleResize, this);
         // GAME OBJECTS
+    }
+
+    /**
+     * 🔧 處理視口大小變化 - 當進入/退出全螢幕時更新目標單字位置
+     * @param {Object} gameSize - 新的遊戲尺寸
+     */
+    handleResize(gameSize) {
+        console.log('🔧 視口大小變化:', gameSize.width, 'x', gameSize.height);
+
+        // 如果有當前目標詞彙，重新更新其顯示位置
+        if (this.currentTargetWord) {
+            const word = this.currentTargetWord;
+            const imageKey = word.imageUrl || word.chineseImageUrl;
+
+            if (imageKey) {
+                // 有圖片：更新圖片和文字位置
+                this.updateTargetImage(imageKey, word);
+            } else {
+                // 沒有圖片：更新純文字位置
+                this.updateTargetTextOnly();
+            }
+
+            console.log('✅ 目標單字位置已更新');
+        }
     }
 
     /**
