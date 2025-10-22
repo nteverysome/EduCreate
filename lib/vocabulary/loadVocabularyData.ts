@@ -21,7 +21,8 @@ export interface VocabularyItem {
   english: string;
   chinese: string;
   phonetic?: string;
-  imageUrl?: string;
+  imageId?: string;     // 圖片 ID（關聯到 UserImage）
+  imageUrl?: string;    // 圖片 URL
   audioUrl?: string;
   partOfSpeech?: string;
   difficultyLevel?: string;

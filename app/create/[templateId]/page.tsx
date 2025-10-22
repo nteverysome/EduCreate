@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import { loadAndNormalizeVocabularyData, getSourceDisplayName } from '@/lib/vocabulary/loadVocabularyData';
+import VocabularyItemWithImage from '@/components/vocabulary-item-with-image';
 
 // 使用統一的詞彙項目接口
 import type { VocabularyItem } from '@/lib/vocabulary/loadVocabularyData';
@@ -340,6 +341,13 @@ export default function CreateGamePage() {
     ));
   };
 
+  // 更新整個詞彙項目（用於圖片功能）
+  const updateItemFull = (id: string, updatedItem: VocabularyItem) => {
+    setVocabularyItems(vocabularyItems.map(item =>
+      item.id === id ? updatedItem : item
+    ));
+  };
+
   const swapColumns = () => {
     setVocabularyItems(vocabularyItems.map(item => ({
       ...item,
@@ -506,44 +514,15 @@ export default function CreateGamePage() {
           {/* 詞彙項目列表 */}
           <div className="space-y-4">
             {vocabularyItems.map((item, index) => (
-              <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
-                <div className="w-8 text-center text-sm text-gray-500 font-medium">
-                  {index + 1}.
-                </div>
-
-                {/* 英文單字欄位 */}
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    value={item.english}
-                    onChange={(e) => updateItem(item.id, 'english', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="輸入英文單字..."
-                  />
-                </div>
-
-                {/* 中文翻譯欄位 */}
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    value={item.chinese}
-                    onChange={(e) => updateItem(item.id, 'chinese', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="輸入中文翻譯..."
-                  />
-                </div>
-
-                {/* 刪除按鈕 */}
-                {vocabularyItems.length > gameConfig.minItems && (
-                  <button
-                    onClick={() => removeItem(item.id)}
-                    className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
-                    title="刪除此項目"
-                  >
-                    🗑️
-                  </button>
-                )}
-              </div>
+              <VocabularyItemWithImage
+                key={item.id}
+                item={item}
+                index={index}
+                onChange={(updatedItem) => updateItemFull(item.id, updatedItem)}
+                onRemove={() => removeItem(item.id)}
+                minItems={gameConfig.minItems}
+                totalItems={vocabularyItems.length}
+              />
             ))}
           </div>
 

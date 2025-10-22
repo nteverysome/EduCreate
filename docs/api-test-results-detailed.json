@@ -1,0 +1,93 @@
+[
+  {
+    "name": "Image List API (No Auth)",
+    "status": "PASS",
+    "details": {
+      "status": 401,
+      "expected": 401,
+      "message": "Correctly requires authentication",
+      "response": {
+        "error": "未授權訪問"
+      }
+    },
+    "timestamp": "2025-10-21T11:40:45.044Z"
+  },
+  {
+    "name": "Image Stats API (No Auth)",
+    "status": "PASS",
+    "details": {
+      "status": 401,
+      "expected": 401,
+      "message": "Correctly requires authentication",
+      "response": {
+        "error": "未授權訪問"
+      }
+    },
+    "timestamp": "2025-10-21T11:40:45.361Z"
+  },
+  {
+    "name": "Image Upload API (No Auth)",
+    "status": "FAIL",
+    "details": {
+      "status": 405,
+      "expected": 401,
+      "message": "Should require authentication",
+      "response": {
+        "rawResponse": ""
+      }
+    },
+    "timestamp": "2025-10-21T11:40:45.639Z"
+  },
+  {
+    "name": "Image Delete API (No Auth)",
+    "status": "PASS",
+    "details": {
+      "status": 401,
+      "expected": 401,
+      "message": "Correctly requires authentication",
+      "response": {
+        "error": "未授權訪問"
+      }
+    },
+    "timestamp": "2025-10-21T11:40:45.907Z"
+  },
+  {
+    "name": "Batch Upload API (No Auth)",
+    "status": "FAIL",
+    "details": {
+      "status": 405,
+      "expected": 401,
+      "message": "Should require authentication",
+      "response": {
+        "rawResponse": ""
+      }
+    },
+    "timestamp": "2025-10-21T11:40:46.207Z"
+  },
+  {
+    "name": "Batch Delete API (No Auth)",
+    "status": "PASS",
+    "details": {
+      "status": 401,
+      "expected": 401,
+      "message": "Correctly requires authentication",
+      "response": {
+        "error": "未授權訪問"
+      }
+    },
+    "timestamp": "2025-10-21T11:40:46.527Z"
+  },
+  {
+    "name": "Image Update API (No Auth)",
+    "status": "PASS",
+    "details": {
+      "status": 401,
+      "expected": 401,
+      "message": "Correctly requires authentication",
+      "response": {
+        "error": "未授權訪問"
+      }
+    },
+    "timestamp": "2025-10-21T11:40:46.783Z"
+  }
+]

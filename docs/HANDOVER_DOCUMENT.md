@@ -368,6 +368,176 @@ async function getActivityCount(folderId: string, userId: string, onlyPublished:
 
 ---
 
+## 🖼️ 圖片管理功能
+
+### 概述
+
+EduCreate 現在支援完整的圖片管理功能，包括：
+- Vercel Blob Storage 圖片存儲
+- Unsplash 圖片搜索和整合
+- 圖片上傳、管理和刪除
+- 三個前端組件（ImagePicker、ContentItemWithImage、ImageGallery）
+
+### 技術架構
+
+**存儲方案**：
+- **Vercel Blob Storage**：用於存儲用戶上傳的圖片
+- **Neon PostgreSQL**：存儲圖片元數據
+- **Unsplash API**：提供免費高質量圖片
+
+**數據庫模型**：
+```prisma
+model UserImage {
+  id            String   @id @default(cuid())
+  userId        String
+  url           String
+  blobPath      String?
+  fileName      String
+  fileSize      Int
+  mimeType      String
+  width         Int
+  height        Int
+  alt           String?
+  tags          String[]
+  source        String   // 'upload' | 'unsplash'
+  sourceId      String?
+  usageCount    Int      @default(0)
+  lastUsedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id])
+  activityImages ActivityImage[]
+}
+
+model ActivityImage {
+  id          String   @id @default(cuid())
+  activityId  String
+  imageId     String
+  position    Int
+  context     String?
+  createdAt   DateTime @default(now())
+
+  activity    Activity  @relation(fields: [activityId], references: [id])
+  image       UserImage @relation(fields: [imageId], references: [id])
+}
+
+model ImageTag {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id])
+}
+```
+
+### API 端點
+
+**圖片管理 API** (7 個):
+1. `POST /api/images/upload` - 單張圖片上傳
+2. `POST /api/images/batch-upload` - 批量上傳（最多 10 張）
+3. `GET /api/images/list` - 圖片列表（分頁、篩選、搜索）
+4. `GET /api/images/stats` - 圖片統計
+5. `DELETE /api/images/delete` - 單張刪除
+6. `POST /api/images/batch-delete` - 批量刪除（最多 50 張）
+7. `PATCH /api/images/update` - 更新圖片信息
+
+**Unsplash 整合 API** (2 個):
+8. `GET /api/unsplash/search` - Unsplash 搜索
+9. `POST /api/unsplash/download` - Unsplash 下載
+
+### 前端組件
+
+**1. ImagePicker 組件**
+- **位置**：`components/image-picker/index.tsx`
+- **功能**：圖片選擇器（Unsplash 搜索、上傳、圖片庫）
+- **使用**：
+```typescript
+import ImagePicker from '@/components/image-picker';
+
+<ImagePicker
+  onSelect={(images) => console.log(images)}
+  onClose={() => setShowPicker(false)}
+  multiple={true}
+  maxSelection={5}
+/>
+```
+
+**2. ContentItemWithImage 組件**
+- **位置**：`components/content-item-with-image/index.tsx`
+- **功能**：內容項目編輯器（圖片 + 文字）
+- **使用**：
+```typescript
+import ContentItemWithImage from '@/components/content-item-with-image';
+
+<ContentItemWithImage
+  value={contentItem}
+  onChange={(value) => setContentItem(value)}
+  onRemove={() => removeItem(contentItem.id)}
+  autoSave={true}
+/>
+```
+
+**3. ImageGallery 組件**
+- **位置**：`components/image-gallery/index.tsx`
+- **功能**：圖片庫管理器（瀏覽、搜索、批量操作）
+- **使用**：
+```typescript
+import ImageGallery from '@/components/image-gallery';
+
+<ImageGallery
+  onSelect={(image) => console.log(image)}
+  selectable={true}
+  multiple={true}
+/>
+```
+
+### 環境變數
+
+需要在 `.env.local` 中添加：
+```env
+# Vercel Blob Storage
+BLOB_READ_WRITE_TOKEN="vercel_blob_rw_..."
+
+# Unsplash API
+UNSPLASH_ACCESS_KEY="..."
+UNSPLASH_SECRET_KEY="..."
+```
+
+### 功能特性
+
+**圖片上傳**：
+- ✅ 文件類型驗證（JPEG, PNG, WebP, GIF）
+- ✅ 文件大小限制（10MB）
+- ✅ 圖片尺寸限制（4096x4096）
+- ✅ 圖片壓縮和優化
+- ✅ 批量上傳（最多 10 張）
+- ✅ 拖放上傳支持
+
+**Unsplash 整合**：
+- ✅ 關鍵字搜索
+- ✅ 尺寸篩選（橫向、縱向、正方形）
+- ✅ 顏色篩選（11 種顏色）
+- ✅ 分頁瀏覽
+- ✅ 符合 Unsplash API 使用條款
+
+**圖片管理**：
+- ✅ 圖片列表（網格/列表視圖）
+- ✅ 搜索和篩選
+- ✅ 標籤管理
+- ✅ 批量選擇和刪除
+- ✅ 統計信息顯示
+
+### 相關文檔
+
+- **使用指南**：`docs/image-components-usage-guide.md`
+- **API 文檔**：`docs/phase2-api-summary.md`
+- **Phase 4 完成報告**：`docs/phase4-complete-report.md`
+- **總體進度**：`docs/overall-progress-report.md`
+
+---
+
 ## 🐛 已知問題和解決方案
 
 ### 1. 詞彙數據消失問題（已修復）
@@ -851,11 +1021,12 @@ npm run dev
 
 ---
 
-**文檔版本**：2.1
+**文檔版本**：2.2
 **最後更新**：2025-10-21
 **維護者**：EduCreate Team
 
 **更新日誌**：
+- 2.2 (2025-10-21)：添加圖片管理功能（Vercel Blob + Unsplash 整合），完成 Phase 1-4 開發
 - 2.1 (2025-10-21)：添加視圖模式偏好記錄功能，更新最新提交記錄，添加手機版本優化說明
 - 2.0 (2025-10-20)：添加資料夾系統完整文檔，更新最新提交記錄，添加「在新分頁開啟」功能修復說明
 - 1.0 (2025-01-18)：初始版本
