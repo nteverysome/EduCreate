@@ -1,3 +1,16 @@
+// 🎯 圖片大小常量 - 智能縮放系統
+const CLOUD_MAX_IMAGE_SIZE = {
+    small: 60,    // 小圖片最大 60x60 像素
+    medium: 80,   // 中圖片最大 80x80 像素
+    large: 100    // 大圖片最大 100x100 像素
+};
+
+const TARGET_MAX_IMAGE_SIZE = {
+    small: 80,    // 小圖片最大 80x80 像素
+    medium: 100,  // 中圖片最大 100x100 像素
+    large: 120    // 大圖片最大 120x120 像素
+};
+
 export default class Title extends Phaser.Scene {
 
     // Vars - 場景變數定義
@@ -860,30 +873,27 @@ export default class Title extends Phaser.Scene {
         const centerX = cam.scrollX + cam.width * 0.5;   // 中央位置
         const topY = cam.scrollY + 80;                   // 在文字下方
 
-        // 根據 imageSize 決定縮放比例
-        let scale = 0.2;  // 預設中等大小
-        if (word && word.imageSize === 'small') {
-            scale = 0.15;  // 小圖片
-        } else if (word && word.imageSize === 'large') {
-            scale = 0.25;  // 大圖片
-        }
+        // 🎯 使用智能縮放系統
+        const imageSize = word?.imageSize || 'medium';
+        const maxSize = TARGET_MAX_IMAGE_SIZE[imageSize];
+        const scale = this.calculateSmartScale(imageKey, imageSize, maxSize);
 
         if (this.targetImage) {
             // 更新現有圖片
             this.targetImage.setTexture(imageKey);
             this.targetImage.setVisible(true);
             this.targetImage.setPosition(centerX, topY);
-            this.targetImage.setScale(scale);            // 更新縮放
+            this.targetImage.setScale(scale);            // 使用智能縮放比例
         } else {
             // 創建新圖片
             this.targetImage = this.add.image(centerX, topY, imageKey);
-            this.targetImage.setScale(scale);            // 根據用戶選擇的大小縮放
+            this.targetImage.setScale(scale);            // 使用智能縮放比例
             this.targetImage.setDepth(200);              // 在最前面
             this.targetImage.setScrollFactor(1);         // 跟隨相機
             this.targetImage.setOrigin(0.5);             // 中心對齊
         }
 
-        console.log(`🖼️ 更新目標圖片: ${imageKey} at (${centerX}, ${topY}), size: ${word?.imageSize || 'medium'}, scale: ${scale}`);
+        console.log(`🖼️ 更新目標圖片: ${imageKey}, size: ${imageSize}, scale: ${scale.toFixed(3)}`);
     }
 
     /**
@@ -1050,6 +1060,35 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
+     * 🎯 計算智能縮放比例
+     * @param {string} imageKey - 圖片鍵值
+     * @param {string} imageSize - 用戶選擇的大小 (small, medium, large)
+     * @param {number} maxSize - 最大尺寸（像素）
+     * @returns {number} - 縮放比例
+     */
+    calculateSmartScale(imageKey, imageSize, maxSize) {
+        // 獲取圖片的原始尺寸
+        const texture = this.textures.get(imageKey);
+        if (!texture || !texture.source || !texture.source[0]) {
+            console.warn(`⚠️ 圖片 ${imageKey} 不存在或無法獲取尺寸`);
+            return 0.15; // 預設縮放比例
+        }
+
+        const originalWidth = texture.source[0].width;
+        const originalHeight = texture.source[0].height;
+
+        // 計算圖片的最大邊長
+        const maxDimension = Math.max(originalWidth, originalHeight);
+
+        // 計算縮放比例，確保圖片不超過最大尺寸
+        const scale = maxSize / maxDimension;
+
+        console.log(`🎯 智能縮放: ${imageKey}, 原始: ${originalWidth}x${originalHeight}, 最大: ${maxSize}px, 縮放: ${scale.toFixed(3)}`);
+
+        return scale;
+    }
+
+    /**
      * 🖼️ 創建雲朵敵人的圖片顯示
      */
     createWordImage(enemy, word, imageKey) {
@@ -1059,13 +1098,10 @@ export default class Title extends Phaser.Scene {
             return;
         }
 
-        // 根據 imageSize 決定縮放比例
-        let scale = 0.15;  // 預設中等大小
-        if (word.imageSize === 'small') {
-            scale = 0.1;   // 小圖片
-        } else if (word.imageSize === 'large') {
-            scale = 0.2;   // 大圖片
-        }
+        // 🎯 使用智能縮放系統
+        const imageSize = word.imageSize || 'medium';
+        const maxSize = CLOUD_MAX_IMAGE_SIZE[imageSize];
+        const scale = this.calculateSmartScale(imageKey, imageSize, maxSize);
 
         // 創建圖片精靈
         const wordImage = this.add.image(
@@ -1075,7 +1111,7 @@ export default class Title extends Phaser.Scene {
         );
 
         // 設置圖片屬性
-        wordImage.setScale(scale);     // 根據用戶選擇的大小縮放
+        wordImage.setScale(scale);     // 使用智能縮放比例
         wordImage.setDepth(-62);       // 在文字前面，雲朵後面
         wordImage.setOrigin(0.5);      // 中心對齊
         wordImage.setAlpha(0.9);       // 稍微透明
@@ -1083,7 +1119,7 @@ export default class Title extends Phaser.Scene {
         // 綁定到敵人
         enemy.setData('wordImage', wordImage);
 
-        console.log(`🖼️ 創建雲朵圖片: ${word.english} at (${enemy.x}, ${enemy.y - 40}), size: ${word.imageSize || 'medium'}, scale: ${scale}`);
+        console.log(`🖼️ 創建雲朵圖片: ${word.english}, size: ${imageSize}, scale: ${scale.toFixed(3)}`);
     }
 
     /**
