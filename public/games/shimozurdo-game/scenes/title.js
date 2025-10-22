@@ -923,7 +923,8 @@ export default class Title extends Phaser.Scene {
      * 🖼️ 更新中文圖片（第二列）
      */
     updateChineseImage() {
-        const chineseImageUrl = this.currentTargetWord?.chineseImageUrl || this.currentTargetWord?.imageUrl;
+        // 🆕 只使用 chineseImageUrl，不使用 imageUrl（英文圖片）
+        const chineseImageUrl = this.currentTargetWord?.chineseImageUrl;
 
         if (chineseImageUrl) {
             const imageKey = `chinese-image-${this.currentTargetWord.id}`;
