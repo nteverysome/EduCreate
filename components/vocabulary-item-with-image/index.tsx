@@ -131,7 +131,13 @@ export default function VocabularyItemWithImage({
       const formData = new FormData();
       formData.append('file', generatedImageBlob, `vocabulary-${item.id}-${Date.now()}.png`);
 
-      const uploadResponse = await fetch('/api/images/upload', {
+      // 使用測試 API 端點（不需要登錄）
+      // 在生產環境中，應該使用 /api/images/upload（需要登錄）
+      const uploadEndpoint = '/api/images/upload-test';
+
+      console.log(`📤 上傳圖片到: ${uploadEndpoint}`);
+
+      const uploadResponse = await fetch(uploadEndpoint, {
         method: 'POST',
         body: formData,
       });
