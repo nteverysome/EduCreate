@@ -63,15 +63,25 @@ export default function VocabularyItemWithImage({
 
   // 處理圖片選擇
   const handleImageSelect = async (images: UserImage[]) => {
+    console.log('🔍 [VocabularyItemWithImage] handleImageSelect 開始:', images);
+
     if (images.length > 0) {
       const selectedImage = images[0];
+      console.log('🔍 [VocabularyItemWithImage] 選擇的圖片:', selectedImage);
+
       setBaseImageUrl(selectedImage.url);
 
-      onChange({
+      const updatedItem = {
         ...item,
         imageId: selectedImage.id,
         imageUrl: selectedImage.url,
-      });
+      };
+
+      console.log('🔍 [VocabularyItemWithImage] 準備調用 onChange，updatedItem:', updatedItem);
+
+      onChange(updatedItem);
+
+      console.log('✅ [VocabularyItemWithImage] onChange 調用完成');
 
       setShowImagePicker(false);
 

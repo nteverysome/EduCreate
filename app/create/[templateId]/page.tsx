@@ -343,9 +343,17 @@ export default function CreateGamePage() {
 
   // 更新整個詞彙項目（用於圖片功能）
   const updateItemFull = (id: string, updatedItem: VocabularyItem) => {
-    setVocabularyItems(vocabularyItems.map(item =>
+    console.log('🔍 [page.tsx] updateItemFull 開始:', { id, updatedItem });
+
+    const newVocabularyItems = vocabularyItems.map(item =>
       item.id === id ? updatedItem : item
-    ));
+    );
+
+    console.log('🔍 [page.tsx] 更新後的 vocabularyItems:', newVocabularyItems);
+
+    setVocabularyItems(newVocabularyItems);
+
+    console.log('✅ [page.tsx] updateItemFull 完成');
   };
 
   const swapColumns = () => {

@@ -99,12 +99,16 @@ export default function SearchTab({ onSelect, isSelected }: SearchTabProps) {
 
   const handlePhotoSelect = async (userImage: UserImage) => {
     try {
+      console.log('🔍 [SearchTab] handlePhotoSelect 開始:', userImage);
+
       // 從 UserImage 中獲取 sourceId（即 Unsplash photo ID）
       const photoId = userImage.sourceId;
 
       if (!photoId) {
         throw new Error('圖片 ID 不可用');
       }
+
+      console.log('🔍 [SearchTab] Unsplash photo ID:', photoId);
 
       // 從原始 photos 數組中查找對應的 UnsplashPhoto
       const originalPhoto = photos.find(p => p.id === photoId);
@@ -113,10 +117,14 @@ export default function SearchTab({ onSelect, isSelected }: SearchTabProps) {
         throw new Error('找不到原始圖片數據');
       }
 
+      console.log('🔍 [SearchTab] 找到原始照片:', originalPhoto);
+
       // 驗證圖片數據完整性
       if (!originalPhoto.links || !originalPhoto.links.downloadLocation) {
         throw new Error('圖片下載鏈接不可用');
       }
+
+      console.log('🔍 [SearchTab] 開始調用 /api/unsplash/download');
 
       // 保存 Unsplash 圖片到用戶圖片庫
       const response = await fetch('/api/unsplash/download', {
@@ -133,15 +141,20 @@ export default function SearchTab({ onSelect, isSelected }: SearchTabProps) {
       });
 
       const data = await response.json();
+      console.log('🔍 [SearchTab] API 響應:', data);
 
       if (!response.ok) {
         throw new Error(data.error || '保存圖片失敗');
       }
 
+      console.log('🔍 [SearchTab] 準備調用 onSelect，data.image:', data.image);
+
       // 調用 onSelect 回調
       onSelect(data.image);
+
+      console.log('✅ [SearchTab] onSelect 調用完成');
     } catch (err) {
-      console.error('選擇圖片錯誤:', err);
+      console.error('❌ [SearchTab] 選擇圖片錯誤:', err);
       alert(err instanceof Error ? err.message : '保存圖片失敗');
     }
   };
