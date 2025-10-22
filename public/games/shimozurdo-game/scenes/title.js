@@ -670,6 +670,7 @@ export default class Title extends Phaser.Scene {
         this.wordsLearned = 0;                               // 已學習的單字數
         this.score = 0;                                      // 分數
         this.currentTargetWord = null;                       // 當前目標詞彙
+        this.targetImage = null;                             // 🖼️ 目標詞彙圖片容器
 
         // 🆕 記錄詳細的問題和答案數據
         this.questionAnswerLog = [];                         // 記錄所有問題和答案
@@ -814,6 +815,29 @@ export default class Title extends Phaser.Scene {
             // 🆕 更新中文文字（右列，對換後）
             this.targetText.setText(this.currentTargetWord.chinese);
 
+            // 🖼️ 更新目標詞彙圖片
+            if (this.currentTargetWord.image) {
+                const imageKey = `target-image-${this.currentTargetWord.id}`;
+
+                // 檢查圖片是否已經載入
+                if (!this.textures.exists(imageKey)) {
+                    // 動態載入圖片
+                    this.load.image(imageKey, this.currentTargetWord.image);
+                    this.load.once('complete', () => {
+                        this.updateTargetImage(imageKey);
+                    });
+                    this.load.start();
+                } else {
+                    // 圖片已載入，直接更新
+                    this.updateTargetImage(imageKey);
+                }
+            } else {
+                // 沒有圖片，隱藏圖片容器
+                if (this.targetImage) {
+                    this.targetImage.setVisible(false);
+                }
+            }
+
             // 🆕 自動播放雙語發音：中文 → 英文
             if (this.game.bilingualManager) {
                 console.log('🔊 自動播放新單字發音:', this.currentTargetWord.chinese, '→', this.currentTargetWord.english);
@@ -825,6 +849,32 @@ export default class Title extends Phaser.Scene {
         } else {
             console.warn('⚠️ 無法獲取隨機詞彙');
         }
+    }
+
+    /**
+     * 🖼️ 更新目標詞彙圖片顯示
+     */
+    updateTargetImage(imageKey) {
+        // 獲取相機視口
+        const cam = this.cameras.main;
+        const centerX = cam.scrollX + cam.width * 0.5;   // 中央位置
+        const topY = cam.scrollY + 80;                   // 在文字下方
+
+        if (this.targetImage) {
+            // 更新現有圖片
+            this.targetImage.setTexture(imageKey);
+            this.targetImage.setVisible(true);
+            this.targetImage.setPosition(centerX, topY);
+        } else {
+            // 創建新圖片
+            this.targetImage = this.add.image(centerX, topY, imageKey);
+            this.targetImage.setScale(0.2);              // 稍大一點
+            this.targetImage.setDepth(200);              // 在最前面
+            this.targetImage.setScrollFactor(1);         // 跟隨相機
+            this.targetImage.setOrigin(0.5);             // 中心對齊
+        }
+
+        console.log(`🖼️ 更新目標圖片: ${imageKey} at (${centerX}, ${topY})`);
     }
 
     /**
@@ -954,6 +1004,24 @@ export default class Title extends Phaser.Scene {
         // 🆕 將文字綁定到敵人 - 用於同步移動和銷毀
         enemy.setData('wordText', wordText);
 
+        // 🖼️ 如果詞彙有圖片，顯示圖片
+        if (word.image) {
+            const imageKey = `word-image-${word.id}`;
+
+            // 檢查圖片是否已經載入
+            if (!this.textures.exists(imageKey)) {
+                // 動態載入圖片
+                this.load.image(imageKey, word.image);
+                this.load.once('complete', () => {
+                    this.createWordImage(enemy, word, imageKey);
+                });
+                this.load.start();
+            } else {
+                // 圖片已載入，直接創建
+                this.createWordImage(enemy, word, imageKey);
+            }
+        }
+
         // 添加浮動動畫 - 讓雲朵上下浮動增加真實感
         this.tweens.add({
             targets: enemy,                              // 動畫目標
@@ -970,6 +1038,35 @@ export default class Title extends Phaser.Scene {
         console.log(`☁️ 生成雲朵敵人在位置 (${enemy.x}, ${enemy.y})`);
         console.log(`📝 詞彙: ${word.chinese} (${word.english}) - ${isTarget ? '目標' : '干擾'}`);
         console.log(`📐 攝影機 worldView: left=${worldView.left}, right=${worldView.right}, top=${worldView.top}, bottom=${worldView.bottom}`);
+    }
+
+    /**
+     * 🖼️ 創建雲朵敵人的圖片顯示
+     */
+    createWordImage(enemy, word, imageKey) {
+        // 防禦性檢查：確保敵人仍然存在
+        if (!enemy || !enemy.active) {
+            console.warn('⚠️ 敵人已被銷毀，無法創建圖片');
+            return;
+        }
+
+        // 創建圖片精靈
+        const wordImage = this.add.image(
+            enemy.x,
+            enemy.y - 40,  // 在雲朵上方顯示
+            imageKey
+        );
+
+        // 設置圖片屬性
+        wordImage.setScale(0.15);      // 縮小圖片
+        wordImage.setDepth(-62);       // 在文字前面，雲朵後面
+        wordImage.setOrigin(0.5);      // 中心對齊
+        wordImage.setAlpha(0.9);       // 稍微透明
+
+        // 綁定到敵人
+        enemy.setData('wordImage', wordImage);
+
+        console.log(`🖼️ 創建雲朵圖片: ${word.english} at (${enemy.x}, ${enemy.y - 40})`);
     }
 
     /**
@@ -1005,6 +1102,13 @@ export default class Title extends Phaser.Scene {
                     wordText.y = enemy.y;                // 保持在敵人中心（雲朵中心）
                 }
 
+                // 🖼️ 同步移動圖片 - 讓圖片跟隨敵人移動（在雲朵上方）
+                const wordImage = enemy.getData('wordImage');
+                if (wordImage && wordImage.active) {
+                    wordImage.x = enemy.x;               // 同步X座標
+                    wordImage.y = enemy.y - 40;          // 保持在雲朵上方
+                }
+
                 // 檢查與太空船的碰撞 - 碰撞檢測
                 if (this.player && this.checkCollision(this.player, enemy)) {
                     // 🆕 處理碰撞 - 判斷是否碰撞正確目標
@@ -1013,6 +1117,11 @@ export default class Title extends Phaser.Scene {
                     // 🆕 銷毀詞彙文字
                     if (wordText && wordText.active) {
                         wordText.destroy();
+                    }
+
+                    // 🖼️ 銷毀圖片
+                    if (wordImage && wordImage.active) {
+                        wordImage.destroy();
                     }
 
                     // 銷毀敵人 - 清理碰撞的敵人
@@ -1029,6 +1138,11 @@ export default class Title extends Phaser.Scene {
                     // 🆕 銷毀詞彙文字
                     if (wordText && wordText.active) {
                         wordText.destroy();
+                    }
+
+                    // 🖼️ 銷毀圖片
+                    if (wordImage && wordImage.active) {
+                        wordImage.destroy();
                     }
 
                     enemy.destroy();                     // 銷毀精靈物件
