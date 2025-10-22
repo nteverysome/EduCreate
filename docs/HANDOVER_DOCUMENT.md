@@ -159,6 +159,70 @@ getSourceDisplayName(source)           // 獲取來源名稱
 **調用位置**：
 - `app/games/switcher/page.tsx` 的 `loadActivityInfo` 函數
 
+#### Shimozurdo Game 五列布局系統
+**文件**：
+- `public/games/shimozurdo-game/scenes/title.js` - 遊戲主場景
+- `public/games/shimozurdo-game/managers/GEPTManager.js` - 詞彙管理器
+- `app/create/[templateId]/page.tsx` - 活動創建頁面
+- `components/vocabulary-item-with-image/index.tsx` - 詞彙項目組件
+
+**功能**：
+- **獨立圖片功能**：英文和中文可以各自添加獨立的圖片
+- **動態布局調整**：根據內容可用性動態調整布局（1-5 列）
+- **靈活顯示邏輯**：只顯示存在的內容（圖片或文字）
+- **居中對齊**：布局始終居中，視覺效果更好
+
+**資料庫欄位**：
+```prisma
+model VocabularyItem {
+  imageUrl          String?  // 英文圖片 URL
+  imageId           String?  // 英文圖片 ID
+  chineseImageUrl   String?  // 中文圖片 URL
+  chineseImageId    String?  // 中文圖片 ID
+}
+```
+
+**布局效果**：
+- **5 列**：分數 | 英文圖 | 英文 | 中文圖 | 中文（所有內容都存在）
+- **4 列**：分數 | 英文圖 | 英文 | 中文（只有英文圖）
+- **4 列**：分數 | 英文 | 中文圖 | 中文（只有中文圖）
+- **3 列**：分數 | 英文 | 中文（沒有圖片）
+- **2 列**：分數 | 英文圖（只有英文圖）
+- **2 列**：分數 | 中文圖（只有中文圖）
+
+**關鍵實現**：
+```javascript
+// 檢查圖片和文字是否存在
+const hasEnglishImage = this.englishImage && this.englishImage.visible;
+const hasChineseImage = this.chineseImage && this.chineseImage.visible;
+const hasEnglishText = this.currentTargetWord?.english && this.currentTargetWord.english.trim() !== '';
+const hasChineseText = this.currentTargetWord?.chinese && this.currentTargetWord.chinese.trim() !== '';
+
+// 動態計算列數
+let totalColumns = 1;  // 基礎：分數
+if (hasEnglishImage) totalColumns++;
+if (hasEnglishText) totalColumns++;
+if (hasChineseImage) totalColumns++;
+if (hasChineseText) totalColumns++;
+```
+
+**重要修復**：
+- ✅ 修復刪除按鈕布局問題（添加 `flex-shrink-0`）
+- ✅ 修復交換列功能（圖片不跟著交換）
+- ✅ 添加中文框圖片功能
+- ✅ 實施獨立圖片功能（英文和中文各自獨立）
+- ✅ 實施動態布局調整（根據內容可用性）
+- ✅ 修復圖片混淆問題（只使用 `chineseImageUrl`，不使用 `imageUrl` 作為 fallback）
+
+**相關提交**：
+- `f291a68`：修復圖片混淆問題
+- `a16d69e`：靈活顯示邏輯
+- `143380a`：動態布局調整
+- `f315791`：保留圖片欄位
+
+**詳細文檔**：
+- [SHIMOZURDO_FIVE_COLUMN_LAYOUT_IMPLEMENTATION.md](./SHIMOZURDO_FIVE_COLUMN_LAYOUT_IMPLEMENTATION.md)
+
 ### 4. API 系統
 
 #### 活動 API
@@ -834,32 +898,53 @@ npm run dev
 
 ### 最新提交（按時間倒序）
 
-1. **7d6d5f8** - docs: 添加視圖模式偏好記錄功能實施文檔
+1. **f291a68** - fix: 只使用 chineseImageUrl 作為中文圖片，不使用 imageUrl 作為 fallback
+   - 修復中文圖片位置顯示英文圖片的問題
+   - 只使用 `chineseImageUrl`，不使用 `imageUrl` 作為 fallback
+   - 確保英文和中文圖片不會混淆
+
+2. **a16d69e** - feat: 靈活顯示邏輯 - 根據內容可用性顯示/隱藏文字和圖片
+   - 檢查圖片和文字是否存在
+   - 動態計算列數（1-5 列）
+   - 只顯示存在的內容
+   - 支援所有組合（只有圖片、只有文字、混合配置）
+
+3. **143380a** - feat: 動態布局調整 - 沒有圖片時隱藏中文圖片列
+   - 根據圖片是否存在動態調整布局
+   - 沒有中文圖片時，不佔用空間
+   - 布局始終居中對齊
+
+4. **f315791** - fix: 在 GEPTManager 中保留 imageUrl 和 chineseImageUrl 欄位以支持五列布局圖片顯示
+   - 修改 GEPTManager.js 在三個詞彙載入路徑中保留圖片欄位
+   - 確保遊戲可以訪問英文和中文圖片 URL
+   - 支持五列布局的獨立圖片功能
+
+5. **7d6d5f8** - docs: 添加視圖模式偏好記錄功能實施文檔
    - 創建完整的實施文檔（552 行）
    - 記錄三個頁面的視圖模式記錄功能
    - 包含技術實現、測試驗證、使用指南
    - 提供故障排除和下一步優化建議
 
-2. **cbd231a** - feat: 為 /my-results 和社區作者頁面添加視圖模式記錄功能
+6. **cbd231a** - feat: 為 /my-results 和社區作者頁面添加視圖模式記錄功能
    - /my-results 使用 localStorage 保存視圖模式（myResultsViewMode）
    - 社區作者頁面使用 localStorage 保存視圖模式（communityAuthorViewMode）
    - 頁面載入時自動恢復用戶的視圖模式偏好
    - 視圖模式變化時自動保存到 localStorage
    - 支援 'grid', 'small-grid', 'list' 三種模式
 
-3. **bea4509** - feat: 記錄用戶的視圖模式偏好設置
+7. **bea4509** - feat: 記錄用戶的視圖模式偏好設置
    - 使用 localStorage 保存用戶選擇的視圖模式（網格/小網格/列表）
    - 頁面載入時自動恢復用戶的視圖模式偏好
    - 視圖模式變化時自動保存到 localStorage
    - 添加 console.log 記錄保存操作
    - 默認值為 'grid'（網格視圖）
 
-4. **da0e71d** - fix: 修復手機版本按鈕溢出問題
+8. **da0e71d** - fix: 修復手機版本按鈕溢出問題
    - 篩選和選擇按鈕在手機版本只顯示圖標
    - 減少按鈕內邊距和間距
    - 添加 title 屬性提供提示信息
 
-5. **ae7da2a** - fix: 優化社區作者頁面手機版本排版
+9. **ae7da2a** - fix: 優化社區作者頁面手機版本排版
    - 將搜索/視圖控制與排序按鈕分為兩行
    - 改善手機版本的佈局和可用性
 
@@ -1021,11 +1106,12 @@ npm run dev
 
 ---
 
-**文檔版本**：2.2
-**最後更新**：2025-10-21
+**文檔版本**：2.3
+**最後更新**：2025-10-23
 **維護者**：EduCreate Team
 
 **更新日誌**：
+- 2.3 (2025-10-23)：添加 Shimozurdo Game 五列布局系統，實施獨立圖片功能和動態布局調整
 - 2.2 (2025-10-21)：添加圖片管理功能（Vercel Blob + Unsplash 整合），完成 Phase 1-4 開發
 - 2.1 (2025-10-21)：添加視圖模式偏好記錄功能，更新最新提交記錄，添加手機版本優化說明
 - 2.0 (2025-10-20)：添加資料夾系統完整文檔，更新最新提交記錄，添加「在新分頁開啟」功能修復說明
