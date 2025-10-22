@@ -380,15 +380,17 @@ export default function CreateGamePage() {
       );
 
       console.log('🔍 保存活動 - 詞彙數據:', filteredVocabulary);
-      console.log('🔍 保存活動 - 圖片字段檢查:', filteredVocabulary.map(item => ({
+      console.log('🔍 保存活動 - 圖片字段檢查:', JSON.stringify(filteredVocabulary.map(item => ({
         id: item.id,
+        english: item.english,
+        chinese: item.chinese,
         imageId: item.imageId,
         imageUrl: item.imageUrl,
         imageSize: item.imageSize,
         chineseImageId: item.chineseImageId,
         chineseImageUrl: item.chineseImageUrl,
         chineseImageSize: item.chineseImageSize
-      })));
+      })), null, 2));
 
       if (isEditMode && editingActivityId) {
         // 編輯模式：更新現有活動
@@ -416,18 +418,22 @@ export default function CreateGamePage() {
         }
       } else {
         // 創建模式：創建新活動
+        const requestBody = {
+          title: activityTitle,
+          gameTemplateId: templateId,
+          vocabularyItems: filteredVocabulary,
+          type: 'vocabulary_game',
+          templateType: gameConfig.inputType,
+        };
+
+        console.log('🔍 發送到 API 的請求體:', JSON.stringify(requestBody, null, 2));
+
         const response = await fetch('/api/activities', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            title: activityTitle,
-            gameTemplateId: templateId,
-            vocabularyItems: filteredVocabulary,
-            type: 'vocabulary_game',
-            templateType: gameConfig.inputType,
-          }),
+          body: JSON.stringify(requestBody),
         });
 
         if (response.ok) {
