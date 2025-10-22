@@ -1630,11 +1630,13 @@ export default class Title extends Phaser.Scene {
 
         // 更新布局位置（世界頂部座標）
         this.scoreText.setPosition(leftX, worldTopY);
-        // 🎯 chineseText（英文大字）和 targetImage（圖片）的位置由 updateTargetImage 控制，不在這裡更新
-        this.targetText.setPosition(rightX, worldTopY);
 
-        // 🎯 更新圖片和英文文字的位置（如果存在）
-        if (this.targetImage && this.targetImage.visible && this.currentTargetWord) {
+        // 🔧 檢查是否有圖片顯示
+        const hasImage = this.targetImage && this.targetImage.visible;
+
+        // 🎯 如果有圖片，使用圖片模式的布局；如果沒有圖片，使用純文字模式的布局
+        if (hasImage && this.currentTargetWord) {
+            // 🖼️ 圖片模式：更新圖片和文字的位置
             const imageKey = `target-image-${this.currentTargetWord.id}`;
             if (this.textures.exists(imageKey)) {
                 // 重新計算圖片和文字的水平布局
@@ -1670,6 +1672,10 @@ export default class Title extends Phaser.Scene {
                     this.chineseText.setVisible(false);
                 }
             }
+        } else if (this.currentTargetWord) {
+            // 📝 純文字模式：更新文字位置（由 updateTargetTextOnly 控制）
+            // 不在這裡更新 targetText 和 chineseText 的位置，避免覆蓋 updateTargetTextOnly 的設置
+            // updateTargetTextOnly 會根據是否有英文來調整布局
         }
     }
 
