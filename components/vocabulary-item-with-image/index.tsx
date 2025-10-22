@@ -205,9 +205,8 @@ export default function VocabularyItemWithImage({
         {index + 1}.
       </div>
 
-      {/* 輸入區域（使用 Wordwall 整合設計） */}
-      <div className="flex-1 space-y-2">
-        {/* 英文輸入框（整合圖片功能） */}
+      {/* 英文輸入框（整合圖片功能） */}
+      <div className="flex-1">
         <InputWithImage
           value={item.english}
           onChange={(value) => onChange({ ...item, english: value })}
@@ -220,20 +219,21 @@ export default function VocabularyItemWithImage({
 
         {/* 生成狀態提示 */}
         {isGenerating && (
-          <div className="flex items-center space-x-2 text-sm text-blue-600">
+          <div className="flex items-center space-x-2 text-sm text-blue-600 mt-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
             <span>正在生成圖片...</span>
           </div>
         )}
       </div>
 
-      {/* 中文輸入框（普通輸入框） */}
-      <div className="flex-1 pt-2">
-        <input
-          type="text"
+      {/* 中文輸入框（也整合圖片功能） */}
+      <div className="flex-1">
+        <InputWithImage
           value={item.chinese}
-          onChange={(e) => onChange({ ...item, chinese: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          onChange={(value) => onChange({ ...item, chinese: value })}
+          imageUrl={item.imageUrl}
+          onImageIconClick={() => setShowImagePicker(true)}
+          onThumbnailClick={() => setShowImageEditor(true)}
           placeholder="輸入中文翻譯..."
           disabled={isGenerating}
         />
@@ -243,7 +243,7 @@ export default function VocabularyItemWithImage({
       {totalItems > minItems && (
         <button
           onClick={onRemove}
-          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors mt-2"
+          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors flex-shrink-0"
           title="刪除此項目"
           aria-label="刪除此項目"
           disabled={isGenerating}

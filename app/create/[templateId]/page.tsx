@@ -353,6 +353,8 @@ export default function CreateGamePage() {
       ...item,
       english: item.chinese,
       chinese: item.english,
+      // 圖片保持在英文欄位，不跟著交換
+      // imageUrl 和 imageId 保持不變
     })));
   };
 
