@@ -64,19 +64,19 @@ export default function VocabularyItemWithImage({
     if (images.length > 0) {
       const selectedImage = images[0];
       setBaseImageUrl(selectedImage.url);
-      
+
       onChange({
         ...item,
         imageId: selectedImage.id,
         imageUrl: selectedImage.url,
       });
-      
+
       setShowImagePicker(false);
-      
-      // 如果有文字，自動生成帶文字的圖片
-      if (item.english || item.chinese) {
-        await generateImageWithText(selectedImage.url);
-      }
+
+      // 🔥 移除自動生成文字功能 - 用戶不需要圖片上的文字
+      // if (item.english || item.chinese) {
+      //   await generateImageWithText(selectedImage.url);
+      // }
     }
   };
 
@@ -88,11 +88,11 @@ export default function VocabularyItemWithImage({
       imageUrl: editedUrl,
     });
     setShowImageEditor(false);
-    
-    // 重新生成帶文字的圖片
-    if (item.english || item.chinese) {
-      generateImageWithText(editedUrl);
-    }
+
+    // 🔥 移除自動生成文字功能 - 用戶不需要圖片上的文字
+    // if (item.english || item.chinese) {
+    //   generateImageWithText(editedUrl);
+    // }
   };
 
   // 處理英文圖片刪除
@@ -119,10 +119,10 @@ export default function VocabularyItemWithImage({
 
       setShowChineseImagePicker(false);
 
-      // 如果有中文文字，自動生成帶文字的圖片
-      if (item.chinese) {
-        await generateChineseImageWithText(selectedImage.url);
-      }
+      // 🔥 移除自動生成文字功能 - 用戶不需要圖片上的文字
+      // if (item.chinese) {
+      //   await generateChineseImageWithText(selectedImage.url);
+      // }
     }
   };
 
@@ -135,10 +135,10 @@ export default function VocabularyItemWithImage({
     });
     setShowChineseImageEditor(false);
 
-    // 重新生成帶文字的圖片
-    if (item.chinese) {
-      generateChineseImageWithText(editedUrl);
-    }
+    // 🔥 移除自動生成文字功能 - 用戶不需要圖片上的文字
+    // if (item.chinese) {
+    //   generateChineseImageWithText(editedUrl);
+    // }
   };
 
   // 處理中文圖片刪除
