@@ -945,7 +945,7 @@ export default class Title extends Phaser.Scene {
         // 獲取相機視口
         const cam = this.cameras.main;
         const centerX = cam.scrollX + cam.width * 0.5;   // 中央位置
-        const topY = cam.scrollY + 50;                   // 頂部位置
+        const topY = cam.worldView.top + 50;             // 🔧 修復：使用 worldView.top 而不是 scrollY
 
         // 🎯 使用智能縮放系統
         const imageSize = word?.imageSize || 'medium';
@@ -1005,7 +1005,7 @@ export default class Title extends Phaser.Scene {
         // 獲取相機視口
         const cam = this.cameras.main;
         const centerX = cam.scrollX + cam.width * 0.5;   // 中央位置
-        const topY = cam.scrollY + 50;                   // 頂部位置
+        const topY = cam.worldView.top + 50;             // 🔧 修復：使用 worldView.top 而不是 scrollY
 
         // 🎯 水平布局：英文大字在左，中文在右
         const hasEnglish = this.currentTargetWord?.english && this.currentTargetWord.english.trim() !== '';
