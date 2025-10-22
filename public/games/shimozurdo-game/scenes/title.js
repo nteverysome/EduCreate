@@ -1593,7 +1593,7 @@ export default class Title extends Phaser.Scene {
      * 場景更新函數
      */
     /**
-     * 🆕 更新 UI 元素位置 - 五列布局
+     * 🆕 更新 UI 元素位置 - 動態布局（根據圖片是否存在調整）
      */
     updateUIPositions() {
         if (!this.scoreText || !this.chineseText || !this.englishText) return;
@@ -1601,7 +1601,7 @@ export default class Title extends Phaser.Scene {
         // 🎯 更新血條位置 - 血條保持在右下角
         this.updateHealthBarPositions();
 
-        // 🎯 五列布局使用世界座標
+        // 🎯 動態布局使用世界座標
         const cam = this.cameras.main;
         const worldView = cam.worldView;
 
@@ -1609,39 +1609,54 @@ export default class Title extends Phaser.Scene {
         const worldTopY = worldView.top + 50;  // 距離世界頂部 50px
         const worldCenterX = (worldView.left + worldView.right) / 2;  // 世界中心 X
 
-        // 🎯 五列布局水平位置：分數 | 英文圖片 | 英文 | 中文圖片 | 中文
+        // 🎯 檢查圖片是否存在
+        const hasEnglishImage = this.englishImage && this.englishImage.visible;
+        const hasChineseImage = this.chineseImage && this.chineseImage.visible;
+
+        // 🎯 動態計算列數和間距
         const spacing = 150;  // 每列之間的間距
 
-        const col1X = worldCenterX - spacing * 2;  // 第一列：分數
-        const col2X = worldCenterX - spacing;      // 第二列：英文圖片
-        const col3X = worldCenterX;                // 第三列：英文文字（中心）
-        const col4X = worldCenterX + spacing;      // 第四列：中文圖片
-        const col5X = worldCenterX + spacing * 2;  // 第五列：中文文字
+        // 計算總列數（分數 + 英文圖片? + 英文 + 中文圖片? + 中文）
+        let totalColumns = 3;  // 基礎：分數 + 英文 + 中文
+        if (hasEnglishImage) totalColumns++;
+        if (hasChineseImage) totalColumns++;
 
-        // 更新分數位置（第一列）
+        // 計算起始位置（讓整個布局居中）
+        const totalWidth = (totalColumns - 1) * spacing;
+        const startX = worldCenterX - totalWidth / 2;
+
+        // 🎯 動態分配列位置
+        let currentColumn = 0;
+
+        // 第一列：分數（總是存在）
+        const col1X = startX + spacing * currentColumn;
         this.scoreText.setPosition(col1X, worldTopY);
+        currentColumn++;
 
-        // 更新英文文字位置（第三列）
-        if (this.englishText) {
-            this.englishText.setPosition(col3X, worldTopY);
-            this.englishText.setVisible(true);
-        }
-
-        // 更新中文文字位置（第五列）
-        if (this.chineseText) {
-            this.chineseText.setPosition(col5X, worldTopY);
-            this.chineseText.setVisible(true);
-        }
-
-        // 更新英文圖片位置（第二列）
-        if (this.englishImage && this.englishImage.visible) {
+        // 第二列：英文圖片（如果存在）
+        if (hasEnglishImage) {
+            const col2X = startX + spacing * currentColumn;
             this.englishImage.setPosition(col2X, worldTopY);
+            currentColumn++;
         }
 
-        // 更新中文圖片位置（第四列）
-        if (this.chineseImage && this.chineseImage.visible) {
+        // 第三列：英文文字（總是存在）
+        const col3X = startX + spacing * currentColumn;
+        this.englishText.setPosition(col3X, worldTopY);
+        this.englishText.setVisible(true);
+        currentColumn++;
+
+        // 第四列：中文圖片（如果存在）
+        if (hasChineseImage) {
+            const col4X = startX + spacing * currentColumn;
             this.chineseImage.setPosition(col4X, worldTopY);
+            currentColumn++;
         }
+
+        // 第五列：中文文字（總是存在）
+        const col5X = startX + spacing * currentColumn;
+        this.chineseText.setPosition(col5X, worldTopY);
+        this.chineseText.setVisible(true);
     }
 
     /**
