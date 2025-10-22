@@ -29,8 +29,37 @@ export default function UploadTab({ onSelect, isSelected }: UploadTabProps) {
 
     try {
       const formData = new FormData();
-      Array.from(files).forEach((file, index) => {
+      const filesArray = Array.from(files);
+
+      // 為每個文件獲取圖片尺寸並添加到 FormData
+      const imageDimensionsPromises = filesArray.map((file, index) => {
+        return new Promise<{ index: number; width: number; height: number }>((resolve, reject) => {
+          const img = new Image();
+          const objectUrl = URL.createObjectURL(file);
+
+          img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            resolve({ index, width: img.width, height: img.height });
+          };
+
+          img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error(`無法讀取圖片: ${file.name}`));
+          };
+
+          img.src = objectUrl;
+        });
+      });
+
+      // 等待所有圖片尺寸獲取完成
+      const imageDimensions = await Promise.all(imageDimensionsPromises);
+
+      // 添加文件和尺寸信息到 FormData
+      filesArray.forEach((file, index) => {
         formData.append(`file${index}`, file);
+        const dimensions = imageDimensions[index];
+        formData.append(`width${index}`, dimensions.width.toString());
+        formData.append(`height${index}`, dimensions.height.toString());
       });
 
       const response = await fetch('/api/images/batch-upload', {
