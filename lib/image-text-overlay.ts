@@ -34,9 +34,18 @@ function getFontSizePixels(fontSize: 'small' | 'medium' | 'large', canvasWidth: 
 function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous'; // Enable CORS
+
+    // 只對跨域圖片設置 crossOrigin
+    // 對於同域或 Blob URL，不需要設置
+    if (!url.startsWith('blob:') && !url.startsWith(window.location.origin)) {
+      img.crossOrigin = 'anonymous';
+    }
+
     img.onload = () => resolve(img);
-    img.onerror = reject;
+    img.onerror = (error) => {
+      console.error('圖片載入失敗:', url, error);
+      reject(new Error(`Failed to load image: ${url}`));
+    };
     img.src = url;
   });
 }

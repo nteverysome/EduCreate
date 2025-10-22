@@ -139,11 +139,14 @@ export default function VocabularyItemWithImage({
       if (uploadResponse.ok) {
         const uploadData = await uploadResponse.json();
 
+        // 檢查響應結構
+        const imageData = uploadData.image || uploadData;
+
         // 更新為永久 URL
         onChange({
           ...item,
-          imageUrl: uploadData.url,
-          imageId: uploadData.id,
+          imageUrl: imageData.url,
+          imageId: imageData.id,
         });
 
         // 釋放預覽 URL
@@ -157,11 +160,19 @@ export default function VocabularyItemWithImage({
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              imageUrl: uploadData.url,
+              imageUrl: imageData.url,
               changes: `Text overlay: ${text}`,
             }),
           });
         }
+      } else {
+        // 處理上傳失敗
+        console.error('圖片上傳失敗:', uploadResponse.status, uploadResponse.statusText);
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        console.error('錯誤詳情:', errorData);
+
+        // 顯示錯誤信息給用戶
+        alert(`圖片上傳失敗: ${errorData.error || '未知錯誤'}`);
       }
     } catch (error) {
       console.error('生成圖片失敗:', error);
