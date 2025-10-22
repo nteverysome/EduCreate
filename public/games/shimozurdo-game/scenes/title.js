@@ -1609,38 +1609,38 @@ export default class Title extends Phaser.Scene {
         const worldTopY = worldView.top + 50;  // 距離世界頂部 50px
         const worldCenterX = (worldView.left + worldView.right) / 2;  // 世界中心 X
 
-        // 🎯 五列布局水平位置：分數 | 中文圖片 | 中文 | 英文圖片 | 英文
+        // 🎯 五列布局水平位置：分數 | 英文圖片 | 英文 | 中文圖片 | 中文
         const spacing = 150;  // 每列之間的間距
 
         const col1X = worldCenterX - spacing * 2;  // 第一列：分數
-        const col2X = worldCenterX - spacing;      // 第二列：中文圖片
-        const col3X = worldCenterX;                // 第三列：中文文字（中心）
-        const col4X = worldCenterX + spacing;      // 第四列：英文圖片
-        const col5X = worldCenterX + spacing * 2;  // 第五列：英文文字
+        const col2X = worldCenterX - spacing;      // 第二列：英文圖片
+        const col3X = worldCenterX;                // 第三列：英文文字（中心）
+        const col4X = worldCenterX + spacing;      // 第四列：中文圖片
+        const col5X = worldCenterX + spacing * 2;  // 第五列：中文文字
 
         // 更新分數位置（第一列）
         this.scoreText.setPosition(col1X, worldTopY);
 
-        // 更新中文文字位置（第三列）
-        if (this.chineseText) {
-            this.chineseText.setPosition(col3X, worldTopY);
-            this.chineseText.setVisible(true);
-        }
-
-        // 更新英文文字位置（第五列）
+        // 更新英文文字位置（第三列）
         if (this.englishText) {
-            this.englishText.setPosition(col5X, worldTopY);
+            this.englishText.setPosition(col3X, worldTopY);
             this.englishText.setVisible(true);
         }
 
-        // 更新中文圖片位置（第二列）
-        if (this.chineseImage && this.chineseImage.visible) {
-            this.chineseImage.setPosition(col2X, worldTopY);
+        // 更新中文文字位置（第五列）
+        if (this.chineseText) {
+            this.chineseText.setPosition(col5X, worldTopY);
+            this.chineseText.setVisible(true);
         }
 
-        // 更新英文圖片位置（第四列）
+        // 更新英文圖片位置（第二列）
         if (this.englishImage && this.englishImage.visible) {
-            this.englishImage.setPosition(col4X, worldTopY);
+            this.englishImage.setPosition(col2X, worldTopY);
+        }
+
+        // 更新中文圖片位置（第四列）
+        if (this.chineseImage && this.chineseImage.visible) {
+            this.chineseImage.setPosition(col4X, worldTopY);
         }
     }
 
