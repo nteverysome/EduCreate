@@ -351,10 +351,14 @@ export default function CreateGamePage() {
   const swapColumns = () => {
     setVocabularyItems(vocabularyItems.map(item => ({
       ...item,
+      // 交換英文和中文文字
       english: item.chinese,
       chinese: item.english,
-      // 圖片保持在英文欄位，不跟著交換
-      // imageUrl 和 imageId 保持不變
+      // 交換英文和中文圖片
+      imageId: item.chineseImageId,
+      imageUrl: item.chineseImageUrl,
+      chineseImageId: item.imageId,
+      chineseImageUrl: item.imageUrl,
     })));
   };
 
