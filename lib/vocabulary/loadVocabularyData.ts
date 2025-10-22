@@ -23,8 +23,10 @@ export interface VocabularyItem {
   phonetic?: string;
   imageId?: string;     // 英文圖片 ID（關聯到 UserImage）
   imageUrl?: string;    // 英文圖片 URL
+  imageSize?: 'small' | 'medium' | 'large';  // 英文圖片大小
   chineseImageId?: string;     // 中文圖片 ID（關聯到 UserImage）
   chineseImageUrl?: string;    // 中文圖片 URL
+  chineseImageSize?: 'small' | 'medium' | 'large';  // 中文圖片大小
   audioUrl?: string;
   partOfSpeech?: string;
   difficultyLevel?: string;
@@ -148,7 +150,12 @@ export function normalizeVocabularyItem(item: any, index: number): VocabularyIte
     english: item.english || item.word || '',
     chinese: item.chinese || item.translation || '',
     phonetic: item.phonetic || '',
+    imageId: item.imageId || undefined,
     imageUrl: item.imageUrl || '',
+    imageSize: item.imageSize || undefined,
+    chineseImageId: item.chineseImageId || undefined,
+    chineseImageUrl: item.chineseImageUrl || '',
+    chineseImageSize: item.chineseImageSize || undefined,
     audioUrl: item.audioUrl || '',
     partOfSpeech: item.partOfSpeech || '',
     difficultyLevel: item.difficultyLevel || '',
