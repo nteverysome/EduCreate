@@ -889,10 +889,13 @@ export default class Title extends Phaser.Scene {
                     this.updateTargetImage(imageKey, this.currentTargetWord);
                 }
             } else {
-                // 沒有圖片，隱藏圖片容器
+                // 沒有圖片，隱藏圖片容器並顯示純文字
                 if (this.targetImage) {
                     this.targetImage.setVisible(false);
                 }
+
+                // 🎯 更新文字位置（沒有圖片時，文字居中顯示）
+                this.updateTargetTextOnly();
             }
 
             // 🆕 自動播放雙語發音：中文 → 英文
@@ -966,6 +969,48 @@ export default class Title extends Phaser.Scene {
         }
 
         console.log(`🖼️ 更新目標圖片: ${imageKey}, size: ${imageSize}, scale: ${scale.toFixed(3)}, hasEnglish: ${hasEnglish}`);
+    }
+
+    /**
+     * 🎯 更新目標文字位置（沒有圖片時使用）
+     */
+    updateTargetTextOnly() {
+        // 獲取相機視口
+        const cam = this.cameras.main;
+        const centerX = cam.scrollX + cam.width * 0.5;   // 中央位置
+        const topY = cam.scrollY + 50;                   // 頂部位置
+
+        // 🎯 水平布局：英文大字在左，中文在右
+        const hasEnglish = this.currentTargetWord?.english && this.currentTargetWord.english.trim() !== '';
+        const spacing = 40; // 英文和中文之間的間距
+
+        if (hasEnglish) {
+            // 有英文：英文和中文水平排列
+            const englishX = centerX - spacing;
+            const chineseX = centerX + spacing;
+
+            if (this.chineseText) {
+                this.chineseText.setPosition(englishX, topY);
+                this.chineseText.setVisible(true);
+            }
+
+            if (this.targetText) {
+                this.targetText.setPosition(chineseX, topY);
+                this.targetText.setVisible(true);
+            }
+        } else {
+            // 沒有英文：只顯示中文，居中
+            if (this.chineseText) {
+                this.chineseText.setVisible(false);
+            }
+
+            if (this.targetText) {
+                this.targetText.setPosition(centerX, topY);
+                this.targetText.setVisible(true);
+            }
+        }
+
+        console.log(`📝 更新目標文字: hasEnglish: ${hasEnglish}, english: "${this.currentTargetWord?.english}", chinese: "${this.currentTargetWord?.chinese}"`);
     }
 
     /**
