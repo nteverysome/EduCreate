@@ -509,19 +509,6 @@ export default function VocabularyItemWithImage({
         )}
       </div>
 
-      {/* 刪除按鈕 */}
-      {totalItems > minItems && (
-        <button
-          onClick={onRemove}
-          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors flex-shrink-0"
-          title="刪除此項目"
-          aria-label="刪除此項目"
-          disabled={isGenerating}
-        >
-          <span className="text-xl">🗑️</span>
-        </button>
-      )}
-
       {/* 英文圖片模態框 */}
       {showImagePicker && (
         <ImagePicker
