@@ -1,0 +1,34 @@
+# 測試單字列表
+# 用於測試詞彙收集工具
+# 每行一個單字,以 # 開頭的行為註釋
+
+# 基礎動物
+cat
+dog
+bird
+fish
+
+# 基礎食物
+apple
+banana
+bread
+milk
+
+# 基礎顏色
+red
+blue
+green
+yellow
+
+# 基礎動詞
+run
+jump
+eat
+sleep
+
+# 基礎形容詞
+big
+small
+happy
+sad
+

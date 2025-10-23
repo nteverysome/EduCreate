@@ -1,0 +1,410 @@
+{
+  "level": "GEPT_KIDS",
+  "description": "GEPT Kids 基礎 300 字 - 幼兒園階段",
+  "totalWords": 300,
+  "sampleWords": 50,
+  "words": [
+    {
+      "word": "apple",
+      "translation": "蘋果",
+      "phonetic": "/ˈæp.əl/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I like to eat an apple.",
+      "exampleTranslation": "我喜歡吃蘋果。"
+    },
+    {
+      "word": "ball",
+      "translation": "球",
+      "phonetic": "/bɔːl/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Let's play with the ball.",
+      "exampleTranslation": "我們一起玩球吧。"
+    },
+    {
+      "word": "cat",
+      "translation": "貓",
+      "phonetic": "/kæt/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The cat is sleeping.",
+      "exampleTranslation": "貓正在睡覺。"
+    },
+    {
+      "word": "dog",
+      "translation": "狗",
+      "phonetic": "/dɔːɡ/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I have a dog.",
+      "exampleTranslation": "我有一隻狗。"
+    },
+    {
+      "word": "egg",
+      "translation": "蛋",
+      "phonetic": "/eɡ/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I eat an egg for breakfast.",
+      "exampleTranslation": "我早餐吃一顆蛋。"
+    },
+    {
+      "word": "fish",
+      "translation": "魚",
+      "phonetic": "/fɪʃ/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The fish is swimming.",
+      "exampleTranslation": "魚正在游泳。"
+    },
+    {
+      "word": "girl",
+      "translation": "女孩",
+      "phonetic": "/ɡɜːrl/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The girl is happy.",
+      "exampleTranslation": "女孩很開心。"
+    },
+    {
+      "word": "hand",
+      "translation": "手",
+      "phonetic": "/hænd/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Wash your hands.",
+      "exampleTranslation": "洗你的手。"
+    },
+    {
+      "word": "ice",
+      "translation": "冰",
+      "phonetic": "/aɪs/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The ice is cold.",
+      "exampleTranslation": "冰很冷。"
+    },
+    {
+      "word": "juice",
+      "translation": "果汁",
+      "phonetic": "/dʒuːs/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I drink orange juice.",
+      "exampleTranslation": "我喝柳橙汁。"
+    },
+    {
+      "word": "kite",
+      "translation": "風箏",
+      "phonetic": "/kaɪt/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Let's fly a kite.",
+      "exampleTranslation": "我們一起放風箏吧。"
+    },
+    {
+      "word": "lion",
+      "translation": "獅子",
+      "phonetic": "/ˈlaɪ.ən/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The lion is big.",
+      "exampleTranslation": "獅子很大。"
+    },
+    {
+      "word": "milk",
+      "translation": "牛奶",
+      "phonetic": "/mɪlk/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I drink milk every day.",
+      "exampleTranslation": "我每天喝牛奶。"
+    },
+    {
+      "word": "nose",
+      "translation": "鼻子",
+      "phonetic": "/noʊz/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Touch your nose.",
+      "exampleTranslation": "摸你的鼻子。"
+    },
+    {
+      "word": "orange",
+      "translation": "橘子",
+      "phonetic": "/ˈɔːr.ɪndʒ/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The orange is sweet.",
+      "exampleTranslation": "橘子很甜。"
+    },
+    {
+      "word": "pen",
+      "translation": "筆",
+      "phonetic": "/pen/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I write with a pen.",
+      "exampleTranslation": "我用筆寫字。"
+    },
+    {
+      "word": "queen",
+      "translation": "女王",
+      "phonetic": "/kwiːn/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The queen is beautiful.",
+      "exampleTranslation": "女王很美麗。"
+    },
+    {
+      "word": "rabbit",
+      "translation": "兔子",
+      "phonetic": "/ˈræb.ɪt/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The rabbit is white.",
+      "exampleTranslation": "兔子是白色的。"
+    },
+    {
+      "word": "sun",
+      "translation": "太陽",
+      "phonetic": "/sʌn/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The sun is bright.",
+      "exampleTranslation": "太陽很明亮。"
+    },
+    {
+      "word": "tree",
+      "translation": "樹",
+      "phonetic": "/triː/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The tree is tall.",
+      "exampleTranslation": "樹很高。"
+    },
+    {
+      "word": "umbrella",
+      "translation": "雨傘",
+      "phonetic": "/ʌmˈbrel.ə/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I need an umbrella.",
+      "exampleTranslation": "我需要一把雨傘。"
+    },
+    {
+      "word": "van",
+      "translation": "廂型車",
+      "phonetic": "/væn/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The van is big.",
+      "exampleTranslation": "廂型車很大。"
+    },
+    {
+      "word": "water",
+      "translation": "水",
+      "phonetic": "/ˈwɔː.tər/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I drink water.",
+      "exampleTranslation": "我喝水。"
+    },
+    {
+      "word": "box",
+      "translation": "盒子",
+      "phonetic": "/bɑːks/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Put it in the box.",
+      "exampleTranslation": "把它放進盒子裡。"
+    },
+    {
+      "word": "yellow",
+      "translation": "黃色",
+      "phonetic": "/ˈjel.oʊ/",
+      "partOfSpeech": "adjective",
+      "exampleSentence": "The banana is yellow.",
+      "exampleTranslation": "香蕉是黃色的。"
+    },
+    {
+      "word": "zoo",
+      "translation": "動物園",
+      "phonetic": "/zuː/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Let's go to the zoo.",
+      "exampleTranslation": "我們去動物園吧。"
+    },
+    {
+      "word": "book",
+      "translation": "書",
+      "phonetic": "/bʊk/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I read a book.",
+      "exampleTranslation": "我讀一本書。"
+    },
+    {
+      "word": "chair",
+      "translation": "椅子",
+      "phonetic": "/tʃer/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Sit on the chair.",
+      "exampleTranslation": "坐在椅子上。"
+    },
+    {
+      "word": "door",
+      "translation": "門",
+      "phonetic": "/dɔːr/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Open the door.",
+      "exampleTranslation": "打開門。"
+    },
+    {
+      "word": "ear",
+      "translation": "耳朵",
+      "phonetic": "/ɪr/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I can hear with my ears.",
+      "exampleTranslation": "我可以用耳朵聽。"
+    },
+    {
+      "word": "flower",
+      "translation": "花",
+      "phonetic": "/ˈflaʊ.ər/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The flower is pretty.",
+      "exampleTranslation": "花很漂亮。"
+    },
+    {
+      "word": "green",
+      "translation": "綠色",
+      "phonetic": "/ɡriːn/",
+      "partOfSpeech": "adjective",
+      "exampleSentence": "The grass is green.",
+      "exampleTranslation": "草是綠色的。"
+    },
+    {
+      "word": "hat",
+      "translation": "帽子",
+      "phonetic": "/hæt/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I wear a hat.",
+      "exampleTranslation": "我戴帽子。"
+    },
+    {
+      "word": "ink",
+      "translation": "墨水",
+      "phonetic": "/ɪŋk/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The ink is black.",
+      "exampleTranslation": "墨水是黑色的。"
+    },
+    {
+      "word": "jam",
+      "translation": "果醬",
+      "phonetic": "/dʒæm/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I like strawberry jam.",
+      "exampleTranslation": "我喜歡草莓果醬。"
+    },
+    {
+      "word": "key",
+      "translation": "鑰匙",
+      "phonetic": "/kiː/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Where is my key?",
+      "exampleTranslation": "我的鑰匙在哪裡?"
+    },
+    {
+      "word": "lamp",
+      "translation": "燈",
+      "phonetic": "/læmp/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Turn on the lamp.",
+      "exampleTranslation": "打開燈。"
+    },
+    {
+      "word": "moon",
+      "translation": "月亮",
+      "phonetic": "/muːn/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The moon is bright.",
+      "exampleTranslation": "月亮很明亮。"
+    },
+    {
+      "word": "nest",
+      "translation": "鳥巢",
+      "phonetic": "/nest/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The bird is in the nest.",
+      "exampleTranslation": "鳥在鳥巢裡。"
+    },
+    {
+      "word": "owl",
+      "translation": "貓頭鷹",
+      "phonetic": "/aʊl/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The owl can fly.",
+      "exampleTranslation": "貓頭鷹會飛。"
+    },
+    {
+      "word": "pig",
+      "translation": "豬",
+      "phonetic": "/pɪɡ/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The pig is pink.",
+      "exampleTranslation": "豬是粉紅色的。"
+    },
+    {
+      "word": "quilt",
+      "translation": "被子",
+      "phonetic": "/kwɪlt/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The quilt is warm.",
+      "exampleTranslation": "被子很溫暖。"
+    },
+    {
+      "word": "red",
+      "translation": "紅色",
+      "phonetic": "/red/",
+      "partOfSpeech": "adjective",
+      "exampleSentence": "The apple is red.",
+      "exampleTranslation": "蘋果是紅色的。"
+    },
+    {
+      "word": "star",
+      "translation": "星星",
+      "phonetic": "/stɑːr/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I see a star.",
+      "exampleTranslation": "我看到一顆星星。"
+    },
+    {
+      "word": "table",
+      "translation": "桌子",
+      "phonetic": "/ˈteɪ.bəl/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Put it on the table.",
+      "exampleTranslation": "把它放在桌子上。"
+    },
+    {
+      "word": "up",
+      "translation": "向上",
+      "phonetic": "/ʌp/",
+      "partOfSpeech": "adverb",
+      "exampleSentence": "Look up!",
+      "exampleTranslation": "往上看!"
+    },
+    {
+      "word": "vest",
+      "translation": "背心",
+      "phonetic": "/vest/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "I wear a vest.",
+      "exampleTranslation": "我穿背心。"
+    },
+    {
+      "word": "window",
+      "translation": "窗戶",
+      "phonetic": "/ˈwɪn.doʊ/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Open the window.",
+      "exampleTranslation": "打開窗戶。"
+    },
+    {
+      "word": "yes",
+      "translation": "是的",
+      "phonetic": "/jes/",
+      "partOfSpeech": "interjection",
+      "exampleSentence": "Yes, I can.",
+      "exampleTranslation": "是的,我可以。"
+    },
+    {
+      "word": "zebra",
+      "translation": "斑馬",
+      "phonetic": "/ˈziː.brə/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The zebra has stripes.",
+      "exampleTranslation": "斑馬有條紋。"
+    }
+  ],
+  "note": "這是 GEPT Kids 300 字的範例檔案,包含 50 個常用詞。完整的 300 字詞彙表需要從官方來源補充。"
+}
+

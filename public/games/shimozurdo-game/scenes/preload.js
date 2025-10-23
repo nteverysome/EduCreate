@@ -86,7 +86,7 @@ export default class Preload extends Phaser.Scene {
         })
     }
 
-    create() {
+    async create() {
         const { width, height } = this               // 解構賦值獲取寬高
 
         // 🆕 初始化管理器系統 - 從 Airplane Game 移植
@@ -108,6 +108,40 @@ export default class Preload extends Phaser.Scene {
             console.warn('⚠️ BilingualManager 未載入');
         }
 
+        // 🧠 初始化 SRS 管理器
+        if (typeof SRSManager !== 'undefined' && SRSManager.isSRSMode()) {
+            console.log('🧠 啟用 SRS 模式');
+
+            this.game.srsManager = new SRSManager();
+
+            // 獲取用戶 ID (從 session 或 localStorage)
+            const userId = await this.getUserId();
+
+            if (!userId) {
+                console.error('❌ 無法獲取用戶 ID,使用預設模式');
+                await this.game.geptManager.loadFromCloud();
+            } else {
+                // 獲取 GEPT 等級 (從 URL 或預設)
+                const geptLevel = this.getGEPTLevel();
+
+                // 初始化 SRS 會話
+                const success = await this.game.srsManager.initSession(userId, geptLevel);
+
+                if (success) {
+                    // 將 SRS 單字傳遞給 GEPT 管理器
+                    const words = this.game.srsManager.words;
+                    this.game.geptManager.loadSRSWords(words);
+                } else {
+                    console.error('❌ SRS 初始化失敗,使用預設模式');
+                    await this.game.geptManager.loadFromCloud();
+                }
+            }
+        } else {
+            console.log('📚 使用自定義活動模式');
+            // 使用現有的載入邏輯
+            await this.game.geptManager.loadFromCloud();
+        }
+
         // CONFIG SCENE - 場景配置區塊
         this.handlerScene.updateResize(this)         // 更新響應式配置，適應不同螢幕尺寸
         if (this.game.debugMode)                     // 如果是調試模式
@@ -117,5 +151,29 @@ export default class Preload extends Phaser.Scene {
         // GAME OBJECTS - 遊戲物件區塊
         this.add.image(width / 2, height / 2, 'logo').setOrigin(.5)  // 在螢幕中央顯示遊戲標誌
         // GAME OBJECTS
+    }
+
+    /**
+     * 獲取用戶 ID
+     * @returns {Promise<string|null>} 用戶 ID
+     */
+    async getUserId() {
+        try {
+            const response = await fetch('/api/auth/session');
+            const data = await response.json();
+            return data.user?.id || null;
+        } catch (error) {
+            console.error('獲取用戶 ID 失敗:', error);
+            return null;
+        }
+    }
+
+    /**
+     * 獲取 GEPT 等級
+     * @returns {string} GEPT 等級
+     */
+    getGEPTLevel() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('geptLevel') || 'elementary';
     }
 }

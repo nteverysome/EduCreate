@@ -1,0 +1,167 @@
+{
+  "level": "TEST_WORDS",
+  "description": "測試詞彙",
+  "totalWords": 20,
+  "words": [
+    {
+      "word": "cat",
+      "translation": "貓",
+      "phonetic": "/kat/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a cat.",
+      "exampleTranslation": "這是一隻貓。"
+    },
+    {
+      "word": "dog",
+      "translation": "狗",
+      "phonetic": "/dɑɡ/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "The dog barked all night long.",
+      "exampleTranslation": "狗整夜吠叫。"
+    },
+    {
+      "word": "bird",
+      "translation": "鳥類",
+      "phonetic": "/bɜd/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Ducks and sparrows are birds.",
+      "exampleTranslation": "鴨子和麻雀是鳥。"
+    },
+    {
+      "word": "fish",
+      "translation": "魚類",
+      "phonetic": "/fɪʃ/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "Salmon is a fish.",
+      "exampleTranslation": "三文魚是魚。"
+    },
+    {
+      "word": "apple",
+      "translation": "蘋果",
+      "phonetic": "/ˈæp.əl/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a apple.",
+      "exampleTranslation": "這是一個蘋果"
+    },
+    {
+      "word": "banana",
+      "translation": "香蕉",
+      "phonetic": "/bəˈnɑːnə/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a banana.",
+      "exampleTranslation": "這是香蕉"
+    },
+    {
+      "word": "bread",
+      "translation": "麵包",
+      "phonetic": "/bɹeːd/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a bread.",
+      "exampleTranslation": "這是麵包"
+    },
+    {
+      "word": "milk",
+      "translation": "牛奶",
+      "phonetic": "[mɛlk]",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a milk.",
+      "exampleTranslation": "這是牛奶"
+    },
+    {
+      "word": "red",
+      "translation": "紅色",
+      "phonetic": "/ɹɛd/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a red.",
+      "exampleTranslation": "這是紅色的"
+    },
+    {
+      "word": "blue",
+      "translation": "藍色",
+      "phonetic": "/bluː/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a blue.",
+      "exampleTranslation": "這是藍色的"
+    },
+    {
+      "word": "green",
+      "translation": "綠色",
+      "phonetic": "/ɡɹiːn/",
+      "partOfSpeech": "adjective",
+      "exampleSentence": "The former flag of Libya is fully green.",
+      "exampleTranslation": "利比亞的前國旗是全綠色的。"
+    },
+    {
+      "word": "yellow",
+      "translation": "黃色",
+      "phonetic": "/jɛlə/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a yellow.",
+      "exampleTranslation": "這是黃色的"
+    },
+    {
+      "word": "run",
+      "translation": "執行",
+      "phonetic": "/ɹʊn/",
+      "partOfSpeech": "verb",
+      "exampleSentence": "I run every day.",
+      "exampleTranslation": "我每天都跑步。"
+    },
+    {
+      "word": "jump",
+      "translation": "跳躍",
+      "phonetic": "/dʒʌmp/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a jump.",
+      "exampleTranslation": "這是一個跳躍。"
+    },
+    {
+      "word": "eat",
+      "translation": "吃",
+      "phonetic": "/iːt/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a eat.",
+      "exampleTranslation": "這是一道美食。"
+    },
+    {
+      "word": "sleep",
+      "translation": "睡眠",
+      "phonetic": "/sliːp/",
+      "partOfSpeech": "verb",
+      "exampleSentence": "You should sleep 8 hours a day.",
+      "exampleTranslation": "您應該每天睡8小時。"
+    },
+    {
+      "word": "big",
+      "translation": "大",
+      "phonetic": "/bɪɡ/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a big.",
+      "exampleTranslation": "這是一個大問題。"
+    },
+    {
+      "word": "small",
+      "translation": "小",
+      "phonetic": "/smoːl/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a small.",
+      "exampleTranslation": "這是一個小的。"
+    },
+    {
+      "word": "happy",
+      "translation": "開心",
+      "phonetic": "/ˈhæpiː/",
+      "partOfSpeech": "noun",
+      "exampleSentence": "This is a happy.",
+      "exampleTranslation": "這真是太開心了。"
+    },
+    {
+      "word": "sad",
+      "translation": "悲傷, 悲傷",
+      "phonetic": "/sæd/",
+      "partOfSpeech": "verb",
+      "exampleSentence": "I sad every day.",
+      "exampleTranslation": "我每天都很難過。"
+    }
+  ]
+}

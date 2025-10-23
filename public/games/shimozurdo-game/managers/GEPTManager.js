@@ -435,6 +435,43 @@ class GEPTManager {
       return [];
     }
   }
+
+  /**
+   * 🧠 載入 SRS 選擇的單字
+   * @param {Array} words - SRS 選擇的單字列表
+   */
+  loadSRSWords(words) {
+    console.log('🧠 載入 SRS 單字:', words.length, '個');
+
+    // 將所有單字設為初級 (因為是 SRS 選擇的)
+    const srsWords = words.map(word => ({
+      id: word.id,
+      english: word.english,
+      chinese: word.chinese || '',
+      level: 'elementary',
+      difficulty: word.difficultyLevel || 1,
+      frequency: 100 - (word.difficultyLevel || 1) * 10,
+      category: 'srs',
+      partOfSpeech: word.partOfSpeech || 'NOUN',
+      image: word.imageUrl,
+      audioUrl: word.audioUrl,
+      chineseImageUrl: word.chineseImageUrl,
+      phonetic: word.phonetic,
+      // 🆕 SRS 相關信息
+      isNew: word.isNew || false,
+      needsReview: word.needsReview || false,
+      memoryStrength: word.memoryStrength || 0
+    }));
+
+    // 只設置初級詞彙
+    this.wordDatabase.set('elementary', srsWords);
+    this.wordDatabase.set('intermediate', []);
+    this.wordDatabase.set('high-intermediate', []);
+
+    console.log('✅ SRS 單字載入完成');
+    console.log(`  - 新單字: ${srsWords.filter(w => w.isNew).length} 個`);
+    console.log(`  - 複習單字: ${srsWords.filter(w => w.needsReview).length} 個`);
+  }
 }
 
 // 導出為全局變量

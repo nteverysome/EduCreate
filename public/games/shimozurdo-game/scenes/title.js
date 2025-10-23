@@ -38,6 +38,16 @@ export default class Title extends Phaser.Scene {
         this.gameStartTime = Date.now();
         console.log('🎮 遊戲開始時間記錄:', new Date(this.gameStartTime).toLocaleTimeString());
 
+        // 🧠 初始化 SRS 相關變數
+        this.srsManager = this.game.srsManager || null;
+        this.answerStartTime = Date.now();  // 記錄答題開始時間
+
+        if (this.srsManager) {
+            console.log('🧠 SRS 模式已啟用');
+            // 顯示 SRS 進度
+            this.createSRSProgressDisplay();
+        }
+
         // 🔧 修復：在場景創建時立即清理攔截層
         this.cleanupInterceptLayers();
 
@@ -1368,6 +1378,13 @@ export default class Title extends Phaser.Scene {
             this.score += 10;
             this.wordsLearned += 1;
 
+            // 🧠 記錄 SRS 答題結果 (正確)
+            if (this.srsManager && this.currentTargetWord) {
+                const responseTime = Date.now() - this.answerStartTime;
+                this.srsManager.recordAnswer(true, responseTime);
+                console.log(`🧠 SRS 記錄: 正確 (${responseTime}ms)`);
+            }
+
             // 🔇 碰撞答對時不播放語音，避免與新單字語音衝突
             console.log('🔇 碰撞答對：不播放語音，避免衝突');
 
@@ -1376,6 +1393,14 @@ export default class Title extends Phaser.Scene {
 
             // 設置新的目標詞彙
             this.setRandomTargetWord();
+
+            // 🧠 重置答題開始時間
+            this.answerStartTime = Date.now();
+
+            // 🧠 更新 SRS 進度顯示
+            if (this.srsManager) {
+                this.updateSRSProgressDisplay();
+            }
 
             // 更新分數顯示
             this.updateScoreDisplay();
@@ -1386,6 +1411,16 @@ export default class Title extends Phaser.Scene {
             // 減少分數和生命值
             this.score = Math.max(0, this.score - 5);
             this.takeDamage(10);
+
+            // 🧠 記錄 SRS 答題結果 (錯誤)
+            if (this.srsManager && this.currentTargetWord) {
+                const responseTime = Date.now() - this.answerStartTime;
+                this.srsManager.recordAnswer(false, responseTime);
+                console.log(`🧠 SRS 記錄: 錯誤 (${responseTime}ms)`);
+
+                // 重置答題開始時間
+                this.answerStartTime = Date.now();
+            }
 
             // 顯示錯誤提示 - 在雲朵位置顯示
             this.showErrorMessage(enemy.x, enemy.y);
@@ -1700,11 +1735,18 @@ export default class Title extends Phaser.Scene {
     /**
      * 🎮 遊戲結束處理 - 提交結果並顯示結束畫面
      */
-    gameOver() {
+    async gameOver() {
         console.log('🎮 遊戲結束！');
 
         // 停止遊戲更新
         this.sceneStopped = true;
+
+        // 🧠 完成 SRS 會話
+        let srsStats = null;
+        if (this.srsManager) {
+            console.log('🧠 完成 SRS 學習會話...');
+            srsStats = await this.srsManager.finishSession();
+        }
 
         // 準備遊戲結果數據
         const gameResult = {
@@ -1716,7 +1758,9 @@ export default class Title extends Phaser.Scene {
             finalHealth: this.currentHealth || 0,
             maxHealth: this.maxHealth || 100,
             // 🆕 添加詳細的問題答案數據
-            questions: this.questionAnswerLog || []
+            questions: this.questionAnswerLog || [],
+            // 🧠 添加 SRS 統計數據
+            srsStats: srsStats
         };
 
         console.log('📊 遊戲結果:', gameResult);
@@ -1855,5 +1899,45 @@ export default class Title extends Phaser.Scene {
             this.updateEnemies();
             this.updateUIPositions();  // 🆕 更新 UI 位置
         }
+    }
+
+    /**
+     * 🧠 創建 SRS 進度顯示
+     */
+    createSRSProgressDisplay() {
+        if (!this.srsManager) return;
+
+        const progress = this.srsManager.getProgress();
+
+        // 創建進度文字 (右上角)
+        this.srsProgressText = this.add.text(
+            this.cameras.main.width - 20,
+            20,
+            `SRS 進度: ${progress.current}/${progress.total}`,
+            {
+                fontSize: '20px',
+                color: '#ffff00',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 3
+            }
+        );
+        this.srsProgressText.setOrigin(1, 0);
+        this.srsProgressText.setScrollFactor(0);
+        this.srsProgressText.setDepth(100);
+
+        console.log('🧠 SRS 進度顯示已創建');
+    }
+
+    /**
+     * 🧠 更新 SRS 進度顯示
+     */
+    updateSRSProgressDisplay() {
+        if (!this.srsManager || !this.srsProgressText) return;
+
+        const progress = this.srsManager.getProgress();
+        this.srsProgressText.setText(`SRS 進度: ${progress.current}/${progress.total}`);
+
+        console.log(`🧠 SRS 進度更新: ${progress.current}/${progress.total} (${progress.percentage}%)`);
     }
 }

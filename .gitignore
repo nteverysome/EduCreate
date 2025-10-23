@@ -24,6 +24,11 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+
+# Google Cloud TTS credentials
+google-cloud-tts-key.json
+celtic-hour-*.json
 
 # vercel
 .vercel

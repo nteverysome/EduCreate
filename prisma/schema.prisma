@@ -55,6 +55,10 @@ model User {
   images        UserImage[]    @relation("UserImages")
   imageTags     ImageTag[]     @relation("UserImageTags")
   imageVersions ImageVersion[] @relation("ImageVersions")
+
+  // SRS 學習系統
+  wordProgress     UserWordProgress[] @relation("UserWordProgress")
+  learningSessions LearningSession[]  @relation("LearningSessions")
 }
 
 model Account {
@@ -466,6 +470,10 @@ model VocabularyItem {
   learningProgress LearningProgress[]
   activity         Activity?          @relation(fields: [activityId], references: [id], onDelete: Cascade)
   set              VocabularySet?     @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  // SRS 學習系統
+  wordProgress     UserWordProgress[] @relation("WordProgress")
+  wordReviews      WordReview[]       @relation("WordReviews")
 
   @@map("vocabulary_items")
 }
@@ -945,4 +953,99 @@ model TTSCache {
   @@index([language])
   @@index([createdAt])
   @@map("tts_cache")
+}
+
+// ==================== SRS (Spaced Repetition System) 功能模型 ====================
+
+// 用戶單字學習進度表
+model UserWordProgress {
+  id       String   @id @default(cuid())
+  userId   String
+  wordId   String
+
+  // ===== SRS 核心參數 =====
+  memoryStrength  Int      @default(0)    // 記憶強度 (0-100)
+  easeFactor      Float    @default(2.5)  // 難度係數 (1.3-2.5)
+  interval        Int      @default(1)    // 複習間隔 (天數)
+  repetitions     Int      @default(0)    // 連續正確次數
+
+  // ===== 時間戳 =====
+  firstLearnedAt  DateTime @default(now())
+  lastReviewedAt  DateTime @default(now())
+  nextReviewAt    DateTime @default(now())
+
+  // ===== 統計數據 =====
+  totalReviews     Int     @default(0)
+  correctReviews   Int     @default(0)
+  incorrectReviews Int     @default(0)
+
+  // ===== 學習狀態 =====
+  status          String   @default("NEW")  // NEW, LEARNING, REVIEWING, MASTERED
+
+  // ===== 關聯 =====
+  user            User     @relation("UserWordProgress", fields: [userId], references: [id], onDelete: Cascade)
+  word            VocabularyItem @relation("WordProgress", fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, wordId])
+  @@index([userId, nextReviewAt])
+  @@index([userId, status])
+  @@index([wordId])
+  @@map("user_word_progress")
+}
+
+// 學習會話表
+model LearningSession {
+  id              String   @id @default(cuid())
+  userId          String
+  geptLevel       String   // elementary, intermediate, high-intermediate
+
+  // ===== 會話數據 =====
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+  duration        Int?     // 秒數
+
+  // ===== 單字統計 =====
+  newWordsCount   Int      @default(0)
+  reviewWordsCount Int     @default(0)
+  totalWords      Int      @default(0)
+
+  // ===== 正確率 =====
+  correctAnswers  Int      @default(0)
+  totalAnswers    Int      @default(0)
+  accuracy        Float?   // 正確率 (0-100)
+
+  // ===== 關聯 =====
+  user            User     @relation("LearningSessions", fields: [userId], references: [id], onDelete: Cascade)
+  wordReviews     WordReview[]
+
+  @@index([userId, startedAt])
+  @@index([geptLevel])
+  @@map("learning_sessions")
+}
+
+// 單字複習記錄表
+model WordReview {
+  id              String   @id @default(cuid())
+  sessionId       String
+  wordId          String
+
+  // ===== 複習數據 =====
+  isCorrect       Boolean
+  responseTime    Int      // 毫秒
+  reviewedAt      DateTime @default(now())
+
+  // ===== SRS 更新前後 =====
+  memoryStrengthBefore  Int
+  memoryStrengthAfter   Int
+  intervalBefore        Int
+  intervalAfter         Int
+
+  // ===== 關聯 =====
+  session         LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  word            VocabularyItem  @relation("WordReviews", fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([wordId])
+  @@index([reviewedAt])
+  @@map("word_reviews")
 }
