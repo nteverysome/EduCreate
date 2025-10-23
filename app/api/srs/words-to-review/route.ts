@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { calculatePriority } from '@/lib/srs/sm2';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * GET /api/srs/words-to-review
@@ -30,7 +32,7 @@ export async function GET(request: NextRequest) {
     console.log(`  - 數量: ${count}`);
 
     // 2. 獲取該等級的所有單字 (從 TTSCache 表)
-    const allWords = await prisma.tTSCache.findMany({
+    let allWords = await prisma.tTSCache.findMany({
       where: {
         geptLevel: geptLevel.toUpperCase() as any,
         language: 'en-US'  // 只獲取英文單字
@@ -44,6 +46,63 @@ export async function GET(request: NextRequest) {
     });
 
     console.log(`  - 找到 ${allWords.length} 個單字`);
+
+    // 如果 TTSCache 沒有數據,從 GEPT 詞彙列表獲取
+    if (allWords.length === 0) {
+      console.log('⚠️ TTSCache 沒有數據,從 GEPT 詞彙列表獲取');
+
+      try {
+        // 讀取詞彙文件
+        const wordListPath = path.join(process.cwd(), 'data', 'word-lists', `gept-${geptLevel}-unique.txt`);
+        console.log(`  - 讀取詞彙文件: ${wordListPath}`);
+
+        const wordListContent = fs.readFileSync(wordListPath, 'utf-8');
+        const wordList = wordListContent.split('\n').filter(line => line.trim());
+
+        console.log(`  - 詞彙文件包含 ${wordList.length} 個單字`);
+
+        // 隨機選擇 15 個單字
+        const selectedWords = wordList
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 15);
+
+        console.log(`  - 選擇了 ${selectedWords.length} 個單字用於 SRS`);
+
+        // 創建臨時單字對象 (不生成 TTS,使用空 audioUrl)
+        allWords = selectedWords.map((word, index) => ({
+          id: `temp-${index}`,
+          text: word,
+          audioUrl: '', // 暫時不生成 TTS
+          geptLevel: geptLevel.toUpperCase() as any
+        }));
+
+        console.log(`  - 創建了 ${allWords.length} 個臨時單字對象`);
+
+      } catch (error: any) {
+        console.error('❌ 讀取詞彙文件失敗:', error);
+        console.error('  - 錯誤詳情:', error.message);
+
+        // 使用硬編碼的預設詞彙作為後備
+        console.log('⚠️ 使用硬編碼的預設詞彙');
+        allWords = [
+          { id: 'default-1', text: 'apple', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-2', text: 'banana', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-3', text: 'cat', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-4', text: 'dog', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-5', text: 'elephant', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-6', text: 'fish', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-7', text: 'girl', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-8', text: 'house', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-9', text: 'ice', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-10', text: 'juice', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-11', text: 'kite', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-12', text: 'lion', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-13', text: 'monkey', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-14', text: 'nose', audioUrl: '', geptLevel: 'ELEMENTARY' as any },
+          { id: 'default-15', text: 'orange', audioUrl: '', geptLevel: 'ELEMENTARY' as any }
+        ];
+      }
+    }
 
     // 3. 獲取用戶的學習記錄
     const userProgress = await prisma.userWordProgress.findMany({
