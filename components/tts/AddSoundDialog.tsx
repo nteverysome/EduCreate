@@ -40,6 +40,9 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [previewMode, setPreviewMode] = useState(false); // 預覽模式狀態
+  const [isPlaying, setIsPlaying] = useState(false); // 播放狀態
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null); // 音頻元素
 
   const handleGenerate = async () => {
     if (!inputText.trim()) {
@@ -106,14 +109,9 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
       const data = await response.json();
       setAudioUrl(data.audioUrl);
       setSuccess(true);
-      
-      // 通知父組件
-      onSoundGenerated(data.audioUrl);
 
-      // 2 秒後自動關閉
-      setTimeout(() => {
-        onClose();
-      }, 2000);
+      // 進入預覽模式（類似 Wordwall 的第二個模態框）
+      setPreviewMode(true);
     } catch (err) {
       console.error('生成語音錯誤:', err);
       setError('生成語音時出錯，請稍後再試');
@@ -124,13 +122,155 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
 
   const handlePlayPreview = () => {
     if (audioUrl) {
+      // 停止當前播放
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+      }
+
+      // 創建新的音頻元素
       const audio = new Audio(audioUrl);
+      setAudioElement(audio);
+      setIsPlaying(true);
+
+      // 播放音頻
       audio.play();
+
+      // 監聽播放結束
+      audio.onended = () => {
+        setIsPlaying(false);
+      };
+
+      // 監聽錯誤
+      audio.onerror = () => {
+        setIsPlaying(false);
+        setError('播放音頻時出錯');
+      };
     }
+  };
+
+  const handleStopPreview = () => {
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      setIsPlaying(false);
+    }
+  };
+
+  const handleBackToEdit = () => {
+    // 返回編輯模式
+    setPreviewMode(false);
+    setSuccess(false);
+    setAudioUrl(null);
+    handleStopPreview();
+  };
+
+  const handleConfirm = () => {
+    // 確認並添加語音
+    if (audioUrl) {
+      onSoundGenerated(audioUrl);
+      handleStopPreview();
+      onClose();
+    }
+  };
+
+  const handleClose = () => {
+    handleStopPreview();
+    setPreviewMode(false);
+    setSuccess(false);
+    setAudioUrl(null);
+    onClose();
   };
 
   if (!isOpen) return null;
 
+  // 預覽模態框（第二個模態框）
+  if (previewMode && audioUrl) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+          {/* 標題欄 */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <Volume2 className="w-6 h-6 text-blue-600" />
+              預覽語音
+            </h2>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* 內容區域 */}
+          <div className="px-6 py-8 flex flex-col items-center justify-center space-y-6">
+            {/* 語音信息 */}
+            <div className="w-full space-y-2 text-center">
+              <p className="text-sm text-gray-500">文字</p>
+              <p className="text-lg font-medium text-gray-900">{inputText}</p>
+            </div>
+
+            <div className="w-full grid grid-cols-2 gap-4 text-center">
+              <div>
+                <p className="text-sm text-gray-500">語言</p>
+                <p className="text-base font-medium text-gray-900">
+                  {LANGUAGE_OPTIONS.find(opt => opt.value === language)?.label}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">語音類型</p>
+                <p className="text-base font-medium text-gray-900">
+                  {VOICE_OPTIONS.find(opt => opt.value === voice)?.label}
+                </p>
+              </div>
+            </div>
+
+            {/* 播放按鈕 */}
+            <button
+              onClick={isPlaying ? handleStopPreview : handlePlayPreview}
+              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
+                isPlaying
+                  ? 'bg-red-500 hover:bg-red-600'
+                  : 'bg-blue-500 hover:bg-blue-600'
+              } shadow-lg hover:shadow-xl`}
+            >
+              {isPlaying ? (
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <div className="w-2 h-8 bg-white rounded-sm mr-2"></div>
+                  <div className="w-2 h-8 bg-white rounded-sm"></div>
+                </div>
+              ) : (
+                <div className="w-0 h-0 border-t-[16px] border-t-transparent border-l-[24px] border-l-white border-b-[16px] border-b-transparent ml-2"></div>
+              )}
+            </button>
+
+            <p className="text-sm text-gray-500">
+              {isPlaying ? '正在播放...' : '點擊播放預覽語音'}
+            </p>
+          </div>
+
+          {/* 底部按鈕 */}
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200">
+            <button
+              onClick={handleBackToEdit}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              返回編輯
+            </button>
+            <button
+              onClick={handleConfirm}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              確認
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 第一個模態框（輸入和配置）
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
@@ -141,7 +281,7 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
             加入聲音
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
             disabled={generating}
           >
@@ -237,41 +377,30 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
 
         {/* 底部按鈕 */}
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200">
-          {audioUrl && (
-            <button
-              onClick={handlePlayPreview}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors"
-            >
-              <Volume2 className="w-4 h-4" />
-              <span>試聽</span>
-            </button>
-          )}
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             disabled={generating}
           >
-            {success ? '關閉' : '取消'}
+            取消
           </button>
-          {!success && (
-            <button
-              onClick={handleGenerate}
-              disabled={generating || !inputText.trim()}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {generating ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>生成中...</span>
-                </>
-              ) : (
-                <>
-                  <Volume2 className="w-4 h-4" />
-                  <span>生成語音</span>
-                </>
-              )}
-            </button>
-          )}
+          <button
+            onClick={handleGenerate}
+            disabled={generating || !inputText.trim()}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {generating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>生成中...</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-4 h-4" />
+                <span>生成語音</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>
