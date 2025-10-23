@@ -65,32 +65,20 @@ export default function VocabularyItemWithImage({
   const [baseChineseImageUrl, setBaseChineseImageUrl] = useState<string | null>(null);
   const [enableChineseTextOverlay, setEnableChineseTextOverlay] = useState(false);
 
-  // 語音狀態
+  // 語音狀態（僅英文）
   const [showAddSoundDialog, setShowAddSoundDialog] = useState(false);
-  const [showChineseAddSoundDialog, setShowChineseAddSoundDialog] = useState(false);
   const [showAudioPreview, setShowAudioPreview] = useState(false);
-  const [showChineseAudioPreview, setShowChineseAudioPreview] = useState(false);
 
-  // 處理語音生成
+  // 處理語音生成（僅英文）
   const handleSoundGenerated = (audioUrl: string) => {
     onChange({ ...item, audioUrl });
     setShowAddSoundDialog(false);
   };
 
-  const handleChineseSoundGenerated = (audioUrl: string) => {
-    onChange({ ...item, chineseAudioUrl: audioUrl });
-    setShowChineseAddSoundDialog(false);
-  };
-
-  // 處理語音移除
+  // 處理語音移除（僅英文）
   const handleRemoveAudio = () => {
     onChange({ ...item, audioUrl: undefined });
     setShowAudioPreview(false);
-  };
-
-  const handleRemoveChineseAudio = () => {
-    onChange({ ...item, chineseAudioUrl: undefined });
-    setShowChineseAudioPreview(false);
   };
 
   // 處理圖片選擇
@@ -500,7 +488,7 @@ export default function VocabularyItemWithImage({
         )}
       </div>
 
-      {/* 中文輸入框（獨立的圖片和語音功能） */}
+      {/* 中文輸入框（獨立的圖片功能，不顯示語音功能） */}
       <div className="flex-1">
         <InputWithImage
           value={item.chinese}
@@ -508,10 +496,6 @@ export default function VocabularyItemWithImage({
           imageUrl={item.chineseImageUrl}
           onImageIconClick={() => setShowChineseImagePicker(true)}
           onThumbnailClick={() => setShowChineseImageEditor(true)}
-          onAddSoundClick={() => setShowChineseAddSoundDialog(true)}
-          hasAudio={!!item.chineseAudioUrl}
-          audioUrl={item.chineseAudioUrl}
-          onAudioThumbnailClick={() => setShowChineseAudioPreview(true)}
           placeholder="輸入中文翻譯..."
           disabled={isGeneratingChinese}
         />
@@ -592,16 +576,6 @@ export default function VocabularyItemWithImage({
         />
       )}
 
-      {/* 中文語音對話框 */}
-      {showChineseAddSoundDialog && (
-        <AddSoundDialog
-          isOpen={showChineseAddSoundDialog}
-          onClose={() => setShowChineseAddSoundDialog(false)}
-          text={item.chinese}
-          onSoundGenerated={handleChineseSoundGenerated}
-        />
-      )}
-
       {/* 英文語音預覽對話框 */}
       {showAudioPreview && item.audioUrl && (
         <AudioPreviewDialog
@@ -610,17 +584,6 @@ export default function VocabularyItemWithImage({
           audioUrl={item.audioUrl}
           text={item.english}
           onRemove={handleRemoveAudio}
-        />
-      )}
-
-      {/* 中文語音預覽對話框 */}
-      {showChineseAudioPreview && item.chineseAudioUrl && (
-        <AudioPreviewDialog
-          isOpen={showChineseAudioPreview}
-          onClose={() => setShowChineseAudioPreview(false)}
-          audioUrl={item.chineseAudioUrl}
-          text={item.chinese}
-          onRemove={handleRemoveChineseAudio}
         />
       )}
     </div>
