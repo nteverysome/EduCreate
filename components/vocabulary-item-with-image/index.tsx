@@ -471,6 +471,13 @@ export default function VocabularyItemWithImage({
           onThumbnailClick={() => setShowImageEditor(true)}
           onAddSoundClick={() => setShowAddSoundDialog(true)}
           hasAudio={!!item.audioUrl}
+          audioUrl={item.audioUrl}
+          onAudioThumbnailClick={() => {
+            if (item.audioUrl) {
+              const audio = new Audio(item.audioUrl);
+              audio.play();
+            }
+          }}
           placeholder="輸入英文單字..."
           disabled={isGenerating}
         />
@@ -494,6 +501,13 @@ export default function VocabularyItemWithImage({
           onThumbnailClick={() => setShowChineseImageEditor(true)}
           onAddSoundClick={() => setShowChineseAddSoundDialog(true)}
           hasAudio={!!item.chineseAudioUrl}
+          audioUrl={item.chineseAudioUrl}
+          onAudioThumbnailClick={() => {
+            if (item.chineseAudioUrl) {
+              const audio = new Audio(item.chineseAudioUrl);
+              audio.play();
+            }
+          }}
           placeholder="輸入中文翻譯..."
           disabled={isGeneratingChinese}
         />

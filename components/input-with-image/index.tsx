@@ -17,6 +17,8 @@ export interface InputWithImageProps {
   // 新增：加入聲音功能
   onAddSoundClick?: () => void;
   hasAudio?: boolean;
+  audioUrl?: string;
+  onAudioThumbnailClick?: () => void;
 }
 
 /**
@@ -50,8 +52,13 @@ export default function InputWithImage({
   disabled = false,
   className = '',
   onAddSoundClick,
-  hasAudio = false
+  hasAudio = false,
+  audioUrl,
+  onAudioThumbnailClick
 }: InputWithImageProps) {
+  // 計算左側 padding（根據是否有語音和圖片）
+  const leftPadding = audioUrl && imageUrl ? 'pl-20' : (audioUrl || imageUrl ? 'pl-12' : 'pl-3');
+
   return (
     <div className="relative w-full">
       {/* 輸入框 */}
@@ -65,24 +72,47 @@ export default function InputWithImage({
           w-full py-2 border border-gray-300 rounded-md
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
           transition-all duration-200
-          ${imageUrl ? 'pl-12' : 'pl-3'}
+          ${leftPadding}
           pr-10
           ${disabled ? 'bg-gray-100 cursor-not-allowed text-gray-500' : 'bg-white'}
           ${className}
         `}
         aria-label={placeholder}
       />
-      
-      {/* 左側縮圖（選擇圖片後顯示） */}
+
+      {/* 左側語音縮圖（添加語音後顯示） */}
+      {audioUrl && (
+        <button
+          type="button"
+          onClick={onAudioThumbnailClick}
+          disabled={disabled}
+          className={`
+            absolute ${imageUrl ? 'left-11' : 'left-2'} top-1/2 -translate-y-1/2
+            w-8 h-8 rounded overflow-hidden
+            border-2 border-green-500 hover:border-green-600
+            bg-green-50
+            transition-all duration-200
+            ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+            focus:outline-none focus:ring-2 focus:ring-green-500
+            flex items-center justify-center
+          `}
+          title="點擊播放語音"
+          aria-label="播放語音"
+        >
+          <span className="text-lg">🔊</span>
+        </button>
+      )}
+
+      {/* 左側圖片縮圖（選擇圖片後顯示） */}
       {imageUrl && (
         <button
           type="button"
           onClick={onThumbnailClick}
           disabled={disabled}
           className={`
-            absolute left-2 top-1/2 -translate-y-1/2 
-            w-8 h-8 rounded overflow-hidden 
-            border-2 border-gray-300 hover:border-blue-500 
+            absolute left-2 top-1/2 -translate-y-1/2
+            w-8 h-8 rounded overflow-hidden
+            border-2 border-gray-300 hover:border-blue-500
             transition-all duration-200
             ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
             focus:outline-none focus:ring-2 focus:ring-blue-500
@@ -90,10 +120,10 @@ export default function InputWithImage({
           title="點擊編輯圖片"
           aria-label="編輯圖片"
         >
-          <img 
-            src={imageUrl} 
-            alt="preview" 
-            className="w-full h-full object-cover" 
+          <img
+            src={imageUrl}
+            alt="preview"
+            className="w-full h-full object-cover"
           />
         </button>
       )}
@@ -105,13 +135,13 @@ export default function InputWithImage({
           <button
             type="button"
             onClick={onAddSoundClick}
-            disabled={disabled || !value.trim()}
+            disabled={disabled}
             className={`
               w-6 h-6 flex items-center justify-center
               ${hasAudio ? 'text-green-500' : 'text-gray-400'}
               hover:text-blue-500
               transition-colors duration-200
-              ${disabled || !value.trim() ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+              ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
             `}
             title={hasAudio ? "已添加語音" : "加入聲音"}
