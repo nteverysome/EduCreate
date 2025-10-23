@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
       console.log('⚠️ TTSCache 沒有數據,從 GEPT 詞彙列表獲取');
 
       try {
-        // 讀取詞彙文件
-        const wordListPath = path.join(process.cwd(), 'data', 'word-lists', `gept-${geptLevel}-unique.txt`);
+        // 讀取詞彙文件 (從 public 目錄)
+        const wordListPath = path.join(process.cwd(), 'public', 'word-lists', `gept-${geptLevel}-unique.txt`);
         console.log(`  - 讀取詞彙文件: ${wordListPath}`);
 
         const wordListContent = fs.readFileSync(wordListPath, 'utf-8');
