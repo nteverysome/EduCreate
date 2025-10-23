@@ -912,3 +912,37 @@ model ImageVersion {
   @@index([imageId])
   @@index([createdBy])
 }
+
+// ==================== TTS 音頻緩存功能模型 ====================
+
+// TTS 音頻緩存表
+model TTSCache {
+  id       String   @id @default(cuid())
+  hash     String   @unique // MD5 hash of (text + language + voice)
+  text     String   // 原始文本
+  language String   // 語言代碼 (en-US, zh-TW, etc.)
+  voice    String   // 語音類型 (male, female)
+
+  // 音頻文件信息
+  audioUrl  String  // R2 公開 URL
+  r2Key     String  // R2 存儲鍵值
+  fileSize  Int     // 文件大小（bytes）
+  duration  Float?  // 音頻時長（秒）
+
+  // GEPT 分級信息
+  geptLevel GEPTLevel? // GEPT 等級
+
+  // 使用統計
+  hitCount  Int      @default(0) // 緩存命中次數
+  lastHit   DateTime? // 最後訪問時間
+
+  // 時間戳
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([hash])
+  @@index([geptLevel])
+  @@index([language])
+  @@index([createdAt])
+  @@map("tts_cache")
+}
