@@ -130,44 +130,46 @@ export default function InputWithImage({
       
       {/* 右側按鈕組 */}
       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-        {/* 加入聲音按鈕（如果提供了回調函數） */}
-        {onAddSoundClick && (
+        {/* 加入聲音按鈕（只在沒有語音時顯示） */}
+        {onAddSoundClick && !audioUrl && (
           <button
             type="button"
             onClick={onAddSoundClick}
             disabled={disabled}
             className={`
               w-6 h-6 flex items-center justify-center
-              ${hasAudio ? 'text-green-500' : 'text-gray-400'}
+              text-gray-400
               hover:text-blue-500
               transition-colors duration-200
               ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
             `}
-            title={hasAudio ? "已添加語音" : "加入聲音"}
-            aria-label={hasAudio ? "已添加語音" : "加入聲音"}
+            title="加入聲音"
+            aria-label="加入聲音"
           >
             <span className="text-xl">🔊</span>
           </button>
         )}
 
-        {/* 圖片圖標（始終顯示） */}
-        <button
-          type="button"
-          onClick={onImageIconClick}
-          disabled={disabled}
-          className={`
-            w-6 h-6 flex items-center justify-center
-            text-gray-400 hover:text-blue-500
-            transition-colors duration-200
-            ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
-          `}
-          title={imageUrl ? "更換圖片" : "添加圖片"}
-          aria-label={imageUrl ? "更換圖片" : "添加圖片"}
-        >
-          <span className="text-xl">🖼️</span>
-        </button>
+        {/* 圖片圖標（只在沒有圖片時顯示） */}
+        {!imageUrl && (
+          <button
+            type="button"
+            onClick={onImageIconClick}
+            disabled={disabled}
+            className={`
+              w-6 h-6 flex items-center justify-center
+              text-gray-400 hover:text-blue-500
+              transition-colors duration-200
+              ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+            `}
+            title="添加圖片"
+            aria-label="添加圖片"
+          >
+            <span className="text-xl">🖼️</span>
+          </button>
+        )}
       </div>
     </div>
   );
