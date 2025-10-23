@@ -6,7 +6,23 @@ import { useSession } from 'next-auth/react';
 import LoginPrompt from '@/components/Auth/LoginPrompt';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import { loadAndNormalizeVocabularyData, getSourceDisplayName } from '@/lib/vocabulary/loadVocabularyData';
-import VocabularyItemWithImage from '@/components/vocabulary-item-with-image';
+import SortableVocabularyItem from '@/components/vocabulary-item-with-image/SortableVocabularyItem';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+
 
 // 使用統一的詞彙項目接口
 import type { VocabularyItem } from '@/lib/vocabulary/loadVocabularyData';
@@ -147,6 +163,14 @@ export default function CreateGamePage() {
   const [isAssignmentMode, setIsAssignmentMode] = useState(false);
   const [assignmentId, setAssignmentId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | null>(null);
+
+  // 拖移排序 sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // 檢查是否為編輯模式或課業分配模式並載入活動數據
   useEffect(() => {
@@ -370,6 +394,20 @@ export default function CreateGamePage() {
     })));
   };
 
+  // 處理拖移排序
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setVocabularyItems((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
   // 保存活動到數據庫
   const saveActivity = async () => {
     setIsLoading(true);
@@ -546,20 +584,31 @@ export default function CreateGamePage() {
             </div>
           </div>
 
-          {/* 詞彙項目列表 */}
-          <div className="space-y-4">
-            {vocabularyItems.map((item, index) => (
-              <VocabularyItemWithImage
-                key={item.id}
-                item={item}
-                index={index}
-                onChange={(updatedItem) => updateItemFull(item.id, updatedItem)}
-                onRemove={() => removeItem(item.id)}
-                minItems={gameConfig.minItems}
-                totalItems={vocabularyItems.length}
-              />
-            ))}
-          </div>
+          {/* 詞彙項目列表 - 使用拖移排序 */}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={vocabularyItems}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-4">
+                {vocabularyItems.map((item, index) => (
+                  <SortableVocabularyItem
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    onChange={(updatedItem) => updateItemFull(item.id, updatedItem)}
+                    onRemove={() => removeItem(item.id)}
+                    minItems={gameConfig.minItems}
+                    totalItems={vocabularyItems.length}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
 
           {/* 新增項目按鈕 */}
           <div className="mt-6">
