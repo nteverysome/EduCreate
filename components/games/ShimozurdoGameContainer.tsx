@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { GameTTSPanel, type Vocabulary } from '@/components/tts/GameTTSPanel';
+import { BilingualTTSManager } from '@/lib/tts/BilingualTTSManager';
 
 // 遊戲狀態類型
 interface GameState {
@@ -33,11 +35,14 @@ const ShimozurdoGameContainer: React.FC<ShimozurdoGameContainerProps> = ({
   });
   const [mounted, setMounted] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [vocabulary, setVocabulary] = useState<Vocabulary[]>([]);
+  const [showTTSPanel, setShowTTSPanel] = useState<boolean>(false);
 
   // Refs
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
   const progressIntervalRef = useRef<NodeJS.Timeout>();
+  const ttsManagerRef = useRef<BilingualTTSManager | null>(null);
 
   // 遊戲配置
   const gameConfig = {
@@ -158,18 +163,65 @@ const ShimozurdoGameContainer: React.FC<ShimozurdoGameContainerProps> = ({
     }
   }, [mounted, simulateLoading]);
 
+  // 處理 TTS Manager 準備就緒
+  const handleTTSManagerReady = useCallback((manager: BilingualTTSManager) => {
+    ttsManagerRef.current = manager;
+    console.log('✅ TTS Manager 準備就緒');
+
+    // 將 TTS Manager 注入到遊戲中
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      try {
+        // 等待遊戲完全載入後再注入
+        const checkGameReady = setInterval(() => {
+          const gameWindow = iframeRef.current?.contentWindow as any;
+          if (gameWindow && gameWindow.game) {
+            gameWindow.game.bilingualManager = manager;
+            console.log('✅ TTS Manager 已注入到遊戲中');
+            clearInterval(checkGameReady);
+          }
+        }, 500);
+
+        // 10秒後停止檢查
+        setTimeout(() => clearInterval(checkGameReady), 10000);
+      } catch (error) {
+        console.error('❌ 注入 TTS Manager 失敗:', error);
+      }
+    }
+  }, []);
+
   // iframe 載入完成處理
   const handleIframeLoad = useCallback(() => {
     if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
-    
+
     setLoadingProgress(100);
     setTimeout(() => {
       setIsLoading(false);
       setLoadingProgress(0);
     }, 100);
-    
+
     console.log(`✅ Shimozurdo 遊戲載入完成`);
+
+    // 從遊戲中獲取詞彙列表
+    setTimeout(() => {
+      try {
+        const gameWindow = iframeRef.current?.contentWindow as any;
+        if (gameWindow && gameWindow.game && gameWindow.game.geptManager) {
+          const words = gameWindow.game.geptManager.getCurrentLevelWords();
+          if (words && words.length > 0) {
+            setVocabulary(words.map((word: any) => ({
+              id: word.id,
+              english: word.english,
+              chinese: word.chinese,
+              geptLevel: word.geptLevel || 'ELEMENTARY'
+            })));
+            console.log(`✅ 獲取到 ${words.length} 個詞彙`);
+          }
+        }
+      } catch (error) {
+        console.error('❌ 獲取詞彙失敗:', error);
+      }
+    }, 1000);
   }, []);
 
   // iframe 消息處理
@@ -354,6 +406,28 @@ const ShimozurdoGameContainer: React.FC<ShimozurdoGameContainerProps> = ({
               <div className="value font-semibold">{gameState.timeSpent}s</div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TTS 控制面板切換按鈕 */}
+      <div className="mt-4">
+        <button
+          onClick={() => setShowTTSPanel(!showTTSPanel)}
+          className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+        >
+          <span>🔊</span>
+          <span>{showTTSPanel ? '隱藏' : '顯示'} TTS 控制面板</span>
+        </button>
+      </div>
+
+      {/* TTS 控制面板 */}
+      {showTTSPanel && vocabulary.length > 0 && (
+        <div className="mt-4">
+          <GameTTSPanel
+            gameId={gameConfig.id}
+            vocabulary={vocabulary}
+            onManagerReady={handleTTSManagerReady}
+          />
         </div>
       )}
     </div>

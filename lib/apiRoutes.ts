@@ -53,6 +53,13 @@ export const API_ROUTES = {
     INTELLIGENT_ASSISTANCE: '/api/ai/intelligent-assistance',
   },
 
+  // TTS 相關
+  TTS: {
+    GENERATE: '/api/tts',
+    BATCH: '/api/tts/batch',
+    STATS: '/api/tts/stats',
+  },
+
   // 系統相關
   SYSTEM: {
     HEALTH: '/api/health',
