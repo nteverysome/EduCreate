@@ -69,7 +69,12 @@ function generateHash(text: string, language: string, voice: string): string {
  */
 async function getCachedAudio(text: string, language: string, voice: string) {
   const hash = generateHash(text, language, voice);
-  
+
+  // 調試日誌
+  console.log('prisma object:', prisma);
+  console.log('prisma type:', typeof prisma);
+  console.log('prisma.tTSCache:', prisma?.tTSCache);
+
   const cached = await prisma.tTSCache.findUnique({
     where: { hash }
   });
