@@ -23,9 +23,22 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 const prisma = new PrismaClient();
 
 // 初始化 Google Cloud TTS 客戶端
-const ttsClient = new textToSpeech.TextToSpeechClient({
-  keyFilename: './google-cloud-tts-key.json'
-});
+// 支持從環境變數或文件讀取憑證
+let ttsClient: textToSpeech.TextToSpeechClient;
+
+if (process.env.GOOGLE_CLOUD_TTS_KEY_JSON) {
+  // Vercel 環境:從環境變數讀取 JSON 密鑰
+  const credentials = JSON.parse(process.env.GOOGLE_CLOUD_TTS_KEY_JSON);
+  ttsClient = new textToSpeech.TextToSpeechClient({
+    credentials,
+    projectId: credentials.project_id,
+  });
+} else {
+  // 本地環境:從文件讀取
+  ttsClient = new textToSpeech.TextToSpeechClient({
+    keyFilename: './google-cloud-tts-key.json'
+  });
+}
 
 // 初始化 Cloudflare R2 客戶端
 const r2Client = new S3Client({
