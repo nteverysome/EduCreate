@@ -6,7 +6,7 @@
     "env": {
       "NODE_ENV": "production",
       "SKIP_ENV_VALIDATION": "true",
-      "FORCE_REBUILD": "2025-10-11-00-15"
+      "FORCE_REBUILD": "2025-10-23-20-05"
     }
   },
   "functions": {
