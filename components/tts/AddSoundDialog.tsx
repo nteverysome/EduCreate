@@ -187,58 +187,59 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
   // 預覽模態框（第二個模態框）
   if (previewMode && audioUrl) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-md mx-auto">
           {/* 標題欄 */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-              <Volume2 className="w-6 h-6 text-blue-600" />
-              預覽語音
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <Volume2 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+              <span className="hidden sm:inline">預覽語音</span>
+              <span className="sm:hidden">預覽</span>
             </h2>
             <button
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
 
           {/* 內容區域 */}
-          <div className="px-6 py-8 flex flex-col items-center justify-center space-y-6">
+          <div className="px-4 sm:px-6 py-6 sm:py-8 flex flex-col items-center justify-center space-y-4 sm:space-y-6">
             {/* 語音信息 */}
-            <div className="w-full space-y-2 text-center">
-              <p className="text-sm text-gray-500">文字</p>
-              <p className="text-lg font-medium text-gray-900">{inputText}</p>
+            <div className="w-full space-y-1 sm:space-y-2 text-center">
+              <p className="text-xs sm:text-sm text-gray-500">文字</p>
+              <p className="text-base sm:text-lg font-medium text-gray-900 break-words px-2">{inputText}</p>
             </div>
 
-            <div className="w-full grid grid-cols-2 gap-4 text-center">
+            <div className="w-full grid grid-cols-2 gap-2 sm:gap-4 text-center">
               <div>
-                <p className="text-sm text-gray-500">語言</p>
-                <p className="text-base font-medium text-gray-900">
+                <p className="text-xs sm:text-sm text-gray-500">語言</p>
+                <p className="text-sm sm:text-base font-medium text-gray-900 truncate px-1">
                   {LANGUAGE_OPTIONS.find(opt => opt.value === language)?.label}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">語音類型</p>
-                <p className="text-base font-medium text-gray-900">
+                <p className="text-xs sm:text-sm text-gray-500">語音類型</p>
+                <p className="text-sm sm:text-base font-medium text-gray-900 truncate px-1">
                   {VOICE_OPTIONS.find(opt => opt.value === voice)?.label}
                 </p>
               </div>
             </div>
 
             {/* 播放按鈕和聲波動畫 */}
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-3 sm:gap-4">
               {/* 聲波動畫（播放時顯示） */}
               {isPlaying && (
-                <div className="flex items-center justify-center gap-1.5 h-20">
+                <div className="flex items-center justify-center gap-1 sm:gap-1.5 h-16 sm:h-20">
                   {[...Array(7)].map((_, i) => (
                     <div
                       key={i}
-                      className="w-1.5 bg-gradient-to-t from-blue-400 to-blue-600 rounded-full"
+                      className="w-1 sm:w-1.5 bg-gradient-to-t from-blue-400 to-blue-600 rounded-full"
                       style={{
                         animation: `wave 0.8s ease-in-out infinite`,
                         animationDelay: `${i * 0.1}s`,
-                        height: '20px',
+                        height: '16px',
                       }}
                     />
                   ))}
@@ -247,10 +248,20 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
               <style jsx>{`
                 @keyframes wave {
                   0%, 100% {
-                    height: 20px;
+                    height: 16px;
                   }
                   50% {
-                    height: 60px;
+                    height: 48px;
+                  }
+                }
+                @media (min-width: 640px) {
+                  @keyframes wave {
+                    0%, 100% {
+                      height: 20px;
+                    }
+                    50% {
+                      height: 60px;
+                    }
                   }
                 }
               `}</style>
@@ -258,39 +269,39 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
               {/* 播放按鈕 */}
               <button
                 onClick={isPlaying ? handleStopPreview : handlePlayPreview}
-                className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
+                className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all ${
                   isPlaying
                     ? 'bg-red-500 hover:bg-red-600'
                     : 'bg-blue-500 hover:bg-blue-600'
                 } shadow-lg hover:shadow-xl`}
               >
                 {isPlaying ? (
-                  <div className="w-8 h-8 flex items-center justify-center">
-                    <div className="w-2 h-8 bg-white rounded-sm mr-2"></div>
-                    <div className="w-2 h-8 bg-white rounded-sm"></div>
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center">
+                    <div className="w-1.5 h-6 sm:w-2 sm:h-8 bg-white rounded-sm mr-1.5 sm:mr-2"></div>
+                    <div className="w-1.5 h-6 sm:w-2 sm:h-8 bg-white rounded-sm"></div>
                   </div>
                 ) : (
-                  <div className="w-0 h-0 border-t-[16px] border-t-transparent border-l-[24px] border-l-white border-b-[16px] border-b-transparent ml-2"></div>
+                  <div className="w-0 h-0 border-t-[12px] sm:border-t-[16px] border-t-transparent border-l-[18px] sm:border-l-[24px] border-l-white border-b-[12px] sm:border-b-[16px] border-b-transparent ml-1.5 sm:ml-2"></div>
                 )}
               </button>
             </div>
 
-            <p className="text-sm text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500">
               {isPlaying ? '正在播放...' : '點擊播放預覽語音'}
             </p>
           </div>
 
           {/* 底部按鈕 */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200">
             <button
               onClick={handleBackToEdit}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             >
               返回編輯
             </button>
             <button
               onClick={handleConfirm}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+              className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
             >
               確認
             </button>
@@ -302,25 +313,26 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
 
   // 第一個模態框（輸入和配置）
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-[95vw] sm:max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
         {/* 標題欄 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            <Volume2 className="w-6 h-6 text-blue-600" />
-            加入聲音
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <Volume2 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+            <span className="hidden sm:inline">加入聲音</span>
+            <span className="sm:hidden">加入聲音</span>
           </h2>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
             disabled={generating}
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
         {/* 內容區域 */}
-        <div className="px-6 py-4 space-y-4">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
           {/* 錯誤提示 */}
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md">
@@ -406,10 +418,10 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
         </div>
 
         {/* 底部按鈕 */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 sticky bottom-0 bg-white">
           <button
             onClick={handleClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             disabled={generating}
           >
             取消
@@ -417,16 +429,16 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
           <button
             onClick={handleGenerate}
             disabled={generating || !inputText.trim()}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {generating ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
                 <span>生成中...</span>
               </>
             ) : (
               <>
-                <Volume2 className="w-4 h-4" />
+                <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>生成語音</span>
               </>
             )}
