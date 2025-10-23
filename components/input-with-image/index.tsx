@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import FormattableInput from './FormattableInput';
 
 /**
  * InputWithImage Props
@@ -61,23 +62,14 @@ export default function InputWithImage({
 
   return (
     <div className="relative w-full">
-      {/* 輸入框 */}
-      <input
-        type="text"
+      {/* 可格式化輸入框 */}
+      <FormattableInput
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={onChange}
         disabled={disabled}
         placeholder={placeholder}
-        className={`
-          w-full py-2 border border-gray-300 rounded-md
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-          transition-all duration-200
-          ${leftPadding}
-          pr-10
-          ${disabled ? 'bg-gray-100 cursor-not-allowed text-gray-500' : 'bg-white'}
-          ${className}
-        `}
-        aria-label={placeholder}
+        leftPadding={leftPadding}
+        className={className}
       />
 
       {/* 左側語音縮圖（添加語音後顯示） */}
