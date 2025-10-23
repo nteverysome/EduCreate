@@ -475,7 +475,7 @@ export default function VocabularyItemWithImage({
           hasAudio={!!item.audioUrl}
           audioUrl={item.audioUrl}
           onAudioThumbnailClick={() => setShowAudioPreview(true)}
-          placeholder="輸入英文單字..."
+          placeholder="輸入關鍵字..."
           disabled={isGenerating}
         />
 
@@ -496,7 +496,7 @@ export default function VocabularyItemWithImage({
           imageUrl={item.chineseImageUrl}
           onImageIconClick={() => setShowChineseImagePicker(true)}
           onThumbnailClick={() => setShowChineseImageEditor(true)}
-          placeholder="輸入中文翻譯..."
+          placeholder="輸入匹配物件..."
           disabled={isGeneratingChinese}
         />
 
