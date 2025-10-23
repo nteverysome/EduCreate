@@ -15,7 +15,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import prisma from '../../../lib/prisma';
 import crypto from 'crypto';
 import textToSpeech from '@google-cloud/text-to-speech';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
