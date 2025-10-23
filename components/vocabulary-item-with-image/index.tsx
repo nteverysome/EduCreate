@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import InputWithImage from '../input-with-image';
 import ImagePicker, { UserImage } from '../image-picker';
 import ImageEditor from '../image-editor';
+import AddSoundDialog from '../tts/AddSoundDialog';
 import { overlayTextOnImage, TextOverlayOptions } from '@/lib/image-text-overlay';
 
 export interface VocabularyItemData {
@@ -16,6 +17,8 @@ export interface VocabularyItemData {
   chineseImageUrl?: string;   // 中文圖片 URL
   imageSize?: 'small' | 'medium' | 'large';        // 英文圖片大小
   chineseImageSize?: 'small' | 'medium' | 'large'; // 中文圖片大小
+  audioUrl?: string;          // 語音 URL
+  chineseAudioUrl?: string;   // 中文語音 URL
 }
 
 interface VocabularyItemWithImageProps {
@@ -60,6 +63,21 @@ export default function VocabularyItemWithImage({
   const [isGeneratingChinese, setIsGeneratingChinese] = useState(false);
   const [baseChineseImageUrl, setBaseChineseImageUrl] = useState<string | null>(null);
   const [enableChineseTextOverlay, setEnableChineseTextOverlay] = useState(false);
+
+  // 語音狀態
+  const [showAddSoundDialog, setShowAddSoundDialog] = useState(false);
+  const [showChineseAddSoundDialog, setShowChineseAddSoundDialog] = useState(false);
+
+  // 處理語音生成
+  const handleSoundGenerated = (audioUrl: string) => {
+    onChange({ ...item, audioUrl });
+    setShowAddSoundDialog(false);
+  };
+
+  const handleChineseSoundGenerated = (audioUrl: string) => {
+    onChange({ ...item, chineseAudioUrl: audioUrl });
+    setShowChineseAddSoundDialog(false);
+  };
 
   // 處理圖片選擇
   const handleImageSelect = async (images: UserImage[]) => {
@@ -443,7 +461,7 @@ export default function VocabularyItemWithImage({
         {index + 1}.
       </div>
 
-      {/* 英文輸入框（整合圖片功能） */}
+      {/* 英文輸入框（整合圖片和語音功能） */}
       <div className="flex-1">
         <InputWithImage
           value={item.english}
@@ -451,6 +469,8 @@ export default function VocabularyItemWithImage({
           imageUrl={item.imageUrl}
           onImageIconClick={() => setShowImagePicker(true)}
           onThumbnailClick={() => setShowImageEditor(true)}
+          onAddSoundClick={() => setShowAddSoundDialog(true)}
+          hasAudio={!!item.audioUrl}
           placeholder="輸入英文單字..."
           disabled={isGenerating}
         />
@@ -464,7 +484,7 @@ export default function VocabularyItemWithImage({
         )}
       </div>
 
-      {/* 中文輸入框（獨立的圖片功能） */}
+      {/* 中文輸入框（獨立的圖片和語音功能） */}
       <div className="flex-1">
         <InputWithImage
           value={item.chinese}
@@ -472,6 +492,8 @@ export default function VocabularyItemWithImage({
           imageUrl={item.chineseImageUrl}
           onImageIconClick={() => setShowChineseImagePicker(true)}
           onThumbnailClick={() => setShowChineseImageEditor(true)}
+          onAddSoundClick={() => setShowChineseAddSoundDialog(true)}
+          hasAudio={!!item.chineseAudioUrl}
           placeholder="輸入中文翻譯..."
           disabled={isGeneratingChinese}
         />
@@ -539,6 +561,26 @@ export default function VocabularyItemWithImage({
           onImageSizeChange={(size) => onChange({ ...item, chineseImageSize: size })}
           enableTextOverlay={enableChineseTextOverlay}
           onEnableTextOverlayChange={setEnableChineseTextOverlay}
+        />
+      )}
+
+      {/* 英文語音對話框 */}
+      {showAddSoundDialog && (
+        <AddSoundDialog
+          isOpen={showAddSoundDialog}
+          onClose={() => setShowAddSoundDialog(false)}
+          text={item.english}
+          onSoundGenerated={handleSoundGenerated}
+        />
+      )}
+
+      {/* 中文語音對話框 */}
+      {showChineseAddSoundDialog && (
+        <AddSoundDialog
+          isOpen={showChineseAddSoundDialog}
+          onClose={() => setShowChineseAddSoundDialog(false)}
+          text={item.chinese}
+          onSoundGenerated={handleChineseSoundGenerated}
         />
       )}
     </div>

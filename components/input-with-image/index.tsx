@@ -14,6 +14,9 @@ export interface InputWithImageProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  // 新增：加入聲音功能
+  onAddSoundClick?: () => void;
+  hasAudio?: boolean;
 }
 
 /**
@@ -45,7 +48,9 @@ export default function InputWithImage({
   onThumbnailClick,
   placeholder,
   disabled = false,
-  className = ''
+  className = '',
+  onAddSoundClick,
+  hasAudio = false
 }: InputWithImageProps) {
   return (
     <div className="relative w-full">
@@ -93,24 +98,47 @@ export default function InputWithImage({
         </button>
       )}
       
-      {/* 右側圖片圖標（始終顯示） */}
-      <button
-        type="button"
-        onClick={onImageIconClick}
-        disabled={disabled}
-        className={`
-          absolute right-2 top-1/2 -translate-y-1/2
-          w-6 h-6 flex items-center justify-center
-          text-gray-400 hover:text-blue-500
-          transition-colors duration-200
-          ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
-        `}
-        title={imageUrl ? "更換圖片" : "添加圖片"}
-        aria-label={imageUrl ? "更換圖片" : "添加圖片"}
-      >
-        <span className="text-xl">🖼️</span>
-      </button>
+      {/* 右側按鈕組 */}
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+        {/* 加入聲音按鈕（如果提供了回調函數） */}
+        {onAddSoundClick && (
+          <button
+            type="button"
+            onClick={onAddSoundClick}
+            disabled={disabled || !value.trim()}
+            className={`
+              w-6 h-6 flex items-center justify-center
+              ${hasAudio ? 'text-green-500' : 'text-gray-400'}
+              hover:text-blue-500
+              transition-colors duration-200
+              ${disabled || !value.trim() ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+            `}
+            title={hasAudio ? "已添加語音" : "加入聲音"}
+            aria-label={hasAudio ? "已添加語音" : "加入聲音"}
+          >
+            <span className="text-xl">🔊</span>
+          </button>
+        )}
+
+        {/* 圖片圖標（始終顯示） */}
+        <button
+          type="button"
+          onClick={onImageIconClick}
+          disabled={disabled}
+          className={`
+            w-6 h-6 flex items-center justify-center
+            text-gray-400 hover:text-blue-500
+            transition-colors duration-200
+            ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+          `}
+          title={imageUrl ? "更換圖片" : "添加圖片"}
+          aria-label={imageUrl ? "更換圖片" : "添加圖片"}
+        >
+          <span className="text-xl">🖼️</span>
+        </button>
+      </div>
     </div>
   );
 }
