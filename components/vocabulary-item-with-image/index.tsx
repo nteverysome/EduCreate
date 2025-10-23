@@ -5,6 +5,7 @@ import InputWithImage from '../input-with-image';
 import ImagePicker, { UserImage } from '../image-picker';
 import ImageEditor from '../image-editor';
 import AddSoundDialog from '../tts/AddSoundDialog';
+import AudioPreviewDialog from '../tts/AudioPreviewDialog';
 import { overlayTextOnImage, TextOverlayOptions } from '@/lib/image-text-overlay';
 
 export interface VocabularyItemData {
@@ -67,6 +68,8 @@ export default function VocabularyItemWithImage({
   // 語音狀態
   const [showAddSoundDialog, setShowAddSoundDialog] = useState(false);
   const [showChineseAddSoundDialog, setShowChineseAddSoundDialog] = useState(false);
+  const [showAudioPreview, setShowAudioPreview] = useState(false);
+  const [showChineseAudioPreview, setShowChineseAudioPreview] = useState(false);
 
   // 處理語音生成
   const handleSoundGenerated = (audioUrl: string) => {
@@ -77,6 +80,17 @@ export default function VocabularyItemWithImage({
   const handleChineseSoundGenerated = (audioUrl: string) => {
     onChange({ ...item, chineseAudioUrl: audioUrl });
     setShowChineseAddSoundDialog(false);
+  };
+
+  // 處理語音移除
+  const handleRemoveAudio = () => {
+    onChange({ ...item, audioUrl: undefined });
+    setShowAudioPreview(false);
+  };
+
+  const handleRemoveChineseAudio = () => {
+    onChange({ ...item, chineseAudioUrl: undefined });
+    setShowChineseAudioPreview(false);
   };
 
   // 處理圖片選擇
@@ -472,12 +486,7 @@ export default function VocabularyItemWithImage({
           onAddSoundClick={() => setShowAddSoundDialog(true)}
           hasAudio={!!item.audioUrl}
           audioUrl={item.audioUrl}
-          onAudioThumbnailClick={() => {
-            if (item.audioUrl) {
-              const audio = new Audio(item.audioUrl);
-              audio.play();
-            }
-          }}
+          onAudioThumbnailClick={() => setShowAudioPreview(true)}
           placeholder="輸入英文單字..."
           disabled={isGenerating}
         />
@@ -502,12 +511,7 @@ export default function VocabularyItemWithImage({
           onAddSoundClick={() => setShowChineseAddSoundDialog(true)}
           hasAudio={!!item.chineseAudioUrl}
           audioUrl={item.chineseAudioUrl}
-          onAudioThumbnailClick={() => {
-            if (item.chineseAudioUrl) {
-              const audio = new Audio(item.chineseAudioUrl);
-              audio.play();
-            }
-          }}
+          onAudioThumbnailClick={() => setShowChineseAudioPreview(true)}
           placeholder="輸入中文翻譯..."
           disabled={isGeneratingChinese}
         />
@@ -595,6 +599,28 @@ export default function VocabularyItemWithImage({
           onClose={() => setShowChineseAddSoundDialog(false)}
           text={item.chinese}
           onSoundGenerated={handleChineseSoundGenerated}
+        />
+      )}
+
+      {/* 英文語音預覽對話框 */}
+      {showAudioPreview && item.audioUrl && (
+        <AudioPreviewDialog
+          isOpen={showAudioPreview}
+          onClose={() => setShowAudioPreview(false)}
+          audioUrl={item.audioUrl}
+          text={item.english}
+          onRemove={handleRemoveAudio}
+        />
+      )}
+
+      {/* 中文語音預覽對話框 */}
+      {showChineseAudioPreview && item.chineseAudioUrl && (
+        <AudioPreviewDialog
+          isOpen={showChineseAudioPreview}
+          onClose={() => setShowChineseAudioPreview(false)}
+          audioUrl={item.chineseAudioUrl}
+          text={item.chinese}
+          onRemove={handleRemoveChineseAudio}
         />
       )}
     </div>
