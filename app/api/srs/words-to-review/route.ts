@@ -139,10 +139,16 @@ export async function GET(request: NextRequest) {
       statistics
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ 獲取單字失敗:', error);
+    console.error('  - 錯誤詳情:', error.message);
+    console.error('  - 錯誤堆棧:', error.stack);
     return NextResponse.json(
-      { error: '獲取單字失敗' },
+      {
+        error: '獲取單字失敗',
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }

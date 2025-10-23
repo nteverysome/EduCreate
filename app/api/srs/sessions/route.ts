@@ -27,17 +27,23 @@ export async function POST(request: NextRequest) {
     console.log(`  - GEPT 等級: ${geptLevel}`);
 
     // 2. 獲取需要學習的單字
-    const wordsResponse = await fetch(
-      `${process.env.NEXTAUTH_URL}/api/srs/words-to-review?geptLevel=${geptLevel}`,
-      {
-        headers: {
-          'Cookie': request.headers.get('cookie') || ''
-        }
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://edu-create.vercel.app';
+    const wordsUrl = `${baseUrl}/api/srs/words-to-review?geptLevel=${geptLevel}`;
+
+    console.log(`  - 調用 API: ${wordsUrl}`);
+
+    const wordsResponse = await fetch(wordsUrl, {
+      headers: {
+        'Cookie': request.headers.get('cookie') || ''
       }
-    );
+    });
+
+    console.log(`  - API 響應狀態: ${wordsResponse.status}`);
 
     if (!wordsResponse.ok) {
-      throw new Error('獲取單字失敗');
+      const errorText = await wordsResponse.text();
+      console.error(`  - API 錯誤響應: ${errorText}`);
+      throw new Error(`獲取單字失敗: ${wordsResponse.status} - ${errorText}`);
     }
 
     const wordsData = await wordsResponse.json();
@@ -66,10 +72,16 @@ export async function POST(request: NextRequest) {
       reviewWords: words.filter((w: any) => w.needsReview)
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ 創建會話失敗:', error);
+    console.error('  - 錯誤詳情:', error.message);
+    console.error('  - 錯誤堆棧:', error.stack);
     return NextResponse.json(
-      { error: '創建會話失敗' },
+      {
+        error: '創建會話失敗',
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }
