@@ -226,24 +226,54 @@ const AddSoundDialog: React.FC<AddSoundDialogProps> = ({
               </div>
             </div>
 
-            {/* 播放按鈕 */}
-            <button
-              onClick={isPlaying ? handleStopPreview : handlePlayPreview}
-              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
-                isPlaying
-                  ? 'bg-red-500 hover:bg-red-600'
-                  : 'bg-blue-500 hover:bg-blue-600'
-              } shadow-lg hover:shadow-xl`}
-            >
-              {isPlaying ? (
-                <div className="w-8 h-8 flex items-center justify-center">
-                  <div className="w-2 h-8 bg-white rounded-sm mr-2"></div>
-                  <div className="w-2 h-8 bg-white rounded-sm"></div>
+            {/* 播放按鈕和聲波動畫 */}
+            <div className="flex flex-col items-center gap-4">
+              {/* 聲波動畫（播放時顯示） */}
+              {isPlaying && (
+                <div className="flex items-center justify-center gap-1.5 h-20">
+                  {[...Array(7)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-1.5 bg-gradient-to-t from-blue-400 to-blue-600 rounded-full"
+                      style={{
+                        animation: `wave 0.8s ease-in-out infinite`,
+                        animationDelay: `${i * 0.1}s`,
+                        height: '20px',
+                      }}
+                    />
+                  ))}
                 </div>
-              ) : (
-                <div className="w-0 h-0 border-t-[16px] border-t-transparent border-l-[24px] border-l-white border-b-[16px] border-b-transparent ml-2"></div>
               )}
-            </button>
+              <style jsx>{`
+                @keyframes wave {
+                  0%, 100% {
+                    height: 20px;
+                  }
+                  50% {
+                    height: 60px;
+                  }
+                }
+              `}</style>
+
+              {/* 播放按鈕 */}
+              <button
+                onClick={isPlaying ? handleStopPreview : handlePlayPreview}
+                className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
+                  isPlaying
+                    ? 'bg-red-500 hover:bg-red-600'
+                    : 'bg-blue-500 hover:bg-blue-600'
+                } shadow-lg hover:shadow-xl`}
+              >
+                {isPlaying ? (
+                  <div className="w-8 h-8 flex items-center justify-center">
+                    <div className="w-2 h-8 bg-white rounded-sm mr-2"></div>
+                    <div className="w-2 h-8 bg-white rounded-sm"></div>
+                  </div>
+                ) : (
+                  <div className="w-0 h-0 border-t-[16px] border-t-transparent border-l-[24px] border-l-white border-b-[16px] border-b-transparent ml-2"></div>
+                )}
+              </button>
+            </div>
 
             <p className="text-sm text-gray-500">
               {isPlaying ? '正在播放...' : '點擊播放預覽語音'}
