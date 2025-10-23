@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Save, Loader2 } from 'lucide-react';
+import { X, Plus, Trash2, Save, Loader2, Volume2 } from 'lucide-react';
+import AddSoundDialog from '../tts/AddSoundDialog';
 
 interface VocabularyItem {
   id?: string;
   english: string;
   chinese: string;
   phonetic?: string;
+  audioUrl?: string;
 }
 
 interface EditVocabularyModalProps {
@@ -27,6 +29,8 @@ const EditVocabularyModal: React.FC<EditVocabularyModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAddSoundDialog, setShowAddSoundDialog] = useState(false);
+  const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(null);
 
   // 載入詞彙
   useEffect(() => {
@@ -73,6 +77,21 @@ const EditVocabularyModal: React.FC<EditVocabularyModalProps> = ({
     const updated = [...vocabularyItems];
     updated[index] = { ...updated[index], [field]: value };
     setVocabularyItems(updated);
+  };
+
+  const handleAddSound = (index: number) => {
+    setSelectedItemIndex(index);
+    setShowAddSoundDialog(true);
+  };
+
+  const handleSoundGenerated = (audioUrl: string) => {
+    if (selectedItemIndex !== null) {
+      const updated = [...vocabularyItems];
+      updated[selectedItemIndex] = { ...updated[selectedItemIndex], audioUrl };
+      setVocabularyItems(updated);
+    }
+    setShowAddSoundDialog(false);
+    setSelectedItemIndex(null);
   };
 
   const handleSave = async () => {
@@ -148,53 +167,73 @@ const EditVocabularyModal: React.FC<EditVocabularyModalProps> = ({
                     key={index}
                     className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg"
                   >
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
-                      {/* 英文 */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          英文 *
-                        </label>
-                        <input
-                          type="text"
-                          value={item.english}
-                          onChange={(e) =>
-                            handleItemChange(index, 'english', e.target.value)
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="例如: apple"
-                        />
+                    <div className="flex-1 space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {/* 英文 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            英文 *
+                          </label>
+                          <input
+                            type="text"
+                            value={item.english}
+                            onChange={(e) =>
+                              handleItemChange(index, 'english', e.target.value)
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="例如: apple"
+                          />
+                        </div>
+
+                        {/* 中文 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            中文 *
+                          </label>
+                          <input
+                            type="text"
+                            value={item.chinese}
+                            onChange={(e) =>
+                              handleItemChange(index, 'chinese', e.target.value)
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="例如: 蘋果"
+                          />
+                        </div>
+
+                        {/* 音標 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            音標（選填）
+                          </label>
+                          <input
+                            type="text"
+                            value={item.phonetic || ''}
+                            onChange={(e) =>
+                              handleItemChange(index, 'phonetic', e.target.value)
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="例如: /ˈæp.əl/"
+                          />
+                        </div>
                       </div>
 
-                      {/* 中文 */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          中文 *
-                        </label>
-                        <input
-                          type="text"
-                          value={item.chinese}
-                          onChange={(e) =>
-                            handleItemChange(index, 'chinese', e.target.value)
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="例如: 蘋果"
-                        />
-                      </div>
-
-                      {/* 音標 */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          音標（選填）
-                        </label>
-                        <input
-                          type="text"
-                          value={item.phonetic || ''}
-                          onChange={(e) =>
-                            handleItemChange(index, 'phonetic', e.target.value)
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          placeholder="例如: /ˈæp.əl/"
-                        />
+                      {/* 加入聲音按鈕 */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleAddSound(index)}
+                          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                          disabled={!item.english.trim()}
+                        >
+                          <Volume2 className="w-4 h-4" />
+                          <span>加入聲音</span>
+                        </button>
+                        {item.audioUrl && (
+                          <span className="text-xs text-green-600 flex items-center gap-1">
+                            <Volume2 className="w-3 h-3" />
+                            已添加語音
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -257,6 +296,19 @@ const EditVocabularyModal: React.FC<EditVocabularyModalProps> = ({
           </button>
         </div>
       </div>
+
+      {/* 加入聲音對話框 */}
+      {showAddSoundDialog && selectedItemIndex !== null && (
+        <AddSoundDialog
+          isOpen={showAddSoundDialog}
+          onClose={() => {
+            setShowAddSoundDialog(false);
+            setSelectedItemIndex(null);
+          }}
+          text={vocabularyItems[selectedItemIndex]?.english || ''}
+          onSoundGenerated={handleSoundGenerated}
+        />
+      )}
     </div>
   );
 };
