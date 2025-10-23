@@ -15,12 +15,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import crypto from 'crypto';
 import textToSpeech from '@google-cloud/text-to-speech';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-
-const prisma = new PrismaClient();
 
 // 初始化 Google Cloud TTS 客戶端
 // 支持從環境變數或文件讀取憑證
