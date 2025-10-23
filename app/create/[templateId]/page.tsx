@@ -359,6 +359,28 @@ export default function CreateGamePage() {
     }
   };
 
+  // 複製項目 - Wordwall 風格
+  const duplicateItem = (id: string) => {
+    setVocabularyItems((items) => {
+      // 找到要複製的項目
+      const index = items.findIndex((item) => item.id === id);
+      if (index === -1) return items;
+
+      // 複製項目 (包含所有屬性: english, chinese, image, sound, formatting)
+      const itemToDuplicate = items[index];
+      const newItem = {
+        ...itemToDuplicate,
+        id: `${Date.now()}-${Math.random()}`, // 生成唯一 ID
+      };
+
+      // 在當前項目下方插入新項目
+      const newItems = [...items];
+      newItems.splice(index + 1, 0, newItem);
+
+      return newItems;
+    });
+  };
+
   const updateItem = (id: string, field: 'english' | 'chinese' | 'phonetic', value: string) => {
     setVocabularyItems(vocabularyItems.map(item =>
       item.id === id ? { ...item, [field]: value } : item
@@ -602,6 +624,7 @@ export default function CreateGamePage() {
                     index={index}
                     onChange={(updatedItem) => updateItemFull(item.id, updatedItem)}
                     onRemove={() => removeItem(item.id)}
+                    onDuplicate={() => duplicateItem(item.id)}
                     minItems={gameConfig.minItems}
                     totalItems={vocabularyItems.length}
                   />
