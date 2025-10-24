@@ -48,12 +48,18 @@ const r2Client = new S3Client({
   },
 });
 
-// TTS 配置
-const TTS_CONFIG = {
+// TTS 默認配置
+const DEFAULT_TTS_CONFIG = {
   audioEncoding: 'MP3' as const,
   speakingRate: 1.0,
   pitch: 0.0,
-  volumeGainDb: 0.0,
+  volumeGainDb: 0.0, // 默認無增益，由前端動態指定
+};
+
+// 語言特定的音量增益（用於新生成的音頻）
+const LANGUAGE_VOLUME_GAIN = {
+  'en-US': 6.0, // 英文音量較小，增加 6dB
+  'zh-TW': 0.0, // 中文音量正常
 };
 
 /**
@@ -95,16 +101,32 @@ async function getCachedAudio(text: string, language: string, voice: string) {
 
 /**
  * 生成 TTS 音頻
+ * @param volumeGainDb 可選的音量增益（dB），如果不提供則使用語言默認值
  */
-async function generateAudio(text: string, language: string, voiceName: string) {
+async function generateAudio(
+  text: string,
+  language: string,
+  voiceName: string,
+  volumeGainDb?: number
+) {
+  // 如果沒有指定音量增益，使用語言默認值
+  const gainDb = volumeGainDb !== undefined
+    ? volumeGainDb
+    : (LANGUAGE_VOLUME_GAIN[language as keyof typeof LANGUAGE_VOLUME_GAIN] || 0.0);
+
   const request = {
     input: { text },
     voice: {
       languageCode: language,
       name: voiceName
     },
-    audioConfig: TTS_CONFIG
+    audioConfig: {
+      ...DEFAULT_TTS_CONFIG,
+      volumeGainDb: gainDb
+    }
   };
+
+  console.log(`🔊 生成音頻: ${text} [${language}] 音量增益: ${gainDb}dB`);
 
   const [response] = await ttsClient.synthesizeSpeech(request);
   return response.audioContent;
@@ -159,11 +181,18 @@ async function saveToDB(data: {
 /**
  * POST /api/tts
  * 獲取或生成單個 TTS 音頻
+ *
+ * 參數:
+ * - text: 要轉換的文本
+ * - language: 語言代碼 (en-US, zh-TW)
+ * - voice: 語音名稱
+ * - geptLevel: GEPT 等級 (可選)
+ * - volumeGainDb: 音量增益 (可選，默認使用語言默認值)
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { text, language, voice, geptLevel } = body;
+    const { text, language, voice, geptLevel, volumeGainDb } = body;
 
     // 驗證必要參數
     if (!text || !language || !voice) {
@@ -175,7 +204,7 @@ export async function POST(request: NextRequest) {
 
     // 1. 檢查緩存
     const cached = await getCachedAudio(text, language, voice);
-    
+
     if (cached) {
       return NextResponse.json({
         audioUrl: cached.audioUrl,
@@ -188,11 +217,12 @@ export async function POST(request: NextRequest) {
 
     // 2. 動態生成 (如果緩存不存在)
     console.log(`🎵 動態生成 TTS: ${text} [${language}/${voice}]`);
-    
-    const audioBuffer = await generateAudio(text, language, voice);
+
+    // 傳遞 volumeGainDb 參數
+    const audioBuffer = await generateAudio(text, language, voice, volumeGainDb);
     const hash = generateHash(text, language, voice);
     const { key, publicUrl } = await uploadToR2(audioBuffer as Buffer, hash);
-    
+
     // 3. 保存到資料庫
     await saveToDB({
       hash,
