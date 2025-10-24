@@ -16,6 +16,7 @@ import PublishToCommunityModal from '@/components/activities/PublishToCommunityM
 import EditActivityTagsModal from '@/components/activities/EditActivityTagsModal';
 import AssignmentModal, { AssignmentConfig } from '@/components/activities/AssignmentModal';
 import AssignmentSetModal from '@/components/activities/AssignmentSetModal';
+import SRSLearningPanel from '@/components/games/SRSLearningPanel';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
 
@@ -58,6 +59,10 @@ const GameSwitcherPage: React.FC = () => {
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isCopying, setIsCopying] = useState<boolean>(false);
+
+  // SRS 學習模式狀態
+  const [showSRSPanel, setShowSRSPanel] = useState<boolean>(true);
+  const [srsMode, setSrsMode] = useState<boolean>(false);
 
 
 
@@ -192,6 +197,27 @@ const GameSwitcherPage: React.FC = () => {
       return updated;
     });
   }, []);
+
+  // 處理開始 SRS 學習
+  const handleStartSRSLearning = useCallback(() => {
+    console.log('🧠 開始 SRS 學習模式');
+
+    // 轉換 GEPT 等級格式
+    let geptLevelParam = currentGeptLevel.toUpperCase();
+    if (geptLevelParam === 'ADVANCED') {
+      geptLevelParam = 'HIGH_INTERMEDIATE';
+    }
+
+    // 設置 SRS 模式
+    setSrsMode(true);
+
+    // 導航到遊戲頁面並帶上 SRS 參數
+    const gameUrl = `/games/switcher?game=shimozurdo-game&useSRS=true&geptLevel=${geptLevelParam}`;
+    router.push(gameUrl);
+
+    // 隱藏 SRS 面板以顯示遊戲
+    setShowSRSPanel(false);
+  }, [currentGeptLevel, router]);
 
 
 
@@ -537,9 +563,28 @@ const GameSwitcherPage: React.FC = () => {
     const assignmentIdParam = searchParams?.get('assignmentId');
     const studentNameParam = searchParams?.get('studentName');
     const anonymousParam = searchParams?.get('anonymous');
+    const useSRSParam = searchParams?.get('useSRS');
+    const geptLevelParam = searchParams?.get('geptLevel');
 
     if (gameParam) {
       setCurrentGameId(gameParam);
+    }
+
+    // 檢查是否為 SRS 模式
+    if (useSRSParam === 'true') {
+      console.log('🧠 檢測到 SRS 模式');
+      setSrsMode(true);
+      setShowSRSPanel(false);
+
+      // 設置 GEPT 等級
+      if (geptLevelParam) {
+        const levelLower = geptLevelParam.toLowerCase();
+        if (levelLower === 'elementary' || levelLower === 'intermediate') {
+          setCurrentGeptLevel(levelLower);
+        } else if (levelLower === 'high_intermediate') {
+          setCurrentGeptLevel('advanced');
+        }
+      }
     }
 
     if (activityIdParam) {
@@ -1044,6 +1089,20 @@ const GameSwitcherPage: React.FC = () => {
 
       {/* 主要內容 - 手機優化佈局 */}
       <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-2">
+
+        {/* SRS 學習面板 - 只在沒有活動ID且顯示面板時顯示 */}
+        {!activityId && !assignmentId && !isShared && showSRSPanel && (
+          <div className="mb-4">
+            <SRSLearningPanel
+              geptLevel={
+                currentGeptLevel === 'elementary' ? 'ELEMENTARY' :
+                currentGeptLevel === 'intermediate' ? 'INTERMEDIATE' :
+                'HIGH_INTERMEDIATE'
+              }
+              onStartLearning={handleStartSRSLearning}
+            />
+          </div>
+        )}
 
         {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
         <div className="mb-1 sm:mb-2" data-testid="game-container">
