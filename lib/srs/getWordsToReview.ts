@@ -31,7 +31,7 @@ export interface GetWordsToReviewResult {
 
 export async function getWordsToReview(
   userId: string,
-  geptLevel: string = 'elementary',
+  geptLevel: string = 'ELEMENTARY',
   count: number = 15
 ): Promise<GetWordsToReviewResult> {
   console.log('🔍 獲取需要複習的單字');
@@ -39,10 +39,13 @@ export async function getWordsToReview(
   console.log(`  - GEPT 等級: ${geptLevel}`);
   console.log(`  - 數量: ${count}`);
 
+  // 確保 geptLevel 是大寫 (符合 GEPTLevel enum)
+  const normalizedGeptLevel = geptLevel.toUpperCase();
+
   // 1. 獲取該等級的所有單字 (從 TTSCache 表)
   let allWords = await prisma.tTSCache.findMany({
     where: {
-      geptLevel: geptLevel.toUpperCase() as any,
+      geptLevel: normalizedGeptLevel as any,
       language: 'en-US'  // 只獲取英文單字
     },
     select: {

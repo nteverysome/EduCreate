@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     console.log('🔍 測試 5: 查詢 TTSCache 表...');
     try {
       const ttsCacheCount = await prisma.tTSCache.count({
-        where: { geptLevel: 'elementary' }
+        where: { geptLevel: 'ELEMENTARY' }
       });
       results.tests.ttsCacheQuery = {
         success: true,
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
       // 使用 transaction 但不提交
       const testSession = {
         userId,
-        geptLevel: 'elementary',
+        geptLevel: 'ELEMENTARY',
         newWordsCount: 5,
         reviewWordsCount: 10,
         totalWords: 15,
