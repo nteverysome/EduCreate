@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 2. 獲取用戶的學習會話
-    const sessions = await prisma.sRSSession.findMany({
+    const sessions = await prisma.learningSession.findMany({
       where: {
         userId,
         geptLevel
