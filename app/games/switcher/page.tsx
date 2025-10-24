@@ -17,6 +17,7 @@ import EditActivityTagsModal from '@/components/activities/EditActivityTagsModal
 import AssignmentModal, { AssignmentConfig } from '@/components/activities/AssignmentModal';
 import AssignmentSetModal from '@/components/activities/AssignmentSetModal';
 import SRSLearningPanel from '@/components/games/SRSLearningPanel';
+import SRSReviewDetails from '@/components/games/SRSReviewDetails';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
 
@@ -63,6 +64,7 @@ const GameSwitcherPage: React.FC = () => {
   // SRS 學習模式狀態
   const [showSRSPanel, setShowSRSPanel] = useState<boolean>(true);
   const [srsMode, setSrsMode] = useState<boolean>(false);
+  const [srsWordIds, setSrsWordIds] = useState<string[]>([]);
 
 
 
@@ -587,10 +589,11 @@ const GameSwitcherPage: React.FC = () => {
         }
       }
 
-      // 如果有指定單字 IDs,存儲到 localStorage
+      // 如果有指定單字 IDs,存儲到 localStorage 和狀態
       if (wordIdsParam) {
         const wordIds = wordIdsParam.split(',');
         console.log('🎯 接收到指定單字 IDs:', wordIds.length, '個');
+        setSrsWordIds(wordIds);
         if (typeof window !== 'undefined') {
           localStorage.setItem('srs_selected_words', JSON.stringify(wordIds));
         }
@@ -1130,6 +1133,20 @@ const GameSwitcherPage: React.FC = () => {
                 'HIGH_INTERMEDIATE'
               }
               onStartLearning={handleStartSRSLearning}
+            />
+          </div>
+        )}
+
+        {/* SRS 複習詳情 - 只在 SRS 模式且有單字 IDs 時顯示 */}
+        {srsMode && srsWordIds.length > 0 && (
+          <div className="mb-4">
+            <SRSReviewDetails
+              wordIds={srsWordIds}
+              geptLevel={
+                currentGeptLevel === 'elementary' ? 'ELEMENTARY' :
+                currentGeptLevel === 'intermediate' ? 'INTERMEDIATE' :
+                'HIGH_INTERMEDIATE'
+              }
             />
           </div>
         )}
