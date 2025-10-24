@@ -18,7 +18,9 @@ interface SRSLearningPanelProps {
 }
 
 interface SRSStatistics {
-  totalWords: number;
+  totalWords: number; // TTS 記錄總數
+  uniqueWords: number; // 唯一單字數 (該等級新增)
+  cumulativeWords: number; // 累積單字數
   newWords: number;
   reviewWords: number;
   masteredWords: number;
@@ -151,11 +153,27 @@ const SRSLearningPanel: React.FC<SRSLearningPanelProps> = ({ geptLevel, onStartL
         </div>
       </div>
 
-      {/* 統計卡片 */}
+      {/* 單字數量統計 */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-4 border border-blue-200">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <div className="text-sm text-gray-600 mb-1">本級新增單字</div>
+            <div className="text-3xl font-bold text-blue-600">{stats.uniqueWords}</div>
+            <div className="text-xs text-gray-500 mt-1">該等級獨有的單字</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-600 mb-1">累積總單字</div>
+            <div className="text-3xl font-bold text-indigo-600">{stats.cumulativeWords}</div>
+            <div className="text-xs text-gray-500 mt-1">包含之前等級的單字</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 學習進度統計 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {/* 新單字 */}
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-          <div className="text-sm text-gray-600 mb-1">新單字</div>
+          <div className="text-sm text-gray-600 mb-1">待學習</div>
           <div className="text-2xl font-bold text-blue-600">{stats.newWords}</div>
         </div>
 

@@ -7,6 +7,8 @@ import Link from 'next/link';
 
 interface SRSStatistics {
   totalWords: number;
+  uniqueWords: number; // 唯一單字數
+  cumulativeWords: number; // 累積單字數
   newWords: number;
   reviewWords: number;
   masteredWords: number;
@@ -137,10 +139,27 @@ export default function StatisticsPage() {
           </p>
         </div>
 
-        {/* 統計卡片 */}
+        {/* 單字數量統計 */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">單字數量統計</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="text-sm text-gray-600 mb-2">本級新增單字</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">{statistics.uniqueWords}</div>
+              <div className="text-xs text-gray-500">該等級獨有的單字</div>
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="text-sm text-gray-600 mb-2">累積總單字</div>
+              <div className="text-4xl font-bold text-indigo-600 mb-2">{statistics.cumulativeWords}</div>
+              <div className="text-xs text-gray-500">包含之前等級的單字</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 學習進度統計 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="text-sm text-gray-600 mb-2">新單字</div>
+            <div className="text-sm text-gray-600 mb-2">待學習</div>
             <div className="text-3xl font-bold text-blue-600">{statistics.newWords}</div>
           </div>
 

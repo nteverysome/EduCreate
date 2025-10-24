@@ -37,20 +37,48 @@ export async function GET(request: NextRequest) {
     console.log(`  - 用戶 ID: ${userId}`);
     console.log(`  - GEPT 等級: ${geptLevel || '全部'}`);
 
-    // 3. 獲取該等級的所有單字總數
-    const totalWordsCount = geptLevel
-      ? await prisma.tTSCache.count({ where: { geptLevel } })
-      : await prisma.tTSCache.count();
-
-    // 4. 獲取該 GEPT 等級的所有 TTS 單字 (用於過濾)
+    // 3. 獲取該等級的所有 TTS 單字
     const ttsWords = geptLevel
       ? await prisma.tTSCache.findMany({
           where: { geptLevel },
           select: { text: true }
         })
-      : [];
+      : await prisma.tTSCache.findMany({
+          select: { text: true }
+        });
 
-    const ttsEnglishSet = new Set(ttsWords.map(w => w.text.toLowerCase()));
+    // 計算唯一單字數 (去除重複)
+    const uniqueWords = new Set(ttsWords.map(w => w.text.toLowerCase()));
+    const uniqueWordsCount = uniqueWords.size;
+    const totalWordsCount = ttsWords.length; // TTS 記錄總數 (包含 4 個版本)
+
+    // 計算累積單字數
+    let cumulativeWordsCount = uniqueWordsCount;
+    if (geptLevel) {
+      // 如果是中級,加上初級的單字
+      if (geptLevel === 'INTERMEDIATE') {
+        const elementaryWords = await prisma.tTSCache.findMany({
+          where: { geptLevel: 'ELEMENTARY' },
+          select: { text: true }
+        });
+        const elementaryUnique = new Set(elementaryWords.map(w => w.text.toLowerCase()));
+        cumulativeWordsCount += elementaryUnique.size;
+      }
+      // 如果是高級,加上初級和中級的單字
+      else if (geptLevel === 'HIGH_INTERMEDIATE') {
+        const elementaryWords = await prisma.tTSCache.findMany({
+          where: { geptLevel: 'ELEMENTARY' },
+          select: { text: true }
+        });
+        const intermediateWords = await prisma.tTSCache.findMany({
+          where: { geptLevel: 'INTERMEDIATE' },
+          select: { text: true }
+        });
+        const elementaryUnique = new Set(elementaryWords.map(w => w.text.toLowerCase()));
+        const intermediateUnique = new Set(intermediateWords.map(w => w.text.toLowerCase()));
+        cumulativeWordsCount += elementaryUnique.size + intermediateUnique.size;
+      }
+    }
 
     // 5. 獲取用戶的學習進度
     const progressWhere: any = { userId };
@@ -70,7 +98,7 @@ export async function GET(request: NextRequest) {
 
     // 6. 根據 TTS 單字列表過濾 GEPT 等級
     const filteredProgress = geptLevel
-      ? allProgress.filter(p => p.word && ttsEnglishSet.has(p.word.english.toLowerCase()))
+      ? allProgress.filter(p => p.word && uniqueWords.has(p.word.english.toLowerCase()))
       : allProgress;
 
     // 7. 獲取學習會話 (根據 GEPT 等級過濾)
@@ -86,7 +114,7 @@ export async function GET(request: NextRequest) {
 
     // 8. 計算統計數據
     const learnedWords = filteredProgress.length;
-    const newWords = Math.max(0, totalWordsCount - learnedWords);
+    const newWords = Math.max(0, uniqueWordsCount - learnedWords); // 使用唯一單字數
 
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -144,8 +172,10 @@ export async function GET(request: NextRequest) {
     // 返回兩種格式的數據以兼容不同的前端組件
     return NextResponse.json({
       // 新格式 (SRSLearningPanel 使用)
-      totalWords: totalWordsCount,
-      newWords,
+      totalWords: totalWordsCount, // TTS 記錄總數 (包含 4 個版本)
+      uniqueWords: uniqueWordsCount, // 唯一單字數 (該等級新增的單字)
+      cumulativeWords: cumulativeWordsCount, // 累積單字數 (包含之前等級的單字)
+      newWords, // 新單字數 (唯一單字數 - 已學習)
       reviewWords,
       masteredWords,
       todayReviews,
