@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     // 5. 根據 audioUrl 過濾 GEPT 等級
     const filteredProgress = geptLevel
-      ? allProgress.filter(p => p.word.audioUrl?.toLowerCase().includes(geptLevel.toLowerCase()))
+      ? allProgress.filter(p => p.word?.audioUrl?.toLowerCase().includes(geptLevel.toLowerCase()))
       : allProgress;
 
     // 6. 獲取學習會話 (根據 GEPT 等級過濾)
