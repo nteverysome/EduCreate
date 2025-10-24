@@ -81,9 +81,9 @@ export async function GET(request: NextRequest) {
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    // 需要複習的單字 (nextReviewDate <= 今天)
+    // 需要複習的單字 (nextReviewAt <= 今天)
     const reviewWords = filteredProgress.filter(p =>
-      new Date(p.nextReviewDate) <= now
+      new Date(p.nextReviewAt) <= now
     ).length;
 
     // 已掌握的單字 (memoryStrength >= 80)
