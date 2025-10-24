@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getWordsToReview } from '@/lib/srs/getWordsToReview';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/srs/words-to-review
  * 獲取需要學習的單字 (新單字 + 複習單字)

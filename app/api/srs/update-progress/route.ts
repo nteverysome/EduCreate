@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { updateWithSM2 } from '@/lib/srs/sm2';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/srs/update-progress
  * 更新單字的學習進度 (使用 SM-2 算法)

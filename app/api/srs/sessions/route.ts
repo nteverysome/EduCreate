@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { getWordsToReview } from '@/lib/srs/getWordsToReview';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/srs/sessions
  * 創建學習會話

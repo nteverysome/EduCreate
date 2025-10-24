@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { GEPTLevel } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/srs/statistics
  * 獲取學習統計
