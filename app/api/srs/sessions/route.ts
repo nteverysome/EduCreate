@@ -23,7 +23,19 @@ export async function POST(request: NextRequest) {
 
     const userId = session.user.id;
     const body = await request.json();
-    const { geptLevel, wordIds } = body;
+    let { geptLevel, wordIds } = body;
+
+    // 標準化 geptLevel 格式 (轉換為大寫)
+    if (geptLevel) {
+      geptLevel = geptLevel.toUpperCase().replace('-', '_');
+      // elementary -> ELEMENTARY
+      // intermediate -> INTERMEDIATE
+      // high-intermediate -> HIGH_INTERMEDIATE
+      // advanced -> HIGH_INTERMEDIATE
+      if (geptLevel === 'ADVANCED') {
+        geptLevel = 'HIGH_INTERMEDIATE';
+      }
+    }
 
     console.log('🔄 創建 SRS 學習會話');
     console.log(`  - 用戶 ID: ${userId}`);
