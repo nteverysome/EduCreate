@@ -165,28 +165,38 @@ export async function getWordsToReview(
 
   // 6. 為每個單字創建或獲取 VocabularyItem
   const createOrGetVocabItem = async (ttsWord: any, chinese: string) => {
-    // 嘗試查找現有的 VocabularyItem
-    let vocabItem = await prisma.vocabularyItem.findFirst({
-      where: {
-        english: ttsWord.text,
-        chinese: chinese
-      }
-    });
+    console.log(`🔍 處理單字: ${ttsWord.text} (${chinese})`);
 
-    // 如果不存在,創建新的
-    if (!vocabItem) {
-      vocabItem = await prisma.vocabularyItem.create({
-        data: {
+    try {
+      // 嘗試查找現有的 VocabularyItem
+      let vocabItem = await prisma.vocabularyItem.findFirst({
+        where: {
           english: ttsWord.text,
-          chinese: chinese,
-          audioUrl: ttsWord.audioUrl,
-          difficultyLevel: 1
+          chinese: chinese
         }
       });
-      console.log(`  - 創建 VocabularyItem: ${ttsWord.text} (${vocabItem.id})`);
-    }
 
-    return vocabItem;
+      if (vocabItem) {
+        console.log(`  ✅ 找到現有 VocabularyItem: ${vocabItem.id}`);
+      } else {
+        // 如果不存在,創建新的
+        console.log(`  🆕 創建新 VocabularyItem...`);
+        vocabItem = await prisma.vocabularyItem.create({
+          data: {
+            english: ttsWord.text,
+            chinese: chinese,
+            audioUrl: ttsWord.audioUrl,
+            difficultyLevel: 1
+          }
+        });
+        console.log(`  ✅ 創建成功: ${vocabItem.id}`);
+      }
+
+      return vocabItem;
+    } catch (error) {
+      console.error(`  ❌ 處理 VocabularyItem 失敗:`, error);
+      throw error;
+    }
   };
 
   // 7. 合併單字列表 (使用 VocabularyItem.id)
