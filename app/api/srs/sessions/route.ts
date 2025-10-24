@@ -48,28 +48,49 @@ export async function POST(request: NextRequest) {
     if (wordIds && wordIds.length > 0) {
       // 如果指定了單字 ID,則使用指定的單字
       console.log('🎯 使用指定的單字 IDs...');
+      console.log('  - wordIds 類型:', typeof wordIds);
+      console.log('  - wordIds 是否為陣列:', Array.isArray(wordIds));
+      console.log('  - wordIds 內容:', JSON.stringify(wordIds).substring(0, 200));
 
-      const vocabularyItems = await prisma.vocabularyItem.findMany({
-        where: {
-          id: { in: wordIds }
-          // 不過濾 geptLevel,因為用戶可能選擇了不同等級的單字
-        },
-        include: {
-          ttsCache: {
-            where: {
-              language: 'zh-TW'
+      let vocabularyItems;
+      try {
+        vocabularyItems = await prisma.vocabularyItem.findMany({
+          where: {
+            id: { in: wordIds }
+            // 不過濾 geptLevel,因為用戶可能選擇了不同等級的單字
+          },
+          include: {
+            ttsCache: {
+              where: {
+                language: 'zh-TW'
+              }
             }
           }
-        }
-      });
+        });
+
+        console.log(`  - 查詢到 ${vocabularyItems.length} 個單字`);
+      } catch (queryError: any) {
+        console.error('❌ Prisma 查詢失敗:', queryError);
+        console.error('  - 錯誤訊息:', queryError.message);
+        console.error('  - 錯誤代碼:', queryError.code);
+        throw queryError;
+      }
 
       // 獲取用戶的學習進度
-      const userProgress = await prisma.userWordProgress.findMany({
-        where: {
-          userId,
-          wordId: { in: wordIds }
-        }
-      });
+      let userProgress;
+      try {
+        userProgress = await prisma.userWordProgress.findMany({
+          where: {
+            userId,
+            wordId: { in: wordIds }
+          }
+        });
+        console.log(`  - 查詢到 ${userProgress.length} 個學習進度記錄`);
+      } catch (progressError: any) {
+        console.error('❌ 學習進度查詢失敗:', progressError);
+        console.error('  - 錯誤訊息:', progressError.message);
+        throw progressError;
+      }
 
       const progressMap = new Map(userProgress.map(p => [p.wordId, p]));
 
