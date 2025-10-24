@@ -63,6 +63,13 @@ export async function POST(request: NextRequest) {
         });
 
         console.log(`  - 查詢到 ${vocabularyItems.length} 個單字`);
+        if (vocabularyItems.length > 0) {
+          console.log(`  - 第一個單字範例:`, {
+            id: vocabularyItems[0].id,
+            english: vocabularyItems[0].english,
+            chinese: vocabularyItems[0].chinese
+          });
+        }
 
         // 獲取 TTS 音頻 URL (通過 text 查詢,因為沒有直接關聯)
         const ttsCache = await prisma.tTSCache.findMany({
