@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import {
   Chart as ChartJS,
@@ -60,7 +60,7 @@ interface ForgettingCurveData {
   };
 }
 
-export default function ForgettingCurvePage() {
+function ForgettingCurveContent() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -70,22 +70,11 @@ export default function ForgettingCurvePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-      return;
-    }
-
-    if (status === 'authenticated') {
-      fetchForgettingCurveData();
-    }
-  }, [status, geptLevel]);
-
   const fetchForgettingCurveData = async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/srs/forgetting-curve?geptLevel=${geptLevel}`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch forgetting curve data');
       }
@@ -98,6 +87,18 @@ export default function ForgettingCurvePage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+      return;
+    }
+
+    if (status === 'authenticated') {
+      fetchForgettingCurveData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, geptLevel]);
 
   const getLevelName = (level: string) => {
     switch (level) {
@@ -331,3 +332,17 @@ export default function ForgettingCurvePage() {
   );
 }
 
+export default function ForgettingCurvePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">載入中...</p>
+        </div>
+      </div>
+    }>
+      <ForgettingCurveContent />
+    </Suspense>
+  );
+}
