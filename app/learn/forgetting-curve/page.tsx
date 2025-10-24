@@ -60,6 +60,154 @@ interface ForgettingCurveData {
   };
 }
 
+// 單字列表組件
+function WordListSection({
+  title,
+  words,
+  color,
+  icon,
+  description,
+  isExpanded,
+  onToggle,
+  getRelativeTime,
+  onStartReview,
+}: {
+  title: string;
+  words: WordProgress[];
+  color: 'red' | 'blue' | 'green' | 'gray';
+  icon: string;
+  description: string;
+  isExpanded: boolean;
+  onToggle: () => void;
+  getRelativeTime: (date: string) => string;
+  onStartReview: (wordIds: string[]) => void;
+}) {
+  const colorClasses = {
+    red: {
+      bg: 'bg-red-50',
+      border: 'border-red-200',
+      text: 'text-red-600',
+      button: 'bg-red-600 hover:bg-red-700',
+      badge: 'bg-red-100 text-red-600',
+    },
+    blue: {
+      bg: 'bg-blue-50',
+      border: 'border-blue-200',
+      text: 'text-blue-600',
+      button: 'bg-blue-600 hover:bg-blue-700',
+      badge: 'bg-blue-100 text-blue-600',
+    },
+    green: {
+      bg: 'bg-green-50',
+      border: 'border-green-200',
+      text: 'text-green-600',
+      button: 'bg-green-600 hover:bg-green-700',
+      badge: 'bg-green-100 text-green-600',
+    },
+    gray: {
+      bg: 'bg-gray-50',
+      border: 'border-gray-200',
+      text: 'text-gray-600',
+      button: 'bg-gray-600 hover:bg-gray-700',
+      badge: 'bg-gray-100 text-gray-600',
+    },
+  };
+
+  const colors = colorClasses[color];
+
+  if (words.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={`${colors.bg} rounded-lg shadow-lg p-6 mb-6 border-2 ${colors.border}`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <h2 className={`text-2xl font-bold ${colors.text}`}>
+            {icon} {title} ({words.length})
+          </h2>
+        </div>
+        <div className="flex gap-2">
+          {words.length > 0 && (
+            <button
+              onClick={() => onStartReview(words.map(w => w.id))}
+              className={`${colors.button} text-white px-4 py-2 rounded-lg font-medium transition-colors`}
+            >
+              立即複習
+            </button>
+          )}
+          <button
+            onClick={onToggle}
+            className="text-gray-600 hover:text-gray-800 px-3 py-2 rounded-lg hover:bg-white transition-colors"
+          >
+            {isExpanded ? '收起 ▲' : '展開 ▼'}
+          </button>
+        </div>
+      </div>
+
+      <p className="text-gray-600 mb-4">{description}</p>
+
+      {isExpanded && (
+        <div className="overflow-x-auto bg-white rounded-lg">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left font-semibold text-gray-700">單字</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-700">中文</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-700">記憶強度</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-700">複習次數</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-700">正確率</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-700">下次複習</th>
+              </tr>
+            </thead>
+            <tbody>
+              {words.map((word, index) => (
+                <tr key={word.id} className={`border-t hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <td className="px-4 py-3 font-medium text-gray-900">{word.word}</td>
+                  <td className="px-4 py-3 text-gray-600">{word.translation}</td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${colors.badge}`}>
+                        {word.memoryStrength}%
+                      </span>
+                      <div className="w-full bg-gray-200 rounded-full h-2 max-w-[100px]">
+                        <div
+                          className={`h-2 rounded-full ${colors.button}`}
+                          style={{ width: `${word.memoryStrength}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-center text-gray-700">{word.reviewCount}</td>
+                  <td className="px-4 py-3 text-center">
+                    {word.reviewCount > 0 ? (
+                      <span className="font-medium text-gray-700">
+                        {Math.round((word.correctCount / word.reviewCount) * 100)}%
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex flex-col">
+                      <span className={`font-medium ${colors.text}`}>
+                        {getRelativeTime(word.nextReviewAt)}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {new Date(word.nextReviewAt).toLocaleDateString('zh-TW')}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ForgettingCurveContent() {
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
@@ -69,6 +217,32 @@ function ForgettingCurveContent() {
   const [data, setData] = useState<ForgettingCurveData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string>('forgetting'); // 默認展開正在遺忘
+
+  // 計算相對時間
+  const getRelativeTime = (dateString: string) => {
+    const now = new Date();
+    const reviewDate = new Date(dateString);
+    const diffMs = reviewDate.getTime() - now.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return `${Math.abs(diffDays)}天前應該複習`;
+    } else if (diffDays === 0) {
+      return '今天應該複習';
+    } else if (diffDays === 1) {
+      return '明天複習';
+    } else {
+      return `${diffDays}天後複習`;
+    }
+  };
+
+  // 開始複習
+  const handleStartReview = (wordIds: string[]) => {
+    // TODO: 創建複習會話並跳轉到遊戲
+    console.log('開始複習單字:', wordIds);
+    router.push(`/games/switcher?useSRS=true&geptLevel=${geptLevel}&reviewMode=true`);
+  };
 
   const fetchForgettingCurveData = async () => {
     try {
@@ -282,51 +456,60 @@ function ForgettingCurveContent() {
           </div>
         </div>
 
-        {/* 單字列表 - 正在遺忘 */}
-        {data.forgettingWords.length > 0 && (
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">
-              🚨 正在遺忘的單字 ({data.forgettingWords.length})
-            </h2>
-            <p className="text-gray-600 mb-4">這些單字需要立即複習以防止遺忘</p>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-2 text-left">單字</th>
-                    <th className="px-4 py-2 text-left">中文</th>
-                    <th className="px-4 py-2 text-center">記憶強度</th>
-                    <th className="px-4 py-2 text-center">複習次數</th>
-                    <th className="px-4 py-2 text-center">正確率</th>
-                    <th className="px-4 py-2 text-left">下次複習</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.forgettingWords.slice(0, 20).map((word) => (
-                    <tr key={word.id} className="border-t hover:bg-gray-50">
-                      <td className="px-4 py-2 font-medium">{word.word}</td>
-                      <td className="px-4 py-2 text-gray-600">{word.translation}</td>
-                      <td className="px-4 py-2 text-center">
-                        <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-600">
-                          {word.memoryStrength}%
-                        </span>
-                      </td>
-                      <td className="px-4 py-2 text-center">{word.reviewCount}</td>
-                      <td className="px-4 py-2 text-center">
-                        {word.reviewCount > 0
-                          ? `${Math.round((word.correctCount / word.reviewCount) * 100)}%`
-                          : 'N/A'}
-                      </td>
-                      <td className="px-4 py-2 text-sm text-gray-600">
-                        {new Date(word.nextReviewAt).toLocaleDateString('zh-TW')}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        {/* 單字詳細列表 */}
+        <div className="space-y-6">
+          {/* 正在遺忘的單字 */}
+          <WordListSection
+            title="正在遺忘的單字"
+            words={data.forgettingWords}
+            color="red"
+            icon="🚨"
+            description="這些單字需要立即複習以防止遺忘 (記憶強度 20-80% 且逾期 3+ 天)"
+            isExpanded={expandedSection === 'forgetting'}
+            onToggle={() => setExpandedSection(expandedSection === 'forgetting' ? '' : 'forgetting')}
+            getRelativeTime={getRelativeTime}
+            onStartReview={handleStartReview}
+          />
+
+          {/* 學習中的單字 */}
+          <WordListSection
+            title="學習中的單字"
+            words={data.learningWords}
+            color="blue"
+            icon="📚"
+            description="這些單字正在學習中,記憶強度在 20-80% 之間"
+            isExpanded={expandedSection === 'learning'}
+            onToggle={() => setExpandedSection(expandedSection === 'learning' ? '' : 'learning')}
+            getRelativeTime={getRelativeTime}
+            onStartReview={handleStartReview}
+          />
+
+          {/* 已掌握的單字 */}
+          <WordListSection
+            title="已掌握的單字"
+            words={data.masteredWords}
+            color="green"
+            icon="✅"
+            description="這些單字已經掌握,記憶強度 ≥ 80%"
+            isExpanded={expandedSection === 'mastered'}
+            onToggle={() => setExpandedSection(expandedSection === 'mastered' ? '' : 'mastered')}
+            getRelativeTime={getRelativeTime}
+            onStartReview={handleStartReview}
+          />
+
+          {/* 新單字 */}
+          <WordListSection
+            title="新單字"
+            words={data.newWords}
+            color="gray"
+            icon="🆕"
+            description="這些是尚未開始學習的新單字,記憶強度 < 20%"
+            isExpanded={expandedSection === 'new'}
+            onToggle={() => setExpandedSection(expandedSection === 'new' ? '' : 'new')}
+            getRelativeTime={getRelativeTime}
+            onStartReview={handleStartReview}
+          />
+        </div>
       </div>
     </div>
   );
