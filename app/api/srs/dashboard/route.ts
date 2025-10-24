@@ -121,7 +121,70 @@ export async function GET(request: NextRequest) {
       nextReview: p.nextReviewAt.toISOString()
     }));
 
-    // 10. 返回數據
+    // 10. 分類單字（遺忘曲線數據）
+    const now = new Date();
+    const forgettingWords: any[] = [];
+    const masteredWordsList: any[] = [];
+    const learningWordsList: any[] = [];
+    const newWordsList: any[] = [];
+
+    // 獲取所有會話 ID 用於查詢複習記錄
+    const sessionIds = sessions.map(s => s.id);
+    const wordReviews = await prisma.wordReview.findMany({
+      where: {
+        sessionId: { in: sessionIds }
+      },
+      orderBy: {
+        reviewedAt: 'desc'
+      }
+    });
+
+    // 創建 wordId -> reviews 的映射
+    const reviewsByWordId = new Map<string, any[]>();
+    wordReviews.forEach(review => {
+      if (!reviewsByWordId.has(review.wordId)) {
+        reviewsByWordId.set(review.wordId, []);
+      }
+      reviewsByWordId.get(review.wordId)!.push(review);
+    });
+
+    filteredProgress.forEach(progress => {
+      const wordReviewList = reviewsByWordId.get(progress.wordId) || [];
+
+      const wordData = {
+        id: progress.wordId,
+        word: progress.word.english,
+        translation: progress.word.chinese,
+        memoryStrength: progress.memoryStrength,
+        nextReviewAt: progress.nextReviewAt.toISOString(),
+        lastReviewedAt: progress.lastReviewedAt?.toISOString() || progress.firstLearnedAt.toISOString(),
+        status: progress.status,
+        reviewCount: wordReviewList.length,
+        correctCount: wordReviewList.filter(r => r.isCorrect).length,
+        incorrectCount: wordReviewList.filter(r => !r.isCorrect).length,
+      };
+
+      // 判斷遺忘狀態
+      const lastReviewDate = progress.lastReviewedAt || progress.firstLearnedAt;
+      const daysSinceLastReview = Math.floor(
+        (now.getTime() - lastReviewDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const isOverdue = progress.nextReviewAt < now;
+
+      if (progress.memoryStrength >= 80) {
+        masteredWordsList.push(wordData);
+      } else if (progress.memoryStrength >= 20 && progress.memoryStrength < 80) {
+        if (isOverdue && daysSinceLastReview > 3) {
+          forgettingWords.push(wordData);
+        } else {
+          learningWordsList.push(wordData);
+        }
+      } else {
+        newWordsList.push(wordData);
+      }
+    });
+
+    // 11. 返回數據
     return NextResponse.json({
       totalDays,
       totalTime,
@@ -132,7 +195,12 @@ export async function GET(request: NextRequest) {
       averageAccuracy,
       dailyStats,
       memoryStrengthDistribution,
-      recentWords
+      recentWords,
+      // 遺忘曲線數據
+      forgettingWords,
+      masteredWordsList,
+      learningWordsList,
+      newWordsList
     });
 
   } catch (error) {

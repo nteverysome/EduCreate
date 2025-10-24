@@ -30,6 +30,19 @@ ChartJS.register(
   Filler
 );
 
+interface WordProgress {
+  id: string;
+  word: string;
+  translation: string;
+  memoryStrength: number;
+  nextReviewAt: string;
+  lastReviewedAt: string;
+  status: string;
+  reviewCount: number;
+  correctCount: number;
+  incorrectCount: number;
+}
+
 interface DashboardData {
   totalDays: number;
   totalTime: number;
@@ -55,6 +68,11 @@ interface DashboardData {
     lastReviewed: string;
     nextReview: string;
   }[];
+  // 遺忘曲線數據
+  forgettingWords: WordProgress[];
+  masteredWordsList: WordProgress[];
+  learningWordsList: WordProgress[];
+  newWordsList: WordProgress[];
 }
 
 export default function DashboardPage() {
@@ -243,6 +261,113 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <h2 className="text-xl font-bold text-gray-800 mb-4">🧠 記憶強度分布</h2>
           <Bar data={memoryDistributionChartData} options={{ responsive: true, maintainAspectRatio: true }} />
+        </div>
+
+        {/* 單字分類列表（遺忘曲線） */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* 正在遺忘的單字 */}
+          {data.forgettingWords && data.forgettingWords.length > 0 && (
+            <div className="bg-red-50 border-2 border-red-200 rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-red-600">⚠️ 正在遺忘 ({data.forgettingWords.length})</h2>
+              </div>
+              <p className="text-sm text-red-600 mb-4">這些單字需要立即複習以防止遺忘</p>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {data.forgettingWords.slice(0, 10).map((word) => (
+                  <div key={word.id} className="bg-white rounded-lg p-3 border border-red-200">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-medium text-gray-900">{word.word}</div>
+                        <div className="text-sm text-gray-600">{word.translation}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-red-600">{word.memoryStrength}%</div>
+                        <div className="text-xs text-gray-500">複習 {word.reviewCount} 次</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 學習中的單字 */}
+          {data.learningWordsList && data.learningWordsList.length > 0 && (
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-blue-600">📖 學習中 ({data.learningWordsList.length})</h2>
+              </div>
+              <p className="text-sm text-blue-600 mb-4">這些單字正在學習中，繼續加油！</p>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {data.learningWordsList.slice(0, 10).map((word) => (
+                  <div key={word.id} className="bg-white rounded-lg p-3 border border-blue-200">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-medium text-gray-900">{word.word}</div>
+                        <div className="text-sm text-gray-600">{word.translation}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-blue-600">{word.memoryStrength}%</div>
+                        <div className="text-xs text-gray-500">複習 {word.reviewCount} 次</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 已掌握的單字 */}
+          {data.masteredWordsList && data.masteredWordsList.length > 0 && (
+            <div className="bg-green-50 border-2 border-green-200 rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-green-600">✅ 已掌握 ({data.masteredWordsList.length})</h2>
+              </div>
+              <p className="text-sm text-green-600 mb-4">恭喜！這些單字你已經掌握了</p>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {data.masteredWordsList.slice(0, 10).map((word) => (
+                  <div key={word.id} className="bg-white rounded-lg p-3 border border-green-200">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-medium text-gray-900">{word.word}</div>
+                        <div className="text-sm text-gray-600">{word.translation}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-green-600">{word.memoryStrength}%</div>
+                        <div className="text-xs text-gray-500">複習 {word.reviewCount} 次</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 新單字 */}
+          {data.newWordsList && data.newWordsList.length > 0 && (
+            <div className="bg-gray-50 border-2 border-gray-200 rounded-xl shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-600">🆕 新單字 ({data.newWordsList.length})</h2>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">這些是你還沒開始學習的單字</p>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {data.newWordsList.slice(0, 10).map((word) => (
+                  <div key={word.id} className="bg-white rounded-lg p-3 border border-gray-200">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-medium text-gray-900">{word.word}</div>
+                        <div className="text-sm text-gray-600">{word.translation}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-gray-600">{word.memoryStrength}%</div>
+                        <div className="text-xs text-gray-500">複習 {word.reviewCount} 次</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 最近學習的單字 */}
