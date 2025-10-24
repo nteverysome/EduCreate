@@ -116,8 +116,8 @@ export async function POST(request: NextRequest) {
 
         return {
           id: item.id,
-          word: item.english,
-          translation: item.chinese,
+          english: item.english,  // 🔧 修復：使用 english 而非 word
+          chinese: item.chinese,  // 🔧 修復：使用 chinese 而非 translation
           geptLevel: geptLevel, // 使用請求中的 geptLevel
           audioUrl: ttsCacheMap.get(item.english) || null,
           isNew,
