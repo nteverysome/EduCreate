@@ -1090,20 +1090,6 @@ const GameSwitcherPage: React.FC = () => {
       {/* 主要內容 - 手機優化佈局 */}
       <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-2">
 
-        {/* SRS 學習面板 - 只在沒有活動ID且顯示面板時顯示 */}
-        {!activityId && !assignmentId && !isShared && showSRSPanel && (
-          <div className="mb-4">
-            <SRSLearningPanel
-              geptLevel={
-                currentGeptLevel === 'elementary' ? 'ELEMENTARY' :
-                currentGeptLevel === 'intermediate' ? 'INTERMEDIATE' :
-                'HIGH_INTERMEDIATE'
-              }
-              onStartLearning={handleStartSRSLearning}
-            />
-          </div>
-        )}
-
         {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
         <div className="mb-1 sm:mb-2" data-testid="game-container">
           <GameSwitcher
@@ -1123,6 +1109,20 @@ const GameSwitcherPage: React.FC = () => {
             isAnonymous={isAnonymous}
           />
         </div>
+
+        {/* SRS 學習面板 - 放在遊戲容器下面，只在沒有活動ID且顯示面板時顯示 */}
+        {!activityId && !assignmentId && !isShared && showSRSPanel && (
+          <div className="mb-4">
+            <SRSLearningPanel
+              geptLevel={
+                currentGeptLevel === 'elementary' ? 'ELEMENTARY' :
+                currentGeptLevel === 'intermediate' ? 'INTERMEDIATE' :
+                'HIGH_INTERMEDIATE'
+              }
+              onStartLearning={handleStartSRSLearning}
+            />
+          </div>
+        )}
 
         {/* 增強版活動信息框 - 只在有 activityId 且不是學生模式時顯示 */}
         {activityId && !assignmentId && !isShared && activityInfo && (
