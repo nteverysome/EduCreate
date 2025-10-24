@@ -239,7 +239,7 @@ function ForgettingCurveContent() {
           <div className="bg-gray-50 rounded-lg shadow-lg p-6 border-2 border-gray-200">
             <div className="text-sm text-gray-700 mb-2">新單字</div>
             <div className="text-3xl font-bold text-gray-600">{data.newWords.length}</div>
-            <div className="text-xs text-gray-600 mt-1">記憶強度 < 20%</div>
+            <div className="text-xs text-gray-600 mt-1">記憶強度 &lt; 20%</div>
           </div>
         </div>
 
