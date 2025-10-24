@@ -130,14 +130,16 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // 7. 測試 WordReview 查詢
+    // 7. 測試 WordReview 查詢 (通過 session 關聯)
     try {
       const todayStart = new Date();
       todayStart.setHours(0, 0, 0, 0);
 
       const todayReviews = await prisma.wordReview.count({
         where: {
-          userId,
+          session: {
+            userId
+          },
           reviewedAt: {
             gte: todayStart
           }
