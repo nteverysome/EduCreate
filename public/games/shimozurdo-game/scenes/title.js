@@ -896,7 +896,9 @@ export default class Title extends Phaser.Scene {
                 console.log('🧠 SRS 目標詞彙:', this.currentTargetWord.chinese, this.currentTargetWord.english);
                 console.log(`  - 進度: ${this.srsManager.currentWordIndex + 1}/${this.srsManager.words.length}`);
             } else {
-                console.warn('⚠️ SRS 模式: 無法獲取當前單字');
+                // 🎉 所有單字都已完成！
+                console.log('🎉 恭喜！所有單字都已完成！');
+                this.gameOver();
                 return;
             }
         } else {
