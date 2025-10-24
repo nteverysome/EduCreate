@@ -1824,11 +1824,11 @@ export default class Title extends Phaser.Scene {
         // 遊戲結束標題
         const gameOverText = this.add.text(
             this.cameras.main.centerX,
-            this.cameras.main.centerY - 150,
-            '遊戲結束',
+            this.cameras.main.centerY - 200,
+            '🎉 學習完成！',
             {
                 fontSize: '48px',
-                color: '#ff4444',
+                color: '#44ff44',
                 fontStyle: 'bold',
                 stroke: '#000000',
                 strokeThickness: 4
@@ -1838,10 +1838,10 @@ export default class Title extends Phaser.Scene {
         gameOverText.setScrollFactor(0);
         gameOverText.setDepth(1001);
 
-        // 分數顯示
+        // 基本統計
         const scoreText = this.add.text(
             this.cameras.main.centerX,
-            this.cameras.main.centerY - 50,
+            this.cameras.main.centerY - 130,
             `最終分數: ${gameResult.score}\n學會單字: ${gameResult.correctAnswers}\n遊戲時間: ${gameResult.timeSpent}秒`,
             {
                 fontSize: '24px',
@@ -1856,11 +1856,61 @@ export default class Title extends Phaser.Scene {
         scoreText.setScrollFactor(0);
         scoreText.setDepth(1001);
 
+        // 🧠 SRS 學習總結
+        if (gameResult.srsStats && this.srsManager) {
+            const srsText = this.add.text(
+                this.cameras.main.centerX,
+                this.cameras.main.centerY - 30,
+                `\n📊 學習總結\n正確率: ${gameResult.srsStats.accuracy.toFixed(1)}%\n答對: ${gameResult.srsStats.correctAnswers}/${gameResult.srsStats.totalAnswers}`,
+                {
+                    fontSize: '20px',
+                    color: '#ffff44',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 2,
+                    align: 'center'
+                }
+            );
+            srsText.setOrigin(0.5);
+            srsText.setScrollFactor(0);
+            srsText.setDepth(1001);
+
+            // 🧠 顯示單字進度變化（如果有）
+            if (gameResult.srsStats.wordDetails && gameResult.srsStats.wordDetails.length > 0) {
+                // 只顯示前 3 個單字的進度變化
+                const topWords = gameResult.srsStats.wordDetails.slice(0, 3);
+                let wordProgressText = '\n記憶強度提升:\n';
+
+                topWords.forEach(word => {
+                    const strengthChange = word.memoryStrength - (word.previousStrength || 0);
+                    const arrow = strengthChange > 0 ? '⬆️' : strengthChange < 0 ? '⬇️' : '➡️';
+                    wordProgressText += `${word.english}: ${word.previousStrength || 0}% → ${word.memoryStrength}% ${arrow}\n`;
+                });
+
+                const wordDetailsText = this.add.text(
+                    this.cameras.main.centerX,
+                    this.cameras.main.centerY + 40,
+                    wordProgressText,
+                    {
+                        fontSize: '16px',
+                        color: '#aaffaa',
+                        fontStyle: 'bold',
+                        stroke: '#000000',
+                        strokeThickness: 2,
+                        align: 'center'
+                    }
+                );
+                wordDetailsText.setOrigin(0.5);
+                wordDetailsText.setScrollFactor(0);
+                wordDetailsText.setDepth(1001);
+            }
+        }
+
         // 結果提交狀態
         if (resultSubmitted) {
             const submitText = this.add.text(
                 this.cameras.main.centerX,
-                this.cameras.main.centerY + 50,
+                this.cameras.main.centerY + 120,
                 '✅ 結果已成功記錄到課業系統',
                 {
                     fontSize: '18px',
@@ -1878,8 +1928,8 @@ export default class Title extends Phaser.Scene {
         // 重新開始按鈕
         const restartButton = this.add.text(
             this.cameras.main.centerX,
-            this.cameras.main.centerY + 120,
-            '點擊重新開始',
+            this.cameras.main.centerY + 180,
+            '🔄 點擊重新開始',
             {
                 fontSize: '20px',
                 color: '#ffff44',

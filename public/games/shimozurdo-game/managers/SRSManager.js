@@ -193,15 +193,15 @@ class SRSManager {
       console.warn('⚠️  沒有活動會話,無法完成');
       return null;
     }
-    
+
     const correctAnswers = this.results.filter(r => r.isCorrect).length;
     const totalAnswers = this.results.length;
     const duration = Math.floor((Date.now() - this.startTime) / 1000);
     const accuracy = totalAnswers > 0 ? (correctAnswers / totalAnswers * 100).toFixed(1) : 0;
-    
+
     try {
       console.log('🏁 完成 SRS 學習會話...');
-      
+
       const response = await fetch(`/api/srs/sessions/${this.sessionId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -211,26 +211,68 @@ class SRSManager {
           duration
         })
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       console.log('✅ 會話完成');
       console.log(`  - 正確率: ${accuracy}%`);
       console.log(`  - 答對: ${correctAnswers}/${totalAnswers}`);
       console.log(`  - 學習時間: ${duration} 秒`);
-      
+
+      // 🧠 獲取詳細的單字進度變化
+      const wordDetails = await this.getWordProgressDetails();
+
       return {
         correctAnswers,
         totalAnswers,
         accuracy: parseFloat(accuracy),
-        duration
+        duration,
+        wordDetails  // 添加單字詳細進度
       };
-      
+
     } catch (error) {
       console.error('❌ 會話完成失敗:', error);
       return null;
+    }
+  }
+
+  /**
+   * 獲取單字進度詳細信息
+   * @returns {Promise<Array>} 單字進度列表
+   */
+  async getWordProgressDetails() {
+    if (!this.sessionId || !this.userId) {
+      return [];
+    }
+
+    try {
+      // 獲取本次學習的所有單字 IDs
+      const wordIds = this.words.map(w => w.id);
+
+      const response = await fetch('/api/srs/word-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wordIds,
+          geptLevel: this.geptLevel
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      console.log('📊 獲取單字進度詳情成功:', data.words.length, '個單字');
+
+      return data.words || [];
+
+    } catch (error) {
+      console.error('❌ 獲取單字進度詳情失敗:', error);
+      return [];
     }
   }
   
