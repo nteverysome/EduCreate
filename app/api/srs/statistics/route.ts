@@ -46,11 +46,11 @@ export async function GET(request: NextRequest) {
     const ttsWords = geptLevel
       ? await prisma.tTSCache.findMany({
           where: { geptLevel },
-          select: { english: true }
+          select: { text: true }
         })
       : [];
 
-    const ttsEnglishSet = new Set(ttsWords.map(w => w.english.toLowerCase()));
+    const ttsEnglishSet = new Set(ttsWords.map(w => w.text.toLowerCase()));
 
     // 5. 獲取用戶的學習進度
     const progressWhere: any = { userId };
