@@ -42,7 +42,17 @@ export async function GET(request: NextRequest) {
       ? await prisma.tTSCache.count({ where: { geptLevel } })
       : await prisma.tTSCache.count();
 
-    // 4. 獲取用戶的學習進度 (根據 GEPT 等級過濾)
+    // 4. 獲取該 GEPT 等級的所有 TTS 單字 (用於過濾)
+    const ttsWords = geptLevel
+      ? await prisma.tTSCache.findMany({
+          where: { geptLevel },
+          select: { english: true }
+        })
+      : [];
+
+    const ttsEnglishSet = new Set(ttsWords.map(w => w.english.toLowerCase()));
+
+    // 5. 獲取用戶的學習進度
     const progressWhere: any = { userId };
 
     const allProgress = await prisma.userWordProgress.findMany({
@@ -58,12 +68,12 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // 5. 根據 audioUrl 過濾 GEPT 等級
+    // 6. 根據 TTS 單字列表過濾 GEPT 等級
     const filteredProgress = geptLevel
-      ? allProgress.filter(p => p.word?.audioUrl?.toLowerCase().includes(geptLevel.toLowerCase()))
+      ? allProgress.filter(p => p.word && ttsEnglishSet.has(p.word.english.toLowerCase()))
       : allProgress;
 
-    // 6. 獲取學習會話 (根據 GEPT 等級過濾)
+    // 7. 獲取學習會話 (根據 GEPT 等級過濾)
     const sessionWhere: any = { userId };
     if (geptLevel) {
       sessionWhere.geptLevel = geptLevel;
@@ -74,7 +84,7 @@ export async function GET(request: NextRequest) {
       orderBy: { startedAt: 'desc' }
     });
 
-    // 7. 計算統計數據
+    // 8. 計算統計數據
     const learnedWords = filteredProgress.length;
     const newWords = Math.max(0, totalWordsCount - learnedWords);
 
@@ -103,15 +113,15 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // 8. 計算連續天數
+    // 9. 計算連續天數
     const streakDays = await calculateStreak(userId);
 
-    // 9. 平均記憶強度
+    // 10. 平均記憶強度
     const averageMemoryStrength = learnedWords > 0
       ? filteredProgress.reduce((sum, p) => sum + p.memoryStrength, 0) / learnedWords
       : 0;
 
-    // 10. 最近 7 天的學習數據
+    // 11. 最近 7 天的學習數據
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
