@@ -29,7 +29,20 @@ export async function POST(request: NextRequest) {
     console.log(`  - 是否正確: ${isCorrect}`);
     console.log(`  - 反應時間: ${responseTime}ms`);
 
-    // 2. 獲取或創建學習記錄
+    // 2. 驗證 wordId 是否存在於 VocabularyItem 表中
+    const vocabularyItem = await prisma.vocabularyItem.findUnique({
+      where: { id: wordId }
+    });
+
+    if (!vocabularyItem) {
+      console.error(`❌ 找不到單字: ${wordId}`);
+      return NextResponse.json(
+        { error: `找不到單字: ${wordId}` },
+        { status: 404 }
+      );
+    }
+
+    // 3. 獲取或創建學習記錄
     let progress = await prisma.userWordProgress.findUnique({
       where: {
         userId_wordId: {

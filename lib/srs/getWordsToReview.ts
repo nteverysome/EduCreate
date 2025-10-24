@@ -163,43 +163,76 @@ export async function getWordsToReview(
     })
     .slice(0, reviewWordsCount);
 
-  // 6. 合併單字列表
-  const words: WordToReview[] = [
-    ...selectedNewWords.map(w => {
-      const word = w.text.toLowerCase();
-      const chinese = translations[word] || '';
-      return {
-        id: w.id,
-        english: w.text,
-        chinese: chinese,  // 從翻譯文件獲取中文
-        audioUrl: w.audioUrl,
-        geptLevel: w.geptLevel,
-        isNew: true,
-        needsReview: false,
-        memoryStrength: 0
-      };
-    }),
-    ...selectedReviewWords.map(p => {
-      const w = allWords.find(word => word.id === p.wordId);
-      if (!w) {
-        throw new Error(`找不到單字: ${p.wordId}`);
+  // 6. 為每個單字創建或獲取 VocabularyItem
+  const createOrGetVocabItem = async (ttsWord: any, chinese: string) => {
+    // 嘗試查找現有的 VocabularyItem
+    let vocabItem = await prisma.vocabularyItem.findFirst({
+      where: {
+        english: ttsWord.text,
+        chinese: chinese
       }
-      const word = w.text.toLowerCase();
-      const chinese = translations[word] || '';
-      return {
-        id: w.id,
-        english: w.text,
-        chinese: chinese,  // 從翻譯文件獲取中文
-        audioUrl: w.audioUrl,
-        geptLevel: w.geptLevel,
-        isNew: false,
-        needsReview: true,
-        memoryStrength: p.memoryStrength
-      };
-    })
-  ];
+    });
 
-  // 7. 統計數據
+    // 如果不存在,創建新的
+    if (!vocabItem) {
+      vocabItem = await prisma.vocabularyItem.create({
+        data: {
+          english: ttsWord.text,
+          chinese: chinese,
+          audioUrl: ttsWord.audioUrl,
+          difficultyLevel: 1
+        }
+      });
+      console.log(`  - 創建 VocabularyItem: ${ttsWord.text} (${vocabItem.id})`);
+    }
+
+    return vocabItem;
+  };
+
+  // 7. 合併單字列表 (使用 VocabularyItem.id)
+  const words: WordToReview[] = [];
+
+  // 處理新單字
+  for (const w of selectedNewWords) {
+    const word = w.text.toLowerCase();
+    const chinese = translations[word] || '';
+    const vocabItem = await createOrGetVocabItem(w, chinese);
+
+    words.push({
+      id: vocabItem.id,  // 使用 VocabularyItem.id
+      english: w.text,
+      chinese: chinese,
+      audioUrl: w.audioUrl,
+      geptLevel: w.geptLevel,
+      isNew: true,
+      needsReview: false,
+      memoryStrength: 0
+    });
+  }
+
+  // 處理複習單字
+  for (const p of selectedReviewWords) {
+    const w = allWords.find(word => word.id === p.wordId);
+    if (!w) {
+      throw new Error(`找不到單字: ${p.wordId}`);
+    }
+    const word = w.text.toLowerCase();
+    const chinese = translations[word] || '';
+    const vocabItem = await createOrGetVocabItem(w, chinese);
+
+    words.push({
+      id: vocabItem.id,  // 使用 VocabularyItem.id
+      english: w.text,
+      chinese: chinese,
+      audioUrl: w.audioUrl,
+      geptLevel: w.geptLevel,
+      isNew: false,
+      needsReview: true,
+      memoryStrength: p.memoryStrength
+    });
+  }
+
+  // 8. 統計數據
   const statistics = {
     totalWords: allWords.length,
     learnedWords: learnedWordIds.size,
