@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
       console.log('  - wordIds 內容:', JSON.stringify(wordIds).substring(0, 200));
 
       let vocabularyItems;
+      let ttsCacheMap;  // 🔧 修復：在 try 塊外定義
       try {
         vocabularyItems = await prisma.vocabularyItem.findMany({
           where: {
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
         });
 
         // 創建 TTS 映射
-        const ttsCacheMap = new Map(ttsCache.map(cache => [cache.text, cache.audioUrl]));
+        ttsCacheMap = new Map(ttsCache.map(cache => [cache.text, cache.audioUrl]));
         console.log(`  - 查詢到 ${ttsCache.length} 個 TTS 音頻`);
 
       } catch (queryError: any) {
