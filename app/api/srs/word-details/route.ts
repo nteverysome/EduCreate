@@ -3,28 +3,20 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     // 驗證用戶身份
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: '未授權' },
         { status: 401 }
       );
     }
 
-    // 獲取用戶
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: '用戶不存在' },
-        { status: 404 }
-      );
-    }
+    const userId = session.user.id;
 
     // 解析請求體
     const body = await request.json();
@@ -45,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('📊 獲取單字詳細信息:', {
-      userId: user.id,
+      userId,
       wordCount: wordIds.length,
       geptLevel,
     });
@@ -65,7 +57,7 @@ export async function POST(request: NextRequest) {
     // 獲取用戶對這些單字的學習進度
     const userProgress = await prisma.userWordProgress.findMany({
       where: {
-        userId: user.id,
+        userId,
         wordId: { in: wordIds },
       },
       select: {
