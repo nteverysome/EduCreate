@@ -127,8 +127,13 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ 獲取儀表板數據失敗:', error);
+    console.error('錯誤詳情:', error instanceof Error ? error.message : String(error));
+    console.error('錯誤堆棧:', error instanceof Error ? error.stack : 'No stack trace');
     return NextResponse.json(
-      { error: '獲取儀表板數據失敗' },
+      {
+        error: '獲取儀表板數據失敗',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
