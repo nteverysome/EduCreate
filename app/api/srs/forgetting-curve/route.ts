@@ -27,13 +27,32 @@ export async function GET(request: NextRequest) {
       },
       include: {
         word: true,
-        reviews: {
-          orderBy: {
-            reviewedAt: 'desc'
-          },
-          take: 10
-        }
       }
+    });
+
+    // 2.5 獲取用戶的所有複習記錄 (通過 session)
+    const userSessions = await prisma.learningSession.findMany({
+      where: { userId },
+      select: { id: true }
+    });
+    const sessionIds = userSessions.map(s => s.id);
+
+    const wordReviews = await prisma.wordReview.findMany({
+      where: {
+        sessionId: { in: sessionIds }
+      },
+      orderBy: {
+        reviewedAt: 'desc'
+      }
+    });
+
+    // 創建 wordId -> reviews 的映射
+    const reviewsByWordId = new Map<string, any[]>();
+    wordReviews.forEach(review => {
+      if (!reviewsByWordId.has(review.wordId)) {
+        reviewsByWordId.set(review.wordId, []);
+      }
+      reviewsByWordId.get(review.wordId)!.push(review);
     });
 
     // 3. 獲取該等級的所有 TTS 單字
@@ -58,22 +77,25 @@ export async function GET(request: NextRequest) {
     const newWords: any[] = [];
 
     filteredProgress.forEach(progress => {
+      // 獲取該單字的複習記錄
+      const wordReviewList = reviewsByWordId.get(progress.wordId) || [];
+
       const wordData = {
         id: progress.id,
         word: progress.word?.english || '',
         translation: progress.word?.chinese || '',
         memoryStrength: progress.memoryStrength,
         nextReviewAt: progress.nextReviewAt.toISOString(),
-        lastReviewedAt: progress.updatedAt.toISOString(),
+        lastReviewedAt: progress.lastReviewedAt.toISOString(),
         status: progress.status,
-        reviewCount: progress.reviews.length,
-        correctCount: progress.reviews.filter(r => r.isCorrect).length,
-        incorrectCount: progress.reviews.filter(r => !r.isCorrect).length,
+        reviewCount: wordReviewList.length,
+        correctCount: wordReviewList.filter(r => r.isCorrect).length,
+        incorrectCount: wordReviewList.filter(r => !r.isCorrect).length,
       };
 
       // 判斷遺忘狀態
       const daysSinceLastReview = Math.floor(
-        (now.getTime() - progress.updatedAt.getTime()) / (1000 * 60 * 60 * 24)
+        (now.getTime() - progress.lastReviewedAt.getTime()) / (1000 * 60 * 60 * 24)
       );
       const isOverdue = progress.nextReviewAt < now;
 
@@ -95,18 +117,21 @@ export async function GET(request: NextRequest) {
 
     // 8. 返回數據
     return NextResponse.json({
-      words: filteredProgress.map(p => ({
-        id: p.id,
-        word: p.word?.english || '',
-        translation: p.word?.chinese || '',
-        memoryStrength: p.memoryStrength,
-        nextReviewAt: p.nextReviewAt.toISOString(),
-        lastReviewedAt: p.updatedAt.toISOString(),
-        status: p.status,
-        reviewCount: p.reviews.length,
-        correctCount: p.reviews.filter(r => r.isCorrect).length,
-        incorrectCount: p.reviews.filter(r => !r.isCorrect).length,
-      })),
+      words: filteredProgress.map(p => {
+        const wordReviewList = reviewsByWordId.get(p.wordId) || [];
+        return {
+          id: p.id,
+          word: p.word?.english || '',
+          translation: p.word?.chinese || '',
+          memoryStrength: p.memoryStrength,
+          nextReviewAt: p.nextReviewAt.toISOString(),
+          lastReviewedAt: p.lastReviewedAt.toISOString(),
+          status: p.status,
+          reviewCount: wordReviewList.length,
+          correctCount: wordReviewList.filter(r => r.isCorrect).length,
+          incorrectCount: wordReviewList.filter(r => !r.isCorrect).length,
+        };
+      }),
       masteredWords,
       learningWords,
       forgettingWords,
