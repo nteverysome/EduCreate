@@ -7,9 +7,19 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔍 開始處理 word-details 請求');
+
     // 驗證用戶身份
     const session = await getServerSession(authOptions);
+    console.log('🔐 Session 狀態:', {
+      hasSession: !!session,
+      hasUser: !!session?.user,
+      hasUserId: !!session?.user?.id,
+      userId: session?.user?.id,
+    });
+
     if (!session?.user?.id) {
+      console.log('❌ 未授權：缺少 session 或 user.id');
       return NextResponse.json(
         { error: '未授權' },
         { status: 401 }
@@ -17,6 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = session.user.id;
+    console.log('✅ 用戶已驗證:', userId);
 
     // 解析請求體
     const body = await request.json();
@@ -109,8 +120,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ 獲取單字詳細信息失敗:', error);
+    console.error('錯誤詳情:', {
+      message: error instanceof Error ? error.message : '未知錯誤',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
-      { error: '獲取單字詳細信息失敗' },
+      {
+        error: '獲取單字詳細信息失敗',
+        details: error instanceof Error ? error.message : '未知錯誤'
+      },
       { status: 500 }
     );
   }
