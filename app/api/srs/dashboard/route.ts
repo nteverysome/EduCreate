@@ -14,7 +14,9 @@ export async function GET(request: NextRequest) {
 
     // 獲取 GEPT 等級
     const searchParams = request.nextUrl.searchParams;
-    const geptLevel = (searchParams.get('geptLevel') || 'ELEMENTARY').toUpperCase() as GEPTLevel;
+    const geptLevelParam = (searchParams.get('geptLevel') || 'ELEMENTARY').toUpperCase();
+    const geptLevel = geptLevelParam as GEPTLevel;
+    const geptLevelString = geptLevelParam.toLowerCase(); // LearningSession 使用小寫字符串
 
     const userId = session.user.id;
 
@@ -38,7 +40,7 @@ export async function GET(request: NextRequest) {
     const sessions = await prisma.learningSession.findMany({
       where: {
         userId,
-        geptLevel
+        geptLevel: geptLevelString
       },
       orderBy: {
         startedAt: 'desc'
