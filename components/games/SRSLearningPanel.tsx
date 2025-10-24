@@ -226,6 +226,15 @@ const SRSLearningPanel: React.FC<SRSLearningPanelProps> = ({ geptLevel, onStartL
           {stats.reviewWords > 0 ? `開始複習 (${stats.reviewWords})` : `學習新單字 (${stats.newWords})`}
         </button>
 
+        {/* 學習數據儀表板按鈕 */}
+        <Link
+          href="/learn/dashboard"
+          className="flex items-center justify-center px-6 py-4 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-teal-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+        >
+          <ChartBarIcon className="w-5 h-5 mr-2" />
+          📊 學習數據儀表板
+        </Link>
+
         {/* 查看統計按鈕 */}
         <Link
           href={`/learn/statistics?geptLevel=${geptLevel}`}
