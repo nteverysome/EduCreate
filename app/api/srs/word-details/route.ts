@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         wordId: true,
         memoryStrength: true,
         nextReviewAt: true,
-        reviewCount: true,
+        totalReviews: true,
         lastReviewedAt: true,
       },
     });
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         chinese: item.chinese,
         memoryStrength,
         nextReviewAt: nextReviewAt.toISOString(),
-        reviewCount: progress?.reviewCount || 0,
+        reviewCount: progress?.totalReviews || 0,
         lastReviewedAt: progress?.lastReviewedAt?.toISOString() || null,
         isNew,
         needsReview,
