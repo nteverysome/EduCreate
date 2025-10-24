@@ -475,6 +475,13 @@ model VocabularyItem {
   wordProgress     UserWordProgress[] @relation("WordProgress")
   wordReviews      WordReview[]       @relation("WordReviews")
 
+  // 詞彙分組系統
+  prefix           String?            // 字首 (un-, re-, pre-, etc.)
+  root             String?            // 字根 (port, dict, vis, etc.)
+  suffix           String?            // 字尾 (-er, -tion, -ful, etc.)
+  theme            String?            // 主題 (daily_life, school, work, etc.)
+  frequency        Int?               // 使用頻率 (1-5, 5 最常用)
+
   @@map("vocabulary_items")
 }
 
