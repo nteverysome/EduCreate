@@ -482,6 +482,19 @@ model VocabularyItem {
   theme            String?            // 主題 (daily_life, school, work, etc.)
   frequency        Int?               // 使用頻率 (1-5, 5 最常用)
 
+  // 新增分組字段
+  wordFamily       String?            // 詞彙家族 ID (happy, care, use, etc.)
+  antonyms         String?            // 反義詞 ID 列表 (JSON array)
+  synonyms         String?            // 同義詞 ID 列表 (JSON array)
+  context          String?            // 情境標籤 (restaurant, hospital, airport, etc.)
+  syllableCount    Int?               // 音節數量
+  phoneticEnding   String?            // 音標結尾 (用於押韻分組)
+  emotionalTone    String?            // 情感色彩 (positive, negative, neutral)
+  actionType       String?            // 動作類型 (movement, hand, thinking, sensory)
+  visualFeature    String?            // 視覺特徵 (color, shape, size, material)
+  temporalCategory String?            // 時間類別 (time_point, season, month, duration)
+  geptLevel        GEPTLevel?         // GEPT 等級
+
   @@map("vocabulary_items")
 }
 

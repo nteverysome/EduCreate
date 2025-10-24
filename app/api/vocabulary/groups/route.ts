@@ -46,6 +46,67 @@ const FREQUENCY_GROUPS = Array.from({ length: 48 }, (_, i) => ({
   limit: 50
 }));
 
+// 詞性分組定義
+const PART_OF_SPEECH_GROUPS = [
+  { id: 'pos-noun', name: '名詞組', description: '人物、地點、物品、抽象概念', partOfSpeech: 'NOUN', limit: 50 },
+  { id: 'pos-verb', name: '動詞組', description: '動作、狀態、感官、思考', partOfSpeech: 'VERB', limit: 50 },
+  { id: 'pos-adjective', name: '形容詞組', description: '描述性、情感、顏色', partOfSpeech: 'ADJECTIVE', limit: 50 },
+  { id: 'pos-adverb', name: '副詞組', description: '方式、時間、頻率', partOfSpeech: 'ADVERB', limit: 50 },
+  { id: 'pos-preposition', name: '介詞組', description: '位置、時間、方向', partOfSpeech: 'PREPOSITION', limit: 50 },
+  { id: 'pos-conjunction', name: '連接詞組', description: '並列、從屬連接詞', partOfSpeech: 'CONJUNCTION', limit: 50 },
+];
+
+// 音節分組定義
+const SYLLABLE_GROUPS = [
+  { id: 'syllable-1', name: '單音節組', description: '最簡單的單字', syllableCount: 1, limit: 50 },
+  { id: 'syllable-2', name: '雙音節組', description: '簡單的單字', syllableCount: 2, limit: 50 },
+  { id: 'syllable-3', name: '三音節組', description: '中等難度的單字', syllableCount: 3, limit: 50 },
+  { id: 'syllable-4', name: '多音節組', description: '較難的單字', syllableCount: 4, limit: 50 },
+];
+
+// 情境分組定義
+const CONTEXT_GROUPS = [
+  { id: 'context-restaurant', name: '餐廳情境', description: '點餐、用餐相關單字', context: 'restaurant', limit: 50 },
+  { id: 'context-hospital', name: '醫院情境', description: '看病、醫療相關單字', context: 'hospital', limit: 50 },
+  { id: 'context-airport', name: '機場情境', description: '旅行、飛行相關單字', context: 'airport', limit: 50 },
+  { id: 'context-shopping', name: '購物情境', description: '買賣、商店相關單字', context: 'shopping', limit: 50 },
+  { id: 'context-school', name: '學校情境', description: '學習、教育相關單字', context: 'school', limit: 50 },
+  { id: 'context-office', name: '辦公室情境', description: '工作、職場相關單字', context: 'office', limit: 50 },
+  { id: 'context-home', name: '家居情境', description: '家庭、日常生活相關單字', context: 'home', limit: 50 },
+  { id: 'context-travel', name: '旅遊情境', description: '旅行、觀光相關單字', context: 'travel', limit: 50 },
+];
+
+// 情感分組定義
+const EMOTIONAL_GROUPS = [
+  { id: 'emotion-positive', name: '正面情感組', description: '快樂、愛、成功相關單字', emotionalTone: 'positive', limit: 50 },
+  { id: 'emotion-negative', name: '負面情感組', description: '悲傷、憤怒、失敗相關單字', emotionalTone: 'negative', limit: 50 },
+  { id: 'emotion-neutral', name: '中性情感組', description: '客觀、中性的單字', emotionalTone: 'neutral', limit: 50 },
+];
+
+// 動作分組定義
+const ACTION_GROUPS = [
+  { id: 'action-movement', name: '移動動作組', description: '走、跑、跳等移動動作', actionType: 'movement', limit: 50 },
+  { id: 'action-hand', name: '手部動作組', description: '寫、畫、拿等手部動作', actionType: 'hand', limit: 50 },
+  { id: 'action-thinking', name: '思考動作組', description: '想、知道、理解等思考動作', actionType: 'thinking', limit: 50 },
+  { id: 'action-sensory', name: '感官動作組', description: '看、聽、聞等感官動作', actionType: 'sensory', limit: 50 },
+];
+
+// 視覺聯想分組定義
+const VISUAL_GROUPS = [
+  { id: 'visual-color', name: '顏色組', description: '各種顏色相關單字', visualFeature: 'color', limit: 50 },
+  { id: 'visual-shape', name: '形狀組', description: '圓形、方形等形狀相關單字', visualFeature: 'shape', limit: 50 },
+  { id: 'visual-size', name: '大小組', description: '大、小等大小相關單字', visualFeature: 'size', limit: 50 },
+  { id: 'visual-material', name: '材質組', description: '木頭、金屬等材質相關單字', visualFeature: 'material', limit: 50 },
+];
+
+// 時間分組定義
+const TEMPORAL_GROUPS = [
+  { id: 'temporal-time-point', name: '時間點組', description: '早上、中午、晚上等時間點', temporalCategory: 'time_point', limit: 50 },
+  { id: 'temporal-season', name: '季節組', description: '春夏秋冬等季節', temporalCategory: 'season', limit: 50 },
+  { id: 'temporal-month', name: '月份組', description: '一月到十二月', temporalCategory: 'month', limit: 50 },
+  { id: 'temporal-duration', name: '時間長度組', description: '秒、分、時、天等時間長度', temporalCategory: 'duration', limit: 50 },
+];
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -61,9 +122,15 @@ export async function GET(request: NextRequest) {
 
     // 根據路徑選擇分組定義
     let groupDefinitions: any[] = [];
-    
+
     if (path === 'prefix') {
       groupDefinitions = PREFIX_GROUPS;
+    } else if (path === 'root') {
+      // 字根分組（暫時使用主題分組代替，後續可以添加專門的字根分組）
+      groupDefinitions = THEME_GROUPS;
+    } else if (path === 'suffix') {
+      // 字尾分組（暫時使用主題分組代替，後續可以添加專門的字尾分組）
+      groupDefinitions = THEME_GROUPS;
     } else if (path === 'theme') {
       groupDefinitions = THEME_GROUPS;
     } else if (path === 'frequency') {
@@ -71,6 +138,20 @@ export async function GET(request: NextRequest) {
     } else if (path === 'mixed') {
       // 混合模式：前 22 組是字首，後 26 組是主題
       groupDefinitions = [...PREFIX_GROUPS, ...THEME_GROUPS];
+    } else if (path === 'partOfSpeech') {
+      groupDefinitions = PART_OF_SPEECH_GROUPS;
+    } else if (path === 'syllable') {
+      groupDefinitions = SYLLABLE_GROUPS;
+    } else if (path === 'context') {
+      groupDefinitions = CONTEXT_GROUPS;
+    } else if (path === 'emotional') {
+      groupDefinitions = EMOTIONAL_GROUPS;
+    } else if (path === 'action') {
+      groupDefinitions = ACTION_GROUPS;
+    } else if (path === 'visual') {
+      groupDefinitions = VISUAL_GROUPS;
+    } else if (path === 'temporal') {
+      groupDefinitions = TEMPORAL_GROUPS;
     } else {
       // 默認使用主題分組
       groupDefinitions = THEME_GROUPS;
@@ -110,6 +191,20 @@ export async function GET(request: NextRequest) {
           whereClause.theme = groupDef.theme;
         } else if (groupDef.frequency) {
           whereClause.frequency = groupDef.frequency;
+        } else if (groupDef.partOfSpeech) {
+          whereClause.partOfSpeech = groupDef.partOfSpeech;
+        } else if (groupDef.syllableCount) {
+          whereClause.syllableCount = groupDef.syllableCount;
+        } else if (groupDef.context) {
+          whereClause.context = groupDef.context;
+        } else if (groupDef.emotionalTone) {
+          whereClause.emotionalTone = groupDef.emotionalTone;
+        } else if (groupDef.actionType) {
+          whereClause.actionType = groupDef.actionType;
+        } else if (groupDef.visualFeature) {
+          whereClause.visualFeature = groupDef.visualFeature;
+        } else if (groupDef.temporalCategory) {
+          whereClause.temporalCategory = groupDef.temporalCategory;
         }
 
         // 獲取該組的單字
@@ -150,6 +245,20 @@ export async function GET(request: NextRequest) {
             prevWhereClause.theme = prevGroupDef.theme;
           } else if (prevGroupDef.frequency) {
             prevWhereClause.frequency = prevGroupDef.frequency;
+          } else if (prevGroupDef.partOfSpeech) {
+            prevWhereClause.partOfSpeech = prevGroupDef.partOfSpeech;
+          } else if (prevGroupDef.syllableCount) {
+            prevWhereClause.syllableCount = prevGroupDef.syllableCount;
+          } else if (prevGroupDef.context) {
+            prevWhereClause.context = prevGroupDef.context;
+          } else if (prevGroupDef.emotionalTone) {
+            prevWhereClause.emotionalTone = prevGroupDef.emotionalTone;
+          } else if (prevGroupDef.actionType) {
+            prevWhereClause.actionType = prevGroupDef.actionType;
+          } else if (prevGroupDef.visualFeature) {
+            prevWhereClause.visualFeature = prevGroupDef.visualFeature;
+          } else if (prevGroupDef.temporalCategory) {
+            prevWhereClause.temporalCategory = prevGroupDef.temporalCategory;
           }
 
           const prevWords = await prisma.vocabularyItem.findMany({

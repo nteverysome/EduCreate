@@ -26,11 +26,33 @@ export default function PathSelectorPage() {
   // 學習路徑選項
   const learningPaths: LearningPath[] = [
     {
+      id: 'partOfSpeech',
+      name: '詞性分組學習',
+      description: '按照詞性分組，有助於語法學習和句子構建',
+      icon: '📖',
+      color: 'blue',
+      groupCount: 6,
+      wordsPerGroup: 50,
+      estimatedDays: 6,
+      advantages: [
+        '語法理解提升 50-60%',
+        '記憶效果提升 30-40%',
+        '快速判斷單字功能',
+        '適合所有學習者'
+      ],
+      examples: [
+        '名詞: teacher, student, book',
+        '動詞: run, jump, write',
+        '形容詞: big, beautiful, happy',
+        '副詞: quickly, slowly, carefully'
+      ]
+    },
+    {
       id: 'prefix',
       name: '字首分組學習',
       description: '按照單字的字首（前綴）分組，理解字首規則後可以推測單字意思',
       icon: '🔤',
-      color: 'blue',
+      color: 'indigo',
       groupCount: 22,
       wordsPerGroup: 50,
       estimatedDays: 22,
@@ -140,7 +162,7 @@ export default function PathSelectorPage() {
       name: '混合分組學習（推薦）',
       description: '結合字根字首和主題分組，先學習字根字首規則，再按主題學習',
       icon: '🎓',
-      color: 'indigo',
+      color: 'purple',
       groupCount: 48,
       wordsPerGroup: 50,
       estimatedDays: 48,
@@ -155,6 +177,137 @@ export default function PathSelectorPage() {
         '第二階段: 按主題學習 (26 組)',
         '建立完整的詞彙網絡',
         '達到最佳學習效果'
+      ]
+    },
+    {
+      id: 'syllable',
+      name: '音節分組學習',
+      description: '按照音節數量分組，循序漸進學習，有助於發音',
+      icon: '🎵',
+      color: 'pink',
+      groupCount: 4,
+      wordsPerGroup: 50,
+      estimatedDays: 4,
+      advantages: [
+        '有助於發音學習',
+        '循序漸進學習',
+        '記憶效果提升 20-30%',
+        '適合初學者'
+      ],
+      examples: [
+        '單音節: cat, dog, run, big',
+        '雙音節: happy, teacher, water',
+        '三音節: beautiful, important',
+        '多音節: university, communication'
+      ]
+    },
+    {
+      id: 'context',
+      name: '情境分組學習',
+      description: '按照生活情境分組，實用性強，容易應用到生活中',
+      icon: '🎬',
+      color: 'teal',
+      groupCount: 8,
+      wordsPerGroup: 50,
+      estimatedDays: 8,
+      advantages: [
+        '實用性極強',
+        '記憶效果提升 50-70%',
+        '容易應用到生活中',
+        '情境記憶深刻'
+      ],
+      examples: [
+        '餐廳情境: menu, order, waiter, bill',
+        '醫院情境: doctor, nurse, patient',
+        '機場情境: flight, ticket, passport',
+        '購物情境: shop, buy, price, discount'
+      ]
+    },
+    {
+      id: 'emotional',
+      name: '情感分組學習',
+      description: '按照情感色彩分組，情感記憶最深刻',
+      icon: '😊',
+      color: 'rose',
+      groupCount: 3,
+      wordsPerGroup: 50,
+      estimatedDays: 3,
+      advantages: [
+        '記憶效果提升 60-80%',
+        '情感記憶最深刻',
+        '有助於情感表達',
+        '記憶保持率最高'
+      ],
+      examples: [
+        '正面情感: happy, joy, love, wonderful',
+        '負面情感: sad, angry, hate, terrible',
+        '中性情感: table, chair, book, pen'
+      ]
+    },
+    {
+      id: 'action',
+      name: '動作分組學習',
+      description: '按照動作類型分組，動作記憶效果好',
+      icon: '🏃',
+      color: 'lime',
+      groupCount: 4,
+      wordsPerGroup: 50,
+      estimatedDays: 4,
+      advantages: [
+        '動作記憶效果好',
+        '記憶效果提升 30-50%',
+        '適合動覺學習者',
+        '有趣且互動性強'
+      ],
+      examples: [
+        '移動動作: walk, run, jump, fly',
+        '手部動作: write, draw, hold, catch',
+        '思考動作: think, know, understand',
+        '感官動作: see, hear, smell, taste'
+      ]
+    },
+    {
+      id: 'visual',
+      name: '視覺聯想分組學習',
+      description: '按照視覺特徵分組，視覺記憶效果好',
+      icon: '🎨',
+      color: 'amber',
+      groupCount: 4,
+      wordsPerGroup: 50,
+      estimatedDays: 4,
+      advantages: [
+        '視覺記憶效果好',
+        '適合視覺學習者',
+        '有助於描述能力',
+        '記憶效果提升 30-40%'
+      ],
+      examples: [
+        '顏色: red, blue, green, yellow',
+        '形狀: circle, square, triangle',
+        '大小: big, small, large, tiny',
+        '材質: wood, metal, plastic, glass'
+      ]
+    },
+    {
+      id: 'temporal',
+      name: '時間分組學習',
+      description: '按照時間類別分組，時間軸記憶清晰',
+      icon: '⏰',
+      color: 'cyan',
+      groupCount: 4,
+      wordsPerGroup: 50,
+      estimatedDays: 4,
+      advantages: [
+        '時間軸記憶清晰',
+        '實用性強',
+        '適合日常對話',
+        '記憶效果提升 20-30%'
+      ],
+      examples: [
+        '時間點: morning, noon, afternoon',
+        '季節: spring, summer, autumn, winter',
+        '月份: January, February, March',
+        '時間長度: second, minute, hour, day'
       ]
     }
   ];
@@ -186,7 +339,13 @@ export default function PathSelectorPage() {
     purple: 'bg-purple-50 border-purple-200 hover:border-purple-400',
     orange: 'bg-orange-50 border-orange-200 hover:border-orange-400',
     yellow: 'bg-yellow-50 border-yellow-200 hover:border-yellow-400',
-    indigo: 'bg-indigo-50 border-indigo-200 hover:border-indigo-400'
+    indigo: 'bg-indigo-50 border-indigo-200 hover:border-indigo-400',
+    pink: 'bg-pink-50 border-pink-200 hover:border-pink-400',
+    teal: 'bg-teal-50 border-teal-200 hover:border-teal-400',
+    rose: 'bg-rose-50 border-rose-200 hover:border-rose-400',
+    lime: 'bg-lime-50 border-lime-200 hover:border-lime-400',
+    amber: 'bg-amber-50 border-amber-200 hover:border-amber-400',
+    cyan: 'bg-cyan-50 border-cyan-200 hover:border-cyan-400'
   };
 
   const selectedColorClasses = {
@@ -195,7 +354,13 @@ export default function PathSelectorPage() {
     purple: 'border-purple-500 bg-purple-100',
     orange: 'border-orange-500 bg-orange-100',
     yellow: 'border-yellow-500 bg-yellow-100',
-    indigo: 'border-indigo-500 bg-indigo-100'
+    indigo: 'border-indigo-500 bg-indigo-100',
+    pink: 'border-pink-500 bg-pink-100',
+    teal: 'border-teal-500 bg-teal-100',
+    rose: 'border-rose-500 bg-rose-100',
+    lime: 'border-lime-500 bg-lime-100',
+    amber: 'border-amber-500 bg-amber-100',
+    cyan: 'border-cyan-500 bg-cyan-100'
   };
 
   if (status === 'loading') {
