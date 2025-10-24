@@ -234,6 +234,15 @@ const SRSLearningPanel: React.FC<SRSLearningPanelProps> = ({ geptLevel, onStartL
           <ChartBarIcon className="w-5 h-5 mr-2" />
           查看詳細統計
         </Link>
+
+        {/* 遺忘曲線按鈕 */}
+        <Link
+          href={`/learn/forgetting-curve?geptLevel=${geptLevel}`}
+          className="flex items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+        >
+          <ChartBarIcon className="w-5 h-5 mr-2" />
+          📈 遺忘曲線分析
+        </Link>
       </div>
 
       {/* 提示信息 */}
