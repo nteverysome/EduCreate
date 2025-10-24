@@ -58,17 +58,23 @@ export async function POST(request: NextRequest) {
           where: {
             id: { in: wordIds }
             // 不過濾 geptLevel,因為用戶可能選擇了不同等級的單字
-          },
-          include: {
-            ttsCache: {
-              where: {
-                language: 'zh-TW'
-              }
-            }
           }
         });
 
         console.log(`  - 查詢到 ${vocabularyItems.length} 個單字`);
+
+        // 獲取 TTS 音頻 URL (通過 text 查詢,因為沒有直接關聯)
+        const ttsCache = await prisma.tTSCache.findMany({
+          where: {
+            text: { in: vocabularyItems.map(item => item.english) },
+            language: 'zh-TW'
+          }
+        });
+
+        // 創建 TTS 映射
+        const ttsCacheMap = new Map(ttsCache.map(cache => [cache.text, cache.audioUrl]));
+        console.log(`  - 查詢到 ${ttsCache.length} 個 TTS 音頻`);
+
       } catch (queryError: any) {
         console.error('❌ Prisma 查詢失敗:', queryError);
         console.error('  - 錯誤訊息:', queryError.message);
@@ -102,10 +108,10 @@ export async function POST(request: NextRequest) {
 
         return {
           id: item.id,
-          word: item.word,
-          translation: item.translation,
-          geptLevel: item.geptLevel,
-          audioUrl: item.ttsCache[0]?.audioUrl || null,
+          word: item.english,
+          translation: item.chinese,
+          geptLevel: geptLevel, // 使用請求中的 geptLevel
+          audioUrl: ttsCacheMap.get(item.english) || null,
           isNew,
           needsReview,
           memoryStrength: progress?.memoryStrength || 0,
