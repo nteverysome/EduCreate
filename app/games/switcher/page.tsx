@@ -1024,6 +1024,15 @@ const GameSwitcherPage: React.FC = () => {
               </button>
 
               <Link
+                href="/learn/dashboard"
+                className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                style={{ minHeight: '44px' }}
+                title="學習數據"
+              >
+                📈
+              </Link>
+
+              <Link
                 href="/my-activities"
                 className="px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg shadow-lg shadow-blue-500/50 hover:from-blue-600 hover:to-cyan-600 hover:shadow-xl hover:shadow-blue-500/60 transform hover:scale-105 transition-all duration-200 flex items-center justify-center animate-pulse"
                 style={{ minHeight: '44px', minWidth: '44px' }}
@@ -1086,6 +1095,16 @@ const GameSwitcherPage: React.FC = () => {
                 <span className="hidden lg:inline">{showStats ? '隱藏統計' : '顯示統計'}</span>
                 <span className="lg:hidden">📊</span>
               </button>
+
+              <Link
+                href="/learn/dashboard"
+                className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
+                style={{ minHeight: '44px' }}
+                title="學習數據"
+              >
+                <span className="hidden lg:inline">學習數據</span>
+                <span className="lg:hidden">📈</span>
+              </Link>
 
               <Link
                 href="/my-activities"
