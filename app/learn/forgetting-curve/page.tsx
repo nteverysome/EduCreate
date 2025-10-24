@@ -239,9 +239,16 @@ function ForgettingCurveContent() {
 
   // 開始複習
   const handleStartReview = (wordIds: string[]) => {
-    // TODO: 創建複習會話並跳轉到遊戲
     console.log('開始複習單字:', wordIds);
-    router.push(`/games/switcher?useSRS=true&geptLevel=${geptLevel}&reviewMode=true`);
+
+    // 將選定的單字 ID 存儲到 localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('srs_selected_words', JSON.stringify(wordIds));
+    }
+
+    // 跳轉到遊戲,並傳遞 wordIds 參數
+    const wordIdsParam = wordIds.join(',');
+    router.push(`/games/switcher?useSRS=true&geptLevel=${geptLevel}&reviewMode=true&wordIds=${encodeURIComponent(wordIdsParam)}`);
   };
 
   const fetchForgettingCurveData = async () => {

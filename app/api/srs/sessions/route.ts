@@ -23,18 +23,71 @@ export async function POST(request: NextRequest) {
 
     const userId = session.user.id;
     const body = await request.json();
-    const { geptLevel } = body;
+    const { geptLevel, wordIds } = body;
 
     console.log('🔄 創建 SRS 學習會話');
     console.log(`  - 用戶 ID: ${userId}`);
     console.log(`  - GEPT 等級: ${geptLevel}`);
+    console.log(`  - 指定單字 IDs: ${wordIds ? wordIds.length : 0} 個`);
 
-    // 2. 獲取需要學習的單字 (直接調用共享函數)
-    console.log('🔍 獲取學習單字...');
-    const wordsData = await getWordsToReview(userId, geptLevel, 15);
-    const words = wordsData.words;
+    // 2. 獲取需要學習的單字
+    let words;
 
-    console.log(`  - 獲取到 ${words.length} 個單字`);
+    if (wordIds && wordIds.length > 0) {
+      // 如果指定了單字 ID,則使用指定的單字
+      console.log('🎯 使用指定的單字 IDs...');
+
+      const vocabularyItems = await prisma.vocabularyItem.findMany({
+        where: {
+          id: { in: wordIds },
+          geptLevel
+        },
+        include: {
+          ttsCache: {
+            where: {
+              language: 'zh-TW'
+            }
+          }
+        }
+      });
+
+      // 獲取用戶的學習進度
+      const userProgress = await prisma.userWordProgress.findMany({
+        where: {
+          userId,
+          wordId: { in: wordIds }
+        }
+      });
+
+      const progressMap = new Map(userProgress.map(p => [p.wordId, p]));
+
+      // 組合單字數據
+      words = vocabularyItems.map(item => {
+        const progress = progressMap.get(item.id);
+        const isNew = !progress || progress.memoryStrength < 20;
+        const needsReview = progress && progress.nextReviewAt < new Date();
+
+        return {
+          id: item.id,
+          word: item.word,
+          translation: item.translation,
+          geptLevel: item.geptLevel,
+          audioUrl: item.ttsCache[0]?.audioUrl || null,
+          isNew,
+          needsReview,
+          memoryStrength: progress?.memoryStrength || 0,
+          nextReviewAt: progress?.nextReviewAt || new Date()
+        };
+      });
+
+      console.log(`  - 載入指定單字: ${words.length} 個`);
+    } else {
+      // 否則使用智能選擇算法
+      console.log('🔍 使用智能選擇算法...');
+      const wordsData = await getWordsToReview(userId, geptLevel, 15);
+      words = wordsData.words;
+      console.log(`  - 智能選擇單字: ${words.length} 個`);
+    }
 
     // 2.5. 驗證用戶是否存在
     console.log('🔍 驗證用戶是否存在...');

@@ -30,12 +30,33 @@ class SRSManager {
       console.log('🔄 創建 SRS 學習會話...');
       console.log(`  - 用戶 ID: ${userId}`);
       console.log(`  - GEPT 等級: ${geptLevel}`);
-      
+
+      // 檢查是否有指定的單字 IDs
+      let wordIds = null;
+      if (typeof localStorage !== 'undefined') {
+        const storedWordIds = localStorage.getItem('srs_selected_words');
+        if (storedWordIds) {
+          try {
+            wordIds = JSON.parse(storedWordIds);
+            console.log(`🎯 使用指定的單字 IDs: ${wordIds.length} 個`);
+            // 清除已使用的單字 IDs
+            localStorage.removeItem('srs_selected_words');
+          } catch (e) {
+            console.error('❌ 解析單字 IDs 失敗:', e);
+          }
+        }
+      }
+
       // 創建學習會話
+      const requestBody = { userId, geptLevel };
+      if (wordIds && wordIds.length > 0) {
+        requestBody.wordIds = wordIds;
+      }
+
       const response = await fetch('/api/srs/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, geptLevel })
+        body: JSON.stringify(requestBody)
       });
       
       if (!response.ok) {

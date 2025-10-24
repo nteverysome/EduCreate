@@ -565,6 +565,7 @@ const GameSwitcherPage: React.FC = () => {
     const anonymousParam = searchParams?.get('anonymous');
     const useSRSParam = searchParams?.get('useSRS');
     const geptLevelParam = searchParams?.get('geptLevel');
+    const wordIdsParam = searchParams?.get('wordIds');
 
     if (gameParam) {
       setCurrentGameId(gameParam);
@@ -583,6 +584,15 @@ const GameSwitcherPage: React.FC = () => {
           setCurrentGeptLevel(levelLower);
         } else if (levelLower === 'high_intermediate') {
           setCurrentGeptLevel('advanced');
+        }
+      }
+
+      // 如果有指定單字 IDs,存儲到 localStorage
+      if (wordIdsParam) {
+        const wordIds = wordIdsParam.split(',');
+        console.log('🎯 接收到指定單字 IDs:', wordIds.length, '個');
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('srs_selected_words', JSON.stringify(wordIds));
         }
       }
     }
