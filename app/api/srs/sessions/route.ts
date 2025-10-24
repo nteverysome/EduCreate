@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { getWordsToReview } from '@/lib/srs/getWordsToReview';
 
 /**
  * POST /api/srs/sessions
@@ -26,27 +27,9 @@ export async function POST(request: NextRequest) {
     console.log(`  - 用戶 ID: ${userId}`);
     console.log(`  - GEPT 等級: ${geptLevel}`);
 
-    // 2. 獲取需要學習的單字
-    const baseUrl = process.env.NEXTAUTH_URL || 'https://edu-create.vercel.app';
-    const wordsUrl = `${baseUrl}/api/srs/words-to-review?geptLevel=${geptLevel}`;
-
-    console.log(`  - 調用 API: ${wordsUrl}`);
-
-    const wordsResponse = await fetch(wordsUrl, {
-      headers: {
-        'Cookie': request.headers.get('cookie') || ''
-      }
-    });
-
-    console.log(`  - API 響應狀態: ${wordsResponse.status}`);
-
-    if (!wordsResponse.ok) {
-      const errorText = await wordsResponse.text();
-      console.error(`  - API 錯誤響應: ${errorText}`);
-      throw new Error(`獲取單字失敗: ${wordsResponse.status} - ${errorText}`);
-    }
-
-    const wordsData = await wordsResponse.json();
+    // 2. 獲取需要學習的單字 (直接調用共享函數)
+    console.log('🔍 獲取學習單字...');
+    const wordsData = await getWordsToReview(userId, geptLevel, 15);
     const words = wordsData.words;
 
     console.log(`  - 獲取到 ${words.length} 個單字`);
