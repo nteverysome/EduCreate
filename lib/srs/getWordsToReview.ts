@@ -5,6 +5,19 @@
 
 import prisma from '@/lib/prisma';
 import { calculatePriority } from './sm2';
+import fs from 'fs';
+import path from 'path';
+
+// 載入 GEPT 翻譯
+let translations: Record<string, string> = {};
+try {
+  const translationsPath = path.join(process.cwd(), 'data/translations/gept-all-translations.json');
+  const translationsData = fs.readFileSync(translationsPath, 'utf-8');
+  translations = JSON.parse(translationsData);
+  console.log(`✅ 載入 ${Object.keys(translations).length} 個翻譯`);
+} catch (error) {
+  console.error('⚠️  無法載入翻譯文件:', error);
+}
 
 export interface WordToReview {
   id: string;
@@ -153,10 +166,12 @@ export async function getWordsToReview(
   // 6. 合併單字列表
   const words: WordToReview[] = [
     ...selectedNewWords.map(w => {
+      const word = w.text.toLowerCase();
+      const chinese = translations[word] || '';
       return {
         id: w.id,
         english: w.text,
-        chinese: '',  // TODO: 從其他來源獲取中文
+        chinese: chinese,  // 從翻譯文件獲取中文
         audioUrl: w.audioUrl,
         geptLevel: w.geptLevel,
         isNew: true,
@@ -169,10 +184,12 @@ export async function getWordsToReview(
       if (!w) {
         throw new Error(`找不到單字: ${p.wordId}`);
       }
+      const word = w.text.toLowerCase();
+      const chinese = translations[word] || '';
       return {
         id: w.id,
         english: w.text,
-        chinese: '',  // TODO: 從其他來源獲取中文
+        chinese: chinese,  // 從翻譯文件獲取中文
         audioUrl: w.audioUrl,
         geptLevel: w.geptLevel,
         isNew: false,
