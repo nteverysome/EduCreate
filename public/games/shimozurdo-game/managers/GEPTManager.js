@@ -447,8 +447,8 @@ class GEPTManager {
     // 將所有單字設為初級 (因為是 SRS 選擇的)
     const srsWords = words.map(word => ({
       id: word.id,
-      english: word.english,
-      chinese: word.chinese || '',
+      english: word.english || word.word,  // 🔧 支持新舊兩種格式
+      chinese: word.chinese || word.translation || '',  // 🔧 支持新舊兩種格式
       level: 'elementary',
       difficulty: word.difficultyLevel || 1,
       frequency: 100 - (word.difficultyLevel || 1) * 10,
