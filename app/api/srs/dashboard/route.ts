@@ -21,19 +21,29 @@ export async function GET(request: NextRequest) {
     const userId = session.user.id;
 
     // 1. 獲取用戶的所有學習進度
+    // 注意：VocabularyItem 沒有 geptLevel 字段，所以我們獲取所有進度
     const userProgress = await prisma.userWordProgress.findMany({
       where: {
-        userId,
-        word: {
-          geptLevel
-        }
+        userId
       },
       include: {
-        word: true
+        word: {
+          include: {
+            set: true,
+            activity: true
+          }
+        }
       },
       orderBy: {
         lastReviewedAt: 'desc'
       }
+    });
+
+    // 過濾出符合 GEPT 等級的單字（通過 set 或 activity）
+    const filteredProgress = userProgress.filter(p => {
+      const setGeptLevel = p.word.set?.geptLevel;
+      const activityGeptLevel = p.word.activity?.geptLevel;
+      return setGeptLevel === geptLevel || activityGeptLevel === geptLevel;
     });
 
     // 2. 獲取用戶的學習會話
@@ -49,10 +59,10 @@ export async function GET(request: NextRequest) {
     });
 
     // 3. 計算統計數據
-    const totalWords = userProgress.length;
-    const masteredWords = userProgress.filter(p => p.status === 'MASTERED').length;
-    const learningWords = userProgress.filter(p => p.status === 'LEARNING').length;
-    const newWords = userProgress.filter(p => p.status === 'NEW').length;
+    const totalWords = filteredProgress.length;
+    const masteredWords = filteredProgress.filter(p => p.status === 'MASTERED').length;
+    const learningWords = filteredProgress.filter(p => p.status === 'LEARNING').length;
+    const newWords = filteredProgress.filter(p => p.status === 'NEW').length;
 
     // 4. 計算學習天數
     const firstSession = sessions[sessions.length - 1];
@@ -95,19 +105,19 @@ export async function GET(request: NextRequest) {
 
     // 8. 記憶強度分布
     const memoryStrengthDistribution = [
-      { range: '0-20%', count: userProgress.filter(p => p.memoryStrength < 20).length },
-      { range: '20-40%', count: userProgress.filter(p => p.memoryStrength >= 20 && p.memoryStrength < 40).length },
-      { range: '40-60%', count: userProgress.filter(p => p.memoryStrength >= 40 && p.memoryStrength < 60).length },
-      { range: '60-80%', count: userProgress.filter(p => p.memoryStrength >= 60 && p.memoryStrength < 80).length },
-      { range: '80-100%', count: userProgress.filter(p => p.memoryStrength >= 80).length }
+      { range: '0-20%', count: filteredProgress.filter(p => p.memoryStrength < 20).length },
+      { range: '20-40%', count: filteredProgress.filter(p => p.memoryStrength >= 20 && p.memoryStrength < 40).length },
+      { range: '40-60%', count: filteredProgress.filter(p => p.memoryStrength >= 40 && p.memoryStrength < 60).length },
+      { range: '60-80%', count: filteredProgress.filter(p => p.memoryStrength >= 60 && p.memoryStrength < 80).length },
+      { range: '80-100%', count: filteredProgress.filter(p => p.memoryStrength >= 80).length }
     ];
 
     // 9. 最近學習的單字（前 10 個）
-    const recentWords = userProgress.slice(0, 10).map(p => ({
-      english: p.word.word,
-      chinese: p.word.translation,
+    const recentWords = filteredProgress.slice(0, 10).map(p => ({
+      english: p.word.english,
+      chinese: p.word.chinese,
       memoryStrength: p.memoryStrength,
-      lastReviewed: p.lastReviewedAt?.toISOString() || p.createdAt.toISOString(),
+      lastReviewed: p.lastReviewedAt?.toISOString() || p.firstLearnedAt.toISOString(),
       nextReview: p.nextReviewAt.toISOString()
     }));
 
