@@ -91,10 +91,12 @@ export async function GET(request: NextRequest) {
       p.memoryStrength >= 80
     ).length;
 
-    // 今日複習數量
+    // 今日複習數量 (通過 session 關聯查詢)
     const todayReviews = await prisma.wordReview.count({
       where: {
-        userId,
+        session: {
+          userId
+        },
         reviewedAt: {
           gte: todayStart
         }
