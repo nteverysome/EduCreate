@@ -51,26 +51,51 @@ export async function POST(request: NextRequest) {
 
     console.log(`  - 獲取到 ${words.length} 個單字`);
 
+    // 2.5. 驗證用戶是否存在
+    console.log('🔍 驗證用戶是否存在...');
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true }
+    });
+
+    if (!userExists) {
+      console.error(`❌ 用戶不存在: ${userId}`);
+      throw new Error(`用戶不存在: ${userId}`);
+    }
+
+    console.log(`✅ 用戶存在: ${userExists.email}`);
+
     // 3. 創建學習會話
-    const learningSession = await prisma.learningSession.create({
-      data: {
-        userId,
-        geptLevel,
-        newWordsCount: words.filter((w: any) => w.isNew).length,
-        reviewWordsCount: words.filter((w: any) => w.needsReview).length,
-        totalWords: words.length
-      }
-    });
+    console.log('🔄 創建學習會話記錄...');
 
-    console.log('✅ 學習會話創建成功');
-    console.log(`  - 會話 ID: ${learningSession.id}`);
+    try {
+      const learningSession = await prisma.learningSession.create({
+        data: {
+          userId,
+          geptLevel,
+          newWordsCount: words.filter((w: any) => w.isNew).length,
+          reviewWordsCount: words.filter((w: any) => w.needsReview).length,
+          totalWords: words.length
+        }
+      });
 
-    return NextResponse.json({
-      sessionId: learningSession.id,
-      words,
-      newWords: words.filter((w: any) => w.isNew),
-      reviewWords: words.filter((w: any) => w.needsReview)
-    });
+      console.log('✅ 學習會話創建成功');
+      console.log(`  - 會話 ID: ${learningSession.id}`);
+
+      return NextResponse.json({
+        sessionId: learningSession.id,
+        words,
+        newWords: words.filter((w: any) => w.isNew),
+        reviewWords: words.filter((w: any) => w.needsReview)
+      });
+
+    } catch (dbError: any) {
+      console.error('❌ 資料庫寫入失敗:', dbError);
+      console.error('  - 錯誤代碼:', dbError.code);
+      console.error('  - 錯誤訊息:', dbError.message);
+      console.error('  - Meta:', dbError.meta);
+      throw new Error(`資料庫寫入失敗: ${dbError.message}`);
+    }
 
   } catch (error: any) {
     console.error('❌ 創建會話失敗:', error);
