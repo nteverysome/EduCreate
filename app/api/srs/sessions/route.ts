@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
 
       const vocabularyItems = await prisma.vocabularyItem.findMany({
         where: {
-          id: { in: wordIds },
-          geptLevel
+          id: { in: wordIds }
+          // 不過濾 geptLevel,因為用戶可能選擇了不同等級的單字
         },
         include: {
           ttsCache: {
