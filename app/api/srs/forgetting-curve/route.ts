@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       const wordReviewList = reviewsByWordId.get(progress.wordId) || [];
 
       const wordData = {
-        id: progress.id,
+        id: progress.wordId,  // 🔧 修復：使用 wordId (VocabularyItem.id) 而不是 progress.id (UserWordProgress.id)
         word: progress.word?.english || '',
         translation: progress.word?.chinese || '',
         memoryStrength: progress.memoryStrength,
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
       words: filteredProgress.map(p => {
         const wordReviewList = reviewsByWordId.get(p.wordId) || [];
         return {
-          id: p.id,
+          id: p.wordId,  // 🔧 修復：使用 wordId (VocabularyItem.id)
           word: p.word?.english || '',
           translation: p.word?.chinese || '',
           memoryStrength: p.memoryStrength,
