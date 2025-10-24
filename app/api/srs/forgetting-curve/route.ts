@@ -18,7 +18,16 @@ export async function GET(request: NextRequest) {
 
     const userId = session.user.id;
     const { searchParams } = new URL(request.url);
-    const geptLevel = searchParams.get('geptLevel') || 'ELEMENTARY';
+    let geptLevel = searchParams.get('geptLevel') || 'ELEMENTARY';
+
+    // 標準化 geptLevel 格式 (轉換為大寫，並處理連字符)
+    geptLevel = geptLevel.toUpperCase().replace('-', '_');
+    // elementary -> ELEMENTARY
+    // intermediate -> INTERMEDIATE
+    // high-intermediate -> HIGH_INTERMEDIATE
+    if (geptLevel === 'ADVANCED') {
+      geptLevel = 'HIGH_INTERMEDIATE';
+    }
 
     // 2. 獲取用戶的所有單字進度
     const userProgress = await prisma.userWordProgress.findMany({
