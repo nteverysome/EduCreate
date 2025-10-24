@@ -58,7 +58,7 @@ const DEFAULT_TTS_CONFIG = {
 
 // 語言特定的音量增益（用於新生成的音頻）
 const LANGUAGE_VOLUME_GAIN = {
-  'en-US': 6.0, // 英文音量較小，增加 6dB
+  'en-US': 10.0, // 英文音量較小，增加 10dB
   'zh-TW': 0.0, // 中文音量正常
 };
 
