@@ -6,7 +6,8 @@ class GEPTManager {
   constructor() {
     this.currentLevel = 'elementary';
     this.wordDatabase = new Map();
-    this.initializeDatabase();
+    // 不在構造函數中初始化數據庫
+    // 讓調用者決定何時初始化 (SRS 模式 vs 自定義活動模式)
     console.log('📚 GEPT 詞彙管理器初始化完成');
   }
 

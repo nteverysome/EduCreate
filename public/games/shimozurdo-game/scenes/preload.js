@@ -119,7 +119,7 @@ export default class Preload extends Phaser.Scene {
 
             if (!userId) {
                 console.error('❌ 無法獲取用戶 ID,使用預設模式');
-                await this.game.geptManager.loadFromCloud();
+                await this.game.geptManager.initializeDatabase();
             } else {
                 // 獲取 GEPT 等級 (從 URL 或預設)
                 const geptLevel = this.getGEPTLevel();
@@ -131,15 +131,16 @@ export default class Preload extends Phaser.Scene {
                     // 將 SRS 單字傳遞給 GEPT 管理器
                     const words = this.game.srsManager.words;
                     this.game.geptManager.loadSRSWords(words);
+                    console.log('✅ SRS 模式: 使用 SRS 選擇的單字');
                 } else {
                     console.error('❌ SRS 初始化失敗,使用預設模式');
-                    await this.game.geptManager.loadFromCloud();
+                    await this.game.geptManager.initializeDatabase();
                 }
             }
         } else {
             console.log('📚 使用自定義活動模式');
             // 使用現有的載入邏輯
-            await this.game.geptManager.loadFromCloud();
+            await this.game.geptManager.initializeDatabase();
         }
 
         // CONFIG SCENE - 場景配置區塊
