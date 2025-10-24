@@ -888,8 +888,21 @@ export default class Title extends Phaser.Scene {
             return;
         }
 
-        // 獲取隨機詞彙
-        this.currentTargetWord = this.game.geptManager.getRandomWord();
+        // 🧠 SRS 模式: 按順序選擇單字
+        if (this.srsManager) {
+            const word = this.srsManager.getCurrentWord();
+            if (word) {
+                this.currentTargetWord = word;
+                console.log('🧠 SRS 目標詞彙:', this.currentTargetWord.chinese, this.currentTargetWord.english);
+                console.log(`  - 進度: ${this.srsManager.currentWordIndex + 1}/${this.srsManager.words.length}`);
+            } else {
+                console.warn('⚠️ SRS 模式: 無法獲取當前單字');
+                return;
+            }
+        } else {
+            // 普通模式: 隨機選擇詞彙
+            this.currentTargetWord = this.game.geptManager.getRandomWord();
+        }
 
         if (this.currentTargetWord) {
             console.log('🎯 新目標詞彙:', this.currentTargetWord.chinese, this.currentTargetWord.english);
@@ -1354,7 +1367,7 @@ export default class Title extends Phaser.Scene {
     /**
      * 🆕 處理敵人碰撞 - 判斷是否碰撞正確目標並處理後果
      */
-    handleEnemyCollision(enemy) {
+    async handleEnemyCollision(enemy) {
         const word = enemy.getData('word');
         const isTarget = enemy.getData('isTarget');
 
@@ -1381,7 +1394,8 @@ export default class Title extends Phaser.Scene {
             // 🧠 記錄 SRS 答題結果 (正確)
             if (this.srsManager && this.currentTargetWord) {
                 const responseTime = Date.now() - this.answerStartTime;
-                this.srsManager.recordAnswer(true, responseTime);
+                // 傳遞單字英文名稱進行驗證
+                await this.srsManager.recordAnswer(true, responseTime, this.currentTargetWord.english);
                 console.log(`🧠 SRS 記錄: 正確 (${responseTime}ms)`);
             }
 
@@ -1415,11 +1429,12 @@ export default class Title extends Phaser.Scene {
             // 🧠 記錄 SRS 答題結果 (錯誤)
             if (this.srsManager && this.currentTargetWord) {
                 const responseTime = Date.now() - this.answerStartTime;
-                this.srsManager.recordAnswer(false, responseTime);
+                // 傳遞單字英文名稱進行驗證
+                await this.srsManager.recordAnswer(false, responseTime, this.currentTargetWord.english);
                 console.log(`🧠 SRS 記錄: 錯誤 (${responseTime}ms)`);
 
-                // 重置答題開始時間
-                this.answerStartTime = Date.now();
+                // 🔄 答錯時不重置答題開始時間,讓用戶繼續嘗試同一個單字
+                // this.answerStartTime = Date.now();
             }
 
             // 顯示錯誤提示 - 在雲朵位置顯示

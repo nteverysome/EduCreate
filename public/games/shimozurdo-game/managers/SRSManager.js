@@ -87,18 +87,30 @@ class SRSManager {
    * 記錄答題結果
    * @param {boolean} isCorrect - 是否答對
    * @param {number} responseTime - 反應時間 (毫秒)
+   * @param {string} wordEnglish - 答題的單字 (用於驗證)
    * @returns {Promise<void>}
    */
-  async recordAnswer(isCorrect, responseTime) {
+  async recordAnswer(isCorrect, responseTime, wordEnglish = null) {
     const word = this.getCurrentWord();
     if (!word) {
       console.warn('⚠️  沒有當前單字,無法記錄答題結果');
+      console.warn(`  - currentWordIndex: ${this.currentWordIndex}`);
+      console.warn(`  - words.length: ${this.words.length}`);
       return;
     }
-    
+
+    // 🔍 驗證單字是否匹配 (如果提供了 wordEnglish)
+    if (wordEnglish && word.english !== wordEnglish) {
+      console.warn('⚠️  單字不匹配!');
+      console.warn(`  - 當前單字: ${word.english}`);
+      console.warn(`  - 答題單字: ${wordEnglish}`);
+      console.warn(`  - 跳過此次記錄`);
+      return;
+    }
+
     // 計算質量分數
     const quality = SM2.calculateQuality(isCorrect, responseTime);
-    
+
     // 記錄結果
     this.results.push({
       wordId: word.id,
@@ -107,12 +119,12 @@ class SRSManager {
       responseTime,
       quality
     });
-    
+
     try {
       console.log(`📝 更新單字進度: ${word.english} (${isCorrect ? '✅ 正確' : '❌ 錯誤'})`);
       console.log(`  - 反應時間: ${responseTime}ms`);
       console.log(`  - 質量分數: ${quality}/5`);
-      
+
       // 更新後端進度
       const response = await fetch('/api/srs/update-progress', {
         method: 'POST',
@@ -125,24 +137,30 @@ class SRSManager {
           sessionId: this.sessionId
         })
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       const data = await response.json();
-      
+
       console.log(`✅ 進度更新成功`);
       console.log(`  - 記憶強度: ${data.progress.memoryStrength}/100`);
       console.log(`  - 複習間隔: ${data.progress.interval} 天`);
       console.log(`  - 下次複習: ${new Date(data.progress.nextReviewAt).toLocaleDateString()}`);
-      
+
     } catch (error) {
       console.error('❌ 進度更新失敗:', error);
     }
-    
-    // 移動到下一個單字
-    this.currentWordIndex++;
+
+    // 🔄 只在答對時移動到下一個單字
+    // 答錯時保持在當前單字,讓用戶再次嘗試
+    if (isCorrect) {
+      this.currentWordIndex++;
+      console.log(`🔄 移動到下一個單字 (${this.currentWordIndex}/${this.words.length})`);
+    } else {
+      console.log(`🔄 保持在當前單字,等待再次嘗試`);
+    }
   }
   
   /**
