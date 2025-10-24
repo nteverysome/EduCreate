@@ -1,7 +1,14 @@
 /**
  * SuperMemo SM-2 算法實現
  * 用於計算間隔重複學習的複習時間
+ *
+ * 改進版本：
+ * - 使用動態複習間隔（基於記憶強度）
+ * - 記憶強度越高，複習間隔越長
+ * - 考慮自然遺忘衰減
  */
+
+import { calculateNextReviewInterval } from './forgetting';
 
 export interface SM2Progress {
   repetitions: number;      // 連續正確次數
@@ -31,39 +38,34 @@ export function updateWithSM2(
   
   if (isCorrect) {
     // ===== 答對 =====
-    
+
     // 1. 增加連續正確次數
     repetitions += 1;
-    
-    // 2. 計算新的複習間隔
-    if (repetitions === 1) {
-      interval = 1;  // 1 天後複習
-    } else if (repetitions === 2) {
-      interval = 6;  // 6 天後複習
-    } else {
-      interval = Math.round(interval * easeFactor);
-    }
-    
+
+    // 2. 增加記憶強度 (最大 100)
+    memoryStrength = Math.min(100, memoryStrength + 10);
+
     // 3. 增加難度係數 (最大 2.5)
     easeFactor = Math.min(2.5, easeFactor + 0.1);
-    
-    // 4. 增加記憶強度 (最大 100)
-    memoryStrength = Math.min(100, memoryStrength + 10);
-    
+
+    // 4. 計算動態複習間隔（基於記憶強度）
+    // 記憶強度越高，複習間隔越長
+    interval = calculateNextReviewInterval(memoryStrength, easeFactor);
+
   } else {
     // ===== 答錯 =====
-    
+
     // 1. 重置連續正確次數
     repetitions = 0;
-    
-    // 2. 重置複習間隔
-    interval = 1;  // 明天再複習
-    
+
+    // 2. 降低記憶強度 (最小 0)
+    memoryStrength = Math.max(0, memoryStrength - 20);
+
     // 3. 降低難度係數 (最小 1.3)
     easeFactor = Math.max(1.3, easeFactor - 0.2);
-    
-    // 4. 降低記憶強度 (最小 0)
-    memoryStrength = Math.max(0, memoryStrength - 20);
+
+    // 4. 重置複習間隔（明天再複習）
+    interval = 1;
   }
   
   // 5. 計算下次複習時間

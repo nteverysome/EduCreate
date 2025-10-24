@@ -1,10 +1,15 @@
 /**
  * 獲取需要學習的單字 (新單字 + 複習單字)
  * 共享函數,可以被 API 路由和內部邏輯調用
+ *
+ * 改進版本：
+ * - 使用實時記憶強度（考慮自然衰減）
+ * - 優先選擇記憶強度最低的單字
+ * - 記憶強度越低，越需要複習
  */
 
 import prisma from '@/lib/prisma';
-import { calculatePriority } from './sm2';
+import { calculateDecayedStrength } from './forgetting';
 import fs from 'fs';
 import path from 'path';
 
@@ -137,33 +142,50 @@ export async function getWordsToReview(
   console.log(`  - 新單字: ${newWords.length}`);
   console.log(`  - 需要複習: ${dueWords.length}`);
 
-  // 5. 選擇單字 (5 個新單字 + 10 個複習單字)
+  // 5. 計算所有複習單字的實時記憶強度（考慮自然衰減）
+  const dueWordsWithRealTimeStrength = dueWords.map(p => {
+    const realTimeStrength = calculateDecayedStrength(
+      p.memoryStrength,
+      p.lastReviewedAt || now,  // 如果沒有 lastReviewedAt，使用當前時間
+      p.easeFactor
+    );
+
+    return {
+      ...p,
+      realTimeStrength
+    };
+  });
+
+  console.log(`  - 計算實時記憶強度完成`);
+
+  // 6. 選擇單字 (優先選擇記憶強度最低的)
   const newWordsCount = Math.min(5, newWords.length);
-  const reviewWordsCount = Math.min(10, dueWords.length);
+  const reviewWordsCount = Math.min(10, dueWordsWithRealTimeStrength.length);
 
   // 隨機選擇新單字
   const selectedNewWords = newWords
     .sort(() => Math.random() - 0.5)
     .slice(0, newWordsCount);
 
-  // 按優先級排序複習單字
-  const selectedReviewWords = dueWords
-    .sort((a, b) => {
-      const priorityA = calculatePriority(
-        a.memoryStrength,
-        new Date(a.nextReviewAt),
-        now
-      );
-      const priorityB = calculatePriority(
-        b.memoryStrength,
-        new Date(b.nextReviewAt),
-        now
-      );
-      return priorityB - priorityA;
-    })
+  // 按實時記憶強度排序複習單字（從低到高）
+  // 記憶強度越低，越需要複習
+  const selectedReviewWords = dueWordsWithRealTimeStrength
+    .sort((a, b) => a.realTimeStrength - b.realTimeStrength)
     .slice(0, reviewWordsCount);
 
-  // 6. 為每個單字創建或獲取 VocabularyItem
+  console.log(`  - 選擇單字完成`);
+  console.log(`  - 新單字: ${selectedNewWords.length} 個`);
+  console.log(`  - 複習單字: ${selectedReviewWords.length} 個`);
+
+  // 打印複習單字的實時記憶強度（用於調試）
+  if (selectedReviewWords.length > 0) {
+    console.log(`  - 複習單字實時記憶強度:`);
+    selectedReviewWords.slice(0, 5).forEach((p, i) => {
+      console.log(`    ${i + 1}. 記憶強度: ${p.memoryStrength}% → 實時: ${p.realTimeStrength}%`);
+    });
+  }
+
+  // 7. 為每個單字創建或獲取 VocabularyItem
   const createOrGetVocabItem = async (ttsWord: any, chinese: string) => {
     console.log(`🔍 處理單字: ${ttsWord.text} (${chinese})`);
 
@@ -199,7 +221,7 @@ export async function getWordsToReview(
     }
   };
 
-  // 7. 合併單字列表 (使用 VocabularyItem.id)
+  // 8. 合併單字列表 (使用 VocabularyItem.id)
   const words: WordToReview[] = [];
 
   // 處理新單字
@@ -242,7 +264,7 @@ export async function getWordsToReview(
     });
   }
 
-  // 8. 統計數據
+  // 9. 統計數據
   const statistics = {
     totalWords: allWords.length,
     learnedWords: learnedWordIds.size,
