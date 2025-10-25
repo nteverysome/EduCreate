@@ -2159,11 +2159,11 @@ export default class Title extends Phaser.Scene {
      */
     applyRandomOption() {
         if (this.gameOptions.random && this.game.geptManager) {
-            // 獲取所有詞彙
-            const allWords = this.game.geptManager.getAllWords();
-            if (allWords && allWords.length > 0) {
+            // 獲取當前等級的詞彙
+            const currentWords = this.game.geptManager.getCurrentLevelWords();
+            if (currentWords && currentWords.length > 0) {
                 // 隨機打亂詞彙順序
-                const shuffledWords = this.shuffleArray(allWords);
+                const shuffledWords = this.shuffleArray(currentWords);
                 // 更新 GEPT Manager 的詞彙列表
                 this.game.geptManager.words = shuffledWords;
                 console.log('🔀 詞彙順序已隨機打亂');
@@ -2264,7 +2264,7 @@ export default class Title extends Phaser.Scene {
         answersContainer.add(title);
 
         // 顯示全部答案
-        const itemsToShow = this.game.geptManager.getAllWords();
+        const itemsToShow = this.game.geptManager.getCurrentLevelWords();
         const maxVisibleItems = 8; // 一次最多顯示 8 個
         const itemHeight = 35; // 每個項目的高度
 
