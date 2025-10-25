@@ -287,6 +287,12 @@ function initializeGame() {
             height: 540       // 基準高度
           };
 
+          // 🎮 將遊戲選項傳遞給遊戲實例
+          if (window.gameOptions) {
+            game.gameOptions = window.gameOptions;
+            console.log('🎮 遊戲選項已設置到遊戲實例:', game.gameOptions);
+          }
+
           // 將遊戲實例設為全域變數，供其他模組存取
           window.game = game;
 
