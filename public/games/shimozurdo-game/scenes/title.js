@@ -2248,40 +2248,61 @@ export default class Title extends Phaser.Scene {
      * 📝 顯示遊戲結束畫面
      */
     showGameOverScreen(reason) {
-        // 🎯 使用相機座標，確保遊戲結束畫面顯示在螢幕中央
+        // 🎯 參考 a781244 版本：使用 cameras.main 的 centerX/centerY 屬性
+        // 這些屬性會自動計算螢幕中央位置
         const cam = this.cameras.main;
-        const centerX = cam.scrollX + cam.width / 2;
-        const centerY = cam.scrollY + cam.height / 2;
-        const visibleWidth = cam.width;
-        const visibleHeight = cam.height;
 
         // 創建半透明背景
-        const overlay = this.add.rectangle(centerX, centerY, visibleWidth, visibleHeight, 0x000000, 0.7)
-            .setDepth(2000)
-            .setScrollFactor(0);
+        const overlay = this.add.rectangle(
+            cam.centerX,
+            cam.centerY,
+            cam.width,
+            cam.height,
+            0x000000,
+            0.7
+        );
+        overlay.setScrollFactor(0);
+        overlay.setDepth(2000);
 
         // 顯示遊戲結束原因
-        const gameOverText = this.add.text(centerX, centerY - 100, reason, {
-            fontSize: '48px',
-            fill: '#ff0000',
-            fontFamily: 'Arial',
-            stroke: '#000000',
-            strokeThickness: 6
-        }).setOrigin(0.5).setDepth(2001).setScrollFactor(0);
+        const gameOverText = this.add.text(
+            cam.centerX,
+            cam.centerY - 100,
+            reason,
+            {
+                fontSize: '48px',
+                fill: '#ff0000',
+                fontFamily: 'Arial',
+                stroke: '#000000',
+                strokeThickness: 6
+            }
+        );
+        gameOverText.setOrigin(0.5);
+        gameOverText.setScrollFactor(0);
+        gameOverText.setDepth(2001);
 
         // 如果啟用了 Show Answers
         if (this.gameOptions.showAnswers && this.game.geptManager) {
-            this.showAnswersScreen(visibleWidth, visibleHeight);
+            this.showAnswersScreen(cam.width, cam.height);
         }
 
         // 顯示重新開始按鈕
-        const restartButton = this.add.text(centerX, centerY + 100, '重新開始', {
-            fontSize: '32px',
-            fill: '#ffffff',
-            fontFamily: 'Arial',
-            backgroundColor: '#4CAF50',
-            padding: { x: 20, y: 10 }
-        }).setOrigin(0.5).setDepth(2001).setScrollFactor(0).setInteractive();
+        const restartButton = this.add.text(
+            cam.centerX,
+            cam.centerY + 100,
+            '重新開始',
+            {
+                fontSize: '32px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                backgroundColor: '#4CAF50',
+                padding: { x: 20, y: 10 }
+            }
+        );
+        restartButton.setOrigin(0.5);
+        restartButton.setScrollFactor(0);
+        restartButton.setDepth(2001);
+        restartButton.setInteractive({ cursor: 'pointer' });
 
         restartButton.on('pointerdown', () => {
             this.scene.restart();
@@ -2294,13 +2315,11 @@ export default class Title extends Phaser.Scene {
      * 📝 顯示答案畫面
      */
     showAnswersScreen(width, height) {
-        // 🎯 使用相機座標，確保答案顯示在螢幕中央
+        // 🎯 參考 a781244 版本：使用 cameras.main 的 centerX/centerY 屬性
         const cam = this.cameras.main;
-        const centerX = cam.scrollX + cam.width / 2;
-        const centerY = cam.scrollY + cam.height / 2;
 
         // 創建答案顯示容器
-        const answersContainer = this.add.container(centerX, centerY)
+        const answersContainer = this.add.container(cam.centerX, cam.centerY)
             .setDepth(2002)
             .setScrollFactor(0);
 
