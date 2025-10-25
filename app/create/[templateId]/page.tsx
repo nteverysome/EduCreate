@@ -528,20 +528,20 @@ export default function CreateGamePage() {
 
       {/* Wordwall 風格頭部 */}
       <div className="bg-white border-b">
-        <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           {/* 遊戲信息 */}
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
+          <div className="flex items-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-lg flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
               {gameConfig.icon}
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">{gameConfig.name}</h2>
-              <p className="text-sm text-gray-600">{gameConfig.description}</p>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{gameConfig.name}</h2>
+              <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{gameConfig.description}</p>
             </div>
           </div>
 
           {/* 進度指示器 */}
-          <div className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+          <div className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-500">
             <span className="text-blue-600">選擇範本</span>
             <span>→</span>
             <span className="text-blue-600 font-medium">輸入內容</span>
@@ -552,7 +552,7 @@ export default function CreateGamePage() {
       </div>
 
       {/* 主要內容區域 */}
-      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-4 sm:py-6 lg:py-8 px-4 sm:px-6 lg:px-8">
         {/* 活動標題 */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -570,16 +570,16 @@ export default function CreateGamePage() {
         {/* 詞彙輸入區域 */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           {/* 操作說明 */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <button
               onClick={() => setShowInstructions(!showInstructions)}
-              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm sm:text-base"
             >
               <span>📋</span>
               <span>操作說明</span>
             </button>
             {showInstructions && (
-              <div className="mt-2 p-4 bg-blue-50 rounded-lg text-sm text-gray-700">
+              <div className="mt-2 p-3 sm:p-4 bg-blue-50 rounded-lg text-xs sm:text-sm text-gray-700 space-y-1">
                 <p>1. 在左欄輸入英文單字，在右欄輸入對應的中文翻譯</p>
                 <p>2. 可以添加音標來幫助發音學習</p>
                 <p>3. 至少需要 {gameConfig.minItems} 個單字，最多 {gameConfig.maxItems} 個</p>
@@ -589,20 +589,20 @@ export default function CreateGamePage() {
           </div>
 
           {/* 欄位標題和交換按鈕 */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex-1">
-              <h3 className="font-medium text-gray-900">英文單字</h3>
-              <p className="text-sm text-gray-500">這些將在遊戲中顯示</p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base">英文單字</h3>
+              <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">這些將在遊戲中顯示</p>
             </div>
             <button
               onClick={swapColumns}
-              className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              className="px-3 py-1.5 sm:py-1 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors whitespace-nowrap self-start sm:self-auto"
             >
-              交換列
+              ⇄ 交換列
             </button>
-            <div className="flex-1 ml-4">
-              <h3 className="font-medium text-gray-900">中文翻譯</h3>
-              <p className="text-sm text-gray-500">對應的中文意思</p>
+            <div className="flex-1 min-w-0 sm:ml-4">
+              <h3 className="font-medium text-gray-900 text-sm sm:text-base">中文翻譯</h3>
+              <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">對應的中文意思</p>
             </div>
           </div>
 
@@ -638,11 +638,11 @@ export default function CreateGamePage() {
             <button
               onClick={addNewItem}
               disabled={vocabularyItems.length >= gameConfig.maxItems}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start"
             >
               <span className="text-lg">+</span>
               <span>新增項目</span>
-              <span className="text-sm text-gray-500">
+              <span className="text-xs sm:text-sm text-gray-500">
                 最小{gameConfig.minItems} 最大{gameConfig.maxItems}
               </span>
             </button>
@@ -650,17 +650,17 @@ export default function CreateGamePage() {
         </div>
 
         {/* 完成按鈕 */}
-        <div className="mt-8 flex justify-end space-x-4">
+        <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
           <button
             onClick={() => router.push('/create')}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-sm sm:text-base"
           >
             返回
           </button>
           <button
             onClick={saveActivity}
             disabled={!validateItems() || isLoading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
           >
             {isLoading ? (isEditMode ? '更新中...' : '保存中...') : (isEditMode ? '更新並開始遊戲' : '完成並開始遊戲')}
           </button>
