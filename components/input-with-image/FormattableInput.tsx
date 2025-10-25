@@ -30,6 +30,7 @@ export default function FormattableInput({
   leftPadding = 'pl-3'
 }: FormattableInputProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const savedRangeRef = useRef<Range | null>(null); // 保存選擇範圍
   const [isFocused, setIsFocused] = useState(false);
   const [isEmpty, setIsEmpty] = useState(!value);
 
@@ -51,8 +52,30 @@ export default function FormattableInput({
     }
   };
 
+  // 保存選擇範圍
+  const saveSelection = () => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      savedRangeRef.current = selection.getRangeAt(0).cloneRange();
+    }
+  };
+
+  // 恢復選擇範圍
+  const restoreSelection = () => {
+    if (savedRangeRef.current) {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(savedRangeRef.current);
+      }
+    }
+  };
+
   // 處理格式化
   const handleFormat = (type: FormatType) => {
+    // 恢復之前保存的選擇範圍
+    restoreSelection();
+
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 
@@ -121,6 +144,9 @@ export default function FormattableInput({
   };
 
   const handleBlur = () => {
+    // 保存當前選擇範圍
+    saveSelection();
+
     // 延遲隱藏工具欄，讓點擊工具欄按鈕有時間執行
     setTimeout(() => {
       setIsFocused(false);
