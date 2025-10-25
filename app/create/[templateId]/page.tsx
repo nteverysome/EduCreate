@@ -7,6 +7,8 @@ import LoginPrompt from '@/components/Auth/LoginPrompt';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import { loadAndNormalizeVocabularyData, getSourceDisplayName } from '@/lib/vocabulary/loadVocabularyData';
 import SortableVocabularyItem from '@/components/vocabulary-item-with-image/SortableVocabularyItem';
+import GameOptionsPanel from '@/components/game-options';
+import { GameOptions, DEFAULT_GAME_OPTIONS } from '@/types/game-options';
 import {
   DndContext,
   closestCenter,
@@ -156,6 +158,7 @@ export default function CreateGamePage() {
     { id: '2', english: '', chinese: '' },
     { id: '3', english: '', chinese: '' },
   ]);
+  const [gameOptions, setGameOptions] = useState<GameOptions>(DEFAULT_GAME_OPTIONS);
   const [isLoading, setIsLoading] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -463,6 +466,7 @@ export default function CreateGamePage() {
             title: activityTitle,
             gameTemplateId: templateId,
             vocabularyItems: filteredVocabulary,
+            gameOptions,  // 包含遊戲選項
             type: 'vocabulary_game',
             templateType: gameConfig.inputType,
           }),
@@ -482,6 +486,7 @@ export default function CreateGamePage() {
           title: activityTitle,
           gameTemplateId: templateId,
           vocabularyItems: filteredVocabulary,
+          gameOptions,  // 包含遊戲選項
           type: 'vocabulary_game',
           templateType: gameConfig.inputType,
         };
@@ -646,6 +651,14 @@ export default function CreateGamePage() {
                 最小{gameConfig.minItems} 最大{gameConfig.maxItems}
               </span>
             </button>
+          </div>
+
+          {/* 遊戲選項面板 */}
+          <div className="mt-8">
+            <GameOptionsPanel
+              options={gameOptions}
+              onChange={setGameOptions}
+            />
           </div>
         </div>
 
