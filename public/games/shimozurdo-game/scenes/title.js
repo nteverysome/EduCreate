@@ -2433,12 +2433,12 @@ export default class Title extends Phaser.Scene {
                 buttonY,
                 '� 顯示答案',
                 {
-                    fontSize: '28px',
+                    fontSize: '24px',
                     fill: '#ffffff',
                     fontFamily: 'Arial',
                     fontStyle: 'bold',
                     backgroundColor: '#2196F3',
-                    padding: { x: 20, y: 10 }
+                    padding: { x: 25, y: 12 }
                 }
             ).setOrigin(0.5);
 
@@ -2471,20 +2471,21 @@ export default class Title extends Phaser.Scene {
             });
 
             optionsContainer.add(showAnswersButton);
+            buttonY += 60;  // 下一個按鈕的位置
         }
 
         // 🆕 確認並查看排行榜按鈕（更明顯的提示）
         const leaderboardButton = this.add.text(
             0,
-            140,
+            buttonY,
             '✅ 確認名稱並查看排行榜',
             {
-                fontSize: '28px',
+                fontSize: '24px',
                 fill: '#ffffff',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
                 backgroundColor: '#4CAF50',  // 綠色，表示確認操作
-                padding: { x: 20, y: 10 }
+                padding: { x: 25, y: 12 }
             }
         ).setOrigin(0.5);
 
@@ -2521,19 +2522,20 @@ export default class Title extends Phaser.Scene {
         });
 
         optionsContainer.add(leaderboardButton);
+        buttonY += 60;  // 下一個按鈕的位置
 
         // 重新開始按鈕
         const restartButton = this.add.text(
             0,
-            200,
+            buttonY,
             '🔄 重新開始',
             {
-                fontSize: '28px',
+                fontSize: '24px',
                 fill: '#ffffff',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                backgroundColor: '#4CAF50',
-                padding: { x: 20, y: 10 }
+                backgroundColor: '#FF9800',  // 橙色，表示重新開始
+                padding: { x: 25, y: 12 }
             }
         ).setOrigin(0.5);
 
@@ -2544,11 +2546,11 @@ export default class Title extends Phaser.Scene {
 
         // hover 效果
         restartButton.on('pointerover', () => {
-            restartButton.setStyle({ backgroundColor: '#45a049' });
+            restartButton.setStyle({ backgroundColor: '#F57C00' });
         });
 
         restartButton.on('pointerout', () => {
-            restartButton.setStyle({ backgroundColor: '#4CAF50' });
+            restartButton.setStyle({ backgroundColor: '#FF9800' });
         });
 
         // 點擊事件：重新開始遊戲
