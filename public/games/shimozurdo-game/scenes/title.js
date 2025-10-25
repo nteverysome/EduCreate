@@ -1737,13 +1737,22 @@ export default class Title extends Phaser.Scene {
         // 🎯 動態分配列位置
         let currentColumn = 0;
 
-        // 第一列：分數（總是存在）
+        // 第一列：分數和計時器（總是存在）
         const col1X = startX + spacing * currentColumn;
-        this.scoreText.setPosition(col1X, worldTopY);
 
-        // 🆕 更新計時器位置（在分數下方）
-        if (this.timerText) {
-            this.timerText.setPosition(col1X, worldTopY + 60);
+        // 🆕 計算分數和計時器的水平布局
+        // 如果有計時器，分數和計時器並排顯示
+        if (this.timerText && this.timerText.text && this.timerText.text.trim() !== '') {
+            // 計時器在左，分數在右
+            const timerWidth = 80;  // 計時器寬度估計
+            this.timerText.setPosition(col1X - timerWidth / 2, worldTopY);
+            this.scoreText.setPosition(col1X + timerWidth / 2, worldTopY);
+        } else {
+            // 沒有計時器，分數居中
+            this.scoreText.setPosition(col1X, worldTopY);
+            if (this.timerText) {
+                this.timerText.setVisible(false);
+            }
         }
 
         currentColumn++;
