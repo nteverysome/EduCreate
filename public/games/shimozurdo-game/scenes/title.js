@@ -2390,7 +2390,12 @@ export default class Title extends Phaser.Scene {
                     backgroundColor: '#2196F3',
                     padding: { x: 20, y: 10 }
                 }
-            ).setOrigin(0.5).setInteractive({ cursor: 'pointer' });
+            ).setOrigin(0.5);
+
+            // 🔧 設置 depth 和 scrollFactor，確保按鈕在最上層
+            showAnswersButton.setScrollFactor(0);
+            showAnswersButton.setDepth(2002);
+            showAnswersButton.setInteractive({ cursor: 'pointer' });
 
             // hover 效果
             showAnswersButton.on('pointerover', () => {
@@ -2431,7 +2436,12 @@ export default class Title extends Phaser.Scene {
                 backgroundColor: '#4CAF50',
                 padding: { x: 20, y: 10 }
             }
-        ).setOrigin(0.5).setInteractive({ cursor: 'pointer' });
+        ).setOrigin(0.5);
+
+        // 🔧 設置 depth 和 scrollFactor，確保按鈕在最上層
+        restartButton.setScrollFactor(0);
+        restartButton.setDepth(2002);
+        restartButton.setInteractive({ cursor: 'pointer' });
 
         // hover 效果
         restartButton.on('pointerover', () => {
