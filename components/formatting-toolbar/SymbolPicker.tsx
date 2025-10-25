@@ -76,12 +76,15 @@ export default function SymbolPicker({ onSelect, onClose }: SymbolPickerProps) {
         </button>
       </div>
 
-      {/* 分類標籤 */}
+      {/* 分類標籤 - 使用 onMouseDown 防止失去焦點 */}
       <div className="flex items-center gap-1 px-3 py-2 border-b border-gray-200 overflow-x-auto">
         {Object.entries(SYMBOL_CATEGORIES).map(([key, category]) => (
           <button
             key={key}
-            onClick={() => setActiveCategory(key as keyof typeof SYMBOL_CATEGORIES)}
+            onMouseDown={(e) => {
+              e.preventDefault(); // 防止失去焦點
+              setActiveCategory(key as keyof typeof SYMBOL_CATEGORIES);
+            }}
             className={`px-3 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap ${
               activeCategory === key
                 ? 'bg-blue-100 text-blue-700'
