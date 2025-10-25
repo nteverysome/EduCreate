@@ -2274,13 +2274,13 @@ export default class Title extends Phaser.Scene {
         // 保存容器引用
         this.gameOverOptionsContainer = optionsContainer;
 
-        // 顯示遊戲結束標題
+        // 顯示遊戲結束標題（縮短文字，避免重疊）
         const gameOverText = this.add.text(
             0,
-            -220,
-            reason,
+            -250,
+            '🎮 遊戲結束',
             {
-                fontSize: '48px',
+                fontSize: '42px',
                 fill: '#ffff00',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
@@ -2291,24 +2291,44 @@ export default class Title extends Phaser.Scene {
 
         optionsContainer.add(gameOverText);
 
+        // 顯示結束原因（如果不是標準的「遊戲結束」）
+        if (reason !== '遊戲結束' && reason !== '🎮 遊戲結束') {
+            const reasonText = this.add.text(
+                0,
+                -200,
+                reason,
+                {
+                    fontSize: '24px',
+                    fill: '#ff6b6b',
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 3
+                }
+            ).setOrigin(0.5);
+
+            optionsContainer.add(reasonText);
+        }
+
         // 計算統計信息
         const correctCount = this.questionAnswerLog.filter(q => q.isCorrect).length;
         const totalCount = this.questionAnswerLog.length;
         const accuracy = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : 0;
         const timeSpent = Math.floor((Date.now() - (this.gameStartTime || Date.now())) / 1000);
 
-        // 顯示統計信息
+        // 顯示統計信息（調整位置和格式）
         const statsText = this.add.text(
             0,
-            -150,
+            -140,
             `最終分數: ${this.score || 0}\n正確率: ${accuracy}%\n答對: ${correctCount}/${totalCount}\n遊戲時間: ${timeSpent}秒`,
             {
-                fontSize: '24px',
+                fontSize: '22px',
                 fill: '#ffffff',
                 fontFamily: 'Arial',
                 align: 'center',
                 stroke: '#000000',
-                strokeThickness: 3
+                strokeThickness: 3,
+                lineSpacing: 5
             }
         ).setOrigin(0.5);
 
@@ -2317,7 +2337,7 @@ export default class Title extends Phaser.Scene {
         // 添加分隔線
         const separator1 = this.add.graphics();
         separator1.lineStyle(3, 0xffffff, 0.7);
-        separator1.lineBetween(-250, -60, 250, -60);
+        separator1.lineBetween(-250, -40, 250, -40);
         separator1.setScrollFactor(0);
         separator1.setDepth(2001);
         optionsContainer.add(separator1);  // 🔧 添加到容器
@@ -2328,7 +2348,7 @@ export default class Title extends Phaser.Scene {
         // 🆕 輸入名稱標籤
         const nameLabel = this.add.text(
             0,
-            -30,
+            -5,
             '輸入你的名稱：',
             {
                 fontSize: '20px',
@@ -2347,7 +2367,7 @@ export default class Title extends Phaser.Scene {
         nameInputElement.placeholder = '請輸入名稱...';
         nameInputElement.style.position = 'absolute';
         nameInputElement.style.left = `${cam.centerX - 150}px`;
-        nameInputElement.style.top = `${cam.centerY + 10}px`;
+        nameInputElement.style.top = `${cam.centerY + 35}px`;
         nameInputElement.style.width = '300px';
         nameInputElement.style.height = '40px';
         nameInputElement.style.fontSize = '18px';
@@ -2375,10 +2395,10 @@ export default class Title extends Phaser.Scene {
         // 🆕 添加提示文字：告訴用戶輸入名稱後點擊綠色按鈕
         const hintText = this.add.text(
             0,
-            50,
-            '👆 輸入名稱後，點擊下方綠色按鈕查看排行榜',
+            75,
+            '👇 輸入名稱後，點擊下方綠色按鈕查看排行榜',
             {
-                fontSize: '18px',
+                fontSize: '16px',
                 fill: '#FFD700',
                 fontFamily: 'Arial',
                 fontStyle: 'italic',
@@ -2395,7 +2415,7 @@ export default class Title extends Phaser.Scene {
         // 添加第二條分隔線
         const separator2 = this.add.graphics();
         separator2.lineStyle(3, 0xffffff, 0.7);
-        separator2.lineBetween(-250, 70, 250, 70);
+        separator2.lineBetween(-250, 100, 250, 100);
         separator2.setScrollFactor(0);
         separator2.setDepth(2001);
         optionsContainer.add(separator2);  // 🔧 添加到容器
@@ -2403,11 +2423,14 @@ export default class Title extends Phaser.Scene {
         // 保存分隔線引用
         this.separator2 = separator2;
 
+        // 🆕 按鈕起始位置
+        let buttonY = 140;
+
         // 🆕 顯示答案按鈕（只有啟用 Show Answers 時才顯示）
         if (this.gameOptions.showAnswers && this.game.geptManager) {
             const showAnswersButton = this.add.text(
                 0,
-                110,
+                buttonY,
                 '� 顯示答案',
                 {
                     fontSize: '28px',
