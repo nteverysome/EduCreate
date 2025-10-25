@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
@@ -15,6 +15,13 @@ interface LearningPath {
   estimatedDays: number;
   advantages: string[];
   examples: string[];
+  totalWords?: number; // 該等級的總單字數
+}
+
+interface GeptLevelStats {
+  level: string;
+  totalWords: number;
+  pathStats: Record<string, { groupCount: number; totalWords: number }>;
 }
 
 export default function PathSelectorPage() {
@@ -22,6 +29,26 @@ export default function PathSelectorPage() {
   const { data: session, status } = useSession();
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [selectedGeptLevel, setSelectedGeptLevel] = useState<string>('ELEMENTARY');
+  const [geptStats, setGeptStats] = useState<GeptLevelStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // 獲取 GEPT 等級統計數據
+  useEffect(() => {
+    const fetchGeptStats = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/vocabulary/gept-stats?geptLevel=${selectedGeptLevel}`);
+        const data = await response.json();
+        setGeptStats(data);
+      } catch (error) {
+        console.error('獲取 GEPT 統計數據失敗:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGeptStats();
+  }, [selectedGeptLevel]);
 
   // 學習路徑選項
   const learningPaths: LearningPath[] = [
@@ -403,7 +430,7 @@ export default function PathSelectorPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              初級 (2,357 個單字)
+              初級 {loading ? '(載入中...)' : `(${geptStats?.totalWords || 0} 個單字)`}
             </button>
             <button
               onClick={() => setSelectedGeptLevel('INTERMEDIATE')}
@@ -413,7 +440,7 @@ export default function PathSelectorPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              中級 (2,568 個單字)
+              中級 {loading ? '(載入中...)' : `(${geptStats?.totalWords || 0} 個單字)`}
             </button>
             <button
               onClick={() => setSelectedGeptLevel('HIGH_INTERMEDIATE')}
@@ -423,7 +450,7 @@ export default function PathSelectorPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              中高級 (3,138 個單字)
+              中高級 {loading ? '(載入中...)' : `(${geptStats?.totalWords || 0} 個單字)`}
             </button>
           </div>
         </div>
@@ -446,7 +473,13 @@ export default function PathSelectorPage() {
                 <div>
                   <h3 className="text-xl font-bold text-gray-800">{path.name}</h3>
                   <p className="text-sm text-gray-600">
-                    {path.groupCount} 組 · 每組 {path.wordsPerGroup} 個單字
+                    {loading ? (
+                      '載入中...'
+                    ) : geptStats?.pathStats[path.id] ? (
+                      `${geptStats.pathStats[path.id].groupCount} 組 · 共 ${geptStats.pathStats[path.id].totalWords} 個單字`
+                    ) : (
+                      `${path.groupCount} 組 · 每組 ${path.wordsPerGroup} 個單字`
+                    )}
                   </p>
                 </div>
               </div>
@@ -457,7 +490,15 @@ export default function PathSelectorPage() {
               {/* 預計時間 */}
               <div className="bg-white rounded-lg p-3 mb-4">
                 <div className="text-sm text-gray-600">預計完成時間</div>
-                <div className="text-2xl font-bold text-gray-800">{path.estimatedDays} 天</div>
+                <div className="text-2xl font-bold text-gray-800">
+                  {loading ? (
+                    '...'
+                  ) : geptStats?.pathStats[path.id] ? (
+                    `${Math.ceil(geptStats.pathStats[path.id].groupCount / 2)} 天`
+                  ) : (
+                    `${path.estimatedDays} 天`
+                  )}
+                </div>
               </div>
 
               {/* 優勢 */}
