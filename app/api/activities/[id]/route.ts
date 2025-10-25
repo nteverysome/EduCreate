@@ -312,6 +312,12 @@ export async function PUT(
       }
     }
 
+    // 如果有 gameOptions，更新 gameOptions
+    if (body.gameOptions !== undefined) {
+      updateData.gameOptions = body.gameOptions;
+      console.log('🎮 更新遊戲選項:', { activityId, gameOptions: body.gameOptions });
+    }
+
     // 如果有 folderId，更新 folderId（支持拖拽功能）
     if (body.folderId !== undefined) {
       updateData.folderId = body.folderId;
