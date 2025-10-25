@@ -5,7 +5,7 @@
  * 功能：
  * - Timer: None / Count up / Count down (with time input)
  * - Lives: 1-5 (slider)
- * - Speed: 1-5 (slider)
+ * - Speed: 1-10 (slider)
  * - Random: Shuffle question order (checkbox)
  * - End of game: Show answers (checkbox)
  */
@@ -138,7 +138,7 @@ export default function GameOptionsPanel({ options, onChange }: GameOptionsProps
                 <input
                   type="range"
                   min="1"
-                  max="5"
+                  max="10"
                   value={options.speed}
                   onChange={(e) => updateOptions({ speed: Number(e.target.value) })}
                   className="flex-1 cursor-pointer"

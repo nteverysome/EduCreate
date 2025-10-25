@@ -2143,9 +2143,14 @@ export default class Title extends Phaser.Scene {
      */
     applySpeedOption() {
         const speed = this.gameOptions.speed || 3;
-        this.speedMultiplier = speed / 3; // 1-5 映射到 0.33-1.67
+        // 1-10 映射到 0.5-5.0 (更大的速度範圍)
+        // speed=1 → 0.5x (最慢)
+        // speed=3 → 1.5x (默認稍快)
+        // speed=5 → 2.5x (中等)
+        // speed=10 → 5.0x (最快)
+        this.speedMultiplier = speed * 0.5;
 
-        console.log('⚡ 遊戲速度:', speed, '倍率:', this.speedMultiplier);
+        console.log('⚡ 遊戲速度:', speed, '倍率:', this.speedMultiplier.toFixed(2) + 'x');
 
         // 如果已經有敵人系統，更新速度
         if (this.enemySpawnTimer) {

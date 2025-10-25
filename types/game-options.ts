@@ -10,7 +10,7 @@ export interface GameOptions {
     seconds?: number;
   };
   lives: number;  // 1-5
-  speed: number;  // 1-5
+  speed: number;  // 1-10
   random: boolean;  // 是否隨機順序
   showAnswers: boolean;  // 遊戲結束後顯示答案
 }
