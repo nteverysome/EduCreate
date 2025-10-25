@@ -20,7 +20,7 @@ interface DuplicateButtonProps {
 export default function DuplicateButton({ onClick }: DuplicateButtonProps) {
   return (
     <button
-      className="w-8 h-11 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+      className="w-9 sm:w-7 md:w-8 h-9 sm:h-11 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors rounded-md hover:bg-gray-100"
       onClick={onClick}
       type="button"
       title="複製項目"
@@ -29,7 +29,7 @@ export default function DuplicateButton({ onClick }: DuplicateButtonProps) {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 16 16"
-        className="w-4 h-4"
+        className="w-4 sm:w-3.5 md:w-4 h-4 sm:h-3.5 md:h-4"
         fill="currentColor"
       >
         {/* Front square */}

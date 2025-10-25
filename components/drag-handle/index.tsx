@@ -19,7 +19,7 @@ interface DragHandleProps {
 export default function DragHandle({ listeners, attributes }: DragHandleProps) {
   return (
     <button
-      className="w-8 h-11 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-move active:cursor-grabbing"
+      className="w-9 sm:w-7 md:w-8 h-9 sm:h-11 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-move active:cursor-grabbing rounded-md hover:bg-gray-100"
       {...listeners}
       {...attributes}
       type="button"
@@ -29,7 +29,7 @@ export default function DragHandle({ listeners, attributes }: DragHandleProps) {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 320 512"
-        className="w-4 h-4"
+        className="w-4 sm:w-3.5 md:w-4 h-4 sm:h-3.5 md:h-4"
         fill="currentColor"
       >
         <path d="M137.4 41.4c12.5-12.5 32.8-12.5 45.3 0l128 128c9.2 9.2 11.9 22.9 6.9 34.9s-16.6 19.8-29.6 19.8H32c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9l128-128zm0 429.3l-128-128c-9.2-9.2-11.9-22.9-6.9-34.9s16.6-19.8 29.6-19.8H288c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9l-128 128c-12.5 12.5-32.8 12.5-45.3 0z"/>
