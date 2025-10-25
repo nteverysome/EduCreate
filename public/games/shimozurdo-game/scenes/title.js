@@ -2519,7 +2519,7 @@ export default class Title extends Phaser.Scene {
         answersContainer.add(separator);
 
         // 🆕 使用 questionAnswerLog 顯示詳細答案（水平排列）
-        const maxVisibleItems = 8; // 一次最多顯示 8 個問題
+        const maxVisibleItems = 5; // 一次最多顯示 5 個問題
         const itemHeight = 40; // 每個問題佔 40 像素（1 行文字）
 
         // 如果問題數量超過最大可見數量，添加滾動提示
@@ -2577,22 +2577,30 @@ export default class Title extends Phaser.Scene {
             let currentScroll = 0;
             const maxScroll = (this.questionAnswerLog.length - maxVisibleItems) * itemHeight;
 
-            // 添加滾動按鈕
-            const scrollUpButton = this.add.text(-width / 4, 0, '▲', {
+            // 添加滾動按鈕（放在左側）
+            const scrollUpButton = this.add.text(-250, 0, '▲', {
                 fontSize: '32px',
                 fill: '#ffffff',
                 fontFamily: 'Arial',
                 backgroundColor: '#333333',
                 padding: { x: 10, y: 5 }
-            }).setOrigin(0.5).setDepth(2003).setScrollFactor(0).setInteractive({ cursor: 'pointer' });
+            }).setOrigin(0.5);
 
-            const scrollDownButton = this.add.text(-width / 4, 50, '▼', {
+            scrollUpButton.setScrollFactor(0);
+            scrollUpButton.setDepth(2003);
+            scrollUpButton.setInteractive({ cursor: 'pointer' });
+
+            const scrollDownButton = this.add.text(-250, 50, '▼', {
                 fontSize: '32px',
                 fill: '#ffffff',
                 fontFamily: 'Arial',
                 backgroundColor: '#333333',
                 padding: { x: 10, y: 5 }
-            }).setOrigin(0.5).setDepth(2003).setScrollFactor(0).setInteractive({ cursor: 'pointer' });
+            }).setOrigin(0.5);
+
+            scrollDownButton.setScrollFactor(0);
+            scrollDownButton.setDepth(2003);
+            scrollDownButton.setInteractive({ cursor: 'pointer' });
 
             answersContainer.add(scrollUpButton);
             answersContainer.add(scrollDownButton);
@@ -2601,12 +2609,14 @@ export default class Title extends Phaser.Scene {
             scrollUpButton.on('pointerdown', () => {
                 currentScroll = Math.max(0, currentScroll - itemHeight * 2);
                 listContainer.y = -140 - currentScroll;
+                console.log(`⬆️ 向上滾動，當前滾動位置: ${currentScroll}`);
             });
 
             // 滾動向下
             scrollDownButton.on('pointerdown', () => {
                 currentScroll = Math.min(maxScroll, currentScroll + itemHeight * 2);
                 listContainer.y = -140 - currentScroll;
+                console.log(`⬇️ 向下滾動，當前滾動位置: ${currentScroll}`);
             });
 
             console.log(`📝 答案畫面已顯示（${this.questionAnswerLog.length} 個問題，可滾動）`);
