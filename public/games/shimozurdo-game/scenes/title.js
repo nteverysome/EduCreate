@@ -2460,8 +2460,11 @@ export default class Title extends Phaser.Scene {
         });
 
         // 點擊事件：顯示排行榜畫面
-        leaderboardButton.on('pointerdown', () => {
+        leaderboardButton.on('pointerdown', async () => {
             console.log('🏆 點擊查看排行榜按鈕');
+
+            // 🆕 先保存分數到排行榜
+            await this.saveScoreToLeaderboard();
 
             // 隱藏選項畫面
             this.gameOverOptionsContainer.setVisible(false);
@@ -2470,7 +2473,7 @@ export default class Title extends Phaser.Scene {
             }
 
             // 顯示排行榜畫面
-            this.showLeaderboardScreen();
+            await this.showLeaderboardScreen();
         });
 
         optionsContainer.add(leaderboardButton);
@@ -2859,9 +2862,20 @@ export default class Title extends Phaser.Scene {
     async showLeaderboardScreen() {
         const cam = this.cameras.main;
 
-        // 創建排行榜顯示容器
+        // 🔧 確保完全隱藏遊戲結束畫面
+        if (this.gameOverOptionsContainer) {
+            this.gameOverOptionsContainer.setVisible(false);
+        }
+        if (this.answersContainer) {
+            this.answersContainer.setVisible(false);
+        }
+        if (this.nameInputElement) {
+            this.nameInputElement.style.display = 'none';
+        }
+
+        // 創建排行榜顯示容器（depth 設置為 2100，確保在最上層）
         const leaderboardContainer = this.add.container(cam.centerX, cam.centerY)
-            .setDepth(2002)
+            .setDepth(2100)
             .setScrollFactor(0);
 
         // 標題
@@ -3010,7 +3024,7 @@ export default class Title extends Phaser.Scene {
         }).setOrigin(0.5);
 
         backButton.setScrollFactor(0);
-        backButton.setDepth(2003);
+        backButton.setDepth(2101);  // 確保在排行榜容器之上
         backButton.setInteractive({ cursor: 'pointer' });
 
         // hover 效果
