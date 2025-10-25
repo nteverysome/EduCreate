@@ -30,16 +30,27 @@ export default function PathSelectorPage() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [selectedGeptLevel, setSelectedGeptLevel] = useState<string>('ELEMENTARY');
   const [geptStats, setGeptStats] = useState<GeptLevelStats | null>(null);
+  const [allGeptStats, setAllGeptStats] = useState<Record<string, GeptLevelStats>>({});
   const [loading, setLoading] = useState(true);
 
-  // 獲取 GEPT 等級統計數據
+  // 一次性獲取所有 GEPT 等級的統計數據
   useEffect(() => {
-    const fetchGeptStats = async () => {
+    const fetchAllGeptStats = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/vocabulary/gept-stats?geptLevel=${selectedGeptLevel}`);
-        const data = await response.json();
-        setGeptStats(data);
+        const levels = ['ELEMENTARY', 'INTERMEDIATE', 'HIGH_INTERMEDIATE'];
+        const promises = levels.map(level =>
+          fetch(`/api/vocabulary/gept-stats?geptLevel=${level}`).then(res => res.json())
+        );
+        const results = await Promise.all(promises);
+
+        const statsMap: Record<string, GeptLevelStats> = {};
+        results.forEach((data, index) => {
+          statsMap[levels[index]] = data;
+        });
+
+        setAllGeptStats(statsMap);
+        setGeptStats(statsMap[selectedGeptLevel]);
       } catch (error) {
         console.error('獲取 GEPT 統計數據失敗:', error);
       } finally {
@@ -47,10 +58,17 @@ export default function PathSelectorPage() {
       }
     };
 
-    fetchGeptStats();
-  }, [selectedGeptLevel]);
+    fetchAllGeptStats();
+  }, []);
 
-  // 獲取動態數據的輔助函�?  const getPathData = (pathId: string) => {
+  // 當選擇的等級改變時，更新當前統計數據
+  useEffect(() => {
+    if (allGeptStats[selectedGeptLevel]) {
+      setGeptStats(allGeptStats[selectedGeptLevel]);
+    }
+  }, [selectedGeptLevel, allGeptStats]);
+
+  // 獲取動態數據的輔助函�?  const getPathData = (pathId: string) => {
     if (!geptStats?.pathStats[pathId]) {
       return { groupCount: 0, totalWords: 0, estimatedDays: 0 };
     }
@@ -58,13 +76,13 @@ export default function PathSelectorPage() {
     return {
       groupCount: stats.groupCount,
       totalWords: stats.totalWords,
-      estimatedDays: Math.ceil(stats.groupCount / 2) // 每天學習 2 �?    };
+      estimatedDays: Math.ceil(stats.groupCount / 2) // 每天學習 2 �?    };
   };
 
-  // 學習路徑選項（移除硬編碼數據�?  const learningPaths: LearningPath[] = [
+  // 學習路徑選項（移除硬編碼數據�?  const learningPaths: LearningPath[] = [
     {
       id: 'partOfSpeech',
-      name: '詞性分組學�?,
+      name: '詞性分組學�?,
       description: '按照詞性分組，有助於語法學習和句子構建',
       icon: '📖',
       color: 'blue',
@@ -74,20 +92,20 @@ export default function PathSelectorPage() {
       advantages: [
         '語法理解提升 50-60%',
         '記憶效果提升 30-40%',
-        '快速判斷單字功�?,
-        '適合所有學習�?
+        '快速判斷單字功�?,
+        '適合所有學習�?
       ],
       examples: [
         '名詞: teacher, student, book',
         '動詞: run, jump, write',
-        '形容�? big, beautiful, happy',
+        '形容�? big, beautiful, happy',
         '副詞: quickly, slowly, carefully'
       ]
     },
     {
       id: 'prefix',
       name: '字首分組學習',
-      description: '按照單字的字首（前綴）分組，理解字首規則後可以推測單字意�?,
+      description: '按照單字的字首（前綴）分組，理解字首規則後可以推測單字意�?,
       icon: '🔤',
       color: 'indigo',
       groupCount: 0,
@@ -96,14 +114,14 @@ export default function PathSelectorPage() {
       advantages: [
         '記憶效率提升 50-100%',
         '可以推測 40-50% 的新單字',
-        '理解英文單字的構成邏�?,
+        '理解英文單字的構成邏�?,
         '建立系統化的記憶網絡'
       ],
       examples: [
-        'un- (�?: unhappy, unable, unfair',
-        're- (�?: rewrite, return, review',
-        'pre- (�?: preview, prepare, predict',
-        'dis- (�?: disagree, dislike, disappear'
+        'un- (�?: unhappy, unable, unfair',
+        're- (�?: rewrite, return, review',
+        'pre- (�?: preview, prepare, predict',
+        'dis- (�?: disagree, dislike, disappear'
       ]
     },
     {
@@ -117,34 +135,34 @@ export default function PathSelectorPage() {
       estimatedDays: 0,
       advantages: [
         '語義關聯強，記憶深刻',
-        '一次學習多個相關單�?,
-        '提升詞彙量擴展能�?,
-        '理解單字的核心意�?
+        '一次學習多個相關單�?,
+        '提升詞彙量擴展能�?,
+        '理解單字的核心意�?
       ],
       examples: [
         'port (攜帶): transport, export, import',
-        'dict (�?: dictionary, predict, dictate',
-        'vis (�?: visit, video, television',
-        'aud (�?: audio, audience, auditorium'
+        'dict (�?: dictionary, predict, dictate',
+        'vis (�?: visit, video, television',
+        'aud (�?: audio, audience, auditorium'
       ]
     },
     {
       id: 'suffix',
       name: '字尾分組學習',
-      description: '按照單字的字尾（後綴）分組，理解字尾後可以判斷詞�?,
+      description: '按照單字的字尾（後綴）分組，理解字尾後可以判斷詞�?,
       icon: '📝',
       color: 'purple',
       groupCount: 0,
       wordsPerGroup: 0,
       estimatedDays: 0,
       advantages: [
-        '快速判斷詞�?,
-        '有助於語法學�?,
-        '理解單字的功�?,
+        '快速判斷詞�?,
+        '有助於語法學�?,
+        '理解單字的功�?,
         '提升寫作能力'
       ],
       examples: [
-        '-er (�?: teacher, worker, player',
+        '-er (�?: teacher, worker, player',
         '-tion (動作): action, education, creation',
         '-ful (充滿): beautiful, careful, useful',
         '-ly (方式): quickly, slowly, carefully'
@@ -160,35 +178,35 @@ export default function PathSelectorPage() {
       wordsPerGroup: 0,
       estimatedDays: 0,
       advantages: [
-        '單字之間有語義關�?,
+        '單字之間有語義關�?,
         '記憶效果提升 30-50%',
-        '實用性強，容易應�?,
-        '可以按興趣選擇主�?
+        '實用性強，容易應�?,
+        '可以按興趣選擇主�?
       ],
       examples: [
         '日常生活: home, family, food, clothes',
         '學校教育: teacher, student, book, class',
         '工作職業: job, office, manager, meeting',
-        '交通旅�? car, bus, train, travel'
+        '交通旅�? car, bus, train, travel'
       ]
     },
     {
       id: 'frequency',
       name: '頻率分組學習',
-      description: '按照單字使用頻率分組，優先學習最常用的單�?,
-      icon: '�?,
+      description: '按照單字使用頻率分組，優先學習最常用的單�?,
+      icon: '�?,
       color: 'yellow',
       groupCount: 0,
       wordsPerGroup: 0,
       estimatedDays: 0,
       advantages: [
-        '優先學習最實用的單�?,
+        '優先學習最實用的單�?,
         '學習效果立即可見',
-        '快速提升英語能�?,
+        '快速提升英語能�?,
         '適合快速入門'
       ],
       examples: [
-        '超高�? the, be, to, of, and, a, in',
+        '超高�? the, be, to, of, and, a, in',
         '高頻: have, I, that, for, you, he, with',
         '中頻: say, this, they, at, but, we, his',
         '低頻: more specific vocabulary words'
@@ -205,31 +223,31 @@ export default function PathSelectorPage() {
       estimatedDays: 0,
       advantages: [
         '結合多種記憶策略',
-        '記憶效果最�?,
-        '系統化學�?,
+        '記憶效果最�?,
+        '系統化學�?,
         '適合長期學習'
       ],
       examples: [
-        '第一階段: 學習字根字首規則 (22 �?',
-        '第二階段: 按主題學�?(26 �?',
-        '建立完整的詞彙網�?,
-        '達到最佳學習效�?
+        '第一階段: 學習字根字首規則 (22 �?',
+        '第二階段: 按主題學�?(26 �?',
+        '建立完整的詞彙網�?,
+        '達到最佳學習效�?
       ]
     },
     {
       id: 'syllable',
       name: '音節分組學習',
-      description: '按照音節數量分組，循序漸進學習，有助於發�?,
+      description: '按照音節數量分組，循序漸進學習，有助於發�?,
       icon: '🎵',
       color: 'pink',
       groupCount: 0,
       wordsPerGroup: 0,
       estimatedDays: 0,
       advantages: [
-        '有助於發音學�?,
-        '循序漸進學�?,
+        '有助於發音學�?,
+        '循序漸進學�?,
         '記憶效果提升 20-30%',
-        '適合初學�?
+        '適合初學�?
       ],
       examples: [
         '單音節: cat, dog, run, big',
@@ -241,14 +259,14 @@ export default function PathSelectorPage() {
     {
       id: 'context',
       name: '情境分組學習',
-      description: '按照生活情境分組，實用性強，容易應用到生活�?,
+      description: '按照生活情境分組，實用性強，容易應用到生活�?,
       icon: '🎬',
       color: 'teal',
       groupCount: 0,
       wordsPerGroup: 0,
       estimatedDays: 0,
       advantages: [
-        '實用性極�?,
+        '實用性極�?,
         '記憶效果提升 50-70%',
         '容易應用到生活中',
         '情境記憶深刻'
@@ -272,13 +290,13 @@ export default function PathSelectorPage() {
       advantages: [
         '記憶效果提升 60-80%',
         '情感記憶最深刻',
-        '有助於情感表�?,
-        '記憶保持率最�?
+        '有助於情感表�?,
+        '記憶保持率最�?
       ],
       examples: [
         '正面情感: happy, joy, love, wonderful',
         '負面情感: sad, angry, hate, terrible',
-        '中性情�? table, chair, book, pen'
+        '中性情�? table, chair, book, pen'
       ]
     },
     {
@@ -291,15 +309,15 @@ export default function PathSelectorPage() {
       wordsPerGroup: 0,
       estimatedDays: 0,
       advantages: [
-        '動作記憶效果�?,
+        '動作記憶效果�?,
         '記憶效果提升 30-50%',
-        '適合動覺學習�?,
+        '適合動覺學習�?,
         '有趣且互動性強'
       ],
       examples: [
         '移動動作: walk, run, jump, fly',
         '手部動作: write, draw, hold, catch',
-        '思考動�? think, know, understand',
+        '思考動�? think, know, understand',
         '感官動作: see, hear, smell, taste'
       ]
     },
@@ -313,9 +331,9 @@ export default function PathSelectorPage() {
       wordsPerGroup: 0,
       estimatedDays: 0,
       advantages: [
-        '視覺記憶效果�?,
-        '適合視覺學習�?,
-        '有助於描述能�?,
+        '視覺記憶效果�?,
+        '適合視覺學習�?,
+        '有助於描述能�?,
         '記憶效果提升 30-40%'
       ],
       examples: [
@@ -329,19 +347,19 @@ export default function PathSelectorPage() {
       id: 'temporal',
       name: '時間分組學習',
       description: '按照時間類別分組，時間軸記憶清晰',
-      icon: '�?,
+      icon: '�?,
       color: 'cyan',
       groupCount: 0,
       wordsPerGroup: 0,
       estimatedDays: 0,
       advantages: [
-        '時間軸記憶清�?,
+        '時間軸記憶清�?,
         '實用性強',
         '適合日常對話',
         '記憶效果提升 20-30%'
       ],
       examples: [
-        '時間�? morning, noon, afternoon',
+        '時間�? morning, noon, afternoon',
         '季節: spring, summer, autumn, winter',
         '月份: January, February, March',
         '時間長度: second, minute, hour, day'
@@ -357,15 +375,15 @@ export default function PathSelectorPage() {
   // 開始學習
   const handleStartLearning = () => {
     if (!selectedPath) {
-      alert('請先選擇一個學習路�?);
+      alert('請先選擇一個學習路�?);
       return;
     }
 
-    // 保存用戶選擇�?localStorage
+    // 保存用戶選擇�?localStorage
     localStorage.setItem('learningPath', selectedPath);
     localStorage.setItem('geptLevel', selectedGeptLevel);
 
-    // 跳轉到分組列表頁�?    router.push(`/learn/groups?path=${selectedPath}&geptLevel=${selectedGeptLevel}`);
+    // 跳轉到分組列表頁�?    router.push(`/learn/groups?path=${selectedPath}&geptLevel=${selectedGeptLevel}`);
   };
 
   // 顏色映射
@@ -402,7 +420,7 @@ export default function PathSelectorPage() {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">載入�?..</div>
+        <div className="text-xl">載入�?..</div>
       </div>
     );
   }
@@ -439,7 +457,7 @@ export default function PathSelectorPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              初級 {loading ? '(載入�?..)' : `(${geptStats?.totalWords || 0} 個單�?`}
+              初級 {loading ? '(載入中...)' : `(${allGeptStats['ELEMENTARY']?.totalWords || 0} 個單字)`}
             </button>
             <button
               onClick={() => setSelectedGeptLevel('INTERMEDIATE')}
@@ -449,7 +467,7 @@ export default function PathSelectorPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              中級 {loading ? '(載入�?..)' : `(${geptStats?.totalWords || 0} 個單�?`}
+              中級 {loading ? '(載入中...)' : `(${allGeptStats['INTERMEDIATE']?.totalWords || 0} 個單字)`}
             </button>
             <button
               onClick={() => setSelectedGeptLevel('HIGH_INTERMEDIATE')}
@@ -459,7 +477,7 @@ export default function PathSelectorPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              中高�?{loading ? '(載入�?..)' : `(${geptStats?.totalWords || 0} 個單�?`}
+              中高級 {loading ? '(載入中...)' : `(${allGeptStats['HIGH_INTERMEDIATE']?.totalWords || 0} 個單字)`}
             </button>
           </div>
         </div>
@@ -476,18 +494,18 @@ export default function PathSelectorPage() {
                   : colorClasses[path.color as keyof typeof colorClasses]
               }`}
             >
-              {/* 圖標和標�?*/}
+              {/* 圖標和標�?*/}
               <div className="flex items-center mb-4">
                 <div className="text-4xl mr-3">{path.icon}</div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-800">{path.name}</h3>
                   <p className="text-sm text-gray-600">
                     {loading ? (
-                      '載入�?..'
+                      '載入�?..'
                     ) : geptStats?.pathStats[path.id] ? (
-                      `${geptStats.pathStats[path.id].groupCount} �?· �?${geptStats.pathStats[path.id].totalWords} 個單字`
+                      `${geptStats.pathStats[path.id].groupCount} �?· �?${geptStats.pathStats[path.id].totalWords} 個單字`
                     ) : (
-                      `${path.groupCount} �?· 每組 ${path.wordsPerGroup} 個單字`
+                      `${path.groupCount} �?· 每組 ${path.wordsPerGroup} 個單字`
                     )}
                   </p>
                 </div>
@@ -512,11 +530,11 @@ export default function PathSelectorPage() {
 
               {/* 優勢 */}
               <div className="mb-4">
-                <div className="text-sm font-medium text-gray-700 mb-2">�?優勢</div>
+                <div className="text-sm font-medium text-gray-700 mb-2">�?優勢</div>
                 <ul className="space-y-1">
                   {path.advantages.slice(0, 3).map((advantage, index) => (
                     <li key={index} className="text-sm text-gray-600 flex items-start">
-                      <span className="mr-2">�?/span>
+                      <span className="mr-2">�?/span>
                       <span>{advantage}</span>
                     </li>
                   ))}
@@ -539,7 +557,7 @@ export default function PathSelectorPage() {
               {selectedPath === path.id && (
                 <div className="mt-4 text-center">
                   <div className="inline-block bg-green-500 text-white px-4 py-2 rounded-full font-medium">
-                    �?已選�?                  </div>
+                    �?已選�?                  </div>
                 </div>
               )}
             </div>
