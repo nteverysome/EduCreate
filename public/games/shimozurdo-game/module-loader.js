@@ -5,6 +5,29 @@
 // 記錄模組載入器啟動
 console.log('🔧 模組載入器啟動');
 
+// 🎮 讀取遊戲選項從 URL 參數
+function loadGameOptions() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const gameOptionsParam = urlParams.get('gameOptions');
+
+  if (gameOptionsParam) {
+    try {
+      const gameOptions = JSON.parse(decodeURIComponent(gameOptionsParam));
+      console.log('🎮 遊戲選項已載入:', gameOptions);
+      return gameOptions;
+    } catch (error) {
+      console.error('❌ 解析遊戲選項失敗:', error);
+      return null;
+    }
+  }
+
+  console.log('ℹ️ 使用默認遊戲選項');
+  return null;
+}
+
+// 載入遊戲選項並存儲到全域變數
+window.gameOptions = loadGameOptions();
+
 // 模組載入狀態追蹤物件 - 記錄每個模組的載入狀態
 const moduleLoadStatus = {
   handler: false,  // Handler 場景載入狀態

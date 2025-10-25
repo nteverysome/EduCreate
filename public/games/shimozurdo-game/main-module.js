@@ -82,6 +82,14 @@ export function initGame(scenes) {
   // 記錄初始化開始和場景數量
   console.log('🎮 初始化遊戲，場景數量:', scenes.length);
 
+  // 🎮 讀取遊戲選項
+  const gameOptions = window.gameOptions || null;
+  if (gameOptions) {
+    console.log('🎮 遊戲選項已應用:', gameOptions);
+  } else {
+    console.log('ℹ️ 使用默認遊戲選項');
+  }
+
   // 創建完整的遊戲配置，合併基礎配置和動態場景
   const config = {
     // 展開基礎遊戲配置的所有屬性
@@ -94,6 +102,12 @@ export function initGame(scenes) {
       postBoot: function (game) {
         // 記錄 Phaser 引擎啟動成功
         console.log('🎉 Phaser 遊戲啟動成功');
+
+        // 🎮 將遊戲選項存儲到遊戲實例
+        game.gameOptions = gameOptions;
+        if (gameOptions) {
+          console.log('🎮 遊戲選項已存儲到遊戲實例');
+        }
 
         // 設置遊戲實例的基準螢幕尺寸屬性，用於響應式計算
         game.screenBaseSize = {

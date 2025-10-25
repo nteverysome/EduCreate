@@ -34,6 +34,16 @@ export default class Title extends Phaser.Scene {
     create() {
         const { width, height } = this                   // 解構賦值獲取寬高
 
+        // 🎮 讀取遊戲選項
+        this.gameOptions = this.game.gameOptions || {
+            timer: { type: 'countUp', minutes: 5, seconds: 0 },
+            lives: 3,
+            speed: 3,
+            random: true,
+            showAnswers: true
+        };
+        console.log('🎮 Title 場景使用的遊戲選項:', this.gameOptions);
+
         // 🎮 記錄遊戲開始時間
         this.gameStartTime = Date.now();
         console.log('🎮 遊戲開始時間記錄:', new Date(this.gameStartTime).toLocaleTimeString());
@@ -88,6 +98,9 @@ export default class Title extends Phaser.Scene {
         // 🔧 監聽視口變化事件 - 確保目標單字在全螢幕模式下正確顯示
         this.scale.on('resize', this.handleResize, this);
         // GAME OBJECTS
+
+        // 🎮 應用遊戲選項
+        this.applyGameOptions();
     }
 
     /**
@@ -624,9 +637,18 @@ export default class Title extends Phaser.Scene {
         const visibleWidth = cam.width;
         const visibleHeight = cam.height;
 
+        // 🎮 使用 gameOptions 中的 lives 設定
+        const livesFromOptions = this.gameOptions?.lives || 3;
+
         // 生命值設定 - 初始化血量參數
-        this.maxHealth = 100;                            // 最大生命值
-        this.currentHealth = 100;                        // 當前生命值
+        // 如果 lives 是 1-5，則將其轉換為百分比系統（每條命 20%）
+        this.maxLives = livesFromOptions;                // 最大生命數
+        this.currentLives = livesFromOptions;            // 當前生命數
+        this.maxHealth = 100;                            // 最大生命值（百分比）
+        this.currentHealth = 100;                        // 當前生命值（百分比）
+        this.healthPerLife = 100 / livesFromOptions;     // 每條命的血量百分比
+
+        console.log(`❤️ 生命值系統初始化: ${this.currentLives}/${this.maxLives} 條命，每條命 ${this.healthPerLife.toFixed(1)}% 血量`);
 
         // 🎯 生命值條位置和尺寸（右下角） - 使用動態相機尺寸
         const healthBarWidth = 100;                      // 生命值條寬度（縮小50%：200 → 100）
@@ -1085,8 +1107,8 @@ export default class Title extends Phaser.Scene {
         }
         this.healthBar.setFillStyle(color);              // 應用顏色變化
 
-        // 更新文字 - 顯示具體數值
-        this.healthText.setText(`${this.currentHealth}/${this.maxHealth}`);
+        // 🎮 更新文字 - 顯示生命數和百分比
+        this.healthText.setText(`❤️ ${this.currentLives}/${this.maxLives}`);
     }
 
     /**
@@ -1094,14 +1116,24 @@ export default class Title extends Phaser.Scene {
      */
     takeDamage(damage) {
         this.currentHealth = Math.max(0, this.currentHealth - damage);  // 扣除傷害，最低為0
+
+        // 🎮 計算當前生命數（基於百分比）
+        const previousLives = this.currentLives;
+        this.currentLives = Math.ceil(this.currentHealth / this.healthPerLife);
+
+        // 如果生命數減少，顯示提示
+        if (this.currentLives < previousLives) {
+            console.log(`💔 失去一條命！剩餘 ${this.currentLives}/${this.maxLives} 條命`);
+        }
+
         this.updateHealthDisplay();                      // 更新UI顯示
 
         if (this.currentHealth <= 0) {                   // 檢查是否死亡
             console.log('💀 太空船被摧毀！');
-            this.gameOver();                              // 調用遊戲結束處理
+            this.gameOver('生命值耗盡！');                // 調用遊戲結束處理
         }
 
-        console.log(`💥 受到 ${damage} 點傷害，剩餘生命值: ${this.currentHealth}`);
+        console.log(`💥 受到 ${damage} 點傷害，剩餘生命值: ${this.currentHealth.toFixed(1)}% (${this.currentLives}/${this.maxLives} 條命)`);
     }
 
     /**
@@ -2006,5 +2038,241 @@ export default class Title extends Phaser.Scene {
         this.srsProgressText.setText(`SRS 進度: ${progress.current}/${progress.total}`);
 
         console.log(`🧠 SRS 進度更新: ${progress.current}/${progress.total} (${progress.percentage}%)`);
+    }
+
+    /**
+     * 🎮 應用遊戲選項
+     */
+    applyGameOptions() {
+        const { width, height } = this;
+
+        // 1. 應用 Timer 選項
+        this.applyTimerOption(width, height);
+
+        // 2. 應用 Speed 選項
+        this.applySpeedOption();
+
+        // 3. 應用 Random 選項（如果有詞彙列表）
+        this.applyRandomOption();
+
+        console.log('✅ 所有遊戲選項已應用');
+    }
+
+    /**
+     * ⏱️ 應用 Timer 選項
+     */
+    applyTimerOption(width, height) {
+        const timerOption = this.gameOptions.timer;
+
+        if (timerOption.type === 'countDown') {
+            // 倒數計時
+            const totalSeconds = (timerOption.minutes || 0) * 60 + (timerOption.seconds || 0);
+            this.timeRemaining = totalSeconds;
+
+            // 創建計時器文字
+            this.timerText = this.add.text(width / 2, 50, this.formatTime(this.timeRemaining), {
+                fontSize: '32px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                stroke: '#000000',
+                strokeThickness: 4
+            }).setOrigin(0.5).setDepth(1000).setScrollFactor(0);
+
+            // 啟動倒數計時器
+            this.timerEvent = this.time.addEvent({
+                delay: 1000,
+                callback: () => {
+                    this.timeRemaining--;
+                    this.timerText.setText(this.formatTime(this.timeRemaining));
+
+                    // 時間快結束時變紅色
+                    if (this.timeRemaining <= 10) {
+                        this.timerText.setColor('#ff0000');
+                    }
+
+                    if (this.timeRemaining <= 0) {
+                        this.timerEvent.remove();
+                        this.gameOver('時間到！');
+                    }
+                },
+                loop: true
+            });
+
+            console.log('⏱️ 倒數計時器已啟動:', totalSeconds, '秒');
+
+        } else if (timerOption.type === 'countUp') {
+            // 正向計時
+            this.timeElapsed = 0;
+
+            // 創建計時器文字
+            this.timerText = this.add.text(width / 2, 50, this.formatTime(this.timeElapsed), {
+                fontSize: '32px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                stroke: '#000000',
+                strokeThickness: 4
+            }).setOrigin(0.5).setDepth(1000).setScrollFactor(0);
+
+            // 啟動正向計時器
+            this.timerEvent = this.time.addEvent({
+                delay: 1000,
+                callback: () => {
+                    this.timeElapsed++;
+                    this.timerText.setText(this.formatTime(this.timeElapsed));
+                },
+                loop: true
+            });
+
+            console.log('⏱️ 正向計時器已啟動');
+        } else {
+            console.log('ℹ️ Timer 選項為 none，不顯示計時器');
+        }
+    }
+
+    /**
+     * 🕐 格式化時間顯示
+     */
+    formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    /**
+     * ⚡ 應用 Speed 選項
+     */
+    applySpeedOption() {
+        const speed = this.gameOptions.speed || 3;
+        this.speedMultiplier = speed / 3; // 1-5 映射到 0.33-1.67
+
+        console.log('⚡ 遊戲速度:', speed, '倍率:', this.speedMultiplier);
+
+        // 如果已經有敵人系統，更新速度
+        if (this.enemySpawnTimer) {
+            // 調整敵人生成速度
+            this.enemySpawnTimer.delay = 2000 / this.speedMultiplier;
+        }
+    }
+
+    /**
+     * 🔀 應用 Random 選項
+     */
+    applyRandomOption() {
+        if (this.gameOptions.random && this.game.vocabularyItems) {
+            // 隨機打亂詞彙順序
+            this.game.vocabularyItems = this.shuffleArray(this.game.vocabularyItems);
+            console.log('🔀 詞彙順序已隨機打亂');
+        }
+    }
+
+    /**
+     * 🔀 打亂數組
+     */
+    shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    /**
+     * 🎮 遊戲結束處理
+     */
+    gameOver(reason) {
+        console.log('🎮 遊戲結束:', reason);
+
+        // 停止計時器
+        if (this.timerEvent) {
+            this.timerEvent.remove();
+        }
+
+        // 停止敵人生成
+        if (this.enemySpawnTimer) {
+            this.enemySpawnTimer.remove();
+        }
+
+        // 顯示遊戲結束畫面
+        this.showGameOverScreen(reason);
+    }
+
+    /**
+     * 📝 顯示遊戲結束畫面
+     */
+    showGameOverScreen(reason) {
+        const { width, height } = this;
+
+        // 創建半透明背景
+        const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7)
+            .setDepth(2000)
+            .setScrollFactor(0);
+
+        // 顯示遊戲結束原因
+        const gameOverText = this.add.text(width / 2, height / 2 - 100, reason, {
+            fontSize: '48px',
+            fill: '#ff0000',
+            fontFamily: 'Arial',
+            stroke: '#000000',
+            strokeThickness: 6
+        }).setOrigin(0.5).setDepth(2001).setScrollFactor(0);
+
+        // 如果啟用了 Show Answers
+        if (this.gameOptions.showAnswers && this.game.vocabularyItems) {
+            this.showAnswersScreen(width, height);
+        }
+
+        // 顯示重新開始按鈕
+        const restartButton = this.add.text(width / 2, height / 2 + 100, '重新開始', {
+            fontSize: '32px',
+            fill: '#ffffff',
+            fontFamily: 'Arial',
+            backgroundColor: '#4CAF50',
+            padding: { x: 20, y: 10 }
+        }).setOrigin(0.5).setDepth(2001).setScrollFactor(0).setInteractive();
+
+        restartButton.on('pointerdown', () => {
+            this.scene.restart();
+        });
+
+        console.log('📝 遊戲結束畫面已顯示');
+    }
+
+    /**
+     * 📝 顯示答案畫面
+     */
+    showAnswersScreen(width, height) {
+        // 創建答案顯示容器
+        const answersContainer = this.add.container(width / 2, height / 2)
+            .setDepth(2002)
+            .setScrollFactor(0);
+
+        // 標題
+        const title = this.add.text(0, -200, '正確答案：', {
+            fontSize: '32px',
+            fill: '#ffff00',
+            fontFamily: 'Arial',
+            stroke: '#000000',
+            strokeThickness: 4
+        }).setOrigin(0.5);
+
+        answersContainer.add(title);
+
+        // 顯示前 5 個答案（避免太多）
+        const itemsToShow = this.game.vocabularyItems.slice(0, 5);
+        itemsToShow.forEach((item, index) => {
+            const answerText = this.add.text(0, -150 + index * 40,
+                `${index + 1}. ${item.english} - ${item.chinese}`, {
+                fontSize: '20px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                stroke: '#000000',
+                strokeThickness: 2
+            }).setOrigin(0.5);
+
+            answersContainer.add(answerText);
+        });
+
+        console.log('📝 答案畫面已顯示');
     }
 }
