@@ -2430,10 +2430,55 @@ export default class Title extends Phaser.Scene {
             optionsContainer.add(showAnswersButton);
         }
 
+        // 🆕 查看排行榜按鈕
+        const leaderboardButton = this.add.text(
+            0,
+            140,
+            '🏆 查看排行榜',
+            {
+                fontSize: '28px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                backgroundColor: '#FF9800',
+                padding: { x: 20, y: 10 }
+            }
+        ).setOrigin(0.5);
+
+        // 🔧 設置 depth 和 scrollFactor，確保按鈕在最上層
+        leaderboardButton.setScrollFactor(0);
+        leaderboardButton.setDepth(2002);
+        leaderboardButton.setInteractive({ cursor: 'pointer' });
+
+        // hover 效果
+        leaderboardButton.on('pointerover', () => {
+            leaderboardButton.setStyle({ backgroundColor: '#F57C00' });
+        });
+
+        leaderboardButton.on('pointerout', () => {
+            leaderboardButton.setStyle({ backgroundColor: '#FF9800' });
+        });
+
+        // 點擊事件：顯示排行榜畫面
+        leaderboardButton.on('pointerdown', () => {
+            console.log('🏆 點擊查看排行榜按鈕');
+
+            // 隱藏選項畫面
+            this.gameOverOptionsContainer.setVisible(false);
+            if (this.nameInputElement) {
+                this.nameInputElement.style.display = 'none';
+            }
+
+            // 顯示排行榜畫面
+            this.showLeaderboardScreen();
+        });
+
+        optionsContainer.add(leaderboardButton);
+
         // 重新開始按鈕
         const restartButton = this.add.text(
             0,
-            170,
+            200,
             '🔄 重新開始',
             {
                 fontSize: '28px',
@@ -2784,5 +2829,157 @@ export default class Title extends Phaser.Scene {
         } catch (error) {
             console.error('❌ 保存排行榜失敗:', error);
         }
+    }
+
+    /**
+     * 🏆 顯示排行榜畫面
+     */
+    showLeaderboardScreen() {
+        const cam = this.cameras.main;
+
+        // 創建排行榜顯示容器
+        const leaderboardContainer = this.add.container(cam.centerX, cam.centerY)
+            .setDepth(2002)
+            .setScrollFactor(0);
+
+        // 標題
+        const title = this.add.text(0, -250, '🏆 排行榜', {
+            fontSize: '36px',
+            fill: '#FFD700',
+            fontFamily: 'Arial',
+            fontStyle: 'bold',
+            stroke: '#000000',
+            strokeThickness: 4
+        }).setOrigin(0.5);
+
+        leaderboardContainer.add(title);
+
+        // 從 localStorage 讀取排行榜
+        let leaderboard = [];
+        try {
+            const storedLeaderboard = localStorage.getItem('shimozurdo_leaderboard');
+            if (storedLeaderboard) {
+                leaderboard = JSON.parse(storedLeaderboard);
+            }
+        } catch (error) {
+            console.error('❌ 讀取排行榜失敗:', error);
+        }
+
+        // 如果沒有記錄，顯示提示
+        if (leaderboard.length === 0) {
+            const noDataText = this.add.text(0, 0, '目前還沒有排行榜記錄\n快來挑戰吧！', {
+                fontSize: '24px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                align: 'center',
+                stroke: '#000000',
+                strokeThickness: 2
+            }).setOrigin(0.5);
+
+            leaderboardContainer.add(noDataText);
+        } else {
+            // 顯示排行榜列表
+            const listContainer = this.add.container(0, -180);
+            leaderboardContainer.add(listContainer);
+
+            // 表頭
+            const headerText = this.add.text(0, 0, '排名  名稱          分數    正確率  時間', {
+                fontSize: '18px',
+                fill: '#FFD700',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 2
+            }).setOrigin(0.5);
+
+            listContainer.add(headerText);
+
+            // 顯示前 10 名
+            leaderboard.slice(0, 10).forEach((entry, index) => {
+                const yPos = 35 + index * 35;
+
+                // 排名圖標
+                let rankIcon = `${index + 1}.`;
+                if (index === 0) rankIcon = '🥇';
+                else if (index === 1) rankIcon = '🥈';
+                else if (index === 2) rankIcon = '🥉';
+
+                // 格式化名稱（最多 8 個字符）
+                const displayName = entry.name.length > 8
+                    ? entry.name.substring(0, 8) + '...'
+                    : entry.name;
+
+                // 格式化時間
+                const minutes = Math.floor(entry.timeSpent / 60);
+                const seconds = entry.timeSpent % 60;
+                const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                // 組合文字
+                const entryText = `${rankIcon}  ${displayName.padEnd(10)}  ${entry.score.toString().padStart(5)}  ${entry.accuracy.toFixed(1)}%  ${timeStr}`;
+
+                // 根據排名決定顏色
+                let textColor = '#ffffff';
+                if (index === 0) textColor = '#FFD700'; // 金色
+                else if (index === 1) textColor = '#C0C0C0'; // 銀色
+                else if (index === 2) textColor = '#CD7F32'; // 銅色
+
+                const entryLine = this.add.text(0, yPos, entryText, {
+                    fontSize: '16px',
+                    fill: textColor,
+                    fontFamily: 'Courier New',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 2
+                }).setOrigin(0.5);
+
+                listContainer.add(entryLine);
+            });
+        }
+
+        // 返回按鈕
+        const backButton = this.add.text(0, 250, '🔙 返回', {
+            fontSize: '28px',
+            fill: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold',
+            backgroundColor: '#757575',
+            padding: { x: 20, y: 10 }
+        }).setOrigin(0.5);
+
+        backButton.setScrollFactor(0);
+        backButton.setDepth(2003);
+        backButton.setInteractive({ cursor: 'pointer' });
+
+        // hover 效果
+        backButton.on('pointerover', () => {
+            backButton.setStyle({ backgroundColor: '#616161' });
+        });
+
+        backButton.on('pointerout', () => {
+            backButton.setStyle({ backgroundColor: '#757575' });
+        });
+
+        // 點擊事件：返回選項畫面
+        backButton.on('pointerdown', () => {
+            console.log('🔙 點擊返回按鈕（排行榜畫面）');
+
+            // 隱藏排行榜畫面
+            leaderboardContainer.setVisible(false);
+
+            // 顯示選項畫面
+            this.gameOverOptionsContainer.setVisible(true);
+            if (this.nameInputElement) {
+                this.nameInputElement.style.display = 'block';
+            }
+
+            console.log('✅ 已返回選項畫面');
+        });
+
+        leaderboardContainer.add(backButton);
+
+        // 保存排行榜容器引用
+        this.leaderboardContainer = leaderboardContainer;
+
+        console.log('🏆 排行榜畫面已顯示');
     }
 }
