@@ -43,6 +43,7 @@ interface GameSwitcherProps {
   assignmentId?: string | null; // 學生遊戲模式
   studentName?: string | null; // 學生姓名
   isAnonymous?: boolean; // 匿名模式
+  gameOptions?: any; // 遊戲選項
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -329,7 +330,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   isShared = false,
   assignmentId = null,
   studentName = null,
-  isAnonymous = false
+  isAnonymous = false,
+  gameOptions = null
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -380,6 +382,12 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       // 正常模式
       else {
         console.log('🎯 正常模式 URL:', url);
+      }
+
+      // 添加遊戲選項到 URL
+      if (gameOptions) {
+        url += `&gameOptions=${encodeURIComponent(JSON.stringify(gameOptions))}`;
+        console.log('🎮 遊戲選項已添加到 URL');
       }
     }
 

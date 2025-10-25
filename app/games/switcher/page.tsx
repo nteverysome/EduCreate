@@ -1152,6 +1152,7 @@ const GameSwitcherPage: React.FC = () => {
             assignmentId={assignmentId}
             studentName={studentName}
             isAnonymous={isAnonymous}
+            gameOptions={gameOptions}
           />
         </div>
 
@@ -1162,6 +1163,46 @@ const GameSwitcherPage: React.FC = () => {
               options={gameOptions}
               onChange={setGameOptions}
             />
+            {/* 應用選項按鈕 */}
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={async () => {
+                  // 保存選項
+                  try {
+                    const response = await fetch(`/api/activities/${activityId}`, {
+                      method: 'PUT',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        gameOptions,
+                      }),
+                    });
+
+                    if (response.ok) {
+                      alert('選項已保存！');
+                    } else {
+                      alert('保存失敗，請稍後再試');
+                    }
+                  } catch (error) {
+                    console.error('保存選項時出錯:', error);
+                    alert('保存失敗，請稍後再試');
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                💾 保存選項
+              </button>
+              <button
+                onClick={() => {
+                  // 重新載入遊戲
+                  window.location.reload();
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                🔄 應用選項
+              </button>
+            </div>
           </div>
         )}
 
