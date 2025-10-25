@@ -2248,15 +2248,20 @@ export default class Title extends Phaser.Scene {
      * 📝 顯示遊戲結束畫面
      */
     showGameOverScreen(reason) {
-        const { width, height } = this;
+        // 🎯 使用相機座標，確保遊戲結束畫面顯示在螢幕中央
+        const cam = this.cameras.main;
+        const centerX = cam.scrollX + cam.width / 2;
+        const centerY = cam.scrollY + cam.height / 2;
+        const visibleWidth = cam.width;
+        const visibleHeight = cam.height;
 
         // 創建半透明背景
-        const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7)
+        const overlay = this.add.rectangle(centerX, centerY, visibleWidth, visibleHeight, 0x000000, 0.7)
             .setDepth(2000)
             .setScrollFactor(0);
 
         // 顯示遊戲結束原因
-        const gameOverText = this.add.text(width / 2, height / 2 - 100, reason, {
+        const gameOverText = this.add.text(centerX, centerY - 100, reason, {
             fontSize: '48px',
             fill: '#ff0000',
             fontFamily: 'Arial',
@@ -2266,11 +2271,11 @@ export default class Title extends Phaser.Scene {
 
         // 如果啟用了 Show Answers
         if (this.gameOptions.showAnswers && this.game.geptManager) {
-            this.showAnswersScreen(width, height);
+            this.showAnswersScreen(visibleWidth, visibleHeight);
         }
 
         // 顯示重新開始按鈕
-        const restartButton = this.add.text(width / 2, height / 2 + 100, '重新開始', {
+        const restartButton = this.add.text(centerX, centerY + 100, '重新開始', {
             fontSize: '32px',
             fill: '#ffffff',
             fontFamily: 'Arial',
@@ -2289,8 +2294,13 @@ export default class Title extends Phaser.Scene {
      * 📝 顯示答案畫面
      */
     showAnswersScreen(width, height) {
+        // 🎯 使用相機座標，確保答案顯示在螢幕中央
+        const cam = this.cameras.main;
+        const centerX = cam.scrollX + cam.width / 2;
+        const centerY = cam.scrollY + cam.height / 2;
+
         // 創建答案顯示容器
-        const answersContainer = this.add.container(width / 2, height / 2)
+        const answersContainer = this.add.container(centerX, centerY)
             .setDepth(2002)
             .setScrollFactor(0);
 
