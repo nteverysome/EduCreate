@@ -2245,7 +2245,7 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 📝 顯示遊戲結束畫面
+     * 📝 顯示遊戲結束畫面（參考 Wordwall 設計）
      */
     showGameOverScreen(reason) {
         // 🎯 參考 a781244 版本：使用 cameras.main 的 centerX/centerY 屬性
@@ -2264,15 +2264,16 @@ export default class Title extends Phaser.Scene {
         overlay.setScrollFactor(0);
         overlay.setDepth(2000);
 
-        // 顯示遊戲結束原因
+        // 顯示遊戲結束原因（標題）
         const gameOverText = this.add.text(
             cam.centerX,
-            cam.centerY - 100,
+            cam.centerY - 180,
             reason,
             {
                 fontSize: '48px',
-                fill: '#ff0000',
+                fill: '#ffff00',  // 🆕 改為黃色，更醒目
                 fontFamily: 'Arial',
+                fontStyle: 'bold',
                 stroke: '#000000',
                 strokeThickness: 6
             }
@@ -2280,6 +2281,42 @@ export default class Title extends Phaser.Scene {
         gameOverText.setOrigin(0.5);
         gameOverText.setScrollFactor(0);
         gameOverText.setDepth(2001);
+
+        // 🆕 計算統計信息（參考 Wordwall）
+        const correctCount = this.questionAnswerLog.filter(q => q.isCorrect).length;
+        const totalCount = this.questionAnswerLog.length;
+        const accuracy = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : 0;
+        const timeSpent = Math.floor((Date.now() - (this.gameStartTime || Date.now())) / 1000);
+
+        // 🆕 顯示統計信息
+        const statsText = this.add.text(
+            cam.centerX,
+            cam.centerY - 120,
+            `最終分數: ${this.score || 0}\n正確率: ${accuracy}%\n答對: ${correctCount}/${totalCount}\n遊戲時間: ${timeSpent}秒`,
+            {
+                fontSize: '24px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                align: 'center',
+                stroke: '#000000',
+                strokeThickness: 3
+            }
+        );
+        statsText.setOrigin(0.5);
+        statsText.setScrollFactor(0);
+        statsText.setDepth(2001);
+
+        // 🆕 添加分隔線
+        const separator = this.add.graphics();
+        separator.lineStyle(3, 0xffffff, 0.7);
+        separator.lineBetween(
+            cam.centerX - 250,
+            cam.centerY - 30,
+            cam.centerX + 250,
+            cam.centerY - 30
+        );
+        separator.setScrollFactor(0);
+        separator.setDepth(2001);
 
         // 如果啟用了 Show Answers
         if (this.gameOptions.showAnswers && this.game.geptManager) {
@@ -2290,11 +2327,12 @@ export default class Title extends Phaser.Scene {
         const restartButton = this.add.text(
             cam.centerX,
             cam.centerY + 100,
-            '重新開始',
+            '🔄 重新開始',
             {
                 fontSize: '32px',
                 fill: '#ffffff',
                 fontFamily: 'Arial',
+                fontStyle: 'bold',
                 backgroundColor: '#4CAF50',
                 padding: { x: 20, y: 10 }
             }
@@ -2304,15 +2342,24 @@ export default class Title extends Phaser.Scene {
         restartButton.setDepth(2001);
         restartButton.setInteractive({ cursor: 'pointer' });
 
+        // 🆕 添加 hover 效果
+        restartButton.on('pointerover', () => {
+            restartButton.setStyle({ backgroundColor: '#45a049' });
+        });
+
+        restartButton.on('pointerout', () => {
+            restartButton.setStyle({ backgroundColor: '#4CAF50' });
+        });
+
         restartButton.on('pointerdown', () => {
             this.scene.restart();
         });
 
-        console.log('📝 遊戲結束畫面已顯示');
+        console.log('📝 遊戲結束畫面已顯示（參考 Wordwall 設計）');
     }
 
     /**
-     * 📝 顯示答案畫面
+     * 📝 顯示答案畫面（參考 Wordwall 設計）
      */
     showAnswersScreen(width, height) {
         // 🎯 參考 a781244 版本：使用 cameras.main 的 centerX/centerY 屬性
@@ -2324,24 +2371,49 @@ export default class Title extends Phaser.Scene {
             .setScrollFactor(0);
 
         // 標題
-        const title = this.add.text(0, -200, '正確答案：', {
+        const title = this.add.text(0, -250, '📋 詳細答案', {
             fontSize: '32px',
             fill: '#ffff00',
             fontFamily: 'Arial',
+            fontStyle: 'bold',
             stroke: '#000000',
             strokeThickness: 4
         }).setOrigin(0.5);
 
         answersContainer.add(title);
 
-        // 顯示全部答案
-        const itemsToShow = this.game.geptManager.getCurrentLevelWords();
-        const maxVisibleItems = 8; // 一次最多顯示 8 個
-        const itemHeight = 35; // 每個項目的高度
+        // 🆕 計算統計信息
+        const correctCount = this.questionAnswerLog.filter(q => q.isCorrect).length;
+        const totalCount = this.questionAnswerLog.length;
+        const accuracy = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : 0;
 
-        // 如果詞彙數量超過最大可見數量，添加滾動提示
-        if (itemsToShow.length > maxVisibleItems) {
-            const scrollHint = this.add.text(0, -170, '(滾動查看更多)', {
+        // 🆕 顯示統計信息
+        const statsText = this.add.text(0, -210,
+            `正確率: ${accuracy}% | 答對: ${correctCount}/${totalCount}`, {
+            fontSize: '20px',
+            fill: '#ffffff',
+            fontFamily: 'Arial',
+            stroke: '#000000',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+
+        answersContainer.add(statsText);
+
+        // 🆕 添加分隔線
+        const separator = this.add.graphics();
+        separator.lineStyle(2, 0xffffff, 0.5);
+        separator.lineBetween(-200, -185, 200, -185);
+        separator.setScrollFactor(0);
+        separator.setDepth(2002);
+        answersContainer.add(separator);
+
+        // 🆕 使用 questionAnswerLog 顯示詳細答案
+        const maxVisibleItems = 5; // 一次最多顯示 5 個問題
+        const itemHeight = 90; // 每個問題佔 90 像素（3 行文字）
+
+        // 如果問題數量超過最大可見數量，添加滾動提示
+        if (this.questionAnswerLog.length > maxVisibleItems) {
+            const scrollHint = this.add.text(0, -165, '(滾動查看更多)', {
                 fontSize: '16px',
                 fill: '#aaaaaa',
                 fontFamily: 'Arial'
@@ -2353,24 +2425,51 @@ export default class Title extends Phaser.Scene {
         const listContainer = this.add.container(0, -140);
         answersContainer.add(listContainer);
 
-        // 顯示所有答案
-        itemsToShow.forEach((item, index) => {
-            const answerText = this.add.text(0, index * itemHeight,
-                `${index + 1}. ${item.english} - ${item.chinese}`, {
+        // 🆕 顯示每個問題的詳細信息（參考 Wordwall）
+        this.questionAnswerLog.forEach((question, index) => {
+            const yPos = index * itemHeight;
+
+            // 問題文字（黃色，粗體）
+            const questionText = this.add.text(0, yPos,
+                `${question.questionNumber}. ${question.questionText}`, {
                 fontSize: '18px',
-                fill: '#ffffff',
+                fill: '#ffff00',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 2,
+                wordWrap: { width: 350 }
+            }).setOrigin(0.5);
+
+            // 正確答案（綠色）
+            const correctText = this.add.text(0, yPos + 25,
+                `✅ 正確: ${question.correctAnswer}`, {
+                fontSize: '16px',
+                fill: '#00ff00',  // 綠色
                 fontFamily: 'Arial',
                 stroke: '#000000',
                 strokeThickness: 2
             }).setOrigin(0.5);
 
-            listContainer.add(answerText);
+            // 用戶答案（顏色根據正確與否）
+            const userAnswerColor = question.isCorrect ? '#00ff00' : '#ff0000';
+            const userAnswerIcon = question.isCorrect ? '✅' : '❌';
+            const userText = this.add.text(0, yPos + 50,
+                `${userAnswerIcon} 你的答案: ${question.studentAnswer}`, {
+                fontSize: '16px',
+                fill: userAnswerColor,  // 正確綠色，錯誤紅色
+                fontFamily: 'Arial',
+                stroke: '#000000',
+                strokeThickness: 2
+            }).setOrigin(0.5);
+
+            listContainer.add([questionText, correctText, userText]);
         });
 
-        // 如果詞彙數量超過最大可見數量，添加滾動功能
-        if (itemsToShow.length > maxVisibleItems) {
+        // 如果問題數量超過最大可見數量，添加滾動功能
+        if (this.questionAnswerLog.length > maxVisibleItems) {
             let currentScroll = 0;
-            const maxScroll = (itemsToShow.length - maxVisibleItems) * itemHeight;
+            const maxScroll = (this.questionAnswerLog.length - maxVisibleItems) * itemHeight;
 
             // 添加滾動按鈕
             const scrollUpButton = this.add.text(-width / 4, 0, '▲', {
@@ -2379,7 +2478,7 @@ export default class Title extends Phaser.Scene {
                 fontFamily: 'Arial',
                 backgroundColor: '#333333',
                 padding: { x: 10, y: 5 }
-            }).setOrigin(0.5).setDepth(2003).setScrollFactor(0).setInteractive();
+            }).setOrigin(0.5).setDepth(2003).setScrollFactor(0).setInteractive({ cursor: 'pointer' });
 
             const scrollDownButton = this.add.text(-width / 4, 50, '▼', {
                 fontSize: '32px',
@@ -2387,7 +2486,7 @@ export default class Title extends Phaser.Scene {
                 fontFamily: 'Arial',
                 backgroundColor: '#333333',
                 padding: { x: 10, y: 5 }
-            }).setOrigin(0.5).setDepth(2003).setScrollFactor(0).setInteractive();
+            }).setOrigin(0.5).setDepth(2003).setScrollFactor(0).setInteractive({ cursor: 'pointer' });
 
             answersContainer.add(scrollUpButton);
             answersContainer.add(scrollDownButton);
@@ -2404,9 +2503,9 @@ export default class Title extends Phaser.Scene {
                 listContainer.y = -140 - currentScroll;
             });
 
-            console.log(`📝 答案畫面已顯示（${itemsToShow.length} 個詞彙，可滾動）`);
+            console.log(`📝 答案畫面已顯示（${this.questionAnswerLog.length} 個問題，可滾動）`);
         } else {
-            console.log(`📝 答案畫面已顯示（${itemsToShow.length} 個詞彙）`);
+            console.log(`📝 答案畫面已顯示（${this.questionAnswerLog.length} 個問題）`);
         }
     }
 }
