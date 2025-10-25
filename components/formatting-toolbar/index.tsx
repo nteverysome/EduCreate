@@ -39,21 +39,27 @@ export default function FormattingToolbar({
       {/* 粗體按鈕 */}
       <button
         type="button"
-        onClick={() => onFormat('bold')}
-        className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+        onMouseDown={(e) => {
+          e.preventDefault(); // 防止失去焦點
+          onFormat('bold');
+        }}
+        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
         title="粗體 (Ctrl+B)"
       >
-        <span className="font-bold text-gray-700">B</span>
+        <span className="font-bold text-gray-700 text-sm sm:text-base">B</span>
       </button>
 
       {/* 上標按鈕 */}
       <button
         type="button"
-        onClick={() => onFormat('superscript')}
-        className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+        onMouseDown={(e) => {
+          e.preventDefault(); // 防止失去焦點
+          onFormat('superscript');
+        }}
+        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
         title="上標 (x²)"
       >
-        <span className="text-gray-700">
+        <span className="text-gray-700 text-sm sm:text-base">
           x<sup className="text-xs">2</sup>
         </span>
       </button>
@@ -61,11 +67,14 @@ export default function FormattingToolbar({
       {/* 下標按鈕 */}
       <button
         type="button"
-        onClick={() => onFormat('subscript')}
-        className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+        onMouseDown={(e) => {
+          e.preventDefault(); // 防止失去焦點
+          onFormat('subscript');
+        }}
+        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
         title="下標 (x₂)"
       >
-        <span className="text-gray-700">
+        <span className="text-gray-700 text-sm sm:text-base">
           x<sub className="text-xs">2</sub>
         </span>
       </button>
@@ -74,11 +83,14 @@ export default function FormattingToolbar({
       <div className="relative">
         <button
           type="button"
-          onClick={() => setShowSymbolPicker(!showSymbolPicker)}
-          className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+          onMouseDown={(e) => {
+            e.preventDefault(); // 防止失去焦點
+            setShowSymbolPicker(!showSymbolPicker);
+          }}
+          className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
           title="特殊符號"
         >
-          <span className="text-gray-700 text-lg">Ω</span>
+          <span className="text-gray-700 text-base sm:text-lg">Ω</span>
         </button>
 
         {/* 符號選擇器 */}

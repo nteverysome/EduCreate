@@ -121,7 +121,10 @@ export default function FormattableInput({
   };
 
   const handleBlur = () => {
-    setIsFocused(false);
+    // 延遲隱藏工具欄，讓點擊工具欄按鈕有時間執行
+    setTimeout(() => {
+      setIsFocused(false);
+    }, 200);
   };
 
   // 處理鍵盤快捷鍵

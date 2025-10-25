@@ -85,14 +85,17 @@ export default function SymbolPicker({ onSelect, onClose }: SymbolPickerProps) {
         ))}
       </div>
 
-      {/* 符號網格 */}
+      {/* 符號網格 - 手機版調整為 6 列，桌面版 8 列 */}
       <div className="p-3 max-h-64 overflow-y-auto">
-        <div className="grid grid-cols-8 gap-1">
+        <div className="grid grid-cols-6 sm:grid-cols-8 gap-1">
           {SYMBOL_CATEGORIES[activeCategory].symbols.map((symbol, index) => (
             <button
               key={index}
-              onClick={() => onSelect(symbol)}
-              className="w-8 h-8 flex items-center justify-center text-lg hover:bg-blue-50 hover:text-blue-700 rounded transition-colors"
+              onMouseDown={(e) => {
+                e.preventDefault(); // 防止失去焦點
+                onSelect(symbol);
+              }}
+              className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-base sm:text-lg hover:bg-blue-50 hover:text-blue-700 rounded transition-colors"
               title={symbol}
             >
               {symbol}
