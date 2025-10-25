@@ -2518,9 +2518,9 @@ export default class Title extends Phaser.Scene {
         separator.setDepth(2002);
         answersContainer.add(separator);
 
-        // 🆕 使用 questionAnswerLog 顯示詳細答案
-        const maxVisibleItems = 5; // 一次最多顯示 5 個問題
-        const itemHeight = 90; // 每個問題佔 90 像素（3 行文字）
+        // 🆕 使用 questionAnswerLog 顯示詳細答案（水平排列）
+        const maxVisibleItems = 8; // 一次最多顯示 8 個問題
+        const itemHeight = 40; // 每個問題佔 40 像素（1 行文字）
 
         // 如果問題數量超過最大可見數量，添加滾動提示
         if (this.questionAnswerLog.length > maxVisibleItems) {
@@ -2536,45 +2536,40 @@ export default class Title extends Phaser.Scene {
         const listContainer = this.add.container(0, -140);
         answersContainer.add(listContainer);
 
-        // 🆕 顯示每個問題的詳細信息（參考 Wordwall）
+        // 🆕 顯示每個問題的詳細信息（題目與答案水平排列）
         this.questionAnswerLog.forEach((question, index) => {
             const yPos = index * itemHeight;
 
-            // 問題文字（黃色，粗體）
-            const questionText = this.add.text(0, yPos,
-                `${question.questionNumber}. ${question.questionText}`, {
-                fontSize: '18px',
-                fill: '#ffff00',
+            // 🎯 題目與答案水平排列
+            // 格式：第1題 貓 | 答對: apple ✅ | 你的答案: apple ✅
+
+            // 題目編號和文字（黃色，粗體）
+            const questionPart = `第${question.questionNumber}題 ${question.questionText}`;
+
+            // 正確答案部分（綠色）
+            const correctPart = `答對: ${question.correctAnswer}`;
+
+            // 用戶答案部分（根據正確與否顯示顏色）
+            const userAnswerIcon = question.isCorrect ? '✅' : '❌';
+            const userPart = `你的答案: ${question.studentAnswer} ${userAnswerIcon}`;
+
+            // 組合成一行文字
+            const fullText = `${questionPart} | ${correctPart} | ${userPart}`;
+
+            // 根據正確與否決定整行的顏色
+            const textColor = question.isCorrect ? '#00ff00' : '#ff0000';
+
+            const answerLine = this.add.text(0, yPos, fullText, {
+                fontSize: '16px',
+                fill: textColor,
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
                 stroke: '#000000',
                 strokeThickness: 2,
-                wordWrap: { width: 350 }
+                wordWrap: { width: 500 }
             }).setOrigin(0.5);
 
-            // 正確答案（綠色）
-            const correctText = this.add.text(0, yPos + 25,
-                `✅ 正確: ${question.correctAnswer}`, {
-                fontSize: '16px',
-                fill: '#00ff00',  // 綠色
-                fontFamily: 'Arial',
-                stroke: '#000000',
-                strokeThickness: 2
-            }).setOrigin(0.5);
-
-            // 用戶答案（顏色根據正確與否）
-            const userAnswerColor = question.isCorrect ? '#00ff00' : '#ff0000';
-            const userAnswerIcon = question.isCorrect ? '✅' : '❌';
-            const userText = this.add.text(0, yPos + 50,
-                `${userAnswerIcon} 你的答案: ${question.studentAnswer}`, {
-                fontSize: '16px',
-                fill: userAnswerColor,  // 正確綠色，錯誤紅色
-                fontFamily: 'Arial',
-                stroke: '#000000',
-                strokeThickness: 2
-            }).setOrigin(0.5);
-
-            listContainer.add([questionText, correctText, userText]);
+            listContainer.add(answerLine);
         });
 
         // 如果問題數量超過最大可見數量，添加滾動功能
