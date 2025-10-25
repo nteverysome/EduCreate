@@ -2245,11 +2245,10 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 📝 顯示遊戲結束畫面（參考 Wordwall 設計）
+     * 📝 顯示遊戲結束畫面（完整實現 Wordwall 流程）
      */
     showGameOverScreen(reason) {
         // 🎯 參考 a781244 版本：使用 cameras.main 的 centerX/centerY 屬性
-        // 這些屬性會自動計算螢幕中央位置
         const cam = this.cameras.main;
 
         // 創建半透明背景
@@ -2264,34 +2263,44 @@ export default class Title extends Phaser.Scene {
         overlay.setScrollFactor(0);
         overlay.setDepth(2000);
 
-        // 顯示遊戲結束原因（標題）
+        // 保存 overlay 引用，用於後續隱藏/顯示
+        this.gameOverOverlay = overlay;
+
+        // 創建選項畫面容器
+        const optionsContainer = this.add.container(cam.centerX, cam.centerY)
+            .setDepth(2001)
+            .setScrollFactor(0);
+
+        // 保存容器引用
+        this.gameOverOptionsContainer = optionsContainer;
+
+        // 顯示遊戲結束標題
         const gameOverText = this.add.text(
-            cam.centerX,
-            cam.centerY - 180,
+            0,
+            -220,
             reason,
             {
                 fontSize: '48px',
-                fill: '#ffff00',  // 🆕 改為黃色，更醒目
+                fill: '#ffff00',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
                 stroke: '#000000',
                 strokeThickness: 6
             }
-        );
-        gameOverText.setOrigin(0.5);
-        gameOverText.setScrollFactor(0);
-        gameOverText.setDepth(2001);
+        ).setOrigin(0.5);
 
-        // 🆕 計算統計信息（參考 Wordwall）
+        optionsContainer.add(gameOverText);
+
+        // 計算統計信息
         const correctCount = this.questionAnswerLog.filter(q => q.isCorrect).length;
         const totalCount = this.questionAnswerLog.length;
         const accuracy = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : 0;
         const timeSpent = Math.floor((Date.now() - (this.gameStartTime || Date.now())) / 1000);
 
-        // 🆕 顯示統計信息
+        // 顯示統計信息
         const statsText = this.add.text(
-            cam.centerX,
-            cam.centerY - 120,
+            0,
+            -150,
             `最終分數: ${this.score || 0}\n正確率: ${accuracy}%\n答對: ${correctCount}/${totalCount}\n遊戲時間: ${timeSpent}秒`,
             {
                 fontSize: '24px',
@@ -2301,48 +2310,122 @@ export default class Title extends Phaser.Scene {
                 stroke: '#000000',
                 strokeThickness: 3
             }
-        );
-        statsText.setOrigin(0.5);
-        statsText.setScrollFactor(0);
-        statsText.setDepth(2001);
+        ).setOrigin(0.5);
 
-        // 🆕 添加分隔線
-        const separator = this.add.graphics();
-        separator.lineStyle(3, 0xffffff, 0.7);
-        separator.lineBetween(
-            cam.centerX - 250,
-            cam.centerY - 30,
-            cam.centerX + 250,
-            cam.centerY - 30
-        );
-        separator.setScrollFactor(0);
-        separator.setDepth(2001);
+        optionsContainer.add(statsText);
 
-        // 如果啟用了 Show Answers
+        // 添加分隔線
+        const separator1 = this.add.graphics();
+        separator1.lineStyle(3, 0xffffff, 0.7);
+        separator1.lineBetween(-250, -60, 250, -60);
+        separator1.setScrollFactor(0);
+        separator1.setDepth(2001);
+
+        // 🆕 輸入名稱標籤
+        const nameLabel = this.add.text(
+            0,
+            -30,
+            '輸入你的名稱：',
+            {
+                fontSize: '20px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                stroke: '#000000',
+                strokeThickness: 2
+            }
+        ).setOrigin(0.5);
+
+        optionsContainer.add(nameLabel);
+
+        // 🆕 創建名稱輸入框（使用 DOM 元素）
+        const nameInputElement = document.createElement('input');
+        nameInputElement.type = 'text';
+        nameInputElement.placeholder = '請輸入名稱...';
+        nameInputElement.style.position = 'absolute';
+        nameInputElement.style.left = `${cam.centerX - 150}px`;
+        nameInputElement.style.top = `${cam.centerY + 10}px`;
+        nameInputElement.style.width = '300px';
+        nameInputElement.style.height = '40px';
+        nameInputElement.style.fontSize = '18px';
+        nameInputElement.style.padding = '5px 10px';
+        nameInputElement.style.border = '2px solid #ffffff';
+        nameInputElement.style.borderRadius = '5px';
+        nameInputElement.style.backgroundColor = '#333333';
+        nameInputElement.style.color = '#ffffff';
+        nameInputElement.style.textAlign = 'center';
+        nameInputElement.style.zIndex = '2001';
+
+        // 添加到 DOM
+        document.body.appendChild(nameInputElement);
+
+        // 保存引用，用於後續清理
+        this.nameInputElement = nameInputElement;
+
+        // 添加第二條分隔線
+        const separator2 = this.add.graphics();
+        separator2.lineStyle(3, 0xffffff, 0.7);
+        separator2.lineBetween(-250, 70, 250, 70);
+        separator2.setScrollFactor(0);
+        separator2.setDepth(2001);
+
+        // 🆕 顯示答案按鈕（只有啟用 Show Answers 時才顯示）
         if (this.gameOptions.showAnswers && this.game.geptManager) {
-            this.showAnswersScreen(cam.width, cam.height);
+            const showAnswersButton = this.add.text(
+                0,
+                110,
+                '� 顯示答案',
+                {
+                    fontSize: '28px',
+                    fill: '#ffffff',
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold',
+                    backgroundColor: '#2196F3',
+                    padding: { x: 20, y: 10 }
+                }
+            ).setOrigin(0.5).setInteractive({ cursor: 'pointer' });
+
+            // hover 效果
+            showAnswersButton.on('pointerover', () => {
+                showAnswersButton.setStyle({ backgroundColor: '#1976D2' });
+            });
+
+            showAnswersButton.on('pointerout', () => {
+                showAnswersButton.setStyle({ backgroundColor: '#2196F3' });
+            });
+
+            // 點擊事件：顯示答案畫面
+            showAnswersButton.on('pointerdown', () => {
+                // 隱藏選項畫面
+                this.gameOverOptionsContainer.setVisible(false);
+                separator1.setVisible(false);
+                separator2.setVisible(false);
+                if (this.nameInputElement) {
+                    this.nameInputElement.style.display = 'none';
+                }
+
+                // 顯示答案畫面
+                this.showAnswersScreen(cam.width, cam.height);
+            });
+
+            optionsContainer.add(showAnswersButton);
         }
 
-        // 顯示重新開始按鈕
+        // 重新開始按鈕
         const restartButton = this.add.text(
-            cam.centerX,
-            cam.centerY + 100,
+            0,
+            170,
             '🔄 重新開始',
             {
-                fontSize: '32px',
+                fontSize: '28px',
                 fill: '#ffffff',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
                 backgroundColor: '#4CAF50',
                 padding: { x: 20, y: 10 }
             }
-        );
-        restartButton.setOrigin(0.5);
-        restartButton.setScrollFactor(0);
-        restartButton.setDepth(2001);
-        restartButton.setInteractive({ cursor: 'pointer' });
+        ).setOrigin(0.5).setInteractive({ cursor: 'pointer' });
 
-        // 🆕 添加 hover 效果
+        // hover 效果
         restartButton.on('pointerover', () => {
             restartButton.setStyle({ backgroundColor: '#45a049' });
         });
@@ -2351,11 +2434,19 @@ export default class Title extends Phaser.Scene {
             restartButton.setStyle({ backgroundColor: '#4CAF50' });
         });
 
+        // 點擊事件：重新開始遊戲
         restartButton.on('pointerdown', () => {
+            // 清理 DOM 元素
+            if (this.nameInputElement) {
+                document.body.removeChild(this.nameInputElement);
+                this.nameInputElement = null;
+            }
             this.scene.restart();
         });
 
-        console.log('📝 遊戲結束畫面已顯示（參考 Wordwall 設計）');
+        optionsContainer.add(restartButton);
+
+        console.log('📝 遊戲結束選項畫面已顯示（完整 Wordwall 流程）');
     }
 
     /**
@@ -2507,5 +2598,96 @@ export default class Title extends Phaser.Scene {
         } else {
             console.log(`📝 答案畫面已顯示（${this.questionAnswerLog.length} 個問題）`);
         }
+
+        // 保存答案容器引用
+        this.answersContainer = answersContainer;
+
+        // 🆕 返回按鈕
+        const backButton = this.add.text(
+            0,
+            220,
+            '🔙 返回',
+            {
+                fontSize: '28px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                backgroundColor: '#757575',
+                padding: { x: 20, y: 10 }
+            }
+        ).setOrigin(0.5);
+
+        backButton.setScrollFactor(0);
+        backButton.setDepth(2003);
+        backButton.setInteractive({ cursor: 'pointer' });
+
+        // hover 效果
+        backButton.on('pointerover', () => {
+            backButton.setStyle({ backgroundColor: '#616161' });
+        });
+
+        backButton.on('pointerout', () => {
+            backButton.setStyle({ backgroundColor: '#757575' });
+        });
+
+        // 點擊事件：返回選項畫面
+        backButton.on('pointerdown', () => {
+            // 隱藏答案畫面
+            answersContainer.setVisible(false);
+            backButton.setVisible(false);
+            restartButton2.setVisible(false);
+
+            // 顯示選項畫面
+            this.gameOverOptionsContainer.setVisible(true);
+            if (this.nameInputElement) {
+                this.nameInputElement.style.display = 'block';
+            }
+
+            console.log('🔙 返回選項畫面');
+        });
+
+        answersContainer.add(backButton);
+
+        // 🆕 重新開始按鈕（在答案畫面中）
+        const restartButton2 = this.add.text(
+            0,
+            280,
+            '🔄 重新開始',
+            {
+                fontSize: '28px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                backgroundColor: '#4CAF50',
+                padding: { x: 20, y: 10 }
+            }
+        ).setOrigin(0.5);
+
+        restartButton2.setScrollFactor(0);
+        restartButton2.setDepth(2003);
+        restartButton2.setInteractive({ cursor: 'pointer' });
+
+        // hover 效果
+        restartButton2.on('pointerover', () => {
+            restartButton2.setStyle({ backgroundColor: '#45a049' });
+        });
+
+        restartButton2.on('pointerout', () => {
+            restartButton2.setStyle({ backgroundColor: '#4CAF50' });
+        });
+
+        // 點擊事件：重新開始遊戲
+        restartButton2.on('pointerdown', () => {
+            // 清理 DOM 元素
+            if (this.nameInputElement) {
+                document.body.removeChild(this.nameInputElement);
+                this.nameInputElement = null;
+            }
+            this.scene.restart();
+        });
+
+        answersContainer.add(restartButton2);
+
+        console.log('📝 答案畫面已顯示（完整 Wordwall 流程）');
     }
 }
