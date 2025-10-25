@@ -1458,7 +1458,7 @@ export default class Title extends Phaser.Scene {
 
             // 減少分數和生命值
             this.score = Math.max(0, this.score - 5);
-            this.takeDamage(10);
+            this.takeDamage(20);  // 🔧 改為 20 點傷害
 
             // 🧠 記錄 SRS 答題結果 (錯誤)
             if (this.srsManager && this.currentTargetWord) {
