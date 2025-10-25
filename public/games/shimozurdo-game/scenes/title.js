@@ -2372,6 +2372,26 @@ export default class Title extends Phaser.Scene {
             console.log('👤 用戶輸入名稱:', this.playerName);
         });
 
+        // 🆕 添加提示文字：告訴用戶輸入名稱後點擊綠色按鈕
+        const hintText = this.add.text(
+            0,
+            50,
+            '👆 輸入名稱後，點擊下方綠色按鈕查看排行榜',
+            {
+                fontSize: '18px',
+                fill: '#FFD700',
+                fontFamily: 'Arial',
+                fontStyle: 'italic',
+                stroke: '#000000',
+                strokeThickness: 2
+            }
+        ).setOrigin(0.5);
+
+        hintText.setScrollFactor(0);
+        hintText.setDepth(2001);
+
+        optionsContainer.add(hintText);
+
         // 添加第二條分隔線
         const separator2 = this.add.graphics();
         separator2.lineStyle(3, 0xffffff, 0.7);
@@ -2430,17 +2450,17 @@ export default class Title extends Phaser.Scene {
             optionsContainer.add(showAnswersButton);
         }
 
-        // 🆕 查看排行榜按鈕
+        // 🆕 確認並查看排行榜按鈕（更明顯的提示）
         const leaderboardButton = this.add.text(
             0,
             140,
-            '🏆 查看排行榜',
+            '✅ 確認名稱並查看排行榜',
             {
                 fontSize: '28px',
                 fill: '#ffffff',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
-                backgroundColor: '#FF9800',
+                backgroundColor: '#4CAF50',  // 綠色，表示確認操作
                 padding: { x: 20, y: 10 }
             }
         ).setOrigin(0.5);
@@ -2452,16 +2472,17 @@ export default class Title extends Phaser.Scene {
 
         // hover 效果
         leaderboardButton.on('pointerover', () => {
-            leaderboardButton.setStyle({ backgroundColor: '#F57C00' });
+            leaderboardButton.setStyle({ backgroundColor: '#45a049' });  // 深綠色
         });
 
         leaderboardButton.on('pointerout', () => {
-            leaderboardButton.setStyle({ backgroundColor: '#FF9800' });
+            leaderboardButton.setStyle({ backgroundColor: '#4CAF50' });  // 綠色
         });
 
-        // 點擊事件：顯示排行榜畫面
+        // 點擊事件：確認名稱並顯示排行榜畫面
         leaderboardButton.on('pointerdown', async () => {
-            console.log('🏆 點擊查看排行榜按鈕');
+            console.log('✅ 點擊確認名稱並查看排行榜按鈕');
+            console.log('👤 當前玩家名稱:', this.playerName || '匿名玩家');
 
             // 🆕 先保存分數到排行榜
             await this.saveScoreToLeaderboard();
