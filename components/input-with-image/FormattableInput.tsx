@@ -33,6 +33,7 @@ export default function FormattableInput({
   const savedRangeRef = useRef<Range | null>(null); // 保存選擇範圍
   const [isFocused, setIsFocused] = useState(false);
   const [isEmpty, setIsEmpty] = useState(!value);
+  const [activeFormats, setActiveFormats] = useState<Set<FormatType>>(new Set());
 
   // 初始化內容
   useEffect(() => {
@@ -69,6 +70,42 @@ export default function FormattableInput({
         selection.addRange(savedRangeRef.current);
       }
     }
+  };
+
+  // 檢測當前光標位置的格式狀態
+  const updateActiveFormats = () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      setActiveFormats(new Set());
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    let node: Node | null = range.commonAncestorContainer;
+
+    // 如果是文本節點，獲取其父元素
+    if (node.nodeType === Node.TEXT_NODE) {
+      node = node.parentNode;
+    }
+
+    const formats = new Set<FormatType>();
+
+    // 向上遍歷 DOM 樹，檢查是否在格式標籤內
+    while (node && node !== editorRef.current) {
+      if (node instanceof HTMLElement) {
+        const tagName = node.tagName.toLowerCase();
+        if (tagName === 'strong' || tagName === 'b') {
+          formats.add('bold');
+        } else if (tagName === 'sup') {
+          formats.add('superscript');
+        } else if (tagName === 'sub') {
+          formats.add('subscript');
+        }
+      }
+      node = node.parentNode;
+    }
+
+    setActiveFormats(formats);
   };
 
   // 處理格式化
@@ -141,6 +178,7 @@ export default function FormattableInput({
   // 處理焦點
   const handleFocus = () => {
     setIsFocused(true);
+    updateActiveFormats();
   };
 
   const handleBlur = () => {
@@ -152,6 +190,21 @@ export default function FormattableInput({
       setIsFocused(false);
     }, 200);
   };
+
+  // 處理選擇變化
+  const handleSelectionChange = () => {
+    if (isFocused) {
+      updateActiveFormats();
+    }
+  };
+
+  // 監聽選擇變化
+  useEffect(() => {
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, [isFocused]);
 
   // 處理鍵盤快捷鍵
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -201,6 +254,7 @@ export default function FormattableInput({
         visible={isFocused && !disabled}
         onFormat={handleFormat}
         onInsertSymbol={handleInsertSymbol}
+        activeFormats={activeFormats}
       />
     </div>
   );

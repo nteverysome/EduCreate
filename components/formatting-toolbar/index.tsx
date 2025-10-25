@@ -10,6 +10,7 @@ interface FormattingToolbarProps {
   visible: boolean;
   onFormat: (type: FormatType) => void;
   onInsertSymbol: (symbol: string) => void;
+  activeFormats?: Set<FormatType>;
 }
 
 /**
@@ -23,7 +24,8 @@ interface FormattingToolbarProps {
 export default function FormattingToolbar({
   visible,
   onFormat,
-  onInsertSymbol
+  onInsertSymbol,
+  activeFormats = new Set()
 }: FormattingToolbarProps) {
   const [showSymbolPicker, setShowSymbolPicker] = useState(false);
 
@@ -32,6 +34,18 @@ export default function FormattingToolbar({
   const handleSymbolSelect = (symbol: string) => {
     onInsertSymbol(symbol);
     setShowSymbolPicker(false);
+  };
+
+  // 獲取按鈕的樣式類名
+  const getButtonClassName = (formatType: FormatType) => {
+    const isActive = activeFormats.has(formatType);
+    return `
+      w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded transition-colors
+      ${isActive
+        ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+        : 'hover:bg-gray-100 text-gray-700'
+      }
+    `;
   };
 
   return (
@@ -43,10 +57,10 @@ export default function FormattingToolbar({
           e.preventDefault(); // 防止失去焦點
           onFormat('bold');
         }}
-        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+        className={getButtonClassName('bold')}
         title="粗體 (Ctrl+B)"
       >
-        <span className="font-bold text-gray-700 text-sm sm:text-base">B</span>
+        <span className="font-bold text-sm sm:text-base">B</span>
       </button>
 
       {/* 上標按鈕 */}
@@ -56,10 +70,10 @@ export default function FormattingToolbar({
           e.preventDefault(); // 防止失去焦點
           onFormat('superscript');
         }}
-        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+        className={getButtonClassName('superscript')}
         title="上標 (x²)"
       >
-        <span className="text-gray-700 text-sm sm:text-base">
+        <span className="text-sm sm:text-base">
           x<sup className="text-xs">2</sup>
         </span>
       </button>
@@ -71,10 +85,10 @@ export default function FormattingToolbar({
           e.preventDefault(); // 防止失去焦點
           onFormat('subscript');
         }}
-        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded hover:bg-gray-100 transition-colors"
+        className={getButtonClassName('subscript')}
         title="下標 (x₂)"
       >
-        <span className="text-gray-700 text-sm sm:text-base">
+        <span className="text-sm sm:text-base">
           x<sub className="text-xs">2</sub>
         </span>
       </button>
