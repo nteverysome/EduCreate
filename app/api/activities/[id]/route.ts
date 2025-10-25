@@ -314,9 +314,91 @@ export async function PUT(
 
     // 如果有 gameOptions，更新 GameSettings
     if (body.gameOptions !== undefined) {
-      console.log('🎮 更新遊戲選項:', { activityId, gameOptions: body.gameOptions });
+      console.log('🎮 [GameOptions] 開始更新遊戲選項:', {
+        activityId,
+        gameOptions: body.gameOptions,
+        timestamp: new Date().toISOString()
+      });
 
       const gameOptions = body.gameOptions;
+
+      // ✅ 數據驗證
+      try {
+        // 驗證 timer 設置
+        if (gameOptions.timer) {
+          const validTimerTypes = ['none', 'countUp', 'countDown'];
+          if (!validTimerTypes.includes(gameOptions.timer.type)) {
+            console.error('❌ [GameOptions] 無效的計時器類型:', gameOptions.timer.type);
+            return NextResponse.json(
+              { error: `無效的計時器類型: ${gameOptions.timer.type}` },
+              { status: 400 }
+            );
+          }
+
+          // 驗證時間範圍
+          if (gameOptions.timer.type !== 'none') {
+            const minutes = gameOptions.timer.minutes || 0;
+            const seconds = gameOptions.timer.seconds || 0;
+
+            if (minutes < 0 || minutes > 60) {
+              console.error('❌ [GameOptions] 無效的分鐘數:', minutes);
+              return NextResponse.json(
+                { error: '分鐘數必須在 0-60 之間' },
+                { status: 400 }
+              );
+            }
+
+            if (seconds < 0 || seconds > 59) {
+              console.error('❌ [GameOptions] 無效的秒數:', seconds);
+              return NextResponse.json(
+                { error: '秒數必須在 0-59 之間' },
+                { status: 400 }
+              );
+            }
+
+            console.log('✅ [GameOptions] 計時器驗證通過:', { minutes, seconds });
+          }
+        }
+
+        // 驗證 lives 設置
+        if (gameOptions.lives !== undefined) {
+          if (typeof gameOptions.lives !== 'number' || gameOptions.lives < 1 || gameOptions.lives > 10) {
+            console.error('❌ [GameOptions] 無效的生命值:', gameOptions.lives);
+            return NextResponse.json(
+              { error: '生命值必須是 1-10 之間的數字' },
+              { status: 400 }
+            );
+          }
+          console.log('✅ [GameOptions] 生命值驗證通過:', gameOptions.lives);
+        }
+
+        // 驗證 random 設置
+        if (gameOptions.random !== undefined && typeof gameOptions.random !== 'boolean') {
+          console.error('❌ [GameOptions] 無效的隨機設置:', gameOptions.random);
+          return NextResponse.json(
+            { error: '隨機設置必須是布爾值' },
+            { status: 400 }
+          );
+        }
+
+        // 驗證 showAnswers 設置
+        if (gameOptions.showAnswers !== undefined && typeof gameOptions.showAnswers !== 'boolean') {
+          console.error('❌ [GameOptions] 無效的顯示答案設置:', gameOptions.showAnswers);
+          return NextResponse.json(
+            { error: '顯示答案設置必須是布爾值' },
+            { status: 400 }
+          );
+        }
+
+        console.log('✅ [GameOptions] 所有數據驗證通過');
+
+      } catch (validationError) {
+        console.error('❌ [GameOptions] 數據驗證失敗:', validationError);
+        return NextResponse.json(
+          { error: '數據驗證失敗' },
+          { status: 400 }
+        );
+      }
 
       // 轉換 gameOptions 到 GameSettings 格式
       const gameSettingsData: any = {
@@ -329,40 +411,65 @@ export async function PUT(
         if (gameOptions.timer.type === 'none') {
           gameSettingsData.timerType = 'NONE';
           gameSettingsData.timerDuration = null;
+          console.log('🔧 [GameOptions] 設置計時器: 無');
         } else if (gameOptions.timer.type === 'countUp') {
           gameSettingsData.timerType = 'COUNT_UP';
           const totalSeconds = (gameOptions.timer.minutes || 0) * 60 + (gameOptions.timer.seconds || 0);
           gameSettingsData.timerDuration = totalSeconds;
+          console.log('🔧 [GameOptions] 設置計時器: 正計時', { totalSeconds });
         } else if (gameOptions.timer.type === 'countDown') {
           gameSettingsData.timerType = 'COUNT_DOWN';
           const totalSeconds = (gameOptions.timer.minutes || 0) * 60 + (gameOptions.timer.seconds || 0);
           gameSettingsData.timerDuration = totalSeconds;
+          console.log('🔧 [GameOptions] 設置計時器: 倒計時', { totalSeconds });
         }
       }
 
       // Lives 設置
       if (gameOptions.lives !== undefined) {
         gameSettingsData.livesCount = gameOptions.lives;
+        console.log('🔧 [GameOptions] 設置生命值:', gameOptions.lives);
       }
 
       // Random (Shuffle Questions) 設置
       if (gameOptions.random !== undefined) {
         gameSettingsData.shuffleQuestions = gameOptions.random;
+        console.log('🔧 [GameOptions] 設置隨機順序:', gameOptions.random);
       }
 
       // Show Answers 設置
       if (gameOptions.showAnswers !== undefined) {
         gameSettingsData.showAnswers = gameOptions.showAnswers;
+        console.log('🔧 [GameOptions] 設置顯示答案:', gameOptions.showAnswers);
       }
 
       // 使用 upsert 創建或更新 GameSettings
-      await prisma.gameSettings.upsert({
-        where: { activityId: activityId },
-        update: gameSettingsData,
-        create: gameSettingsData
-      });
+      try {
+        console.log('💾 [GameOptions] 開始保存到數據庫:', gameSettingsData);
 
-      console.log('✅ GameSettings 更新成功');
+        const result = await prisma.gameSettings.upsert({
+          where: { activityId: activityId },
+          update: gameSettingsData,
+          create: gameSettingsData
+        });
+
+        console.log('✅ [GameOptions] GameSettings 更新成功:', {
+          id: result.id,
+          activityId: result.activityId,
+          timerType: result.timerType,
+          timerDuration: result.timerDuration,
+          livesCount: result.livesCount,
+          shuffleQuestions: result.shuffleQuestions,
+          showAnswers: result.showAnswers,
+          updatedAt: result.updatedAt
+        });
+      } catch (dbError) {
+        console.error('❌ [GameOptions] 數據庫操作失敗:', dbError);
+        return NextResponse.json(
+          { error: '保存遊戲設置失敗' },
+          { status: 500 }
+        );
+      }
     }
 
     // 如果有 folderId，更新 folderId（支持拖拽功能）
