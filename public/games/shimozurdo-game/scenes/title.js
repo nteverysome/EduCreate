@@ -2188,10 +2188,9 @@ export default class Title extends Phaser.Scene {
             this.timerEvent.remove();
         }
 
-        // 停止敵人生成
-        if (this.enemySpawnTimer) {
-            this.enemySpawnTimer.remove();
-        }
+        // 停止敵人生成（enemySpawnTimer 是數字，不需要 remove）
+        // 只需要設置一個標誌來停止更新
+        this.sceneStopped = true;
 
         // 顯示遊戲結束畫面
         this.showGameOverScreen(reason);
