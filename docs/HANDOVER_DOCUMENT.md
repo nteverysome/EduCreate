@@ -127,6 +127,76 @@ getSourceDisplayName(source)           // 獲取來源名稱
 - 修復了 JavaScript 空數組陷阱（空數組是 truthy 值）
 - 所有檢查都添加了 `&& arr.length > 0` 驗證
 
+#### 詞彙學習路徑系統（2025-10-25 更新）
+
+**概述**：
+- 13 種學習路徑完全動態化
+- 支援 GEPT 三個等級（初級、中級、中高級）
+- 所有數據基於資料庫實時統計
+
+**核心文件**：
+- `app/learn/path-selector/page.tsx` - 學習路徑選擇頁面
+- `app/api/vocabulary/gept-stats/route.ts` - GEPT 統計 API
+- `scripts/fill-theme-data.mjs` - 主題數據填充腳本
+- `scripts/fill-frequency-data.mjs` - 頻率數據填充腳本
+- `scripts/check-gept-counts.mjs` - GEPT 數量檢查腳本
+
+**13 種學習路徑**：
+1. 詞性分組學習（96.5% 數據完整性）
+2. 字首分組學習（20.4% 數據完整性）
+3. 字根分組學習（13.1% 數據完整性）
+4. 字尾分組學習（38.6% 數據完整性）
+5. 主題分組學習（32.7% 數據完整性）
+6. 頻率分組學習（100% 數據完整性）
+7. 混合分組學習（100% 數據完整性）
+8. 音節分組學習（99.1% 數據完整性）
+9. 情境分組學習（3.2% 數據完整性）
+10. 情感分組學習（100% 數據完整性）
+11. 動作分組學習（0.9% 數據完整性）
+12. 視覺聯想分組學習（4.3% 數據完整性）
+13. 時間分組學習（1.5% 數據完整性）
+
+**GEPT 等級統計**：
+| 等級 | 單字數量 | 有詞性 | 有字首 | 有主題 |
+|------|---------|--------|--------|--------|
+| 初級 (ELEMENTARY) | 1,313 | 1,201 (91.5%) | 151 (11.5%) | 593 (45.2%) |
+| 中級 (INTERMEDIATE) | 995 | 960 (96.5%) | 211 (21.2%) | 327 (32.9%) |
+| 中高級 (HIGH_INTERMEDIATE) | 5,485 | 5,352 (97.6%) | 1,261 (23.0%) | 1,634 (29.8%) |
+| 總計 | 7,952 | 7,513 (94.5%) | 1,623 (20.4%) | 2,554 (32.1%) |
+
+**動態數據實現**：
+```typescript
+// 一次性獲取所有 GEPT 等級的統計數據
+const levels = ['ELEMENTARY', 'INTERMEDIATE', 'HIGH_INTERMEDIATE'];
+const promises = levels.map(level =>
+  fetch(`/api/vocabulary/gept-stats?geptLevel=${level}`).then(res => res.json())
+);
+const results = await Promise.all(promises);
+```
+
+**API 響應格式**：
+```typescript
+{
+  level: "ELEMENTARY",
+  totalWords: 1313,
+  pathStats: {
+    partOfSpeech: { groupCount: 6, totalWords: 1263 },
+    prefix: { groupCount: 15, totalWords: 263 },
+    // ... 其他路徑
+  }
+}
+```
+
+**重要改進**：
+- ✅ 移除所有硬編碼數據
+- ✅ 實現完全動態化
+- ✅ 修復 GEPT 等級按鈕顯示問題
+- ✅ 填充主題數據（2,603 個單字，32.7%）
+- ✅ 填充頻率數據（7,949 個單字，100%）
+
+**詳細文檔**：
+參見 [VOCABULARY_SYSTEM_HANDOVER_2025-10-25.md](./VOCABULARY_SYSTEM_HANDOVER_2025-10-25.md)
+
 ### 3. 遊戲系統
 
 #### 遊戲切換器頁面
@@ -1106,11 +1176,12 @@ npm run dev
 
 ---
 
-**文檔版本**：2.3
-**最後更新**：2025-10-23
+**文檔版本**：2.4
+**最後更新**：2025-10-25
 **維護者**：EduCreate Team
 
 **更新日誌**：
+- 2.4 (2025-10-25)：詞彙系統完全動態化 - 填充主題和頻率數據，創建 GEPT 統計 API，移除所有硬編碼，修復 GEPT 等級按鈕顯示問題。詳見 [VOCABULARY_SYSTEM_HANDOVER_2025-10-25.md](./VOCABULARY_SYSTEM_HANDOVER_2025-10-25.md)
 - 2.3 (2025-10-23)：添加 Shimozurdo Game 五列布局系統，實施獨立圖片功能和動態布局調整
 - 2.2 (2025-10-21)：添加圖片管理功能（Vercel Blob + Unsplash 整合），完成 Phase 1-4 開發
 - 2.1 (2025-10-21)：添加視圖模式偏好記錄功能，更新最新提交記錄，添加手機版本優化說明
