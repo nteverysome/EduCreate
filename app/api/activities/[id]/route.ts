@@ -113,6 +113,7 @@ export async function GET(
             image: true
           }
         },
+        gameSettings: true,  // 包含遊戲設置
         _count: {
           select: {
             versions: true
@@ -125,7 +126,49 @@ export async function GET(
       return NextResponse.json({ error: '活動不存在' }, { status: 404 });
     }
 
-    return NextResponse.json(activity);
+    // 轉換 GameSettings 到 gameOptions 格式
+    let gameOptions = null;
+    if (activity.gameSettings) {
+      const gs = activity.gameSettings;
+
+      // 轉換 Timer
+      let timer: any = { type: 'countUp', minutes: 5, seconds: 0 };
+      if (gs.timerType === 'NONE') {
+        timer = { type: 'none', minutes: 0, seconds: 0 };
+      } else if (gs.timerType === 'COUNT_UP') {
+        const totalSeconds = gs.timerDuration || 300;
+        timer = {
+          type: 'countUp',
+          minutes: Math.floor(totalSeconds / 60),
+          seconds: totalSeconds % 60
+        };
+      } else if (gs.timerType === 'COUNT_DOWN') {
+        const totalSeconds = gs.timerDuration || 300;
+        timer = {
+          type: 'countDown',
+          minutes: Math.floor(totalSeconds / 60),
+          seconds: totalSeconds % 60
+        };
+      }
+
+      gameOptions = {
+        timer,
+        lives: gs.livesCount || 5,
+        speed: gs.speed || 3,  // 從 GameSettings 讀取 speed
+        random: gs.shuffleQuestions ?? true,
+        showAnswers: gs.showAnswers ?? true
+      };
+
+      console.log('✅ [GET] GameSettings 轉換為 gameOptions:', gameOptions);
+    }
+
+    // 返回活動數據，包含 gameOptions
+    const responseData = {
+      ...activity,
+      gameOptions
+    };
+
+    return NextResponse.json(responseData);
 
   } catch (error) {
     console.error('獲取活動詳情時出錯:', error);
@@ -372,6 +415,18 @@ export async function PUT(
           console.log('✅ [GameOptions] 生命值驗證通過:', gameOptions.lives);
         }
 
+        // 驗證 speed 設置
+        if (gameOptions.speed !== undefined) {
+          if (typeof gameOptions.speed !== 'number' || gameOptions.speed < 1 || gameOptions.speed > 10) {
+            console.error('❌ [GameOptions] 無效的速度:', gameOptions.speed);
+            return NextResponse.json(
+              { error: '速度必須是 1-10 之間的數字' },
+              { status: 400 }
+            );
+          }
+          console.log('✅ [GameOptions] 速度驗證通過:', gameOptions.speed);
+        }
+
         // 驗證 random 設置
         if (gameOptions.random !== undefined && typeof gameOptions.random !== 'boolean') {
           console.error('❌ [GameOptions] 無效的隨機設置:', gameOptions.random);
@@ -429,6 +484,12 @@ export async function PUT(
       if (gameOptions.lives !== undefined) {
         gameSettingsData.livesCount = gameOptions.lives;
         console.log('🔧 [GameOptions] 設置生命值:', gameOptions.lives);
+      }
+
+      // Speed 設置
+      if (gameOptions.speed !== undefined) {
+        gameSettingsData.speed = gameOptions.speed;
+        console.log('🔧 [GameOptions] 設置速度:', gameOptions.speed);
       }
 
       // Random (Shuffle Questions) 設置

@@ -1191,8 +1191,9 @@ export default class Title extends Phaser.Scene {
         enemy.setData('word', word);                     // 存儲詞彙對象
         enemy.setData('isTarget', isTarget);             // 存儲是否為目標詞彙
 
-        // 設置敵人屬性 - 移動速度
-        enemy.speed = Phaser.Math.Between(1, 3);         // 隨機速度（1-3像素/幀）
+        // 設置敵人屬性 - 移動速度（應用速度倍率）
+        const baseSpeed = Phaser.Math.Between(1, 3);     // 基礎隨機速度（1-3像素/幀）
+        enemy.speed = baseSpeed * (this.speedMultiplier || 1);  // 應用速度倍率
 
         // 🆕 添加詞彙文字 - 顯示英文單字（放入雲中，透明背景）
         const wordText = this.add.text(

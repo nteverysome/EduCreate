@@ -392,6 +392,7 @@ model GameSettings {
   timerType        TimerType     @default(NONE)
   timerDuration    Int?
   livesCount       Int           @default(0)
+  speed            Int           @default(3)  // 遊戲速度 (1-10)
   shuffleQuestions Boolean       @default(false)
   shuffleAnswers   Boolean       @default(false)
   autoProceed      Boolean       @default(true)
