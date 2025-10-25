@@ -99,6 +99,13 @@ export default class Handler extends Phaser.Scene {
             // 攝影機更新邏輯 - TODO: 改進以下代碼，因為與 updateCamera 方法重複
             // 獲取當前場景的主攝影機實例
             const camera = this.cameras.main
+
+            // 🛡️ 防禦性檢查：確保 camera 存在
+            if (!camera) {
+                console.warn('⚠️ resize: camera 不存在，跳過縮放設置');
+                return;
+            }
+
             // 計算水平方向的縮放比例（調整器寬度 / 基準螢幕寬度）
             const scaleX = this.sizer.width / this.game.screenBaseSize.width
             // 計算垂直方向的縮放比例（調整器高度 / 基準螢幕高度）
