@@ -138,7 +138,7 @@ export default function GameOptionsPanel({ options, onChange }: GameOptionsProps
                 <input
                   type="range"
                   min="1"
-                  max="10"
+                  max="20"
                   value={options.speed}
                   onChange={(e) => updateOptions({ speed: Number(e.target.value) })}
                   className="flex-1 cursor-pointer"

@@ -417,10 +417,10 @@ export async function PUT(
 
         // 驗證 speed 設置
         if (gameOptions.speed !== undefined) {
-          if (typeof gameOptions.speed !== 'number' || gameOptions.speed < 1 || gameOptions.speed > 10) {
+          if (typeof gameOptions.speed !== 'number' || gameOptions.speed < 1 || gameOptions.speed > 20) {
             console.error('❌ [GameOptions] 無效的速度:', gameOptions.speed);
             return NextResponse.json(
-              { error: '速度必須是 1-10 之間的數字' },
+              { error: '速度必須是 1-20 之間的數字' },
               { status: 400 }
             );
           }
