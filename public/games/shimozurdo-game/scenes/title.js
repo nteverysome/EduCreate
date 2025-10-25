@@ -1740,6 +1740,12 @@ export default class Title extends Phaser.Scene {
         // 第一列：分數（總是存在）
         const col1X = startX + spacing * currentColumn;
         this.scoreText.setPosition(col1X, worldTopY);
+
+        // 🆕 更新計時器位置（在分數下方）
+        if (this.timerText) {
+            this.timerText.setPosition(col1X, worldTopY + 60);
+        }
+
         currentColumn++;
 
         // 第二列：英文圖片（如果存在）
