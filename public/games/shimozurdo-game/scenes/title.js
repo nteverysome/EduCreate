@@ -702,7 +702,7 @@ export default class Title extends Phaser.Scene {
         this.healthText = this.add.text(
             healthBarX - 15,                             // X座標（生命值條左側15像素）
             healthBarY + healthBarHeight / 2,            // Y座標（生命值條垂直中央）
-            `${this.currentHealth}/${this.maxHealth}`,   // 顯示當前/最大生命值
+            `❤️ ${this.currentLives}/${this.maxLives}`,  // 顯示當前/最大生命數
             {
                 fontSize: '16px',                        // 字體大小
                 color: '#ffffff',                        // 白色文字
