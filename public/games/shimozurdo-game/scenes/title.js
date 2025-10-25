@@ -2158,10 +2158,16 @@ export default class Title extends Phaser.Scene {
      * 🔀 應用 Random 選項
      */
     applyRandomOption() {
-        if (this.gameOptions.random && this.game.vocabularyItems) {
-            // 隨機打亂詞彙順序
-            this.game.vocabularyItems = this.shuffleArray(this.game.vocabularyItems);
-            console.log('🔀 詞彙順序已隨機打亂');
+        if (this.gameOptions.random && this.game.geptManager) {
+            // 獲取所有詞彙
+            const allWords = this.game.geptManager.getAllWords();
+            if (allWords && allWords.length > 0) {
+                // 隨機打亂詞彙順序
+                const shuffledWords = this.shuffleArray(allWords);
+                // 更新 GEPT Manager 的詞彙列表
+                this.game.geptManager.words = shuffledWords;
+                console.log('🔀 詞彙順序已隨機打亂');
+            }
         }
     }
 
@@ -2217,7 +2223,7 @@ export default class Title extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(2001).setScrollFactor(0);
 
         // 如果啟用了 Show Answers
-        if (this.gameOptions.showAnswers && this.game.vocabularyItems) {
+        if (this.gameOptions.showAnswers && this.game.geptManager) {
             this.showAnswersScreen(width, height);
         }
 
@@ -2258,7 +2264,7 @@ export default class Title extends Phaser.Scene {
         answersContainer.add(title);
 
         // 顯示全部答案
-        const itemsToShow = this.game.vocabularyItems;
+        const itemsToShow = this.game.geptManager.getAllWords();
         const maxVisibleItems = 8; // 一次最多顯示 8 個
         const itemHeight = 35; // 每個項目的高度
 
