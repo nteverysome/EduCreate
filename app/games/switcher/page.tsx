@@ -64,6 +64,7 @@ const GameSwitcherPage: React.FC = () => {
   const [isCopying, setIsCopying] = useState<boolean>(false);
   const [gameOptions, setGameOptions] = useState<GameOptions>(DEFAULT_GAME_OPTIONS);
   const [isSavingOptions, setIsSavingOptions] = useState<boolean>(false);
+  const [gameKey, setGameKey] = useState<number>(0); // 用於強制重新渲染 GameSwitcher
 
   // SRS 學習模式狀態
   const [showSRSPanel, setShowSRSPanel] = useState<boolean>(true);
@@ -1139,6 +1140,7 @@ const GameSwitcherPage: React.FC = () => {
         {/* 遊戲切換器 - 主要區域，手機模式減少間距 */}
         <div className="mb-1 sm:mb-2" data-testid="game-container">
           <GameSwitcher
+            key={gameKey}
             defaultGame={currentGameId}
             geptLevel={currentGeptLevel as 'elementary' | 'intermediate' | 'advanced'}
             onGameChange={handleGameChange}
@@ -1226,8 +1228,11 @@ const GameSwitcherPage: React.FC = () => {
               </button>
               <button
                 onClick={() => {
-                  // 重新載入遊戲
-                  window.location.reload();
+                  // 🔄 重新載入遊戲以應用選項
+                  // 通過更新 key 來強制重新渲染 GameSwitcher 組件
+                  // 這會重新創建 iframe 並應用新的 gameOptions
+                  setGameKey(prev => prev + 1);
+                  console.log('🔄 應用選項：重新載入遊戲');
                 }}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
               >
