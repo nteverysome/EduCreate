@@ -2258,21 +2258,79 @@ export default class Title extends Phaser.Scene {
 
         answersContainer.add(title);
 
-        // 顯示前 5 個答案（避免太多）
-        const itemsToShow = this.game.vocabularyItems.slice(0, 5);
+        // 顯示全部答案
+        const itemsToShow = this.game.vocabularyItems;
+        const maxVisibleItems = 8; // 一次最多顯示 8 個
+        const itemHeight = 35; // 每個項目的高度
+
+        // 如果詞彙數量超過最大可見數量，添加滾動提示
+        if (itemsToShow.length > maxVisibleItems) {
+            const scrollHint = this.add.text(0, -170, '(滾動查看更多)', {
+                fontSize: '16px',
+                fill: '#aaaaaa',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
+            answersContainer.add(scrollHint);
+        }
+
+        // 創建答案列表容器（用於滾動）
+        const listContainer = this.add.container(0, -140);
+        answersContainer.add(listContainer);
+
+        // 顯示所有答案
         itemsToShow.forEach((item, index) => {
-            const answerText = this.add.text(0, -150 + index * 40,
+            const answerText = this.add.text(0, index * itemHeight,
                 `${index + 1}. ${item.english} - ${item.chinese}`, {
-                fontSize: '20px',
+                fontSize: '18px',
                 fill: '#ffffff',
                 fontFamily: 'Arial',
                 stroke: '#000000',
                 strokeThickness: 2
             }).setOrigin(0.5);
 
-            answersContainer.add(answerText);
+            listContainer.add(answerText);
         });
 
-        console.log('📝 答案畫面已顯示');
+        // 如果詞彙數量超過最大可見數量，添加滾動功能
+        if (itemsToShow.length > maxVisibleItems) {
+            let currentScroll = 0;
+            const maxScroll = (itemsToShow.length - maxVisibleItems) * itemHeight;
+
+            // 添加滾動按鈕
+            const scrollUpButton = this.add.text(-width / 4, 0, '▲', {
+                fontSize: '32px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                backgroundColor: '#333333',
+                padding: { x: 10, y: 5 }
+            }).setOrigin(0.5).setDepth(2003).setScrollFactor(0).setInteractive();
+
+            const scrollDownButton = this.add.text(-width / 4, 50, '▼', {
+                fontSize: '32px',
+                fill: '#ffffff',
+                fontFamily: 'Arial',
+                backgroundColor: '#333333',
+                padding: { x: 10, y: 5 }
+            }).setOrigin(0.5).setDepth(2003).setScrollFactor(0).setInteractive();
+
+            answersContainer.add(scrollUpButton);
+            answersContainer.add(scrollDownButton);
+
+            // 滾動向上
+            scrollUpButton.on('pointerdown', () => {
+                currentScroll = Math.max(0, currentScroll - itemHeight * 2);
+                listContainer.y = -140 - currentScroll;
+            });
+
+            // 滾動向下
+            scrollDownButton.on('pointerdown', () => {
+                currentScroll = Math.min(maxScroll, currentScroll + itemHeight * 2);
+                listContainer.y = -140 - currentScroll;
+            });
+
+            console.log(`📝 答案畫面已顯示（${itemsToShow.length} 個詞彙，可滾動）`);
+        } else {
+            console.log(`📝 答案畫面已顯示（${itemsToShow.length} 個詞彙）`);
+        }
     }
 }
