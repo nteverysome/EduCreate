@@ -18,6 +18,8 @@ import AssignmentModal, { AssignmentConfig } from '@/components/activities/Assig
 import AssignmentSetModal from '@/components/activities/AssignmentSetModal';
 import SRSLearningPanel from '@/components/games/SRSLearningPanel';
 import SRSReviewDetails from '@/components/games/SRSReviewDetails';
+import GameOptionsPanel from '@/components/game-options';
+import { GameOptions, DEFAULT_GAME_OPTIONS } from '@/types/game-options';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
 
@@ -60,6 +62,7 @@ const GameSwitcherPage: React.FC = () => {
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isCopying, setIsCopying] = useState<boolean>(false);
+  const [gameOptions, setGameOptions] = useState<GameOptions>(DEFAULT_GAME_OPTIONS);
 
   // SRS 學習模式狀態
   const [showSRSPanel, setShowSRSPanel] = useState<boolean>(true);
@@ -379,6 +382,7 @@ const GameSwitcherPage: React.FC = () => {
           communityCategory?: string;
           geptLevel?: string;
           templateType?: string;
+          gameOptions?: GameOptions;
           user?: {
             id: string;
             name: string;
@@ -409,6 +413,15 @@ const GameSwitcherPage: React.FC = () => {
           copiedFromActivityId: data.copiedFromActivityId,
           category: data.communityCategory || undefined,
         });
+
+        // 載入遊戲選項
+        if (data.gameOptions) {
+          setGameOptions(data.gameOptions);
+          console.log('✅ 遊戲選項已載入:', data.gameOptions);
+        } else {
+          setGameOptions(DEFAULT_GAME_OPTIONS);
+          console.log('ℹ️ 使用默認遊戲選項');
+        }
 
         // 判斷是否是所有者
         console.log('🔍 檢查所有者身份:', {
@@ -1141,6 +1154,16 @@ const GameSwitcherPage: React.FC = () => {
             isAnonymous={isAnonymous}
           />
         </div>
+
+        {/* 遊戲選項面板 - 只在有活動ID時顯示 */}
+        {activityId && (
+          <div className="mb-4">
+            <GameOptionsPanel
+              options={gameOptions}
+              onChange={setGameOptions}
+            />
+          </div>
+        )}
 
         {/* SRS 學習面板 - 放在遊戲容器下面，只在沒有活動ID且顯示面板時顯示 */}
         {!activityId && !assignmentId && !isShared && showSRSPanel && (
