@@ -2357,13 +2357,20 @@ export default class Title extends Phaser.Scene {
         nameInputElement.style.backgroundColor = '#333333';
         nameInputElement.style.color = '#ffffff';
         nameInputElement.style.textAlign = 'center';
-        nameInputElement.style.zIndex = '2001';
+        nameInputElement.style.zIndex = '9999'; // 🔧 提高 zIndex 確保在最上層
+        nameInputElement.style.pointerEvents = 'auto'; // 🔧 確保可以點擊和輸入
 
         // 添加到 DOM
         document.body.appendChild(nameInputElement);
 
         // 保存引用，用於後續清理
         this.nameInputElement = nameInputElement;
+
+        // 🆕 保存用戶輸入的名稱
+        nameInputElement.addEventListener('input', (e) => {
+            this.playerName = e.target.value;
+            console.log('👤 用戶輸入名稱:', this.playerName);
+        });
 
         // 添加第二條分隔線
         const separator2 = this.add.graphics();
@@ -2455,6 +2462,9 @@ export default class Title extends Phaser.Scene {
         // 點擊事件：重新開始遊戲
         restartButton.on('pointerdown', () => {
             console.log('🔄 點擊重新開始按鈕（選項畫面）');
+
+            // 🆕 保存分數到排行榜
+            this.saveScoreToLeaderboard();
 
             // 清理 DOM 元素
             if (this.nameInputElement) {
@@ -2659,6 +2669,9 @@ export default class Title extends Phaser.Scene {
         restartButton2.on('pointerdown', () => {
             console.log('🔄 點擊重新開始按鈕（答案畫面）');
 
+            // 🆕 保存分數到排行榜
+            this.saveScoreToLeaderboard();
+
             // 清理 DOM 元素
             if (this.nameInputElement) {
                 document.body.removeChild(this.nameInputElement);
@@ -2716,5 +2729,60 @@ export default class Title extends Phaser.Scene {
         answersContainer.add(backButton);
 
         console.log('📝 答案畫面已顯示（完整 Wordwall 流程）');
+    }
+
+    /**
+     * 💾 保存分數到排行榜
+     */
+    saveScoreToLeaderboard() {
+        // 獲取用戶輸入的名稱
+        const playerName = this.playerName || '匿名玩家';
+
+        // 計算統計信息
+        const correctCount = this.questionAnswerLog.filter(q => q.isCorrect).length;
+        const totalCount = this.questionAnswerLog.length;
+        const accuracy = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : 0;
+        const timeSpent = Math.floor((Date.now() - (this.gameStartTime || Date.now())) / 1000);
+
+        // 創建分數記錄
+        const scoreEntry = {
+            name: playerName,
+            score: this.score || 0,
+            correctCount: correctCount,
+            totalCount: totalCount,
+            accuracy: parseFloat(accuracy),
+            timeSpent: timeSpent,
+            timestamp: Date.now(),
+            date: new Date().toLocaleString('zh-TW')
+        };
+
+        // 從 localStorage 讀取現有排行榜
+        let leaderboard = [];
+        try {
+            const storedLeaderboard = localStorage.getItem('shimozurdo_leaderboard');
+            if (storedLeaderboard) {
+                leaderboard = JSON.parse(storedLeaderboard);
+            }
+        } catch (error) {
+            console.error('❌ 讀取排行榜失敗:', error);
+        }
+
+        // 添加新記錄
+        leaderboard.push(scoreEntry);
+
+        // 按分數排序（降序）
+        leaderboard.sort((a, b) => b.score - a.score);
+
+        // 只保留前 10 名
+        leaderboard = leaderboard.slice(0, 10);
+
+        // 保存到 localStorage
+        try {
+            localStorage.setItem('shimozurdo_leaderboard', JSON.stringify(leaderboard));
+            console.log('💾 分數已保存到排行榜:', scoreEntry);
+            console.log('🏆 當前排行榜:', leaderboard);
+        } catch (error) {
+            console.error('❌ 保存排行榜失敗:', error);
+        }
     }
 }
