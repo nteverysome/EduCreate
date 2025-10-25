@@ -113,6 +113,7 @@
     "react-window": "^1.8.11",
     "react-window-infinite-loader": "^1.0.10",
     "stripe": "^14.3.0",
+    "syllable": "^5.0.1",
     "unsplash-js": "^7.0.20",
     "uuid": "^9.0.1",
     "web-vitals": "^5.0.1",
