@@ -63,6 +63,7 @@ const GameSwitcherPage: React.FC = () => {
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isCopying, setIsCopying] = useState<boolean>(false);
   const [gameOptions, setGameOptions] = useState<GameOptions>(DEFAULT_GAME_OPTIONS);
+  const [isSavingOptions, setIsSavingOptions] = useState<boolean>(false);
 
   // SRS 學習模式狀態
   const [showSRSPanel, setShowSRSPanel] = useState<boolean>(true);
@@ -1168,7 +1169,12 @@ const GameSwitcherPage: React.FC = () => {
               <button
                 onClick={async () => {
                   // 保存選項
+                  if (isSavingOptions) return; // 防止重複點擊
+
+                  setIsSavingOptions(true);
                   try {
+                    console.log('🔍 開始保存遊戲選項:', gameOptions);
+
                     const response = await fetch(`/api/activities/${activityId}`, {
                       method: 'PUT',
                       headers: {
@@ -1180,18 +1186,43 @@ const GameSwitcherPage: React.FC = () => {
                     });
 
                     if (response.ok) {
-                      alert('選項已保存！');
+                      const data = await response.json();
+                      console.log('✅ 選項保存成功:', data);
+
+                      // 顯示成功消息（使用更友好的提示）
+                      const successMessage = '✅ 選項已成功保存！\n\n' +
+                        '已保存的設置：\n' +
+                        `⏱️ 計時器: ${gameOptions.timer.type === 'none' ? '無' : gameOptions.timer.type === 'countUp' ? '正計時' : '倒計時'}\n` +
+                        `❤️ 生命值: ${gameOptions.lives} 條命\n` +
+                        `🎲 隨機順序: ${gameOptions.random ? '開啟' : '關閉'}\n` +
+                        `📝 顯示答案: ${gameOptions.showAnswers ? '開啟' : '關閉'}`;
+
+                      alert(successMessage);
                     } else {
-                      alert('保存失敗，請稍後再試');
+                      const errorData = await response.json() as { error?: string };
+                      console.error('❌ 保存失敗:', errorData);
+
+                      // 顯示詳細錯誤信息
+                      const errorMessage = errorData.error || '未知錯誤';
+                      alert(`❌ 保存失敗\n\n錯誤原因: ${errorMessage}\n\n請稍後再試或聯繫技術支持。`);
                     }
                   } catch (error) {
-                    console.error('保存選項時出錯:', error);
-                    alert('保存失敗，請稍後再試');
+                    console.error('❌ 保存選項時出錯:', error);
+
+                    // 顯示網絡錯誤信息
+                    alert('❌ 保存失敗\n\n可能的原因：\n• 網絡連接中斷\n• 伺服器暫時無法訪問\n\n請檢查網絡連接後重試。');
+                  } finally {
+                    setIsSavingOptions(false);
                   }
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                disabled={isSavingOptions}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  isSavingOptions
+                    ? 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                }`}
               >
-                💾 保存選項
+                {isSavingOptions ? '💾 保存中...' : '💾 保存選項'}
               </button>
               <button
                 onClick={() => {
