@@ -1459,7 +1459,9 @@ export default class Title extends Phaser.Scene {
 
             // 減少分數和生命值
             this.score = Math.max(0, this.score - 5);
-            this.takeDamage(20);  // 🔧 改為 20 點傷害
+            // 🎮 動態計算傷害：每次碰撞失去一條命（100 / maxLives）
+            const damagePerHit = this.healthPerLife;  // 每條命的血量百分比
+            this.takeDamage(damagePerHit);
 
             // 🧠 記錄 SRS 答題結果 (錯誤)
             if (this.srsManager && this.currentTargetWord) {
