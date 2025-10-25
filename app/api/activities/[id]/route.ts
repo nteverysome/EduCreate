@@ -312,10 +312,57 @@ export async function PUT(
       }
     }
 
-    // 如果有 gameOptions，更新 gameOptions
+    // 如果有 gameOptions，更新 GameSettings
     if (body.gameOptions !== undefined) {
-      updateData.gameOptions = body.gameOptions;
       console.log('🎮 更新遊戲選項:', { activityId, gameOptions: body.gameOptions });
+
+      const gameOptions = body.gameOptions;
+
+      // 轉換 gameOptions 到 GameSettings 格式
+      const gameSettingsData: any = {
+        activityId: activityId,
+        updatedAt: new Date()
+      };
+
+      // Timer 設置
+      if (gameOptions.timer) {
+        if (gameOptions.timer.type === 'none') {
+          gameSettingsData.timerType = 'NONE';
+          gameSettingsData.timerDuration = null;
+        } else if (gameOptions.timer.type === 'countUp') {
+          gameSettingsData.timerType = 'COUNT_UP';
+          const totalSeconds = (gameOptions.timer.minutes || 0) * 60 + (gameOptions.timer.seconds || 0);
+          gameSettingsData.timerDuration = totalSeconds;
+        } else if (gameOptions.timer.type === 'countDown') {
+          gameSettingsData.timerType = 'COUNT_DOWN';
+          const totalSeconds = (gameOptions.timer.minutes || 0) * 60 + (gameOptions.timer.seconds || 0);
+          gameSettingsData.timerDuration = totalSeconds;
+        }
+      }
+
+      // Lives 設置
+      if (gameOptions.lives !== undefined) {
+        gameSettingsData.livesCount = gameOptions.lives;
+      }
+
+      // Random (Shuffle Questions) 設置
+      if (gameOptions.random !== undefined) {
+        gameSettingsData.shuffleQuestions = gameOptions.random;
+      }
+
+      // Show Answers 設置
+      if (gameOptions.showAnswers !== undefined) {
+        gameSettingsData.showAnswers = gameOptions.showAnswers;
+      }
+
+      // 使用 upsert 創建或更新 GameSettings
+      await prisma.gameSettings.upsert({
+        where: { activityId: activityId },
+        update: gameSettingsData,
+        create: gameSettingsData
+      });
+
+      console.log('✅ GameSettings 更新成功');
     }
 
     // 如果有 folderId，更新 folderId（支持拖拽功能）
