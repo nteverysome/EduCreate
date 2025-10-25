@@ -37,7 +37,7 @@ export default class Title extends Phaser.Scene {
         // 🎮 讀取遊戲選項
         this.gameOptions = this.game.gameOptions || {
             timer: { type: 'countUp', minutes: 5, seconds: 0 },
-            lives: 3,
+            lives: 5,
             speed: 3,
             random: true,
             showAnswers: true

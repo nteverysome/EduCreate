@@ -21,7 +21,7 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
     minutes: 5,
     seconds: 0
   },
-  lives: 3,
+  lives: 5,
   speed: 3,
   random: true,
   showAnswers: true
