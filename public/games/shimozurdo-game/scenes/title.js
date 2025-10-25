@@ -766,6 +766,23 @@ export default class Title extends Phaser.Scene {
         this.scoreText.setScrollFactor(1);                   // 🎯 改為世界物件，在視差背景裡面
         this.scoreText.setDepth(200);                        // 確保在最前面
 
+        // 🆕 創建計時器顯示（第一列，在分數下方）
+        this.timerText = this.add.text(
+            0,                                               // X座標（稍後在 updateUIPositions 中設置）
+            topY + 60,                                       // Y座標（在分數下方60像素）
+            '',                                              // 初始文字為空（稍後在 applyTimerOption 中設置）
+            {
+                fontSize: '24px',                            // 字體大小
+                color: '#ffffff',                            // 白色
+                fontStyle: 'bold',                           // 粗體
+                stroke: '#000000',                           // 黑色描邊
+                strokeThickness: 3,                          // 描邊粗細
+                align: 'center'                              // 文字居中
+            }
+        ).setOrigin(0.5);                                    // 設置原點為中央
+        this.timerText.setScrollFactor(1);                   // 🎯 改為世界物件，在視差背景裡面
+        this.timerText.setDepth(200);                        // 確保在最前面
+
         // 🆕 創建英文文字（第三列，黃色框大字，可點擊發音）
         this.englishText = this.add.text(
             0,                                               // X座標（稍後在 updateUIPositions 中設置）
@@ -2072,25 +2089,24 @@ export default class Title extends Phaser.Scene {
             const totalSeconds = (timerOption.minutes || 0) * 60 + (timerOption.seconds || 0);
             this.timeRemaining = totalSeconds;
 
-            // 創建計時器文字
-            this.timerText = this.add.text(width / 2, 50, this.formatTime(this.timeRemaining), {
-                fontSize: '32px',
-                fill: '#ffffff',
-                fontFamily: 'Arial',
-                stroke: '#000000',
-                strokeThickness: 4
-            }).setOrigin(0.5).setDepth(1000).setScrollFactor(0);
+            // 🆕 使用五列布局中已創建的 timerText，只需設置初始文字
+            if (this.timerText) {
+                this.timerText.setText(this.formatTime(this.timeRemaining));
+                this.timerText.setVisible(true);  // 確保可見
+            }
 
             // 啟動倒數計時器
             this.timerEvent = this.time.addEvent({
                 delay: 1000,
                 callback: () => {
                     this.timeRemaining--;
-                    this.timerText.setText(this.formatTime(this.timeRemaining));
+                    if (this.timerText) {
+                        this.timerText.setText(this.formatTime(this.timeRemaining));
 
-                    // 時間快結束時變紅色
-                    if (this.timeRemaining <= 10) {
-                        this.timerText.setColor('#ff0000');
+                        // 時間快結束時變紅色
+                        if (this.timeRemaining <= 10) {
+                            this.timerText.setColor('#ff0000');
+                        }
                     }
 
                     if (this.timeRemaining <= 0) {
@@ -2107,27 +2123,30 @@ export default class Title extends Phaser.Scene {
             // 正向計時
             this.timeElapsed = 0;
 
-            // 創建計時器文字
-            this.timerText = this.add.text(width / 2, 50, this.formatTime(this.timeElapsed), {
-                fontSize: '32px',
-                fill: '#ffffff',
-                fontFamily: 'Arial',
-                stroke: '#000000',
-                strokeThickness: 4
-            }).setOrigin(0.5).setDepth(1000).setScrollFactor(0);
+            // 🆕 使用五列布局中已創建的 timerText，只需設置初始文字
+            if (this.timerText) {
+                this.timerText.setText(this.formatTime(this.timeElapsed));
+                this.timerText.setVisible(true);  // 確保可見
+            }
 
             // 啟動正向計時器
             this.timerEvent = this.time.addEvent({
                 delay: 1000,
                 callback: () => {
                     this.timeElapsed++;
-                    this.timerText.setText(this.formatTime(this.timeElapsed));
+                    if (this.timerText) {
+                        this.timerText.setText(this.formatTime(this.timeElapsed));
+                    }
                 },
                 loop: true
             });
 
             console.log('⏱️ 正向計時器已啟動');
         } else {
+            // 🆕 Timer 選項為 none，隱藏計時器
+            if (this.timerText) {
+                this.timerText.setVisible(false);
+            }
             console.log('ℹ️ Timer 選項為 none，不顯示計時器');
         }
     }
