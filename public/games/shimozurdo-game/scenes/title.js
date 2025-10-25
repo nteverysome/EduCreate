@@ -2777,9 +2777,9 @@ export default class Title extends Phaser.Scene {
     }
 
     /**
-     * 💾 保存分數到排行榜
+     * 💾 保存分數到排行榜（使用後端 API）
      */
-    saveScoreToLeaderboard() {
+    async saveScoreToLeaderboard() {
         // 獲取用戶輸入的名稱
         const playerName = this.playerName || '匿名玩家';
 
@@ -2789,52 +2789,74 @@ export default class Title extends Phaser.Scene {
         const accuracy = totalCount > 0 ? (correctCount / totalCount * 100).toFixed(1) : 0;
         const timeSpent = Math.floor((Date.now() - (this.gameStartTime || Date.now())) / 1000);
 
+        // 獲取 activityId（從 URL 參數）
+        const urlParams = new URLSearchParams(window.location.search);
+        const activityId = urlParams.get('activityId');
+
+        if (!activityId) {
+            console.error('❌ 無法獲取 activityId');
+            return;
+        }
+
         // 創建分數記錄
         const scoreEntry = {
-            name: playerName,
+            activityId: activityId,
+            playerName: playerName,
             score: this.score || 0,
             correctCount: correctCount,
             totalCount: totalCount,
             accuracy: parseFloat(accuracy),
             timeSpent: timeSpent,
-            timestamp: Date.now(),
-            date: new Date().toLocaleString('zh-TW')
+            gameData: {
+                questionAnswerLog: this.questionAnswerLog,
+                timestamp: Date.now(),
+                date: new Date().toLocaleString('zh-TW')
+            }
         };
 
-        // 從 localStorage 讀取現有排行榜
-        let leaderboard = [];
+        // 保存到後端數據庫
         try {
-            const storedLeaderboard = localStorage.getItem('shimozurdo_leaderboard');
-            if (storedLeaderboard) {
-                leaderboard = JSON.parse(storedLeaderboard);
+            const response = await fetch('/api/leaderboard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(scoreEntry),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save score');
             }
-        } catch (error) {
-            console.error('❌ 讀取排行榜失敗:', error);
-        }
 
-        // 添加新記錄
-        leaderboard.push(scoreEntry);
-
-        // 按分數排序（降序）
-        leaderboard.sort((a, b) => b.score - a.score);
-
-        // 只保留前 10 名
-        leaderboard = leaderboard.slice(0, 10);
-
-        // 保存到 localStorage
-        try {
-            localStorage.setItem('shimozurdo_leaderboard', JSON.stringify(leaderboard));
-            console.log('💾 分數已保存到排行榜:', scoreEntry);
-            console.log('🏆 當前排行榜:', leaderboard);
+            const result = await response.json();
+            console.log('💾 分數已保存到數據庫:', result.data);
         } catch (error) {
             console.error('❌ 保存排行榜失敗:', error);
+
+            // 🔄 降級方案：如果 API 失敗，保存到 localStorage
+            try {
+                let leaderboard = [];
+                const storedLeaderboard = localStorage.getItem('shimozurdo_leaderboard');
+                if (storedLeaderboard) {
+                    leaderboard = JSON.parse(storedLeaderboard);
+                }
+
+                leaderboard.push(scoreEntry);
+                leaderboard.sort((a, b) => b.score - a.score);
+                leaderboard = leaderboard.slice(0, 10);
+
+                localStorage.setItem('shimozurdo_leaderboard', JSON.stringify(leaderboard));
+                console.log('💾 分數已保存到 localStorage（降級方案）:', scoreEntry);
+            } catch (localError) {
+                console.error('❌ localStorage 保存也失敗:', localError);
+            }
         }
     }
 
     /**
-     * 🏆 顯示排行榜畫面
+     * 🏆 顯示排行榜畫面（使用後端 API）
      */
-    showLeaderboardScreen() {
+    async showLeaderboardScreen() {
         const cam = this.cameras.main;
 
         // 創建排行榜顯示容器
@@ -2854,16 +2876,55 @@ export default class Title extends Phaser.Scene {
 
         leaderboardContainer.add(title);
 
-        // 從 localStorage 讀取排行榜
+        // 顯示加載中提示
+        const loadingText = this.add.text(0, 0, '載入中...', {
+            fontSize: '24px',
+            fill: '#ffffff',
+            fontFamily: 'Arial',
+            stroke: '#000000',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+
+        leaderboardContainer.add(loadingText);
+
+        // 從後端 API 讀取排行榜
         let leaderboard = [];
         try {
-            const storedLeaderboard = localStorage.getItem('shimozurdo_leaderboard');
-            if (storedLeaderboard) {
-                leaderboard = JSON.parse(storedLeaderboard);
+            // 獲取 activityId（從 URL 參數）
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId');
+
+            if (!activityId) {
+                throw new Error('無法獲取 activityId');
             }
+
+            const response = await fetch(`/api/leaderboard?activityId=${activityId}&limit=10`);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch leaderboard');
+            }
+
+            const result = await response.json();
+            leaderboard = result.data || [];
+
+            console.log('🏆 從數據庫獲取排行榜:', leaderboard);
         } catch (error) {
             console.error('❌ 讀取排行榜失敗:', error);
+
+            // 🔄 降級方案：如果 API 失敗，從 localStorage 讀取
+            try {
+                const storedLeaderboard = localStorage.getItem('shimozurdo_leaderboard');
+                if (storedLeaderboard) {
+                    leaderboard = JSON.parse(storedLeaderboard);
+                    console.log('🏆 從 localStorage 獲取排行榜（降級方案）:', leaderboard);
+                }
+            } catch (localError) {
+                console.error('❌ localStorage 讀取也失敗:', localError);
+            }
         }
+
+        // 移除加載中提示
+        loadingText.destroy();
 
         // 如果沒有記錄，顯示提示
         if (leaderboard.length === 0) {
@@ -2905,9 +2966,11 @@ export default class Title extends Phaser.Scene {
                 else if (index === 2) rankIcon = '🥉';
 
                 // 格式化名稱（最多 8 個字符）
-                const displayName = entry.name.length > 8
-                    ? entry.name.substring(0, 8) + '...'
-                    : entry.name;
+                // 兼容後端 API (playerName) 和 localStorage (name)
+                const name = entry.playerName || entry.name || '匿名玩家';
+                const displayName = name.length > 8
+                    ? name.substring(0, 8) + '...'
+                    : name;
 
                 // 格式化時間
                 const minutes = Math.floor(entry.timeSpent / 60);

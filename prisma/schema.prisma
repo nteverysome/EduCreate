@@ -1070,3 +1070,27 @@ model WordReview {
   @@index([reviewedAt])
   @@map("word_reviews")
 }
+
+// ==================== 遊戲排行榜功能模型 ====================
+
+// 遊戲排行榜表
+model GameLeaderboard {
+  id              String   @id @default(cuid())
+  activityId      String   // 活動 ID
+  playerName      String   // 玩家名稱
+  score           Int      // 分數
+  correctCount    Int      // 答對題數
+  totalCount      Int      // 總題數
+  accuracy        Float    // 正確率 (0-100)
+  timeSpent       Int      // 遊戲時間（秒）
+  gameData        Json?    // 詳細遊戲數據（問題答案記錄等）
+
+  // 時間戳
+  createdAt       DateTime @default(now())
+
+  // 索引
+  @@index([activityId, score])
+  @@index([activityId, createdAt])
+  @@index([createdAt])
+  @@map("game_leaderboard")
+}
