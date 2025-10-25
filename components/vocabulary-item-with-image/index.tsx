@@ -457,56 +457,59 @@ export default function VocabularyItemWithImage({
   }, [item.chinese, enableChineseTextOverlay]);
 
   return (
-    <div className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors bg-white">
-      {/* 序號 */}
-      <div className="w-8 text-center text-sm text-gray-500 font-medium pt-2">
+    <div className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-4 p-3 sm:p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors bg-white">
+      {/* 序號 - 手機版在頂部，桌面版在左側 */}
+      <div className="sm:w-8 text-left sm:text-center text-sm text-gray-500 font-medium sm:pt-2">
         {index + 1}.
       </div>
 
-      {/* 英文輸入框（整合圖片和語音功能） */}
-      <div className="flex-1">
-        <InputWithImage
-          value={item.english}
-          onChange={(value) => onChange({ ...item, english: value })}
-          imageUrl={item.imageUrl}
-          onImageIconClick={() => setShowImagePicker(true)}
-          onThumbnailClick={() => setShowImageEditor(true)}
-          onAddSoundClick={() => setShowAddSoundDialog(true)}
-          hasAudio={!!item.audioUrl}
-          audioUrl={item.audioUrl}
-          onAudioThumbnailClick={() => setShowAudioPreview(true)}
-          placeholder="輸入關鍵字..."
-          disabled={isGenerating}
-        />
+      {/* 輸入框容器 - 手機版垂直堆疊，桌面版水平排列 */}
+      <div className="flex-1 flex flex-col sm:flex-row gap-3 sm:gap-4">
+        {/* 英文輸入框（整合圖片和語音功能） */}
+        <div className="flex-1 min-w-0">
+          <InputWithImage
+            value={item.english}
+            onChange={(value) => onChange({ ...item, english: value })}
+            imageUrl={item.imageUrl}
+            onImageIconClick={() => setShowImagePicker(true)}
+            onThumbnailClick={() => setShowImageEditor(true)}
+            onAddSoundClick={() => setShowAddSoundDialog(true)}
+            hasAudio={!!item.audioUrl}
+            audioUrl={item.audioUrl}
+            onAudioThumbnailClick={() => setShowAudioPreview(true)}
+            placeholder="輸入關鍵字..."
+            disabled={isGenerating}
+          />
 
-        {/* 生成狀態提示 */}
-        {isGenerating && (
-          <div className="flex items-center space-x-2 text-sm text-blue-600 mt-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <span>正在生成圖片...</span>
-          </div>
-        )}
-      </div>
+          {/* 生成狀態提示 */}
+          {isGenerating && (
+            <div className="flex items-center space-x-2 text-xs sm:text-sm text-blue-600 mt-2">
+              <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-blue-600"></div>
+              <span>正在生成圖片...</span>
+            </div>
+          )}
+        </div>
 
-      {/* 中文輸入框（獨立的圖片功能，不顯示語音功能） */}
-      <div className="flex-1">
-        <InputWithImage
-          value={item.chinese}
-          onChange={(value) => onChange({ ...item, chinese: value })}
-          imageUrl={item.chineseImageUrl}
-          onImageIconClick={() => setShowChineseImagePicker(true)}
-          onThumbnailClick={() => setShowChineseImageEditor(true)}
-          placeholder="輸入匹配物件..."
-          disabled={isGeneratingChinese}
-        />
+        {/* 中文輸入框（獨立的圖片功能，不顯示語音功能） */}
+        <div className="flex-1 min-w-0">
+          <InputWithImage
+            value={item.chinese}
+            onChange={(value) => onChange({ ...item, chinese: value })}
+            imageUrl={item.chineseImageUrl}
+            onImageIconClick={() => setShowChineseImagePicker(true)}
+            onThumbnailClick={() => setShowChineseImageEditor(true)}
+            placeholder="輸入匹配物件..."
+            disabled={isGeneratingChinese}
+          />
 
-        {/* 生成狀態提示 */}
-        {isGeneratingChinese && (
-          <div className="flex items-center space-x-2 text-sm text-blue-600 mt-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <span>正在生成中文圖片...</span>
-          </div>
-        )}
+          {/* 生成狀態提示 */}
+          {isGeneratingChinese && (
+            <div className="flex items-center space-x-2 text-xs sm:text-sm text-blue-600 mt-2">
+              <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-blue-600"></div>
+              <span>正在生成中文圖片...</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 英文圖片模態框 */}

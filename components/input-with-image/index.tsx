@@ -57,8 +57,10 @@ export default function InputWithImage({
   audioUrl,
   onAudioThumbnailClick
 }: InputWithImageProps) {
-  // 計算左側 padding（根據是否有語音和圖片）
-  const leftPadding = audioUrl && imageUrl ? 'pl-20' : (audioUrl || imageUrl ? 'pl-12' : 'pl-3');
+  // 計算左側 padding（根據是否有語音和圖片）- 手機版增加間距
+  const leftPadding = audioUrl && imageUrl
+    ? 'pl-20 sm:pl-20'
+    : (audioUrl || imageUrl ? 'pl-12 sm:pl-12' : 'pl-3');
 
   return (
     <div className="relative w-full">
@@ -72,15 +74,15 @@ export default function InputWithImage({
         className={className}
       />
 
-      {/* 左側語音縮圖（添加語音後顯示） */}
+      {/* 左側語音縮圖（添加語音後顯示）- 手機版增大尺寸 */}
       {audioUrl && (
         <button
           type="button"
           onClick={onAudioThumbnailClick}
           disabled={disabled}
           className={`
-            absolute ${imageUrl ? 'left-11' : 'left-2'} top-1/2 -translate-y-1/2
-            w-8 h-8 rounded overflow-hidden
+            absolute ${imageUrl ? 'left-11 sm:left-11' : 'left-1.5 sm:left-2'} top-1/2 -translate-y-1/2
+            w-9 h-9 sm:w-8 sm:h-8 rounded overflow-hidden
             border-2 border-green-500 hover:border-green-600
             bg-green-50
             transition-all duration-200
@@ -91,19 +93,19 @@ export default function InputWithImage({
           title="點擊播放語音"
           aria-label="播放語音"
         >
-          <span className="text-lg">🔊</span>
+          <span className="text-lg sm:text-base">🔊</span>
         </button>
       )}
 
-      {/* 左側圖片縮圖（選擇圖片後顯示） */}
+      {/* 左側圖片縮圖（選擇圖片後顯示）- 手機版增大尺寸 */}
       {imageUrl && (
         <button
           type="button"
           onClick={onThumbnailClick}
           disabled={disabled}
           className={`
-            absolute left-2 top-1/2 -translate-y-1/2
-            w-8 h-8 rounded overflow-hidden
+            absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2
+            w-9 h-9 sm:w-8 sm:h-8 rounded overflow-hidden
             border-2 border-gray-300 hover:border-blue-500
             transition-all duration-200
             ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
@@ -120,8 +122,8 @@ export default function InputWithImage({
         </button>
       )}
       
-      {/* 右側按鈕組 */}
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+      {/* 右側按鈕組 - 手機版增大按鈕尺寸和間距 */}
+      <div className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 sm:gap-1">
         {/* 加入聲音按鈕（只在沒有語音時顯示） */}
         {onAddSoundClick && !audioUrl && (
           <button
@@ -129,17 +131,18 @@ export default function InputWithImage({
             onClick={onAddSoundClick}
             disabled={disabled}
             className={`
-              w-6 h-6 flex items-center justify-center
+              w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center
               text-gray-400
               hover:text-blue-500
               transition-colors duration-200
               ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+              rounded-md hover:bg-blue-50
             `}
             title="加入聲音"
             aria-label="加入聲音"
           >
-            <span className="text-xl">🔊</span>
+            <span className="text-xl sm:text-lg">🔊</span>
           </button>
         )}
 
@@ -150,16 +153,17 @@ export default function InputWithImage({
             onClick={onImageIconClick}
             disabled={disabled}
             className={`
-              w-6 h-6 flex items-center justify-center
+              w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center
               text-gray-400 hover:text-blue-500
               transition-colors duration-200
               ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+              rounded-md hover:bg-blue-50
             `}
             title="添加圖片"
             aria-label="添加圖片"
           >
-            <span className="text-xl">🖼️</span>
+            <span className="text-xl sm:text-lg">🖼️</span>
           </button>
         )}
       </div>
