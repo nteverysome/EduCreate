@@ -1292,8 +1292,27 @@ export default class Title extends Phaser.Scene {
         const spawnX = worldView.right + Phaser.Math.Between(100, 300);  // 右邊界外 100-300 像素
         const spawnY = Phaser.Math.Between(worldView.top + 100, worldView.bottom - 100);  // Y 在遊戲區域內
 
+        // 🎨 獲取視覺風格雲朵資源
+        const styleId = this.gameOptions.visualStyle || 'modern';
+        const cloud1Key = `cloud1_${styleId}`;
+        const cloud2Key = `cloud2_${styleId}`;
+
+        // 🎨 優先使用視覺風格雲朵，隨機選擇 cloud1 或 cloud2
+        let cloudKey = 'cloud_enemy';  // 默認雲朵
+        if (this.textures.exists(cloud1Key) && this.textures.exists(cloud2Key)) {
+            // 隨機選擇 cloud1 或 cloud2
+            cloudKey = Math.random() > 0.5 ? cloud1Key : cloud2Key;
+            console.log('✅ 使用視覺風格雲朵:', cloudKey);
+        } else if (this.textures.exists('cloud_enemy')) {
+            console.log('✅ 使用默認雲朵');
+        } else {
+            console.warn('⚠️ 雲朵資源不存在，使用備用方案');
+            // 這裡可以創建備用雲朵，但為了簡化，我們暫時跳過
+            return;
+        }
+
         // 創建敵人（從 FIT 後遊戲區域外開始） - 確保在真正的遊戲區域外生成
-        const enemy = this.add.sprite(spawnX, spawnY, 'cloud_enemy');
+        const enemy = this.add.sprite(spawnX, spawnY, cloudKey);
         enemy.setOrigin(0.5, 0.5);                       // 設置中心點
         enemy.setScale(0.533);                           // 用戶要求雲大三分之一：0.4 × 4/3 ≈ 0.533
         enemy.setDepth(-65);                             // 在太空船後面，視差背景前面
@@ -3368,6 +3387,16 @@ export default class Title extends Phaser.Scene {
         // 2. 應用 UI 元素顏色（如果元素已經創建）
         this.applyVisualStyleToUI(style);
 
+        // 3. 🎬 應用動畫風格（如果有動畫配置）
+        if (style.animations) {
+            this.applyAnimationStyle(style.animations);
+        }
+
+        // 4. 🔊 應用音效主題（如果有音效配置）
+        if (style.sounds) {
+            this.applySoundTheme(styleId, style.sounds);
+        }
+
         console.log('🎨 完整視覺風格已應用:', {
             styleId: style.id,
             name: style.name,
@@ -3375,7 +3404,9 @@ export default class Title extends Phaser.Scene {
             primaryColor: style.primaryColor,
             secondaryColor: style.secondaryColor,
             fontFamily: style.fontFamily,
-            ui: style.ui
+            ui: style.ui,
+            animations: style.animations,
+            sounds: style.sounds
         });
     }
 
@@ -3435,6 +3466,124 @@ export default class Title extends Phaser.Scene {
             }
 
             console.log('🎨 目標詞彙樣式已更新:', targetWordStyle);
+        }
+    }
+
+    /**
+     * 🎬 應用動畫風格
+     * @param {object} animConfig - 動畫配置
+     */
+    applyAnimationStyle(animConfig) {
+        if (!animConfig) return;
+
+        const { style, speed } = animConfig;
+
+        switch (style) {
+            case 'bouncy':  // 幼兒風格 - 彈跳動畫
+                if (this.tweens) {
+                    this.tweens.timeScale = speed || 1.2;
+                }
+                if (this.physics && this.physics.world) {
+                    this.physics.world.gravity.y = 800;
+                }
+                console.log('🎬 應用彈跳動畫風格 (bouncy)');
+                break;
+
+            case 'smooth':  // 現代/深色/自然風格 - 平滑動畫
+                if (this.tweens) {
+                    this.tweens.timeScale = speed || 1.0;
+                }
+                if (this.physics && this.physics.world) {
+                    this.physics.world.gravity.y = 600;
+                }
+                console.log('🎬 應用平滑動畫風格 (smooth)');
+                break;
+
+            case 'subtle':  // 經典風格 - 微妙動畫
+                if (this.tweens) {
+                    this.tweens.timeScale = speed || 0.9;
+                }
+                if (this.physics && this.physics.world) {
+                    this.physics.world.gravity.y = 500;
+                }
+                console.log('🎬 應用微妙動畫風格 (subtle)');
+                break;
+
+            default:
+                console.log('🎬 使用默認動畫風格');
+        }
+
+        console.log('🎬 動畫風格已應用:', animConfig);
+    }
+
+    /**
+     * 🔊 應用音效主題
+     * @param {string} styleId - 視覺風格 ID
+     * @param {object} soundsConfig - 音效配置
+     */
+    applySoundTheme(styleId, soundsConfig) {
+        if (!soundsConfig) return;
+
+        // 停止當前背景音樂（如果有）
+        if (this.backgroundMusic) {
+            this.backgroundMusic.stop();
+            this.backgroundMusic = null;
+        }
+
+        // 嘗試載入新的背景音樂
+        const bgmKey = `bgm_${styleId}`;
+        if (this.cache.audio.exists(bgmKey)) {
+            try {
+                this.backgroundMusic = this.sound.add(bgmKey, {
+                    loop: true,
+                    volume: 0.5
+                });
+                this.backgroundMusic.play();
+                console.log('🎵 背景音樂已切換:', styleId);
+            } catch (error) {
+                console.warn('⚠️ 背景音樂播放失敗:', error);
+            }
+        } else {
+            console.log('💡 背景音樂資源不存在:', bgmKey);
+        }
+
+        // 保存音效鍵值供後續使用
+        this.hitSoundKey = `hit_${styleId}`;
+        this.successSoundKey = `success_${styleId}`;
+
+        console.log('🔊 音效主題已應用:', {
+            styleId,
+            bgmKey,
+            hitSoundKey: this.hitSoundKey,
+            successSoundKey: this.successSoundKey
+        });
+    }
+
+    /**
+     * 🔊 播放碰撞音效
+     */
+    playHitSound() {
+        if (this.hitSoundKey && this.cache.audio.exists(this.hitSoundKey)) {
+            try {
+                this.sound.play(this.hitSoundKey);
+                console.log('🔊 播放碰撞音效:', this.hitSoundKey);
+            } catch (error) {
+                console.warn('⚠️ 碰撞音效播放失敗:', error);
+            }
+        }
+    }
+
+    /**
+     * 🔊 播放成功音效
+     */
+    playSuccessSound() {
+        if (this.successSoundKey && this.cache.audio.exists(this.successSoundKey)) {
+            try {
+                this.sound.play(this.successSoundKey);
+                console.log('🔊 播放成功音效:', this.successSoundKey);
+            } catch (error) {
+                console.warn('⚠️ 成功音效播放失敗:', error);
+            }
         }
     }
 }
