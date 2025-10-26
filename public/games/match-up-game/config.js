@@ -1,10 +1,10 @@
 // Phaser 3 遊戲配置
 const config = {
     type: Phaser.AUTO,
-    width: 960,
-    height: 540,
+    width: 660,
+    height: 383,
     parent: 'game-container',
-    backgroundColor: '#FFFFFF', // 白色背景（Classic 主題）
+    backgroundColor: '#FFFFFF', // 白色背景（Wordwall Classic 主題）
     scene: [PreloadScene, GameScene],
     scale: {
         mode: Phaser.Scale.FIT,

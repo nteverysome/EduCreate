@@ -1,4 +1,4 @@
-// Game 場景 - 主遊戲邏輯（連線配對）
+// Game 場景 - 主遊戲邏輯（卡片拖動配對）
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
@@ -10,20 +10,11 @@ class GameScene extends Phaser.Scene {
             { id: 3, question: 'dog', answer: '狗' }
         ];
 
-        // 卡片顏色（左側彩色卡片）
-        this.cardColors = [
-            0xd72537,  // 紅色
-            0xfb7303,  // 橙色
-            0x4caf50,  // 綠色
-        ];
-
         // 遊戲狀態
         this.leftCards = [];
         this.rightCards = [];
-        this.lines = [];  // 儲存連線
         this.matchedPairs = new Set();
         this.isDragging = false;
-        this.dragLine = null;
         this.dragStartCard = null;
     }
 
@@ -35,31 +26,16 @@ class GameScene extends Phaser.Scene {
         this.isDragging = false;
         this.dragStartCard = null;
 
-        // 添加淺藍色背景
-        this.add.rectangle(480, 270, 960, 540, 0xdbf6ff).setDepth(-1);
+        // 添加白色背景（Wordwall Classic 主題）
+        this.add.rectangle(330, 191.5, 660, 383, 0xffffff).setDepth(-1);
 
         // 添加標題
-        this.add.text(480, 40, 'Match-up Game', {
-            fontSize: '36px',
+        this.add.text(330, 30, 'Match up', {
+            fontSize: '24px',
             color: '#333333',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         }).setOrigin(0.5);
-
-        // 添加說明
-        this.add.text(480, 90, '拖曳左側卡片到右側卡片進行配對', {
-            fontSize: '20px',
-            color: '#666666',
-            fontFamily: 'Arial'
-        }).setOrigin(0.5);
-
-        // 創建連線圖層（在卡片下方）
-        this.linesGraphics = this.add.graphics();
-        this.linesGraphics.setDepth(0);
-
-        // 創建拖曳線圖層（在卡片上方）
-        this.dragGraphics = this.add.graphics();
-        this.dragGraphics.setDepth(10);
 
         // 創建卡片
         this.createCards();
@@ -70,20 +46,19 @@ class GameScene extends Phaser.Scene {
 
     createCards() {
         const cardWidth = 200;
-        const cardHeight = 80;
-        const leftX = 200;
-        const rightX = 760;
-        const startY = 180;
-        const spacing = 100;
+        const cardHeight = 60;
+        const leftX = 150;
+        const rightX = 510;
+        const startY = 80;
+        const spacing = 80;
 
         // 隨機排列答案
         const shuffledAnswers = Phaser.Utils.Array.Shuffle([...this.pairs]);
 
-        // 創建左側題目卡片（彩色）
+        // 創建左側題目卡片（白色）
         this.pairs.forEach((pair, index) => {
             const y = startY + index * spacing;
-            const color = this.cardColors[index % this.cardColors.length];
-            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id, color);
+            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id);
             this.leftCards.push(card);
         });
 
@@ -95,22 +70,22 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    createLeftCard(x, y, width, height, text, pairId, color) {
+    createLeftCard(x, y, width, height, text, pairId) {
         // 創建卡片容器
         const container = this.add.container(x, y);
         container.setSize(width, height);
         container.setDepth(5);
 
-        // 創建卡片背景（彩色）
-        const background = this.add.rectangle(0, 0, width, height, color);
-        background.setStrokeStyle(0);
+        // 創建卡片背景（白色）
+        const background = this.add.rectangle(0, 0, width, height, 0xffffff);
+        background.setStrokeStyle(2, 0x333333);
 
-        // 創建卡片文字（白色）
+        // 創建卡片文字（黑色）
         const cardText = this.add.text(0, 0, text, {
-            fontSize: '24px',
-            color: '#ffffff',
+            fontSize: '20px',
+            color: '#333333',
             fontFamily: 'Arial',
-            fontStyle: 'bold'
+            fontStyle: 'normal'
         });
         cardText.setOrigin(0.5);
 
@@ -126,7 +101,6 @@ class GameScene extends Phaser.Scene {
             side: 'left',
             background: background,
             text: cardText,
-            color: color,
             isMatched: false,
             originalX: x,
             originalY: y
@@ -198,10 +172,10 @@ class GameScene extends Phaser.Scene {
 
         // 創建卡片文字（黑色）
         const cardText = this.add.text(0, 0, text, {
-            fontSize: '24px',
+            fontSize: '20px',
             color: '#333333',
             fontFamily: 'Arial',
-            fontStyle: 'bold'
+            fontStyle: 'normal'
         });
         cardText.setOrigin(0.5);
 
@@ -352,14 +326,14 @@ class GameScene extends Phaser.Scene {
     }
 
     onGameComplete() {
-        // 顯示完成訊息（Classic 主題）
-        const completeText = this.add.text(480, 270, '🎉 完成！', {
-            fontSize: '48px',
+        // 顯示完成訊息（Wordwall Classic 主題）
+        const completeText = this.add.text(330, 191.5, '🎉 完成！', {
+            fontSize: '36px',
             color: '#4caf50',
             fontFamily: 'Arial',
             fontStyle: 'bold',
             backgroundColor: '#e8f5e9',
-            padding: { x: 30, y: 15 }
+            padding: { x: 25, y: 12 }
         });
         completeText.setOrigin(0.5);
 
@@ -376,13 +350,13 @@ class GameScene extends Phaser.Scene {
     }
 
     createRestartButton() {
-        // 創建重新開始按鈕（Classic 主題）
-        const button = this.add.text(480, 500, '🔄 重新開始', {
-            fontSize: '24px',
+        // 創建重新開始按鈕（Wordwall Classic 主題）
+        const button = this.add.text(330, 320, '🔄 重新開始', {
+            fontSize: '18px',
             color: '#fe7606',
             fontFamily: 'Arial',
             backgroundColor: '#fff3e0',
-            padding: { x: 25, y: 12 }
+            padding: { x: 20, y: 10 }
         });
         button.setOrigin(0.5);
         button.setInteractive({ useHandCursor: true });
