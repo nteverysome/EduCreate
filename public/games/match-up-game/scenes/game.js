@@ -153,24 +153,29 @@ class GameScene extends Phaser.Scene {
         container.on('dragend', (pointer) => {
             this.isDragging = false;
 
-            // 檢查是否拖曳到右側卡片
-            const dropped = this.checkDrop(pointer, container);
+            // 先檢查是否拖曳到其他左側卡片（交換位置）
+            const swapped = this.checkSwap(pointer, container);
 
-            if (!dropped) {
-                // 沒有放到正確位置，返回原位
-                this.tweens.add({
-                    targets: container,
-                    x: container.getData('originalX'),
-                    y: container.getData('originalY'),
-                    scaleX: 1,
-                    scaleY: 1,
-                    duration: 300,
-                    ease: 'Back.easeOut',
-                    onComplete: () => {
-                        container.setDepth(5);
-                        background.setAlpha(1);
-                    }
-                });
+            if (!swapped) {
+                // 如果沒有交換，檢查是否拖曳到右側卡片
+                const dropped = this.checkDrop(pointer, container);
+
+                if (!dropped) {
+                    // 沒有放到正確位置，返回原位
+                    this.tweens.add({
+                        targets: container,
+                        x: container.getData('originalX'),
+                        y: container.getData('originalY'),
+                        scaleX: 1,
+                        scaleY: 1,
+                        duration: 300,
+                        ease: 'Back.easeOut',
+                        onComplete: () => {
+                            container.setDepth(5);
+                            background.setAlpha(1);
+                        }
+                    });
+                }
             }
 
             this.dragStartCard = null;
@@ -228,6 +233,70 @@ class GameScene extends Phaser.Scene {
         });
 
         return container;
+    }
+
+    checkSwap(pointer, draggedCard) {
+        if (!draggedCard) return false;
+
+        // 檢查指針是否在其他左側卡片上
+        let targetCard = null;
+
+        for (const card of this.leftCards) {
+            // 跳過自己和已配對的卡片
+            if (card === draggedCard || card.getData('isMatched')) continue;
+
+            const bounds = card.getBounds();
+            if (bounds.contains(pointer.x, pointer.y)) {
+                targetCard = card;
+                break;
+            }
+        }
+
+        if (targetCard) {
+            // 交換兩張卡片的位置
+            this.swapCards(draggedCard, targetCard);
+            return true;
+        }
+
+        return false;
+    }
+
+    swapCards(card1, card2) {
+        // 獲取兩張卡片的原始位置
+        const card1OriginalX = card1.getData('originalX');
+        const card1OriginalY = card1.getData('originalY');
+        const card2OriginalX = card2.getData('originalX');
+        const card2OriginalY = card2.getData('originalY');
+
+        // 交換原始位置數據
+        card1.setData('originalX', card2OriginalX);
+        card1.setData('originalY', card2OriginalY);
+        card2.setData('originalX', card1OriginalX);
+        card2.setData('originalY', card1OriginalY);
+
+        // 動畫移動到新位置
+        this.tweens.add({
+            targets: card1,
+            x: card2OriginalX,
+            y: card2OriginalY,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 300,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                card1.setDepth(5);
+                const bg1 = card1.getAt(0);
+                if (bg1) bg1.setAlpha(1);
+            }
+        });
+
+        this.tweens.add({
+            targets: card2,
+            x: card1OriginalX,
+            y: card1OriginalY,
+            duration: 300,
+            ease: 'Back.easeOut'
+        });
     }
 
     checkDrop(pointer, draggedCard) {
