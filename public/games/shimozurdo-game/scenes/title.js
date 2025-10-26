@@ -33,60 +33,8 @@ export default class Title extends Phaser.Scene {
         this.handlerScene = this.scene.get('handler')   // 獲取場景管理器引用
         this.handlerScene.sceneRunning = 'title'        // 通知管理器當前運行場景
 
-        // 🎨 預載入視覺風格資源
-        this.preloadVisualStyleAssets();
-    }
-
-    /**
-     * 🎨 預載入視覺風格資源
-     * 根據選擇的視覺風格載入對應的圖片和音效資源
-     */
-    preloadVisualStyleAssets() {
-        // 獲取視覺風格 ID
-        const styleId = this.game.gameOptions?.visualStyle || 'clouds';
-
-        console.log('🎨 開始預載入視覺風格資源:', styleId);
-
-        // 定義資源路徑前綴
-        const basePath = '/games/shimozurdo-game/assets/themes';
-
-        // 嘗試載入太空船圖片
-        const spaceshipPath = `${basePath}/${styleId}/spaceship.png`;
-        this.load.image(`spaceship_${styleId}`, spaceshipPath);
-        console.log('🚀 載入太空船圖片:', spaceshipPath);
-
-        // 嘗試載入雲朵圖片
-        const cloud1Path = `${basePath}/${styleId}/cloud1.png`;
-        const cloud2Path = `${basePath}/${styleId}/cloud2.png`;
-        this.load.image(`cloud1_${styleId}`, cloud1Path);
-        this.load.image(`cloud2_${styleId}`, cloud2Path);
-        console.log('☁️ 載入雲朵圖片:', cloud1Path, cloud2Path);
-
-        // 嘗試載入背景圖片
-        const bgLayerPath = `${basePath}/${styleId}/bg_layer.png`;
-        this.load.image(`bg_layer_${styleId}`, bgLayerPath);
-        console.log('🖼️ 載入背景圖片:', bgLayerPath);
-
-        // 嘗試載入音效
-        const bgmPath = `${basePath}/${styleId}/sounds/background.mp3`;
-        const hitPath = `${basePath}/${styleId}/sounds/hit.mp3`;
-        const successPath = `${basePath}/${styleId}/sounds/success.mp3`;
-
-        this.load.audio(`bgm_${styleId}`, bgmPath);
-        this.load.audio(`hit_${styleId}`, hitPath);
-        this.load.audio(`success_${styleId}`, successPath);
-        console.log('🔊 載入音效:', bgmPath, hitPath, successPath);
-
-        // 設置載入錯誤處理
-        this.load.on('loaderror', (file) => {
-            console.warn('⚠️ 資源載入失敗:', file.key, file.src);
-            console.log('💡 提示：請確保資源文件存在於正確的路徑');
-        });
-
-        // 設置載入完成處理
-        this.load.on('complete', () => {
-            console.log('✅ 視覺風格資源載入完成');
-        });
+        // 🎨 視覺風格資源已在 PreloadScene 中載入，這裡不需要再次載入
+        console.log('🎨 TitleScene 啟動，視覺風格資源已在 PreloadScene 中載入');
     }
 
     create() {
