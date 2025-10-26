@@ -31,13 +31,13 @@ export async function GET(request: NextRequest) {
       prefix: `visual-styles/${styleId}/`,
     });
 
-    // 構建資源 URL 映射（格式：{ resourceType: { url: string } }）
-    const resources: Record<string, { url: string }> = {};
+    // 構建資源 URL 映射（格式：{ resourceType: url }）
+    const resources: Record<string, string> = {};
 
     blobs.forEach((blob) => {
       const fileName = blob.pathname.split('/').pop() || '';
       const resourceType = fileName.split('.')[0];
-      resources[resourceType] = { url: blob.url };
+      resources[resourceType] = blob.url;
     });
 
     return NextResponse.json({

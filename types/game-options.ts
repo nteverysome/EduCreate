@@ -26,6 +26,6 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
   speed: 3,
   random: true,
   showAnswers: true,
-  visualStyle: 'modern'  // 默認使用現代風格
+  visualStyle: 'clouds'  // 默認使用雲朵風格
 };
 
