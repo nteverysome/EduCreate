@@ -162,8 +162,14 @@ export default class Title extends Phaser.Scene {
             console.log(`📐 背景圖片尺寸: ${bgWidth} x ${bgHeight}`);
             console.log(`📐 遊戲視口尺寸: ${width} x ${height}`);
 
-            // 🎨 使用 tileSprite 支持滾動，設置為視口尺寸
-            // tileSprite 會自動平鋪圖片，不需要縮放
+            // 計算縮放比例以適應視口（保持寬高比）
+            const scaleX = width / bgWidth;
+            const scaleY = height / bgHeight;
+            const scale = Math.max(scaleX, scaleY); // 使用較大的縮放比例以填滿視口
+
+            console.log(`📐 背景縮放比例: ${scale.toFixed(3)}`);
+
+            // 🎨 使用 tileSprite 支持滾動
             const customBg = this.add.tileSprite(
                 width / 2,      // x: 視口中心
                 height / 2,     // y: 視口中心
@@ -172,11 +178,12 @@ export default class Title extends Phaser.Scene {
                 customBgKey     // texture: 背景圖片
             );
             customBg.setOrigin(0.5, 0.5);  // 設置原點為中心
+            customBg.setTileScale(scale, scale);  // 🎨 縮放平鋪的圖片
             customBg.setDepth(-100);
             customBg.setAlpha(1.0);
             customBg.setVisible(true);
             this.backgroundLayers['custom'] = customBg;
-            console.log('✅ 自定義背景已創建（支持滾動，無縮放）');
+            console.log('✅ 自定義背景已創建（支持滾動，已縮放）');
 
             // 初始化滾動位置
             this.scrollPositions = { custom: 0 };
