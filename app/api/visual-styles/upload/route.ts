@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
     const blob = await put(blobPath, file, {
       access: 'public',
       addRandomSuffix: false, // 不添加隨機後綴，保持文件名一致
+      allowOverwrite: true,   // 允許覆蓋已存在的文件
     });
 
     console.log(`✅ 文件上傳成功到 Blob Storage: ${blob.url}`);
