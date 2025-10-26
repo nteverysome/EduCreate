@@ -49,7 +49,8 @@ class GameScene extends Phaser.Scene {
         const cardHeight = 60;
         const leftX = 150;
         const rightX = 510;
-        const startY = 120;       // 從 100 改為 120（再往下 20px）
+        const leftStartY = 120;   // 左側起始位置（往下 20px）
+        const rightStartY = 100;  // 右側起始位置（保持原位）
         const leftSpacing = 65;   // 左側間距：60 + 5 = 65（5px 距離）
         const rightSpacing = 80;  // 右側間距：60 + 20 = 80（20px 距離）
 
@@ -57,18 +58,18 @@ class GameScene extends Phaser.Scene {
         const shuffledAnswers = Phaser.Utils.Array.Shuffle([...this.pairs]);
 
         // 創建左側外框（包圍所有左側卡片）
-        this.createLeftContainerBox(leftX, startY, cardWidth, cardHeight, leftSpacing, this.pairs.length);
+        this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftSpacing, this.pairs.length);
 
         // 創建左側題目卡片（白色，5px 間距）
         this.pairs.forEach((pair, index) => {
-            const y = startY + index * leftSpacing;
+            const y = leftStartY + index * leftSpacing;
             const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id);
             this.leftCards.push(card);
         });
 
         // 創建右側答案卡片（白色，20px 間距）
         shuffledAnswers.forEach((pair, index) => {
-            const y = startY + index * rightSpacing;
+            const y = rightStartY + index * rightSpacing;
             const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id);
             this.rightCards.push(card);
         });
