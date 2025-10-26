@@ -1414,7 +1414,35 @@ const GameSwitcherPage: React.FC = () => {
               {/* 視覺風格選擇器 */}
               <VisualStyleSelector
                 selectedStyle={gameOptions.visualStyle}
-                onChange={(styleId) => setGameOptions({ ...gameOptions, visualStyle: styleId })}
+                onChange={async (styleId) => {
+                  // 更新本地狀態
+                  const newOptions = { ...gameOptions, visualStyle: styleId };
+                  setGameOptions(newOptions);
+
+                  // 自動保存到資料庫
+                  try {
+                    console.log('🎨 自動保存視覺風格:', styleId);
+                    const response = await fetch(`/api/activities/${activityId}`, {
+                      method: 'PUT',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        gameOptions: newOptions,
+                      }),
+                    });
+
+                    if (response.ok) {
+                      console.log('✅ 視覺風格已自動保存');
+                      // 自動應用選項（重新載入遊戲）
+                      setGameKey(prev => prev + 1);
+                    } else {
+                      console.error('❌ 自動保存失敗');
+                    }
+                  } catch (error) {
+                    console.error('❌ 自動保存時出錯:', error);
+                  }
+                }}
               />
 
               {/* 遊戲選項面板 */}
