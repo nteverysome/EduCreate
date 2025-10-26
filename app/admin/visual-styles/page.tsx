@@ -196,7 +196,7 @@ export default function VisualStylesAdminPage() {
                         {uploaded?.exists && uploaded.url ? (
                           <div className="mb-2">
                             <img
-                              src={uploaded.url}
+                              src={`${uploaded.url}?t=${Date.now()}`}
                               alt={resource.name}
                               className="w-24 h-24 object-contain mx-auto rounded-lg border border-gray-200"
                             />
