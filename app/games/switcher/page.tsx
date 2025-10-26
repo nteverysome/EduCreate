@@ -1557,45 +1557,46 @@ const GameSwitcherPage: React.FC = () => {
           )}
 
           {/* 活動排行榜 - 只在有活動ID且不是學生模式時顯示 */}
-          {activityId && !assignmentId && activityLeaderboard.length > 0 && (
+          {activityId && !assignmentId && (
             <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 md:col-span-2 lg:col-span-1">
               <h3 className="font-semibold text-gray-900 mb-3 md:mb-4">🏆 排行榜</h3>
-              <div className="space-y-2">
-                {activityLeaderboard.slice(0, 10).map((entry, index) => (
-                  <div
-                    key={entry.id}
-                    className={`flex items-center justify-between p-3 rounded-lg ${
-                      index < 3 ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="text-lg font-bold">
-                        {index === 0 && '🥇'}
-                        {index === 1 && '🥈'}
-                        {index === 2 && '🥉'}
-                        {index > 2 && `#${index + 1}`}
+              {activityLeaderboard.length > 0 ? (
+                <div className="space-y-2">
+                  {activityLeaderboard.slice(0, 10).map((entry, index) => (
+                    <div
+                      key={entry.id}
+                      className={`flex items-center justify-between p-3 rounded-lg ${
+                        index < 3 ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        <div className="text-lg font-bold">
+                          {index === 0 && '🥇'}
+                          {index === 1 && '🥈'}
+                          {index === 2 && '🥉'}
+                          {index > 2 && `#${index + 1}`}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 truncate">
+                            {entry.playerName}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {entry.correctCount}/{entry.totalCount} 題 • {entry.accuracy.toFixed(1)}%
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 truncate">
-                          {entry.playerName}
+                      <div className="text-right flex-shrink-0 ml-2">
+                        <div className="font-bold text-blue-600">
+                          {entry.score} 分
                         </div>
                         <div className="text-xs text-gray-500">
-                          {entry.correctCount}/{entry.totalCount} 題 • {entry.accuracy.toFixed(1)}%
+                          {Math.floor(entry.timeSpent / 60)}:{(entry.timeSpent % 60).toString().padStart(2, '0')}
                         </div>
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0 ml-2">
-                      <div className="font-bold text-blue-600">
-                        {entry.score} 分
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {Math.floor(entry.timeSpent / 60)}:{(entry.timeSpent % 60).toString().padStart(2, '0')}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {activityLeaderboard.length === 0 && (
+                  ))}
+                </div>
+              ) : (
                 <div className="text-center py-8 text-gray-500">
                   <div className="text-4xl mb-2">🎯</div>
                   <p>還沒有成績記錄</p>
