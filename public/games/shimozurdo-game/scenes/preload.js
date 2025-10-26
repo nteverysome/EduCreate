@@ -219,8 +219,13 @@ export default class Preload extends Phaser.Scene {
             // 載入太空船圖片（如果存在）
             if (data.resources.spaceship) {
                 const spaceshipKey = `spaceship_${visualStyle}`;
-                this.load.image(spaceshipKey, data.resources.spaceship);
-                console.log(`✅ 載入視覺風格太空船: ${spaceshipKey}`);
+                // 🎨 使用 spritesheet 載入，支持精靈圖動畫
+                // 假設精靈圖是 2450x150，包含 7 幀（每幀 350x150）
+                this.load.spritesheet(spaceshipKey, data.resources.spaceship, {
+                    frameWidth: 350,  // 每幀寬度
+                    frameHeight: 150  // 每幀高度
+                });
+                console.log(`✅ 載入視覺風格太空船精靈圖: ${spaceshipKey}`);
             }
 
             // 載入雲朵圖片（如果存在）

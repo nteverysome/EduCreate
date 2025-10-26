@@ -278,6 +278,25 @@ export default class Title extends Phaser.Scene {
             console.log('✅ 使用視覺風格太空船:', styleId);
 
             try {
+                // 🎨 創建動畫（如果是精靈圖）
+                const animKey = `${styleId}_spaceship_fly`;
+                if (!this.anims.exists(animKey)) {
+                    try {
+                        this.anims.create({
+                            key: animKey,
+                            frames: this.anims.generateFrameNumbers(spaceshipKey, {
+                                start: 0,
+                                end: 6  // 假設有 7 幀（0-6）
+                            }),
+                            frameRate: 10,
+                            repeat: -1
+                        });
+                        console.log('✅ 視覺風格太空船動畫創建成功:', animKey);
+                    } catch (animError) {
+                        console.warn('⚠️ 無法創建動畫，可能不是精靈圖:', animError);
+                    }
+                }
+
                 // 創建太空船精靈
                 this.player = this.add.sprite(width * 0.15, height * 0.5, spaceshipKey);
                 this.player.setOrigin(0.5, 0.5);
@@ -292,6 +311,12 @@ export default class Title extends Phaser.Scene {
                 }
 
                 this.player.setDepth(-60);
+
+                // 🎨 播放動畫（如果存在）
+                if (this.anims.exists(animKey)) {
+                    this.player.play(animKey);
+                    console.log('✅ 視覺風格太空船動畫播放中');
+                }
 
                 // 初始化移動相關變數
                 this.playerSpeed = 250;
