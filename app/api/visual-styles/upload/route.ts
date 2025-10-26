@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { put, list } from '@vercel/blob';
 
 /**
  * POST /api/visual-styles/upload
- * 上傳視覺風格資源（圖片或音效）
+ * 上傳視覺風格資源（圖片或音效）到 Vercel Blob Storage
  */
 export async function POST(request: NextRequest) {
   try {
@@ -41,21 +39,21 @@ export async function POST(request: NextRequest) {
 
     // 獲取文件擴展名
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    
+
     // 驗證文件類型
     const imageExtensions = ['png', 'jpg', 'jpeg', 'webp'];
     const audioExtensions = ['mp3', 'wav', 'ogg'];
-    
+
     const isImage = ['spaceship', 'cloud1', 'cloud2'].includes(resourceType);
     const isAudio = ['background', 'hit', 'success'].includes(resourceType);
-    
+
     if (isImage && !imageExtensions.includes(fileExtension || '')) {
       return NextResponse.json(
         { error: '圖片文件必須是 PNG, JPEG 或 WebP 格式' },
         { status: 400 }
       );
     }
-    
+
     if (isAudio && !audioExtensions.includes(fileExtension || '')) {
       return NextResponse.json(
         { error: '音效文件必須是 MP3, WAV 或 OGG 格式' },
@@ -63,40 +61,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 確定文件名和路徑
-    let fileName: string;
-    let targetDir: string;
-    
-    if (isImage) {
-      fileName = `${resourceType}.${fileExtension}`;
-      targetDir = join(process.cwd(), 'public', 'games', 'shimozurdo-game', 'assets', 'themes', styleId);
-    } else {
-      fileName = `${resourceType}.${fileExtension}`;
-      targetDir = join(process.cwd(), 'public', 'games', 'shimozurdo-game', 'assets', 'themes', styleId, 'sounds');
-    }
+    // 構建 Blob 存儲路徑
+    const blobPath = isAudio
+      ? `visual-styles/${styleId}/sounds/${resourceType}.${fileExtension}`
+      : `visual-styles/${styleId}/${resourceType}.${fileExtension}`;
 
-    // 確保目錄存在
-    if (!existsSync(targetDir)) {
-      await mkdir(targetDir, { recursive: true });
-    }
+    // 上傳到 Vercel Blob Storage
+    const blob = await put(blobPath, file, {
+      access: 'public',
+      addRandomSuffix: false, // 不添加隨機後綴，保持文件名一致
+    });
 
-    // 讀取文件內容
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // 寫入文件
-    const filePath = join(targetDir, fileName);
-    await writeFile(filePath, buffer);
-
-    console.log(`✅ 文件上傳成功: ${filePath}`);
+    console.log(`✅ 文件上傳成功到 Blob Storage: ${blob.url}`);
 
     return NextResponse.json({
       success: true,
       message: '文件上傳成功',
-      filePath: `/games/shimozurdo-game/assets/themes/${styleId}/${isAudio ? 'sounds/' : ''}${fileName}`,
+      url: blob.url,
+      blobPath,
       styleId,
       resourceType,
-      fileName
+      fileName: `${resourceType}.${fileExtension}`
     });
 
   } catch (error) {
@@ -110,7 +95,7 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET /api/visual-styles/upload
- * 獲取已上傳的資源列表
+ * 獲取已上傳的資源列表（從 Vercel Blob Storage）
  */
 export async function GET(request: NextRequest) {
   try {
@@ -133,18 +118,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const basePath = join(process.cwd(), 'public', 'games', 'shimozurdo-game', 'assets', 'themes', styleId);
-    const soundsPath = join(basePath, 'sounds');
+    // 從 Blob Storage 列出所有文件
+    const { blobs } = await list({
+      prefix: `visual-styles/${styleId}/`,
+    });
 
-    // 檢查資源是否存在
-    const resources = {
-      spaceship: existsSync(join(basePath, 'spaceship.png')) || existsSync(join(basePath, 'spaceship.jpg')) || existsSync(join(basePath, 'spaceship.webp')),
-      cloud1: existsSync(join(basePath, 'cloud1.png')) || existsSync(join(basePath, 'cloud1.jpg')) || existsSync(join(basePath, 'cloud1.webp')),
-      cloud2: existsSync(join(basePath, 'cloud2.png')) || existsSync(join(basePath, 'cloud2.jpg')) || existsSync(join(basePath, 'cloud2.webp')),
-      background: existsSync(join(soundsPath, 'background.mp3')) || existsSync(join(soundsPath, 'background.wav')) || existsSync(join(soundsPath, 'background.ogg')),
-      hit: existsSync(join(soundsPath, 'hit.mp3')) || existsSync(join(soundsPath, 'hit.wav')) || existsSync(join(soundsPath, 'hit.ogg')),
-      success: existsSync(join(soundsPath, 'success.mp3')) || existsSync(join(soundsPath, 'success.wav')) || existsSync(join(soundsPath, 'success.ogg')),
+    // 檢查每種資源類型是否存在
+    const resources: Record<string, { exists: boolean; url?: string }> = {
+      spaceship: { exists: false },
+      cloud1: { exists: false },
+      cloud2: { exists: false },
+      background: { exists: false },
+      hit: { exists: false },
+      success: { exists: false },
     };
+
+    // 遍歷 Blob 列表，匹配資源類型
+    blobs.forEach((blob) => {
+      const fileName = blob.pathname.split('/').pop() || '';
+      const resourceType = fileName.split('.')[0];
+
+      if (resources[resourceType]) {
+        resources[resourceType] = {
+          exists: true,
+          url: blob.url
+        };
+      }
+    });
 
     return NextResponse.json({
       success: true,

@@ -4,12 +4,16 @@ export default class Preload extends Phaser.Scene {
     height = null           // 遊戲畫面高度
     handlerScene = null     // 場景管理器引用
     sceneStopped = false    // 場景停止狀態標記
+    visualStyleResources = null  // 視覺風格資源 URL（從 Blob Storage）
 
     constructor() {
         super({ key: 'preload' })  // 註冊場景名稱為 'preload'
     }
 
-    preload() {
+    async preload() {
+        // 🎨 載入視覺風格資源（從 Blob Storage）
+        await this.loadVisualStyleResources();
+
         // Images - 基礎圖片資源載入
         this.load.image('logo', 'assets/images/logo.png')           // 遊戲標誌
         this.load.image('guide', 'assets/images/540x960-guide.png') // 開發輔助線（調試用）
@@ -176,5 +180,82 @@ export default class Preload extends Phaser.Scene {
     getGEPTLevel() {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('geptLevel') || 'elementary';
+    }
+
+    /**
+     * 載入視覺風格資源（從 Vercel Blob Storage）
+     * 這個方法會從 API 獲取視覺風格資源的 URL，並載入到遊戲中
+     */
+    async loadVisualStyleResources() {
+        try {
+            // 獲取視覺風格 ID（從 URL 參數或使用默認值）
+            const urlParams = new URLSearchParams(window.location.search);
+            const visualStyle = urlParams.get('visualStyle') || 'clouds';
+
+            console.log('🎨 開始載入視覺風格資源:', visualStyle);
+
+            // 從 API 獲取資源 URL
+            const response = await fetch(`/api/visual-styles/resources?styleId=${visualStyle}`);
+
+            if (!response.ok) {
+                console.warn('⚠️ 無法獲取視覺風格資源，使用默認資源');
+                return;
+            }
+
+            const data = await response.json();
+
+            if (!data.success || !data.resources) {
+                console.warn('⚠️ 視覺風格資源數據無效，使用默認資源');
+                return;
+            }
+
+            // 保存資源 URL 供其他場景使用
+            this.visualStyleResources = data.resources;
+
+            // 載入太空船圖片（如果存在）
+            if (data.resources.spaceship) {
+                const spaceshipKey = `spaceship_${visualStyle}`;
+                this.load.image(spaceshipKey, data.resources.spaceship);
+                console.log(`✅ 載入視覺風格太空船: ${spaceshipKey}`);
+            }
+
+            // 載入雲朵圖片（如果存在）
+            if (data.resources.cloud1) {
+                const cloud1Key = `cloud1_${visualStyle}`;
+                this.load.image(cloud1Key, data.resources.cloud1);
+                console.log(`✅ 載入視覺風格雲朵1: ${cloud1Key}`);
+            }
+
+            if (data.resources.cloud2) {
+                const cloud2Key = `cloud2_${visualStyle}`;
+                this.load.image(cloud2Key, data.resources.cloud2);
+                console.log(`✅ 載入視覺風格雲朵2: ${cloud2Key}`);
+            }
+
+            // 載入音效（如果存在）
+            if (data.resources.background) {
+                const backgroundKey = `background_${visualStyle}`;
+                this.load.audio(backgroundKey, data.resources.background);
+                console.log(`✅ 載入視覺風格背景音樂: ${backgroundKey}`);
+            }
+
+            if (data.resources.hit) {
+                const hitKey = `hit_${visualStyle}`;
+                this.load.audio(hitKey, data.resources.hit);
+                console.log(`✅ 載入視覺風格碰撞音效: ${hitKey}`);
+            }
+
+            if (data.resources.success) {
+                const successKey = `success_${visualStyle}`;
+                this.load.audio(successKey, data.resources.success);
+                console.log(`✅ 載入視覺風格成功音效: ${successKey}`);
+            }
+
+            console.log('🎨 視覺風格資源載入配置完成');
+
+        } catch (error) {
+            console.error('❌ 載入視覺風格資源失敗:', error);
+            console.warn('⚠️ 將使用默認資源');
+        }
     }
 }
