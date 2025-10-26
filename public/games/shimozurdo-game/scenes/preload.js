@@ -164,11 +164,16 @@ export default class Preload extends Phaser.Scene {
         // 🚀 啟動遊戲主場景
         // 使用 time.delayedCall 確保所有資源載入完成後再啟動場景
         this.time.delayedCall(100, () => {
-            if (this.handlerScene) {
+            // 直接從場景管理器獲取 handler 場景引用
+            const handlerScene = this.scene.get('handler');
+
+            if (handlerScene && handlerScene.launchScene) {
                 console.log('🎮 預載入完成，啟動遊戲主場景: title');
-                this.handlerScene.launchScene('title');
+                handlerScene.launchScene('title');
             } else {
-                console.error('❌ handlerScene 未初始化，無法啟動 title 場景');
+                console.error('❌ 無法獲取 handler 場景，嘗試直接啟動 title 場景');
+                // 降級方案：直接啟動 title 場景
+                this.scene.start('title');
             }
         });
     }
