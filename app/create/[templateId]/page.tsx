@@ -128,6 +128,15 @@ const gameTemplateConfig = {
     maxItems: 100,
     inputType: 'math'
   },
+  'match-up-game': {
+    name: 'Match up 配對遊戲',
+    description: '拖動左側卡片到右側對應的答案框進行配對',
+    icon: '🎯',
+    category: '關聯配對記憶',
+    minItems: 3,
+    maxItems: 20,
+    inputType: 'vocabulary'
+  },
   // 默認配置
   'default': {
     name: '未知遊戲',

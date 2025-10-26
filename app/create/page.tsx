@@ -130,6 +130,16 @@ const gameTemplates = [
     status: 'completed',
     estimatedLoadTime: 1200
   },
+  {
+    id: 'match-up-game',
+    name: 'Match up 配對遊戲',
+    description: '拖動左側卡片到右側對應的答案框進行配對',
+    icon: '🎯',
+    category: '關聯配對記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 500
+  },
   // 開發中的遊戲
   {
     id: 'matching-pairs',
