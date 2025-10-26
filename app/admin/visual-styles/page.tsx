@@ -18,6 +18,7 @@ export default function VisualStylesAdminPage() {
     { id: 'spaceship', name: '太空船圖片', accept: 'image/png,image/jpeg,image/webp' },
     { id: 'cloud1', name: '雲朵圖片 1', accept: 'image/png,image/jpeg,image/webp' },
     { id: 'cloud2', name: '雲朵圖片 2', accept: 'image/png,image/jpeg,image/webp' },
+    { id: 'bg_layer', name: '背景圖片', accept: 'image/png,image/jpeg,image/webp' },
     { id: 'background', name: '背景音樂', accept: 'audio/mpeg,audio/wav,audio/ogg' },
     { id: 'hit', name: '碰撞音效', accept: 'audio/mpeg,audio/wav,audio/ogg' },
     { id: 'success', name: '成功音效', accept: 'audio/mpeg,audio/wav,audio/ogg' },
@@ -177,8 +178,8 @@ export default function VisualStylesAdminPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               📷 圖片資源
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {resourceTypes.filter(r => r.id.includes('spaceship') || r.id.includes('cloud')).map((resource) => {
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {resourceTypes.filter(r => r.id.includes('spaceship') || r.id.includes('cloud') || r.id.includes('bg_layer')).map((resource) => {
                 const uploaded = uploadedResources[resource.id];
                 return (
                   <div
@@ -203,7 +204,7 @@ export default function VisualStylesAdminPage() {
                           </div>
                         ) : (
                           <div className="text-4xl mb-2">
-                            {resource.id === 'spaceship' ? '🚀' : '☁️'}
+                            {resource.id === 'spaceship' ? '🚀' : resource.id === 'bg_layer' ? '🖼️' : '☁️'}
                           </div>
                         )}
                         <div className="text-sm font-medium text-gray-900 mb-2">
@@ -305,7 +306,8 @@ export default function VisualStylesAdminPage() {
           </h3>
           <div className="space-y-2 text-sm text-gray-700">
             <div><strong>太空船圖片：</strong>建議尺寸 100x100 像素，PNG 格式，透明背景</div>
-            <div><strong>雲朵圖片：</strong>建議尺寸 150x100 像素，PNG 格式，透明背景</div>
+            <div><strong>雲朵圖片：</strong>建議尺寸 150x100 像素，PNG 格式，透明背景（用作敵人）</div>
+            <div><strong>背景圖片：</strong>建議尺寸 1920x1080 像素，PNG/JPEG 格式（遊戲背景）</div>
             <div><strong>背景音樂：</strong>MP3 格式，建議時長 1-3 分鐘，循環播放</div>
             <div><strong>碰撞音效：</strong>MP3 格式，建議時長 0.5-1 秒</div>
             <div><strong>成功音效：</strong>MP3 格式，建議時長 1-2 秒</div>

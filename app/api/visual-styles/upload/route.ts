@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 驗證資源類型
-    const validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'background', 'hit', 'success'];
+    const validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
     if (!validResourceTypes.includes(resourceType)) {
       return NextResponse.json(
         { error: '無效的資源類型' },
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const imageExtensions = ['png', 'jpg', 'jpeg', 'webp'];
     const audioExtensions = ['mp3', 'wav', 'ogg'];
 
-    const isImage = ['spaceship', 'cloud1', 'cloud2'].includes(resourceType);
+    const isImage = ['spaceship', 'cloud1', 'cloud2', 'bg_layer'].includes(resourceType);
     const isAudio = ['background', 'hit', 'success'].includes(resourceType);
 
     if (isImage && !imageExtensions.includes(fileExtension || '')) {
@@ -129,6 +129,7 @@ export async function GET(request: NextRequest) {
       spaceship: { exists: false },
       cloud1: { exists: false },
       cloud2: { exists: false },
+      bg_layer: { exists: false },
       background: { exists: false },
       hit: { exists: false },
       success: { exists: false },

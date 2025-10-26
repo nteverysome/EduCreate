@@ -62,6 +62,11 @@ export default class Title extends Phaser.Scene {
         this.load.image(`cloud2_${styleId}`, cloud2Path);
         console.log('☁️ 載入雲朵圖片:', cloud1Path, cloud2Path);
 
+        // 嘗試載入背景圖片
+        const bgLayerPath = `${basePath}/${styleId}/bg_layer.png`;
+        this.load.image(`bg_layer_${styleId}`, bgLayerPath);
+        console.log('🖼️ 載入背景圖片:', bgLayerPath);
+
         // 嘗試載入音效
         const bgmPath = `${basePath}/${styleId}/sounds/background.mp3`;
         const hitPath = `${basePath}/${styleId}/sounds/hit.mp3`;
@@ -192,7 +197,28 @@ export default class Title extends Phaser.Scene {
         // 創建背景層 - 用於存儲所有視差背景層
         this.backgroundLayers = {};
 
-        // 背景層配置 - 定義6層背景的屬性和深度
+        // 🎨 檢查是否有自定義背景圖片
+        const styleId = this.gameOptions.visualStyle || 'clouds';
+        const customBgKey = `bg_layer_${styleId}`;
+        const hasCustomBg = this.textures.exists(customBgKey);
+
+        if (hasCustomBg) {
+            // 使用自定義背景圖片
+            console.log('🎨 使用自定義背景圖片:', customBgKey);
+            const customBg = this.add.tileSprite(0, 0, width, height, customBgKey);
+            customBg.setOrigin(0, 0);
+            customBg.setDepth(-100);
+            customBg.setAlpha(1.0);
+            customBg.setVisible(true);
+            this.backgroundLayers['custom'] = customBg;
+            console.log('✅ 自定義背景已創建');
+
+            // 初始化滾動位置
+            this.scrollPositions = { custom: 0 };
+            return; // 使用自定義背景時，不創建默認背景層
+        }
+
+        // 背景層配置 - 定義6層背景的屬性和深度（默認背景）
         const layerConfigs = [
             { key: 'bg_layer_1', name: 'sky', depth: -100, alpha: 1.0 },    // 最遠星空層
             { key: 'bg_layer_2', name: 'moon', depth: -95, alpha: 1.0 },    // 月亮主體層
