@@ -317,6 +317,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/blastemup-game/dist/';
     case 'math-attack-game':
       return '/games/math-attack-game/';
+    case 'match-up-game':
+      return '/games/match-up-game/';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':
