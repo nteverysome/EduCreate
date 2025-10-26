@@ -278,6 +278,17 @@ export default class Preload extends Phaser.Scene {
 
             console.log('🎨 視覺風格資源載入配置完成');
 
+            // 🔧 手動啟動載入器並等待完成
+            if (!this.load.isLoading()) {
+                return new Promise((resolve) => {
+                    this.load.once('complete', () => {
+                        console.log('✅ 視覺風格資源載入完成');
+                        resolve();
+                    });
+                    this.load.start();
+                });
+            }
+
         } catch (error) {
             console.error('❌ 載入視覺風格資源失敗:', error);
             console.warn('⚠️ 將使用默認資源');
