@@ -26,13 +26,13 @@ export default function GameOptionsPanel({ options, onChange }: GameOptionsProps
 
   return (
     <div className="bg-white border border-gray-300 rounded-lg p-4 sm:p-6">
-      <h3 className="text-lg font-semibold mb-4">Options</h3>
-      
+      <h3 className="text-lg font-semibold mb-4">選項</h3>
+
       <table className="w-full">
         <tbody>
           {/* Timer 選項 */}
           <tr className="border-b border-gray-200">
-            <td className="py-3 pr-4 font-medium align-top">Timer</td>
+            <td className="py-3 pr-4 font-medium align-top">計時器</td>
             <td className="py-3">
               <div className="flex flex-col gap-2">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -40,39 +40,39 @@ export default function GameOptionsPanel({ options, onChange }: GameOptionsProps
                     type="radio"
                     name="timer"
                     checked={options.timer.type === 'none'}
-                    onChange={() => updateOptions({ 
-                      timer: { ...options.timer, type: 'none' } 
+                    onChange={() => updateOptions({
+                      timer: { ...options.timer, type: 'none' }
                     })}
                     className="cursor-pointer"
                   />
-                  <span>None</span>
+                  <span>無</span>
                 </label>
-                
+
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="timer"
                     checked={options.timer.type === 'countUp'}
-                    onChange={() => updateOptions({ 
-                      timer: { ...options.timer, type: 'countUp' } 
+                    onChange={() => updateOptions({
+                      timer: { ...options.timer, type: 'countUp' }
                     })}
                     className="cursor-pointer"
                   />
-                  <span>Count up</span>
+                  <span>正向計時</span>
                 </label>
-                
+
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="timer"
                     checked={options.timer.type === 'countDown'}
-                    onChange={() => updateOptions({ 
-                      timer: { ...options.timer, type: 'countDown' } 
+                    onChange={() => updateOptions({
+                      timer: { ...options.timer, type: 'countDown' }
                     })}
                     className="cursor-pointer mt-1"
                   />
                   <div className="flex flex-col gap-2">
-                    <span>Count down</span>
+                    <span>倒數計時</span>
                     
                     {options.timer.type === 'countDown' && (
                       <div className="flex items-center gap-2">
@@ -114,7 +114,7 @@ export default function GameOptionsPanel({ options, onChange }: GameOptionsProps
 
           {/* Lives 選項 */}
           <tr className="border-b border-gray-200">
-            <td className="py-3 pr-4 font-medium">Lives</td>
+            <td className="py-3 pr-4 font-medium">生命值</td>
             <td className="py-3">
               <div className="flex items-center gap-3">
                 <input
@@ -132,7 +132,7 @@ export default function GameOptionsPanel({ options, onChange }: GameOptionsProps
 
           {/* Speed 選項 */}
           <tr className="border-b border-gray-200">
-            <td className="py-3 pr-4 font-medium">Speed</td>
+            <td className="py-3 pr-4 font-medium">速度</td>
             <td className="py-3">
               <div className="flex items-center gap-3">
                 <input
@@ -150,7 +150,7 @@ export default function GameOptionsPanel({ options, onChange }: GameOptionsProps
 
           {/* Random 選項 */}
           <tr className="border-b border-gray-200">
-            <td className="py-3 pr-4 font-medium">Random</td>
+            <td className="py-3 pr-4 font-medium">隨機</td>
             <td className="py-3">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -159,14 +159,14 @@ export default function GameOptionsPanel({ options, onChange }: GameOptionsProps
                   onChange={(e) => updateOptions({ random: e.target.checked })}
                   className="cursor-pointer"
                 />
-                <span>Shuffle question order</span>
+                <span>打亂題目順序</span>
               </label>
             </td>
           </tr>
 
           {/* End of game 選項 */}
           <tr>
-            <td className="py-3 pr-4 font-medium">End of game</td>
+            <td className="py-3 pr-4 font-medium">遊戲結束</td>
             <td className="py-3">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -175,7 +175,7 @@ export default function GameOptionsPanel({ options, onChange }: GameOptionsProps
                   onChange={(e) => updateOptions({ showAnswers: e.target.checked })}
                   className="cursor-pointer"
                 />
-                <span>Show answers</span>
+                <span>顯示答案</span>
               </label>
             </td>
           </tr>
