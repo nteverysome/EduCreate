@@ -160,6 +160,17 @@ export default class Preload extends Phaser.Scene {
         // GAME OBJECTS - 遊戲物件區塊
         this.add.image(width / 2, height / 2, 'logo').setOrigin(.5)  // 在螢幕中央顯示遊戲標誌
         // GAME OBJECTS
+
+        // 🚀 啟動遊戲主場景
+        // 使用 time.delayedCall 確保所有資源載入完成後再啟動場景
+        this.time.delayedCall(100, () => {
+            if (this.handlerScene) {
+                console.log('🎮 預載入完成，啟動遊戲主場景: title');
+                this.handlerScene.launchScene('title');
+            } else {
+                console.error('❌ handlerScene 未初始化，無法啟動 title 場景');
+            }
+        });
     }
 
     /**
