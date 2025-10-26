@@ -184,7 +184,9 @@ export default class Preload extends Phaser.Scene {
      */
     async getUserId() {
         try {
-            const response = await fetch('/api/auth/session');
+            // 🔧 使用完整 URL 路徑，避免 iframe 內相對路徑問題
+            const apiUrl = `${window.location.origin}/api/auth/session`;
+            const response = await fetch(apiUrl);
             const data = await response.json();
             return data.user?.id || null;
         } catch (error) {
@@ -214,8 +216,12 @@ export default class Preload extends Phaser.Scene {
 
             console.log('🎨 開始載入視覺風格資源:', visualStyle);
 
+            // 🔧 使用完整 URL 路徑，避免 iframe 內相對路徑問題
+            const apiUrl = `${window.location.origin}/api/visual-styles/resources?styleId=${visualStyle}`;
+            console.log('📡 API URL:', apiUrl);
+
             // 從 API 獲取資源 URL
-            const response = await fetch(`/api/visual-styles/resources?styleId=${visualStyle}`);
+            const response = await fetch(apiUrl);
 
             if (!response.ok) {
                 console.warn('⚠️ 無法獲取視覺風格資源，使用默認資源');
