@@ -44,6 +44,7 @@ interface GameSwitcherProps {
   studentName?: string | null; // 學生姓名
   isAnonymous?: boolean; // 匿名模式
   gameOptions?: any; // 遊戲選項
+  visualStyle?: string; // 視覺風格
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -331,7 +332,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   assignmentId = null,
   studentName = null,
   isAnonymous = false,
-  gameOptions = null
+  gameOptions = null,
+  visualStyle = null
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -388,6 +390,12 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       if (gameOptions) {
         url += `&gameOptions=${encodeURIComponent(JSON.stringify(gameOptions))}`;
         console.log('🎮 遊戲選項已添加到 URL');
+      }
+
+      // 添加視覺風格到 URL
+      if (visualStyle) {
+        url += `&visualStyle=${visualStyle}`;
+        console.log('🎨 視覺風格已添加到 URL:', visualStyle);
       }
     }
 
