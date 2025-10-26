@@ -389,6 +389,7 @@ model GameSettings {
   activityId       String        @unique
   templateId       String?
   themeId          String?
+  visualStyle      String?       // 視覺風格 ID (clouds, videogame, magiclibrary, etc.)
   timerType        TimerType     @default(NONE)
   timerDuration    Int?
   livesCount       Int           @default(0)

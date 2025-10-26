@@ -156,7 +156,8 @@ export async function GET(
         lives: gs.livesCount || 5,
         speed: gs.speed || 3,  // 從 GameSettings 讀取 speed
         random: gs.shuffleQuestions ?? true,
-        showAnswers: gs.showAnswers ?? true
+        showAnswers: gs.showAnswers ?? true,
+        visualStyle: gs.visualStyle || 'clouds'  // 從 GameSettings 讀取 visualStyle
       };
 
       console.log('✅ [GET] GameSettings 轉換為 gameOptions:', gameOptions);
@@ -504,6 +505,12 @@ export async function PUT(
         console.log('🔧 [GameOptions] 設置顯示答案:', gameOptions.showAnswers);
       }
 
+      // Visual Style 設置
+      if (gameOptions.visualStyle !== undefined) {
+        gameSettingsData.visualStyle = gameOptions.visualStyle;
+        console.log('🔧 [GameOptions] 設置視覺風格:', gameOptions.visualStyle);
+      }
+
       // 使用 upsert 創建或更新 GameSettings
       try {
         console.log('💾 [GameOptions] 開始保存到數據庫:', gameSettingsData);
@@ -520,8 +527,10 @@ export async function PUT(
           timerType: result.timerType,
           timerDuration: result.timerDuration,
           livesCount: result.livesCount,
+          speed: result.speed,
           shuffleQuestions: result.shuffleQuestions,
           showAnswers: result.showAnswers,
+          visualStyle: result.visualStyle,
           updatedAt: result.updatedAt
         });
       } catch (dbError) {
