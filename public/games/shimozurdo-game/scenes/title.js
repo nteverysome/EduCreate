@@ -236,51 +236,58 @@ export default class Title extends Phaser.Scene {
     /**
      * 🚀 創建太空船（防禦性編程）- 主角太空船創建和動畫設置
      */
+    /**
+     * 🚀 創建太空船（支持視覺風格）- 主角太空船創建和動畫設置
+     */
     createSpaceship() {
         const { width, height } = this;                  // 獲取場景尺寸
+        const styleId = this.gameOptions.visualStyle || 'modern';  // 獲取視覺風格 ID
+        const spaceshipKey = `spaceship_${styleId}`;     // 視覺風格太空船鍵值
 
-        // 防禦性檢查：確認精靈圖是否存在 - 避免資源載入失敗導致崩潰
-        if (this.textures.exists('player_spaceship')) {
-            console.log('✅ 使用真實太空船精靈圖')
+        // 🎨 優先使用視覺風格太空船
+        if (this.textures.exists(spaceshipKey)) {
+            console.log('✅ 使用視覺風格太空船:', styleId);
 
             try {
-                // 創建7幀動畫 - 太空船飛行動畫序列
-                this.anims.create({
-                    key: 'spaceship_fly',                // 動畫名稱
-                    frames: this.anims.generateFrameNumbers('player_spaceship', {
-                        start: 0, end: 6                // 使用第0-6幀，共7幀
-                    }),
-                    frameRate: 10,                       // 每秒10幀的播放速度
-                    repeat: -1                           // 無限循環播放
-                });
+                // 創建太空船精靈
+                this.player = this.add.sprite(width * 0.15, height * 0.5, spaceshipKey);
+                this.player.setOrigin(0.5, 0.5);
 
-                // 創建太空船精靈（先用簡單方式確保顯示）
-                this.player = this.add.sprite(width * 0.15, height * 0.5, 'player_spaceship');  // 位置在左側15%，垂直中央
-                this.player.setOrigin(0.5, 0.5);        // 設置中心點為精靈中央
-                this.player.setScale(0.2);               // 用戶要求飛機小一半：40% × 0.5 = 20%
-                this.player.setDepth(-60);               // 在視差背景前景，調整深度層級
-                this.player.play('spaceship_fly');       // 播放飛行動畫
+                // 🎨 應用視覺風格配置
+                const style = this.currentVisualStyle;
+                if (style && style.ui && style.ui.targetWord) {
+                    // 使用視覺風格的縮放配置（如果有）
+                    this.player.setScale(0.2);  // 默認縮放
+                } else {
+                    this.player.setScale(0.2);
+                }
 
-                // 初始化移動相關變數 - 用於控制太空船移動
-                this.playerSpeed = 250;                  // 移動速度（像素/秒）
-                this.playerTargetY = this.player.y;      // 目標Y座標（用於平滑移動）
+                this.player.setDepth(-60);
 
-                console.log('✅ 太空船精靈創建成功，位置:', this.player.x, this.player.y);
+                // 初始化移動相關變數
+                this.playerSpeed = 250;
+                this.playerTargetY = this.player.y;
 
-                console.log('✅ 太空船精靈圖動畫創建成功');
+                console.log('✅ 視覺風格太空船創建成功');
 
             } catch (error) {
-                console.error('❌ 太空船動畫創建失敗:', error);
-                this.createBackupSpaceship(width, height);  // 失敗時使用備用方案
+                console.error('❌ 視覺風格太空船創建失敗:', error);
+                this.createDefaultSpaceship(width, height);
             }
 
+        // 降級到默認太空船
+        } else if (this.textures.exists('player_spaceship')) {
+            console.log('✅ 使用默認太空船精靈圖')
+            this.createDefaultSpaceship(width, height);
+
+        // 最後降級到備用太空船
         } else {
             console.warn('⚠️ 太空船精靈圖不存在，使用備用方案');
-            this.createBackupSpaceship(width, height);      // 資源不存在時使用備用方案
+            this.createBackupSpaceship(width, height);
         }
 
         // 🔧 初始化調試模式和性能監控
-        this.debugMode = true; // 設為 true 啟用詳細調試信息 - 座標偏移診斷
+        this.debugMode = true;
         this.performanceStats = {
             touchResponses: [],
             averageResponseTime: 0
@@ -292,8 +299,42 @@ export default class Title extends Phaser.Scene {
             testCoordinateAccuracy() { return { isAccurate: true }; }
         })(this);
 
-        // 設置太空船控制 - 初始化鍵盤和滑鼠控制
+        // 設置太空船控制
         this.setupSpaceshipControls();
+    }
+
+    /**
+     * 🚀 創建默認太空船（使用原始精靈圖）
+     */
+    createDefaultSpaceship(width, height) {
+        try {
+            // 創建7幀動畫
+            this.anims.create({
+                key: 'spaceship_fly',
+                frames: this.anims.generateFrameNumbers('player_spaceship', {
+                    start: 0, end: 6
+                }),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            // 創建太空船精靈
+            this.player = this.add.sprite(width * 0.15, height * 0.5, 'player_spaceship');
+            this.player.setOrigin(0.5, 0.5);
+            this.player.setScale(0.2);
+            this.player.setDepth(-60);
+            this.player.play('spaceship_fly');
+
+            // 初始化移動相關變數
+            this.playerSpeed = 250;
+            this.playerTargetY = this.player.y;
+
+            console.log('✅ 默認太空船創建成功');
+
+        } catch (error) {
+            console.error('❌ 默認太空船創建失敗:', error);
+            this.createBackupSpaceship(width, height);
+        }
     }
 
     /**
