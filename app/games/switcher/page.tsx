@@ -48,7 +48,6 @@ const GameSwitcherPage: React.FC = () => {
   const router = useRouter();
   const { data: session } = useSession();
   const [currentGameId, setCurrentGameId] = useState<string>('shimozurdo-game');
-  const [showStats, setShowStats] = useState<boolean>(false);
   const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
   const [showMobileGeptMenu, setShowMobileGeptMenu] = useState<boolean>(false);
 
@@ -1030,14 +1029,6 @@ const GameSwitcherPage: React.FC = () => {
                 ⚙️
               </button>
 
-              <button
-                onClick={() => setShowStats(!showStats)}
-                className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                style={{ minHeight: '44px' }}
-              >
-                📊
-              </button>
-
               <Link
                 href="/learn/dashboard"
                 className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
@@ -1102,15 +1093,6 @@ const GameSwitcherPage: React.FC = () => {
               </div>
 
               {/* 控制按鈕組 */}
-              <button
-                onClick={() => setShowStats(!showStats)}
-                className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
-                style={{ minHeight: '44px' }}
-              >
-                <span className="hidden lg:inline">{showStats ? '隱藏統計' : '顯示統計'}</span>
-                <span className="lg:hidden">📊</span>
-              </button>
-
               <Link
                 href="/learn/dashboard"
                 className="px-2 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50"
