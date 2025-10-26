@@ -101,9 +101,9 @@ class GameScene extends Phaser.Scene {
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
 
-        // 創建卡片文字（黑色）
+        // 創建卡片文字（黑色，放大一倍：20px → 40px）
         const cardText = this.add.text(0, 0, text, {
-            fontSize: '20px',
+            fontSize: '40px',
             color: '#333333',
             fontFamily: 'Arial',
             fontStyle: 'normal'
@@ -193,7 +193,7 @@ class GameScene extends Phaser.Scene {
 
         // 創建文字標籤（在框外，右側）
         const cardText = this.add.text(width / 2 + 15, 0, text, {
-            fontSize: '20px',
+            fontSize: '40px',
             color: '#333333',
             fontFamily: 'Arial',
             fontStyle: 'normal'
