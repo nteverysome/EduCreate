@@ -73,8 +73,8 @@ export default function VisualStylesAdminPage() {
       // 重新獲取資源列表
       await fetchUploadedResources();
 
-      // 更新刷新鍵以強制重新渲染圖片
-      setRefreshKey(prev => prev + 1);
+      // 更新刷新鍵以強制重新渲染圖片（使用時間戳確保唯一性）
+      setRefreshKey(Date.now());
 
       // 3 秒後清除消息
       setTimeout(() => setMessage(''), 3000);
