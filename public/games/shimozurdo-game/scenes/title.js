@@ -169,16 +169,17 @@ export default class Title extends Phaser.Scene {
 
             console.log(`📐 背景縮放比例: ${scale.toFixed(3)}`);
 
-            // 創建背景圖片（使用 image 而不是 tileSprite）
-            const customBg = this.add.image(width / 2, height / 2, customBgKey);
+            // 🎨 使用 tileSprite 而不是 image，以支持滾動
+            const customBg = this.add.tileSprite(0, 0, width, height, customBgKey);
+            customBg.setOrigin(0, 0);
             customBg.setScale(scale);
             customBg.setDepth(-100);
             customBg.setAlpha(1.0);
             customBg.setVisible(true);
             this.backgroundLayers['custom'] = customBg;
-            console.log('✅ 自定義背景已創建並縮放');
+            console.log('✅ 自定義背景已創建並縮放（支持滾動）');
 
-            // 初始化滾動位置（雖然不會滾動，但保持兼容性）
+            // 初始化滾動位置
             this.scrollPositions = { custom: 0 };
             return; // 使用自定義背景時，不創建默認背景層
         }
