@@ -40,9 +40,13 @@ export default class Title extends Phaser.Scene {
             lives: 5,
             speed: 3,
             random: true,
-            showAnswers: true
+            showAnswers: true,
+            visualStyle: 'modern'
         };
         console.log('🎮 Title 場景使用的遊戲選項:', this.gameOptions);
+
+        // 🎨 應用視覺風格
+        this.applyVisualStyle(this.gameOptions.visualStyle);
 
         // 🎮 記錄遊戲開始時間
         this.gameStartTime = Date.now();
@@ -3104,5 +3108,113 @@ export default class Title extends Phaser.Scene {
         this.leaderboardContainer = leaderboardContainer;
 
         console.log('🏆 排行榜畫面已顯示');
+    }
+
+    /**
+     * 🎨 應用視覺風格
+     * @param {string} styleId - 視覺風格 ID
+     */
+    applyVisualStyle(styleId) {
+        // 定義視覺風格配置
+        const VISUAL_STYLES = {
+            primary: {
+                id: 'primary',
+                name: '幼兒風格',
+                backgroundColor: 0xFFF9E6,
+                primaryColor: '#FF6B6B',
+                secondaryColor: '#4ECDC4',
+                fontFamily: 'Comic Sans MS, cursive',
+                textColor: '#000000',
+                buttonColors: {
+                    primary: '#FF6B6B',
+                    secondary: '#4ECDC4',
+                    success: '#4CAF50',
+                    warning: '#FF9800',
+                    danger: '#F44336'
+                }
+            },
+            modern: {
+                id: 'modern',
+                name: '現代風格',
+                backgroundColor: 0xFFFFFF,
+                primaryColor: '#2196F3',
+                secondaryColor: '#FF9800',
+                fontFamily: 'Roboto, sans-serif',
+                textColor: '#000000',
+                buttonColors: {
+                    primary: '#2196F3',
+                    secondary: '#FF9800',
+                    success: '#4CAF50',
+                    warning: '#FF9800',
+                    danger: '#F44336'
+                }
+            },
+            classic: {
+                id: 'classic',
+                name: '經典風格',
+                backgroundColor: 0xF5F5DC,
+                primaryColor: '#8B4513',
+                secondaryColor: '#DAA520',
+                fontFamily: 'Georgia, serif',
+                textColor: '#000000',
+                buttonColors: {
+                    primary: '#8B4513',
+                    secondary: '#DAA520',
+                    success: '#4CAF50',
+                    warning: '#FF9800',
+                    danger: '#F44336'
+                }
+            },
+            dark: {
+                id: 'dark',
+                name: '深色風格',
+                backgroundColor: 0x1E1E1E,
+                primaryColor: '#BB86FC',
+                secondaryColor: '#03DAC6',
+                fontFamily: 'Roboto, sans-serif',
+                textColor: '#FFFFFF',
+                buttonColors: {
+                    primary: '#BB86FC',
+                    secondary: '#03DAC6',
+                    success: '#4CAF50',
+                    warning: '#FF9800',
+                    danger: '#F44336'
+                }
+            },
+            nature: {
+                id: 'nature',
+                name: '自然風格',
+                backgroundColor: 0xF0F8F0,
+                primaryColor: '#4CAF50',
+                secondaryColor: '#8BC34A',
+                fontFamily: 'Roboto, sans-serif',
+                textColor: '#000000',
+                buttonColors: {
+                    primary: '#4CAF50',
+                    secondary: '#8BC34A',
+                    success: '#4CAF50',
+                    warning: '#FF9800',
+                    danger: '#F44336'
+                }
+            }
+        };
+
+        // 獲取視覺風格配置
+        const style = VISUAL_STYLES[styleId] || VISUAL_STYLES.modern;
+
+        // 保存當前視覺風格
+        this.currentVisualStyle = style;
+
+        // 應用背景顏色
+        this.cameras.main.setBackgroundColor(style.backgroundColor);
+
+        console.log('🎨 視覺風格已應用:', {
+            styleId: style.id,
+            name: style.name,
+            backgroundColor: style.backgroundColor.toString(16),
+            primaryColor: style.primaryColor,
+            secondaryColor: style.secondaryColor,
+            fontFamily: style.fontFamily
+        });
     }
 }
