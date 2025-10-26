@@ -50,21 +50,22 @@ class GameScene extends Phaser.Scene {
         const leftX = 150;
         const rightX = 510;
         const startY = 80;
-        const spacing = 65;  // 60 (卡片高度) + 5 (距離) = 65
+        const leftSpacing = 65;   // 左側間距：60 + 5 = 65（5px 距離）
+        const rightSpacing = 80;  // 右側間距：60 + 20 = 80（20px 距離）
 
         // 隨機排列答案
         const shuffledAnswers = Phaser.Utils.Array.Shuffle([...this.pairs]);
 
-        // 創建左側題目卡片（白色）
+        // 創建左側題目卡片（白色，5px 間距）
         this.pairs.forEach((pair, index) => {
-            const y = startY + index * spacing;
+            const y = startY + index * leftSpacing;
             const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id);
             this.leftCards.push(card);
         });
 
-        // 創建右側答案卡片（白色）
+        // 創建右側答案卡片（白色，20px 間距）
         shuffledAnswers.forEach((pair, index) => {
-            const y = startY + index * spacing;
+            const y = startY + index * rightSpacing;
             const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id);
             this.rightCards.push(card);
         });
