@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { VISUAL_STYLES } from '@/types/visual-style';
 
 /**
@@ -11,6 +11,7 @@ export default function VisualStylesAdminPage() {
   const [selectedStyle, setSelectedStyle] = useState('clouds');
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
+  const [uploadedResources, setUploadedResources] = useState<Record<string, { exists: boolean; url?: string }>>({});
 
   // 資源類型定義
   const resourceTypes = [
@@ -21,6 +22,26 @@ export default function VisualStylesAdminPage() {
     { id: 'hit', name: '碰撞音效', accept: 'audio/mpeg,audio/wav,audio/ogg' },
     { id: 'success', name: '成功音效', accept: 'audio/mpeg,audio/wav,audio/ogg' },
   ];
+
+  /**
+   * 獲取已上傳的資源
+   */
+  const fetchUploadedResources = async () => {
+    try {
+      const response = await fetch(`/api/visual-styles/upload?styleId=${selectedStyle}`);
+      if (response.ok) {
+        const data = await response.json();
+        setUploadedResources(data.resources || {});
+      }
+    } catch (error) {
+      console.error('獲取資源列表失敗:', error);
+    }
+  };
+
+  // 當選擇的風格改變時，重新獲取資源
+  useEffect(() => {
+    fetchUploadedResources();
+  }, [selectedStyle]);
 
   /**
    * 處理文件上傳
@@ -46,7 +67,10 @@ export default function VisualStylesAdminPage() {
 
       const data = await response.json();
       setMessage(`✅ ${resourceType} 上傳成功！`);
-      
+
+      // 重新獲取資源列表
+      await fetchUploadedResources();
+
       // 3 秒後清除消息
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
@@ -154,39 +178,56 @@ export default function VisualStylesAdminPage() {
               📷 圖片資源
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {resourceTypes.filter(r => r.id.includes('spaceship') || r.id.includes('cloud')).map((resource) => (
-                <div
-                  key={resource.id}
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors"
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(resource.id, e)}
-                >
-                  <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
-                    <div className="text-center">
-                      <div className="text-4xl mb-2">
-                        {resource.id === 'spaceship' ? '🚀' : '☁️'}
+              {resourceTypes.filter(r => r.id.includes('spaceship') || r.id.includes('cloud')).map((resource) => {
+                const uploaded = uploadedResources[resource.id];
+                return (
+                  <div
+                    key={resource.id}
+                    className={`border-2 border-dashed rounded-lg p-6 hover:border-blue-400 transition-colors ${
+                      uploaded?.exists ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(resource.id, e)}
+                  >
+                    <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
+                      <div className="text-center">
+                        {/* 預覽圖片 */}
+                        {uploaded?.exists && uploaded.url ? (
+                          <div className="mb-2">
+                            <img
+                              src={uploaded.url}
+                              alt={resource.name}
+                              className="w-24 h-24 object-contain mx-auto rounded-lg border border-gray-200"
+                            />
+                            <div className="text-xs text-green-600 mt-1">✅ 已上傳</div>
+                          </div>
+                        ) : (
+                          <div className="text-4xl mb-2">
+                            {resource.id === 'spaceship' ? '🚀' : '☁️'}
+                          </div>
+                        )}
+                        <div className="text-sm font-medium text-gray-900 mb-2">
+                          {resource.name}
+                        </div>
+                        <div className="text-xs text-gray-500 mb-4">
+                          點擊上傳或拖放文件
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          支持 PNG, JPEG, WebP
+                        </div>
                       </div>
-                      <div className="text-sm font-medium text-gray-900 mb-2">
-                        {resource.name}
-                      </div>
-                      <div className="text-xs text-gray-500 mb-4">
-                        點擊上傳或拖放文件
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        支持 PNG, JPEG, WebP
-                      </div>
-                    </div>
-                  </label>
-                  <input
-                    id={`upload-${selectedStyle}-${resource.id}`}
-                    type="file"
-                    accept={resource.accept}
-                    onChange={(e) => handleFileChange(resource.id, e)}
-                    disabled={uploading}
-                    className="hidden"
-                  />
-                </div>
-              ))}
+                    </label>
+                    <input
+                      id={`upload-${selectedStyle}-${resource.id}`}
+                      type="file"
+                      accept={resource.accept}
+                      onChange={(e) => handleFileChange(resource.id, e)}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -196,39 +237,55 @@ export default function VisualStylesAdminPage() {
               🔊 音效資源
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {resourceTypes.filter(r => !r.id.includes('spaceship') && !r.id.includes('cloud')).map((resource) => (
-                <div
-                  key={resource.id}
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors"
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(resource.id, e)}
-                >
-                  <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
-                    <div className="text-center">
-                      <div className="text-4xl mb-2">
-                        {resource.id === 'background' ? '🎵' : resource.id === 'hit' ? '💥' : '🎉'}
+              {resourceTypes.filter(r => !r.id.includes('spaceship') && !r.id.includes('cloud')).map((resource) => {
+                const uploaded = uploadedResources[resource.id];
+                return (
+                  <div
+                    key={resource.id}
+                    className={`border-2 border-dashed rounded-lg p-6 hover:border-blue-400 transition-colors ${
+                      uploaded?.exists ? 'border-green-300 bg-green-50' : 'border-gray-300'
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(resource.id, e)}
+                  >
+                    <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
+                      <div className="text-center">
+                        <div className="text-4xl mb-2">
+                          {resource.id === 'background' ? '🎵' : resource.id === 'hit' ? '💥' : '🎉'}
+                        </div>
+                        {/* 音效預覽 */}
+                        {uploaded?.exists && uploaded.url && (
+                          <div className="mb-2">
+                            <audio
+                              controls
+                              className="w-full max-w-xs mx-auto"
+                              src={uploaded.url}
+                            />
+                            <div className="text-xs text-green-600 mt-1">✅ 已上傳</div>
+                          </div>
+                        )}
+                        <div className="text-sm font-medium text-gray-900 mb-2">
+                          {resource.name}
+                        </div>
+                        <div className="text-xs text-gray-500 mb-4">
+                          點擊上傳或拖放文件
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          支持 MP3, WAV, OGG
+                        </div>
                       </div>
-                      <div className="text-sm font-medium text-gray-900 mb-2">
-                        {resource.name}
-                      </div>
-                      <div className="text-xs text-gray-500 mb-4">
-                        點擊上傳或拖放文件
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        支持 MP3, WAV, OGG
-                      </div>
-                    </div>
-                  </label>
-                  <input
-                    id={`upload-${selectedStyle}-${resource.id}`}
-                    type="file"
-                    accept={resource.accept}
-                    onChange={(e) => handleFileChange(resource.id, e)}
-                    disabled={uploading}
-                    className="hidden"
-                  />
-                </div>
-              ))}
+                    </label>
+                    <input
+                      id={`upload-${selectedStyle}-${resource.id}`}
+                      type="file"
+                      accept={resource.accept}
+                      onChange={(e) => handleFileChange(resource.id, e)}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
