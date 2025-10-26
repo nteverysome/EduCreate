@@ -166,18 +166,18 @@ class GameScene extends Phaser.Scene {
         const container = this.add.container(x, y);
         container.setDepth(5);
 
-        // 創建卡片背景（白色）
+        // 創建空白框（白色背景，黑色邊框）
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
 
-        // 創建卡片文字（黑色）
-        const cardText = this.add.text(0, 0, text, {
+        // 創建文字標籤（在框外，右側）
+        const cardText = this.add.text(width / 2 + 15, 0, text, {
             fontSize: '20px',
             color: '#333333',
             fontFamily: 'Arial',
             fontStyle: 'normal'
         });
-        cardText.setOrigin(0.5);
+        cardText.setOrigin(0, 0.5);  // 左對齊，垂直居中
 
         // 添加到容器
         container.add([background, cardText]);
@@ -252,8 +252,8 @@ class GameScene extends Phaser.Scene {
         rightCard.setData('isMatched', true);
         this.matchedPairs.add(leftCard.getData('pairId'));
 
-        // 左側卡片移動到右側卡片旁邊
-        const targetX = rightCard.x - 120;  // 右側卡片左邊
+        // 左側卡片移動到右側空白框的位置（完全覆蓋）
+        const targetX = rightCard.x;
         const targetY = rightCard.y;
 
         this.tweens.add({
@@ -265,15 +265,15 @@ class GameScene extends Phaser.Scene {
             duration: 300,
             ease: 'Back.easeOut',
             onComplete: () => {
-                leftCard.setDepth(5);
+                leftCard.setDepth(10);  // 提升到空白框上方
                 leftCard.getData('background').setAlpha(1);
 
-                // 右側卡片變成綠色邊框
-                rightCard.getData('background').setStrokeStyle(3, 0x4caf50);
+                // 隱藏右側空白框（因為被覆蓋了）
+                rightCard.getData('background').setVisible(false);
 
                 // 成功動畫
                 this.tweens.add({
-                    targets: [leftCard, rightCard],
+                    targets: leftCard,
                     scaleX: 1.05,
                     scaleY: 1.05,
                     duration: 200,
