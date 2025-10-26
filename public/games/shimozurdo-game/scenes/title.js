@@ -3433,10 +3433,13 @@ export default class Title extends Phaser.Scene {
             this.applySoundTheme(styleId, style.sounds);
         }
 
+        // 🔍 安全地獲取背景顏色用於日誌輸出
+        const bgColorForLog = style.background?.color || style.backgroundColor || 0x87CEEB;
+
         console.log('🎨 完整視覺風格已應用:', {
             styleId: style.id,
             name: style.name,
-            backgroundColor: style.backgroundColor.toString(16),
+            backgroundColor: bgColorForLog.toString(16),
             primaryColor: style.primaryColor,
             secondaryColor: style.secondaryColor,
             fontFamily: style.fontFamily,
