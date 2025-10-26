@@ -40,7 +40,7 @@ export default class Title extends Phaser.Scene {
      */
     preloadVisualStyleAssets() {
         // 獲取視覺風格 ID
-        const styleId = this.game.gameOptions?.visualStyle || 'modern';
+        const styleId = this.game.gameOptions?.visualStyle || 'clouds';
 
         console.log('🎨 開始預載入視覺風格資源:', styleId);
 
@@ -91,7 +91,7 @@ export default class Title extends Phaser.Scene {
             speed: 3,
             random: true,
             showAnswers: true,
-            visualStyle: 'modern'
+            visualStyle: 'clouds'
         };
         console.log('🎮 Title 場景使用的遊戲選項:', this.gameOptions);
 
@@ -241,7 +241,7 @@ export default class Title extends Phaser.Scene {
      */
     createSpaceship() {
         const { width, height } = this;                  // 獲取場景尺寸
-        const styleId = this.gameOptions.visualStyle || 'modern';  // 獲取視覺風格 ID
+        const styleId = this.gameOptions.visualStyle || 'clouds';  // 獲取視覺風格 ID
         const spaceshipKey = `spaceship_${styleId}`;     // 視覺風格太空船鍵值
 
         // 🎨 優先使用視覺風格太空船
@@ -1293,7 +1293,7 @@ export default class Title extends Phaser.Scene {
         const spawnY = Phaser.Math.Between(worldView.top + 100, worldView.bottom - 100);  // Y 在遊戲區域內
 
         // 🎨 獲取視覺風格雲朵資源
-        const styleId = this.gameOptions.visualStyle || 'modern';
+        const styleId = this.gameOptions.visualStyle || 'clouds';
         const cloud1Key = `cloud1_${styleId}`;
         const cloud2Key = `cloud2_${styleId}`;
 
@@ -3376,7 +3376,7 @@ export default class Title extends Phaser.Scene {
         };
 
         // 獲取視覺風格配置
-        const style = VISUAL_STYLES[styleId] || VISUAL_STYLES.modern;
+        const style = VISUAL_STYLES[styleId] || VISUAL_STYLES.clouds;
 
         // 保存當前視覺風格
         this.currentVisualStyle = style;

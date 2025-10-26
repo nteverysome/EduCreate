@@ -1,6 +1,15 @@
 /**
  * 視覺風格類型定義
  * 參考 Wordwall 的 Visual Styles 功能實現
+ *
+ * Wordwall 的 7 種視覺風格：
+ * 1. Clouds (雲朵)
+ * 2. Video Game (電子遊戲)
+ * 3. Magic Library (魔法圖書館)
+ * 4. Underwater (水下)
+ * 5. Pets (寵物)
+ * 6. Space (太空)
+ * 7. Dinosaur (恐龍)
  */
 
 export interface VisualStyle {
@@ -20,83 +29,113 @@ export interface VisualStyle {
 }
 
 /**
- * 預定義的視覺風格
+ * 預定義的視覺風格（參考 Wordwall）
  */
 export const VISUAL_STYLES: VisualStyle[] = [
   {
-    id: 'primary',
-    name: 'primary',
-    displayName: '🎨 幼兒風格',
-    description: '適合幼兒園和小學低年級，使用大字體和明亮色彩',
-    cssClass: 'visual-style-primary',
-    fontFamily: 'Comic Sans MS, cursive',
-    backgroundColor: '#FFF9E6',
-    primaryColor: '#FF6B6B',
-    secondaryColor: '#4ECDC4',
+    id: 'clouds',
+    name: 'clouds',
+    displayName: '☁️ 雲朵',
+    description: '輕鬆愉快的雲朵主題，適合所有年齡層',
+    cssClass: 'visual-style-clouds',
+    fontFamily: 'Roboto, sans-serif',
+    backgroundColor: '#87CEEB',
+    primaryColor: '#4FC3F7',
+    secondaryColor: '#FFFFFF',
     backgroundImage: undefined,
     soundTheme: 'cheerful',
-    animationStyle: 'bouncy',
-    preview: '/images/visual-styles/primary-preview.png'
+    animationStyle: 'smooth',
+    preview: '/images/visual-styles/clouds-preview.png'
   },
   {
-    id: 'modern',
-    name: 'modern',
-    displayName: '🌟 現代風格',
-    description: '適合中學和高中，簡潔現代的設計',
-    cssClass: 'visual-style-modern',
+    id: 'videogame',
+    name: 'videogame',
+    displayName: '🎮 電子遊戲',
+    description: '復古像素風格，適合遊戲愛好者',
+    cssClass: 'visual-style-videogame',
+    fontFamily: '"Press Start 2P", monospace',
+    backgroundColor: '#000000',
+    primaryColor: '#00FF00',
+    secondaryColor: '#FF00FF',
+    backgroundImage: undefined,
+    soundTheme: 'retro',
+    animationStyle: 'bouncy',
+    preview: '/images/visual-styles/videogame-preview.png'
+  },
+  {
+    id: 'magiclibrary',
+    name: 'magiclibrary',
+    displayName: '📚 魔法圖書館',
+    description: '神秘的魔法圖書館主題，充滿魔法氛圍',
+    cssClass: 'visual-style-magiclibrary',
+    fontFamily: 'Georgia, serif',
+    backgroundColor: '#2C1B47',
+    primaryColor: '#9C27B0',
+    secondaryColor: '#FFD700',
+    backgroundImage: undefined,
+    soundTheme: 'magical',
+    animationStyle: 'smooth',
+    preview: '/images/visual-styles/magiclibrary-preview.png'
+  },
+  {
+    id: 'underwater',
+    name: 'underwater',
+    displayName: '🐠 水下',
+    description: '神秘的海底世界主題',
+    cssClass: 'visual-style-underwater',
     fontFamily: 'Roboto, sans-serif',
-    backgroundColor: '#FFFFFF',
-    primaryColor: '#2196F3',
+    backgroundColor: '#006994',
+    primaryColor: '#00BCD4',
     secondaryColor: '#FF9800',
     backgroundImage: undefined,
-    soundTheme: 'modern',
+    soundTheme: 'underwater',
     animationStyle: 'smooth',
-    preview: '/images/visual-styles/modern-preview.png'
+    preview: '/images/visual-styles/underwater-preview.png'
   },
   {
-    id: 'classic',
-    name: 'classic',
-    displayName: '📚 經典風格',
-    description: '傳統教室風格，適合所有年齡層',
-    cssClass: 'visual-style-classic',
-    fontFamily: 'Georgia, serif',
-    backgroundColor: '#F5F5DC',
-    primaryColor: '#8B4513',
-    secondaryColor: '#DAA520',
-    backgroundImage: undefined,
-    soundTheme: 'classic',
-    animationStyle: 'subtle',
-    preview: '/images/visual-styles/classic-preview.png'
-  },
-  {
-    id: 'dark',
-    name: 'dark',
-    displayName: '🌙 深色風格',
-    description: '深色主題，減少眼睛疲勞',
-    cssClass: 'visual-style-dark',
+    id: 'pets',
+    name: 'pets',
+    displayName: '🐶 寵物',
+    description: '可愛的寵物主題，適合動物愛好者',
+    cssClass: 'visual-style-pets',
     fontFamily: 'Roboto, sans-serif',
-    backgroundColor: '#1E1E1E',
-    primaryColor: '#BB86FC',
-    secondaryColor: '#03DAC6',
+    backgroundColor: '#FFE4B5',
+    primaryColor: '#FF6F00',
+    secondaryColor: '#FFAB91',
     backgroundImage: undefined,
-    soundTheme: 'modern',
+    soundTheme: 'playful',
+    animationStyle: 'bouncy',
+    preview: '/images/visual-styles/pets-preview.png'
+  },
+  {
+    id: 'space',
+    name: 'space',
+    displayName: '🚀 太空',
+    description: '神秘的外太空主題',
+    cssClass: 'visual-style-space',
+    fontFamily: 'Roboto, sans-serif',
+    backgroundColor: '#0D1B2A',
+    primaryColor: '#00E5FF',
+    secondaryColor: '#9C27B0',
+    backgroundImage: undefined,
+    soundTheme: 'space',
     animationStyle: 'smooth',
-    preview: '/images/visual-styles/dark-preview.png'
+    preview: '/images/visual-styles/space-preview.png'
   },
   {
-    id: 'nature',
-    name: 'nature',
-    displayName: '🌿 自然風格',
-    description: '自然清新的綠色主題',
-    cssClass: 'visual-style-nature',
+    id: 'dinosaur',
+    name: 'dinosaur',
+    displayName: '🦕 恐龍',
+    description: '史前恐龍主題，適合恐龍愛好者',
+    cssClass: 'visual-style-dinosaur',
     fontFamily: 'Roboto, sans-serif',
-    backgroundColor: '#F0F8F0',
+    backgroundColor: '#8D6E63',
     primaryColor: '#4CAF50',
-    secondaryColor: '#8BC34A',
+    secondaryColor: '#A1887F',
     backgroundImage: undefined,
-    soundTheme: 'nature',
-    animationStyle: 'smooth',
-    preview: '/images/visual-styles/nature-preview.png'
+    soundTheme: 'prehistoric',
+    animationStyle: 'bouncy',
+    preview: '/images/visual-styles/dinosaur-preview.png'
   }
 ];
 
@@ -111,6 +150,6 @@ export function getVisualStyleById(id: string): VisualStyle | undefined {
  * 獲取默認視覺風格
  */
 export function getDefaultVisualStyle(): VisualStyle {
-  return VISUAL_STYLES[1]; // 默認使用現代風格
+  return VISUAL_STYLES[0]; // 默認使用雲朵風格
 }
 
