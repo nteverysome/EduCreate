@@ -1,3 +1,6 @@
+// 🎨 導入視覺風格配置
+import { VISUAL_STYLE_ASSETS } from '../config/visual-styles.js';
+
 // 🎯 圖片大小常量 - 智能縮放系統
 const CLOUD_MAX_IMAGE_SIZE = {
     small: 60,    // 小圖片最大 60x60 像素
@@ -3375,14 +3378,48 @@ export default class Title extends Phaser.Scene {
             }
         };
 
-        // 獲取視覺風格配置
-        const style = VISUAL_STYLES[styleId] || VISUAL_STYLES.clouds;
+        // 🔍 獲取視覺風格配置（使用導入的完整配置）
+        let style = null;
 
-        // 保存當前視覺風格
-        this.currentVisualStyle = style;
+        try {
+            console.log('🎨 嘗試載入視覺風格:', styleId);
 
-        // 1. 應用背景顏色
-        this.cameras.main.setBackgroundColor(style.backgroundColor);
+            // 優先使用導入的視覺風格配置
+            if (VISUAL_STYLE_ASSETS && VISUAL_STYLE_ASSETS[styleId]) {
+                style = VISUAL_STYLE_ASSETS[styleId];
+                console.log('✅ 使用完整視覺風格配置:', styleId);
+            }
+            // 降級到 clouds 風格
+            else if (VISUAL_STYLE_ASSETS && VISUAL_STYLE_ASSETS.clouds) {
+                style = VISUAL_STYLE_ASSETS.clouds;
+                console.log('⚠️ 視覺風格不存在，降級到 clouds 風格');
+            }
+            // 降級到內部定義的風格
+            else if (VISUAL_STYLES[styleId]) {
+                style = VISUAL_STYLES[styleId];
+                console.log('⚠️ 使用內部定義的視覺風格:', styleId);
+            }
+            // 最後降級到 primary 風格
+            else {
+                style = VISUAL_STYLES.primary;
+                console.log('⚠️ 降級到 primary 風格');
+            }
+
+            // 保存當前視覺風格
+            this.currentVisualStyle = style;
+
+            // 1. 應用背景顏色（支持多種配置格式）
+            const bgColor = style.background?.color || style.backgroundColor || 0x87CEEB;
+            this.cameras.main.setBackgroundColor(bgColor);
+            console.log('🎨 背景顏色已應用:', bgColor.toString(16));
+
+        } catch (error) {
+            console.error('❌ 應用視覺風格時發生錯誤:', error);
+            // 降級到安全的默認背景顏色
+            this.cameras.main.setBackgroundColor(0x87CEEB);
+            console.log('🔧 已降級到安全的默認背景顏色');
+            return;  // 提前返回，避免後續錯誤
+        }
 
         // 2. 應用 UI 元素顏色（如果元素已經創建）
         this.applyVisualStyleToUI(style);
