@@ -1,23 +1,43 @@
-// Game 場景 - 主遊戲邏輯
+// Game 場景 - 主遊戲邏輯（連線配對）
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
-        
+
         // 配對數據
         this.pairs = [
             { id: 1, question: 'book', answer: '書' },
             { id: 2, question: 'cat', answer: '貓' },
             { id: 3, question: 'dog', answer: '狗' }
         ];
-        
+
+        // 卡片顏色（左側彩色卡片）
+        this.cardColors = [
+            0xd72537,  // 紅色
+            0xfb7303,  // 橙色
+            0x4caf50,  // 綠色
+        ];
+
         // 遊戲狀態
-        this.selectedLeft = null;
-        this.selectedRight = null;
+        this.leftCards = [];
+        this.rightCards = [];
+        this.lines = [];  // 儲存連線
         this.matchedPairs = new Set();
-        this.cards = [];
+        this.isDragging = false;
+        this.dragLine = null;
+        this.dragStartCard = null;
     }
 
     create() {
+        // 清空數組（防止重新開始時重複）
+        this.leftCards = [];
+        this.rightCards = [];
+        this.matchedPairs = new Set();
+        this.isDragging = false;
+        this.dragStartCard = null;
+
+        // 添加淺藍色背景
+        this.add.rectangle(480, 270, 960, 540, 0xdbf6ff).setDepth(-1);
+
         // 添加標題
         this.add.text(480, 40, 'Match-up Game', {
             fontSize: '36px',
@@ -27,11 +47,19 @@ class GameScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         // 添加說明
-        this.add.text(480, 90, '點擊左右兩側的卡片進行配對', {
+        this.add.text(480, 90, '拖曳左側卡片到右側卡片進行配對', {
             fontSize: '20px',
             color: '#666666',
             fontFamily: 'Arial'
         }).setOrigin(0.5);
+
+        // 創建連線圖層（在卡片下方）
+        this.linesGraphics = this.add.graphics();
+        this.linesGraphics.setDepth(0);
+
+        // 創建拖曳線圖層（在卡片上方）
+        this.dragGraphics = this.add.graphics();
+        this.dragGraphics.setDepth(10);
 
         // 創建卡片
         this.createCards();
@@ -51,30 +79,108 @@ class GameScene extends Phaser.Scene {
         // 隨機排列答案
         const shuffledAnswers = Phaser.Utils.Array.Shuffle([...this.pairs]);
 
-        // 創建左側題目卡片
+        // 創建左側題目卡片（彩色）
         this.pairs.forEach((pair, index) => {
             const y = startY + index * spacing;
-            const card = this.createCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id, 'left');
-            this.cards.push(card);
+            const color = this.cardColors[index % this.cardColors.length];
+            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id, color);
+            this.leftCards.push(card);
         });
 
-        // 創建右側答案卡片
+        // 創建右側答案卡片（白色）
         shuffledAnswers.forEach((pair, index) => {
             const y = startY + index * spacing;
-            const card = this.createCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id, 'right');
-            this.cards.push(card);
+            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id);
+            this.rightCards.push(card);
         });
     }
 
-    createCard(x, y, width, height, text, pairId, side) {
+    createLeftCard(x, y, width, height, text, pairId, color) {
         // 創建卡片容器
         const container = this.add.container(x, y);
+        container.setDepth(5);
 
-        // 創建卡片背景（白色，帶陰影效果）
+        // 創建卡片背景（彩色）
+        const background = this.add.rectangle(0, 0, width, height, color);
+        background.setStrokeStyle(0);
+
+        // 創建卡片文字（白色）
+        const cardText = this.add.text(0, 0, text, {
+            fontSize: '24px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        cardText.setOrigin(0.5);
+
+        // 添加到容器
+        container.add([background, cardText]);
+
+        // 設置互動（可拖曳）
+        background.setInteractive({ useHandCursor: true, draggable: true });
+
+        // 拖曳開始
+        background.on('dragstart', (pointer) => {
+            if (container.getData('isMatched')) return;
+
+            this.isDragging = true;
+            this.dragStartCard = container;
+
+            // 高亮卡片
+            background.setAlpha(0.8);
+        });
+
+        // 拖曳中
+        background.on('drag', (pointer, dragX, dragY) => {
+            if (!this.isDragging) return;
+
+            // 繪製拖曳線
+            this.dragGraphics.clear();
+            this.dragGraphics.lineStyle(3, color, 1);
+            this.dragGraphics.beginPath();
+            this.dragGraphics.moveTo(container.x, container.y);
+            this.dragGraphics.lineTo(pointer.x, pointer.y);
+            this.dragGraphics.strokePath();
+        });
+
+        // 拖曳結束
+        background.on('dragend', (pointer) => {
+            this.isDragging = false;
+            this.dragGraphics.clear();
+            background.setAlpha(1);
+
+            // 檢查是否拖曳到右側卡片
+            this.checkDrop(pointer);
+
+            this.dragStartCard = null;
+        });
+
+        // 儲存卡片數據
+        container.setData({
+            pairId: pairId,
+            side: 'left',
+            background: background,
+            text: cardText,
+            color: color,
+            isMatched: false
+        });
+
+        // 啟用拖曳
+        this.input.setDraggable(background);
+
+        return container;
+    }
+
+    createRightCard(x, y, width, height, text, pairId) {
+        // 創建卡片容器
+        const container = this.add.container(x, y);
+        container.setDepth(5);
+
+        // 創建卡片背景（白色）
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
-        background.setStrokeStyle(2, 0xcccccc);
+        background.setStrokeStyle(2, 0x333333);
 
-        // 創建卡片文字
+        // 創建卡片文字（黑色）
         const cardText = this.add.text(0, 0, text, {
             fontSize: '24px',
             color: '#333333',
@@ -86,26 +192,25 @@ class GameScene extends Phaser.Scene {
         // 添加到容器
         container.add([background, cardText]);
 
-        // 設置互動
+        // 設置互動（接收拖曳）
         background.setInteractive({ useHandCursor: true });
-        background.on('pointerdown', () => this.onCardClick(container, pairId, side));
 
         // 懸停效果
         background.on('pointerover', () => {
-            if (!container.getData('isMatched')) {
+            if (!container.getData('isMatched') && this.isDragging) {
                 background.setStrokeStyle(3, 0xfe7606); // 橙色邊框
             }
         });
         background.on('pointerout', () => {
-            if (!container.getData('isMatched') && container !== this.selectedLeft && container !== this.selectedRight) {
-                background.setStrokeStyle(2, 0xcccccc);
+            if (!container.getData('isMatched')) {
+                background.setStrokeStyle(2, 0x333333);
             }
         });
 
         // 儲存卡片數據
         container.setData({
             pairId: pairId,
-            side: side,
+            side: 'right',
             background: background,
             text: cardText,
             isMatched: false
@@ -114,75 +219,58 @@ class GameScene extends Phaser.Scene {
         return container;
     }
 
-    onCardClick(card, pairId, side) {
-        // 如果已經配對，不處理
-        if (card.getData('isMatched')) {
-            return;
+    checkDrop(pointer) {
+        if (!this.dragStartCard) return;
+
+        // 檢查指針是否在任何右側卡片上
+        let targetCard = null;
+
+        for (const card of this.rightCards) {
+            const bounds = card.getBounds();
+            if (bounds.contains(pointer.x, pointer.y)) {
+                targetCard = card;
+                break;
+            }
         }
 
-        // 如果是左側卡片
-        if (side === 'left') {
-            // 取消之前的選擇
-            if (this.selectedLeft) {
-                this.selectedLeft.getData('background').setFillStyle(0xffffff);
-                this.selectedLeft.getData('background').setStrokeStyle(2, 0xcccccc);
-            }
-
-            // 選擇當前卡片
-            this.selectedLeft = card;
-            card.getData('background').setFillStyle(0xfff3e0); // 淺橙色高亮
-            card.getData('background').setStrokeStyle(3, 0xfe7606); // 橙色邊框
-        }
-        // 如果是右側卡片
-        else {
-            // 取消之前的選擇
-            if (this.selectedRight) {
-                this.selectedRight.getData('background').setFillStyle(0xffffff);
-                this.selectedRight.getData('background').setStrokeStyle(2, 0xcccccc);
-            }
-
-            // 選擇當前卡片
-            this.selectedRight = card;
-            card.getData('background').setFillStyle(0xfff3e0); // 淺橙色高亮
-            card.getData('background').setStrokeStyle(3, 0xfe7606); // 橙色邊框
-        }
-
-        // 檢查是否可以配對
-        this.checkMatch();
-    }
-
-    checkMatch() {
-        // 如果左右都有選擇
-        if (this.selectedLeft && this.selectedRight) {
-            const leftId = this.selectedLeft.getData('pairId');
-            const rightId = this.selectedRight.getData('pairId');
-
-            // 檢查是否配對成功
-            if (leftId === rightId) {
-                // 配對成功
-                this.onMatchSuccess();
-            } else {
-                // 配對失敗
-                this.onMatchFail();
-            }
+        if (targetCard) {
+            this.checkMatch(this.dragStartCard, targetCard);
         }
     }
 
-    onMatchSuccess() {
+    checkMatch(leftCard, rightCard) {
+        const leftPairId = leftCard.getData('pairId');
+        const rightPairId = rightCard.getData('pairId');
+
+        if (leftPairId === rightPairId) {
+            // 配對成功
+            this.onMatchSuccess(leftCard, rightCard);
+        } else {
+            // 配對失敗
+            this.onMatchFail(leftCard, rightCard);
+        }
+    }
+
+    onMatchSuccess(leftCard, rightCard) {
         // 標記為已配對
-        this.selectedLeft.setData('isMatched', true);
-        this.selectedRight.setData('isMatched', true);
-        this.matchedPairs.add(this.selectedLeft.getData('pairId'));
+        leftCard.setData('isMatched', true);
+        rightCard.setData('isMatched', true);
+        this.matchedPairs.add(leftCard.getData('pairId'));
 
-        // 變成淺綠色（Classic 主題）
-        this.selectedLeft.getData('background').setFillStyle(0xe8f5e9);
-        this.selectedRight.getData('background').setFillStyle(0xe8f5e9);
-        this.selectedLeft.getData('background').setStrokeStyle(2, 0x4caf50);
-        this.selectedRight.getData('background').setStrokeStyle(2, 0x4caf50);
+        // 繪製永久連線
+        const leftColor = leftCard.getData('color');
+        this.linesGraphics.lineStyle(4, leftColor, 1);
+        this.linesGraphics.beginPath();
+        this.linesGraphics.moveTo(leftCard.x, leftCard.y);
+        this.linesGraphics.lineTo(rightCard.x, rightCard.y);
+        this.linesGraphics.strokePath();
+
+        // 右側卡片變成綠色邊框
+        rightCard.getData('background').setStrokeStyle(3, 0x4caf50);
 
         // 縮放動畫
         this.tweens.add({
-            targets: [this.selectedLeft, this.selectedRight],
+            targets: [leftCard, rightCard],
             scaleX: 1.05,
             scaleY: 1.05,
             duration: 200,
@@ -190,45 +278,29 @@ class GameScene extends Phaser.Scene {
             ease: 'Power2'
         });
 
-        // 清除選擇
-        this.selectedLeft = null;
-        this.selectedRight = null;
-
         // 檢查是否全部配對完成
         if (this.matchedPairs.size === this.pairs.length) {
-            this.onGameComplete();
+            this.time.delayedCall(500, () => {
+                this.onGameComplete();
+            });
         }
     }
 
-    onMatchFail() {
-        // 變成淺紅色（Classic 主題）
-        this.selectedLeft.getData('background').setFillStyle(0xffebee);
-        this.selectedRight.getData('background').setFillStyle(0xffebee);
-        this.selectedLeft.getData('background').setStrokeStyle(2, 0xf44336);
-        this.selectedRight.getData('background').setStrokeStyle(2, 0xf44336);
+    onMatchFail(leftCard, rightCard) {
+        // 右側卡片變成紅色邊框
+        rightCard.getData('background').setStrokeStyle(3, 0xf44336);
 
         // 搖晃動畫
         this.tweens.add({
-            targets: [this.selectedLeft, this.selectedRight],
+            targets: [leftCard, rightCard],
             x: '+=10',
             duration: 50,
             yoyo: true,
             repeat: 3,
             ease: 'Power2',
             onComplete: () => {
-                // 恢復白色
-                if (this.selectedLeft) {
-                    this.selectedLeft.getData('background').setFillStyle(0xffffff);
-                    this.selectedLeft.getData('background').setStrokeStyle(2, 0xcccccc);
-                }
-                if (this.selectedRight) {
-                    this.selectedRight.getData('background').setFillStyle(0xffffff);
-                    this.selectedRight.getData('background').setStrokeStyle(2, 0xcccccc);
-                }
-
-                // 清除選擇
-                this.selectedLeft = null;
-                this.selectedRight = null;
+                // 恢復原狀
+                rightCard.getData('background').setStrokeStyle(2, 0x333333);
             }
         });
     }
