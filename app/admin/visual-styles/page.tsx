@@ -138,7 +138,7 @@ export default function VisualStylesAdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {resourceTypes.filter(r => r.id.includes('spaceship') || r.id.includes('cloud')).map((resource) => (
                 <div key={resource.id} className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors">
-                  <label className="cursor-pointer block">
+                  <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
                     <div className="text-center">
                       <div className="text-4xl mb-2">
                         {resource.id === 'spaceship' ? '🚀' : '☁️'}
@@ -153,14 +153,15 @@ export default function VisualStylesAdminPage() {
                         支持 PNG, JPEG, WebP
                       </div>
                     </div>
-                    <input
-                      type="file"
-                      accept={resource.accept}
-                      onChange={(e) => handleFileChange(resource.id, e)}
-                      disabled={uploading}
-                      className="hidden"
-                    />
                   </label>
+                  <input
+                    id={`upload-${selectedStyle}-${resource.id}`}
+                    type="file"
+                    accept={resource.accept}
+                    onChange={(e) => handleFileChange(resource.id, e)}
+                    disabled={uploading}
+                    className="hidden"
+                  />
                 </div>
               ))}
             </div>
@@ -174,7 +175,7 @@ export default function VisualStylesAdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {resourceTypes.filter(r => !r.id.includes('spaceship') && !r.id.includes('cloud')).map((resource) => (
                 <div key={resource.id} className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors">
-                  <label className="cursor-pointer block">
+                  <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
                     <div className="text-center">
                       <div className="text-4xl mb-2">
                         {resource.id === 'background' ? '🎵' : resource.id === 'hit' ? '💥' : '🎉'}
@@ -189,14 +190,15 @@ export default function VisualStylesAdminPage() {
                         支持 MP3, WAV, OGG
                       </div>
                     </div>
-                    <input
-                      type="file"
-                      accept={resource.accept}
-                      onChange={(e) => handleFileChange(resource.id, e)}
-                      disabled={uploading}
-                      className="hidden"
-                    />
                   </label>
+                  <input
+                    id={`upload-${selectedStyle}-${resource.id}`}
+                    type="file"
+                    accept={resource.accept}
+                    onChange={(e) => handleFileChange(resource.id, e)}
+                    disabled={uploading}
+                    className="hidden"
+                  />
                 </div>
               ))}
             </div>
