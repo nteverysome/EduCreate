@@ -12,6 +12,7 @@ export default function VisualStylesAdminPage() {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
   const [uploadedResources, setUploadedResources] = useState<Record<string, { exists: boolean; url?: string }>>({});
+  const [refreshKey, setRefreshKey] = useState(0); // 用於強制刷新圖片預覽
 
   // 資源類型定義
   const resourceTypes = [
@@ -71,6 +72,9 @@ export default function VisualStylesAdminPage() {
 
       // 重新獲取資源列表
       await fetchUploadedResources();
+
+      // 更新刷新鍵以強制重新渲染圖片
+      setRefreshKey(prev => prev + 1);
 
       // 3 秒後清除消息
       setTimeout(() => setMessage(''), 3000);
@@ -196,7 +200,8 @@ export default function VisualStylesAdminPage() {
                         {uploaded?.exists && uploaded.url ? (
                           <div className="mb-2">
                             <img
-                              src={`${uploaded.url}?t=${Date.now()}`}
+                              key={`${resource.id}-${refreshKey}`}
+                              src={`${uploaded.url}?t=${refreshKey}`}
                               alt={resource.name}
                               className="w-24 h-24 object-contain mx-auto rounded-lg border border-gray-200"
                             />
