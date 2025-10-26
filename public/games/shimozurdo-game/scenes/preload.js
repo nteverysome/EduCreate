@@ -221,9 +221,25 @@ export default class Preload extends Phaser.Scene {
      */
     async loadVisualStyleResources() {
         try {
-            // 獲取視覺風格 ID（從 URL 參數或使用默認值）
-            const urlParams = new URLSearchParams(window.location.search);
-            const visualStyle = urlParams.get('visualStyle') || 'clouds';
+            // 🎨 優先從 gameOptions 讀取視覺風格，其次從 URL 參數，最後使用默認值
+            let visualStyle = 'clouds';  // 默認值
+
+            // 1. 嘗試從 game.gameOptions 讀取
+            if (this.game && this.game.gameOptions && this.game.gameOptions.visualStyle) {
+                visualStyle = this.game.gameOptions.visualStyle;
+                console.log('🎨 從 game.gameOptions 讀取視覺風格:', visualStyle);
+            }
+            // 2. 嘗試從 window.gameOptions 讀取
+            else if (window.gameOptions && window.gameOptions.visualStyle) {
+                visualStyle = window.gameOptions.visualStyle;
+                console.log('🎨 從 window.gameOptions 讀取視覺風格:', visualStyle);
+            }
+            // 3. 嘗試從 URL 參數讀取
+            else {
+                const urlParams = new URLSearchParams(window.location.search);
+                visualStyle = urlParams.get('visualStyle') || 'clouds';
+                console.log('🎨 從 URL 參數讀取視覺風格:', visualStyle);
+            }
 
             console.log('🎨 開始載入視覺風格資源:', visualStyle);
 
