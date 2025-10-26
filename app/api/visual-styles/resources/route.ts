@@ -34,16 +34,21 @@ export async function GET(request: NextRequest) {
     // 構建資源 URL 映射（格式：{ resourceType: url }）
     const resources: Record<string, string> = {};
 
+    // 添加時間戳以破壞 CDN 緩存
+    const timestamp = Date.now();
+
     blobs.forEach((blob) => {
       const fileName = blob.pathname.split('/').pop() || '';
       const resourceType = fileName.split('.')[0];
-      resources[resourceType] = blob.url;
+      // 在 URL 中添加時間戳參數以破壞緩存
+      resources[resourceType] = `${blob.url}?v=${timestamp}`;
     });
 
     return NextResponse.json({
       success: true,
       styleId,
-      resources
+      resources,
+      timestamp // 返回時間戳供前端參考
     });
 
   } catch (error) {
