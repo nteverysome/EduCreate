@@ -13,6 +13,7 @@ export interface GameOptions {
   speed: number;  // 1-20
   random: boolean;  // 是否隨機順序
   showAnswers: boolean;  // 遊戲結束後顯示答案
+  visualStyle: string;  // 視覺風格 ID
 }
 
 export const DEFAULT_GAME_OPTIONS: GameOptions = {
@@ -24,6 +25,7 @@ export const DEFAULT_GAME_OPTIONS: GameOptions = {
   lives: 5,
   speed: 3,
   random: true,
-  showAnswers: true
+  showAnswers: true,
+  visualStyle: 'modern'  // 默認使用現代風格
 };
 

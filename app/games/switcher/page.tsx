@@ -19,6 +19,7 @@ import AssignmentSetModal from '@/components/activities/AssignmentSetModal';
 import SRSLearningPanel from '@/components/games/SRSLearningPanel';
 import SRSReviewDetails from '@/components/games/SRSReviewDetails';
 import GameOptionsPanel from '@/components/game-options';
+import VisualStyleSelector from '@/components/visual-style-selector';
 import { GameOptions, DEFAULT_GAME_OPTIONS } from '@/types/game-options';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
@@ -1399,9 +1400,16 @@ const GameSwitcherPage: React.FC = () => {
 
         {/* 統計和歷史 - 響應式網格佈局 */}
         <div className="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-          {/* 遊戲選項面板 - 只在有活動ID時顯示 */}
+          {/* 視覺風格和遊戲選項面板 - 只在有活動ID時顯示 */}
           {activityId && (
-            <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+            <div className="stats-card md:col-span-2 lg:col-span-3">
+              {/* 視覺風格選擇器 */}
+              <VisualStyleSelector
+                selectedStyle={gameOptions.visualStyle}
+                onChange={(styleId) => setGameOptions({ ...gameOptions, visualStyle: styleId })}
+              />
+
+              {/* 遊戲選項面板 */}
               <GameOptionsPanel
                 options={gameOptions}
                 onChange={setGameOptions}
@@ -1434,6 +1442,7 @@ const GameSwitcherPage: React.FC = () => {
                         // 顯示成功消息（使用更友好的提示）
                         const successMessage = '✅ 選項已成功保存！\n\n' +
                           '已保存的設置：\n' +
+                          `🎨 視覺風格: ${gameOptions.visualStyle}\n` +
                           `⏱️ 計時器: ${gameOptions.timer.type === 'none' ? '無' : gameOptions.timer.type === 'countUp' ? '正計時' : '倒計時'}\n` +
                           `❤️ 生命值: ${gameOptions.lives} 條命\n` +
                           `🎲 隨機順序: ${gameOptions.random ? '開啟' : '關閉'}\n` +
