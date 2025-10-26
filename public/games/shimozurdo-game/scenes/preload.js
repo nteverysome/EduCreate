@@ -148,7 +148,11 @@ export default class Preload extends Phaser.Scene {
         }
 
         // CONFIG SCENE - 場景配置區塊
-        this.handlerScene.updateResize(this)         // 更新響應式配置，適應不同螢幕尺寸
+        if (this.handlerScene) {                     // 防禦性檢查：確保 handlerScene 已初始化
+            this.handlerScene.updateResize(this)     // 更新響應式配置，適應不同螢幕尺寸
+        } else {
+            console.warn('⚠️ handlerScene 未初始化，跳過 updateResize');
+        }
         if (this.game.debugMode)                     // 如果是調試模式
             this.add.image(0, 0, 'guide').setOrigin(0).setDepth(1)  // 顯示輔助參考線
         // CONFIG SCENE
