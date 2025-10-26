@@ -67,6 +67,24 @@ export default function VisualStylesAdminPage() {
     }
   };
 
+  /**
+   * 處理拖放上傳
+   */
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleDrop = (resourceType: string, event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const file = event.dataTransfer.files?.[0];
+    if (file) {
+      handleFileUpload(resourceType, file);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
@@ -137,7 +155,12 @@ export default function VisualStylesAdminPage() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {resourceTypes.filter(r => r.id.includes('spaceship') || r.id.includes('cloud')).map((resource) => (
-                <div key={resource.id} className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors">
+                <div
+                  key={resource.id}
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(resource.id, e)}
+                >
                   <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
                     <div className="text-center">
                       <div className="text-4xl mb-2">
@@ -174,7 +197,12 @@ export default function VisualStylesAdminPage() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {resourceTypes.filter(r => !r.id.includes('spaceship') && !r.id.includes('cloud')).map((resource) => (
-                <div key={resource.id} className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors">
+                <div
+                  key={resource.id}
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 transition-colors"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(resource.id, e)}
+                >
                   <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
                     <div className="text-center">
                       <div className="text-4xl mb-2">
