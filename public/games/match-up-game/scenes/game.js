@@ -98,6 +98,7 @@ class GameScene extends Phaser.Scene {
     createLeftCard(x, y, width, height, text, pairId, color) {
         // 創建卡片容器
         const container = this.add.container(x, y);
+        container.setSize(width, height);
         container.setDepth(5);
 
         // 創建卡片背景（彩色）
@@ -116,57 +117,72 @@ class GameScene extends Phaser.Scene {
         // 添加到容器
         container.add([background, cardText]);
 
-        // 設置互動（可拖曳）
-        background.setInteractive({ useHandCursor: true, draggable: true });
+        // 設置互動（整個容器可拖曳）
+        container.setInteractive({ useHandCursor: true, draggable: true });
 
-        // 拖曳開始
-        background.on('dragstart', (pointer) => {
-            if (container.getData('isMatched')) return;
-
-            this.isDragging = true;
-            this.dragStartCard = container;
-
-            // 高亮卡片
-            background.setAlpha(0.8);
-        });
-
-        // 拖曳中
-        background.on('drag', (pointer, dragX, dragY) => {
-            if (!this.isDragging) return;
-
-            // 繪製拖曳線
-            this.dragGraphics.clear();
-            this.dragGraphics.lineStyle(3, color, 1);
-            this.dragGraphics.beginPath();
-            this.dragGraphics.moveTo(container.x, container.y);
-            this.dragGraphics.lineTo(pointer.x, pointer.y);
-            this.dragGraphics.strokePath();
-        });
-
-        // 拖曳結束
-        background.on('dragend', (pointer) => {
-            this.isDragging = false;
-            this.dragGraphics.clear();
-            background.setAlpha(1);
-
-            // 檢查是否拖曳到右側卡片
-            this.checkDrop(pointer);
-
-            this.dragStartCard = null;
-        });
-
-        // 儲存卡片數據
+        // 儲存原始位置
         container.setData({
             pairId: pairId,
             side: 'left',
             background: background,
             text: cardText,
             color: color,
-            isMatched: false
+            isMatched: false,
+            originalX: x,
+            originalY: y
+        });
+
+        // 拖曳開始
+        container.on('dragstart', (pointer) => {
+            if (container.getData('isMatched')) return;
+
+            this.isDragging = true;
+            this.dragStartCard = container;
+
+            // 卡片"飄浮"起來
+            container.setDepth(100);  // 提升到最上層
+            container.setScale(1.1);  // 稍微放大
+            background.setAlpha(0.9);  // 半透明
+        });
+
+        // 拖曳中 - 卡片跟隨鼠標
+        container.on('drag', (pointer, dragX, dragY) => {
+            if (!this.isDragging) return;
+
+            // 移動整個卡片
+            container.x = pointer.x;
+            container.y = pointer.y;
+        });
+
+        // 拖曳結束
+        container.on('dragend', (pointer) => {
+            this.isDragging = false;
+
+            // 檢查是否拖曳到右側卡片
+            const dropped = this.checkDrop(pointer, container);
+
+            if (!dropped) {
+                // 沒有放到正確位置，返回原位
+                this.tweens.add({
+                    targets: container,
+                    x: container.getData('originalX'),
+                    y: container.getData('originalY'),
+                    scaleX: 1,
+                    scaleY: 1,
+                    duration: 300,
+                    ease: 'Back.easeOut',
+                    onComplete: () => {
+                        container.setDepth(5);
+                        background.setAlpha(1);
+                    }
+                });
+            }
+
+            this.dragStartCard = null;
         });
 
         // 啟用拖曳
-        this.input.setDraggable(background);
+        this.input.setDraggable(container);
 
         return container;
     }
@@ -219,13 +235,15 @@ class GameScene extends Phaser.Scene {
         return container;
     }
 
-    checkDrop(pointer) {
-        if (!this.dragStartCard) return;
+    checkDrop(pointer, draggedCard) {
+        if (!draggedCard) return false;
 
         // 檢查指針是否在任何右側卡片上
         let targetCard = null;
 
         for (const card of this.rightCards) {
+            if (card.getData('isMatched')) continue;  // 跳過已配對的卡片
+
             const bounds = card.getBounds();
             if (bounds.contains(pointer.x, pointer.y)) {
                 targetCard = card;
@@ -234,8 +252,11 @@ class GameScene extends Phaser.Scene {
         }
 
         if (targetCard) {
-            this.checkMatch(this.dragStartCard, targetCard);
+            this.checkMatch(draggedCard, targetCard);
+            return true;
         }
+
+        return false;
     }
 
     checkMatch(leftCard, rightCard) {
@@ -257,42 +278,52 @@ class GameScene extends Phaser.Scene {
         rightCard.setData('isMatched', true);
         this.matchedPairs.add(leftCard.getData('pairId'));
 
-        // 繪製永久連線
-        const leftColor = leftCard.getData('color');
-        this.linesGraphics.lineStyle(4, leftColor, 1);
-        this.linesGraphics.beginPath();
-        this.linesGraphics.moveTo(leftCard.x, leftCard.y);
-        this.linesGraphics.lineTo(rightCard.x, rightCard.y);
-        this.linesGraphics.strokePath();
+        // 左側卡片移動到右側卡片旁邊
+        const targetX = rightCard.x - 120;  // 右側卡片左邊
+        const targetY = rightCard.y;
 
-        // 右側卡片變成綠色邊框
-        rightCard.getData('background').setStrokeStyle(3, 0x4caf50);
-
-        // 縮放動畫
         this.tweens.add({
-            targets: [leftCard, rightCard],
-            scaleX: 1.05,
-            scaleY: 1.05,
-            duration: 200,
-            yoyo: true,
-            ease: 'Power2'
+            targets: leftCard,
+            x: targetX,
+            y: targetY,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 300,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                leftCard.setDepth(5);
+                leftCard.getData('background').setAlpha(1);
+
+                // 右側卡片變成綠色邊框
+                rightCard.getData('background').setStrokeStyle(3, 0x4caf50);
+
+                // 成功動畫
+                this.tweens.add({
+                    targets: [leftCard, rightCard],
+                    scaleX: 1.05,
+                    scaleY: 1.05,
+                    duration: 200,
+                    yoyo: true,
+                    ease: 'Power2'
+                });
+            }
         });
 
         // 檢查是否全部配對完成
         if (this.matchedPairs.size === this.pairs.length) {
-            this.time.delayedCall(500, () => {
+            this.time.delayedCall(800, () => {
                 this.onGameComplete();
             });
         }
     }
 
     onMatchFail(leftCard, rightCard) {
-        // 右側卡片變成紅色邊框
+        // 右側卡片變成紅色邊框並搖晃
         rightCard.getData('background').setStrokeStyle(3, 0xf44336);
 
         // 搖晃動畫
         this.tweens.add({
-            targets: [leftCard, rightCard],
+            targets: rightCard,
             x: '+=10',
             duration: 50,
             yoyo: true,
@@ -301,6 +332,21 @@ class GameScene extends Phaser.Scene {
             onComplete: () => {
                 // 恢復原狀
                 rightCard.getData('background').setStrokeStyle(2, 0x333333);
+            }
+        });
+
+        // 左側卡片返回原位
+        this.tweens.add({
+            targets: leftCard,
+            x: leftCard.getData('originalX'),
+            y: leftCard.getData('originalY'),
+            scaleX: 1,
+            scaleY: 1,
+            duration: 300,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                leftCard.setDepth(5);
+                leftCard.getData('background').setAlpha(1);
             }
         });
     }
