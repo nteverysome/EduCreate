@@ -105,7 +105,7 @@ const GameSwitcherPage: React.FC = () => {
     description?: string;
   } | null>(null);
 
-  // 排行榜狀態
+  // 排行榜狀態（課業分配模式）
   const [leaderboard, setLeaderboard] = useState<Array<{
     rank: number;
     studentName: string;
@@ -115,6 +115,18 @@ const GameSwitcherPage: React.FC = () => {
     totalQuestions: number;
   }>>([]);
   const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
+
+  // 活動排行榜狀態（一般模式）
+  const [activityLeaderboard, setActivityLeaderboard] = useState<Array<{
+    id: string;
+    playerName: string;
+    score: number;
+    correctCount: number;
+    totalCount: number;
+    accuracy: number;
+    timeSpent: number;
+    createdAt: string;
+  }>>([]);
 
   // 活動結果狀態
   const [activityResults, setActivityResults] = useState<Array<{
@@ -497,6 +509,37 @@ const GameSwitcherPage: React.FC = () => {
     }
   }, []);
 
+  // 載入活動排行榜（一般模式）
+  const loadActivityLeaderboard = useCallback(async (activityId: string) => {
+    try {
+      const response = await fetch(`/api/leaderboard?activityId=${activityId}&limit=10`);
+      if (response.ok) {
+        const data = await response.json() as {
+          success?: boolean;
+          data?: Array<{
+            id: string;
+            playerName: string;
+            score: number;
+            correctCount: number;
+            totalCount: number;
+            accuracy: number;
+            timeSpent: number;
+            createdAt: string;
+          }>;
+        };
+        if (data.success && data.data) {
+          setActivityLeaderboard(data.data);
+          console.log('✅ 活動排行榜數據已載入:', {
+            totalEntries: data.data.length,
+            topScore: data.data[0]?.score || 0
+          });
+        }
+      }
+    } catch (error) {
+      console.error('❌ 載入活動排行榜時出錯:', error);
+    }
+  }, []);
+
   // 載入活動結果（作業）
   const loadActivityResults = useCallback(async (activityId: string) => {
     try {
@@ -623,6 +666,11 @@ const GameSwitcherPage: React.FC = () => {
       // 載入活動結果（作業）- 只在非學生模式下載入
       if (!assignmentIdParam) {
         loadActivityResults(activityIdParam);
+      }
+
+      // 載入活動排行榜 - 只在非學生模式下載入
+      if (!assignmentIdParam) {
+        loadActivityLeaderboard(activityIdParam);
       }
 
       // 優先檢查是否為學生遊戲模式（有 assignmentId）
@@ -1460,6 +1508,55 @@ const GameSwitcherPage: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* 活動排行榜 - 只在有活動ID且不是學生模式時顯示 */}
+          {activityId && !assignmentId && activityLeaderboard.length > 0 && (
+            <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 md:col-span-2 lg:col-span-1">
+              <h3 className="font-semibold text-gray-900 mb-3 md:mb-4">🏆 排行榜</h3>
+              <div className="space-y-2">
+                {activityLeaderboard.slice(0, 10).map((entry, index) => (
+                  <div
+                    key={entry.id}
+                    className={`flex items-center justify-between p-3 rounded-lg ${
+                      index < 3 ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      <div className="text-lg font-bold">
+                        {index === 0 && '🥇'}
+                        {index === 1 && '🥈'}
+                        {index === 2 && '🥉'}
+                        {index > 2 && `#${index + 1}`}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-900 truncate">
+                          {entry.playerName}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {entry.correctCount}/{entry.totalCount} 題 • {entry.accuracy.toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-2">
+                      <div className="font-bold text-blue-600">
+                        {entry.score} 分
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {Math.floor(entry.timeSpent / 60)}:{(entry.timeSpent % 60).toString().padStart(2, '0')}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {activityLeaderboard.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <div className="text-4xl mb-2">🎯</div>
+                  <p>還沒有成績記錄</p>
+                  <p className="text-sm">開始遊戲來創建第一個記錄吧！</p>
+                </div>
+              )}
             </div>
           )}
         </div>
