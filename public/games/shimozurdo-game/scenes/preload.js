@@ -11,8 +11,8 @@ export default class Preload extends Phaser.Scene {
     }
 
     async preload() {
-        // 🎨 載入視覺風格資源（從 Blob Storage）
-        await this.loadVisualStyleResources();
+        // 🎨 視覺風格資源將在 create() 方法中載入
+        // 這裡只載入基礎資源
 
         // Images - 基礎圖片資源載入
         this.load.image('logo', 'assets/images/logo.png')           // 遊戲標誌
@@ -92,6 +92,11 @@ export default class Preload extends Phaser.Scene {
 
     async create() {
         const { width, height } = this               // 解構賦值獲取寬高
+
+        // 🎨 優先載入視覺風格資源（必須在遊戲啟動前完成）
+        console.log('🎨 開始載入視覺風格資源...');
+        await this.loadVisualStyleResources();
+        console.log('✅ 視覺風格資源載入完成，繼續初始化管理器');
 
         // 🆕 初始化管理器系統 - 從 Airplane Game 移植
         console.log('🎮 初始化管理器系統...');
