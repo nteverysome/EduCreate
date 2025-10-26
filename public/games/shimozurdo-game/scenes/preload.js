@@ -268,10 +268,24 @@ export default class Preload extends Phaser.Scene {
             // 載入太空船圖片（如果存在）
             if (data.resources.spaceship) {
                 const spaceshipKey = `spaceship_${visualStyle}`;
-                // 🎨 使用 image 載入單個圖片（不是精靈圖）
-                // 如果需要精靈圖動畫，請上傳精靈圖並修改此處
-                this.load.image(spaceshipKey, data.resources.spaceship);
-                console.log(`✅ 載入視覺風格太空船圖片: ${spaceshipKey}`);
+
+                // 🎨 檢查 URL 是否有效（不是空字符串或錯誤 URL）
+                const spaceshipUrl = data.resources.spaceship;
+                if (spaceshipUrl && spaceshipUrl.startsWith('http')) {
+                    // 🎨 使用 image 載入單個圖片（不是精靈圖）
+                    // 如果需要精靈圖動畫，請上傳精靈圖並修改此處
+                    this.load.image(spaceshipKey, spaceshipUrl);
+                    console.log(`✅ 載入視覺風格太空船圖片: ${spaceshipKey}`);
+
+                    // 標記已載入自定義太空船
+                    this.customSpaceshipLoaded = true;
+                } else {
+                    console.warn(`⚠️ 視覺風格太空船 URL 無效: ${spaceshipUrl}`);
+                    this.customSpaceshipLoaded = false;
+                }
+            } else {
+                console.log(`ℹ️ 視覺風格 ${visualStyle} 沒有自定義太空船，將使用默認精靈圖`);
+                this.customSpaceshipLoaded = false;
             }
 
             // 載入雲朵圖片（如果存在）

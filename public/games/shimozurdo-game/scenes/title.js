@@ -238,8 +238,12 @@ export default class Title extends Phaser.Scene {
         const styleId = this.gameOptions.visualStyle || 'clouds';  // 獲取視覺風格 ID
         const spaceshipKey = `spaceship_${styleId}`;     // 視覺風格太空船鍵值
 
-        // 🎨 優先使用視覺風格太空船
-        if (this.textures.exists(spaceshipKey)) {
+        // 🎨 檢查是否成功載入自定義太空船
+        const preloadScene = this.scene.get('preload');
+        const hasCustomSpaceship = preloadScene && preloadScene.customSpaceshipLoaded && this.textures.exists(spaceshipKey);
+
+        // 🎨 優先使用視覺風格太空船（如果存在且載入成功）
+        if (hasCustomSpaceship) {
             console.log('✅ 使用視覺風格太空船:', styleId);
 
             try {
