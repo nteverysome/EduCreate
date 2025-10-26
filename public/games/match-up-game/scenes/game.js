@@ -73,9 +73,14 @@ class GameScene extends Phaser.Scene {
     createLeftCard(x, y, width, height, text, pairId) {
         // 創建卡片容器
         const container = this.add.container(x, y);
+        container.setSize(width, height);
         container.setDepth(5);
 
-        // 先創建文字以測量寬度
+        // 創建卡片背景（白色）
+        const background = this.add.rectangle(0, 0, width, height, 0xffffff);
+        background.setStrokeStyle(2, 0x333333);
+
+        // 創建卡片文字（黑色）
         const cardText = this.add.text(0, 0, text, {
             fontSize: '20px',
             color: '#333333',
@@ -83,20 +88,6 @@ class GameScene extends Phaser.Scene {
             fontStyle: 'normal'
         });
         cardText.setOrigin(0.5);
-
-        // 根據文字寬度創建緊密貼合的框
-        const textWidth = cardText.width;
-        const textHeight = cardText.height;
-        const padding = 10;  // 內邊距
-        const boxWidth = textWidth + padding * 2;
-        const boxHeight = textHeight + padding * 2;
-
-        // 創建卡片背景（白色，緊密貼合文字）
-        const background = this.add.rectangle(0, 0, boxWidth, boxHeight, 0xffffff);
-        background.setStrokeStyle(2, 0x333333);
-
-        // 設置容器大小
-        container.setSize(boxWidth, boxHeight);
 
         // 添加到容器
         container.add([background, cardText]);
