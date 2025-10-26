@@ -153,15 +153,32 @@ export default class Title extends Phaser.Scene {
         if (hasCustomBg) {
             // 使用自定義背景圖片
             console.log('🎨 使用自定義背景圖片:', customBgKey);
-            const customBg = this.add.tileSprite(0, 0, width, height, customBgKey);
-            customBg.setOrigin(0, 0);
+
+            // 獲取背景圖片的原始尺寸
+            const texture = this.textures.get(customBgKey);
+            const bgWidth = texture.source[0].width;
+            const bgHeight = texture.source[0].height;
+
+            console.log(`📐 背景圖片尺寸: ${bgWidth} x ${bgHeight}`);
+            console.log(`📐 遊戲視口尺寸: ${width} x ${height}`);
+
+            // 計算縮放比例以適應視口（保持寬高比）
+            const scaleX = width / bgWidth;
+            const scaleY = height / bgHeight;
+            const scale = Math.max(scaleX, scaleY); // 使用較大的縮放比例以填滿視口
+
+            console.log(`📐 背景縮放比例: ${scale.toFixed(3)}`);
+
+            // 創建背景圖片（使用 image 而不是 tileSprite）
+            const customBg = this.add.image(width / 2, height / 2, customBgKey);
+            customBg.setScale(scale);
             customBg.setDepth(-100);
             customBg.setAlpha(1.0);
             customBg.setVisible(true);
             this.backgroundLayers['custom'] = customBg;
-            console.log('✅ 自定義背景已創建');
+            console.log('✅ 自定義背景已創建並縮放');
 
-            // 初始化滾動位置
+            // 初始化滾動位置（雖然不會滾動，但保持兼容性）
             this.scrollPositions = { custom: 0 };
             return; // 使用自定義背景時，不創建默認背景層
         }
