@@ -1187,6 +1187,7 @@ const GameSwitcherPage: React.FC = () => {
             studentName={studentName}
             isAnonymous={isAnonymous}
             gameOptions={gameOptions}
+            visualStyle={gameOptions.visualStyle}
           />
         </div>
 
