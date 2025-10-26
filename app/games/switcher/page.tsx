@@ -430,8 +430,15 @@ const GameSwitcherPage: React.FC = () => {
 
         // 載入遊戲選項
         if (data.gameOptions) {
-          setGameOptions(data.gameOptions);
-          console.log('✅ 遊戲選項已載入:', data.gameOptions);
+          // 合併數據庫選項和默認選項，確保所有字段都有值
+          const mergedOptions = {
+            ...DEFAULT_GAME_OPTIONS,
+            ...data.gameOptions,
+            // 確保 visualStyle 有值
+            visualStyle: data.gameOptions.visualStyle || DEFAULT_GAME_OPTIONS.visualStyle
+          };
+          setGameOptions(mergedOptions);
+          console.log('✅ 遊戲選項已載入:', mergedOptions);
         } else {
           setGameOptions(DEFAULT_GAME_OPTIONS);
           console.log('ℹ️ 使用默認遊戲選項');
