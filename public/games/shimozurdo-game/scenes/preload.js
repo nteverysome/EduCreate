@@ -274,6 +274,13 @@ export default class Preload extends Phaser.Scene {
                 console.log(`✅ 載入視覺風格雲朵2: ${cloud2Key}`);
             }
 
+            // 載入背景圖片（如果存在）
+            if (data.resources.bg_layer) {
+                const bgLayerKey = `bg_layer_${visualStyle}`;
+                this.load.image(bgLayerKey, data.resources.bg_layer);
+                console.log(`✅ 載入視覺風格背景圖片: ${bgLayerKey}`);
+            }
+
             // 載入音效（如果存在）
             if (data.resources.background) {
                 const backgroundKey = `background_${visualStyle}`;
