@@ -50,7 +50,7 @@ class GameScene extends Phaser.Scene {
         const leftX = 150;
         const rightX = 510;
         const startY = 80;
-        const spacing = 80;
+        const spacing = 65;  // 60 (卡片高度) + 5 (距離) = 65
 
         // 隨機排列答案
         const shuffledAnswers = Phaser.Utils.Array.Shuffle([...this.pairs]);
