@@ -56,6 +56,9 @@ class GameScene extends Phaser.Scene {
         // 隨機排列答案
         const shuffledAnswers = Phaser.Utils.Array.Shuffle([...this.pairs]);
 
+        // 創建左側外框（包圍所有左側卡片）
+        this.createLeftContainerBox(leftX, startY, cardWidth, cardHeight, leftSpacing, this.pairs.length);
+
         // 創建左側題目卡片（白色，5px 間距）
         this.pairs.forEach((pair, index) => {
             const y = startY + index * leftSpacing;
@@ -69,6 +72,22 @@ class GameScene extends Phaser.Scene {
             const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id);
             this.rightCards.push(card);
         });
+    }
+
+    createLeftContainerBox(x, y, cardWidth, cardHeight, spacing, count) {
+        // 計算外框的尺寸
+        const padding = 10;  // 外框與卡片之間的間距
+        const boxWidth = cardWidth + padding * 2;
+        const boxHeight = (cardHeight * count) + (spacing - cardHeight) * (count - 1) + padding * 2;
+
+        // 計算外框的中心位置
+        const boxCenterY = y + (spacing * (count - 1)) / 2;
+
+        // 創建外框
+        const containerBox = this.add.rectangle(x, boxCenterY, boxWidth, boxHeight);
+        containerBox.setStrokeStyle(2, 0x333333);  // 黑色邊框
+        containerBox.setFillStyle(0xffffff, 0);    // 透明填充
+        containerBox.setDepth(0);  // 在卡片下層
     }
 
     createLeftCard(x, y, width, height, text, pairId) {
