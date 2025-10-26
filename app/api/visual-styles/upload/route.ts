@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put, list } from '@vercel/blob';
+import { put, list, del } from '@vercel/blob';
 
 /**
  * POST /api/visual-styles/upload
@@ -163,3 +163,78 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * DELETE /api/visual-styles/upload
+ * 刪除指定的視覺風格資源（從 Vercel Blob Storage）
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const styleId = searchParams.get('styleId');
+    const resourceType = searchParams.get('resourceType');
+
+    if (!styleId || !resourceType) {
+      return NextResponse.json(
+        { error: '缺少必要參數' },
+        { status: 400 }
+      );
+    }
+
+    // 驗證視覺風格 ID
+    const validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    if (!validStyleIds.includes(styleId)) {
+      return NextResponse.json(
+        { error: '無效的視覺風格 ID' },
+        { status: 400 }
+      );
+    }
+
+    // 驗證資源類型
+    const validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
+    if (!validResourceTypes.includes(resourceType)) {
+      return NextResponse.json(
+        { error: '無效的資源類型' },
+        { status: 400 }
+      );
+    }
+
+    // 從 Blob Storage 列出所有文件，找到要刪除的文件
+    const { blobs } = await list({
+      prefix: `visual-styles/${styleId}/`,
+    });
+
+    // 找到匹配的文件
+    const blobToDelete = blobs.find((blob) => {
+      const fileName = blob.pathname.split('/').pop() || '';
+      const fileResourceType = fileName.split('.')[0];
+      return fileResourceType === resourceType;
+    });
+
+    if (!blobToDelete) {
+      return NextResponse.json(
+        { error: '找不到要刪除的資源' },
+        { status: 404 }
+      );
+    }
+
+    // 刪除文件
+    await del(blobToDelete.url);
+
+    console.log(`✅ 文件刪除成功: ${blobToDelete.url}`);
+
+    return NextResponse.json({
+      success: true,
+      message: '文件刪除成功',
+      deletedUrl: blobToDelete.url,
+      styleId,
+      resourceType
+    });
+
+  } catch (error) {
+    console.error('文件刪除錯誤:', error);
+    return NextResponse.json(
+      { error: '文件刪除失敗', details: error instanceof Error ? error.message : '未知錯誤' },
+      { status: 500 }
+    );
+  }
+}

@@ -87,6 +87,47 @@ export default function VisualStylesAdminPage() {
   };
 
   /**
+   * 處理文件刪除
+   */
+  const handleFileDelete = async (resourceType: string) => {
+    // 確認刪除
+    if (!confirm(`確定要刪除 ${resourceType} 資源嗎？此操作無法撤銷。`)) {
+      return;
+    }
+
+    setUploading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`/api/visual-styles/upload?styleId=${selectedStyle}&resourceType=${resourceType}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '刪除失敗');
+      }
+
+      const data = await response.json();
+      setMessage(`✅ ${resourceType} 刪除成功！`);
+
+      // 重新獲取資源列表
+      await fetchUploadedResources();
+
+      // 更新刷新鍵以強制重新渲染圖片
+      setRefreshKey(Date.now());
+
+      // 3 秒後清除消息
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('刪除錯誤:', error);
+      setMessage(`❌ 刪除失敗: ${error instanceof Error ? error.message : '未知錯誤'}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  /**
    * 處理文件選擇
    */
   const handleFileChange = (resourceType: string, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -194,35 +235,53 @@ export default function VisualStylesAdminPage() {
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(resource.id, e)}
                   >
-                    <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
-                      <div className="text-center">
-                        {/* 預覽圖片 */}
-                        {uploaded?.exists && uploaded.url ? (
-                          <div className="mb-2">
-                            <img
-                              key={`${resource.id}-${refreshKey}`}
-                              src={`${uploaded.url}?t=${refreshKey}`}
-                              alt={resource.name}
-                              className="w-24 h-24 object-contain mx-auto rounded-lg border border-gray-200"
-                            />
-                            <div className="text-xs text-green-600 mt-1">✅ 已上傳</div>
+                    <div className="relative">
+                      <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
+                        <div className="text-center">
+                          {/* 預覽圖片 */}
+                          {uploaded?.exists && uploaded.url ? (
+                            <div className="mb-2 relative">
+                              <img
+                                key={`${resource.id}-${refreshKey}`}
+                                src={`${uploaded.url}?t=${refreshKey}`}
+                                alt={resource.name}
+                                className="w-24 h-24 object-contain mx-auto rounded-lg border border-gray-200"
+                              />
+                              <div className="text-xs text-green-600 mt-1">✅ 已上傳</div>
+                            </div>
+                          ) : (
+                            <div className="text-4xl mb-2">
+                              {resource.id === 'spaceship' ? '🚀' : resource.id === 'bg_layer' ? '🖼️' : '☁️'}
+                            </div>
+                          )}
+                          <div className="text-sm font-medium text-gray-900 mb-2">
+                            {resource.name}
                           </div>
-                        ) : (
-                          <div className="text-4xl mb-2">
-                            {resource.id === 'spaceship' ? '🚀' : resource.id === 'bg_layer' ? '🖼️' : '☁️'}
+                          <div className="text-xs text-gray-500 mb-4">
+                            點擊上傳或拖放文件
                           </div>
-                        )}
-                        <div className="text-sm font-medium text-gray-900 mb-2">
-                          {resource.name}
+                          <div className="text-xs text-gray-400">
+                            支持 PNG, JPEG, WebP
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 mb-4">
-                          點擊上傳或拖放文件
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          支持 PNG, JPEG, WebP
-                        </div>
-                      </div>
-                    </label>
+                      </label>
+                      {/* 刪除按鈕 */}
+                      {uploaded?.exists && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFileDelete(resource.id);
+                          }}
+                          disabled={uploading}
+                          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="刪除資源"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
                     <input
                       id={`upload-${selectedStyle}-${resource.id}`}
                       type="file"
@@ -254,41 +313,59 @@ export default function VisualStylesAdminPage() {
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(resource.id, e)}
                   >
-                    <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">
-                          {resource.id === 'background' ? '🎵' : resource.id === 'hit' ? '💥' : '🎉'}
-                        </div>
-                        {/* 音效預覽 */}
-                        {uploaded?.exists && uploaded.url && (
-                          <div className="mb-2">
-                            <audio
-                              controls
-                              className="w-full max-w-xs mx-auto"
-                              src={uploaded.url}
-                            />
-                            <div className="text-xs text-green-600 mt-1">✅ 已上傳</div>
+                    <div className="relative">
+                      <label htmlFor={`upload-${selectedStyle}-${resource.id}`} className="cursor-pointer block">
+                        <div className="text-center">
+                          <div className="text-4xl mb-2">
+                            {resource.id === 'background' ? '🎵' : resource.id === 'hit' ? '💥' : '🎉'}
                           </div>
-                        )}
-                        <div className="text-sm font-medium text-gray-900 mb-2">
-                          {resource.name}
+                          {/* 音效預覽 */}
+                          {uploaded?.exists && uploaded.url && (
+                            <div className="mb-2">
+                              <audio
+                                controls
+                                className="w-full max-w-xs mx-auto"
+                                src={uploaded.url}
+                              />
+                              <div className="text-xs text-green-600 mt-1">✅ 已上傳</div>
+                            </div>
+                          )}
+                          <div className="text-sm font-medium text-gray-900 mb-2">
+                            {resource.name}
+                          </div>
+                          <div className="text-xs text-gray-500 mb-4">
+                            點擊上傳或拖放文件
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            支持 MP3, WAV, OGG
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 mb-4">
-                          點擊上傳或拖放文件
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          支持 MP3, WAV, OGG
-                        </div>
-                      </div>
-                    </label>
-                    <input
-                      id={`upload-${selectedStyle}-${resource.id}`}
-                      type="file"
-                      accept={resource.accept}
-                      onChange={(e) => handleFileChange(resource.id, e)}
-                      disabled={uploading}
-                      className="hidden"
-                    />
+                      </label>
+                      {/* 刪除按鈕 */}
+                      {uploaded?.exists && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFileDelete(resource.id);
+                          }}
+                          disabled={uploading}
+                          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="刪除資源"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
+                      <input
+                        id={`upload-${selectedStyle}-${resource.id}`}
+                        type="file"
+                        accept={resource.accept}
+                        onChange={(e) => handleFileChange(resource.id, e)}
+                        disabled={uploading}
+                        className="hidden"
+                      />
+                    </div>
                   </div>
                 );
               })}
