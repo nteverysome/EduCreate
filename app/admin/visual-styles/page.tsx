@@ -173,19 +173,19 @@ export default function VisualStylesAdminPage() {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             選擇視覺風格
           </h2>
-          <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-3">
+          <div className="grid grid-cols-7 gap-1">
             {VISUAL_STYLES.map((style) => (
               <button
                 key={style.id}
                 onClick={() => setSelectedStyle(style.id)}
-                className={`p-2 rounded-lg border-2 transition-all ${
+                className={`p-1 rounded border transition-all ${
                   selectedStyle === style.id
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="text-2xl mb-1">{style.displayName.split(' ')[0]}</div>
-                <div className="text-xs font-medium text-gray-900">
+                <div className="text-xl mb-1">{style.displayName.split(' ')[0]}</div>
+                <div className="text-xs font-medium text-gray-900 truncate">
                   {style.name}
                 </div>
               </button>
