@@ -1159,88 +1159,7 @@ const GameSwitcherPage: React.FC = () => {
           />
         </div>
 
-        {/* 遊戲選項面板 - 只在有活動ID時顯示 */}
-        {activityId && (
-          <div className="mb-4">
-            <GameOptionsPanel
-              options={gameOptions}
-              onChange={setGameOptions}
-            />
-            {/* 應用選項按鈕 */}
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                onClick={async () => {
-                  // 保存選項
-                  if (isSavingOptions) return; // 防止重複點擊
 
-                  setIsSavingOptions(true);
-                  try {
-                    console.log('🔍 開始保存遊戲選項:', gameOptions);
-
-                    const response = await fetch(`/api/activities/${activityId}`, {
-                      method: 'PUT',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        gameOptions,
-                      }),
-                    });
-
-                    if (response.ok) {
-                      const data = await response.json();
-                      console.log('✅ 選項保存成功:', data);
-
-                      // 顯示成功消息（使用更友好的提示）
-                      const successMessage = '✅ 選項已成功保存！\n\n' +
-                        '已保存的設置：\n' +
-                        `⏱️ 計時器: ${gameOptions.timer.type === 'none' ? '無' : gameOptions.timer.type === 'countUp' ? '正計時' : '倒計時'}\n` +
-                        `❤️ 生命值: ${gameOptions.lives} 條命\n` +
-                        `🎲 隨機順序: ${gameOptions.random ? '開啟' : '關閉'}\n` +
-                        `📝 顯示答案: ${gameOptions.showAnswers ? '開啟' : '關閉'}`;
-
-                      alert(successMessage);
-                    } else {
-                      const errorData = await response.json() as { error?: string };
-                      console.error('❌ 保存失敗:', errorData);
-
-                      // 顯示詳細錯誤信息
-                      const errorMessage = errorData.error || '未知錯誤';
-                      alert(`❌ 保存失敗\n\n錯誤原因: ${errorMessage}\n\n請稍後再試或聯繫技術支持。`);
-                    }
-                  } catch (error) {
-                    console.error('❌ 保存選項時出錯:', error);
-
-                    // 顯示網絡錯誤信息
-                    alert('❌ 保存失敗\n\n可能的原因：\n• 網絡連接中斷\n• 伺服器暫時無法訪問\n\n請檢查網絡連接後重試。');
-                  } finally {
-                    setIsSavingOptions(false);
-                  }
-                }}
-                disabled={isSavingOptions}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  isSavingOptions
-                    ? 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
-                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                {isSavingOptions ? '💾 保存中...' : '💾 保存選項'}
-              </button>
-              <button
-                onClick={() => {
-                  // 🔄 重新載入遊戲以應用選項
-                  // 通過更新 key 來強制重新渲染 GameSwitcher 組件
-                  // 這會重新創建 iframe 並應用新的 gameOptions
-                  setGameKey(prev => prev + 1);
-                  console.log('🔄 應用選項：重新載入遊戲');
-                }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                🔄 應用選項
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* SRS 學習面板 - 放在遊戲容器下面，只在沒有活動ID且顯示面板時顯示 */}
         {!activityId && !assignmentId && !isShared && showSRSPanel && (
@@ -1268,31 +1187,6 @@ const GameSwitcherPage: React.FC = () => {
               }
             />
           </div>
-        )}
-
-        {/* 增強版活動信息框 - 只在有 activityId 且不是學生模式時顯示 */}
-        {activityId && !assignmentId && !isShared && activityInfo && (
-          <EnhancedActivityInfoBox
-            activityId={activityId}
-            activityTitle={activityInfo.title}
-            templateType={activityInfo.templateType}
-            author={activityInfo.author}
-            originalAuthor={activityInfo.originalAuthor}
-            copiedFromActivityId={activityInfo.copiedFromActivityId}
-            tags={activityInfo.tags}
-            category={activityInfo.category}
-            geptLevel={activityInfo.geptLevel}
-            description={activityInfo.description}
-            createdAt={activityInfo.createdAt}
-            isOwner={isOwner}
-            onPrint={handlePrint}
-            onEmbed={handleEmbed}
-            onRename={handleRename}
-            onAssignment={handleAssignment}
-            onCopy={handleCopyActivity}
-            isCopying={isCopying}
-            onEditTags={handleEditTags}
-          />
         )}
 
         {/* 作業信息區域 - 只在有 activityId 且不是學生模式時顯示 */}
@@ -1448,8 +1342,116 @@ const GameSwitcherPage: React.FC = () => {
           </div>
         )}
 
+        {/* 增強版活動信息框 - 只在有 activityId 且不是學生模式時顯示 */}
+        {activityId && !assignmentId && !isShared && activityInfo && (
+          <EnhancedActivityInfoBox
+            activityId={activityId}
+            activityTitle={activityInfo.title}
+            templateType={activityInfo.templateType}
+            author={activityInfo.author}
+            originalAuthor={activityInfo.originalAuthor}
+            copiedFromActivityId={activityInfo.copiedFromActivityId}
+            tags={activityInfo.tags}
+            category={activityInfo.category}
+            geptLevel={activityInfo.geptLevel}
+            description={activityInfo.description}
+            createdAt={activityInfo.createdAt}
+            isOwner={isOwner}
+            onPrint={handlePrint}
+            onEmbed={handleEmbed}
+            onRename={handleRename}
+            onAssignment={handleAssignment}
+            onCopy={handleCopyActivity}
+            isCopying={isCopying}
+            onEditTags={handleEditTags}
+          />
+        )}
+
         {/* 統計和歷史 - 響應式網格佈局 */}
         <div className="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
+          {/* 遊戲選項面板 - 只在有活動ID時顯示 */}
+          {activityId && (
+            <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
+              <GameOptionsPanel
+                options={gameOptions}
+                onChange={setGameOptions}
+              />
+              {/* 應用選項按鈕 */}
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  onClick={async () => {
+                    // 保存選項
+                    if (isSavingOptions) return; // 防止重複點擊
+
+                    setIsSavingOptions(true);
+                    try {
+                      console.log('🔍 開始保存遊戲選項:', gameOptions);
+
+                      const response = await fetch(`/api/activities/${activityId}`, {
+                        method: 'PUT',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          gameOptions,
+                        }),
+                      });
+
+                      if (response.ok) {
+                        const data = await response.json();
+                        console.log('✅ 選項保存成功:', data);
+
+                        // 顯示成功消息（使用更友好的提示）
+                        const successMessage = '✅ 選項已成功保存！\n\n' +
+                          '已保存的設置：\n' +
+                          `⏱️ 計時器: ${gameOptions.timer.type === 'none' ? '無' : gameOptions.timer.type === 'countUp' ? '正計時' : '倒計時'}\n` +
+                          `❤️ 生命值: ${gameOptions.lives} 條命\n` +
+                          `🎲 隨機順序: ${gameOptions.random ? '開啟' : '關閉'}\n` +
+                          `📝 顯示答案: ${gameOptions.showAnswers ? '開啟' : '關閉'}`;
+
+                        alert(successMessage);
+                      } else {
+                        const errorData = await response.json() as { error?: string };
+                        console.error('❌ 保存失敗:', errorData);
+
+                        // 顯示詳細錯誤信息
+                        const errorMessage = errorData.error || '未知錯誤';
+                        alert(`❌ 保存失敗\n\n錯誤原因: ${errorMessage}\n\n請稍後再試或聯繫技術支持。`);
+                      }
+                    } catch (error) {
+                      console.error('❌ 保存選項時出錯:', error);
+
+                      // 顯示網絡錯誤信息
+                      alert('❌ 保存失敗\n\n可能的原因：\n• 網絡連接中斷\n• 伺服器暫時無法訪問\n\n請檢查網絡連接後重試。');
+                    } finally {
+                      setIsSavingOptions(false);
+                    }
+                  }}
+                  disabled={isSavingOptions}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isSavingOptions
+                      ? 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                      : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {isSavingOptions ? '💾 保存中...' : '💾 保存選項'}
+                </button>
+                <button
+                  onClick={() => {
+                    // 🔄 重新載入遊戲以應用選項
+                    // 通過更新 key 來強制重新渲染 GameSwitcher 組件
+                    // 這會重新創建 iframe 並應用新的 gameOptions
+                    setGameKey(prev => prev + 1);
+                    console.log('🔄 應用選項：重新載入遊戲');
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  🔄 應用選項
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* 學習統計 */}
           <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
             <h3 className="font-semibold text-gray-900 mb-3 md:mb-4">學習統計</h3>
