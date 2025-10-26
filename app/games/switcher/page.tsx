@@ -1434,55 +1434,6 @@ const GameSwitcherPage: React.FC = () => {
             </div>
           )}
 
-          {/* 學習統計 */}
-          <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
-            <h3 className="font-semibold text-gray-900 mb-3 md:mb-4">學習統計</h3>
-            <div className="space-y-3 md:space-y-4">
-              <div>
-                <div className="text-sm text-gray-500">總遊戲次數</div>
-                <div className="text-xl md:text-2xl font-bold text-blue-600">{gameStats.totalGamesPlayed}</div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-500">總學習時間</div>
-                <div className="text-base md:text-lg font-semibold text-gray-900">
-                  {formatTime(gameStats.totalTimeSpent)}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-500">平均分數</div>
-                <div className="text-base md:text-lg font-semibold text-gray-900">
-                  {Math.round(gameStats.averageScore)}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* GEPT 進度 */}
-          <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6">
-            <h3 className="font-semibold text-gray-900 mb-3 md:mb-4">GEPT 學習進度</h3>
-            <div className="space-y-3">
-              {Object.entries(gameStats.geptProgress).map(([level, progress]) => (
-                <div key={level}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">
-                      {level === 'elementary' ? '初級' : level === 'intermediate' ? '中級' : '高級'}
-                    </span>
-                    <span className="text-gray-900 font-medium">{Math.round(progress)}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        level === 'elementary' ? 'bg-green-500' :
-                        level === 'intermediate' ? 'bg-yellow-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* 遊戲歷史 */}
           {gameHistory.length > 0 && (
             <div className="stats-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 md:col-span-2 lg:col-span-1">
