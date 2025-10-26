@@ -143,6 +143,19 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     hidden: false  // 顯示在切換遊戲選單中
   },
   {
+    id: 'match-up-game',
+    name: 'match-up',
+    displayName: 'Match up 配對遊戲',
+    description: '拖動左側卡片到右側對應的答案框進行配對',
+    type: 'iframe',
+    memoryType: '關聯配對記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🎯',
+    estimatedLoadTime: 500,
+    hidden: false  // 顯示在切換遊戲選單中
+  },
+  {
     id: 'mars-game',
     name: 'mars',
     displayName: 'Mars 火星探險',
