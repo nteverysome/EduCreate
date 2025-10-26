@@ -48,7 +48,10 @@ const GameSwitcherPage: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { data: session } = useSession();
-  const [currentGameId, setCurrentGameId] = useState<string>('shimozurdo-game');
+  const [currentGameId, setCurrentGameId] = useState<string>(() => {
+    // 從 URL 參數讀取遊戲 ID，如果沒有則使用默認值
+    return searchParams?.get('game') || 'shimozurdo-game';
+  });
   const [currentGeptLevel, setCurrentGeptLevel] = useState<string>('elementary');
   const [showMobileGeptMenu, setShowMobileGeptMenu] = useState<boolean>(false);
 
