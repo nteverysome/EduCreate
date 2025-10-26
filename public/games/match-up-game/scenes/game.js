@@ -48,7 +48,7 @@ class GameScene extends Phaser.Scene {
         const cardWidth = 200;
         const cardHeight = 60;
         const leftX = 150;
-        const rightX = 510;
+        const rightX = 470;       // 從 510 改為 470（往左 40px）
         const leftStartY = 120;   // 左側起始位置（往下 20px）
         const rightStartY = 100;  // 右側起始位置（保持原位）
         const leftSpacing = 65;   // 左側間距：60 + 5 = 65（5px 距離）
