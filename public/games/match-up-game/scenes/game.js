@@ -671,20 +671,20 @@ class GameScene extends Phaser.Scene {
         }
 
         // 🔥 根據容器大小動態調整間距
-        // 英文卡片：不加文字高度
-        // 中文卡片：文字在框下邊，需要考慮卡片高度 + 文字高度 + 一個字的間距
+        // 英文卡片：加 cardHeight（回到 ba60a85 版本）
+        // 中文卡片：文字在框右邊，需要考慮卡片高度 + 文字高度 + 一個字的間距
         const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
         const oneCharSpacing = textHeight;  // 一個字的間距
 
         let leftSpacing, rightSpacing;
         if (isSmallContainer) {
-            leftSpacing = Math.max(3, height * 0.008);  // 🔥 英文卡片：不加 cardHeight 和文字高度
+            leftSpacing = cardHeight + Math.max(3, height * 0.008);  // 🔥 英文卡片：加 cardHeight（ba60a85 版本）
             rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(8, height * 0.02);
         } else if (isMediumContainer) {
-            leftSpacing = Math.max(4, height * 0.009);  // 🔥 英文卡片：不加 cardHeight 和文字高度
+            leftSpacing = cardHeight + Math.max(4, height * 0.009);  // 🔥 英文卡片：加 cardHeight（ba60a85 版本）
             rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(12, height * 0.025);
         } else {
-            leftSpacing = Math.max(5, height * 0.01);  // 🔥 英文卡片：不加 cardHeight 和文字高度
+            leftSpacing = cardHeight + Math.max(5, height * 0.01);  // 🔥 英文卡片：加 cardHeight（ba60a85 版本）
             rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(15, height * 0.03);
         }
 
