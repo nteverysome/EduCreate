@@ -17,34 +17,59 @@
             background: #000;
             overflow: hidden;
             font-family: Arial, sans-serif;
+
+            /* 🔥 強化網址列隱藏 - 動態視窗高度 */
             height: 100vh;
-            height: 100dvh;
+            height: 100dvh !important; /* 動態視窗高度，更準確 */
             position: fixed;
             width: 100%;
             top: 0;
             left: 0;
+            margin: 0;
+            padding: 0;
+            /* 🔥 確保 body 不攔截觸控事件 */
             pointer-events: none;
         }
 
         html {
             height: 100vh;
-            height: 100dvh;
+            height: 100dvh !important;
             overflow: hidden;
             position: fixed;
             width: 100%;
             margin: 0;
             padding: 0;
+            /* 🔥 確保 html 不攔截觸控事件 */
             pointer-events: none;
         }
 
-        #game-container {
-            width: 100vw;
-            height: 100dvh;
-            pointer-events: auto !important;
-            touch-action: manipulation !important;
+        /* 🔥 針對手機瀏覽器的額外強化 */
+        @media screen and (max-width: 768px) {
+            body, html {
+                height: 100vh !important;
+                height: 100dvh !important;
+                overflow: hidden !important;
+                position: fixed !important;
+                width: 100% !important;
+                top: 0 !important;
+                left: 0 !important;
+                /* 🔥 確保手機上 html 和 body 不攔截觸控事件 */
+                pointer-events: none !important;
+            }
         }
 
-        /* 全螢幕樣式 */
+        #game-container {
+            width: 100vw !important;
+            height: 100dvh !important;
+            /* 🔥 確保遊戲容器能接收觸控事件 */
+            pointer-events: auto !important;
+            touch-action: manipulation !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        /* 🔥 全螢幕樣式修復 - 跨瀏覽器支援 */
         #game-container:fullscreen {
             width: 100vw !important;
             height: 100vh !important;
@@ -69,9 +94,9 @@
             background: #000;
         }
 
-        /* 全螢幕按鈕 */
+        /* 🔥 全螢幕按鈕 - 在所有設備上都顯示 */
         .fullscreen-btn {
-            position: fixed !important;
+            position: fixed !important;  /* 改為 fixed，脫離容器限制 */
             top: 20px !important;
             right: 20px !important;
             width: 50px;
@@ -84,8 +109,8 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             transition: transform 0.1s;
             cursor: pointer;
-            z-index: 9999 !important;
-            display: block !important;
+            z-index: 9999 !important;  /* 確保在最上層 */
+            display: block !important;  /* 強制顯示 */
             color: white;
         }
 
@@ -114,6 +139,31 @@
 
     <!-- 全螢幕控制 JavaScript -->
     <script>
+        // 🔥 全域攔截層清理函數
+        function cleanupGlobalInterceptLayers() {
+            console.log('🧹 執行全域攔截層清理');
+
+            // 移除高 z-index 的覆蓋層
+            const overlays = document.querySelectorAll('div[style*="z-index:999999"], div[style*="z-index: 999999"]');
+            overlays.forEach(overlay => {
+                console.log('🗑️ 移除全域攔截層:', overlay);
+                overlay.remove();
+            });
+
+            // 移除可能攔截觸控的 CSS 類別
+            document.body.classList.remove('mobile-fullscreen', 'fullscreen-game', 'real-mobile-fullscreen');
+
+            // 確保遊戲容器和 Canvas 能接收觸控事件
+            const gameContainer = document.getElementById('game-container');
+            if (gameContainer) {
+                gameContainer.style.pointerEvents = 'auto';
+                gameContainer.style.touchAction = 'manipulation';
+            }
+
+            console.log('✅ 全域攔截層清理完成');
+        }
+
+        // 🔥 全螢幕控制器
         class FullscreenController {
             constructor() {
                 this.fullscreenBtn = document.querySelector('.fullscreen-btn');
@@ -154,8 +204,24 @@
             }
         }
 
-        // 初始化全螢幕控制器
+        // 🔥 頁面載入時立即清理攔截層
+        cleanupGlobalInterceptLayers();
+
+        // 🔥 初始化全螢幕控制器
         window.fullscreenController = new FullscreenController();
+
+        // 🔥 遊戲準備就緒時再次清理
+        window.addEventListener('load', cleanupGlobalInterceptLayers);
+
+        // 🔥 全螢幕變化時清理
+        document.addEventListener('fullscreenchange', cleanupGlobalInterceptLayers);
+
+        // 🔥 防止觸摸滾動
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        console.log('✅ Match-up 遊戲初始化完成');
     </script>
 </body>
 </html>
