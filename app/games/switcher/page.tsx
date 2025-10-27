@@ -1504,6 +1504,10 @@ const GameSwitcherPage: React.FC = () => {
                         // 如果是 Match-up 遊戲，添加 Match-up 專屬選項
                         if (currentGameId === 'match-up-game') {
                           successMessage += `\n\n🎮 Match-up 專屬選項：\n` +
+                            `⏱️ 計時器: ${matchUpOptions.timer.type === 'none' ? '無' : matchUpOptions.timer.type === 'countUp' ? '正計時' : `倒計時 ${matchUpOptions.timer.minutes}:${matchUpOptions.timer.seconds}`}\n` +
+                            `📐 佈局: ${matchUpOptions.layout === 'separated' ? '分離（左右）' : '混合'}\n` +
+                            `🎲 隨機: ${matchUpOptions.random === 'different' ? '每次不同' : '總是相同'}\n` +
+                            `📝 顯示答案: ${matchUpOptions.showAnswers ? '開啟' : '關閉'}\n` +
                             `📄 每頁匹配數: ${matchUpOptions.itemsPerPage}\n` +
                             `⏭️ 自動繼續: ${matchUpOptions.autoProceed ? '開啟' : '關閉'}`;
                         }

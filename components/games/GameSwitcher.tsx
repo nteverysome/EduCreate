@@ -419,6 +419,14 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       if (matchUpOptions && game.id === 'match-up-game') {
         url += `&itemsPerPage=${matchUpOptions.itemsPerPage}`;
         url += `&autoProceed=${matchUpOptions.autoProceed}`;
+        url += `&timerType=${matchUpOptions.timer.type}`;
+        if (matchUpOptions.timer.type === 'countDown') {
+          url += `&timerMinutes=${matchUpOptions.timer.minutes || 5}`;
+          url += `&timerSeconds=${matchUpOptions.timer.seconds || 0}`;
+        }
+        url += `&layout=${matchUpOptions.layout}`;
+        url += `&random=${matchUpOptions.random}`;
+        url += `&showAnswers=${matchUpOptions.showAnswers}`;
         console.log('🎮 Match-up 選項已添加到 URL:', matchUpOptions);
       }
     }
