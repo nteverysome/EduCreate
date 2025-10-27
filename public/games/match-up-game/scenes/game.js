@@ -671,21 +671,18 @@ class GameScene extends Phaser.Scene {
         }
 
         // 🔥 根據容器大小動態調整間距
-        // 英文卡片：加 cardHeight（回到 ba60a85 版本）
-        // 中文卡片：文字在框右邊，需要考慮卡片高度 + 文字高度 + 一個字的間距
-        const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
-        const oneCharSpacing = textHeight;  // 一個字的間距
-
+        // 英文卡片：加 cardHeight
+        // 中文卡片（3-5個匹配數）：只加 cardHeight（不加 textHeight + oneCharSpacing）
         let leftSpacing, rightSpacing;
         if (isSmallContainer) {
-            leftSpacing = cardHeight + Math.max(3, height * 0.008);  // 🔥 英文卡片：加 cardHeight（ba60a85 版本）
-            rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(8, height * 0.02);
+            leftSpacing = cardHeight + Math.max(3, height * 0.008);
+            rightSpacing = cardHeight + Math.max(8, height * 0.02);  // 🔥 3-5個：只加 cardHeight
         } else if (isMediumContainer) {
-            leftSpacing = cardHeight + Math.max(4, height * 0.009);  // 🔥 英文卡片：加 cardHeight（ba60a85 版本）
-            rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(12, height * 0.025);
+            leftSpacing = cardHeight + Math.max(4, height * 0.009);
+            rightSpacing = cardHeight + Math.max(12, height * 0.025);  // 🔥 3-5個：只加 cardHeight
         } else {
-            leftSpacing = cardHeight + Math.max(5, height * 0.01);  // 🔥 英文卡片：加 cardHeight（ba60a85 版本）
-            rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(15, height * 0.03);
+            leftSpacing = cardHeight + Math.max(5, height * 0.01);
+            rightSpacing = cardHeight + Math.max(15, height * 0.03);  // 🔥 3-5個：只加 cardHeight
         }
 
         console.log(`📏 間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px`);
