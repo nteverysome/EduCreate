@@ -169,6 +169,7 @@ export default function CreateGamePage() {
   const [showInstructions, setShowInstructions] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingActivityId, setEditingActivityId] = useState<string | null>(null);
+  const [actualGameTemplateId, setActualGameTemplateId] = useState<string | null>(null); // 🔥 新增：保存活動的實際 gameTemplateId
   const [isAssignmentMode, setIsAssignmentMode] = useState(false);
   const [assignmentId, setAssignmentId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | null>(null);
@@ -213,16 +214,9 @@ export default function CreateGamePage() {
       if (response.ok) {
         const activity = await response.json() as {
           title?: string;
-          vocabularyItems?: Array<{
-            english?: string;
-            word?: string;
-            chinese?: string;
-            translation?: string;
-            phonetic?: string;
-            imageUrl?: string;
-            audioUrl?: string;
-          }>;
+          gameTemplateId?: string; // 🔥 新增：讀取活動的 gameTemplateId
           content?: {
+            gameTemplateId?: string; // 🔥 新增：也可能存儲在 content 中
             vocabularyItems?: Array<{
               english?: string;
               word?: string;
@@ -233,8 +227,22 @@ export default function CreateGamePage() {
               audioUrl?: string;
             }>;
           };
+          vocabularyItems?: Array<{
+            english?: string;
+            word?: string;
+            chinese?: string;
+            translation?: string;
+            phonetic?: string;
+            imageUrl?: string;
+            audioUrl?: string;
+          }>;
         };
         setActivityTitle(activity.title || '無標題活動');
+
+        // 🔥 保存活動的實際 gameTemplateId（優先級：activity.gameTemplateId > activity.content.gameTemplateId > templateId）
+        const realGameTemplateId = activity.gameTemplateId || activity.content?.gameTemplateId || templateId;
+        setActualGameTemplateId(realGameTemplateId);
+        console.log('🎮 活動的實際 gameTemplateId:', realGameTemplateId, '(URL templateId:', templateId, ')');
 
         // 載入詞彙數據 - 支援新舊架構
         // 使用統一的詞彙載入工具函數
@@ -462,6 +470,10 @@ export default function CreateGamePage() {
       })), null, 2));
 
       if (isEditMode && editingActivityId) {
+        // 🔥 編輯模式：使用活動的實際 gameTemplateId 而不是 URL 的 templateId
+        const gameIdToUse = actualGameTemplateId || templateId;
+        console.log('💾 保存活動 - 使用 gameTemplateId:', gameIdToUse, '(actualGameTemplateId:', actualGameTemplateId, ', URL templateId:', templateId, ')');
+
         // 編輯模式：更新現有活動
         const response = await fetch(`/api/activities/${editingActivityId}`, {
           method: 'PUT',
@@ -470,7 +482,7 @@ export default function CreateGamePage() {
           },
           body: JSON.stringify({
             title: activityTitle,
-            gameTemplateId: templateId,
+            gameTemplateId: gameIdToUse, // 🔥 使用實際的 gameTemplateId
             vocabularyItems: filteredVocabulary,
             type: 'vocabulary_game',
             templateType: gameConfig.inputType,
@@ -480,8 +492,8 @@ export default function CreateGamePage() {
         if (response.ok) {
           const activity = await response.json() as { id?: string };
           alert('活動更新成功！');
-          // 跳轉到遊戲頁面，並傳遞活動 ID
-          router.push(`/games/switcher?game=${templateId}&activityId=${activity.id}`);
+          // 🔥 跳轉到遊戲頁面，使用實際的 gameTemplateId
+          router.push(`/games/switcher?game=${gameIdToUse}&activityId=${activity.id}`);
         } else {
           alert('更新失敗，請重試');
         }
