@@ -27,15 +27,13 @@ class GameScene extends Phaser.Scene {
 
             console.log('🔍 Match-up 遊戲 - URL 參數:', { activityId, customVocabulary });
 
-            // 如果沒有 activityId 或不使用自定義詞彙，使用默認數據
-            if (!activityId || customVocabulary !== 'true') {
-                console.log('ℹ️ 使用默認詞彙數據');
-                this.pairs = [
-                    { id: 1, question: 'book', answer: '書' },
-                    { id: 2, question: 'cat', answer: '貓' },
-                    { id: 3, question: 'dog', answer: '狗' }
-                ];
-                return true;
+            // 🔥 修復：必須提供 activityId，不使用默認數據
+            if (!activityId) {
+                throw new Error('❌ 缺少 activityId 參數，無法載入詞彙數據');
+            }
+
+            if (customVocabulary !== 'true') {
+                throw new Error('❌ 缺少 customVocabulary=true 參數，無法載入詞彙數據');
             }
 
             // 從 API 載入詞彙數據
@@ -77,24 +75,14 @@ class GameScene extends Phaser.Scene {
                 console.log('✅ 詞彙數據轉換完成:', this.pairs);
                 return true;
             } else {
-                console.warn('⚠️ 未找到詞彙數據，使用默認數據');
-                this.pairs = [
-                    { id: 1, question: 'book', answer: '書' },
-                    { id: 2, question: 'cat', answer: '貓' },
-                    { id: 3, question: 'dog', answer: '狗' }
-                ];
-                return true;
+                // 🔥 修復：不使用默認數據，拋出錯誤
+                throw new Error('❌ 活動中沒有詞彙數據，請先添加詞彙');
             }
         } catch (error) {
             console.error('❌ 載入詞彙數據失敗:', error);
             this.vocabularyLoadError = error.message;
-            // 使用默認數據作為後備
-            this.pairs = [
-                { id: 1, question: 'book', answer: '書' },
-                { id: 2, question: 'cat', answer: '貓' },
-                { id: 3, question: 'dog', answer: '狗' }
-            ];
-            return false;
+            // 🔥 修復：不使用默認數據，直接拋出錯誤
+            throw error;
         }
     }
 
@@ -128,35 +116,73 @@ class GameScene extends Phaser.Scene {
 
         console.log('🎮 GameScene: 開始載入詞彙數據');
 
-        // 載入詞彙數據
+        // 🔥 修復：使用 try-catch 處理錯誤
         this.isLoadingVocabulary = true;
-        const success = await this.loadVocabularyFromAPI();
-        this.isLoadingVocabulary = false;
+        let success = false;
 
-        console.log('🎮 GameScene: 詞彙數據載入完成', { success, pairsCount: this.pairs.length });
+        try {
+            success = await this.loadVocabularyFromAPI();
+            console.log('🎮 GameScene: 詞彙數據載入完成', { success, pairsCount: this.pairs.length });
+        } catch (error) {
+            console.error('❌ GameScene: 詞彙數據載入失敗', error);
+            this.vocabularyLoadError = error.message;
+            success = false;
+        }
+
+        this.isLoadingVocabulary = false;
 
         // 移除載入提示
         loadingText.destroy();
         console.log('🎮 GameScene: 載入文字已移除');
 
-        // 如果載入失敗，顯示錯誤信息
-        if (!success && this.vocabularyLoadError) {
+        // 🔥 修復：如果載入失敗，顯示錯誤信息並停止遊戲
+        if (!success || this.vocabularyLoadError) {
             console.warn('⚠️ GameScene: 顯示錯誤信息', this.vocabularyLoadError);
-            this.add.text(width / 2, height / 2 - 50, '載入詞彙失敗', {
-                fontSize: '24px',
+
+            // 顯示錯誤標題
+            this.add.text(width / 2, height / 2 - 80, '❌ 載入詞彙失敗', {
+                fontSize: '32px',
                 color: '#ff0000',
-                fontFamily: 'Arial'
+                fontFamily: 'Arial',
+                fontStyle: 'bold'
             }).setOrigin(0.5);
-            this.add.text(width / 2, height / 2, this.vocabularyLoadError, {
-                fontSize: '16px',
+
+            // 顯示錯誤訊息
+            this.add.text(width / 2, height / 2 - 20, this.vocabularyLoadError || '未知錯誤', {
+                fontSize: '18px',
                 color: '#666666',
-                fontFamily: 'Arial'
+                fontFamily: 'Arial',
+                align: 'center',
+                wordWrap: { width: width - 100 }
             }).setOrigin(0.5);
-            this.add.text(width / 2, height / 2 + 50, '使用默認詞彙', {
+
+            // 顯示解決方案
+            this.add.text(width / 2, height / 2 + 40, '請確認：', {
                 fontSize: '16px',
                 color: '#999999',
                 fontFamily: 'Arial'
             }).setOrigin(0.5);
+
+            this.add.text(width / 2, height / 2 + 70, '1. URL 包含正確的 activityId 參數', {
+                fontSize: '14px',
+                color: '#999999',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
+
+            this.add.text(width / 2, height / 2 + 95, '2. URL 包含 customVocabulary=true 參數', {
+                fontSize: '14px',
+                color: '#999999',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
+
+            this.add.text(width / 2, height / 2 + 120, '3. 活動中已添加詞彙數據', {
+                fontSize: '14px',
+                color: '#999999',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
+
+            // 停止遊戲，不繼續執行
+            return;
         }
 
         // 🔥 獲取 Handler 場景引用
