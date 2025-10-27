@@ -1512,6 +1512,7 @@ class GameScene extends Phaser.Scene {
         // 🔥 創建白色框（內框）
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
+        background.setDepth(1);
 
         // 🔥 創建文字標籤（在框下方，響應式字體大小）
         const fontSize = Math.max(24, Math.min(48, height * 0.6));
@@ -1522,6 +1523,7 @@ class GameScene extends Phaser.Scene {
             fontStyle: 'normal'
         });
         cardText.setOrigin(0.5, 0);  // 水平居中，頂部對齊
+        cardText.setDepth(10);  // 確保文字在最上層
 
         // 添加到容器
         container.add([background, cardText]);
