@@ -587,10 +587,69 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    // 🔥 創建分離佈局（左右分離）
+    // 🔥 創建分離佈局（左右分離 - 智能多列）
     createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
                           cardWidth, cardHeight, leftSpacing, rightSpacing) {
-        console.log('🎮 創建分離佈局');
+        console.log('🎮 創建智能多列分離佈局');
+
+        const width = this.scale.width;
+        const height = this.scale.height;
+        const itemCount = currentPagePairs.length;
+
+        // 🔥 根據匹配數計算列數
+        let columns = 1;
+        if (itemCount > 24) {
+            columns = 4;  // 25-30 個：4 列
+        } else if (itemCount > 16) {
+            columns = 3;  // 17-24 個：3 列
+        } else if (itemCount > 8) {
+            columns = 2;  // 9-16 個：2 列
+        }
+        // 1-8 個：1 列（默認）
+
+        console.log(`📊 匹配數: ${itemCount}, 使用 ${columns} 列佈局`);
+
+        // 🔥 根據列數調整卡片寬度
+        const dynamicCardWidth = {
+            1: Math.max(150, Math.min(250, width * 0.2)),   // 20% 寬度
+            2: Math.max(120, Math.min(180, width * 0.15)),  // 15% 寬度
+            3: Math.max(100, Math.min(140, width * 0.12)),  // 12% 寬度
+            4: Math.max(80, Math.min(120, width * 0.1))     // 10% 寬度
+        }[columns];
+
+        // 🔥 根據列數調整卡片高度
+        const dynamicCardHeight = {
+            1: Math.max(50, Math.min(80, height * 0.1)),    // 10% 高度
+            2: Math.max(45, Math.min(70, height * 0.09)),   // 9% 高度
+            3: Math.max(40, Math.min(60, height * 0.08)),   // 8% 高度
+            4: Math.max(35, Math.min(50, height * 0.07))    // 7% 高度
+        }[columns];
+
+        console.log(`📐 卡片尺寸: ${dynamicCardWidth} × ${dynamicCardHeight}`);
+
+        // 🔥 計算行數
+        const rows = Math.ceil(itemCount / columns);
+        console.log(`📊 行數: ${rows}`);
+
+        // 🔥 計算垂直間距
+        const availableHeight = height * 0.7;  // 使用 70% 的高度
+        const totalCardHeight = rows * dynamicCardHeight;
+        const verticalSpacing = Math.max(5, (availableHeight - totalCardHeight) / (rows + 1));
+
+        console.log(`📏 垂直間距: ${verticalSpacing}`);
+
+        // 🔥 計算水平間距
+        const horizontalSpacing = dynamicCardWidth * 0.15;  // 卡片寬度的 15%
+
+        // 🔥 計算左側區域的起始位置
+        const leftAreaWidth = columns * dynamicCardWidth + (columns - 1) * horizontalSpacing;
+        const leftAreaStartX = width * 0.15;  // 從 15% 位置開始
+
+        // 🔥 計算右側區域的起始位置
+        const rightAreaStartX = width * 0.55;  // 從 55% 位置開始
+
+        // 🔥 計算起始 Y 位置
+        const startY = height * 0.15;  // 從 15% 高度開始
 
         // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
@@ -610,22 +669,41 @@ class GameScene extends Phaser.Scene {
             console.log('🎲 使用隨機排列模式');
         }
 
-        // 創建左側外框（包圍所有左側卡片）
-        this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftSpacing, currentPagePairs.length);
+        // 🔥 創建左側外框（包圍所有左側卡片）
+        this.createMultiColumnContainerBox(
+            leftAreaStartX,
+            startY,
+            dynamicCardWidth,
+            dynamicCardHeight,
+            horizontalSpacing,
+            verticalSpacing,
+            columns,
+            rows
+        );
 
-        // 創建左側題目卡片（白色，5px 間距）
+        // 🔥 創建左側題目卡片（多列佈局）
         currentPagePairs.forEach((pair, index) => {
-            const y = leftStartY + index * leftSpacing;
-            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id);
+            const col = index % columns;
+            const row = Math.floor(index / columns);
+            const x = leftAreaStartX + col * (dynamicCardWidth + horizontalSpacing) + dynamicCardWidth / 2;
+            const y = startY + row * (dynamicCardHeight + verticalSpacing) + dynamicCardHeight / 2;
+
+            const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, pair.question, pair.id);
             this.leftCards.push(card);
         });
 
-        // 創建右側答案卡片（白色，20px 間距）
+        // 🔥 創建右側答案卡片（多列佈局）
         shuffledAnswers.forEach((pair, index) => {
-            const y = rightStartY + index * rightSpacing;
-            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id);
+            const col = index % columns;
+            const row = Math.floor(index / columns);
+            const x = rightAreaStartX + col * (dynamicCardWidth + horizontalSpacing) + dynamicCardWidth / 2;
+            const y = startY + row * (dynamicCardHeight + verticalSpacing) + dynamicCardHeight / 2;
+
+            const card = this.createRightCard(x, y, dynamicCardWidth, dynamicCardHeight, pair.answer, pair.id);
             this.rightCards.push(card);
         });
+
+        console.log('✅ 智能多列分離佈局創建完成');
     }
 
     // 🔥 創建混合佈局（所有卡片混合）
@@ -711,6 +789,34 @@ class GameScene extends Phaser.Scene {
         containerBox.setStrokeStyle(2, 0x333333);  // 黑色邊框
         containerBox.setFillStyle(0xffffff, 0);    // 透明填充
         containerBox.setDepth(0);  // 在卡片下層
+    }
+
+    // 🔥 創建多列外框（智能多列佈局）
+    createMultiColumnContainerBox(startX, startY, cardWidth, cardHeight, horizontalSpacing, verticalSpacing, columns, rows) {
+        const padding = 10;  // 外框與卡片之間的間距
+
+        // 計算外框的尺寸
+        const boxWidth = columns * cardWidth + (columns - 1) * horizontalSpacing + padding * 2;
+        const boxHeight = rows * cardHeight + (rows - 1) * verticalSpacing + padding * 2;
+
+        // 計算外框的中心位置
+        const boxCenterX = startX + (columns * cardWidth + (columns - 1) * horizontalSpacing) / 2;
+        const boxCenterY = startY + (rows * cardHeight + (rows - 1) * verticalSpacing) / 2;
+
+        // 創建外框
+        const containerBox = this.add.rectangle(boxCenterX, boxCenterY, boxWidth, boxHeight);
+        containerBox.setStrokeStyle(2, 0x333333);  // 黑色邊框
+        containerBox.setFillStyle(0xffffff, 0);    // 透明填充
+        containerBox.setDepth(0);  // 在卡片下層
+
+        console.log('📦 多列外框已創建:', {
+            columns,
+            rows,
+            boxWidth,
+            boxHeight,
+            centerX: boxCenterX,
+            centerY: boxCenterY
+        });
     }
 
     createLeftCard(x, y, width, height, text, pairId) {
