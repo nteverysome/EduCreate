@@ -762,7 +762,13 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 計算間距
         const horizontalSpacing = Math.max(5, width * 0.01);
-        const verticalSpacing = Math.max(5, height * 0.02);
+
+        // 🔥 計算文字高度和一個字的間距（用於下方中文卡片）
+        const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
+        const oneCharSpacing = textHeight;
+
+        // 🔥 垂直間距 = 文字高度 + 一個字的間距 + 額外間距
+        const verticalSpacing = textHeight + oneCharSpacing + Math.max(5, height * 0.02);
 
         // 🔥 計算上方區域（英文）的起始位置
         const topAreaStartX = (width - (columns * cardWidth + (columns - 1) * horizontalSpacing)) / 2;
@@ -871,7 +877,13 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 計算間距
         const horizontalSpacing = Math.max(5, width * 0.01);
-        const verticalSpacing = Math.max(3, height * 0.008);
+
+        // 🔥 計算文字高度和一個字的間距（用於右側中文卡片）
+        const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
+        const oneCharSpacing = textHeight;
+
+        // 🔥 垂直間距 = 文字高度 + 一個字的間距 + 額外間距
+        const verticalSpacing = textHeight + oneCharSpacing + Math.max(3, height * 0.008);
 
         // 🔥 計算左側區域（英文）的起始位置
         const leftAreaStartX = width * 0.08;
@@ -988,7 +1000,13 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 計算間距
         const horizontalSpacing = Math.max(3, width * 0.005);
-        const verticalSpacing = Math.max(3, height * 0.01);
+
+        // 🔥 計算文字高度和一個字的間距（用於下方中文卡片）
+        const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
+        const oneCharSpacing = textHeight;
+
+        // 🔥 垂直間距 = 文字高度 + 一個字的間距 + 額外間距
+        const verticalSpacing = textHeight + oneCharSpacing + Math.max(3, height * 0.01);
 
         // 🔥 計算上方區域（英文）的起始位置
         const topAreaStartX = (width - (columns * cardWidth + (columns - 1) * horizontalSpacing)) / 2;
