@@ -233,9 +233,7 @@ class GameScene extends Phaser.Scene {
         this.createCards();
         console.log('🎮 GameScene: 卡片創建完成');
 
-        console.log('🎮 GameScene: 創建重新開始按鈕');
-        // 添加重新開始按鈕
-        this.createRestartButton();
+        // 🔥 移除重新開始按鈕：用戶要求拿掉
         console.log('🎮 GameScene: updateLayout 完成');
     }
 
@@ -721,37 +719,6 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    createRestartButton() {
-        // 獲取當前螢幕尺寸
-        const width = this.scale.width;
-        const height = this.scale.height;
-
-        // 創建重新開始按鈕（響應式）
-        const fontSize = Math.max(16, Math.min(22, width * 0.018));
-        const button = this.add.text(width / 2, height * 0.85, '🔄 重新開始', {
-            fontSize: `${fontSize}px`,
-            color: '#fe7606',
-            fontFamily: 'Arial',
-            backgroundColor: '#fff3e0',
-            padding: { x: 20, y: 10 }
-        });
-        button.setOrigin(0.5);
-        button.setInteractive({ useHandCursor: true });
-
-        // 懸停效果
-        button.on('pointerover', () => {
-            button.setScale(1.05);
-            button.setStyle({ backgroundColor: '#ffe0b2' });
-        });
-        button.on('pointerout', () => {
-            button.setScale(1);
-            button.setStyle({ backgroundColor: '#fff3e0' });
-        });
-
-        // 點擊重新開始
-        button.on('pointerdown', () => {
-            this.scene.restart();
-        });
-    }
+    // � 移除 createRestartButton() 方法：用戶要求拿掉重新開始按鈕
 }
 
