@@ -129,8 +129,7 @@ class GameScene extends Phaser.Scene {
 
         // 拖曳開始
         container.on('dragstart', (pointer) => {
-            if (container.getData('isMatched')) return;
-
+            // 允許已配對的卡片也可以拖動
             this.isDragging = true;
             this.dragStartCard = container;
 
@@ -153,28 +152,51 @@ class GameScene extends Phaser.Scene {
         container.on('dragend', (pointer) => {
             this.isDragging = false;
 
-            // 先檢查是否拖曳到其他左側卡片（交換位置）
-            const swapped = this.checkSwap(pointer, container);
+            // 檢查是否拖回左側區域（取消配對）
+            const isInLeftArea = pointer.x < 300;  // 左側區域
 
-            if (!swapped) {
-                // 如果沒有交換，檢查是否拖曳到右側卡片
-                const dropped = this.checkDrop(pointer, container);
+            if (isInLeftArea && container.getData('isMatched')) {
+                // 取消配對
+                this.unmatchCard(container);
 
-                if (!dropped) {
-                    // 沒有放到正確位置，返回原位
-                    this.tweens.add({
-                        targets: container,
-                        x: container.getData('originalX'),
-                        y: container.getData('originalY'),
-                        scaleX: 1,
-                        scaleY: 1,
-                        duration: 300,
-                        ease: 'Back.easeOut',
-                        onComplete: () => {
-                            container.setDepth(5);
-                            background.setAlpha(1);
-                        }
-                    });
+                // 返回原位
+                this.tweens.add({
+                    targets: container,
+                    x: container.getData('originalX'),
+                    y: container.getData('originalY'),
+                    scaleX: 1,
+                    scaleY: 1,
+                    duration: 300,
+                    ease: 'Back.easeOut',
+                    onComplete: () => {
+                        container.setDepth(5);
+                        background.setAlpha(1);
+                    }
+                });
+            } else {
+                // 先檢查是否拖曳到其他左側卡片（交換位置）
+                const swapped = this.checkSwap(pointer, container);
+
+                if (!swapped) {
+                    // 如果沒有交換，檢查是否拖曳到右側卡片
+                    const dropped = this.checkDrop(pointer, container);
+
+                    if (!dropped) {
+                        // 沒有放到正確位置，返回原位
+                        this.tweens.add({
+                            targets: container,
+                            x: container.getData('originalX'),
+                            y: container.getData('originalY'),
+                            scaleX: 1,
+                            scaleY: 1,
+                            duration: 300,
+                            ease: 'Back.easeOut',
+                            onComplete: () => {
+                                container.setDepth(5);
+                                background.setAlpha(1);
+                            }
+                        });
+                    }
                 }
             }
 
@@ -339,7 +361,9 @@ class GameScene extends Phaser.Scene {
     onMatchSuccess(leftCard, rightCard) {
         // 標記為已配對
         leftCard.setData('isMatched', true);
+        leftCard.setData('matchedWith', rightCard);  // 記錄配對的右側卡片
         rightCard.setData('isMatched', true);
+        rightCard.setData('matchedWith', leftCard);  // 記錄配對的左側卡片
         this.matchedPairs.add(leftCard.getData('pairId'));
 
         // 左側卡片移動到右側空白框的位置（完全覆蓋）
@@ -358,8 +382,8 @@ class GameScene extends Phaser.Scene {
                 leftCard.setDepth(10);  // 提升到空白框上方
                 leftCard.getData('background').setAlpha(1);
 
-                // 隱藏右側空白框（因為被覆蓋了）
-                rightCard.getData('background').setVisible(false);
+                // 不隱藏右側空白框，保持可見（但在左側卡片下方）
+                // rightCard.getData('background').setVisible(false);  // 註釋掉這行
 
                 // 成功動畫
                 this.tweens.add({
@@ -378,6 +402,25 @@ class GameScene extends Phaser.Scene {
             this.time.delayedCall(800, () => {
                 this.onGameComplete();
             });
+        }
+    }
+
+    unmatchCard(leftCard) {
+        // 取消配對狀態
+        const rightCard = leftCard.getData('matchedWith');
+
+        if (rightCard) {
+            // 移除配對標記
+            leftCard.setData('isMatched', false);
+            leftCard.setData('matchedWith', null);
+            rightCard.setData('isMatched', false);
+            rightCard.setData('matchedWith', null);
+
+            // 從已配對集合中移除
+            this.matchedPairs.delete(leftCard.getData('pairId'));
+
+            // 顯示右側空白框（如果之前被隱藏）
+            rightCard.getData('background').setVisible(true);
         }
     }
 
