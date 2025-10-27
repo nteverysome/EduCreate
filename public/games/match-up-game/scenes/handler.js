@@ -25,10 +25,15 @@ class Handler extends Phaser.Scene {
      * 設定遊戲的初始狀態和啟動必要的場景
      */
     create() {
+        console.log('🎮 Handler: create 方法開始');
         // 設定主攝影機的背景顏色為白色（Match-up 遊戲主題）
         this.cameras.main.setBackgroundColor('#FFFFFF')
-        // 啟動預載場景，負責載入遊戲資源
-        this.launchScene('preload')
+        console.log('🎮 Handler: 背景顏色設定為白色');
+
+        // 🔥 修復：使用正確的場景鍵值 'PreloadScene'
+        console.log('🎮 Handler: 準備啟動 PreloadScene');
+        this.launchScene('PreloadScene')
+        console.log('🎮 Handler: PreloadScene 已啟動');
     }
 
     /**
@@ -37,17 +42,19 @@ class Handler extends Phaser.Scene {
      * @param {Object} data - 傳遞給場景的初始化數據（可選）
      */
     launchScene(scene, data) {
-        // 對於主要遊戲場景，使用 start 確保可見和活躍
-        if (scene === 'game') {
-            console.log(`🚀 啟動主要場景: ${scene}`);
-            this.scene.start(scene, data);
-        } else {
-            // 對於背景場景（如 preload），使用 launch 並行運行
-            console.log(`🔧 啟動背景場景: ${scene}`);
-            this.scene.launch(scene, data);
-        }
+        // 🔥 修復：對所有場景都使用 start 確保可見和活躍
+        console.log(`🚀 Handler: 啟動場景 ${scene}`);
+        this.scene.start(scene, data);
+
         // 獲取並保存場景實例的引用，方便後續操作
         this.gameScene = this.scene.get(scene)
+        // 保存當前運行的場景名稱
+        this.sceneRunning = scene
+
+        console.log(`✅ Handler: 場景 ${scene} 已啟動`, {
+            isActive: this.gameScene.scene.isActive(),
+            isVisible: this.gameScene.scene.isVisible()
+        });
     }
 
     /**
