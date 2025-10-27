@@ -1494,19 +1494,24 @@ const GameSwitcherPage: React.FC = () => {
                         const data = await response.json();
                         console.log('✅ 選項保存成功:', data);
 
-                        // 顯示成功消息（使用更友好的提示）
-                        let successMessage = '✅ 選項已成功保存！\n\n' +
-                          '已保存的設置：\n' +
-                          `🎨 視覺風格: ${gameOptions.visualStyle}\n` +
-                          `⏱️ 計時器: ${gameOptions.timer.type === 'none' ? '無' : gameOptions.timer.type === 'countUp' ? '正計時' : '倒計時'}\n` +
-                          `❤️ 生命值: ${gameOptions.lives} 條命\n` +
-                          `🎲 隨機順序: ${gameOptions.random ? '開啟' : '關閉'}\n` +
-                          `📝 顯示答案: ${gameOptions.showAnswers ? '開啟' : '關閉'}`;
+                        // 顯示成功消息（根據遊戲類型顯示不同的選項）
+                        let successMessage = '✅ 選項已成功保存！\n\n已保存的設置：\n';
 
-                        // 如果是 Match-up 遊戲，添加 Match-up 專屬選項
+                        // 視覺風格（所有遊戲共用）
+                        successMessage += `🎨 視覺風格: ${gameOptions.visualStyle}\n`;
+
+                        // 如果是 Shimozurdo 遊戲，顯示 Shimozurdo 選項
+                        if (currentGameId === 'shimozurdo-game') {
+                          successMessage += `⏱️ 計時器: ${gameOptions.timer.type === 'none' ? '無' : gameOptions.timer.type === 'countUp' ? '正計時' : '倒計時'}\n` +
+                            `❤️ 生命值: ${gameOptions.lives} 條命\n` +
+                            `⚡ 速度: ${gameOptions.speed}\n` +
+                            `🎲 隨機順序: ${gameOptions.random ? '開啟' : '關閉'}\n` +
+                            `📝 顯示答案: ${gameOptions.showAnswers ? '開啟' : '關閉'}`;
+                        }
+
+                        // 如果是 Match-up 遊戲，顯示 Match-up 選項
                         if (currentGameId === 'match-up-game') {
-                          successMessage += `\n\n🎮 Match-up 專屬選項：\n` +
-                            `⏱️ 計時器: ${matchUpOptions.timer.type === 'none' ? '無' : matchUpOptions.timer.type === 'countUp' ? '正計時' : `倒計時 ${matchUpOptions.timer.minutes}:${matchUpOptions.timer.seconds}`}\n` +
+                          successMessage += `⏱️ 計時器: ${matchUpOptions.timer.type === 'none' ? '無' : matchUpOptions.timer.type === 'countUp' ? '正計時' : `倒計時 ${matchUpOptions.timer.minutes}:${matchUpOptions.timer.seconds}`}\n` +
                             `📐 佈局: ${matchUpOptions.layout === 'separated' ? '分離（左右）' : '混合'}\n` +
                             `🎲 隨機: ${matchUpOptions.random === 'different' ? '每次不同' : '總是相同'}\n` +
                             `📝 顯示答案: ${matchUpOptions.showAnswers ? '開啟' : '關閉'}\n` +
