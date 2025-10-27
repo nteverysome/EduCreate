@@ -587,28 +587,28 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    // 🔥 創建分離佈局（1-5個左右分離，6個以上上下分離）
+    // 🔥 創建分離佈局（1-10個左右分離，11個以上混合網格）
     createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
                           cardWidth, cardHeight, leftSpacing, rightSpacing) {
         const width = this.scale.width;
         const height = this.scale.height;
         const itemCount = currentPagePairs.length;
 
-        // 🔥 判斷使用左右分離還是上下分離
-        if (itemCount <= 5) {
-            // 1-5 個：使用左右分離（單列）
-            console.log('🎮 使用左右分離佈局（1-5個匹配數）');
+        // 🔥 判斷使用左右分離還是混合網格
+        if (itemCount <= 10) {
+            // 1-10 個：使用左右分離（單列）
+            console.log('🎮 使用左右分離佈局（1-10個匹配數）');
             this.createLeftRightLayout(currentPagePairs, width, height);
         } else {
-            // 6 個以上：使用上下分離（多列）
-            console.log('🎮 使用上下分離佈局（6個以上匹配數）');
-            this.createTopBottomLayout(currentPagePairs, width, height);
+            // 11 個以上：使用混合網格（多列）
+            console.log('🎮 使用混合網格佈局（11個以上匹配數）');
+            this.createMixedGridLayout(currentPagePairs, width, height);
         }
     }
 
-    // 🔥 創建左右分離佈局（1-5個匹配數）
+    // 🔥 創建左右分離佈局（1-10個匹配數）
     createLeftRightLayout(currentPagePairs, width, height) {
-        console.log('📐 創建左右分離佈局（1-5個匹配數）');
+        console.log('📐 創建左右分離佈局（1-10個匹配數）');
 
         const itemCount = currentPagePairs.length;
 
@@ -711,64 +711,65 @@ class GameScene extends Phaser.Scene {
         console.log('✅ 左右分離佈局創建完成');
     }
 
-    // 🔥 創建上下分離佈局（6個以上匹配數）
-    createTopBottomLayout(currentPagePairs, width, height) {
-        console.log('📐 創建上下分離佈局（6個以上匹配數）');
+    // 🔥 創建混合網格佈局（11個以上匹配數）
+    createMixedGridLayout(currentPagePairs, width, height) {
+        console.log('📐 創建混合網格佈局（11個以上匹配數）');
 
         const itemCount = currentPagePairs.length;
+        const totalCards = itemCount * 2;  // 英文 + 中文
 
         // 🔥 檢測容器高度
         const isSmallContainer = height < 600;
         const isMediumContainer = height >= 600 && height < 800;
 
-        // 🔥 根據容器高度和匹配數計算列數
+        console.log(`📐 容器尺寸: ${width} × ${height}`, {
+            isSmallContainer,
+            isMediumContainer,
+            isLargeContainer: height >= 800,
+            totalCards
+        });
+
+        // 🔥 根據容器高度和總卡片數計算列數
         let columns = 1;
 
         if (isSmallContainer) {
             // 小容器（< 600px）：更早切換到多列
-            if (itemCount > 18) {
-                columns = 5;  // 19-30 個：5 列
-            } else if (itemCount > 12) {
-                columns = 4;  // 13-18 個：4 列
-            } else if (itemCount > 8) {
-                columns = 3;  // 9-12 個：3 列
+            if (totalCards > 40) {
+                columns = 5;  // 41-60 張卡片：5 列
+            } else if (totalCards > 30) {
+                columns = 4;  // 31-40 張卡片：4 列
             } else {
-                columns = 2;  // 6-8 個：2 列
+                columns = 3;  // 22-30 張卡片：3 列
             }
         } else if (isMediumContainer) {
             // 中等容器（600-800px）：適中的切換點
-            if (itemCount > 20) {
-                columns = 5;  // 21-30 個：5 列
-            } else if (itemCount > 15) {
-                columns = 4;  // 16-20 個：4 列
-            } else if (itemCount > 10) {
-                columns = 3;  // 11-15 個：3 列
+            if (totalCards > 48) {
+                columns = 6;  // 49-60 張卡片：6 列
+            } else if (totalCards > 36) {
+                columns = 5;  // 37-48 張卡片：5 列
+            } else if (totalCards > 24) {
+                columns = 4;  // 25-36 張卡片：4 列
             } else {
-                columns = 2;  // 6-10 個：2 列
+                columns = 3;  // 22-24 張卡片：3 列
             }
         } else {
             // 大容器（>= 800px）：較晚切換到多列
-            if (itemCount > 24) {
-                columns = 6;  // 25-30 個：6 列
-            } else if (itemCount > 18) {
-                columns = 5;  // 19-24 個：5 列
-            } else if (itemCount > 12) {
-                columns = 4;  // 13-18 個：4 列
-            } else if (itemCount > 8) {
-                columns = 3;  // 9-12 個：3 列
+            if (totalCards > 48) {
+                columns = 6;  // 49-60 張卡片：6 列
+            } else if (totalCards > 36) {
+                columns = 5;  // 37-48 張卡片：5 列
             } else {
-                columns = 2;  // 6-8 個：2 列
+                columns = 4;  // 22-36 張卡片：4 列
             }
         }
 
-        console.log(`📊 匹配數: ${itemCount}, 容器高度: ${height}px, 使用 ${columns} 列佈局`);
+        console.log(`📊 總卡片數: ${totalCards}, 容器高度: ${height}px, 使用 ${columns} 列佈局`);
 
         // 🔥 根據列數和容器大小調整卡片寬度
         let dynamicCardWidth;
         if (isSmallContainer) {
             // 小容器：更小的卡片
             dynamicCardWidth = {
-                2: Math.max(100, Math.min(150, width * 0.14)),   // 14% 寬度
                 3: Math.max(80, Math.min(120, width * 0.11)),    // 11% 寬度
                 4: Math.max(70, Math.min(100, width * 0.09)),    // 9% 寬度
                 5: Math.max(60, Math.min(85, width * 0.075))     // 7.5% 寬度
@@ -776,16 +777,14 @@ class GameScene extends Phaser.Scene {
         } else if (isMediumContainer) {
             // 中等容器：適中的卡片
             dynamicCardWidth = {
-                2: Math.max(110, Math.min(165, width * 0.145)),  // 14.5% 寬度
                 3: Math.max(90, Math.min(130, width * 0.115)),   // 11.5% 寬度
                 4: Math.max(75, Math.min(110, width * 0.095)),   // 9.5% 寬度
-                5: Math.max(65, Math.min(95, width * 0.08))      // 8% 寬度
+                5: Math.max(65, Math.min(95, width * 0.08)),     // 8% 寬度
+                6: Math.max(60, Math.min(85, width * 0.07))      // 7% 寬度
             }[columns];
         } else {
             // 大容器：較大的卡片
             dynamicCardWidth = {
-                2: Math.max(120, Math.min(180, width * 0.15)),   // 15% 寬度
-                3: Math.max(100, Math.min(140, width * 0.12)),   // 12% 寬度
                 4: Math.max(80, Math.min(120, width * 0.1)),     // 10% 寬度
                 5: Math.max(70, Math.min(100, width * 0.085)),   // 8.5% 寬度
                 6: Math.max(60, Math.min(90, width * 0.075))     // 7.5% 寬度
@@ -797,7 +796,6 @@ class GameScene extends Phaser.Scene {
         if (isSmallContainer) {
             // 小容器：更小的卡片高度
             dynamicCardHeight = {
-                2: Math.max(38, Math.min(58, height * 0.08)),    // 8% 高度
                 3: Math.max(35, Math.min(50, height * 0.07)),    // 7% 高度
                 4: Math.max(32, Math.min(45, height * 0.06)),    // 6% 高度
                 5: Math.max(30, Math.min(42, height * 0.055))    // 5.5% 高度
@@ -805,16 +803,14 @@ class GameScene extends Phaser.Scene {
         } else if (isMediumContainer) {
             // 中等容器：適中的卡片高度
             dynamicCardHeight = {
-                2: Math.max(42, Math.min(64, height * 0.085)),   // 8.5% 高度
                 3: Math.max(38, Math.min(55, height * 0.075)),   // 7.5% 高度
                 4: Math.max(34, Math.min(48, height * 0.065)),   // 6.5% 高度
-                5: Math.max(32, Math.min(45, height * 0.06))     // 6% 高度
+                5: Math.max(32, Math.min(45, height * 0.06)),    // 6% 高度
+                6: Math.max(30, Math.min(42, height * 0.055))    // 5.5% 高度
             }[columns];
         } else {
             // 大容器：較大的卡片高度
             dynamicCardHeight = {
-                2: Math.max(45, Math.min(70, height * 0.09)),    // 9% 高度
-                3: Math.max(40, Math.min(60, height * 0.08)),    // 8% 高度
                 4: Math.max(35, Math.min(50, height * 0.07)),    // 7% 高度
                 5: Math.max(33, Math.min(48, height * 0.065)),   // 6.5% 高度
                 6: Math.max(30, Math.min(45, height * 0.06))     // 6% 高度
@@ -823,8 +819,49 @@ class GameScene extends Phaser.Scene {
 
         console.log(`📐 卡片尺寸: ${dynamicCardWidth.toFixed(0)} × ${dynamicCardHeight.toFixed(0)}`);
 
+        // 🔥 創建所有卡片數據（英文 + 中文）
+        const allCards = [];
+
+        // 添加英文卡片
+        currentPagePairs.forEach((pair) => {
+            allCards.push({
+                type: 'question',
+                pair: pair,
+                text: pair.question,
+                pairId: pair.id
+            });
+        });
+
+        // 添加中文卡片
+        currentPagePairs.forEach((pair) => {
+            allCards.push({
+                type: 'answer',
+                pair: pair,
+                text: pair.answer,
+                pairId: pair.id
+            });
+        });
+
+        // 🔥 根據隨機模式排列所有卡片
+        let shuffledCards;
+        if (this.random === 'same') {
+            // 固定隨機模式：使用活動 ID 作為種子
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId') || 'default-seed';
+            const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+            // 使用固定種子創建隨機數生成器
+            const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
+            shuffledCards = rng.shuffle(allCards);
+            console.log('🎲 混合網格使用固定隨機模式，種子:', seed);
+        } else {
+            // 每次不同模式：隨機排列
+            shuffledCards = Phaser.Utils.Array.Shuffle(allCards);
+            console.log('🎲 混合網格使用隨機排列模式');
+        }
+
         // 🔥 計算行數
-        const rows = Math.ceil(itemCount / columns);
+        const rows = Math.ceil(totalCards / columns);
         console.log(`📊 行數: ${rows}`);
 
         // 🔥 根據容器高度動態調整可用空間和起始位置
@@ -832,16 +869,16 @@ class GameScene extends Phaser.Scene {
 
         if (isSmallContainer) {
             // 小容器：使用更多空間，更緊湊的佈局
-            availableHeightPercent = 0.80;  // 使用 80% 的高度
-            startYPercent = 0.08;  // 從 8% 高度開始
+            availableHeightPercent = 0.85;  // 使用 85% 的高度
+            startYPercent = 0.05;  // 從 5% 高度開始
         } else if (isMediumContainer) {
             // 中等容器：平衡的佈局
-            availableHeightPercent = 0.75;  // 使用 75% 的高度
-            startYPercent = 0.12;  // 從 12% 高度開始
+            availableHeightPercent = 0.80;  // 使用 80% 的高度
+            startYPercent = 0.08;  // 從 8% 高度開始
         } else {
             // 大容器：舒適的佈局
-            availableHeightPercent = 0.70;  // 使用 70% 的高度
-            startYPercent = 0.15;  // 從 15% 高度開始
+            availableHeightPercent = 0.75;  // 使用 75% 的高度
+            startYPercent = 0.12;  // 從 12% 高度開始
         }
 
         const availableHeight = height * availableHeightPercent;
@@ -863,87 +900,33 @@ class GameScene extends Phaser.Scene {
         // 🔥 計算水平間距
         const horizontalSpacing = Math.max(5, dynamicCardWidth * 0.08);  // 卡片寬度的 8%，最小 5px
 
-        // 🔥 計算上方區域（英文）的起始位置
-        const topAreaStartX = width * 0.05;  // 從 5% 位置開始
-        const topAreaStartY = height * 0.1;  // 從 10% 高度開始
+        // 🔥 計算網格起始位置
+        const gridStartX = width * 0.05;  // 從 5% 位置開始
+        const gridStartY = startY;
 
-        // 🔥 計算下方區域（中文）的起始位置
-        const bottomAreaStartX = width * 0.05;  // 從 5% 位置開始
-        const bottomAreaStartY = height * 0.55;  // 從 55% 高度開始
-
-        console.log(`📍 區域位置:`, {
-            topAreaStartX: topAreaStartX.toFixed(0),
-            topAreaStartY: topAreaStartY.toFixed(0),
-            bottomAreaStartX: bottomAreaStartX.toFixed(0),
-            bottomAreaStartY: bottomAreaStartY.toFixed(0),
+        console.log(`📍 網格位置:`, {
+            gridStartX: gridStartX.toFixed(0),
+            gridStartY: gridStartY.toFixed(0),
             horizontalSpacing: horizontalSpacing.toFixed(1)
         });
 
-        // 🔥 根據隨機模式排列答案
-        let shuffledAnswers;
-        if (this.random === 'same') {
-            // 固定隨機模式：使用活動 ID 作為種子
-            const urlParams = new URLSearchParams(window.location.search);
-            const activityId = urlParams.get('activityId') || 'default-seed';
-            const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-            // 使用固定種子創建隨機數生成器
-            const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
-            shuffledAnswers = rng.shuffle([...currentPagePairs]);
-            console.log('🎲 使用固定隨機模式，種子:', seed);
-        } else {
-            // 每次不同模式：隨機排列
-            shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('🎲 使用隨機排列模式');
-        }
-
-        // 🔥 創建上方外框（包圍所有英文卡片）
-        this.createMultiColumnContainerBox(
-            topAreaStartX,
-            topAreaStartY,
-            dynamicCardWidth,
-            dynamicCardHeight,
-            horizontalSpacing,
-            verticalSpacing,
-            columns,
-            rows
-        );
-
-        // 🔥 創建下方外框（包圍所有中文卡片）
-        this.createMultiColumnContainerBox(
-            bottomAreaStartX,
-            bottomAreaStartY,
-            dynamicCardWidth,
-            dynamicCardHeight,
-            horizontalSpacing,
-            verticalSpacing,
-            columns,
-            rows
-        );
-
-        // 🔥 創建上方英文卡片（多列佈局）
-        currentPagePairs.forEach((pair, index) => {
+        // 🔥 創建混合網格卡片
+        shuffledCards.forEach((cardData, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
-            const x = topAreaStartX + col * (dynamicCardWidth + horizontalSpacing) + dynamicCardWidth / 2;
-            const y = topAreaStartY + row * (dynamicCardHeight + verticalSpacing) + dynamicCardHeight / 2;
+            const x = gridStartX + col * (dynamicCardWidth + horizontalSpacing) + dynamicCardWidth / 2;
+            const y = gridStartY + row * (dynamicCardHeight + verticalSpacing) + dynamicCardHeight / 2;
 
-            const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, pair.question, pair.id);
-            this.leftCards.push(card);
+            if (cardData.type === 'question') {
+                const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId);
+                this.leftCards.push(card);
+            } else {
+                const card = this.createRightCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId);
+                this.rightCards.push(card);
+            }
         });
 
-        // 🔥 創建下方中文卡片（多列佈局）
-        shuffledAnswers.forEach((pair, index) => {
-            const col = index % columns;
-            const row = Math.floor(index / columns);
-            const x = bottomAreaStartX + col * (dynamicCardWidth + horizontalSpacing) + dynamicCardWidth / 2;
-            const y = bottomAreaStartY + row * (dynamicCardHeight + verticalSpacing) + dynamicCardHeight / 2;
-
-            const card = this.createRightCard(x, y, dynamicCardWidth, dynamicCardHeight, pair.answer, pair.id);
-            this.rightCards.push(card);
-        });
-
-        console.log('✅ 上下分離佈局創建完成');
+        console.log('✅ 混合網格佈局創建完成');
     }
 
     // 🔥 創建混合佈局（所有卡片混合）
