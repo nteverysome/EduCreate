@@ -26,12 +26,28 @@ class GameScene extends Phaser.Scene {
         this.isDragging = false;
         this.dragStartCard = null;
 
-        // 添加白色背景（Wordwall Classic 主題）
-        this.add.rectangle(330, 191.5, 660, 383, 0xffffff).setDepth(-1);
+        // 獲取當前螢幕尺寸
+        this.updateLayout();
 
-        // 添加標題
-        this.add.text(330, 30, 'Match up', {
-            fontSize: '24px',
+        // 監聽螢幕尺寸變化
+        this.scale.on('resize', this.handleResize, this);
+    }
+
+    updateLayout() {
+        // 清除所有現有元素
+        this.children.removeAll(true);
+
+        // 獲取當前螢幕尺寸
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 添加白色背景
+        this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
+
+        // 添加標題（響應式字體大小）
+        const titleFontSize = Math.max(20, Math.min(32, width * 0.025));
+        this.add.text(width / 2, height * 0.08, 'Match up', {
+            fontSize: `${titleFontSize}px`,
             color: '#333333',
             fontFamily: 'Arial',
             fontStyle: 'bold'
@@ -44,15 +60,29 @@ class GameScene extends Phaser.Scene {
         this.createRestartButton();
     }
 
+    handleResize(gameSize) {
+        // 螢幕尺寸改變時重新佈局
+        this.updateLayout();
+    }
+
     createCards() {
-        const cardWidth = 200;
-        const cardHeight = 60;
-        const leftX = 150;
-        const rightX = 390;       // 從 470 改為 390（再往左 80px，總共往左 120px）
-        const leftStartY = 120;   // 左側起始位置（往下 20px）
-        const rightStartY = 100;  // 右側起始位置（保持原位）
-        const leftSpacing = 65;   // 左側間距：60 + 5 = 65（5px 距離）
-        const rightSpacing = 80;  // 右側間距：60 + 20 = 80（20px 距離）
+        // 獲取當前螢幕尺寸
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 響應式卡片尺寸（根據螢幕寬度調整）
+        const cardWidth = Math.max(150, Math.min(250, width * 0.2));
+        const cardHeight = Math.max(50, Math.min(80, height * 0.1));
+
+        // 響應式位置（使用百分比）
+        const leftX = width * 0.25;        // 左側卡片在 25% 位置
+        const rightX = width * 0.65;       // 右側卡片在 65% 位置
+        const leftStartY = height * 0.25;  // 左側起始位置在 25% 高度
+        const rightStartY = height * 0.22; // 右側起始位置在 22% 高度
+
+        // 響應式間距
+        const leftSpacing = cardHeight + Math.max(5, height * 0.01);   // 卡片高度 + 5px 或 1% 高度
+        const rightSpacing = cardHeight + Math.max(15, height * 0.03); // 卡片高度 + 15px 或 3% 高度
 
         // 隨機排列答案
         const shuffledAnswers = Phaser.Utils.Array.Shuffle([...this.pairs]);
@@ -101,9 +131,10 @@ class GameScene extends Phaser.Scene {
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
 
-        // 創建卡片文字（黑色，放大一倍：20px → 40px）
+        // 創建卡片文字（響應式字體大小）
+        const fontSize = Math.max(24, Math.min(48, height * 0.6));
         const cardText = this.add.text(0, 0, text, {
-            fontSize: '40px',
+            fontSize: `${fontSize}px`,
             color: '#333333',
             fontFamily: 'Arial',
             fontStyle: 'normal'
@@ -152,8 +183,8 @@ class GameScene extends Phaser.Scene {
         container.on('dragend', (pointer) => {
             this.isDragging = false;
 
-            // 檢查是否拖回左側區域（取消配對）
-            const isInLeftArea = pointer.x < 300;  // 左側區域
+            // 檢查是否拖回左側區域（取消配對）- 使用螢幕寬度的 45% 作為分界線
+            const isInLeftArea = pointer.x < this.scale.width * 0.45;
 
             if (isInLeftArea && container.getData('isMatched')) {
                 // 取消配對
@@ -218,9 +249,10 @@ class GameScene extends Phaser.Scene {
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
 
-        // 創建文字標籤（在框外，右側）
+        // 創建文字標籤（在框外，右側，響應式字體大小）
+        const fontSize = Math.max(24, Math.min(48, height * 0.6));
         const cardText = this.add.text(width / 2 + 15, 0, text, {
-            fontSize: '40px',
+            fontSize: `${fontSize}px`,
             color: '#333333',
             fontFamily: 'Arial',
             fontStyle: 'normal'
@@ -459,9 +491,14 @@ class GameScene extends Phaser.Scene {
     }
 
     onGameComplete() {
-        // 顯示完成訊息（Wordwall Classic 主題）
-        const completeText = this.add.text(330, 191.5, '🎉 完成！', {
-            fontSize: '36px',
+        // 獲取當前螢幕尺寸
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 顯示完成訊息（響應式）
+        const fontSize = Math.max(28, Math.min(48, width * 0.035));
+        const completeText = this.add.text(width / 2, height / 2, '🎉 完成！', {
+            fontSize: `${fontSize}px`,
             color: '#4caf50',
             fontFamily: 'Arial',
             fontStyle: 'bold',
@@ -483,9 +520,14 @@ class GameScene extends Phaser.Scene {
     }
 
     createRestartButton() {
-        // 創建重新開始按鈕（Wordwall Classic 主題）
-        const button = this.add.text(330, 320, '🔄 重新開始', {
-            fontSize: '18px',
+        // 獲取當前螢幕尺寸
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 創建重新開始按鈕（響應式）
+        const fontSize = Math.max(16, Math.min(22, width * 0.018));
+        const button = this.add.text(width / 2, height * 0.85, '🔄 重新開始', {
+            fontSize: `${fontSize}px`,
             color: '#fe7606',
             fontFamily: 'Arial',
             backgroundColor: '#fff3e0',
