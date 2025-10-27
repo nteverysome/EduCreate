@@ -14,6 +14,7 @@ class GameScene extends Phaser.Scene {
         this.matchedPairs = new Set();
         this.isDragging = false;
         this.dragStartCard = null;
+        this.sceneStopped = false;  // 🔥 場景停止狀態標記
     }
 
     // 從 API 載入詞彙數據
@@ -140,6 +141,17 @@ class GameScene extends Phaser.Scene {
                 color: '#999999',
                 fontFamily: 'Arial'
             }).setOrigin(0.5);
+        }
+
+        // 🔥 獲取 Handler 場景引用
+        this.handlerScene = this.scene.get('handler');
+
+        // 🔥 調用 Handler 的 updateResize 方法設定響應式
+        if (this.handlerScene && this.handlerScene.updateResize) {
+            console.log('🎮 GameScene: 調用 Handler.updateResize');
+            this.handlerScene.updateResize(this);
+        } else {
+            console.warn('⚠️ GameScene: handlerScene 未初始化或 updateResize 方法不存在');
         }
 
         // 獲取當前螢幕尺寸

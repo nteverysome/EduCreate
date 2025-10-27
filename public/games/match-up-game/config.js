@@ -11,7 +11,7 @@ const config = {
     type: Phaser.AUTO,
     parent: 'game-container',
     backgroundColor: '#FFFFFF', // 白色背景（Wordwall Classic 主題）
-    scene: [PreloadScene, GameScene],
+    scene: [Handler, PreloadScene, GameScene],  // 🔥 添加 Handler 場景作為第一個場景
     scale: {
         mode: Phaser.Scale.RESIZE,  // 動態調整尺寸
         width: SIZE_WIDTH_SCREEN,
@@ -35,4 +35,18 @@ const config = {
 
 // 啟動遊戲
 const game = new Phaser.Game(config);
+
+// 🔥 設定遊戲的基準螢幕尺寸，用於響應式縮放計算
+game.screenBaseSize = {
+    maxWidth: MAX_SIZE_WIDTH_SCREEN,    // 最大寬度參考值
+    maxHeight: MAX_SIZE_HEIGHT_SCREEN,  // 最大高度參考值
+    minWidth: MIN_SIZE_WIDTH_SCREEN,    // 最小寬度參考值
+    minHeight: MIN_SIZE_HEIGHT_SCREEN,  // 最小高度參考值
+    width: SIZE_WIDTH_SCREEN,           // 基準寬度，用於縮放比例計算
+    height: SIZE_HEIGHT_SCREEN          // 基準高度，用於縮放比例計算
+}
+
+console.log('✅ Match-up 遊戲配置完成', {
+    screenBaseSize: game.screenBaseSize
+});
 

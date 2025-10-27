@@ -2,6 +2,7 @@
 class PreloadScene extends Phaser.Scene {
     constructor() {
         super({ key: 'PreloadScene' });
+        this.sceneStopped = false;  // 場景停止狀態標記
     }
 
     preload() {
@@ -23,6 +24,17 @@ class PreloadScene extends Phaser.Scene {
     }
 
     create() {
+        // 🔥 獲取 Handler 場景引用
+        this.handlerScene = this.scene.get('handler');
+
+        // 🔥 調用 Handler 的 updateResize 方法設定響應式
+        if (this.handlerScene && this.handlerScene.updateResize) {
+            console.log('🎮 PreloadScene: 調用 Handler.updateResize');
+            this.handlerScene.updateResize(this);
+        } else {
+            console.warn('⚠️ PreloadScene: handlerScene 未初始化或 updateResize 方法不存在');
+        }
+
         // 載入完成，切換到遊戲場景
         this.scene.start('GameScene');
     }
