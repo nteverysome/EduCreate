@@ -402,6 +402,7 @@ const GameSwitcherPage: React.FC = () => {
           geptLevel?: string;
           templateType?: string;
           gameOptions?: GameOptions;
+          matchUpOptions?: MatchUpOptions;  // 🔥 添加 Match-up 選項類型
           user?: {
             id: string;
             name: string;
@@ -447,6 +448,20 @@ const GameSwitcherPage: React.FC = () => {
         } else {
           setGameOptions(DEFAULT_GAME_OPTIONS);
           console.log('ℹ️ 使用默認遊戲選項');
+        }
+
+        // 🔥 載入 Match-up 遊戲選項
+        if (data.matchUpOptions) {
+          // 合併數據庫選項和默認選項，確保所有字段都有值
+          const mergedMatchUpOptions = {
+            ...DEFAULT_MATCH_UP_OPTIONS,
+            ...data.matchUpOptions,
+          };
+          setMatchUpOptions(mergedMatchUpOptions);
+          console.log('✅ Match-up 選項已載入:', mergedMatchUpOptions);
+        } else {
+          setMatchUpOptions(DEFAULT_MATCH_UP_OPTIONS);
+          console.log('ℹ️ 使用默認 Match-up 選項');
         }
 
         // 判斷是否是所有者
