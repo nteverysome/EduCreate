@@ -99,6 +99,14 @@ class GameScene extends Phaser.Scene {
     }
 
     async create() {
+        console.log('🎮 GameScene: create 方法開始');
+        console.log('🎮 GameScene: 場景尺寸', {
+            width: this.scale.width,
+            height: this.scale.height,
+            gameWidth: this.game.config.width,
+            gameHeight: this.game.config.height
+        });
+
         // 清空數組（防止重新開始時重複）
         this.leftCards = [];
         this.rightCards = [];
@@ -109,6 +117,8 @@ class GameScene extends Phaser.Scene {
         // 顯示載入提示
         const width = this.scale.width;
         const height = this.scale.height;
+        console.log('🎮 GameScene: 創建白色背景和載入文字', { width, height });
+
         this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
         const loadingText = this.add.text(width / 2, height / 2, '載入詞彙中...', {
             fontSize: '24px',
@@ -116,16 +126,22 @@ class GameScene extends Phaser.Scene {
             fontFamily: 'Arial'
         }).setOrigin(0.5);
 
+        console.log('🎮 GameScene: 開始載入詞彙數據');
+
         // 載入詞彙數據
         this.isLoadingVocabulary = true;
         const success = await this.loadVocabularyFromAPI();
         this.isLoadingVocabulary = false;
 
+        console.log('🎮 GameScene: 詞彙數據載入完成', { success, pairsCount: this.pairs.length });
+
         // 移除載入提示
         loadingText.destroy();
+        console.log('🎮 GameScene: 載入文字已移除');
 
         // 如果載入失敗，顯示錯誤信息
         if (!success && this.vocabularyLoadError) {
+            console.warn('⚠️ GameScene: 顯示錯誤信息', this.vocabularyLoadError);
             this.add.text(width / 2, height / 2 - 50, '載入詞彙失敗', {
                 fontSize: '24px',
                 color: '#ff0000',
@@ -145,6 +161,7 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 獲取 Handler 場景引用
         this.handlerScene = this.scene.get('handler');
+        console.log('🎮 GameScene: Handler 場景引用', this.handlerScene ? '✅ 存在' : '❌ 不存在');
 
         // 🔥 調用 Handler 的 updateResize 方法設定響應式
         if (this.handlerScene && this.handlerScene.updateResize) {
@@ -155,23 +172,35 @@ class GameScene extends Phaser.Scene {
         }
 
         // 獲取當前螢幕尺寸
+        console.log('🎮 GameScene: 調用 updateLayout');
         this.updateLayout();
+        console.log('🎮 GameScene: updateLayout 完成');
 
         // 監聽螢幕尺寸變化
         this.scale.on('resize', this.handleResize, this);
+        console.log('🎮 GameScene: create 方法完成');
     }
 
     updateLayout() {
+        console.log('🎮 GameScene: updateLayout 開始');
+        console.log('🎮 GameScene: 當前場景尺寸', {
+            width: this.scale.width,
+            height: this.scale.height
+        });
+
         // 清除所有現有元素
+        console.log('🎮 GameScene: 清除所有現有元素');
         this.children.removeAll(true);
 
         // 獲取當前螢幕尺寸
         const width = this.scale.width;
         const height = this.scale.height;
 
+        console.log('🎮 GameScene: 添加白色背景', { width, height });
         // 添加白色背景
         this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
 
+        console.log('🎮 GameScene: 添加標題');
         // 添加標題（響應式字體大小）
         const titleFontSize = Math.max(20, Math.min(32, width * 0.025));
         this.add.text(width / 2, height * 0.08, 'Match up', {
@@ -181,26 +210,38 @@ class GameScene extends Phaser.Scene {
             fontStyle: 'bold'
         }).setOrigin(0.5);
 
+        console.log('🎮 GameScene: 創建卡片');
         // 創建卡片
         this.createCards();
+        console.log('🎮 GameScene: 卡片創建完成');
 
+        console.log('🎮 GameScene: 創建重新開始按鈕');
         // 添加重新開始按鈕
         this.createRestartButton();
+        console.log('🎮 GameScene: updateLayout 完成');
     }
 
     handleResize(gameSize) {
+        console.log('🎮 GameScene: handleResize 觸發', gameSize);
         // 螢幕尺寸改變時重新佈局
         this.updateLayout();
     }
 
     createCards() {
+        console.log('🎮 GameScene: createCards 開始');
+        console.log('🎮 GameScene: pairs 數據', this.pairs);
+
         // 獲取當前螢幕尺寸
         const width = this.scale.width;
         const height = this.scale.height;
 
+        console.log('🎮 GameScene: 計算卡片尺寸和位置', { width, height });
+
         // 響應式卡片尺寸（根據螢幕寬度調整）
         const cardWidth = Math.max(150, Math.min(250, width * 0.2));
         const cardHeight = Math.max(50, Math.min(80, height * 0.1));
+
+        console.log('🎮 GameScene: 卡片尺寸', { cardWidth, cardHeight });
 
         // 響應式位置（使用百分比）
         const leftX = width * 0.25;        // 左側卡片在 25% 位置
@@ -208,28 +249,43 @@ class GameScene extends Phaser.Scene {
         const leftStartY = height * 0.25;  // 左側起始位置在 25% 高度
         const rightStartY = height * 0.22; // 右側起始位置在 22% 高度
 
+        console.log('🎮 GameScene: 卡片位置', { leftX, rightX, leftStartY, rightStartY });
+
         // 響應式間距
         const leftSpacing = cardHeight + Math.max(5, height * 0.01);   // 卡片高度 + 5px 或 1% 高度
         const rightSpacing = cardHeight + Math.max(15, height * 0.03); // 卡片高度 + 15px 或 3% 高度
 
+        console.log('🎮 GameScene: 卡片間距', { leftSpacing, rightSpacing });
+
         // 隨機排列答案
         const shuffledAnswers = Phaser.Utils.Array.Shuffle([...this.pairs]);
+        console.log('🎮 GameScene: 隨機排列答案完成');
 
         // 創建左側外框（包圍所有左側卡片）
+        console.log('🎮 GameScene: 創建左側外框');
         this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftSpacing, this.pairs.length);
 
         // 創建左側題目卡片（白色，5px 間距）
+        console.log('🎮 GameScene: 創建左側題目卡片', this.pairs.length, '個');
         this.pairs.forEach((pair, index) => {
             const y = leftStartY + index * leftSpacing;
             const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id);
             this.leftCards.push(card);
+            console.log(`🎮 GameScene: 左側卡片 ${index + 1}/${this.pairs.length} 創建完成`, pair.question);
         });
 
         // 創建右側答案卡片（白色，20px 間距）
+        console.log('🎮 GameScene: 創建右側答案卡片', shuffledAnswers.length, '個');
         shuffledAnswers.forEach((pair, index) => {
             const y = rightStartY + index * rightSpacing;
             const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id);
             this.rightCards.push(card);
+            console.log(`🎮 GameScene: 右側卡片 ${index + 1}/${shuffledAnswers.length} 創建完成`, pair.answer);
+        });
+
+        console.log('🎮 GameScene: createCards 完成', {
+            leftCardsCount: this.leftCards.length,
+            rightCardsCount: this.rightCards.length
         });
     }
 
