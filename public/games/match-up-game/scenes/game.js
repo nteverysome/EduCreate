@@ -649,26 +649,26 @@ class GameScene extends Phaser.Scene {
         console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
 
         // 🔥 根據容器大小動態調整位置
-        // 🔥 英文區域往右移動 20%
+        // 🔥 英文區域往右移動 20%，英文區和中文區都往下移動 10%
         let leftX, rightX, leftStartY, rightStartY;
         if (isSmallContainer) {
             // 小容器：更緊湊的佈局
             leftX = width * 0.42;  // 🔥 從 0.22 改為 0.42（+20%）
             rightX = width * 0.68;
-            leftStartY = height * 0.15;
-            rightStartY = height * 0.12;
+            leftStartY = height * 0.25;   // 🔥 從 0.15 改為 0.25（+10%）
+            rightStartY = height * 0.22;  // 🔥 從 0.12 改為 0.22（+10%）
         } else if (isMediumContainer) {
             // 中等容器：平衡的佈局
             leftX = width * 0.44;  // 🔥 從 0.24 改為 0.44（+20%）
             rightX = width * 0.66;
-            leftStartY = height * 0.2;
-            rightStartY = height * 0.17;
+            leftStartY = height * 0.3;    // 🔥 從 0.2 改為 0.3（+10%）
+            rightStartY = height * 0.27;  // 🔥 從 0.17 改為 0.27（+10%）
         } else {
             // 大容器：舒適的佈局
             leftX = width * 0.45;  // 🔥 從 0.25 改為 0.45（+20%）
             rightX = width * 0.65;
-            leftStartY = height * 0.25;
-            rightStartY = height * 0.22;
+            leftStartY = height * 0.35;   // 🔥 從 0.25 改為 0.35（+10%）
+            rightStartY = height * 0.32;  // 🔥 從 0.22 改為 0.32（+10%）
         }
 
         // 🔥 根據容器大小動態調整間距
