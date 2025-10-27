@@ -671,19 +671,20 @@ class GameScene extends Phaser.Scene {
         }
 
         // 🔥 根據容器大小動態調整間距
-        // 文字在框下邊，所以垂直間距需要考慮卡片高度 + 文字高度 + 一個字的間距
+        // 英文卡片：不加文字高度
+        // 中文卡片：文字在框下邊，需要考慮卡片高度 + 文字高度 + 一個字的間距
         const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
         const oneCharSpacing = textHeight;  // 一個字的間距
 
         let leftSpacing, rightSpacing;
         if (isSmallContainer) {
-            leftSpacing = cardHeight + Math.max(3, height * 0.008);
+            leftSpacing = Math.max(3, height * 0.008);  // 🔥 英文卡片：不加 cardHeight 和文字高度
             rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(8, height * 0.02);
         } else if (isMediumContainer) {
-            leftSpacing = cardHeight + Math.max(4, height * 0.009);
+            leftSpacing = Math.max(4, height * 0.009);  // 🔥 英文卡片：不加 cardHeight 和文字高度
             rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(12, height * 0.025);
         } else {
-            leftSpacing = cardHeight + Math.max(5, height * 0.01);
+            leftSpacing = Math.max(5, height * 0.01);  // 🔥 英文卡片：不加 cardHeight 和文字高度
             rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(15, height * 0.03);
         }
 
@@ -885,8 +886,11 @@ class GameScene extends Phaser.Scene {
         const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
         const oneCharSpacing = textHeight;
 
-        // 🔥 垂直間距 = 文字高度 + 一個字的間距 + 額外間距
-        const verticalSpacing = textHeight + oneCharSpacing + Math.max(3, height * 0.008);
+        // 🔥 英文卡片的垂直間距（不加文字高度）
+        const leftVerticalSpacing = Math.max(3, height * 0.008);
+
+        // 🔥 中文卡片的垂直間距（加文字高度 + 一個字的間距）
+        const rightVerticalSpacing = textHeight + oneCharSpacing + Math.max(3, height * 0.008);
 
         // 🔥 計算左側區域（英文）的起始位置
         const leftAreaStartX = width * 0.08;
@@ -924,7 +928,7 @@ class GameScene extends Phaser.Scene {
             cardWidth,
             cardHeight,
             horizontalSpacing,
-            verticalSpacing,
+            leftVerticalSpacing,  // 🔥 英文卡片使用 leftVerticalSpacing
             columns,
             rows
         );
@@ -936,7 +940,7 @@ class GameScene extends Phaser.Scene {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = leftAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = leftAreaStartY + row * (cardHeight + verticalSpacing) + cardHeight / 2;
+            const y = leftAreaStartY + row * (cardHeight + leftVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 leftVerticalSpacing
 
             const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id);
             this.leftCards.push(card);
@@ -947,7 +951,7 @@ class GameScene extends Phaser.Scene {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = rightAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = rightAreaStartY + row * (cardHeight + verticalSpacing) + cardHeight / 2;
+            const y = rightAreaStartY + row * (cardHeight + rightVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 rightVerticalSpacing
 
             const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id);
             this.rightCards.push(card);
