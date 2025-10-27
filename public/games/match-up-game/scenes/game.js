@@ -767,8 +767,11 @@ class GameScene extends Phaser.Scene {
         const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
         const oneCharSpacing = textHeight;
 
-        // 🔥 垂直間距 = 文字高度 + 一個字的間距 + 額外間距
-        const verticalSpacing = textHeight + oneCharSpacing + Math.max(5, height * 0.02);
+        // 🔥 英文卡片的垂直間距（不加文字高度）
+        const topVerticalSpacing = Math.max(5, height * 0.02);
+
+        // 🔥 中文卡片的垂直間距（加文字高度 + 一個字的間距）
+        const bottomVerticalSpacing = textHeight + oneCharSpacing + Math.max(5, height * 0.02);
 
         // 🔥 計算上方區域（英文）的起始位置
         const topAreaStartX = (width - (columns * cardWidth + (columns - 1) * horizontalSpacing)) / 2;
@@ -806,7 +809,7 @@ class GameScene extends Phaser.Scene {
             cardWidth,
             cardHeight,
             horizontalSpacing,
-            verticalSpacing,
+            topVerticalSpacing,  // 🔥 英文卡片使用 topVerticalSpacing
             columns,
             rows
         );
@@ -818,7 +821,7 @@ class GameScene extends Phaser.Scene {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = topAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = topAreaStartY + row * (cardHeight + verticalSpacing) + cardHeight / 2;
+            const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
 
             const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id);
             this.leftCards.push(card);
@@ -829,7 +832,7 @@ class GameScene extends Phaser.Scene {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = bottomAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = bottomAreaStartY + row * (cardHeight + verticalSpacing) + cardHeight / 2;
+            const y = bottomAreaStartY + row * (cardHeight + bottomVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 bottomVerticalSpacing
 
             const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id);
             this.rightCards.push(card);
@@ -1005,8 +1008,11 @@ class GameScene extends Phaser.Scene {
         const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
         const oneCharSpacing = textHeight;
 
-        // 🔥 垂直間距 = 文字高度 + 一個字的間距 + 額外間距
-        const verticalSpacing = textHeight + oneCharSpacing + Math.max(3, height * 0.01);
+        // 🔥 英文卡片的垂直間距（不加文字高度）
+        const topVerticalSpacing = Math.max(3, height * 0.01);
+
+        // 🔥 中文卡片的垂直間距（加文字高度 + 一個字的間距）
+        const bottomVerticalSpacing = textHeight + oneCharSpacing + Math.max(3, height * 0.01);
 
         // 🔥 計算上方區域（英文）的起始位置
         const topAreaStartX = (width - (columns * cardWidth + (columns - 1) * horizontalSpacing)) / 2;
@@ -1044,7 +1050,7 @@ class GameScene extends Phaser.Scene {
             cardWidth,
             cardHeight,
             horizontalSpacing,
-            verticalSpacing,
+            topVerticalSpacing,  // 🔥 英文卡片使用 topVerticalSpacing
             columns,
             rows
         );
@@ -1056,7 +1062,7 @@ class GameScene extends Phaser.Scene {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = topAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = topAreaStartY + row * (cardHeight + verticalSpacing) + cardHeight / 2;
+            const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
 
             const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id);
             this.leftCards.push(card);
@@ -1067,7 +1073,7 @@ class GameScene extends Phaser.Scene {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = bottomAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = bottomAreaStartY + row * (cardHeight + verticalSpacing) + cardHeight / 2;
+            const y = bottomAreaStartY + row * (cardHeight + bottomVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 bottomVerticalSpacing
 
             const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id);
             this.rightCards.push(card);
