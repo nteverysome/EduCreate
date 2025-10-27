@@ -1539,35 +1539,33 @@ class GameScene extends Phaser.Scene {
         const container = this.add.container(x, y);
         container.setDepth(5);
 
-        // 創建空白框（白色背景，黑色邊框）
-        const background = this.add.rectangle(0, 0, width, height, 0xffffff);
-        background.setStrokeStyle(2, 0x333333);
-
-        // 創建文字標籤（在框外，右側，響應式字體大小）
-        const fontSize = Math.max(24, Math.min(48, height * 0.6));
-        const cardText = this.add.text(width / 2 + 15, 0, text, {
+        // 🔥 只創建文字標籤（不要框）
+        const fontSize = Math.max(24, Math.min(48, height * 0.8));
+        const cardText = this.add.text(0, 0, text, {
             fontSize: `${fontSize}px`,
             color: '#333333',
             fontFamily: 'Arial',
-            fontStyle: 'normal'
+            fontStyle: 'bold'
         });
-        cardText.setOrigin(0, 0.5);  // 左對齊，垂直居中
+        cardText.setOrigin(0.5, 0.5);  // 居中對齊
 
         // 添加到容器
-        container.add([background, cardText]);
+        container.add([cardText]);
 
-        // 設置互動（接收拖曳）
-        background.setInteractive({ useHandCursor: true });
+        // 🔥 創建不可見的互動區域（用於接收拖曳）
+        const hitArea = this.add.rectangle(0, 0, width, height, 0xffffff, 0);
+        hitArea.setInteractive({ useHandCursor: true });
+        container.add(hitArea);
 
-        // 懸停效果
-        background.on('pointerover', () => {
+        // 懸停效果（改變文字顏色）
+        hitArea.on('pointerover', () => {
             if (!container.getData('isMatched') && this.isDragging) {
-                background.setStrokeStyle(3, 0xfe7606); // 橙色邊框
+                cardText.setColor('#fe7606'); // 橙色文字
             }
         });
-        background.on('pointerout', () => {
+        hitArea.on('pointerout', () => {
             if (!container.getData('isMatched')) {
-                background.setStrokeStyle(2, 0x333333);
+                cardText.setColor('#333333'); // 恢復黑色
             }
         });
 
@@ -1575,7 +1573,7 @@ class GameScene extends Phaser.Scene {
         container.setData({
             pairId: pairId,
             side: 'right',
-            background: background,
+            background: hitArea,
             text: cardText,
             isMatched: false
         });
