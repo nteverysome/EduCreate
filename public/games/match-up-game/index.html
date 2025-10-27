@@ -2,34 +2,161 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Match-up Game</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #1a1a1a;
-            font-family: Arial, sans-serif;
+            box-sizing: border-box;
         }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            height: 100dvh;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        html {
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            pointer-events: none;
+        }
+
         #game-container {
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            width: 100vw;
+            height: 100dvh;
+            pointer-events: auto !important;
+            touch-action: manipulation !important;
+        }
+
+        /* 全螢幕樣式 */
+        #game-container:fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            background: #000;
+        }
+
+        #game-container:-webkit-full-screen {
+            width: 100vw !important;
+            height: 100vh !important;
+            background: #000;
+        }
+
+        #game-container:-moz-full-screen {
+            width: 100vw !important;
+            height: 100vh !important;
+            background: #000;
+        }
+
+        #game-container:-ms-fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            background: #000;
+        }
+
+        /* 全螢幕按鈕 */
+        .fullscreen-btn {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            font-size: 24px;
+            pointer-events: all !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s;
+            cursor: pointer;
+            z-index: 9999 !important;
+            display: block !important;
+            color: white;
+        }
+
+        .fullscreen-btn:active {
+            transform: scale(0.95);
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
         }
     </style>
 </head>
 <body>
     <div id="game-container"></div>
-    
+
+    <!-- 全螢幕按鈕 -->
+    <button class="fullscreen-btn">⛶</button>
+
     <!-- Phaser 3 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-    
+
     <!-- Game Files -->
     <script src="/games/match-up-game/scenes/preload.js"></script>
     <script src="/games/match-up-game/scenes/game.js"></script>
     <script src="/games/match-up-game/config.js"></script>
+
+    <!-- 全螢幕控制 JavaScript -->
+    <script>
+        class FullscreenController {
+            constructor() {
+                this.fullscreenBtn = document.querySelector('.fullscreen-btn');
+                this.init();
+            }
+
+            init() {
+                if (!this.fullscreenBtn) {
+                    console.warn('⚠️ 全螢幕按鈕未找到');
+                    return;
+                }
+
+                this.fullscreenBtn.addEventListener('click', this.toggleFullscreen.bind(this));
+                console.log('✅ 全螢幕控制器初始化完成');
+            }
+
+            toggleFullscreen() {
+                console.log('🖥️ 全螢幕按鈕點擊');
+
+                // 發送 PostMessage 到父頁面
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'DUAL_FULLSCREEN_REQUEST',
+                        action: 'toggle',
+                        timestamp: Date.now(),
+                        source: 'match-up-fullscreen-button'
+                    }, '*');
+
+                    console.log('📤 已發送全螢幕請求到父頁面');
+                } else {
+                    // 備用方案：使用瀏覽器原生全螢幕 API
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen();
+                    } else {
+                        document.exitFullscreen();
+                    }
+                }
+            }
+        }
+
+        // 初始化全螢幕控制器
+        window.fullscreenController = new FullscreenController();
+    </script>
 </body>
 </html>
 
