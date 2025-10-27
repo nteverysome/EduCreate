@@ -778,7 +778,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       gameContainer.style.top = '0';
       gameContainer.style.left = '0';
       gameContainer.style.width = '100vw';
-      gameContainer.style.height = '100vh';
+      gameContainer.style.height = '100dvh'; // 🔥 修復：使用 100dvh 而不是 100vh
       gameContainer.style.zIndex = '9999';
       gameContainer.style.backgroundColor = '#000';
 
@@ -787,7 +787,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       iframe.style.top = '0'; // 完全填滿，不留上方空間
       iframe.style.left = '0';
       iframe.style.width = '100vw';
-      iframe.style.height = '100vh'; // 完全填滿螢幕高度
+      iframe.style.height = '100dvh'; // 🔥 修復：使用 100dvh 而不是 100vh
       iframe.style.border = 'none';
       iframe.style.borderRadius = '0';
       iframe.style.transform = ''; // 移除transform，使用top定位
