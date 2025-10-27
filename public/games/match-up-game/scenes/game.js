@@ -596,60 +596,162 @@ class GameScene extends Phaser.Scene {
         const height = this.scale.height;
         const itemCount = currentPagePairs.length;
 
-        // 🔥 根據匹配數計算列數
+        // 🔥 檢測容器高度，判斷是否為小容器
+        const isSmallContainer = height < 600;  // 小於 600px 視為小容器
+        const isMediumContainer = height >= 600 && height < 800;  // 600-800px 視為中等容器
+
+        console.log(`📐 容器尺寸: ${width} × ${height}`, {
+            isSmallContainer,
+            isMediumContainer,
+            isLargeContainer: height >= 800
+        });
+
+        // 🔥 根據容器高度和匹配數計算列數
         let columns = 1;
-        if (itemCount > 24) {
-            columns = 4;  // 25-30 個：4 列
-        } else if (itemCount > 16) {
-            columns = 3;  // 17-24 個：3 列
-        } else if (itemCount > 8) {
-            columns = 2;  // 9-16 個：2 列
+
+        if (isSmallContainer) {
+            // 小容器（< 600px）：更早切換到多列
+            if (itemCount > 20) {
+                columns = 4;  // 21-30 個：4 列
+            } else if (itemCount > 12) {
+                columns = 3;  // 13-20 個：3 列
+            } else if (itemCount > 6) {
+                columns = 2;  // 7-12 個：2 列
+            }
+            // 1-6 個：1 列
+        } else if (isMediumContainer) {
+            // 中等容器（600-800px）：適中的切換點
+            if (itemCount > 22) {
+                columns = 4;  // 23-30 個：4 列
+            } else if (itemCount > 14) {
+                columns = 3;  // 15-22 個：3 列
+            } else if (itemCount > 7) {
+                columns = 2;  // 8-14 個：2 列
+            }
+            // 1-7 個：1 列
+        } else {
+            // 大容器（>= 800px）：較晚切換到多列
+            if (itemCount > 24) {
+                columns = 4;  // 25-30 個：4 列
+            } else if (itemCount > 16) {
+                columns = 3;  // 17-24 個：3 列
+            } else if (itemCount > 8) {
+                columns = 2;  // 9-16 個：2 列
+            }
+            // 1-8 個：1 列
         }
-        // 1-8 個：1 列（默認）
 
-        console.log(`📊 匹配數: ${itemCount}, 使用 ${columns} 列佈局`);
+        console.log(`📊 匹配數: ${itemCount}, 容器高度: ${height}px, 使用 ${columns} 列佈局`);
 
-        // 🔥 根據列數調整卡片寬度
-        const dynamicCardWidth = {
-            1: Math.max(150, Math.min(250, width * 0.2)),   // 20% 寬度
-            2: Math.max(120, Math.min(180, width * 0.15)),  // 15% 寬度
-            3: Math.max(100, Math.min(140, width * 0.12)),  // 12% 寬度
-            4: Math.max(80, Math.min(120, width * 0.1))     // 10% 寬度
-        }[columns];
+        // 🔥 根據列數和容器大小調整卡片寬度
+        let dynamicCardWidth;
+        if (isSmallContainer) {
+            // 小容器：更小的卡片
+            dynamicCardWidth = {
+                1: Math.max(120, Math.min(200, width * 0.18)),   // 18% 寬度
+                2: Math.max(100, Math.min(150, width * 0.14)),   // 14% 寬度
+                3: Math.max(80, Math.min(120, width * 0.11)),    // 11% 寬度
+                4: Math.max(70, Math.min(100, width * 0.09))     // 9% 寬度
+            }[columns];
+        } else if (isMediumContainer) {
+            // 中等容器：適中的卡片
+            dynamicCardWidth = {
+                1: Math.max(140, Math.min(220, width * 0.19)),   // 19% 寬度
+                2: Math.max(110, Math.min(165, width * 0.145)),  // 14.5% 寬度
+                3: Math.max(90, Math.min(130, width * 0.115)),   // 11.5% 寬度
+                4: Math.max(75, Math.min(110, width * 0.095))    // 9.5% 寬度
+            }[columns];
+        } else {
+            // 大容器：較大的卡片
+            dynamicCardWidth = {
+                1: Math.max(150, Math.min(250, width * 0.2)),    // 20% 寬度
+                2: Math.max(120, Math.min(180, width * 0.15)),   // 15% 寬度
+                3: Math.max(100, Math.min(140, width * 0.12)),   // 12% 寬度
+                4: Math.max(80, Math.min(120, width * 0.1))      // 10% 寬度
+            }[columns];
+        }
 
-        // 🔥 根據列數調整卡片高度
-        const dynamicCardHeight = {
-            1: Math.max(50, Math.min(80, height * 0.1)),    // 10% 高度
-            2: Math.max(45, Math.min(70, height * 0.09)),   // 9% 高度
-            3: Math.max(40, Math.min(60, height * 0.08)),   // 8% 高度
-            4: Math.max(35, Math.min(50, height * 0.07))    // 7% 高度
-        }[columns];
+        // 🔥 根據列數和容器大小調整卡片高度
+        let dynamicCardHeight;
+        if (isSmallContainer) {
+            // 小容器：更小的卡片高度
+            dynamicCardHeight = {
+                1: Math.max(40, Math.min(65, height * 0.09)),    // 9% 高度
+                2: Math.max(38, Math.min(58, height * 0.08)),    // 8% 高度
+                3: Math.max(35, Math.min(50, height * 0.07)),    // 7% 高度
+                4: Math.max(32, Math.min(45, height * 0.06))     // 6% 高度
+            }[columns];
+        } else if (isMediumContainer) {
+            // 中等容器：適中的卡片高度
+            dynamicCardHeight = {
+                1: Math.max(45, Math.min(72, height * 0.095)),   // 9.5% 高度
+                2: Math.max(42, Math.min(64, height * 0.085)),   // 8.5% 高度
+                3: Math.max(38, Math.min(55, height * 0.075)),   // 7.5% 高度
+                4: Math.max(34, Math.min(48, height * 0.065))    // 6.5% 高度
+            }[columns];
+        } else {
+            // 大容器：較大的卡片高度
+            dynamicCardHeight = {
+                1: Math.max(50, Math.min(80, height * 0.1)),     // 10% 高度
+                2: Math.max(45, Math.min(70, height * 0.09)),    // 9% 高度
+                3: Math.max(40, Math.min(60, height * 0.08)),    // 8% 高度
+                4: Math.max(35, Math.min(50, height * 0.07))     // 7% 高度
+            }[columns];
+        }
 
-        console.log(`📐 卡片尺寸: ${dynamicCardWidth} × ${dynamicCardHeight}`);
+        console.log(`📐 卡片尺寸: ${dynamicCardWidth.toFixed(0)} × ${dynamicCardHeight.toFixed(0)}`);
 
         // 🔥 計算行數
         const rows = Math.ceil(itemCount / columns);
         console.log(`📊 行數: ${rows}`);
 
-        // 🔥 計算垂直間距
-        const availableHeight = height * 0.7;  // 使用 70% 的高度
-        const totalCardHeight = rows * dynamicCardHeight;
-        const verticalSpacing = Math.max(5, (availableHeight - totalCardHeight) / (rows + 1));
+        // 🔥 根據容器高度動態調整可用空間和起始位置
+        let availableHeightPercent, startYPercent;
 
-        console.log(`📏 垂直間距: ${verticalSpacing}`);
+        if (isSmallContainer) {
+            // 小容器：使用更多空間，更緊湊的佈局
+            availableHeightPercent = 0.80;  // 使用 80% 的高度
+            startYPercent = 0.08;  // 從 8% 高度開始
+        } else if (isMediumContainer) {
+            // 中等容器：平衡的佈局
+            availableHeightPercent = 0.75;  // 使用 75% 的高度
+            startYPercent = 0.12;  // 從 12% 高度開始
+        } else {
+            // 大容器：舒適的佈局
+            availableHeightPercent = 0.70;  // 使用 70% 的高度
+            startYPercent = 0.15;  // 從 15% 高度開始
+        }
+
+        const availableHeight = height * availableHeightPercent;
+        const startY = height * startYPercent;
+
+        console.log(`📐 佈局參數:`, {
+            availableHeight: availableHeight.toFixed(0),
+            startY: startY.toFixed(0),
+            availableHeightPercent: `${(availableHeightPercent * 100).toFixed(0)}%`,
+            startYPercent: `${(startYPercent * 100).toFixed(0)}%`
+        });
+
+        // 🔥 計算垂直間距
+        const totalCardHeight = rows * dynamicCardHeight;
+        const verticalSpacing = Math.max(3, (availableHeight - totalCardHeight) / (rows + 1));
+
+        console.log(`📏 垂直間距: ${verticalSpacing.toFixed(1)}px`);
 
         // 🔥 計算水平間距
-        const horizontalSpacing = dynamicCardWidth * 0.15;  // 卡片寬度的 15%
+        const horizontalSpacing = Math.max(5, dynamicCardWidth * 0.12);  // 卡片寬度的 12%，最小 5px
 
         // 🔥 計算左側區域的起始位置
-        const leftAreaWidth = columns * dynamicCardWidth + (columns - 1) * horizontalSpacing;
-        const leftAreaStartX = width * 0.15;  // 從 15% 位置開始
+        const leftAreaStartX = width * 0.12;  // 從 12% 位置開始（更靠左）
 
         // 🔥 計算右側區域的起始位置
-        const rightAreaStartX = width * 0.55;  // 從 55% 位置開始
+        const rightAreaStartX = width * 0.58;  // 從 58% 位置開始（更靠右）
 
-        // 🔥 計算起始 Y 位置
-        const startY = height * 0.15;  // 從 15% 高度開始
+        console.log(`📍 區域位置:`, {
+            leftAreaStartX: leftAreaStartX.toFixed(0),
+            rightAreaStartX: rightAreaStartX.toFixed(0),
+            horizontalSpacing: horizontalSpacing.toFixed(1)
+        });
 
         // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
