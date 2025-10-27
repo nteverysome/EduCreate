@@ -226,15 +226,7 @@ class GameScene extends Phaser.Scene {
         // 添加白色背景
         this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
 
-        console.log('🎮 GameScene: 添加標題');
-        // 添加標題（響應式字體大小）
-        const titleFontSize = Math.max(20, Math.min(32, width * 0.025));
-        this.add.text(width / 2, height * 0.08, 'Match up', {
-            fontSize: `${titleFontSize}px`,
-            color: '#333333',
-            fontFamily: 'Arial',
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        // 🔥 移除標題：用戶要求拿掉遊戲內的 "Match up" 標題
 
         console.log('🎮 GameScene: 創建卡片');
         // 創建卡片
