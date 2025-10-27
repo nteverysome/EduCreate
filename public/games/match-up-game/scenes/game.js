@@ -3,12 +3,10 @@ class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
 
-        // 配對數據
-        this.pairs = [
-            { id: 1, question: 'book', answer: '書' },
-            { id: 2, question: 'cat', answer: '貓' },
-            { id: 3, question: 'dog', answer: '狗' }
-        ];
+        // 配對數據（將從 API 載入）
+        this.pairs = [];
+        this.isLoadingVocabulary = false;
+        this.vocabularyLoadError = null;
 
         // 遊戲狀態
         this.leftCards = [];
@@ -18,13 +16,131 @@ class GameScene extends Phaser.Scene {
         this.dragStartCard = null;
     }
 
-    create() {
+    // 從 API 載入詞彙數據
+    async loadVocabularyFromAPI() {
+        try {
+            // 從 URL 參數獲取 activityId
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId');
+            const customVocabulary = urlParams.get('customVocabulary');
+
+            console.log('🔍 Match-up 遊戲 - URL 參數:', { activityId, customVocabulary });
+
+            // 如果沒有 activityId 或不使用自定義詞彙，使用默認數據
+            if (!activityId || customVocabulary !== 'true') {
+                console.log('ℹ️ 使用默認詞彙數據');
+                this.pairs = [
+                    { id: 1, question: 'book', answer: '書' },
+                    { id: 2, question: 'cat', answer: '貓' },
+                    { id: 3, question: 'dog', answer: '狗' }
+                ];
+                return true;
+            }
+
+            // 從 API 載入詞彙數據
+            console.log(`🔄 從 API 載入詞彙: /api/activities/${activityId}`);
+            const response = await fetch(`/api/activities/${activityId}`);
+
+            if (!response.ok) {
+                throw new Error(`API 請求失敗: ${response.status} ${response.statusText}`);
+            }
+
+            const activity = await response.json();
+            console.log('✅ 活動數據載入成功:', activity);
+
+            // 提取詞彙數據（支持多種數據源）
+            let vocabularyData = [];
+
+            if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems) && activity.vocabularyItems.length > 0) {
+                // 新架構：從關聯表中獲取詞彙數據
+                vocabularyData = activity.vocabularyItems;
+                console.log('📝 從 vocabularyItems 載入詞彙:', vocabularyData.length, '個');
+            } else if (activity.elements && Array.isArray(activity.elements) && activity.elements.length > 0) {
+                // 中間架構：從 elements 字段載入詞彙數據
+                vocabularyData = activity.elements;
+                console.log('📝 從 elements 載入詞彙:', vocabularyData.length, '個');
+            } else if (activity.content && activity.content.vocabularyItems && Array.isArray(activity.content.vocabularyItems)) {
+                // 舊架構：從 content 中獲取詞彙數據
+                vocabularyData = activity.content.vocabularyItems;
+                console.log('📝 從 content.vocabularyItems 載入詞彙:', vocabularyData.length, '個');
+            }
+
+            // 轉換為遊戲所需的格式
+            if (vocabularyData.length > 0) {
+                this.pairs = vocabularyData.map((item, index) => ({
+                    id: index + 1,
+                    question: item.english || item.word || '',
+                    answer: item.chinese || item.translation || ''
+                }));
+
+                console.log('✅ 詞彙數據轉換完成:', this.pairs);
+                return true;
+            } else {
+                console.warn('⚠️ 未找到詞彙數據，使用默認數據');
+                this.pairs = [
+                    { id: 1, question: 'book', answer: '書' },
+                    { id: 2, question: 'cat', answer: '貓' },
+                    { id: 3, question: 'dog', answer: '狗' }
+                ];
+                return true;
+            }
+        } catch (error) {
+            console.error('❌ 載入詞彙數據失敗:', error);
+            this.vocabularyLoadError = error.message;
+            // 使用默認數據作為後備
+            this.pairs = [
+                { id: 1, question: 'book', answer: '書' },
+                { id: 2, question: 'cat', answer: '貓' },
+                { id: 3, question: 'dog', answer: '狗' }
+            ];
+            return false;
+        }
+    }
+
+    async create() {
         // 清空數組（防止重新開始時重複）
         this.leftCards = [];
         this.rightCards = [];
         this.matchedPairs = new Set();
         this.isDragging = false;
         this.dragStartCard = null;
+
+        // 顯示載入提示
+        const width = this.scale.width;
+        const height = this.scale.height;
+        this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
+        const loadingText = this.add.text(width / 2, height / 2, '載入詞彙中...', {
+            fontSize: '24px',
+            color: '#333333',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5);
+
+        // 載入詞彙數據
+        this.isLoadingVocabulary = true;
+        const success = await this.loadVocabularyFromAPI();
+        this.isLoadingVocabulary = false;
+
+        // 移除載入提示
+        loadingText.destroy();
+
+        // 如果載入失敗，顯示錯誤信息
+        if (!success && this.vocabularyLoadError) {
+            this.add.text(width / 2, height / 2 - 50, '載入詞彙失敗', {
+                fontSize: '24px',
+                color: '#ff0000',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
+            this.add.text(width / 2, height / 2, this.vocabularyLoadError, {
+                fontSize: '16px',
+                color: '#666666',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
+            this.add.text(width / 2, height / 2 + 50, '使用默認詞彙', {
+                fontSize: '16px',
+                color: '#999999',
+                fontFamily: 'Arial'
+            }).setOrigin(0.5);
+        }
 
         // 獲取當前螢幕尺寸
         this.updateLayout();
