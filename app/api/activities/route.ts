@@ -43,7 +43,6 @@ function getGameDisplayName(gameTemplateId: string): string {
     'matching': '配對遊戲',
     'flashcards': '單字卡片',
     'flashcard': '單字卡片',
-    'vocabulary': '詞彙遊戲',
   };
 
   return gameTypeMap[gameTemplateId] || gameTemplateId;
