@@ -612,19 +612,70 @@ class GameScene extends Phaser.Scene {
 
         const itemCount = currentPagePairs.length;
 
-        // 響應式卡片尺寸
-        const cardWidth = Math.max(150, Math.min(250, width * 0.2));
-        const cardHeight = Math.max(50, Math.min(80, height * 0.1));
+        // 🔥 檢測容器高度
+        const isSmallContainer = height < 600;
+        const isMediumContainer = height >= 600 && height < 800;
 
-        // 響應式位置
-        const leftX = width * 0.25;        // 左側卡片在 25% 位置
-        const rightX = width * 0.65;       // 右側卡片在 65% 位置
-        const leftStartY = height * 0.25;  // 左側起始位置在 25% 高度
-        const rightStartY = height * 0.22; // 右側起始位置在 22% 高度
+        console.log(`📐 容器尺寸: ${width} × ${height}`, {
+            isSmallContainer,
+            isMediumContainer,
+            isLargeContainer: height >= 800
+        });
 
-        // 響應式間距
-        const leftSpacing = cardHeight + Math.max(5, height * 0.01);   // 卡片高度 + 5px 或 1% 高度
-        const rightSpacing = cardHeight + Math.max(15, height * 0.03); // 卡片高度 + 15px 或 3% 高度
+        // 🔥 根據容器大小動態調整卡片尺寸
+        let cardWidth, cardHeight;
+        if (isSmallContainer) {
+            // 小容器：更小的卡片
+            cardWidth = Math.max(120, Math.min(200, width * 0.18));
+            cardHeight = Math.max(40, Math.min(65, height * 0.09));
+        } else if (isMediumContainer) {
+            // 中等容器：適中的卡片
+            cardWidth = Math.max(140, Math.min(220, width * 0.19));
+            cardHeight = Math.max(45, Math.min(72, height * 0.095));
+        } else {
+            // 大容器：較大的卡片
+            cardWidth = Math.max(150, Math.min(250, width * 0.2));
+            cardHeight = Math.max(50, Math.min(80, height * 0.1));
+        }
+
+        console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
+
+        // 🔥 根據容器大小動態調整位置
+        let leftX, rightX, leftStartY, rightStartY;
+        if (isSmallContainer) {
+            // 小容器：更緊湊的佈局
+            leftX = width * 0.22;
+            rightX = width * 0.68;
+            leftStartY = height * 0.15;
+            rightStartY = height * 0.12;
+        } else if (isMediumContainer) {
+            // 中等容器：平衡的佈局
+            leftX = width * 0.24;
+            rightX = width * 0.66;
+            leftStartY = height * 0.2;
+            rightStartY = height * 0.17;
+        } else {
+            // 大容器：舒適的佈局
+            leftX = width * 0.25;
+            rightX = width * 0.65;
+            leftStartY = height * 0.25;
+            rightStartY = height * 0.22;
+        }
+
+        // 🔥 根據容器大小動態調整間距
+        let leftSpacing, rightSpacing;
+        if (isSmallContainer) {
+            leftSpacing = cardHeight + Math.max(3, height * 0.008);
+            rightSpacing = cardHeight + Math.max(8, height * 0.02);
+        } else if (isMediumContainer) {
+            leftSpacing = cardHeight + Math.max(4, height * 0.009);
+            rightSpacing = cardHeight + Math.max(12, height * 0.025);
+        } else {
+            leftSpacing = cardHeight + Math.max(5, height * 0.01);
+            rightSpacing = cardHeight + Math.max(15, height * 0.03);
+        }
+
+        console.log(`📏 間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px`);
 
         // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
