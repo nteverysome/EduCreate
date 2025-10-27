@@ -134,7 +134,7 @@ const gameTemplateConfig = {
     icon: '🎯',
     category: '關聯配對記憶',
     minItems: 1,
-    maxItems: 100,
+    maxItems: 30,
     inputType: 'vocabulary'
   },
   // 默認配置
