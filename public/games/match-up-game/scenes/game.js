@@ -620,19 +620,27 @@ class GameScene extends Phaser.Scene {
 
         const itemCount = currentPagePairs.length;
 
-        // 🔥 檢測容器高度
+        // 🔥 檢測容器高度和手機橫向模式
         const isSmallContainer = height < 600;
         const isMediumContainer = height >= 600 && height < 800;
+        const isLandscapeMobile = width > height && height < 450;  // 🔥 手機橫向模式
 
         console.log(`📐 容器尺寸: ${width} × ${height}`, {
             isSmallContainer,
             isMediumContainer,
-            isLargeContainer: height >= 800
+            isLargeContainer: height >= 800,
+            isLandscapeMobile  // 🔥 顯示是否為手機橫向模式
         });
 
         // 🔥 根據容器大小動態調整卡片尺寸
         let cardWidth, cardHeight;
-        if (isSmallContainer) {
+
+        if (isLandscapeMobile) {
+            // 🔥 手機橫向模式：使用超緊湊佈局
+            cardWidth = Math.max(100, Math.min(150, width * 0.15));
+            cardHeight = Math.max(28, Math.min(40, height * 0.08));
+            console.log('📱 手機橫向模式：使用超緊湊佈局');
+        } else if (isSmallContainer) {
             // 小容器：更小的卡片
             cardWidth = Math.max(120, Math.min(200, width * 0.18));
             cardHeight = Math.max(40, Math.min(65, height * 0.09));
@@ -651,7 +659,14 @@ class GameScene extends Phaser.Scene {
         // 🔥 根據容器大小動態調整位置
         // 🔥 英文區域往右移動 20%，英文區和中文區都往下移動 10%
         let leftX, rightX, leftStartY, rightStartY;
-        if (isSmallContainer) {
+
+        if (isLandscapeMobile) {
+            // 🔥 手機橫向模式：更緊湊的位置
+            leftX = width * 0.38;
+            rightX = width * 0.70;
+            leftStartY = height * 0.15;
+            rightStartY = height * 0.12;
+        } else if (isSmallContainer) {
             // 小容器：更緊湊的佈局
             leftX = width * 0.42;  // 🔥 從 0.22 改為 0.42（+20%）
             rightX = width * 0.68;
@@ -675,7 +690,16 @@ class GameScene extends Phaser.Scene {
         // 英文卡片：加 cardHeight
         // 中文卡片（3-5個匹配數）：只加 cardHeight（不加 textHeight + oneCharSpacing）
         let leftSpacing, rightSpacing;
-        if (isSmallContainer) {
+
+        if (isLandscapeMobile) {
+            // 🔥 手機橫向模式：計算最大可用高度，確保所有卡片都能顯示
+            const availableHeight = height * 0.75;  // 使用 75% 的高度
+            const maxSpacing = (availableHeight - cardHeight * itemCount) / (itemCount - 1);
+
+            leftSpacing = Math.max(18, Math.min(maxSpacing, cardHeight + 3));
+            rightSpacing = Math.max(18, Math.min(maxSpacing, cardHeight + 5));
+            console.log(`📱 手機橫向間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px, 可用高度=${availableHeight.toFixed(0)}px`);
+        } else if (isSmallContainer) {
             leftSpacing = cardHeight + Math.max(3, height * 0.008);
             rightSpacing = cardHeight + Math.max(8, height * 0.02);  // 🔥 3-5個：只加 cardHeight
         } else if (isMediumContainer) {
@@ -686,7 +710,9 @@ class GameScene extends Phaser.Scene {
             rightSpacing = cardHeight + Math.max(15, height * 0.03);  // 🔥 3-5個：只加 cardHeight
         }
 
-        console.log(`📏 間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px`);
+        if (!isLandscapeMobile) {
+            console.log(`📏 間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px`);
+        }
 
         // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
