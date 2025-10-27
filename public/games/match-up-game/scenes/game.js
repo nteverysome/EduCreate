@@ -801,17 +801,7 @@ class GameScene extends Phaser.Scene {
             rows
         );
 
-        // 🔥 創建下方外框（包圍所有中文卡片）
-        this.createMultiColumnContainerBox(
-            bottomAreaStartX,
-            bottomAreaStartY,
-            cardWidth,
-            cardHeight,
-            horizontalSpacing,
-            verticalSpacing,
-            columns,
-            rows
-        );
+        // 🔥 不創建下方外框（中文卡片不需要外框）
 
         // 🔥 創建上方英文卡片（2 行多列）
         currentPagePairs.forEach((pair, index) => {
@@ -920,17 +910,7 @@ class GameScene extends Phaser.Scene {
             rows
         );
 
-        // 🔥 創建右側外框（包圍所有中文卡片）
-        this.createMultiColumnContainerBox(
-            rightAreaStartX,
-            rightAreaStartY,
-            cardWidth,
-            cardHeight,
-            horizontalSpacing,
-            verticalSpacing,
-            columns,
-            rows
-        );
+        // 🔥 不創建右側外框（中文卡片不需要外框）
 
         // 🔥 創建左側英文卡片（多行 2 列）
         currentPagePairs.forEach((pair, index) => {
@@ -1047,17 +1027,7 @@ class GameScene extends Phaser.Scene {
             rows
         );
 
-        // 🔥 創建下方外框（包圍所有中文卡片）
-        this.createMultiColumnContainerBox(
-            bottomAreaStartX,
-            bottomAreaStartY,
-            cardWidth,
-            cardHeight,
-            horizontalSpacing,
-            verticalSpacing,
-            columns,
-            rows
-        );
+        // 🔥 不創建下方外框（中文卡片不需要外框）
 
         // 🔥 創建上方英文卡片（多行多列）
         currentPagePairs.forEach((pair, index) => {
@@ -1539,33 +1509,35 @@ class GameScene extends Phaser.Scene {
         const container = this.add.container(x, y);
         container.setDepth(5);
 
-        // 🔥 只創建文字標籤（不要框）
-        const fontSize = Math.max(24, Math.min(48, height * 0.8));
-        const cardText = this.add.text(0, 0, text, {
+        // 🔥 創建白色框（內框）
+        const background = this.add.rectangle(0, 0, width, height, 0xffffff);
+        background.setStrokeStyle(2, 0x333333);
+
+        // 創建文字標籤（在框外，右側，響應式字體大小）
+        const fontSize = Math.max(24, Math.min(48, height * 0.6));
+        const cardText = this.add.text(width / 2 + 15, 0, text, {
             fontSize: `${fontSize}px`,
             color: '#333333',
             fontFamily: 'Arial',
-            fontStyle: 'bold'
+            fontStyle: 'normal'
         });
-        cardText.setOrigin(0.5, 0.5);  // 居中對齊
+        cardText.setOrigin(0, 0.5);  // 左對齊，垂直居中
 
         // 添加到容器
-        container.add([cardText]);
+        container.add([background, cardText]);
 
-        // 🔥 創建不可見的互動區域（用於接收拖曳）
-        const hitArea = this.add.rectangle(0, 0, width, height, 0xffffff, 0);
-        hitArea.setInteractive({ useHandCursor: true });
-        container.add(hitArea);
+        // 設置互動（接收拖曳）
+        background.setInteractive({ useHandCursor: true });
 
-        // 懸停效果（改變文字顏色）
-        hitArea.on('pointerover', () => {
+        // 懸停效果
+        background.on('pointerover', () => {
             if (!container.getData('isMatched') && this.isDragging) {
-                cardText.setColor('#fe7606'); // 橙色文字
+                background.setStrokeStyle(3, 0xfe7606); // 橙色邊框
             }
         });
-        hitArea.on('pointerout', () => {
+        background.on('pointerout', () => {
             if (!container.getData('isMatched')) {
-                cardText.setColor('#333333'); // 恢復黑色
+                background.setStrokeStyle(2, 0x333333);
             }
         });
 
@@ -1573,7 +1545,7 @@ class GameScene extends Phaser.Scene {
         container.setData({
             pairId: pairId,
             side: 'right',
-            background: hitArea,
+            background: background,
             text: cardText,
             isMatched: false
         });
