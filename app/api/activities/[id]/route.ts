@@ -163,10 +163,11 @@ export async function GET(
       console.log('✅ [GET] GameSettings 轉換為 gameOptions:', gameOptions);
     }
 
-    // 返回活動數據，包含 gameOptions
+    // 返回活動數據，包含 gameOptions 和 matchUpOptions
     const responseData = {
       ...activity,
-      gameOptions
+      gameOptions,
+      matchUpOptions: activity.matchUpOptions || null  // 🔥 添加 matchUpOptions
     };
 
     return NextResponse.json(responseData);
@@ -540,6 +541,18 @@ export async function PUT(
           { status: 500 }
         );
       }
+    }
+
+    // 🔥 如果有 matchUpOptions，直接保存到 Activity
+    if (body.matchUpOptions !== undefined) {
+      console.log('🎮 [MatchUpOptions] 開始更新 Match-up 選項:', {
+        activityId,
+        matchUpOptions: body.matchUpOptions,
+        timestamp: new Date().toISOString()
+      });
+
+      updateData.matchUpOptions = body.matchUpOptions;
+      console.log('✅ [MatchUpOptions] Match-up 選項已添加到更新數據');
     }
 
     // 如果有 folderId，更新 folderId（支持拖拽功能）
