@@ -733,6 +733,20 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     const iframe = iframeRef.current;
 
     if (gameContainer && iframe) {
+      // 隱藏導航欄
+      const navigation = document.querySelector('nav') as HTMLElement;
+      if (navigation) {
+        navigation.style.display = 'none';
+        console.log('🙈 隱藏導航欄');
+      }
+
+      // 隱藏頁腳
+      const footer = document.querySelector('footer') as HTMLElement;
+      if (footer) {
+        footer.style.display = 'none';
+        console.log('🙈 隱藏頁腳');
+      }
+
       // 隱藏上面的控制按鈕區域
       const gameHeader = document.querySelector('[data-testid="game-header"]') as HTMLElement;
       const geptSelector = document.querySelector('[data-testid="gept-selector"]') as HTMLElement;
@@ -797,6 +811,20 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     const iframe = iframeRef.current;
 
     if (gameContainer && iframe) {
+      // 恢復導航欄
+      const navigation = document.querySelector('nav') as HTMLElement;
+      if (navigation) {
+        navigation.style.display = '';
+        console.log('👁️ 恢復導航欄顯示');
+      }
+
+      // 恢復頁腳
+      const footer = document.querySelector('footer') as HTMLElement;
+      if (footer) {
+        footer.style.display = '';
+        console.log('👁️ 恢復頁腳顯示');
+      }
+
       // 恢復上面的控制按鈕區域
       const gameHeader = document.querySelector('[data-testid="game-header"]') as HTMLElement;
       const geptSelector = document.querySelector('[data-testid="gept-selector"]') as HTMLElement;
