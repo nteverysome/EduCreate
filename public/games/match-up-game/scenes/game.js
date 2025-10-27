@@ -671,19 +671,20 @@ class GameScene extends Phaser.Scene {
         }
 
         // 🔥 根據容器大小動態調整間距
-        // 文字在框下邊，所以垂直間距需要考慮卡片高度 + 文字高度
+        // 文字在框下邊，所以垂直間距需要考慮卡片高度 + 文字高度 + 一個字的間距
         const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
+        const oneCharSpacing = textHeight;  // 一個字的間距
 
         let leftSpacing, rightSpacing;
         if (isSmallContainer) {
             leftSpacing = cardHeight + Math.max(3, height * 0.008);
-            rightSpacing = cardHeight + textHeight + Math.max(8, height * 0.02);
+            rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(8, height * 0.02);
         } else if (isMediumContainer) {
             leftSpacing = cardHeight + Math.max(4, height * 0.009);
-            rightSpacing = cardHeight + textHeight + Math.max(12, height * 0.025);
+            rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(12, height * 0.025);
         } else {
             leftSpacing = cardHeight + Math.max(5, height * 0.01);
-            rightSpacing = cardHeight + textHeight + Math.max(15, height * 0.03);
+            rightSpacing = cardHeight + textHeight + oneCharSpacing + Math.max(15, height * 0.03);
         }
 
         console.log(`📏 間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px`);
