@@ -22,6 +22,20 @@ class GameScene extends Phaser.Scene {
         this.totalPages = 1;    // 總頁數
         this.enablePagination = false;  // 是否啟用分頁
         this.pageIndicatorText = null;  // 分頁指示器文字對象
+
+        // 🔥 計時器功能
+        this.timerType = 'none';  // 計時器類型：none, countUp, countDown
+        this.timerMinutes = 5;    // 倒數計時分鐘數
+        this.timerSeconds = 0;    // 倒數計時秒數
+        this.startTime = null;    // 正向計時開始時間
+        this.remainingTime = 0;   // 倒數計時剩餘時間（秒）
+        this.timerText = null;    // 計時器文字對象
+        this.timerEvent = null;   // 計時器事件
+
+        // 🔥 遊戲選項
+        this.layout = 'separated';  // 佈局模式：separated, mixed
+        this.random = 'different';  // 隨機模式：different, same
+        this.showAnswers = false;   // 遊戲結束時顯示答案
     }
 
     // 從 API 載入詞彙數據
@@ -207,6 +221,12 @@ class GameScene extends Phaser.Scene {
         // 🔥 初始化分頁設置
         this.initializePagination();
 
+        // 🔥 初始化遊戲選項
+        this.initializeGameOptions();
+
+        // 🔥 初始化計時器
+        this.initializeTimer();
+
         // 獲取當前螢幕尺寸
         console.log('🎮 GameScene: 調用 updateLayout');
         this.updateLayout();
@@ -274,6 +294,196 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    // 🔥 初始化遊戲選項
+    initializeGameOptions() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // 讀取佈局選項
+        this.layout = urlParams.get('layout') || 'separated';
+        console.log('🎮 佈局模式:', this.layout);
+
+        // 讀取隨機選項
+        this.random = urlParams.get('random') || 'different';
+        console.log('🎲 隨機模式:', this.random);
+
+        // 讀取顯示答案選項
+        this.showAnswers = urlParams.get('showAnswers') === 'true';
+        console.log('📝 顯示答案:', this.showAnswers);
+    }
+
+    // 🔥 初始化計時器
+    initializeTimer() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        // 讀取計時器類型
+        this.timerType = urlParams.get('timerType') || 'none';
+        console.log('⏱️ 計時器類型:', this.timerType);
+
+        if (this.timerType === 'countDown') {
+            // 讀取倒數計時時間
+            this.timerMinutes = parseInt(urlParams.get('timerMinutes') || '5', 10);
+            this.timerSeconds = parseInt(urlParams.get('timerSeconds') || '0', 10);
+            this.remainingTime = this.timerMinutes * 60 + this.timerSeconds;
+            console.log('⏱️ 倒數計時時間:', this.timerMinutes, '分', this.timerSeconds, '秒');
+        } else if (this.timerType === 'countUp') {
+            // 記錄開始時間
+            this.startTime = Date.now();
+            console.log('⏱️ 正向計時開始');
+        }
+    }
+
+    // 🔥 創建計時器 UI
+    createTimerUI() {
+        const width = this.scale.width;
+
+        if (this.timerType === 'none') {
+            return;  // 不顯示計時器
+        }
+
+        // 創建計時器文字
+        const timerColor = this.timerType === 'countDown' ? '#ff0000' : '#000000';
+        const initialText = this.timerType === 'countDown'
+            ? this.formatTime(this.remainingTime)
+            : '00:00';
+
+        this.timerText = this.add.text(width - 20, 20, initialText, {
+            fontSize: '28px',
+            color: timerColor,
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(1, 0).setDepth(1000);
+
+        // 如果是倒數計時，啟動計時器事件
+        if (this.timerType === 'countDown') {
+            this.timerEvent = this.time.addEvent({
+                delay: 1000,
+                callback: this.updateCountDownTimer,
+                callbackScope: this,
+                loop: true
+            });
+        } else if (this.timerType === 'countUp') {
+            // 正向計時每秒更新
+            this.timerEvent = this.time.addEvent({
+                delay: 1000,
+                callback: this.updateCountUpTimer,
+                callbackScope: this,
+                loop: true
+            });
+        }
+
+        console.log('⏱️ 計時器 UI 已創建');
+    }
+
+    // 🔥 更新倒數計時器
+    updateCountDownTimer() {
+        this.remainingTime--;
+
+        if (this.remainingTime <= 0) {
+            // 時間到
+            this.onTimeUp();
+        } else {
+            // 更新顯示
+            if (this.timerText) {
+                this.timerText.setText(this.formatTime(this.remainingTime));
+
+                // 最後 10 秒變紅色並閃爍
+                if (this.remainingTime <= 10) {
+                    this.timerText.setColor('#ff0000');
+                    this.tweens.add({
+                        targets: this.timerText,
+                        alpha: 0.3,
+                        duration: 500,
+                        yoyo: true
+                    });
+                }
+            }
+        }
+    }
+
+    // 🔥 更新正向計時器
+    updateCountUpTimer() {
+        const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+        if (this.timerText) {
+            this.timerText.setText(this.formatTime(elapsed));
+        }
+    }
+
+    // 🔥 格式化時間（秒 -> MM:SS）
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // 🔥 時間到達處理
+    onTimeUp() {
+        console.log('⏱️ 時間到！');
+
+        // 停止計時器
+        if (this.timerEvent) {
+            this.timerEvent.remove();
+        }
+
+        // 顯示時間到訊息
+        this.showTimeUpMessage();
+    }
+
+    // 🔥 顯示時間到訊息
+    showTimeUpMessage() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 創建半透明背景
+        const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7)
+            .setDepth(2000);
+
+        // 顯示時間到訊息
+        const messageText = this.add.text(width / 2, height / 2 - 50, '⏰ 時間到！', {
+            fontSize: '48px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(2001);
+
+        // 顯示完成進度
+        const completedCount = this.matchedPairs.size;
+        const totalCount = this.getCurrentPagePairs().length;
+        const progressText = this.add.text(
+            width / 2,
+            height / 2 + 20,
+            `已完成 ${completedCount} / ${totalCount} 個配對`,
+            {
+                fontSize: '24px',
+                color: '#ffffff',
+                fontFamily: 'Arial'
+            }
+        ).setOrigin(0.5).setDepth(2001);
+
+        // 如果開啟顯示答案，顯示答案按鈕
+        if (this.showAnswers) {
+            const showAnswersButton = this.add.text(
+                width / 2,
+                height / 2 + 80,
+                '📝 查看答案',
+                {
+                    fontSize: '24px',
+                    color: '#ffffff',
+                    fontFamily: 'Arial',
+                    backgroundColor: '#4CAF50',
+                    padding: { x: 20, y: 10 }
+                }
+            ).setOrigin(0.5).setDepth(2001).setInteractive({ useHandCursor: true });
+
+            showAnswersButton.on('pointerdown', () => {
+                overlay.destroy();
+                messageText.destroy();
+                progressText.destroy();
+                showAnswersButton.destroy();
+                this.showAnswersScreen();
+            });
+        }
+    }
+
     updateLayout() {
         console.log('🎮 GameScene: updateLayout 開始');
         console.log('🎮 GameScene: 當前場景尺寸', {
@@ -299,6 +509,9 @@ class GameScene extends Phaser.Scene {
         // 創建卡片
         this.createCards();
         console.log('🎮 GameScene: 卡片創建完成');
+
+        // 🔥 創建計時器 UI
+        this.createTimerUI();
 
         // 🔥 移除重新開始按鈕：用戶要求拿掉
         console.log('🎮 GameScene: updateLayout 完成');
@@ -353,31 +566,15 @@ class GameScene extends Phaser.Scene {
 
         console.log('🎮 GameScene: 卡片間距', { leftSpacing, rightSpacing });
 
-        // 隨機排列答案
-        const shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-        console.log('🎮 GameScene: 隨機排列答案完成');
-
-        // 創建左側外框（包圍所有左側卡片）
-        console.log('🎮 GameScene: 創建左側外框');
-        this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftSpacing, currentPagePairs.length);
-
-        // 創建左側題目卡片（白色，5px 間距）
-        console.log('🎮 GameScene: 創建左側題目卡片', currentPagePairs.length, '個');
-        currentPagePairs.forEach((pair, index) => {
-            const y = leftStartY + index * leftSpacing;
-            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id);
-            this.leftCards.push(card);
-            console.log(`🎮 GameScene: 左側卡片 ${index + 1}/${currentPagePairs.length} 創建完成`, pair.question);
-        });
-
-        // 創建右側答案卡片（白色，20px 間距）
-        console.log('🎮 GameScene: 創建右側答案卡片', shuffledAnswers.length, '個');
-        shuffledAnswers.forEach((pair, index) => {
-            const y = rightStartY + index * rightSpacing;
-            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id);
-            this.rightCards.push(card);
-            console.log(`🎮 GameScene: 右側卡片 ${index + 1}/${shuffledAnswers.length} 創建完成`, pair.answer);
-        });
+        // 🔥 根據佈局模式創建卡片
+        if (this.layout === 'mixed') {
+            // 混合佈局模式
+            this.createMixedLayout(currentPagePairs, width, height, cardWidth, cardHeight);
+        } else {
+            // 分離佈局模式（默認）
+            this.createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
+                                      cardWidth, cardHeight, leftSpacing, rightSpacing);
+        }
 
         // 🔥 創建分頁指示器
         if (this.enablePagination) {
@@ -387,6 +584,116 @@ class GameScene extends Phaser.Scene {
         console.log('🎮 GameScene: createCards 完成', {
             leftCardsCount: this.leftCards.length,
             rightCardsCount: this.rightCards.length
+        });
+    }
+
+    // 🔥 創建分離佈局（左右分離）
+    createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
+                          cardWidth, cardHeight, leftSpacing, rightSpacing) {
+        console.log('🎮 創建分離佈局');
+
+        // 🔥 根據隨機模式排列答案
+        let shuffledAnswers;
+        if (this.random === 'same') {
+            // 固定隨機模式：使用活動 ID 作為種子
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId') || 'default-seed';
+            const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+            // 使用固定種子創建隨機數生成器
+            const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
+            shuffledAnswers = rng.shuffle([...currentPagePairs]);
+            console.log('🎲 使用固定隨機模式，種子:', seed);
+        } else {
+            // 每次不同模式：隨機排列
+            shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
+            console.log('🎲 使用隨機排列模式');
+        }
+
+        // 創建左側外框（包圍所有左側卡片）
+        this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftSpacing, currentPagePairs.length);
+
+        // 創建左側題目卡片（白色，5px 間距）
+        currentPagePairs.forEach((pair, index) => {
+            const y = leftStartY + index * leftSpacing;
+            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id);
+            this.leftCards.push(card);
+        });
+
+        // 創建右側答案卡片（白色，20px 間距）
+        shuffledAnswers.forEach((pair, index) => {
+            const y = rightStartY + index * rightSpacing;
+            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id);
+            this.rightCards.push(card);
+        });
+    }
+
+    // 🔥 創建混合佈局（所有卡片混合）
+    createMixedLayout(currentPagePairs, width, height, cardWidth, cardHeight) {
+        console.log('🎮 創建混合佈局');
+
+        // 創建所有卡片數據
+        const allCards = [];
+
+        // 添加英文卡片
+        currentPagePairs.forEach((pair) => {
+            allCards.push({
+                type: 'question',
+                pair: pair,
+                text: pair.question,
+                pairId: pair.id
+            });
+        });
+
+        // 添加中文卡片
+        currentPagePairs.forEach((pair) => {
+            allCards.push({
+                type: 'answer',
+                pair: pair,
+                text: pair.answer,
+                pairId: pair.id
+            });
+        });
+
+        // 🔥 根據隨機模式排列卡片
+        let shuffledCards;
+        if (this.random === 'same') {
+            // 固定隨機模式
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId') || 'default-seed';
+            const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+            const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
+            shuffledCards = rng.shuffle(allCards);
+            console.log('🎲 混合佈局使用固定隨機模式，種子:', seed);
+        } else {
+            // 每次不同模式
+            shuffledCards = Phaser.Utils.Array.Shuffle(allCards);
+            console.log('🎲 混合佈局使用隨機排列模式');
+        }
+
+        // 計算網格佈局
+        const cols = 4;  // 每行 4 個卡片
+        const rows = Math.ceil(shuffledCards.length / cols);
+
+        // 計算卡片間距
+        const horizontalSpacing = (width - cardWidth * cols) / (cols + 1);
+        const verticalSpacing = (height - cardHeight * rows) / (rows + 1);
+
+        // 創建卡片
+        shuffledCards.forEach((cardData, i) => {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const x = horizontalSpacing + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
+            const y = verticalSpacing + row * (cardHeight + verticalSpacing) + cardHeight / 2 + height * 0.1;
+
+            if (cardData.type === 'question') {
+                const card = this.createLeftCard(x, y, cardWidth, cardHeight, cardData.text, cardData.pairId);
+                this.leftCards.push(card);
+            } else {
+                const card = this.createRightCard(x, y, cardWidth, cardHeight, cardData.text, cardData.pairId);
+                this.rightCards.push(card);
+            }
         });
     }
 
@@ -795,13 +1102,18 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 顯示最終完成訊息
     showFinalCompletion() {
+        // 停止計時器
+        if (this.timerEvent) {
+            this.timerEvent.remove();
+        }
+
         // 獲取當前螢幕尺寸
         const width = this.scale.width;
         const height = this.scale.height;
 
         // 顯示完成訊息（響應式）
         const fontSize = Math.max(28, Math.min(48, width * 0.035));
-        const completeText = this.add.text(width / 2, height / 2, '🎉 全部完成！', {
+        const completeText = this.add.text(width / 2, height / 2 - 50, '🎉 全部完成！', {
             fontSize: `${fontSize}px`,
             color: '#4caf50',
             fontFamily: 'Arial',
@@ -809,7 +1121,7 @@ class GameScene extends Phaser.Scene {
             backgroundColor: '#e8f5e9',
             padding: { x: 25, y: 12 }
         });
-        completeText.setOrigin(0.5);
+        completeText.setOrigin(0.5).setDepth(2000);
 
         // 縮放動畫
         this.tweens.add({
@@ -820,6 +1132,123 @@ class GameScene extends Phaser.Scene {
             yoyo: true,
             repeat: -1,
             ease: 'Sine.easeInOut'
+        });
+
+        // 🔥 如果開啟顯示答案，顯示答案按鈕
+        if (this.showAnswers) {
+            const showAnswersButton = this.add.text(
+                width / 2,
+                height / 2 + 30,
+                '📝 查看答案',
+                {
+                    fontSize: '24px',
+                    color: '#ffffff',
+                    fontFamily: 'Arial',
+                    backgroundColor: '#2196F3',
+                    padding: { x: 20, y: 10 }
+                }
+            ).setOrigin(0.5).setDepth(2001).setInteractive({ useHandCursor: true });
+
+            showAnswersButton.on('pointerdown', () => {
+                completeText.destroy();
+                showAnswersButton.destroy();
+                this.showAnswersScreen();
+            });
+
+            // 按鈕懸停效果
+            showAnswersButton.on('pointerover', () => {
+                showAnswersButton.setBackgroundColor('#1976D2');
+            });
+
+            showAnswersButton.on('pointerout', () => {
+                showAnswersButton.setBackgroundColor('#2196F3');
+            });
+        }
+    }
+
+    // 🔥 顯示答案畫面
+    showAnswersScreen() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 清除所有現有元素
+        this.children.removeAll(true);
+
+        // 添加白色背景
+        this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
+
+        // 顯示標題
+        this.add.text(width / 2, 50, '📝 正確答案', {
+            fontSize: '32px',
+            color: '#000000',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+
+        // 創建滾動區域
+        const startY = 100;
+        const lineHeight = 40;
+        const maxVisibleLines = Math.floor((height - 150) / lineHeight);
+
+        // 顯示所有配對
+        this.pairs.forEach((pair, index) => {
+            const y = startY + index * lineHeight;
+
+            // 只顯示可見範圍內的答案
+            if (index < maxVisibleLines) {
+                this.add.text(
+                    width / 2,
+                    y,
+                    `${pair.question} = ${pair.answer}`,
+                    {
+                        fontSize: '20px',
+                        color: '#333333',
+                        fontFamily: 'Arial'
+                    }
+                ).setOrigin(0.5);
+            }
+        });
+
+        // 如果答案太多，顯示提示
+        if (this.pairs.length > maxVisibleLines) {
+            this.add.text(
+                width / 2,
+                height - 50,
+                `（顯示前 ${maxVisibleLines} 個答案，共 ${this.pairs.length} 個）`,
+                {
+                    fontSize: '16px',
+                    color: '#999999',
+                    fontFamily: 'Arial'
+                }
+            ).setOrigin(0.5);
+        }
+
+        // 添加關閉按鈕
+        const closeButton = this.add.text(
+            width / 2,
+            height - 80,
+            '✖ 關閉',
+            {
+                fontSize: '20px',
+                color: '#ffffff',
+                fontFamily: 'Arial',
+                backgroundColor: '#f44336',
+                padding: { x: 20, y: 10 }
+            }
+        ).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        closeButton.on('pointerdown', () => {
+            // 重新載入遊戲
+            this.scene.restart();
+        });
+
+        // 按鈕懸停效果
+        closeButton.on('pointerover', () => {
+            closeButton.setBackgroundColor('#d32f2f');
+        });
+
+        closeButton.on('pointerout', () => {
+            closeButton.setBackgroundColor('#f44336');
         });
     }
 
