@@ -906,15 +906,9 @@ class GameScene extends Phaser.Scene {
         // 🔥 計算間距
         const horizontalSpacing = Math.max(5, width * 0.01);
 
-        // 🔥 計算文字高度和一個字的間距（用於右側中文卡片）
-        const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
-        const oneCharSpacing = textHeight;
-
-        // 🔥 英文卡片的垂直間距（不加文字高度）
+        // 🔥 英文卡片和中文卡片的垂直間距（文字在框右邊，不需要額外間距）
         const leftVerticalSpacing = Math.max(3, height * 0.008);
-
-        // 🔥 中文卡片的垂直間距（加文字高度 + 一個字的間距）
-        const rightVerticalSpacing = textHeight + oneCharSpacing + Math.max(3, height * 0.008);
+        const rightVerticalSpacing = Math.max(3, height * 0.008);  // 🔥 與左側相同
 
         // 🔥 計算左側區域（英文）的起始位置
         const leftAreaStartX = width * 0.08;
@@ -977,7 +971,7 @@ class GameScene extends Phaser.Scene {
             const x = rightAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
             const y = rightAreaStartY + row * (cardHeight + rightVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 rightVerticalSpacing
 
-            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id);
+            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, 'right');  // 🔥 文字在框右邊
             this.rightCards.push(card);
         });
 
