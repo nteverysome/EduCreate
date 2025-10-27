@@ -15,6 +15,13 @@ class GameScene extends Phaser.Scene {
         this.isDragging = false;
         this.dragStartCard = null;
         this.sceneStopped = false;  // 🔥 場景停止狀態標記
+
+        // 🔥 分頁功能
+        this.itemsPerPage = 7;  // 默認每頁 7 個詞彙（可配置）
+        this.currentPage = 0;   // 當前頁碼（從 0 開始）
+        this.totalPages = 1;    // 總頁數
+        this.enablePagination = false;  // 是否啟用分頁
+        this.pageIndicatorText = null;  // 分頁指示器文字對象
     }
 
     // 從 API 載入詞彙數據
@@ -197,6 +204,9 @@ class GameScene extends Phaser.Scene {
             console.warn('⚠️ GameScene: handlerScene 未初始化或 updateResize 方法不存在');
         }
 
+        // 🔥 初始化分頁設置
+        this.initializePagination();
+
         // 獲取當前螢幕尺寸
         console.log('🎮 GameScene: 調用 updateLayout');
         this.updateLayout();
@@ -205,6 +215,51 @@ class GameScene extends Phaser.Scene {
         // 監聽螢幕尺寸變化
         this.scale.on('resize', this.handleResize, this);
         console.log('🎮 GameScene: create 方法完成');
+    }
+
+    // 🔥 初始化分頁設置
+    initializePagination() {
+        const totalPairs = this.pairs.length;
+        console.log('📄 初始化分頁設置 - 總詞彙數:', totalPairs);
+
+        // 從 URL 參數讀取每頁顯示數量（如果有的話）
+        const urlParams = new URLSearchParams(window.location.search);
+        const itemsPerPageParam = urlParams.get('itemsPerPage');
+
+        if (itemsPerPageParam) {
+            this.itemsPerPage = parseInt(itemsPerPageParam, 10);
+            console.log('📄 從 URL 讀取 itemsPerPage:', this.itemsPerPage);
+        } else {
+            // 根據詞彙數量自動決定每頁顯示數量
+            if (totalPairs <= 6) {
+                this.itemsPerPage = totalPairs;  // 不分頁
+            } else if (totalPairs <= 12) {
+                this.itemsPerPage = 4;  // 每頁 4 個
+            } else if (totalPairs <= 18) {
+                this.itemsPerPage = 5;  // 每頁 5 個
+            } else if (totalPairs <= 24) {
+                this.itemsPerPage = 6;  // 每頁 6 個
+            } else {
+                this.itemsPerPage = 7;  // 每頁 7 個
+            }
+            console.log('📄 自動決定 itemsPerPage:', this.itemsPerPage);
+        }
+
+        // 計算總頁數
+        this.totalPages = Math.ceil(totalPairs / this.itemsPerPage);
+
+        // 決定是否啟用分頁
+        this.enablePagination = this.totalPages > 1;
+
+        // 重置當前頁碼
+        this.currentPage = 0;
+
+        console.log('📄 分頁設置完成:', {
+            totalPairs,
+            itemsPerPage: this.itemsPerPage,
+            totalPages: this.totalPages,
+            enablePagination: this.enablePagination
+        });
     }
 
     updateLayout() {
@@ -247,6 +302,19 @@ class GameScene extends Phaser.Scene {
         console.log('🎮 GameScene: createCards 開始');
         console.log('🎮 GameScene: pairs 數據', this.pairs);
 
+        // 🔥 獲取當前頁的詞彙數據
+        const startIndex = this.currentPage * this.itemsPerPage;
+        const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
+        const currentPagePairs = this.pairs.slice(startIndex, endIndex);
+
+        console.log('📄 當前頁數據:', {
+            currentPage: this.currentPage + 1,
+            totalPages: this.totalPages,
+            startIndex,
+            endIndex,
+            currentPagePairs: currentPagePairs.length
+        });
+
         // 獲取當前螢幕尺寸
         const width = this.scale.width;
         const height = this.scale.height;
@@ -274,20 +342,20 @@ class GameScene extends Phaser.Scene {
         console.log('🎮 GameScene: 卡片間距', { leftSpacing, rightSpacing });
 
         // 隨機排列答案
-        const shuffledAnswers = Phaser.Utils.Array.Shuffle([...this.pairs]);
+        const shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
         console.log('🎮 GameScene: 隨機排列答案完成');
 
         // 創建左側外框（包圍所有左側卡片）
         console.log('🎮 GameScene: 創建左側外框');
-        this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftSpacing, this.pairs.length);
+        this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftSpacing, currentPagePairs.length);
 
         // 創建左側題目卡片（白色，5px 間距）
-        console.log('🎮 GameScene: 創建左側題目卡片', this.pairs.length, '個');
-        this.pairs.forEach((pair, index) => {
+        console.log('🎮 GameScene: 創建左側題目卡片', currentPagePairs.length, '個');
+        currentPagePairs.forEach((pair, index) => {
             const y = leftStartY + index * leftSpacing;
             const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id);
             this.leftCards.push(card);
-            console.log(`🎮 GameScene: 左側卡片 ${index + 1}/${this.pairs.length} 創建完成`, pair.question);
+            console.log(`🎮 GameScene: 左側卡片 ${index + 1}/${currentPagePairs.length} 創建完成`, pair.question);
         });
 
         // 創建右側答案卡片（白色，20px 間距）
@@ -298,6 +366,11 @@ class GameScene extends Phaser.Scene {
             this.rightCards.push(card);
             console.log(`🎮 GameScene: 右側卡片 ${index + 1}/${shuffledAnswers.length} 創建完成`, pair.answer);
         });
+
+        // 🔥 創建分頁指示器
+        if (this.enablePagination) {
+            this.createPageIndicator();
+        }
 
         console.log('🎮 GameScene: createCards 完成', {
             leftCardsCount: this.leftCards.length,
@@ -629,12 +702,8 @@ class GameScene extends Phaser.Scene {
             }
         });
 
-        // 檢查是否全部配對完成
-        if (this.matchedPairs.size === this.pairs.length) {
-            this.time.delayedCall(800, () => {
-                this.onGameComplete();
-            });
-        }
+        // 🔥 檢查當前頁是否全部配對完成
+        this.checkCurrentPageComplete();
     }
 
     unmatchCard(leftCard) {
@@ -691,13 +760,29 @@ class GameScene extends Phaser.Scene {
     }
 
     onGameComplete() {
+        // 🔥 檢查是否還有下一頁
+        if (this.enablePagination && this.currentPage < this.totalPages - 1) {
+            // 還有下一頁，自動進入下一頁
+            console.log('📄 當前頁完成，自動進入下一頁');
+            this.time.delayedCall(500, () => {
+                this.goToNextPage();
+            });
+        } else {
+            // 所有頁面都完成了，顯示最終完成訊息
+            console.log('🎉 所有頁面完成！');
+            this.showFinalCompletion();
+        }
+    }
+
+    // 🔥 顯示最終完成訊息
+    showFinalCompletion() {
         // 獲取當前螢幕尺寸
         const width = this.scale.width;
         const height = this.scale.height;
 
         // 顯示完成訊息（響應式）
         const fontSize = Math.max(28, Math.min(48, width * 0.035));
-        const completeText = this.add.text(width / 2, height / 2, '🎉 完成！', {
+        const completeText = this.add.text(width / 2, height / 2, '🎉 全部完成！', {
             fontSize: `${fontSize}px`,
             color: '#4caf50',
             fontFamily: 'Arial',
@@ -717,6 +802,79 @@ class GameScene extends Phaser.Scene {
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
+    }
+
+    // 🔥 創建分頁指示器
+    createPageIndicator() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 分頁指示器文字（例如：1/5）
+        const pageText = `${this.currentPage + 1}/${this.totalPages}`;
+        const fontSize = Math.max(18, Math.min(24, width * 0.02));
+
+        this.pageIndicatorText = this.add.text(width / 2, height * 0.05, pageText, {
+            fontSize: `${fontSize}px`,
+            color: '#666666',
+            fontFamily: 'Arial',
+            fontStyle: 'bold',
+            backgroundColor: '#f5f5f5',
+            padding: { x: 15, y: 8 }
+        });
+        this.pageIndicatorText.setOrigin(0.5);
+        this.pageIndicatorText.setDepth(100);  // 確保在最上層
+
+        console.log('📄 分頁指示器已創建:', pageText);
+    }
+
+    // 🔥 更新分頁指示器
+    updatePageIndicator() {
+        if (this.pageIndicatorText) {
+            const pageText = `${this.currentPage + 1}/${this.totalPages}`;
+            this.pageIndicatorText.setText(pageText);
+            console.log('📄 分頁指示器已更新:', pageText);
+        }
+    }
+
+    // 🔥 進入下一頁
+    goToNextPage() {
+        if (this.currentPage < this.totalPages - 1) {
+            this.currentPage++;
+            console.log('📄 進入下一頁:', this.currentPage + 1);
+
+            // 重新佈局（會重新創建卡片）
+            this.updateLayout();
+        }
+    }
+
+    // 🔥 檢查當前頁是否全部配對完成
+    checkCurrentPageComplete() {
+        // 計算當前頁應該有多少個配對
+        const startIndex = this.currentPage * this.itemsPerPage;
+        const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
+        const currentPagePairsCount = endIndex - startIndex;
+
+        // 計算當前頁已配對的數量
+        let currentPageMatchedCount = 0;
+        for (let i = startIndex; i < endIndex; i++) {
+            const pairId = this.pairs[i].id;
+            if (this.matchedPairs.has(pairId)) {
+                currentPageMatchedCount++;
+            }
+        }
+
+        console.log('📄 當前頁配對進度:', {
+            currentPage: this.currentPage + 1,
+            matched: currentPageMatchedCount,
+            total: currentPagePairsCount
+        });
+
+        // 如果當前頁全部配對完成
+        if (currentPageMatchedCount === currentPagePairsCount) {
+            this.time.delayedCall(800, () => {
+                this.onGameComplete();
+            });
+        }
     }
 
     // � 移除 createRestartButton() 方法：用戶要求拿掉重新開始按鈕
