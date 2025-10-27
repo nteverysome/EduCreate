@@ -24,6 +24,8 @@ class PreloadScene extends Phaser.Scene {
     }
 
     create() {
+        console.log('🎮 PreloadScene: create 方法開始');
+
         // 🔥 獲取 Handler 場景引用
         this.handlerScene = this.scene.get('handler');
 
@@ -36,7 +38,9 @@ class PreloadScene extends Phaser.Scene {
         }
 
         // 載入完成，切換到遊戲場景
+        console.log('🎮 PreloadScene: 準備啟動 GameScene');
         this.scene.start('GameScene');
+        console.log('🎮 PreloadScene: GameScene 已啟動');
     }
 }
 

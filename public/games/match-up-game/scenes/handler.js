@@ -107,36 +107,18 @@ class Handler extends Phaser.Scene {
             // 更新調整器的尺寸以匹配新的視窗大小
             this.sizer.setSize(width, height)
 
-            // 攝影機更新邏輯
-            // 獲取當前場景的主攝影機實例
-            const camera = this.cameras.main
-
-            // 🛡️ 防禦性檢查：確保 camera 存在
-            if (!camera) {
-                console.warn('⚠️ resize: camera 不存在，跳過縮放設置');
-                return;
-            }
-
-            // 計算水平方向的縮放比例（調整器寬度 / 基準螢幕寬度）
-            const scaleX = this.sizer.width / this.game.screenBaseSize.width
-            // 計算垂直方向的縮放比例（調整器高度 / 基準螢幕高度）
-            const scaleY = this.sizer.height / this.game.screenBaseSize.height
-
-            // 設定攝影機縮放，使用較大的縮放比例確保內容完全填滿螢幕
-            camera.setZoom(Math.max(scaleX, scaleY))
-            // 將攝影機中心點設定在基準螢幕的中央位置
-            camera.centerOn(
-                this.game.screenBaseSize.width / 2, 
-                this.game.screenBaseSize.height / 2
-            )
-
-            console.log('🔄 Handler: resize 完成', {
+            // 🔥 Match-up 遊戲不需要攝影機縮放
+            // 因為遊戲使用 Phaser.Scale.RESIZE 模式，會自動調整遊戲尺寸
+            console.log('🔄 Handler: resize - Match-up 遊戲不使用攝影機縮放', {
                 width,
-                height,
-                scaleX,
-                scaleY,
-                zoom: Math.max(scaleX, scaleY)
+                height
             });
+
+            // 重置攝影機縮放為 1
+            const camera = this.cameras.main
+            if (camera) {
+                camera.setZoom(1);
+            }
         }
     }
 
@@ -154,24 +136,15 @@ class Handler extends Phaser.Scene {
             return;
         }
 
-        // 計算水平方向的縮放比例（場景調整器寬度 / 遊戲基準寬度）
-        const scaleX = scene.sizer.width / this.game.screenBaseSize.width
-        // 計算垂直方向的縮放比例（場景調整器高度 / 遊戲基準高度）
-        const scaleY = scene.sizer.height / this.game.screenBaseSize.height
+        // 🔥 Match-up 遊戲不需要攝影機縮放
+        // 因為遊戲使用 Phaser.Scale.RESIZE 模式，會自動調整遊戲尺寸
+        // 攝影機縮放會導致遊戲內容看起來是白色的
+        console.log('📷 Handler: updateCamera - Match-up 遊戲不使用攝影機縮放');
 
-        // 設定攝影機縮放比例，選擇較大的比例以確保內容不會被裁切
-        camera.setZoom(Math.max(scaleX, scaleY))
-        // 將攝影機焦點設定在遊戲基準螢幕的中心點
-        camera.centerOn(
-            this.game.screenBaseSize.width / 2, 
-            this.game.screenBaseSize.height / 2
-        )
+        // 重置攝影機縮放為 1
+        camera.setZoom(1);
 
-        console.log('📷 Handler: updateCamera 完成', {
-            scaleX,
-            scaleY,
-            zoom: Math.max(scaleX, scaleY)
-        });
+        // 不需要 centerOn，因為遊戲使用 RESIZE 模式
     }
 
 }
