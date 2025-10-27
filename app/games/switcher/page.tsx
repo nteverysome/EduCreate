@@ -1451,6 +1451,14 @@ const GameSwitcherPage: React.FC = () => {
                 }}
               />
 
+              {/* Shimozurdo 遊戲專屬選項面板 - 只在 Shimozurdo 遊戲時顯示 */}
+              {currentGameId === 'shimozurdo-game' && (
+                <GameOptionsPanel
+                  options={gameOptions}
+                  onChange={setGameOptions}
+                />
+              )}
+
               {/* Match-up 遊戲專屬選項面板 - 只在 Match-up 遊戲時顯示 */}
               {currentGameId === 'match-up-game' && (
                 <MatchUpOptionsPanel
@@ -1459,12 +1467,6 @@ const GameSwitcherPage: React.FC = () => {
                   totalVocabulary={customVocabulary.length}
                 />
               )}
-
-              {/* 遊戲選項面板 */}
-              <GameOptionsPanel
-                options={gameOptions}
-                onChange={setGameOptions}
-              />
               {/* 應用選項按鈕 */}
               <div className="mt-4 flex justify-end gap-2">
                 <button
