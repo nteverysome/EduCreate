@@ -222,10 +222,12 @@ class GameScene extends Phaser.Scene {
         const totalPairs = this.pairs.length;
         console.log('📄 初始化分頁設置 - 總詞彙數:', totalPairs);
 
-        // 從 URL 參數讀取每頁顯示數量（如果有的話）
+        // 從 URL 參數讀取設置
         const urlParams = new URLSearchParams(window.location.search);
         const itemsPerPageParam = urlParams.get('itemsPerPage');
+        const autoProceedParam = urlParams.get('autoProceed');
 
+        // 讀取每頁顯示數量
         if (itemsPerPageParam) {
             this.itemsPerPage = parseInt(itemsPerPageParam, 10);
             console.log('📄 從 URL 讀取 itemsPerPage:', this.itemsPerPage);
@@ -245,6 +247,15 @@ class GameScene extends Phaser.Scene {
             console.log('📄 自動決定 itemsPerPage:', this.itemsPerPage);
         }
 
+        // 讀取自動繼續設置
+        if (autoProceedParam !== null) {
+            this.autoProceed = autoProceedParam === 'true';
+            console.log('📄 從 URL 讀取 autoProceed:', this.autoProceed);
+        } else {
+            this.autoProceed = true;  // 默認開啟
+            console.log('📄 使用默認 autoProceed:', this.autoProceed);
+        }
+
         // 計算總頁數
         this.totalPages = Math.ceil(totalPairs / this.itemsPerPage);
 
@@ -258,7 +269,8 @@ class GameScene extends Phaser.Scene {
             totalPairs,
             itemsPerPage: this.itemsPerPage,
             totalPages: this.totalPages,
-            enablePagination: this.enablePagination
+            enablePagination: this.enablePagination,
+            autoProceed: this.autoProceed
         });
     }
 
@@ -762,11 +774,18 @@ class GameScene extends Phaser.Scene {
     onGameComplete() {
         // 🔥 檢查是否還有下一頁
         if (this.enablePagination && this.currentPage < this.totalPages - 1) {
-            // 還有下一頁，自動進入下一頁
-            console.log('📄 當前頁完成，自動進入下一頁');
-            this.time.delayedCall(500, () => {
-                this.goToNextPage();
-            });
+            // 還有下一頁
+            if (this.autoProceed) {
+                // 自動進入下一頁
+                console.log('📄 當前頁完成，自動進入下一頁');
+                this.time.delayedCall(500, () => {
+                    this.goToNextPage();
+                });
+            } else {
+                // 顯示「下一頁」按鈕
+                console.log('📄 當前頁完成，顯示下一頁按鈕');
+                this.showNextPageButton();
+            }
         } else {
             // 所有頁面都完成了，顯示最終完成訊息
             console.log('🎉 所有頁面完成！');
@@ -845,6 +864,53 @@ class GameScene extends Phaser.Scene {
             // 重新佈局（會重新創建卡片）
             this.updateLayout();
         }
+    }
+
+    // 🔥 顯示「下一頁」按鈕
+    showNextPageButton() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 創建按鈕背景
+        const buttonWidth = 200;
+        const buttonHeight = 60;
+        const buttonX = width / 2;
+        const buttonY = height / 2;
+
+        const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x4caf50);
+        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setDepth(100);
+
+        // 創建按鈕文字
+        const buttonText = this.add.text(buttonX, buttonY, '➡️ 下一頁', {
+            fontSize: '24px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        buttonText.setOrigin(0.5);
+        buttonText.setDepth(101);
+
+        // 點擊事件
+        buttonBg.on('pointerdown', () => {
+            // 移除按鈕
+            buttonBg.destroy();
+            buttonText.destroy();
+
+            // 進入下一頁
+            this.goToNextPage();
+        });
+
+        // 懸停效果
+        buttonBg.on('pointerover', () => {
+            buttonBg.setFillStyle(0x45a049);
+        });
+
+        buttonBg.on('pointerout', () => {
+            buttonBg.setFillStyle(0x4caf50);
+        });
+
+        console.log('📄 下一頁按鈕已顯示');
     }
 
     // 🔥 檢查當前頁是否全部配對完成

@@ -20,6 +20,7 @@ import SRSLearningPanel from '@/components/games/SRSLearningPanel';
 import SRSReviewDetails from '@/components/games/SRSReviewDetails';
 import GameOptionsPanel from '@/components/game-options';
 import VisualStyleSelector from '@/components/visual-style-selector';
+import MatchUpOptionsPanel, { MatchUpOptions, DEFAULT_MATCH_UP_OPTIONS } from '@/components/game-options/MatchUpOptionsPanel';
 import { GameOptions, DEFAULT_GAME_OPTIONS } from '@/types/game-options';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
@@ -66,6 +67,7 @@ const GameSwitcherPage: React.FC = () => {
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [isCopying, setIsCopying] = useState<boolean>(false);
   const [gameOptions, setGameOptions] = useState<GameOptions>(DEFAULT_GAME_OPTIONS);
+  const [matchUpOptions, setMatchUpOptions] = useState<MatchUpOptions>(DEFAULT_MATCH_UP_OPTIONS);
   const [isSavingOptions, setIsSavingOptions] = useState<boolean>(false);
   const [gameKey, setGameKey] = useState<number>(0); // 用於強制重新渲染 GameSwitcher
 
@@ -1198,6 +1200,7 @@ const GameSwitcherPage: React.FC = () => {
             isAnonymous={isAnonymous}
             gameOptions={gameOptions}
             visualStyle={gameOptions.visualStyle}
+            matchUpOptions={matchUpOptions}
           />
         </div>
 
@@ -1448,6 +1451,15 @@ const GameSwitcherPage: React.FC = () => {
                 }}
               />
 
+              {/* Match-up 遊戲專屬選項面板 - 只在 Match-up 遊戲時顯示 */}
+              {currentGameId === 'match-up-game' && (
+                <MatchUpOptionsPanel
+                  options={matchUpOptions}
+                  onChange={setMatchUpOptions}
+                  totalVocabulary={customVocabulary.length}
+                />
+              )}
+
               {/* 遊戲選項面板 */}
               <GameOptionsPanel
                 options={gameOptions}
@@ -1463,6 +1475,7 @@ const GameSwitcherPage: React.FC = () => {
                     setIsSavingOptions(true);
                     try {
                       console.log('🔍 開始保存遊戲選項:', gameOptions);
+                      console.log('🔍 開始保存 Match-up 選項:', matchUpOptions);
 
                       const response = await fetch(`/api/activities/${activityId}`, {
                         method: 'PUT',
@@ -1471,6 +1484,7 @@ const GameSwitcherPage: React.FC = () => {
                         },
                         body: JSON.stringify({
                           gameOptions,
+                          matchUpOptions,
                         }),
                       });
 
@@ -1479,13 +1493,20 @@ const GameSwitcherPage: React.FC = () => {
                         console.log('✅ 選項保存成功:', data);
 
                         // 顯示成功消息（使用更友好的提示）
-                        const successMessage = '✅ 選項已成功保存！\n\n' +
+                        let successMessage = '✅ 選項已成功保存！\n\n' +
                           '已保存的設置：\n' +
                           `🎨 視覺風格: ${gameOptions.visualStyle}\n` +
                           `⏱️ 計時器: ${gameOptions.timer.type === 'none' ? '無' : gameOptions.timer.type === 'countUp' ? '正計時' : '倒計時'}\n` +
                           `❤️ 生命值: ${gameOptions.lives} 條命\n` +
                           `🎲 隨機順序: ${gameOptions.random ? '開啟' : '關閉'}\n` +
                           `📝 顯示答案: ${gameOptions.showAnswers ? '開啟' : '關閉'}`;
+
+                        // 如果是 Match-up 遊戲，添加 Match-up 專屬選項
+                        if (currentGameId === 'match-up-game') {
+                          successMessage += `\n\n🎮 Match-up 專屬選項：\n` +
+                            `📄 每頁匹配數: ${matchUpOptions.itemsPerPage}\n` +
+                            `⏭️ 自動繼續: ${matchUpOptions.autoProceed ? '開啟' : '關閉'}`;
+                        }
 
                         alert(successMessage);
                       } else {

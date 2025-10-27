@@ -45,6 +45,7 @@ interface GameSwitcherProps {
   isAnonymous?: boolean; // 匿名模式
   gameOptions?: any; // 遊戲選項
   visualStyle?: string; // 視覺風格
+  matchUpOptions?: any; // Match-up 遊戲專屬選項
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -348,7 +349,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   studentName = null,
   isAnonymous = false,
   gameOptions = null,
-  visualStyle = null
+  visualStyle = null,
+  matchUpOptions = null
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -411,6 +413,13 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       if (visualStyle) {
         url += `&visualStyle=${visualStyle}`;
         console.log('🎨 視覺風格已添加到 URL:', visualStyle);
+      }
+
+      // 添加 Match-up 選項到 URL
+      if (matchUpOptions && game.id === 'match-up-game') {
+        url += `&itemsPerPage=${matchUpOptions.itemsPerPage}`;
+        url += `&autoProceed=${matchUpOptions.autoProceed}`;
+        console.log('🎮 Match-up 選項已添加到 URL:', matchUpOptions);
       }
     }
 
