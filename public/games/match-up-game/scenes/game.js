@@ -671,19 +671,17 @@ class GameScene extends Phaser.Scene {
         }
 
         // 🔥 根據容器大小動態調整間距
-        // 中文文字高度估算（根據字體大小）
-        const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
-
+        // 文字在框右邊，所以垂直間距只需要考慮卡片高度
         let leftSpacing, rightSpacing;
         if (isSmallContainer) {
             leftSpacing = cardHeight + Math.max(3, height * 0.008);
-            rightSpacing = cardHeight + textHeight + Math.max(8, height * 0.02);  // 加上文字高度
+            rightSpacing = cardHeight + Math.max(8, height * 0.02);
         } else if (isMediumContainer) {
             leftSpacing = cardHeight + Math.max(4, height * 0.009);
-            rightSpacing = cardHeight + textHeight + Math.max(12, height * 0.025);  // 加上文字高度
+            rightSpacing = cardHeight + Math.max(12, height * 0.025);
         } else {
             leftSpacing = cardHeight + Math.max(5, height * 0.01);
-            rightSpacing = cardHeight + textHeight + Math.max(15, height * 0.03);  // 加上文字高度
+            rightSpacing = cardHeight + Math.max(15, height * 0.03);
         }
 
         console.log(`📏 間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px`);
@@ -1517,15 +1515,15 @@ class GameScene extends Phaser.Scene {
         background.setStrokeStyle(2, 0x333333);
         background.setDepth(1);
 
-        // 🔥 創建文字標籤（在框下方，響應式字體大小）
+        // 🔥 創建文字標籤（在框右邊，響應式字體大小）
         const fontSize = Math.max(24, Math.min(48, height * 0.6));
-        const cardText = this.add.text(0, height / 2 + 10, text, {
+        const cardText = this.add.text(width / 2 + 15, 0, text, {
             fontSize: `${fontSize}px`,
             color: '#333333',
             fontFamily: 'Arial',
             fontStyle: 'normal'
         });
-        cardText.setOrigin(0.5, 0);  // 水平居中，頂部對齊
+        cardText.setOrigin(0, 0.5);  // 左對齊，垂直居中
         cardText.setDepth(10);  // 確保文字在最上層
 
         // 添加到容器
