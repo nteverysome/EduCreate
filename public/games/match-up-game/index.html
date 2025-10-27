@@ -184,22 +184,48 @@
             toggleFullscreen() {
                 console.log('🖥️ 全螢幕按鈕點擊');
 
-                // 發送 PostMessage 到父頁面
-                if (window.parent && window.parent !== window) {
-                    window.parent.postMessage({
-                        type: 'DUAL_FULLSCREEN_REQUEST',
-                        action: 'toggle',
-                        timestamp: Date.now(),
-                        source: 'match-up-fullscreen-button'
-                    }, '*');
+                // 🔥 修復：優先使用原生 Fullscreen API
+                const gameContainer = document.getElementById('game-container');
 
-                    console.log('📤 已發送全螢幕請求到父頁面');
-                } else {
-                    // 備用方案：使用瀏覽器原生全螢幕 API
-                    if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen();
+                if (!document.fullscreenElement) {
+                    // 進入全螢幕
+                    console.log('📱 進入全螢幕模式');
+
+                    // 嘗試對 game-container 進行全螢幕
+                    if (gameContainer && gameContainer.requestFullscreen) {
+                        gameContainer.requestFullscreen().then(() => {
+                            console.log('✅ 全螢幕成功 (requestFullscreen)');
+                        }).catch(err => {
+                            console.warn('⚠️ 全螢幕失敗:', err);
+                            // 退路：嘗試對整個文檔進行全螢幕
+                            if (document.documentElement.requestFullscreen) {
+                                document.documentElement.requestFullscreen();
+                            }
+                        });
+                    } else if (gameContainer.webkitRequestFullscreen) {
+                        gameContainer.webkitRequestFullscreen();
+                        console.log('✅ 全螢幕成功 (webkit)');
+                    } else if (gameContainer.mozRequestFullScreen) {
+                        gameContainer.mozRequestFullScreen();
+                        console.log('✅ 全螢幕成功 (moz)');
+                    } else if (gameContainer.msRequestFullscreen) {
+                        gameContainer.msRequestFullscreen();
+                        console.log('✅ 全螢幕成功 (ms)');
                     } else {
+                        console.warn('⚠️ 不支援全螢幕 API');
+                    }
+                } else {
+                    // 退出全螢幕
+                    console.log('🚪 退出全螢幕模式');
+
+                    if (document.exitFullscreen) {
                         document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
                     }
                 }
             }
