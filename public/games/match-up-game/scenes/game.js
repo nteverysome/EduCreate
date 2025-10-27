@@ -714,10 +714,10 @@ class GameScene extends Phaser.Scene {
             this.leftCards.push(card);
         });
 
-        // 創建右側答案卡片
+        // 創建右側答案卡片（文字在框右邊）
         shuffledAnswers.forEach((pair, index) => {
             const y = rightStartY + index * rightSpacing;
-            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id);
+            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id, 'right');  // 🔥 文字在框右邊
             this.rightCards.push(card);
         });
 
@@ -1536,7 +1536,7 @@ class GameScene extends Phaser.Scene {
         return container;
     }
 
-    createRightCard(x, y, width, height, text, pairId) {
+    createRightCard(x, y, width, height, text, pairId, textPosition = 'bottom') {
         // 創建卡片容器
         const container = this.add.container(x, y);
         container.setDepth(5);
@@ -1546,15 +1546,32 @@ class GameScene extends Phaser.Scene {
         background.setStrokeStyle(2, 0x333333);
         background.setDepth(1);
 
-        // 🔥 創建文字標籤（在框下邊，響應式字體大小）
+        // 🔥 創建文字標籤（響應式字體大小）
         const fontSize = Math.max(24, Math.min(48, height * 0.6));
-        const cardText = this.add.text(0, height / 2 + 10, text, {
+
+        // 🔥 根據 textPosition 設置文字位置
+        let textX, textY, originX, originY;
+        if (textPosition === 'right') {
+            // 文字在框右邊
+            textX = width / 2 + 15;
+            textY = 0;
+            originX = 0;      // 左對齊
+            originY = 0.5;    // 垂直居中
+        } else {
+            // 文字在框下邊（默認）
+            textX = 0;
+            textY = height / 2 + 10;
+            originX = 0.5;    // 水平居中
+            originY = 0;      // 頂部對齊
+        }
+
+        const cardText = this.add.text(textX, textY, text, {
             fontSize: `${fontSize}px`,
             color: '#333333',
             fontFamily: 'Arial',
             fontStyle: 'normal'
         });
-        cardText.setOrigin(0.5, 0);  // 水平居中，頂部對齊
+        cardText.setOrigin(originX, originY);
         cardText.setDepth(10);  // 確保文字在最上層
 
         // 添加到容器
