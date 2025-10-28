@@ -888,27 +888,34 @@ class GameScene extends Phaser.Scene {
 
         console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局`);
 
+        // 🔥 計算間距（先計算，用於後續卡片高度計算）
+        const horizontalSpacing = Math.max(5, width * 0.01);
+        const verticalSpacing = Math.max(3, height * 0.008);
+
+        // 🔥 動態計算最大卡片高度，確保所有卡片都能放入容器
+        const availableHeight = height * 0.8;  // 使用 80% 的容器高度
+        const totalVerticalSpacing = (rows - 1) * verticalSpacing;
+        const maxCardHeight = (availableHeight - totalVerticalSpacing) / rows;
+
         // 🔥 根據容器大小調整卡片尺寸
         let cardWidth, cardHeight;
         if (isSmallContainer) {
             cardWidth = Math.max(80, Math.min(130, width * 0.13));
-            cardHeight = Math.max(30, Math.min(45, height * (0.75 / rows)));
+            cardHeight = Math.max(20, Math.min(maxCardHeight, 45));  // 🔥 使用動態最大高度
         } else if (isMediumContainer) {
             cardWidth = Math.max(90, Math.min(150, width * 0.14));
-            cardHeight = Math.max(35, Math.min(52, height * (0.78 / rows)));
+            cardHeight = Math.max(25, Math.min(maxCardHeight, 52));  // 🔥 使用動態最大高度
         } else {
             cardWidth = Math.max(100, Math.min(170, width * 0.15));
-            cardHeight = Math.max(40, Math.min(60, height * (0.8 / rows)));
+            cardHeight = Math.max(30, Math.min(maxCardHeight, 60));  // 🔥 使用動態最大高度
         }
 
         console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
-
-        // 🔥 計算間距
-        const horizontalSpacing = Math.max(5, width * 0.01);
+        console.log(`📏 可用高度: ${availableHeight.toFixed(0)}, 最大卡片高度: ${maxCardHeight.toFixed(0)}`);
 
         // 🔥 英文卡片和中文卡片的垂直間距（文字在框右邊，不需要額外間距）
-        const leftVerticalSpacing = Math.max(3, height * 0.008);
-        const rightVerticalSpacing = Math.max(3, height * 0.008);  // 🔥 與左側相同
+        const leftVerticalSpacing = verticalSpacing;
+        const rightVerticalSpacing = verticalSpacing;  // 🔥 與左側相同
 
         // 🔥 計算左側區域（英文）的起始位置
         const leftAreaStartX = width * 0.08;
