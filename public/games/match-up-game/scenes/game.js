@@ -1648,19 +1648,56 @@ class GameScene extends Phaser.Scene {
                 // 🔥 第九步：計算行數
                 const optimalRows = Math.ceil(itemCount / optimalCols);
 
-                // 🔥 第十步：計算正方形卡片尺寸
+                // 🔥 第十步：計算正方形卡片尺寸（迭代計算，確保不超出邊界）
                 // 方法1：基於高度
                 // totalUnitHeight = squareSize + chineseTextHeight
                 // totalUnitHeight = squareSize + squareSize * 0.4 = squareSize * 1.4
                 // 所以 squareSize = totalUnitHeight / 1.4
-                const availableHeightPerRow = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows;
-                const squareSizeByHeight = availableHeightPerRow / 1.4;  // 正確計算：考慮中文文字高度
+                let availableHeightPerRow = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows;
+                let squareSizeByHeight = availableHeightPerRow / 1.4;  // 正確計算：考慮中文文字高度
 
                 // 方法2：基於寬度
                 const squareSizeByWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
 
-                // 取較小值，確保卡片不會超出邊界，且不小於最小尺寸
-                const squareSize = Math.max(minSquareSize, Math.min(squareSizeByHeight, squareSizeByWidth));
+                // 取較小值，確保卡片不會超出邊界
+                let squareSize = Math.min(squareSizeByHeight, squareSizeByWidth);
+
+                // 🔥 檢查是否需要增加列數（如果卡片太小）
+                if (squareSize < minSquareSize && optimalCols < itemCount) {
+                    // 嘗試增加列數，減少行數
+                    const newCols = Math.min(optimalCols + 1, itemCount);
+                    const newRows = Math.ceil(itemCount / newCols);
+
+                    // 重新計算卡片尺寸
+                    const newSquareSizeByWidth = (availableWidth - horizontalSpacing * (newCols + 1)) / newCols;
+                    const newAvailableHeightPerRow = (availableHeight - verticalSpacing * (newRows + 1)) / newRows;
+                    const newSquareSizeByHeight = newAvailableHeightPerRow / 1.4;
+                    const newSquareSize = Math.min(newSquareSizeByHeight, newSquareSizeByWidth);
+
+                    // 如果新的卡片尺寸更大，使用新的佈局
+                    if (newSquareSize > squareSize) {
+                        cols = newCols;
+                        squareSize = newSquareSize;
+                        availableHeightPerRow = newAvailableHeightPerRow;
+
+                        console.log('🔄 增加列數以避免卡片過小:', {
+                            oldCols: optimalCols,
+                            newCols: newCols,
+                            oldSquareSize: squareSize.toFixed(1),
+                            newSquareSize: newSquareSize.toFixed(1)
+                        });
+                    } else {
+                        // 使用最小尺寸
+                        squareSize = minSquareSize;
+                        cols = optimalCols;
+                    }
+                } else if (squareSize < minSquareSize) {
+                    // 使用最小尺寸
+                    squareSize = minSquareSize;
+                    cols = optimalCols;
+                } else {
+                    cols = optimalCols;
+                }
 
                 // 🔥 第十一步：設置卡片尺寸（正方形）
                 frameWidth = squareSize;
@@ -1668,8 +1705,8 @@ class GameScene extends Phaser.Scene {
                 chineseTextHeight = squareSize * 0.4;  // 中文文字高度為卡片高度的40%
                 totalUnitHeight = cardHeightInFrame + chineseTextHeight;  // = squareSize * 1.4
 
-                cols = optimalCols;
-                const rows = optimalRows;
+                // cols 已在上面的邏輯中設置
+                const rows = Math.ceil(itemCount / cols);
 
                 console.log('🟦 正方形卡片佈局:', {
                     resolution: `${width}×${height}`,
