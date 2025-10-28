@@ -1396,12 +1396,16 @@ class GameScene extends Phaser.Scene {
         console.log('📱 響應式檢測:', { width, height, isLandscapeMobile, isTinyHeight, isCompactMode });
 
         // 🔥 根據匹配數和模式決定列數和框的尺寸
-        let cols, frameWidth, frameHeight, cardHeightInFrame, chineseFontSize;
-        const chineseTextHeight = 25;  // 中文文字高度（優化：從30px減少到25px）
+        let cols, frameWidth, frameHeight, cardHeightInFrame, chineseFontSize, chineseTextHeight;
+
+        // 中文文字高度會根據模式動態調整
+        // 緊湊模式：20px字體 → ~20px高度
+        // 正常模式：18px字體 → ~18px高度
 
         if (isCompactMode) {
             // 🔥 手機橫向模式或極小高度：優先增加列數，減少行數，充分利用垂直空間
             chineseFontSize = '20px';  // 緊湊模式使用更小的字體
+            chineseTextHeight = 20;  // 20px字體對應的高度
 
             // 先確定列數
             if (itemCount <= 5) {
@@ -1443,29 +1447,30 @@ class GameScene extends Phaser.Scene {
                 totalUnitHeight: cardHeightInFrame + chineseTextHeight
             });
         } else {
-            // 🔥 桌面或手機直向模式：原有邏輯
-            chineseFontSize = '24px';  // 正常模式使用正常字體
+            // 🔥 桌面或手機直向模式：激進縮小方案（減少30-35%）
+            chineseFontSize = '18px';  // 使用更小的字體
+            chineseTextHeight = 18;  // 18px字體對應的高度
 
             if (itemCount <= 5) {
                 cols = Math.min(3, itemCount);
-                frameWidth = Math.min(280, (width - 100) / cols);
-                frameHeight = 140;
-                cardHeightInFrame = 60;
+                frameWidth = Math.min(200, (width - 100) / cols);  // 從280px減少到200px
+                frameHeight = 58;  // 從140px減少到58px
+                cardHeightInFrame = 40;  // 從60px減少到40px
             } else if (itemCount <= 10) {
                 cols = Math.min(4, Math.ceil(itemCount / 2));
-                frameWidth = Math.min(240, (width - 120) / cols);
-                frameHeight = 130;
-                cardHeightInFrame = 55;
+                frameWidth = Math.min(160, (width - 120) / cols);  // 從240px減少到160px
+                frameHeight = 53;  // 從130px減少到53px
+                cardHeightInFrame = 35;  // 從55px減少到35px
             } else if (itemCount <= 20) {
                 cols = Math.min(6, Math.ceil(itemCount / 3));
-                frameWidth = Math.min(180, (width - 140) / cols);
-                frameHeight = 110;
-                cardHeightInFrame = 45;
+                frameWidth = Math.min(120, (width - 140) / cols);  // 從180px減少到120px
+                frameHeight = 46;  // 從110px減少到46px
+                cardHeightInFrame = 30;  // 從45px減少到30px
             } else {
                 cols = 4;
-                frameWidth = Math.min(260, (width - 100) / cols);
-                frameHeight = 135;
-                cardHeightInFrame = 58;
+                frameWidth = Math.min(180, (width - 100) / cols);  // 從260px減少到180px
+                frameHeight = 56;  // 從135px減少到56px
+                cardHeightInFrame = 38;  // 從58px減少到38px
             }
         }
 
