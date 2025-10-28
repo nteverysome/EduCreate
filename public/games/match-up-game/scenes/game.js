@@ -100,7 +100,9 @@ class GameScene extends Phaser.Scene {
                     question: item.english || item.word || '',
                     answer: item.chinese || item.translation || '',
                     english: item.english || item.word || '',  // 🔥 添加 english 欄位
-                    chinese: item.chinese || item.translation || ''  // 🔥 添加 chinese 欄位
+                    chinese: item.chinese || item.translation || '',  // 🔥 添加 chinese 欄位
+                    imageUrl: item.imageUrl || null,  // 🔥 添加英文圖片 URL
+                    chineseImageUrl: item.chineseImageUrl || null  // 🔥 添加中文圖片 URL
                 }));
 
                 console.log('✅ 詞彙數據轉換完成:', this.pairs);
@@ -748,7 +750,7 @@ class GameScene extends Phaser.Scene {
         currentPagePairs.forEach((pair, index) => {
             const y = leftStartY + index * leftSpacing;
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
-            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay);
+            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl);
             this.leftCards.push(card);
         });
 
@@ -862,7 +864,7 @@ class GameScene extends Phaser.Scene {
             const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
 
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
-            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay);
+            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl);
             this.leftCards.push(card);
         });
 
@@ -1002,7 +1004,7 @@ class GameScene extends Phaser.Scene {
             const y = leftAreaStartY + row * (cardHeight + leftVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 leftVerticalSpacing
 
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
-            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay);
+            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl);
             this.leftCards.push(card);
         });
 
@@ -1144,7 +1146,7 @@ class GameScene extends Phaser.Scene {
             const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
 
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
-            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay);
+            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl);
             this.leftCards.push(card);
         });
 
@@ -1371,7 +1373,7 @@ class GameScene extends Phaser.Scene {
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
 
             if (cardData.type === 'question') {
-                const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId, animationDelay);
+                const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId, animationDelay, cardData.pair.imageUrl);
                 this.leftCards.push(card);
             } else {
                 const card = this.createRightCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId);
@@ -1579,7 +1581,7 @@ class GameScene extends Phaser.Scene {
             const animationDelay = i * 100;  // 每個卡片延遲 100ms
 
             // 創建英文卡片（使用與中文文字相同的寬度）
-            const card = this.createLeftCard(frameX, cardY, frameWidth - 10, cardHeightInFrame, pair.question, pair.id, animationDelay);
+            const card = this.createLeftCard(frameX, cardY, frameWidth - 10, cardHeightInFrame, pair.question, pair.id, animationDelay, pair.imageUrl);
 
             // 保存卡片當前所在的框的索引
             card.setData('currentFrameIndex', i);
@@ -1641,7 +1643,7 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    createLeftCard(x, y, width, height, text, pairId, animationDelay = 0) {
+    createLeftCard(x, y, width, height, text, pairId, animationDelay = 0, imageUrl = null) {
         // 創建卡片容器
         const container = this.add.container(x, y);
         container.setSize(width, height);
@@ -1654,36 +1656,99 @@ class GameScene extends Phaser.Scene {
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
 
-        // 🔥 創建卡片文字（動態字體大小，適應內框寬度）
-        let fontSize = Math.max(24, Math.min(48, height * 0.6));
+        // 🔥 如果有圖片，創建圖片在上，文字在下的佈局
+        if (imageUrl) {
+            // 圖片區域：佔據卡片上方 60%
+            const imageHeight = height * 0.6;
+            const imageY = -height / 2 + imageHeight / 2;
 
-        // 🔥 創建臨時文字對象來測量寬度
-        const tempText = this.add.text(0, 0, text, {
-            fontSize: `${fontSize}px`,
-            fontFamily: 'Arial'
-        });
+            // 文字區域：佔據卡片下方 40%
+            const textHeight = height * 0.4;
+            const textY = height / 2 - textHeight / 2;
 
-        // 🔥 如果文字寬度超過卡片寬度的 85%，縮小字體
-        const maxTextWidth = width * 0.85;  // 留 15% 的邊距
-        while (tempText.width > maxTextWidth && fontSize > 18) {
-            fontSize -= 2;
-            tempText.setFontSize(fontSize);
+            // 🔥 創建圖片（使用 Phaser 的 load.image）
+            const imageKey = `card-image-${pairId}`;
+
+            // 檢查圖片是否已經載入
+            if (!this.textures.exists(imageKey)) {
+                // 載入圖片
+                this.load.image(imageKey, imageUrl);
+                this.load.once('complete', () => {
+                    // 圖片載入完成後創建
+                    const cardImage = this.add.image(0, imageY, imageKey);
+                    cardImage.setDisplaySize(width - 4, imageHeight - 4);  // 留 2px 邊距
+                    container.add(cardImage);
+                });
+                this.load.start();
+            } else {
+                // 圖片已載入，直接創建
+                const cardImage = this.add.image(0, imageY, imageKey);
+                cardImage.setDisplaySize(width - 4, imageHeight - 4);  // 留 2px 邊距
+                container.add(cardImage);
+            }
+
+            // 🔥 創建文字（在圖片下方）
+            let fontSize = Math.max(18, Math.min(32, textHeight * 0.5));
+
+            // 🔥 創建臨時文字對象來測量寬度
+            const tempText = this.add.text(0, 0, text, {
+                fontSize: `${fontSize}px`,
+                fontFamily: 'Arial'
+            });
+
+            // 🔥 如果文字寬度超過卡片寬度的 85%，縮小字體
+            const maxTextWidth = width * 0.85;  // 留 15% 的邊距
+            while (tempText.width > maxTextWidth && fontSize > 14) {
+                fontSize -= 2;
+                tempText.setFontSize(fontSize);
+            }
+
+            // 銷毀臨時文字對象
+            tempText.destroy();
+
+            // 🔥 創建最終的文字對象
+            const cardText = this.add.text(0, textY, text, {
+                fontSize: `${fontSize}px`,
+                color: '#333333',
+                fontFamily: 'Arial',
+                fontStyle: 'normal'
+            });
+            cardText.setOrigin(0.5);
+
+            // 添加到容器
+            container.add([background, cardText]);
+        } else {
+            // 🔥 沒有圖片，只顯示文字（與原來相同）
+            let fontSize = Math.max(24, Math.min(48, height * 0.6));
+
+            // 🔥 創建臨時文字對象來測量寬度
+            const tempText = this.add.text(0, 0, text, {
+                fontSize: `${fontSize}px`,
+                fontFamily: 'Arial'
+            });
+
+            // 🔥 如果文字寬度超過卡片寬度的 85%，縮小字體
+            const maxTextWidth = width * 0.85;  // 留 15% 的邊距
+            while (tempText.width > maxTextWidth && fontSize > 18) {
+                fontSize -= 2;
+                tempText.setFontSize(fontSize);
+            }
+
+            // 銷毀臨時文字對象
+            tempText.destroy();
+
+            // 🔥 創建最終的文字對象
+            const cardText = this.add.text(0, 0, text, {
+                fontSize: `${fontSize}px`,
+                color: '#333333',
+                fontFamily: 'Arial',
+                fontStyle: 'normal'
+            });
+            cardText.setOrigin(0.5);
+
+            // 添加到容器
+            container.add([background, cardText]);
         }
-
-        // 銷毀臨時文字對象
-        tempText.destroy();
-
-        // 🔥 創建最終的文字對象
-        const cardText = this.add.text(0, 0, text, {
-            fontSize: `${fontSize}px`,
-            color: '#333333',
-            fontFamily: 'Arial',
-            fontStyle: 'normal'
-        });
-        cardText.setOrigin(0.5);
-
-        // 添加到容器
-        container.add([background, cardText]);
 
         // 🔥 添加淡入動畫（按照順序出現）
         this.tweens.add({
