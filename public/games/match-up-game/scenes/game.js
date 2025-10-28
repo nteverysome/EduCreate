@@ -2025,11 +2025,14 @@ class GameScene extends Phaser.Scene {
                 const rightPairId = rightCard.getData('pairId');
                 const isCorrect = leftPairId === rightPairId;
 
+                // 🔥 獲取用戶回答的英文（從 pairs 數據中獲取，而不是從卡片對象）
+                const userAnswerPair = currentPagePairs.find(pair => pair.id === rightPairId);
+
                 // 🔥 記錄用戶答案
                 this.currentPageAnswers.push({
                     page: this.currentPage,
-                    leftText: leftCard.getData('text'),
-                    rightText: rightCard.getData('text'),
+                    leftText: correctPair.chinese,  // 🔥 使用 pair.chinese 而不是 getData('text')
+                    rightText: userAnswerPair ? userAnswerPair.english : '(未知)',  // 🔥 使用 pair.english
                     correctAnswer: correctPair.english,
                     correctChinese: correctPair.chinese,
                     isCorrect: isCorrect,
@@ -2040,14 +2043,14 @@ class GameScene extends Phaser.Scene {
                 if (isCorrect) {
                     // 配對正確
                     correctCount++;
-                    console.log('✅ 配對正確:', leftCard.getData('text'), '-', rightCard.getData('text'));
+                    console.log('✅ 配對正確:', correctPair.chinese, '-', userAnswerPair.english);
 
                     // 🔥 顯示正確的英文單字，內框呈白色，標記勾勾
                     this.showCorrectAnswer(rightCard, correctPair.english);
                 } else {
                     // 配對錯誤
                     incorrectCount++;
-                    console.log('❌ 配對錯誤:', leftCard.getData('text'), '-', rightCard.getData('text'));
+                    console.log('❌ 配對錯誤:', correctPair.chinese, '-', userAnswerPair.english);
 
                     // 🔥 顯示正確的英文單字，內框呈灰色，標記 X
                     this.showIncorrectAnswer(rightCard, correctPair.english);
@@ -2055,12 +2058,12 @@ class GameScene extends Phaser.Scene {
             } else {
                 // 未配對
                 unmatchedCount++;
-                console.log('⚠️ 未配對:', leftCard.getData('text'));
+                console.log('⚠️ 未配對:', correctPair.chinese);
 
                 // 🔥 記錄未配對的答案
                 this.currentPageAnswers.push({
                     page: this.currentPage,
-                    leftText: leftCard.getData('text'),
+                    leftText: correctPair.chinese,  // 🔥 使用 pair.chinese
                     rightText: null,
                     correctAnswer: correctPair.english,
                     correctChinese: correctPair.chinese,
