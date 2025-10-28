@@ -723,10 +723,11 @@ class GameScene extends Phaser.Scene {
         // 創建左側外框
         this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftSpacing, itemCount);
 
-        // 創建左側題目卡片
+        // 🔥 創建左側題目卡片（按照順序出現動畫）
         currentPagePairs.forEach((pair, index) => {
             const y = leftStartY + index * leftSpacing;
-            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id);
+            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
+            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay);
             this.leftCards.push(card);
         });
 
@@ -832,14 +833,15 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 不創建下方外框（中文卡片不需要外框）
 
-        // 🔥 創建上方英文卡片（2 行多列）
+        // 🔥 創建上方英文卡片（2 行多列，按照順序出現動畫）
         currentPagePairs.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = topAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
             const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
 
-            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id);
+            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
+            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay);
             this.leftCards.push(card);
         });
 
@@ -971,14 +973,15 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 不創建右側外框（中文卡片不需要外框）
 
-        // 🔥 創建左側英文卡片（多行 2 列）
+        // 🔥 創建左側英文卡片（多行 2 列，按照順序出現動畫）
         currentPagePairs.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = leftAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
             const y = leftAreaStartY + row * (cardHeight + leftVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 leftVerticalSpacing
 
-            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id);
+            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
+            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay);
             this.leftCards.push(card);
         });
 
@@ -1112,14 +1115,15 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 不創建下方外框（中文卡片不需要外框）
 
-        // 🔥 創建上方英文卡片（多行多列）
+        // 🔥 創建上方英文卡片（多行多列，按照順序出現動畫）
         currentPagePairs.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = topAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
             const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
 
-            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id);
+            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
+            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay);
             this.leftCards.push(card);
         });
 
@@ -1336,15 +1340,17 @@ class GameScene extends Phaser.Scene {
             horizontalSpacing: horizontalSpacing.toFixed(1)
         });
 
-        // 🔥 創建混合網格卡片
+        // 🔥 創建混合網格卡片（按照順序出現動畫）
         shuffledCards.forEach((cardData, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = gridStartX + col * (dynamicCardWidth + horizontalSpacing) + dynamicCardWidth / 2;
             const y = gridStartY + row * (dynamicCardHeight + verticalSpacing) + dynamicCardHeight / 2;
 
+            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
+
             if (cardData.type === 'question') {
-                const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId);
+                const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId, animationDelay);
                 this.leftCards.push(card);
             } else {
                 const card = this.createRightCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId);
@@ -1407,15 +1413,17 @@ class GameScene extends Phaser.Scene {
         const horizontalSpacing = (width - cardWidth * cols) / (cols + 1);
         const verticalSpacing = (height - cardHeight * rows) / (rows + 1);
 
-        // 創建卡片
+        // 🔥 創建卡片（按照順序出現動畫）
         shuffledCards.forEach((cardData, i) => {
             const col = i % cols;
             const row = Math.floor(i / cols);
             const x = horizontalSpacing + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
             const y = verticalSpacing + row * (cardHeight + verticalSpacing) + cardHeight / 2 + height * 0.1;
 
+            const animationDelay = i * 100;  // 🔥 每個卡片延遲 100ms
+
             if (cardData.type === 'question') {
-                const card = this.createLeftCard(x, y, cardWidth, cardHeight, cardData.text, cardData.pairId);
+                const card = this.createLeftCard(x, y, cardWidth, cardHeight, cardData.text, cardData.pairId, animationDelay);
                 this.leftCards.push(card);
             } else {
                 const card = this.createRightCard(x, y, cardWidth, cardHeight, cardData.text, cardData.pairId);
@@ -1468,11 +1476,14 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    createLeftCard(x, y, width, height, text, pairId) {
+    createLeftCard(x, y, width, height, text, pairId, animationDelay = 0) {
         // 創建卡片容器
         const container = this.add.container(x, y);
         container.setSize(width, height);
         container.setDepth(5);
+
+        // 🔥 設置初始透明度為 0（隱藏）
+        container.setAlpha(0);
 
         // 創建卡片背景（白色）
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
@@ -1508,6 +1519,15 @@ class GameScene extends Phaser.Scene {
 
         // 添加到容器
         container.add([background, cardText]);
+
+        // 🔥 添加淡入動畫（按照順序出現）
+        this.tweens.add({
+            targets: container,
+            alpha: 1,  // 從 0 淡入到 1
+            duration: 300,  // 動畫持續 300ms
+            delay: animationDelay,  // 延遲時間
+            ease: 'Power2'
+        });
 
         // 設置互動（整個容器可拖曳）
         container.setInteractive({ useHandCursor: true, draggable: true });
