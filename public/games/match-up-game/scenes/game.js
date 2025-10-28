@@ -1909,20 +1909,25 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 按鈕尺寸（響應式）
-        const buttonWidth = Math.max(120, Math.min(200, width * 0.15));
-        const buttonHeight = Math.max(40, Math.min(60, height * 0.08));
-        const fontSize = Math.max(16, Math.min(24, width * 0.02));
+        console.log('🔍 顯示提交答案按鈕', { width, height });
 
-        // 按鈕位置（最底下中央）
+        // 按鈕尺寸（響應式）
+        const buttonWidth = Math.max(150, Math.min(250, width * 0.2));
+        const buttonHeight = Math.max(50, Math.min(70, height * 0.1));
+        const fontSize = Math.max(20, Math.min(28, width * 0.025));
+
+        // 🔥 按鈕位置（最底下中央，確保可見）
         const buttonX = width / 2;
-        const buttonY = height - buttonHeight / 2 - 20;
+        const buttonY = height - buttonHeight - 10;  // 距離底部 10px
+
+        console.log('🔍 按鈕位置', { buttonX, buttonY, buttonWidth, buttonHeight });
 
         // 創建按鈕背景
         const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x4caf50);
-        buttonBg.setStrokeStyle(2, 0x388e3c);
+        buttonBg.setStrokeStyle(3, 0x388e3c);
         buttonBg.setInteractive({ useHandCursor: true });
-        buttonBg.setDepth(2000);
+        buttonBg.setDepth(3000);  // 🔥 提高深度確保在最上層
+        buttonBg.setScrollFactor(0);  // 🔥 固定在螢幕上，不隨相機移動
 
         // 創建按鈕文字
         const buttonText = this.add.text(buttonX, buttonY, '提交答案', {
@@ -1932,7 +1937,10 @@ class GameScene extends Phaser.Scene {
             fontStyle: 'bold'
         });
         buttonText.setOrigin(0.5);
-        buttonText.setDepth(2001);
+        buttonText.setDepth(3001);  // 🔥 提高深度確保在最上層
+        buttonText.setScrollFactor(0);  // 🔥 固定在螢幕上，不隨相機移動
+
+        console.log('✅ 提交答案按鈕已創建');
 
         // 按鈕點擊事件
         buttonBg.on('pointerdown', () => {
@@ -1943,6 +1951,7 @@ class GameScene extends Phaser.Scene {
         // 按鈕懸停效果
         buttonBg.on('pointerover', () => {
             buttonBg.setFillStyle(0x66bb6a);
+            console.log('🔍 按鈕懸停');
         });
 
         buttonBg.on('pointerout', () => {
