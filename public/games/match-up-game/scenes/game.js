@@ -1407,16 +1407,8 @@ class GameScene extends Phaser.Scene {
             chineseFontSize = '16px';  // 減少字體大小以節省垂直空間
             chineseTextHeight = 16;  // 16px字體對應的高度
 
-            // 先確定列數
-            if (itemCount <= 5) {
-                cols = itemCount;  // 全部排成一行
-            } else if (itemCount <= 10) {
-                cols = Math.min(5, itemCount);  // 最多5列
-            } else if (itemCount <= 20) {
-                cols = Math.min(7, Math.ceil(itemCount / 2));  // 最多7列
-            } else {
-                cols = Math.min(8, Math.ceil(itemCount / 3));  // 最多8列
-            }
+            // 🔥 手機橫向模式固定5列
+            cols = Math.min(5, itemCount);  // 固定最多5列
 
             // 計算行數
             const rows = Math.ceil(itemCount / cols);
@@ -1487,9 +1479,9 @@ class GameScene extends Phaser.Scene {
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
         const verticalSpacing = 0;  // 固定為0，無垂直間距
 
-        // 🔥 計算頂部偏移，確保佈局垂直居中或從頂部開始
+        // 🔥 計算頂部偏移，確保佈局垂直居中或從頂部開始（手機版增加20px）
         const totalContentHeight = rows * (frameHeight + chineseTextHeight);
-        const topOffset = isCompactMode ? 10 : Math.max(10, (height - totalContentHeight) / 2);
+        const topOffset = isCompactMode ? 30 : Math.max(10, (height - totalContentHeight) / 2);
 
         console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, chineseTextHeight, rows, totalContentHeight, topOffset });
 
