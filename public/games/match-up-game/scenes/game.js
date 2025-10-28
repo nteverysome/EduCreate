@@ -1914,20 +1914,40 @@ class GameScene extends Phaser.Scene {
 
         console.log('🔍 顯示提交答案按鈕', { width, height });
 
-        // 按鈕尺寸（響應式）
-        const buttonWidth = Math.max(150, Math.min(250, width * 0.2));
-        const buttonHeight = Math.max(50, Math.min(70, height * 0.1));
-        const fontSize = Math.max(20, Math.min(28, width * 0.025));
+        // 🔥 智能判斷容器大小
+        const isSmallContainer = height < 600;
+        const isMediumContainer = height >= 600 && height < 800;
+        const isLargeContainer = height >= 800;
 
-        // 🔥 按鈕位置（最底下中央，確保可見）
+        // 🔥 按鈕尺寸（根據容器大小調整）
+        let buttonWidth, buttonHeight, fontSize;
+
+        if (isSmallContainer) {
+            // 小容器：更小的按鈕
+            buttonWidth = Math.max(80, Math.min(120, width * 0.12));
+            buttonHeight = Math.max(30, Math.min(40, height * 0.06));
+            fontSize = Math.max(14, Math.min(18, width * 0.015));
+        } else if (isMediumContainer) {
+            // 中等容器：中等按鈕
+            buttonWidth = Math.max(100, Math.min(150, width * 0.15));
+            buttonHeight = Math.max(35, Math.min(50, height * 0.07));
+            fontSize = Math.max(16, Math.min(22, width * 0.02));
+        } else {
+            // 大容器：稍大的按鈕
+            buttonWidth = Math.max(120, Math.min(180, width * 0.12));
+            buttonHeight = Math.max(40, Math.min(55, height * 0.06));
+            fontSize = Math.max(18, Math.min(24, width * 0.02));
+        }
+
+        // 🔥 按鈕位置（最底下中央，留出更多空間）
         const buttonX = width / 2;
-        const buttonY = height - buttonHeight - 10;  // 距離底部 10px
+        const buttonY = height - buttonHeight / 2 - 5;  // 距離底部 5px
 
-        console.log('🔍 按鈕位置', { buttonX, buttonY, buttonWidth, buttonHeight });
+        console.log('🔍 按鈕位置', { buttonX, buttonY, buttonWidth, buttonHeight, isSmallContainer, isMediumContainer, isLargeContainer });
 
         // 創建按鈕背景
         const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x4caf50);
-        buttonBg.setStrokeStyle(3, 0x388e3c);
+        buttonBg.setStrokeStyle(2, 0x388e3c);
         buttonBg.setInteractive({ useHandCursor: true });
         buttonBg.setDepth(3000);  // 🔥 提高深度確保在最上層
         buttonBg.setScrollFactor(0);  // 🔥 固定在螢幕上，不隨相機移動
