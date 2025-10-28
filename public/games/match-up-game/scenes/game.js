@@ -2690,7 +2690,7 @@ class GameScene extends Phaser.Scene {
         // Show answers 按鈕
         this.createModalButton(modal, 0, buttonY, 'Show answers', () => {
             console.log('🎮 點擊 Show answers 按鈕');
-            // TODO: 顯示答案檢視頁面
+            this.showMyAnswersPage();
         });
 
         // Start again 按鈕
@@ -2775,6 +2775,311 @@ class GameScene extends Phaser.Scene {
 
         // 重新載入遊戲
         this.scene.restart();
+    }
+
+    // 🔥 顯示 My Answers 頁面
+    showMyAnswersPage() {
+        console.log('🎮 顯示 My Answers 頁面');
+
+        // 隱藏遊戲結束模態框
+        if (this.gameCompleteModal) {
+            this.gameCompleteModal.overlay.setVisible(false);
+            this.gameCompleteModal.modal.setVisible(false);
+        }
+
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 創建半透明背景（遮罩）
+        const overlay = this.add.rectangle(
+            width / 2,
+            height / 2,
+            width,
+            height,
+            0x000000,
+            0.7
+        );
+        overlay.setDepth(6000);
+        overlay.setScrollFactor(0);
+
+        // 創建答案頁面容器
+        const pageWidth = Math.min(800, width * 0.9);
+        const pageHeight = Math.min(600, height * 0.9);
+        const page = this.add.container(width / 2, height / 2);
+        page.setDepth(6001);
+        page.setScrollFactor(0);
+
+        // 頁面背景
+        const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0xffffff);
+        pageBg.setStrokeStyle(4, 0x000000);
+        page.add(pageBg);
+
+        // 標題：My Answers
+        const title = this.add.text(0, -pageHeight / 2 + 40, 'My Answers', {
+            fontSize: '32px',
+            color: '#000000',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        title.setOrigin(0.5);
+        page.add(title);
+
+        // 顯示答案列表
+        const answerStartY = -pageHeight / 2 + 100;
+        const answerSpacing = 80;
+        const maxAnswersPerPage = Math.floor((pageHeight - 200) / answerSpacing);
+
+        // 獲取所有答案（包含所有頁面）
+        const allAnswers = this.allPagesAnswers;
+        console.log('📝 所有答案:', allAnswers);
+
+        // 顯示答案（最多顯示 maxAnswersPerPage 個）
+        const answersToShow = allAnswers.slice(0, maxAnswersPerPage);
+        answersToShow.forEach((answer, index) => {
+            const y = answerStartY + index * answerSpacing;
+            this.createAnswerCard(page, -pageWidth / 2 + 150, y, answer, 'myAnswer');
+        });
+
+        // 底部按鈕區域
+        const buttonY = pageHeight / 2 - 60;
+
+        // Correct Answers 按鈕
+        this.createAnswerPageButton(page, -150, buttonY, 'Correct Answers', () => {
+            console.log('🎮 點擊 Correct Answers 按鈕');
+            this.hideMyAnswersPage();
+            this.showCorrectAnswersPage();
+        });
+
+        // Back 按鈕
+        this.createAnswerPageButton(page, 150, buttonY, 'Back', () => {
+            console.log('🎮 點擊 Back 按鈕');
+            this.hideMyAnswersPage();
+        });
+
+        // 保存頁面引用
+        this.myAnswersPage = { overlay, page };
+    }
+
+    // 🔥 隱藏 My Answers 頁面
+    hideMyAnswersPage() {
+        if (this.myAnswersPage) {
+            this.myAnswersPage.overlay.destroy();
+            this.myAnswersPage.page.destroy();
+            this.myAnswersPage = null;
+        }
+
+        // 顯示遊戲結束模態框
+        if (this.gameCompleteModal) {
+            this.gameCompleteModal.overlay.setVisible(true);
+            this.gameCompleteModal.modal.setVisible(true);
+        }
+    }
+
+    // 🔥 顯示 Correct Answers 頁面
+    showCorrectAnswersPage() {
+        console.log('🎮 顯示 Correct Answers 頁面');
+
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 創建半透明背景（遮罩）
+        const overlay = this.add.rectangle(
+            width / 2,
+            height / 2,
+            width,
+            height,
+            0x000000,
+            0.7
+        );
+        overlay.setDepth(6000);
+        overlay.setScrollFactor(0);
+
+        // 創建答案頁面容器
+        const pageWidth = Math.min(800, width * 0.9);
+        const pageHeight = Math.min(600, height * 0.9);
+        const page = this.add.container(width / 2, height / 2);
+        page.setDepth(6001);
+        page.setScrollFactor(0);
+
+        // 頁面背景
+        const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0xffffff);
+        pageBg.setStrokeStyle(4, 0x000000);
+        page.add(pageBg);
+
+        // 標題：Correct Answers
+        const title = this.add.text(0, -pageHeight / 2 + 40, 'Correct Answers', {
+            fontSize: '32px',
+            color: '#000000',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        title.setOrigin(0.5);
+        page.add(title);
+
+        // 顯示答案列表
+        const answerStartY = -pageHeight / 2 + 100;
+        const answerSpacing = 80;
+        const maxAnswersPerPage = Math.floor((pageHeight - 200) / answerSpacing);
+
+        // 獲取所有答案（包含所有頁面）
+        const allAnswers = this.allPagesAnswers;
+
+        // 顯示答案（最多顯示 maxAnswersPerPage 個）
+        const answersToShow = allAnswers.slice(0, maxAnswersPerPage);
+        answersToShow.forEach((answer, index) => {
+            const y = answerStartY + index * answerSpacing;
+            this.createAnswerCard(page, -pageWidth / 2 + 150, y, answer, 'correctAnswer');
+        });
+
+        // 底部按鈕區域
+        const buttonY = pageHeight / 2 - 60;
+
+        // My Answers 按鈕
+        this.createAnswerPageButton(page, -150, buttonY, 'My Answers', () => {
+            console.log('🎮 點擊 My Answers 按鈕');
+            this.hideCorrectAnswersPage();
+            this.showMyAnswersPage();
+        });
+
+        // Back 按鈕
+        this.createAnswerPageButton(page, 150, buttonY, 'Back', () => {
+            console.log('🎮 點擊 Back 按鈕');
+            this.hideCorrectAnswersPage();
+        });
+
+        // 保存頁面引用
+        this.correctAnswersPage = { overlay, page };
+    }
+
+    // 🔥 隱藏 Correct Answers 頁面
+    hideCorrectAnswersPage() {
+        if (this.correctAnswersPage) {
+            this.correctAnswersPage.overlay.destroy();
+            this.correctAnswersPage.page.destroy();
+            this.correctAnswersPage = null;
+        }
+
+        // 顯示遊戲結束模態框
+        if (this.gameCompleteModal) {
+            this.gameCompleteModal.overlay.setVisible(true);
+            this.gameCompleteModal.modal.setVisible(true);
+        }
+    }
+
+    // 🔥 創建答案卡片
+    createAnswerCard(container, x, y, answer, type) {
+        const cardWidth = 400;
+        const cardHeight = 60;
+        const chineseX = x + cardWidth + 50;
+
+        // 根據類型決定顯示內容
+        let displayText, bgColor, markColor, markText;
+
+        if (type === 'myAnswer') {
+            // My Answers 頁面：顯示用戶的答案
+            displayText = answer.rightText || '(未配對)';
+            if (answer.isCorrect) {
+                bgColor = this.getCardColor(answer.leftPairId); // 彩色背景
+                markColor = '#4caf50';
+                markText = '✓';
+            } else {
+                bgColor = 0xcccccc; // 灰色背景
+                markColor = '#f44336';
+                markText = '✗';
+            }
+        } else {
+            // Correct Answers 頁面：顯示正確答案
+            displayText = answer.correctAnswer;
+            bgColor = this.getCardColor(answer.leftPairId); // 彩色背景
+            markColor = '#4caf50';
+            markText = '✓';
+        }
+
+        // 創建卡片背景
+        const cardBg = this.add.rectangle(x, y, cardWidth, cardHeight, bgColor);
+        cardBg.setStrokeStyle(2, 0x000000);
+        container.add(cardBg);
+
+        // 創建卡片文字
+        const cardText = this.add.text(x, y, displayText, {
+            fontSize: '24px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        cardText.setOrigin(0.5);
+        container.add(cardText);
+
+        // 創建標記（勾勾或 X）
+        const mark = this.add.text(x + cardWidth / 2 - 20, y - cardHeight / 2 + 10, markText, {
+            fontSize: '24px',
+            color: markColor,
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        mark.setOrigin(0.5);
+        container.add(mark);
+
+        // 創建中文文字
+        const chineseText = this.add.text(chineseX, y, answer.correctChinese, {
+            fontSize: '32px',
+            color: '#000000',
+            fontFamily: 'Arial',
+            fontStyle: 'normal'
+        });
+        chineseText.setOrigin(0, 0.5);
+        container.add(chineseText);
+    }
+
+    // 🔥 獲取卡片顏色（根據 pairId）
+    getCardColor(pairId) {
+        const colors = [
+            0x4a9eff, // 藍色
+            0xff4a4a, // 紅色
+            0xffa500, // 橙色
+            0x4caf50, // 綠色
+            0x9c27b0, // 紫色
+            0xffeb3b, // 黃色
+            0x00bcd4, // 青色
+            0xff9800  // 深橙色
+        ];
+        return colors[(pairId - 1) % colors.length];
+    }
+
+    // 🔥 創建答案頁面按鈕
+    createAnswerPageButton(container, x, y, text, callback) {
+        const buttonWidth = 250;
+        const buttonHeight = 45;
+
+        // 按鈕背景
+        const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0xffffff);
+        buttonBg.setStrokeStyle(2, 0x000000);
+        buttonBg.setInteractive({ useHandCursor: true });
+        container.add(buttonBg);
+
+        // 按鈕文字
+        const buttonText = this.add.text(x, y, text, {
+            fontSize: '20px',
+            color: '#000000',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        buttonText.setOrigin(0.5);
+        container.add(buttonText);
+
+        // 點擊事件
+        buttonBg.on('pointerdown', callback);
+
+        // 懸停效果
+        buttonBg.on('pointerover', () => {
+            buttonBg.setFillStyle(0xf0f0f0);
+        });
+
+        buttonBg.on('pointerout', () => {
+            buttonBg.setFillStyle(0xffffff);
+        });
+
+        return { buttonBg, buttonText };
     }
 }
 
