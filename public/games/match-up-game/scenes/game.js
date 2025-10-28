@@ -1610,7 +1610,7 @@ class GameScene extends Phaser.Scene {
         background.setStrokeStyle(2, 0x333333);
         background.setDepth(1);
 
-        // 🔥 創建文字標籤（響應式字體大小，根據文字長度動態調整）
+        // 🔥 創建文字標籤（動態字體大小，根據文字長度和內框寬度調整）
         const textLength = text.length;
         let baseFontSize = Math.max(24, Math.min(48, height * 0.6));
 
@@ -1629,6 +1629,22 @@ class GameScene extends Phaser.Scene {
         }
 
         fontSize = Math.max(18, fontSize);  // 最小字體大小 18px
+
+        // 🔥 創建臨時文字對象來測量寬度（適應內框寬度）
+        const tempText = this.add.text(0, 0, text, {
+            fontSize: `${fontSize}px`,
+            fontFamily: 'Arial'
+        });
+
+        // 🔥 如果文字寬度超過內框寬度的 85%，縮小字體
+        const maxTextWidth = width * 0.85;  // 留 15% 的邊距
+        while (tempText.width > maxTextWidth && fontSize > 14) {
+            fontSize -= 1;  // 每次縮小 1px
+            tempText.setFontSize(fontSize);
+        }
+
+        // 銷毀臨時文字對象
+        tempText.destroy();
 
         // 🔥 根據 textPosition 設置文字位置
         let textX, textY, originX, originY;
