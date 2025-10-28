@@ -1388,44 +1388,71 @@ class GameScene extends Phaser.Scene {
 
         const itemCount = currentPagePairs.length;
 
-        // 🔥 根據匹配數決定列數和框的尺寸
-        let cols, frameWidth, frameHeight, cardHeightInFrame;
+        // 🔥 檢測手機橫向模式和極小高度
+        const isLandscapeMobile = width > height && height < 500;
+        const isTinyHeight = height < 400;
+        const isCompactMode = isLandscapeMobile || isTinyHeight;
 
-        if (itemCount <= 5) {
-            // 3-5個：2-3列
-            cols = Math.min(3, itemCount);
-            frameWidth = Math.min(280, (width - 100) / cols);
-            frameHeight = 140;  // 框的總高度
-            cardHeightInFrame = 60;  // 英文卡片高度
-        } else if (itemCount <= 10) {
-            // 6-10個：3-4列
-            cols = Math.min(4, Math.ceil(itemCount / 2));
-            frameWidth = Math.min(240, (width - 120) / cols);
-            frameHeight = 130;
-            cardHeightInFrame = 55;
-        } else if (itemCount <= 20) {
-            // 11-20個：5-6列
-            cols = Math.min(6, Math.ceil(itemCount / 3));
-            frameWidth = Math.min(180, (width - 140) / cols);
-            frameHeight = 110;
-            cardHeightInFrame = 45;
+        console.log('📱 響應式檢測:', { width, height, isLandscapeMobile, isTinyHeight, isCompactMode });
+
+        // 🔥 根據匹配數和模式決定列數和框的尺寸
+        let cols, frameWidth, frameHeight, cardHeightInFrame;
+        const chineseTextHeight = 30;  // 中文文字高度
+
+        if (isCompactMode) {
+            // 🔥 手機橫向模式或極小高度：優先增加列數，減少行數
+            if (itemCount <= 5) {
+                cols = itemCount;  // 全部排成一行
+                cardHeightInFrame = Math.min(50, (height - 80) / 2);
+                frameWidth = Math.min(200, (width - 60) / cols);
+            } else if (itemCount <= 10) {
+                cols = Math.min(5, itemCount);  // 最多5列
+                cardHeightInFrame = Math.min(45, (height - 60) / 2);
+                frameWidth = Math.min(180, (width - 60) / cols);
+            } else if (itemCount <= 20) {
+                cols = Math.min(7, Math.ceil(itemCount / 2));  // 最多7列
+                cardHeightInFrame = Math.min(40, (height - 50) / 3);
+                frameWidth = Math.min(150, (width - 60) / cols);
+            } else {
+                cols = Math.min(8, Math.ceil(itemCount / 3));  // 最多8列
+                cardHeightInFrame = Math.min(35, (height - 40) / 4);
+                frameWidth = Math.min(140, (width - 60) / cols);
+            }
+            frameHeight = cardHeightInFrame + chineseTextHeight;
         } else {
-            // 21-30個：使用分頁，每頁顯示較少
-            cols = 4;
-            frameWidth = Math.min(260, (width - 100) / cols);
-            frameHeight = 135;
-            cardHeightInFrame = 58;
+            // 🔥 桌面或手機直向模式：原有邏輯
+            if (itemCount <= 5) {
+                cols = Math.min(3, itemCount);
+                frameWidth = Math.min(280, (width - 100) / cols);
+                frameHeight = 140;
+                cardHeightInFrame = 60;
+            } else if (itemCount <= 10) {
+                cols = Math.min(4, Math.ceil(itemCount / 2));
+                frameWidth = Math.min(240, (width - 120) / cols);
+                frameHeight = 130;
+                cardHeightInFrame = 55;
+            } else if (itemCount <= 20) {
+                cols = Math.min(6, Math.ceil(itemCount / 3));
+                frameWidth = Math.min(180, (width - 140) / cols);
+                frameHeight = 110;
+                cardHeightInFrame = 45;
+            } else {
+                cols = 4;
+                frameWidth = Math.min(260, (width - 100) / cols);
+                frameHeight = 135;
+                cardHeightInFrame = 58;
+            }
         }
 
-        console.log('📐 混合佈局參數:', { itemCount, cols, frameWidth, frameHeight, cardHeightInFrame });
+        console.log('📐 混合佈局參數:', { itemCount, cols, frameWidth, frameHeight, cardHeightInFrame, isCompactMode });
 
         // 計算行數
         const rows = Math.ceil(itemCount / cols);
 
-        // 🔥 計算間距（中文文字在框外，無額外間距）
-        const chineseTextHeight = 0;  // 中文文字下方無間距
+        // 🔥 計算間距（手機橫向模式使用更小的間距）
+        const minVerticalSpacing = isCompactMode ? 2 : 5;
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
-        const verticalSpacing = Math.max(5, (height - (frameHeight + chineseTextHeight) * rows) / (rows + 1));
+        const verticalSpacing = Math.max(minVerticalSpacing, (height - (cardHeightInFrame + chineseTextHeight) * rows) / (rows + 1));
 
         console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, chineseTextHeight });
 
