@@ -1438,11 +1438,16 @@ class GameScene extends Phaser.Scene {
             const frameX = horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
             const frameY = verticalSpacing + row * (frameHeight + chineseTextHeight + verticalSpacing) + frameHeight / 2 + 50;
 
-            // 🔥 創建中文文字容器（作為"框"的參考位置）
+            // 🔥 創建中文文字容器（包含白色框）
             const frameContainer = this.add.container(frameX, frameY);
 
-            // 🔥 中文文字（在英文卡片下方）
-            const chineseY = cardHeightInFrame / 2 + 15;  // 在英文卡片下方，留15px間距
+            // 🔥 白色背景框（與英文卡片同大小）
+            const background = this.add.rectangle(0, 0, frameWidth - 10, cardHeightInFrame, 0xffffff);
+            background.setStrokeStyle(2, 0x333333);
+            frameContainer.add(background);
+
+            // 🔥 中文文字（在白色框下方）
+            const chineseY = cardHeightInFrame / 2 + 15;  // 在白色框下方，留15px間距
             const chineseText = this.add.text(0, chineseY, pair.answer, {
                 fontSize: '24px',
                 color: '#000000',
