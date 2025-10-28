@@ -1423,7 +1423,7 @@ class GameScene extends Phaser.Scene {
         const rows = Math.ceil(itemCount / cols);
 
         // 🔥 計算間距（中文文字在框外，需要額外空間）
-        const chineseTextHeight = 30;  // 中文文字高度 + 間距
+        const chineseTextHeight = 1;  // 中文文字高度 + 間距
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
         const verticalSpacing = Math.max(5, (height - (frameHeight + chineseTextHeight) * rows) / (rows + 1));
 
