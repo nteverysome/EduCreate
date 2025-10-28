@@ -1418,28 +1418,35 @@ class GameScene extends Phaser.Scene {
                 cols = Math.min(8, Math.ceil(itemCount / 3));  // 最多8列
             }
 
-            // 🔥 固定卡片高度以創造扁平長方形（不再動態計算）
-            // 根據匹配數設置固定的扁平尺寸
-            if (itemCount <= 5) {
-                cardHeightInFrame = 25;  // 固定高度
-                frameWidth = Math.min(250, (width - 30) / cols);  // 增加寬度
-            } else if (itemCount <= 10) {
-                cardHeightInFrame = 22;  // 固定高度
-                frameWidth = Math.min(200, (width - 30) / cols);  // 增加寬度
-            } else if (itemCount <= 20) {
-                cardHeightInFrame = 20;  // 固定高度
-                frameWidth = Math.min(150, (width - 30) / cols);  // 增加寬度
-            } else {
-                cardHeightInFrame = 24;  // 固定高度
-                frameWidth = Math.min(220, (width - 30) / cols);  // 增加寬度
-            }
+            // 計算行數
+            const rows = Math.ceil(itemCount / cols);
+
+            // 🔥 動態計算扁平長方形尺寸
+            const topBottomMargin = 30;
+            const minVerticalSpacing = 2;
+            const availableHeight = height - topBottomMargin;
+
+            // 計算每行的高度
+            const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
+
+            // 🔥 卡片高度 = 行高 - 中文文字高度，但限制最大高度以確保扁平長方形
+            const maxCardHeight = itemCount <= 5 ? 25 : itemCount <= 10 ? 22 : itemCount <= 20 ? 20 : 24;
+            cardHeightInFrame = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight - chineseTextHeight)));
+
+            // 🔥 計算框寬度（增加寬度以創造扁平長方形）
+            const horizontalMargin = 30;
+            const maxFrameWidth = itemCount <= 5 ? 250 : itemCount <= 10 ? 200 : itemCount <= 20 ? 150 : 220;
+            frameWidth = Math.min(maxFrameWidth, (width - horizontalMargin) / cols);
 
             frameHeight = cardHeightInFrame + chineseTextHeight;
 
-            console.log('🔥 緊湊模式固定扁平尺寸:', {
-                itemCount,
-                cols,
+            console.log('🔥 緊湊模式動態扁平尺寸:', {
+                rows,
+                availableHeight,
+                rowHeight,
+                maxCardHeight,
                 cardHeightInFrame,
+                maxFrameWidth,
                 frameWidth,
                 chineseTextHeight,
                 totalUnitHeight: cardHeightInFrame + chineseTextHeight,
