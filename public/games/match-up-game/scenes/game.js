@@ -1612,7 +1612,8 @@ class GameScene extends Phaser.Scene {
                 const verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
 
                 // 🔥 第七步：計算最大可能的列數
-                const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (Math.max(minSquareSize, estimatedSquareSize) + horizontalSpacing));
+                // 使用最小卡片尺寸來計算最大可能列數
+                const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minSquareSize + horizontalSpacing));
 
                 // 🔥 第八步：智能計算最佳列數（優先使用最大可能列數）
                 // 策略：盡可能多的列數，充分利用水平空間
