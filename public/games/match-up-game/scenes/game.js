@@ -1592,8 +1592,25 @@ class GameScene extends Phaser.Scene {
         background.setStrokeStyle(2, 0x333333);
         background.setDepth(1);
 
-        // 🔥 創建文字標籤（響應式字體大小）
-        const fontSize = Math.max(24, Math.min(48, height * 0.6));
+        // 🔥 創建文字標籤（響應式字體大小，根據文字長度動態調整）
+        const textLength = text.length;
+        let baseFontSize = Math.max(24, Math.min(48, height * 0.6));
+
+        // 🔥 根據文字長度調整字體大小
+        let fontSize;
+        if (textLength <= 2) {
+            fontSize = baseFontSize;  // 1-2 個字：正常大小
+        } else if (textLength === 3) {
+            fontSize = baseFontSize * 0.9;  // 3 個字：縮小 10%
+        } else if (textLength === 4) {
+            fontSize = baseFontSize * 0.8;  // 4 個字：縮小 20%
+        } else if (textLength <= 6) {
+            fontSize = baseFontSize * 0.7;  // 5-6 個字：縮小 30%
+        } else {
+            fontSize = baseFontSize * 0.6;  // 7+ 個字：縮小 40%
+        }
+
+        fontSize = Math.max(18, fontSize);  // 最小字體大小 18px
 
         // 🔥 根據 textPosition 設置文字位置
         let textX, textY, originX, originY;
