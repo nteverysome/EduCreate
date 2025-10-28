@@ -788,15 +788,14 @@ class GameScene extends Phaser.Scene {
         // 🔥 計算間距
         const horizontalSpacing = Math.max(5, width * 0.01);
 
-        // 🔥 計算文字高度和一個字的間距（用於下方中文卡片）
+        // 🔥 計算文字高度（用於下方中文卡片）
         const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
-        const oneCharSpacing = textHeight;
 
         // 🔥 英文卡片的垂直間距（不加文字高度）
         const topVerticalSpacing = Math.max(5, height * 0.02);
 
-        // 🔥 中文卡片的垂直間距（加文字高度 + 一個字的間距）
-        const bottomVerticalSpacing = textHeight + oneCharSpacing + Math.max(5, height * 0.02);
+        // 🔥 中文卡片的垂直間距（只加文字高度，不加額外間距）
+        const bottomVerticalSpacing = textHeight;
 
         // 🔥 計算上方區域（英文）的起始位置
         const topAreaStartX = (width - (columns * cardWidth + (columns - 1) * horizontalSpacing)) / 2;
