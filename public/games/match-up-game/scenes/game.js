@@ -889,17 +889,8 @@ class GameScene extends Phaser.Scene {
         console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局`);
 
         // 🔥 計算間距（先計算，用於後續卡片高度計算）
-        const baseHorizontalSpacing = Math.max(5, width * 0.01);
-
-        // 🔥 計算 4 個中文字的寬度（假設字體大小為卡片高度的 60%）
-        const estimatedFontSize = Math.max(24, Math.min(48, 40 * 0.6));  // 估算字體大小
-        const fourCharsWidth = estimatedFontSize * 4;  // 4 個字的寬度
-
-        // 🔥 水平間距 = 基礎間距 + 4 個字的寬度
-        const horizontalSpacing = baseHorizontalSpacing + fourCharsWidth;
+        const horizontalSpacing = Math.max(5, width * 0.01);
         const verticalSpacing = Math.max(3, height * 0.008);
-
-        console.log(`📏 間距計算: 基礎間距=${baseHorizontalSpacing.toFixed(0)}px, 4個字寬度=${fourCharsWidth.toFixed(0)}px, 總水平間距=${horizontalSpacing.toFixed(0)}px`);
 
         // 🔥 動態計算最大卡片高度，確保所有卡片都能放入容器
         const availableHeight = height * 0.8;  // 使用 80% 的容器高度
