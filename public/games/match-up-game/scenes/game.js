@@ -1421,13 +1421,13 @@ class GameScene extends Phaser.Scene {
             // 計算每行的高度
             const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
 
-            // 🔥 卡片高度 = 行高 - 中文文字高度，但限制最大高度以確保扁平長方形
-            const maxCardHeight = itemCount <= 5 ? 25 : itemCount <= 10 ? 22 : itemCount <= 20 ? 20 : 24;
+            // 🔥 卡片高度 = 行高 - 中文文字高度，但限制最大高度以確保扁平長方形（每個增加20px）
+            const maxCardHeight = itemCount <= 5 ? 45 : itemCount <= 10 ? 42 : itemCount <= 20 ? 40 : 44;
             cardHeightInFrame = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight - chineseTextHeight)));
 
-            // 🔥 計算框寬度（增加寬度以創造扁平長方形，每個增加10px）
+            // 🔥 計算框寬度（增加寬度以創造扁平長方形，每個增加30px）
             const horizontalMargin = 30;
-            const maxFrameWidth = itemCount <= 5 ? 260 : itemCount <= 10 ? 210 : itemCount <= 20 ? 160 : 230;
+            const maxFrameWidth = itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250;
             frameWidth = Math.min(maxFrameWidth, (width - horizontalMargin) / cols);
 
             frameHeight = cardHeightInFrame + chineseTextHeight;
