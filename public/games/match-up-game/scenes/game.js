@@ -1896,24 +1896,7 @@ class GameScene extends Phaser.Scene {
     }
 
     onMatchFail(leftCard, rightCard) {
-        // 右側卡片變成紅色邊框並搖晃
-        rightCard.getData('background').setStrokeStyle(3, 0xf44336);
-
-        // 搖晃動畫
-        this.tweens.add({
-            targets: rightCard,
-            x: '+=10',
-            duration: 50,
-            yoyo: true,
-            repeat: 3,
-            ease: 'Power2',
-            onComplete: () => {
-                // 恢復原狀
-                rightCard.getData('background').setStrokeStyle(2, 0x333333);
-            }
-        });
-
-        // 左側卡片返回原位
+        // 🔥 不顯示錯誤提示，只讓左側卡片返回原位
         this.tweens.add({
             targets: leftCard,
             x: leftCard.getData('originalX'),
@@ -1927,6 +1910,8 @@ class GameScene extends Phaser.Scene {
                 leftCard.getData('background').setAlpha(1);
             }
         });
+
+        console.log('❌ 配對失敗（不顯示錯誤提示）');
     }
 
     onGameComplete() {
