@@ -1425,9 +1425,9 @@ class GameScene extends Phaser.Scene {
             const maxCardHeight = itemCount <= 5 ? 25 : itemCount <= 10 ? 22 : itemCount <= 20 ? 20 : 24;
             cardHeightInFrame = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight - chineseTextHeight)));
 
-            // 🔥 計算框寬度（增加寬度以創造扁平長方形）
+            // 🔥 計算框寬度（增加寬度以創造扁平長方形，每個增加10px）
             const horizontalMargin = 30;
-            const maxFrameWidth = itemCount <= 5 ? 250 : itemCount <= 10 ? 200 : itemCount <= 20 ? 150 : 220;
+            const maxFrameWidth = itemCount <= 5 ? 260 : itemCount <= 10 ? 210 : itemCount <= 20 ? 160 : 230;
             frameWidth = Math.min(maxFrameWidth, (width - horizontalMargin) / cols);
 
             frameHeight = cardHeightInFrame + chineseTextHeight;
