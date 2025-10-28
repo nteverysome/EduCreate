@@ -1609,8 +1609,9 @@ class GameScene extends Phaser.Scene {
 
                 // 🔥 第六步：估算單元總高度（正方形卡片 + 中文文字）
                 // 假設中文文字高度為卡片高度的40%
+                // totalUnitHeight = squareSize + squareSize * 0.4 = squareSize * 1.4
                 const estimatedUnitHeight = availableHeight / Math.ceil(Math.sqrt(itemCount));
-                const estimatedSquareSize = estimatedUnitHeight * 0.6;  // 卡片佔60%
+                const estimatedSquareSize = estimatedUnitHeight / 1.4;  // 正確計算：squareSize = totalUnitHeight / 1.4
 
                 // 🔥 第七步：計算最大可能的列數
                 const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (Math.max(minSquareSize, estimatedSquareSize) + horizontalSpacing));
@@ -1639,7 +1640,11 @@ class GameScene extends Phaser.Scene {
 
                 // 🔥 第十步：計算正方形卡片尺寸
                 // 方法1：基於高度
-                const squareSizeByHeight = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows * 0.6;
+                // totalUnitHeight = squareSize + chineseTextHeight
+                // totalUnitHeight = squareSize + squareSize * 0.4 = squareSize * 1.4
+                // 所以 squareSize = totalUnitHeight / 1.4
+                const availableHeightPerRow = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows;
+                const squareSizeByHeight = availableHeightPerRow / 1.4;  // 正確計算：考慮中文文字高度
 
                 // 方法2：基於寬度
                 const squareSizeByWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
@@ -1651,7 +1656,7 @@ class GameScene extends Phaser.Scene {
                 frameWidth = squareSize;
                 cardHeightInFrame = squareSize;
                 chineseTextHeight = squareSize * 0.4;  // 中文文字高度為卡片高度的40%
-                totalUnitHeight = cardHeightInFrame + chineseTextHeight;
+                totalUnitHeight = cardHeightInFrame + chineseTextHeight;  // = squareSize * 1.4
 
                 cols = optimalCols;
                 const rows = optimalRows;
