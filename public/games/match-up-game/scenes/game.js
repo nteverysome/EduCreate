@@ -1476,11 +1476,16 @@ class GameScene extends Phaser.Scene {
 
         console.log('📐 混合佈局參數:', { itemCount, cols, frameWidth, frameHeight, cardHeightInFrame, chineseFontSize, isCompactMode });
 
-        // 🔥 計算間距（垂直間距設為0，無間距）
+        // 🔥 計算間距和行數
+        const rows = Math.ceil(itemCount / cols);
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
         const verticalSpacing = 0;  // 固定為0，無垂直間距
 
-        console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, chineseTextHeight });
+        // 🔥 計算頂部偏移，確保佈局垂直居中或從頂部開始
+        const totalContentHeight = rows * (frameHeight + chineseTextHeight);
+        const topOffset = isCompactMode ? 10 : Math.max(10, (height - totalContentHeight) / 2);
+
+        console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, chineseTextHeight, rows, totalContentHeight, topOffset });
 
         // 🔥 第一步：創建中文文字（固定位置，作為"框"的參考）
         const chineseFrames = [];
@@ -1489,8 +1494,8 @@ class GameScene extends Phaser.Scene {
             const row = Math.floor(i / cols);
 
             const frameX = horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
-            // 垂直間距為0，單元緊密排列
-            const frameY = row * (frameHeight + chineseTextHeight) + frameHeight / 2 + 50;
+            // 垂直間距為0，單元緊密排列，使用動態topOffset
+            const frameY = topOffset + row * (frameHeight + chineseTextHeight) + frameHeight / 2;
 
             // 🔥 創建中文文字容器（包含白色框）
             const frameContainer = this.add.container(frameX, frameY);
