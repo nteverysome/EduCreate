@@ -90,7 +90,9 @@ class GameScene extends Phaser.Scene {
                 this.pairs = vocabularyData.map((item, index) => ({
                     id: index + 1,
                     question: item.english || item.word || '',
-                    answer: item.chinese || item.translation || ''
+                    answer: item.chinese || item.translation || '',
+                    english: item.english || item.word || '',  // 🔥 添加 english 欄位
+                    chinese: item.chinese || item.translation || ''  // 🔥 添加 chinese 欄位
                 }));
 
                 console.log('✅ 詞彙數據轉換完成:', this.pairs);
