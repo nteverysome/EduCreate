@@ -1616,20 +1616,25 @@ class GameScene extends Phaser.Scene {
                 // 🔥 第七步：計算最大可能的列數
                 const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (Math.max(minSquareSize, estimatedSquareSize) + horizontalSpacing));
 
-                // 🔥 第八步：智能計算最佳列數（根據寬高比和匹配數）
+                // 🔥 第八步：智能計算最佳列數（優先使用最大可能列數）
+                // 策略：盡可能多的列數，充分利用水平空間
                 let optimalCols;
+
+                // 設定最大列數限制（避免卡片過小）
+                const maxColsLimit = 10;  // 最多10列
+
                 if (aspectRatio > 2.0) {
-                    // 超寬螢幕（21:9, 32:9）
-                    optimalCols = Math.min(maxPossibleCols, Math.ceil(Math.sqrt(itemCount * 2)));
+                    // 超寬螢幕（21:9, 32:9）- 可以容納更多列
+                    optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
                 } else if (aspectRatio > 1.5) {
-                    // 寬螢幕（16:9, 16:10）
-                    optimalCols = Math.min(maxPossibleCols, Math.ceil(Math.sqrt(itemCount * 1.5)));
+                    // 寬螢幕（16:9, 16:10）- 優先使用最大可能列數
+                    optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
                 } else if (aspectRatio > 1.2) {
-                    // 標準螢幕（4:3, 3:2）
-                    optimalCols = Math.min(maxPossibleCols, Math.ceil(Math.sqrt(itemCount)));
+                    // 標準螢幕（4:3, 3:2）- 稍微限制列數
+                    optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.8), itemCount);
                 } else {
-                    // 直向螢幕（9:16）
-                    optimalCols = Math.min(maxPossibleCols, Math.ceil(Math.sqrt(itemCount * 0.7)));
+                    // 直向螢幕（9:16）- 限制列數
+                    optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.5), itemCount);
                 }
 
                 // 確保列數在合理範圍內
