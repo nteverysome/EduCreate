@@ -1429,7 +1429,7 @@ class GameScene extends Phaser.Scene {
 
         console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, chineseTextHeight });
 
-        // 🔥 第一步：創建中文框（固定位置）
+        // 🔥 第一步：創建中文文字（固定位置，作為"框"的參考）
         const chineseFrames = [];
         currentPagePairs.forEach((pair, i) => {
             const col = i % cols;
@@ -1438,16 +1438,11 @@ class GameScene extends Phaser.Scene {
             const frameX = horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
             const frameY = verticalSpacing + row * (frameHeight + chineseTextHeight + verticalSpacing) + frameHeight / 2 + 50;
 
-            // 創建中文框容器
+            // 🔥 創建中文文字容器（作為"框"的參考位置）
             const frameContainer = this.add.container(frameX, frameY);
 
-            // 白色背景框
-            const background = this.add.rectangle(0, 0, frameWidth, frameHeight, 0xffffff);
-            background.setStrokeStyle(2, 0x333333);
-            frameContainer.add(background);
-
-            // 🔥 中文文字（在框的外面下方）
-            const chineseY = frameHeight / 2 + 20;  // 在框的下方，留20px間距
+            // 🔥 中文文字（在英文卡片下方）
+            const chineseY = cardHeightInFrame / 2 + 15;  // 在英文卡片下方，留15px間距
             const chineseText = this.add.text(0, chineseY, pair.answer, {
                 fontSize: '24px',
                 color: '#000000',
@@ -1486,18 +1481,18 @@ class GameScene extends Phaser.Scene {
             console.log('🎲 混合佈局使用隨機排列模式');
         }
 
-        // 創建英文卡片並放在框內
+        // 創建英文卡片並放在中文文字上方
         shuffledPairs.forEach((pair, i) => {
             const frame = chineseFrames[i];
             const frameX = frame.x;
             const frameY = frame.y;
 
-            // 🔥 英文卡片位置（在框的中心）
-            const cardY = frameY;  // 在框的中心
+            // 🔥 英文卡片位置（在中文文字上方）
+            const cardY = frameY;  // 與中文文字容器同一位置（英文卡片會在上方）
 
             const animationDelay = i * 100;  // 每個卡片延遲 100ms
 
-            // 創建英文卡片
+            // 創建英文卡片（使用與中文文字相同的寬度）
             const card = this.createLeftCard(frameX, cardY, frameWidth - 10, cardHeightInFrame, pair.question, pair.id, animationDelay);
 
             // 保存卡片當前所在的框的索引
@@ -1915,21 +1910,31 @@ class GameScene extends Phaser.Scene {
         return false;
     }
 
-    // 🔥 混合模式：檢查拖放到中文框（交換英文卡片）
+    // 🔥 混合模式：檢查拖放到其他英文卡片（交換位置）
     checkMixedModeDrop(pointer, draggedCard) {
-        // 找到拖曳到的目標框
-        let targetFrame = null;
+        // 找到拖曳到的目標英文卡片
+        let targetCard = null;
 
-        for (const frame of this.rightCards) {
-            const bounds = frame.getBounds();
-            if (bounds.contains(pointer.x, pointer.y)) {
-                targetFrame = frame;
+        for (const card of this.leftCards) {
+            if (card === draggedCard) continue;  // 跳過自己
+
+            const bounds = card.getBounds();
+            // 擴大檢測範圍，包括卡片下方的中文文字區域
+            const expandedBounds = new Phaser.Geom.Rectangle(
+                bounds.x,
+                bounds.y,
+                bounds.width,
+                bounds.height + 50  // 擴大50px，包括中文文字區域
+            );
+
+            if (expandedBounds.contains(pointer.x, pointer.y)) {
+                targetCard = card;
                 break;
             }
         }
 
-        if (!targetFrame) {
-            // 沒有拖曳到任何框，返回原位
+        if (!targetCard) {
+            // 沒有拖曳到任何卡片，返回原位
             this.tweens.add({
                 targets: draggedCard,
                 x: draggedCard.getData('originalX'),
@@ -1946,38 +1951,13 @@ class GameScene extends Phaser.Scene {
             return false;
         }
 
-        // 獲取目標框的索引
-        const targetFrameIndex = targetFrame.getData('frameIndex');
+        // 獲取兩個卡片的框索引
+        const targetFrameIndex = targetCard.getData('currentFrameIndex');
         const currentFrameIndex = draggedCard.getData('currentFrameIndex');
 
-        // 如果拖曳到同一個框，返回原位
-        if (targetFrameIndex === currentFrameIndex) {
-            this.tweens.add({
-                targets: draggedCard,
-                x: draggedCard.getData('originalX'),
-                y: draggedCard.getData('originalY'),
-                scaleX: 1,
-                scaleY: 1,
-                duration: 300,
-                ease: 'Back.easeOut',
-                onComplete: () => {
-                    draggedCard.setDepth(5);
-                    draggedCard.getData('background').setAlpha(1);
-                }
-            });
-            return false;
-        }
-
-        // 找到目標框內的英文卡片
-        const targetCard = this.leftCards.find(card => card.getData('currentFrameIndex') === targetFrameIndex);
-
-        if (targetCard) {
-            // 交換兩個英文卡片的位置
-            this.swapMixedModeCards(draggedCard, targetCard, currentFrameIndex, targetFrameIndex);
-            return true;
-        }
-
-        return false;
+        // 交換兩個英文卡片的位置
+        this.swapMixedModeCards(draggedCard, targetCard, currentFrameIndex, targetFrameIndex);
+        return true;
     }
 
     // 🔥 混合模式：交換兩個英文卡片的位置
