@@ -599,14 +599,10 @@ class GameScene extends Phaser.Scene {
             // 3-5 個：左右分離，單列
             console.log('🎮 使用左右分離佈局（3-5個匹配數，單列）');
             this.createLeftRightSingleColumn(currentPagePairs, width, height);
-        } else if (itemCount <= 20) {
+        } else {
             // 6-20 個：左右分離，多行 2 列
             console.log('🎮 使用左右分離佈局（6-20個匹配數，多行2列）');
             this.createLeftRightMultiRows(currentPagePairs, width, height);
-        } else {
-            // 21-30 個：上下分離，多行多列
-            console.log('🎮 使用上下分離佈局（21-30個匹配數，多行多列）');
-            this.createTopBottomMultiRows(currentPagePairs, width, height);
         }
     }
 
