@@ -1615,8 +1615,9 @@ class GameScene extends Phaser.Scene {
                 const estimatedChineseTextHeight = estimatedSquareSize * 0.4;
 
                 // 🔥 智能計算垂直間距（根據估算的中文文字高度）
-                // 垂直間距 = 中文文字高度的 20-30%，範圍：10-40px
-                const verticalSpacing = Math.max(10, Math.min(40, estimatedChineseTextHeight * 0.25));
+                // 垂直間距 = 中文文字高度的 50%，範圍：20-60px
+                // 增加間距以避免中文字與下一行白色框重疊
+                const verticalSpacing = Math.max(20, Math.min(60, estimatedChineseTextHeight * 0.5));
 
                 // 🔥 第七步：計算最大可能的列數
                 const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (Math.max(minSquareSize, estimatedSquareSize) + horizontalSpacing));
