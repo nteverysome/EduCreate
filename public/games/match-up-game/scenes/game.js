@@ -1913,22 +1913,6 @@ class GameScene extends Phaser.Scene {
             // 更新框的數據
             frame.setData('currentCardPairId', pair.id);
 
-            // 🔥 智能傳遞English文字的字體大小到中文文字
-            const englishFontSize = card.getData('englishFontSize');
-            if (englishFontSize) {
-                // 找到對應的中文框（根據pairId匹配）
-                const matchingFrame = chineseFrames.find(f => f.getData('pairId') === pair.id);
-                if (matchingFrame) {
-                    // 找到中文文字（在frame的子元素中）
-                    const chineseText = matchingFrame.list.find(child => child.type === 'Text');
-                    if (chineseText) {
-                        // 更新中文文字的字體大小為English文字的字體大小
-                        chineseText.setFontSize(englishFontSize);
-                        console.log(`🔄 智能傳遞字體大小: English "${pair.question}" ${englishFontSize}px → Chinese "${chineseText.text}" ${englishFontSize}px`);
-                    }
-                }
-            }
-
             this.leftCards.push(card);
         });
 
@@ -2067,9 +2051,6 @@ class GameScene extends Phaser.Scene {
             });
             cardText.setOrigin(0.5);
 
-            // 🔥 存儲English文字的字體大小到container（用於中文文字）
-            container.setData('englishFontSize', fontSize);
-
             // 添加到容器
             container.add([background, cardText]);
         } else {
@@ -2100,9 +2081,6 @@ class GameScene extends Phaser.Scene {
                 fontStyle: 'normal'
             });
             cardText.setOrigin(0.5);
-
-            // 🔥 存儲English文字的字體大小到container（用於中文文字）
-            container.setData('englishFontSize', fontSize);
 
             // 添加到容器
             container.add([background, cardText]);
