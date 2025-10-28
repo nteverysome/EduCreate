@@ -18,14 +18,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 從數據庫獲取排行榜
+    // 從數據庫獲取排行榜（分數優先，時間次之）
     const leaderboard = await prisma.gameLeaderboard.findMany({
       where: {
         activityId: activityId,
       },
-      orderBy: {
-        score: 'desc',
-      },
+      orderBy: [
+        { score: 'desc' },      // 分數優先（降序）
+        { timeSpent: 'asc' },   // 時間次之（升序，時間越短越好）
+      ],
       take: limit,
     });
 
