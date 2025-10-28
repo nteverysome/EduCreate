@@ -514,6 +514,9 @@ class GameScene extends Phaser.Scene {
         // 🔥 創建計時器 UI
         this.createTimerUI();
 
+        // 🔥 顯示「提交答案」按鈕（遊戲開始時就顯示）
+        this.showSubmitButton();
+
         // 🔥 移除重新開始按鈕：用戶要求拿掉
         console.log('🎮 GameScene: updateLayout 完成');
     }
@@ -1966,6 +1969,7 @@ class GameScene extends Phaser.Scene {
     checkAllMatches() {
         let correctCount = 0;
         let incorrectCount = 0;
+        let unmatchedCount = 0;
 
         // 檢查每個左側卡片的配對
         this.leftCards.forEach(leftCard => {
@@ -1988,15 +1992,19 @@ class GameScene extends Phaser.Scene {
                     leftCard.getData('background').setStrokeStyle(3, 0xf44336);
                     rightCard.getData('background').setStrokeStyle(3, 0xf44336);
                 }
+            } else {
+                // 未配對
+                unmatchedCount++;
+                console.log('⚠️ 未配對:', leftCard.getData('text'));
             }
         });
 
         // 顯示總結
-        this.showMatchSummary(correctCount, incorrectCount);
+        this.showMatchSummary(correctCount, incorrectCount, unmatchedCount);
     }
 
     // 🔥 顯示配對總結
-    showMatchSummary(correctCount, incorrectCount) {
+    showMatchSummary(correctCount, incorrectCount, unmatchedCount = 0) {
         const width = this.scale.width;
         const height = this.scale.height;
 
@@ -2011,25 +2019,31 @@ class GameScene extends Phaser.Scene {
         const fontSize = Math.max(24, Math.min(36, width * 0.03));
 
         // 顯示總結
-        const totalCount = correctCount + incorrectCount;
+        const totalCount = this.leftCards.length;
+        let summaryMessage = `配對結果\n正確：${correctCount} / ${totalCount}\n錯誤：${incorrectCount} / ${totalCount}`;
+
+        if (unmatchedCount > 0) {
+            summaryMessage += `\n未配對：${unmatchedCount} / ${totalCount}`;
+        }
+
         const summaryText = this.add.text(
             width / 2,
             height / 2 - 50,
-            `配對結果\n正確：${correctCount} / ${totalCount}\n錯誤：${incorrectCount} / ${totalCount}`,
+            summaryMessage,
             {
                 fontSize: `${fontSize}px`,
-                color: correctCount === totalCount ? '#4caf50' : '#ff9800',
+                color: correctCount === totalCount && unmatchedCount === 0 ? '#4caf50' : '#ff9800',
                 fontFamily: 'Arial',
                 fontStyle: 'bold',
                 align: 'center',
-                backgroundColor: correctCount === totalCount ? '#e8f5e9' : '#fff3e0',
+                backgroundColor: correctCount === totalCount && unmatchedCount === 0 ? '#e8f5e9' : '#fff3e0',
                 padding: { x: 25, y: 15 }
             }
         );
         summaryText.setOrigin(0.5).setDepth(2000);
 
-        // 如果全部正確，顯示完成動畫
-        if (correctCount === totalCount) {
+        // 如果全部正確且沒有未配對，顯示完成動畫
+        if (correctCount === totalCount && unmatchedCount === 0) {
             this.tweens.add({
                 targets: summaryText,
                 scaleX: 1.1,
