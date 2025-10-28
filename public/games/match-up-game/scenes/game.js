@@ -357,12 +357,13 @@ class GameScene extends Phaser.Scene {
             ? this.formatTime(this.remainingTime)
             : '00:00';
 
-        this.timerText = this.add.text(width - 20, 20, initialText, {
+        // 🔥 計時器置中顯示
+        this.timerText = this.add.text(width / 2, 20, initialText, {
             fontSize: '28px',
             color: timerColor,
             fontFamily: 'Arial',
             fontStyle: 'bold'
-        }).setOrigin(1, 0).setDepth(1000);
+        }).setOrigin(0.5, 0).setDepth(1000);
 
         // 如果是倒數計時，啟動計時器事件
         if (this.timerType === 'countDown') {
