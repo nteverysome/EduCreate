@@ -36,6 +36,14 @@ class GameScene extends Phaser.Scene {
         this.layout = 'separated';  // 佈局模式：separated, mixed
         this.random = 'different';  // 隨機模式：different, same
         this.showAnswers = false;   // 遊戲結束時顯示答案
+
+        // 🔥 遊戲結束狀態管理
+        this.gameState = 'playing';  // 遊戲狀態：playing, completed
+        this.gameStartTime = null;   // 遊戲開始時間
+        this.gameEndTime = null;     // 遊戲結束時間
+        this.totalGameTime = 0;      // 總遊戲時間（秒）
+        this.allPagesAnswers = [];   // 所有頁面的用戶答案記錄
+        this.currentPageAnswers = []; // 當前頁面的用戶答案記錄
     }
 
     // 從 API 載入詞彙數據
@@ -512,6 +520,12 @@ class GameScene extends Phaser.Scene {
         // 創建卡片
         this.createCards();
         console.log('🎮 GameScene: 卡片創建完成');
+
+        // 🔥 記錄遊戲開始時間
+        if (!this.gameStartTime) {
+            this.gameStartTime = Date.now();
+            console.log('🎮 GameScene: 遊戲開始時間已記錄');
+        }
 
         // 🔥 創建計時器 UI
         this.createTimerUI();
@@ -1998,6 +2012,9 @@ class GameScene extends Phaser.Scene {
         const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
         const currentPagePairs = this.pairs.slice(startIndex, endIndex);
 
+        // 🔥 清空當前頁面的答案記錄
+        this.currentPageAnswers = [];
+
         // 檢查每個左側卡片的配對
         this.leftCards.forEach(leftCard => {
             const leftPairId = leftCard.getData('pairId');
@@ -2006,8 +2023,21 @@ class GameScene extends Phaser.Scene {
 
             if (rightCard) {
                 const rightPairId = rightCard.getData('pairId');
+                const isCorrect = leftPairId === rightPairId;
 
-                if (leftPairId === rightPairId) {
+                // 🔥 記錄用戶答案
+                this.currentPageAnswers.push({
+                    page: this.currentPage,
+                    leftText: leftCard.getData('text'),
+                    rightText: rightCard.getData('text'),
+                    correctAnswer: correctPair.english,
+                    correctChinese: correctPair.chinese,
+                    isCorrect: isCorrect,
+                    leftPairId: leftPairId,
+                    rightPairId: rightPairId
+                });
+
+                if (isCorrect) {
                     // 配對正確
                     correctCount++;
                     console.log('✅ 配對正確:', leftCard.getData('text'), '-', rightCard.getData('text'));
@@ -2026,12 +2056,43 @@ class GameScene extends Phaser.Scene {
                 // 未配對
                 unmatchedCount++;
                 console.log('⚠️ 未配對:', leftCard.getData('text'));
-                // 🔥 未配對的不顯示
+
+                // 🔥 記錄未配對的答案
+                this.currentPageAnswers.push({
+                    page: this.currentPage,
+                    leftText: leftCard.getData('text'),
+                    rightText: null,
+                    correctAnswer: correctPair.english,
+                    correctChinese: correctPair.chinese,
+                    isCorrect: false,
+                    leftPairId: leftPairId,
+                    rightPairId: null
+                });
             }
         });
 
-        // 顯示總結
-        this.showMatchSummary(correctCount, incorrectCount, unmatchedCount);
+        // 🔥 將當前頁面的答案添加到所有答案記錄中
+        this.allPagesAnswers.push(...this.currentPageAnswers);
+
+        console.log('📝 當前頁面答案記錄:', this.currentPageAnswers);
+        console.log('📝 所有頁面答案記錄:', this.allPagesAnswers);
+
+        // 🔥 檢查是否所有頁面都已完成
+        const isLastPage = this.currentPage === this.totalPages - 1;
+        if (isLastPage) {
+            // 遊戲結束
+            this.gameEndTime = Date.now();
+            this.totalGameTime = (this.gameEndTime - this.gameStartTime) / 1000; // 秒
+            this.gameState = 'completed';
+
+            console.log('🎮 遊戲結束！總時間:', this.totalGameTime, '秒');
+
+            // 顯示遊戲結束模態框
+            this.showGameCompleteModal();
+        } else {
+            // 顯示當前頁面的總結
+            this.showMatchSummary(correctCount, incorrectCount, unmatchedCount);
+        }
     }
 
     // 🔥 顯示正確答案（白色內框 + 勾勾）
@@ -2513,5 +2574,207 @@ class GameScene extends Phaser.Scene {
     }
 
     // � 移除 createRestartButton() 方法：用戶要求拿掉重新開始按鈕
+
+    // 🔥 顯示遊戲結束模態框
+    showGameCompleteModal() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 計算總分數
+        const totalCorrect = this.allPagesAnswers.filter(answer => answer.isCorrect).length;
+        const totalQuestions = this.pairs.length;
+
+        // 格式化時間
+        const timeText = this.formatGameTime(this.totalGameTime);
+
+        console.log('🎮 顯示遊戲結束模態框', {
+            totalCorrect,
+            totalQuestions,
+            totalGameTime: this.totalGameTime,
+            timeText
+        });
+
+        // 創建半透明背景（遮罩）
+        const overlay = this.add.rectangle(
+            width / 2,
+            height / 2,
+            width,
+            height,
+            0x000000,
+            0.7
+        );
+        overlay.setDepth(5000);
+        overlay.setScrollFactor(0);
+
+        // 創建模態框容器
+        const modalWidth = Math.min(500, width * 0.8);
+        const modalHeight = Math.min(400, height * 0.7);
+        const modal = this.add.container(width / 2, height / 2);
+        modal.setDepth(5001);
+        modal.setScrollFactor(0);
+
+        // 模態框背景
+        const modalBg = this.add.rectangle(0, 0, modalWidth, modalHeight, 0x2c2c2c);
+        modalBg.setStrokeStyle(4, 0x000000);
+        modal.add(modalBg);
+
+        // 標題：GAME COMPLETE
+        const title = this.add.text(0, -modalHeight / 2 + 40, 'GAME COMPLETE', {
+            fontSize: '36px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        title.setOrigin(0.5);
+        modal.add(title);
+
+        // 分數標籤
+        const scoreLabel = this.add.text(-80, -modalHeight / 2 + 100, 'Score', {
+            fontSize: '20px',
+            color: '#4a9eff',
+            fontFamily: 'Arial'
+        });
+        scoreLabel.setOrigin(0.5);
+        modal.add(scoreLabel);
+
+        // 分數值
+        const scoreValue = this.add.text(-80, -modalHeight / 2 + 140, `${totalCorrect}/${totalQuestions}`, {
+            fontSize: '32px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        scoreValue.setOrigin(0.5);
+        modal.add(scoreValue);
+
+        // 時間標籤（如果有計時器）
+        if (this.timerType !== 'none') {
+            const timeLabel = this.add.text(80, -modalHeight / 2 + 100, 'Time', {
+                fontSize: '20px',
+                color: '#4a9eff',
+                fontFamily: 'Arial'
+            });
+            timeLabel.setOrigin(0.5);
+            modal.add(timeLabel);
+
+            // 時間值
+            const timeValue = this.add.text(80, -modalHeight / 2 + 140, timeText, {
+                fontSize: '32px',
+                color: '#ffffff',
+                fontFamily: 'Arial',
+                fontStyle: 'bold'
+            });
+            timeValue.setOrigin(0.5);
+            modal.add(timeValue);
+        }
+
+        // 排名提示（暫時固定為 1st）
+        const rankText = this.add.text(0, -modalHeight / 2 + 200, "YOU'RE 1ST ON THE LEADERBOARD", {
+            fontSize: '16px',
+            color: '#cccccc',
+            fontFamily: 'Arial'
+        });
+        rankText.setOrigin(0.5);
+        modal.add(rankText);
+
+        // 按鈕區域
+        const buttonY = modalHeight / 2 - 120;
+        const buttonSpacing = 60;
+
+        // Leaderboard 按鈕
+        this.createModalButton(modal, 0, buttonY - buttonSpacing, 'Leaderboard', () => {
+            console.log('🎮 點擊 Leaderboard 按鈕');
+            // TODO: 顯示輸入名稱頁面
+        });
+
+        // Show answers 按鈕
+        this.createModalButton(modal, 0, buttonY, 'Show answers', () => {
+            console.log('🎮 點擊 Show answers 按鈕');
+            // TODO: 顯示答案檢視頁面
+        });
+
+        // Start again 按鈕
+        this.createModalButton(modal, 0, buttonY + buttonSpacing, 'Start again', () => {
+            console.log('🎮 點擊 Start again 按鈕');
+            this.restartGame();
+        });
+
+        // 保存模態框引用（用於後續關閉）
+        this.gameCompleteModal = { overlay, modal };
+    }
+
+    // 🔥 創建模態框按鈕
+    createModalButton(container, x, y, text, callback) {
+        const buttonWidth = 300;
+        const buttonHeight = 45;
+
+        // 按鈕背景
+        const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0x3c3c3c);
+        buttonBg.setStrokeStyle(2, 0x000000);
+        buttonBg.setInteractive({ useHandCursor: true });
+        container.add(buttonBg);
+
+        // 按鈕文字
+        const buttonText = this.add.text(x, y, text, {
+            fontSize: '22px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        buttonText.setOrigin(0.5);
+        container.add(buttonText);
+
+        // 點擊事件
+        buttonBg.on('pointerdown', callback);
+
+        // 懸停效果
+        buttonBg.on('pointerover', () => {
+            buttonBg.setFillStyle(0x4c4c4c);
+        });
+
+        buttonBg.on('pointerout', () => {
+            buttonBg.setFillStyle(0x3c3c3c);
+        });
+
+        return { buttonBg, buttonText };
+    }
+
+    // 🔥 格式化遊戲時間
+    formatGameTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        const decimal = Math.floor((seconds % 1) * 10);
+
+        if (mins > 0) {
+            return `${mins}:${secs.toString().padStart(2, '0')}.${decimal}`;
+        } else {
+            return `${secs}.${decimal}s`;
+        }
+    }
+
+    // 🔥 重新開始遊戲
+    restartGame() {
+        console.log('🎮 重新開始遊戲');
+
+        // 關閉模態框
+        if (this.gameCompleteModal) {
+            this.gameCompleteModal.overlay.destroy();
+            this.gameCompleteModal.modal.destroy();
+            this.gameCompleteModal = null;
+        }
+
+        // 重置遊戲狀態
+        this.gameState = 'playing';
+        this.gameStartTime = null;
+        this.gameEndTime = null;
+        this.totalGameTime = 0;
+        this.allPagesAnswers = [];
+        this.currentPageAnswers = [];
+        this.currentPage = 0;
+        this.matchedPairs.clear();
+
+        // 重新載入遊戲
+        this.scene.restart();
+    }
 }
 
