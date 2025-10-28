@@ -1596,9 +1596,8 @@ class GameScene extends Phaser.Scene {
             // 🔥 第三步：計算螢幕寬高比
             const aspectRatio = width / height;
 
-            // 🔥 第四步：智能計算間距（根據螢幕高度）
+            // 🔥 第四步：智能計算水平間距（根據螢幕寬度）
             const horizontalSpacing = Math.max(15, Math.min(30, width * 0.015));  // 15-30px，基於寬度的1.5%
-            const verticalSpacing = Math.max(20, Math.min(40, height * 0.025));   // 20-40px，基於高度的2.5%
 
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
@@ -1607,11 +1606,17 @@ class GameScene extends Phaser.Scene {
                 // 🔥 第五步：定義最小正方形卡片大小
                 const minSquareSize = 150;  // 最小正方形尺寸150×150
 
-                // 🔥 第六步：估算單元總高度（正方形卡片 + 中文文字）
+                // 🔥 第六步：估算單元總高度和垂直間距
                 // 假設中文文字高度為卡片高度的40%
                 // totalUnitHeight = squareSize + squareSize * 0.4 = squareSize * 1.4
-                const estimatedUnitHeight = availableHeight / Math.ceil(Math.sqrt(itemCount));
+                const estimatedRows = Math.ceil(Math.sqrt(itemCount));
+                const estimatedUnitHeight = availableHeight / estimatedRows;
                 const estimatedSquareSize = estimatedUnitHeight / 1.4;  // 正確計算：squareSize = totalUnitHeight / 1.4
+                const estimatedChineseTextHeight = estimatedSquareSize * 0.4;
+
+                // 🔥 智能計算垂直間距（根據估算的中文文字高度）
+                // 垂直間距 = 中文文字高度的 20-30%，範圍：10-40px
+                const verticalSpacing = Math.max(10, Math.min(40, estimatedChineseTextHeight * 0.25));
 
                 // 🔥 第七步：計算最大可能的列數
                 const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (Math.max(minSquareSize, estimatedSquareSize) + horizontalSpacing));
