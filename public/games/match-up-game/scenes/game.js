@@ -1398,7 +1398,8 @@ class GameScene extends Phaser.Scene {
         console.log('📱 響應式檢測:', { width, height, isLandscapeMobile, isTinyHeight, isCompactMode });
 
         // 🔥 根據匹配數和模式決定列數和框的尺寸
-        let cols, frameWidth, frameHeight, cardHeightInFrame, chineseFontSize, chineseTextHeight;
+        let cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, chineseTextHeight;
+        // 📝 totalUnitHeight = 單元總高度（包含英文卡片高度 + 中文文字高度）
 
         // 中文文字高度會根據模式動態調整
         // 緊湊模式：20px字體 → ~20px高度
@@ -1432,7 +1433,8 @@ class GameScene extends Phaser.Scene {
             const maxFrameWidth = itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250;
             frameWidth = Math.min(maxFrameWidth, (width - horizontalMargin) / cols);
 
-            frameHeight = cardHeightInFrame + chineseTextHeight;
+            // 📝 單元總高度 = 英文卡片高度 + 中文文字高度
+            totalUnitHeight = cardHeightInFrame + chineseTextHeight;
 
             console.log('🔥 緊湊模式動態扁平尺寸:', {
                 rows,
@@ -1455,27 +1457,27 @@ class GameScene extends Phaser.Scene {
             if (itemCount <= 5) {
                 cols = Math.min(5, itemCount);  // 最多5列
                 frameWidth = Math.min(350, (width - 100) / cols);  // 最大寬度350px
-                frameHeight = 100;  // 總高度 = 60px（卡片）+ 40px（中文）
+                totalUnitHeight = 100;  // 📝 單元總高度 = 60px（卡片）+ 40px（中文）
                 cardHeightInFrame = 60;  // 卡片高度60px
             } else if (itemCount <= 10) {
                 cols = Math.min(5, Math.ceil(itemCount / 2));  // 最多5列
                 frameWidth = Math.min(350, (width - 120) / cols);  // 最大寬度350px
-                frameHeight = 100;  // 總高度 = 60px（卡片）+ 40px（中文）
+                totalUnitHeight = 100;  // 📝 單元總高度 = 60px（卡片）+ 40px（中文）
                 cardHeightInFrame = 60;  // 卡片高度60px
             } else if (itemCount <= 20) {
                 cols = Math.min(5, Math.ceil(itemCount / 4));  // 最多5列，4行
                 frameWidth = Math.min(350, (width - 140) / cols);  // 最大寬度350px
-                frameHeight = 100;  // 總高度 = 60px（卡片）+ 40px（中文）
+                totalUnitHeight = 100;  // 📝 單元總高度 = 60px（卡片）+ 40px（中文）
                 cardHeightInFrame = 60;  // 卡片高度60px
             } else {
                 cols = 5;  // 固定5列
                 frameWidth = Math.min(350, (width - 100) / cols);  // 最大寬度350px
-                frameHeight = 100;  // 總高度 = 60px（卡片）+ 40px（中文）
+                totalUnitHeight = 100;  // 📝 單元總高度 = 60px（卡片）+ 40px（中文）
                 cardHeightInFrame = 60;  // 卡片高度60px
             }
         }
 
-        console.log('📐 混合佈局參數:', { itemCount, cols, frameWidth, frameHeight, cardHeightInFrame, chineseFontSize, isCompactMode });
+        console.log('📐 混合佈局參數:', { itemCount, cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, isCompactMode });
 
         // 🔥 計算間距和行數
         const rows = Math.ceil(itemCount / cols);
@@ -1483,8 +1485,8 @@ class GameScene extends Phaser.Scene {
         const verticalSpacing = 0;  // 固定為0，無垂直間距
 
         // 🔥 計算頂部偏移，確保佈局垂直居中或從頂部開始（手機版減少10px）
-        // frameHeight 已經包含 chineseTextHeight，所以不需要重複加
-        const totalContentHeight = rows * frameHeight;
+        // 📝 totalUnitHeight 已經包含 chineseTextHeight，所以不需要重複加
+        const totalContentHeight = rows * totalUnitHeight;
         const topOffset = isCompactMode ? 30 : Math.max(10, (height - totalContentHeight) / 2);
 
         console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, chineseTextHeight, rows, totalContentHeight, topOffset });
@@ -1497,8 +1499,8 @@ class GameScene extends Phaser.Scene {
 
             const frameX = horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
             // 垂直間距為0，單元緊密排列，使用動態topOffset
-            // frameHeight 已經包含 chineseTextHeight，所以不需要重複加
-            const frameY = topOffset + row * frameHeight + frameHeight / 2;
+            // 📝 totalUnitHeight 已經包含 chineseTextHeight，所以不需要重複加
+            const frameY = topOffset + row * totalUnitHeight + totalUnitHeight / 2;
 
             // 🔥 創建中文文字容器（包含白色框）
             const frameContainer = this.add.container(frameX, frameY);
