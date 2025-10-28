@@ -1913,6 +1913,22 @@ class GameScene extends Phaser.Scene {
             // 更新框的數據
             frame.setData('currentCardPairId', pair.id);
 
+            // 🔥 智能傳遞English文字的字體大小到中文文字
+            const englishFontSize = card.getData('englishFontSize');
+            if (englishFontSize) {
+                // 找到對應的中文框（根據pairId匹配）
+                const matchingFrame = chineseFrames.find(f => f.getData('pairId') === pair.id);
+                if (matchingFrame) {
+                    // 找到中文文字（在frame的子元素中）
+                    const chineseText = matchingFrame.list.find(child => child.type === 'Text');
+                    if (chineseText) {
+                        // 更新中文文字的字體大小為English文字的字體大小
+                        chineseText.setFontSize(englishFontSize);
+                        console.log(`🔄 智能傳遞字體大小: English "${pair.question}" ${englishFontSize}px → Chinese "${chineseText.text}" ${englishFontSize}px`);
+                    }
+                }
+            }
+
             this.leftCards.push(card);
         });
 
@@ -1985,12 +2001,12 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 如果有圖片，創建圖片在上，文字在下的佈局
         if (imageUrl && imageUrl.trim() !== '') {
-            // 圖片區域：佔據卡片上方 60%
-            const imageHeight = height * 0.6;
+            // 圖片區域：佔據卡片上方 90%
+            const imageHeight = height * 0.9;
             const imageY = -height / 2 + imageHeight / 2;
 
-            // 文字區域：佔據卡片下方 40%
-            const textHeight = height * 0.4;
+            // 文字區域：佔據卡片下方 10%
+            const textHeight = height * 0.1;
             const textY = height / 2 - textHeight / 2;
 
             // 🔥 創建圖片（使用 Phaser 的 load.image）
@@ -2051,6 +2067,9 @@ class GameScene extends Phaser.Scene {
             });
             cardText.setOrigin(0.5);
 
+            // 🔥 存儲English文字的字體大小到container（用於中文文字）
+            container.setData('englishFontSize', fontSize);
+
             // 添加到容器
             container.add([background, cardText]);
         } else {
@@ -2081,6 +2100,9 @@ class GameScene extends Phaser.Scene {
                 fontStyle: 'normal'
             });
             cardText.setOrigin(0.5);
+
+            // 🔥 存儲English文字的字體大小到container（用於中文文字）
+            container.setData('englishFontSize', fontSize);
 
             // 添加到容器
             container.add([background, cardText]);
