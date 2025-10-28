@@ -1422,8 +1422,8 @@ class GameScene extends Phaser.Scene {
         // 計算行數
         const rows = Math.ceil(itemCount / cols);
 
-        // 🔥 計算間距（中文文字在框外，需要額外空間）
-        const chineseTextHeight = 15;  // 中文文字下方到下一個白色框的間距
+        // 🔥 計算間距（中文文字在框外，無額外間距）
+        const chineseTextHeight = 0;  // 中文文字下方無間距
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
         const verticalSpacing = Math.max(5, (height - (frameHeight + chineseTextHeight) * rows) / (rows + 1));
 
@@ -1446,8 +1446,8 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 🔥 中文文字（在白色框下方）
-            const chineseY = cardHeightInFrame / 2 + 15;  // 在白色框下方，留15px間距
+            // 🔥 中文文字（在白色框下方，無間距）
+            const chineseY = cardHeightInFrame / 2;  // 緊貼白色框底部，無間距
             const chineseText = this.add.text(0, chineseY, pair.answer, {
                 fontSize: '24px',
                 color: '#000000',
