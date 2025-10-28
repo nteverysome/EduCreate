@@ -2835,9 +2835,11 @@ class GameScene extends Phaser.Scene {
 
         // 顯示答案（最多顯示 maxAnswersPerPage 個）
         const answersToShow = allAnswers.slice(0, maxAnswersPerPage);
+        const cardWidth = 300;  // 🔥 與 createAnswerCard 中的 cardWidth 一致
+        const cardX = -pageWidth / 2 + cardWidth / 2 + 30;  // 🔥 左邊距 30px
         answersToShow.forEach((answer, index) => {
             const y = answerStartY + index * answerSpacing;
-            this.createAnswerCard(page, -pageWidth / 2 + 150, y, answer, 'myAnswer');
+            this.createAnswerCard(page, cardX, y, answer, 'myAnswer');
         });
 
         // 底部按鈕區域
@@ -2926,9 +2928,11 @@ class GameScene extends Phaser.Scene {
 
         // 顯示答案（最多顯示 maxAnswersPerPage 個）
         const answersToShow = allAnswers.slice(0, maxAnswersPerPage);
+        const cardWidth = 300;  // 🔥 與 createAnswerCard 中的 cardWidth 一致
+        const cardX = -pageWidth / 2 + cardWidth / 2 + 30;  // 🔥 左邊距 30px
         answersToShow.forEach((answer, index) => {
             const y = answerStartY + index * answerSpacing;
-            this.createAnswerCard(page, -pageWidth / 2 + 150, y, answer, 'correctAnswer');
+            this.createAnswerCard(page, cardX, y, answer, 'correctAnswer');
         });
 
         // 底部按鈕區域
@@ -2968,9 +2972,9 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 創建答案卡片
     createAnswerCard(container, x, y, answer, type) {
-        const cardWidth = 400;
+        const cardWidth = 300;  // 🔥 減小卡片寬度以適應容器
         const cardHeight = 60;
-        const chineseX = x + cardWidth + 50;
+        const chineseX = x + cardWidth / 2 + 20;  // 🔥 中文在卡片右邊 20px
 
         // 根據類型決定顯示內容
         let displayText, bgColor, markColor, markText;
@@ -3020,9 +3024,9 @@ class GameScene extends Phaser.Scene {
         mark.setOrigin(0.5);
         container.add(mark);
 
-        // 創建中文文字
-        const chineseText = this.add.text(chineseX, y, answer.correctChinese, {
-            fontSize: '32px',
+        // 創建中文文字（顯示用戶選擇的中文）
+        const chineseText = this.add.text(chineseX, y, answer.leftText, {
+            fontSize: '28px',
             color: '#000000',
             fontFamily: 'Arial',
             fontStyle: 'normal'
