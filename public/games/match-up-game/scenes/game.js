@@ -897,17 +897,36 @@ class GameScene extends Phaser.Scene {
         const totalVerticalSpacing = (rows - 1) * verticalSpacing;
         const maxCardHeight = (availableHeight - totalVerticalSpacing) / rows;
 
-        // 🔥 根據容器大小調整卡片尺寸
+        // 🔥 根據容器大小和匹配數調整卡片尺寸
         let cardWidth, cardHeight;
+
+        // 🔥 16-20 個匹配數使用更小的卡片尺寸
+        const isHighItemCount = itemCount >= 16;
+
         if (isSmallContainer) {
-            cardWidth = Math.max(80, Math.min(130, width * 0.13));
-            cardHeight = Math.max(20, Math.min(maxCardHeight, 45));  // 🔥 使用動態最大高度
+            if (isHighItemCount) {
+                cardWidth = Math.max(70, Math.min(110, width * 0.11));  // 🔥 16-20 個：更小的寬度
+                cardHeight = Math.max(18, Math.min(maxCardHeight, 38));  // 🔥 16-20 個：更小的高度
+            } else {
+                cardWidth = Math.max(80, Math.min(130, width * 0.13));
+                cardHeight = Math.max(20, Math.min(maxCardHeight, 45));
+            }
         } else if (isMediumContainer) {
-            cardWidth = Math.max(90, Math.min(150, width * 0.14));
-            cardHeight = Math.max(25, Math.min(maxCardHeight, 52));  // 🔥 使用動態最大高度
+            if (isHighItemCount) {
+                cardWidth = Math.max(80, Math.min(130, width * 0.12));  // 🔥 16-20 個：更小的寬度
+                cardHeight = Math.max(22, Math.min(maxCardHeight, 45));  // 🔥 16-20 個：更小的高度
+            } else {
+                cardWidth = Math.max(90, Math.min(150, width * 0.14));
+                cardHeight = Math.max(25, Math.min(maxCardHeight, 52));
+            }
         } else {
-            cardWidth = Math.max(100, Math.min(170, width * 0.15));
-            cardHeight = Math.max(30, Math.min(maxCardHeight, 60));  // 🔥 使用動態最大高度
+            if (isHighItemCount) {
+                cardWidth = Math.max(90, Math.min(150, width * 0.13));  // 🔥 16-20 個：更小的寬度
+                cardHeight = Math.max(25, Math.min(maxCardHeight, 52));  // 🔥 16-20 個：更小的高度
+            } else {
+                cardWidth = Math.max(100, Math.min(170, width * 0.15));
+                cardHeight = Math.max(30, Math.min(maxCardHeight, 60));
+            }
         }
 
         console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
