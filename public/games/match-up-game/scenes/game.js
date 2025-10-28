@@ -1404,8 +1404,8 @@ class GameScene extends Phaser.Scene {
 
         if (isCompactMode) {
             // 🔥 手機橫向模式或極小高度：優先增加列數，減少行數，充分利用垂直空間
-            chineseFontSize = '20px';  // 緊湊模式使用更小的字體
-            chineseTextHeight = 20;  // 20px字體對應的高度
+            chineseFontSize = '16px';  // 減少字體大小以節省垂直空間
+            chineseTextHeight = 16;  // 16px字體對應的高度
 
             // 先確定列數
             if (itemCount <= 5) {
@@ -1429,12 +1429,12 @@ class GameScene extends Phaser.Scene {
             // 計算每行的高度
             const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
 
-            // 卡片高度 = 行高 - 中文文字高度
-            cardHeightInFrame = Math.max(35, Math.floor(rowHeight - chineseTextHeight));
+            // 卡片高度 = 行高 - 中文文字高度（減少最小高度以節省垂直空間）
+            cardHeightInFrame = Math.max(22, Math.floor(rowHeight - chineseTextHeight));
 
-            // 計算框寬度（減少水平邊距）
+            // 計算框寬度（增加寬度以創造更扁平的長方形）
             const horizontalMargin = 30;  // 減少邊距（從40px減少到30px）
-            frameWidth = Math.min(200, (width - horizontalMargin) / cols);
+            frameWidth = Math.min(250, (width - horizontalMargin) / cols);  // 增加最大寬度到250px
 
             frameHeight = cardHeightInFrame + chineseTextHeight;
 
@@ -1447,30 +1447,30 @@ class GameScene extends Phaser.Scene {
                 totalUnitHeight: cardHeightInFrame + chineseTextHeight
             });
         } else {
-            // 🔥 桌面或手機直向模式：激進縮小方案 + 8列佈局
-            chineseFontSize = '18px';  // 使用更小的字體
-            chineseTextHeight = 18;  // 18px字體對應的高度
+            // 🔥 桌面或手機直向模式：扁平長方形設計 + 8列佈局
+            chineseFontSize = '15px';  // 減少字體大小以節省垂直空間
+            chineseTextHeight = 15;  // 15px字體對應的高度
 
             if (itemCount <= 5) {
                 cols = Math.min(8, itemCount);  // 改為最多8列
-                frameWidth = Math.min(200, (width - 100) / cols);
-                frameHeight = 58;
-                cardHeightInFrame = 40;
+                frameWidth = Math.min(250, (width - 100) / cols);  // 增加寬度
+                frameHeight = 40;  // 減少總高度
+                cardHeightInFrame = 25;  // 減少卡片高度
             } else if (itemCount <= 10) {
                 cols = Math.min(8, Math.ceil(itemCount / 2));  // 改為最多8列
-                frameWidth = Math.min(160, (width - 120) / cols);
-                frameHeight = 53;
-                cardHeightInFrame = 35;
+                frameWidth = Math.min(200, (width - 120) / cols);  // 增加寬度
+                frameHeight = 37;  // 減少總高度
+                cardHeightInFrame = 22;  // 減少卡片高度
             } else if (itemCount <= 20) {
                 cols = Math.min(8, Math.ceil(itemCount / 3));  // 改為最多8列
-                frameWidth = Math.min(120, (width - 140) / cols);
-                frameHeight = 46;
-                cardHeightInFrame = 30;
+                frameWidth = Math.min(150, (width - 140) / cols);  // 增加寬度
+                frameHeight = 35;  // 減少總高度
+                cardHeightInFrame = 20;  // 減少卡片高度
             } else {
                 cols = 8;  // 改為固定8列
-                frameWidth = Math.min(180, (width - 100) / cols);
-                frameHeight = 56;
-                cardHeightInFrame = 38;
+                frameWidth = Math.min(220, (width - 100) / cols);  // 增加寬度
+                frameHeight = 39;  // 減少總高度
+                cardHeightInFrame = 24;  // 減少卡片高度
             }
         }
 
