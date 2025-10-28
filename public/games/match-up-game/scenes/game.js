@@ -1606,18 +1606,10 @@ class GameScene extends Phaser.Scene {
                 // 🔥 第五步：定義最小正方形卡片大小
                 const minSquareSize = 150;  // 最小正方形尺寸150×150
 
-                // 🔥 第六步：估算單元總高度和垂直間距
-                // 假設中文文字高度為卡片高度的40%
-                // totalUnitHeight = squareSize + squareSize * 0.4 = squareSize * 1.4
-                const estimatedRows = Math.ceil(Math.sqrt(itemCount));
-                const estimatedUnitHeight = availableHeight / estimatedRows;
-                const estimatedSquareSize = estimatedUnitHeight / 1.4;  // 正確計算：squareSize = totalUnitHeight / 1.4
-                const estimatedChineseTextHeight = estimatedSquareSize * 0.4;
-
-                // 🔥 智能計算垂直間距（根據估算的中文文字高度）
-                // 垂直間距 = 中文文字高度的 50%，範圍：20-60px
-                // 增加間距以避免中文字與下一行白色框重疊
-                const verticalSpacing = Math.max(20, Math.min(60, estimatedChineseTextHeight * 0.5));
+                // 🔥 第六步：計算垂直間距（基於螢幕高度）
+                // 使用固定的垂直間距，避免估算不準確導致間距太小
+                // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
+                const verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
 
                 // 🔥 第七步：計算最大可能的列數
                 const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (Math.max(minSquareSize, estimatedSquareSize) + horizontalSpacing));
