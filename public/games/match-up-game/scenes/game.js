@@ -2671,9 +2671,31 @@ class GameScene extends Phaser.Scene {
             modal.add(timeValue);
         }
 
-        // 按鈕區域
-        const buttonY = modalHeight / 2 - 120;
+        // 🔥 排名提示（動態顯示，位置調整到按鈕上方）
+        const rankText = this.add.text(0, 0, 'Loading ranking...', {
+            fontSize: '16px',
+            color: '#ffffff',
+            fontFamily: 'Arial'
+        });
+        rankText.setOrigin(0.5);
+        modal.add(rankText);
+
+        // 🔥 異步獲取排名並更新文字
+        this.fetchUserRanking(totalCorrect, totalQuestions, this.totalGameTime).then(ranking => {
+            if (ranking && ranking.rank) {
+                const rankSuffix = this.getRankSuffix(ranking.rank);
+                rankText.setText(`YOU'RE ${ranking.rank}${rankSuffix} ON THE LEADERBOARD`);
+            } else {
+                rankText.setText('');  // 如果無法獲取排名，隱藏文字
+            }
+        });
+
+        // 按鈕區域（調整位置，為排名提示留出空間）
+        const buttonY = modalHeight / 2 - 100;
         const buttonSpacing = 60;
+
+        // 🔥 調整排名提示位置到第一個按鈕上方
+        rankText.y = buttonY - buttonSpacing - 40;
 
         // Leaderboard 按鈕
         this.createModalButton(modal, 0, buttonY - buttonSpacing, 'Leaderboard', () => {
@@ -2731,6 +2753,66 @@ class GameScene extends Phaser.Scene {
         });
 
         return { buttonBg, buttonText };
+    }
+
+    // 🔥 獲取用戶排名（異步）
+    async fetchUserRanking(correctCount, totalCount, timeSpent) {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId');
+
+            if (!activityId) {
+                console.log('⚠️ 無法獲取 activityId，無法查詢排名');
+                return null;
+            }
+
+            // 計算分數和準確率
+            const score = Math.round((correctCount / totalCount) * 100);
+            const accuracy = Math.round((correctCount / totalCount) * 100);
+
+            // 獲取排行榜數據
+            const response = await fetch(`/api/leaderboard?activityId=${activityId}&limit=100`);
+            if (!response.ok) {
+                console.log('⚠️ 無法獲取排行榜數據');
+                return null;
+            }
+
+            const data = await response.json();
+            const leaderboard = data.leaderboard || [];
+
+            // 計算當前用戶的排名
+            // 排序規則：分數優先（降序），時間次之（升序）
+            const userScore = score;
+            const userTime = timeSpent;
+
+            let rank = 1;
+            for (const entry of leaderboard) {
+                if (entry.score > userScore) {
+                    rank++;
+                } else if (entry.score === userScore && entry.timeSpent < userTime) {
+                    rank++;
+                }
+            }
+
+            console.log('🏆 用戶排名:', rank);
+            return { rank, score, accuracy, timeSpent };
+        } catch (error) {
+            console.error('❌ 獲取排名失敗:', error);
+            return null;
+        }
+    }
+
+    // 🔥 獲取排名後綴（1st, 2nd, 3rd, 4th, ...）
+    getRankSuffix(rank) {
+        if (rank % 100 >= 11 && rank % 100 <= 13) {
+            return 'TH';
+        }
+        switch (rank % 10) {
+            case 1: return 'ST';
+            case 2: return 'ND';
+            case 3: return 'RD';
+            default: return 'TH';
+        }
     }
 
     // 🔥 格式化遊戲時間
