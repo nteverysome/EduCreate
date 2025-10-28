@@ -1472,9 +1472,6 @@ class GameScene extends Phaser.Scene {
             // 目標：減少垂直空間佔用，增加列數
             console.log('📱 使用緊湊模式佈局');
 
-            chineseFontSize = '16px';  // 減少字體大小以節省垂直空間
-            chineseTextHeight = 16;    // 16px字體對應的高度
-
             // 🔥 手機橫向模式固定5列
             cols = Math.min(5, itemCount);  // 固定最多5列
 
@@ -1486,24 +1483,78 @@ class GameScene extends Phaser.Scene {
             const minVerticalSpacing = 2;  // 最小垂直間距
             const availableHeight = height - topBottomMargin;  // 可用高度
 
-            // 📝 計算每行的高度
+            // 📝 計算每行的高度（初步估算）
             // 公式：(可用高度 - 間距總和) / 行數
             const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
 
             // 📝 根據匹配數決定最大卡片高度
             // 目標：創造扁平長方形（寬 > 高）
             const maxCardHeight = itemCount <= 5 ? 35 : itemCount <= 10 ? 32 : itemCount <= 20 ? 30 : 34;
-            cardHeightInFrame = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight - chineseTextHeight)));
 
             // 🔥 計算框寬度（增加寬度以創造扁平長方形，每個增加30px）
             const horizontalMargin = 30;
             const maxFrameWidth = itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250;
             frameWidth = Math.min(maxFrameWidth, (width - horizontalMargin) / cols);
 
-            // 📝 單元總高度 = 英文卡片高度 + 中文文字高度
-            totalUnitHeight = cardHeightInFrame + chineseTextHeight;
+            // 🔥 智能預先計算所有中文文字的實際字體大小
+            console.log('🔍 開始預先計算中文字體大小...');
+            const tempCardHeight = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight * 0.6)));  // 臨時卡片高度
+            const chineseFontSizes = currentPagePairs.map(pair => {
+                // 計算初始字體大小
+                let fontSize = Math.max(24, Math.min(48, tempCardHeight * 0.6));
 
-            console.log('🔥 緊湊模式動態扁平尺寸:', {
+                // 創建臨時文字對象來測量寬度
+                const tempText = this.add.text(0, 0, pair.answer, {
+                    fontSize: `${fontSize}px`,
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold'
+                });
+
+                // 如果文字寬度超過框寬度的 85%，縮小字體
+                const maxTextWidth = (frameWidth - 10) * 0.85;
+                while (tempText.width > maxTextWidth && fontSize > 18) {
+                    fontSize -= 2;
+                    tempText.setFontSize(fontSize);
+                }
+
+                // 銷毀臨時文字對象
+                tempText.destroy();
+
+                return fontSize;
+            });
+
+            // 找出最大的字體大小
+            const maxChineseFontSize = Math.max(...chineseFontSizes);
+            const minChineseFontSize = Math.min(...chineseFontSizes);
+            const avgChineseFontSize = (chineseFontSizes.reduce((a, b) => a + b, 0) / chineseFontSizes.length).toFixed(1);
+
+            console.log('📊 中文字體大小範圍:', {
+                min: minChineseFontSize,
+                max: maxChineseFontSize,
+                average: avgChineseFontSize,
+                allSizes: chineseFontSizes
+            });
+
+            // 🔥 使用最大字體大小作為中文文字高度（加5px作為行高）
+            chineseTextHeight = maxChineseFontSize + 5;
+            chineseFontSize = `${maxChineseFontSize}px`;  // 保存為字符串格式
+
+            // 🔥 根據實際字體大小動態調整垂直間距
+            const dynamicVerticalSpacing = Math.max(5, Math.floor(maxChineseFontSize * 0.2));  // 字體大小的20%
+
+            console.log('📐 動態垂直間距:', {
+                chineseTextHeight,
+                dynamicVerticalSpacing,
+                formula: `max(5, ${maxChineseFontSize} * 0.2) = ${dynamicVerticalSpacing}`
+            });
+
+            // 重新計算卡片高度（考慮實際的中文文字高度）
+            cardHeightInFrame = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight - chineseTextHeight - dynamicVerticalSpacing)));
+
+            // 📝 單元總高度 = 英文卡片高度 + 中文文字高度 + 垂直間距
+            totalUnitHeight = cardHeightInFrame + chineseTextHeight + dynamicVerticalSpacing;
+
+            console.log('🔥 緊湊模式智能動態尺寸:', {
                 rows,
                 availableHeight,
                 rowHeight,
@@ -1512,7 +1563,8 @@ class GameScene extends Phaser.Scene {
                 maxFrameWidth,
                 frameWidth,
                 chineseTextHeight,
-                totalUnitHeight: cardHeightInFrame + chineseTextHeight,
+                dynamicVerticalSpacing,
+                totalUnitHeight,
                 ratio: (frameWidth / cardHeightInFrame).toFixed(1) + ':1'
             });
         } else {
@@ -1549,24 +1601,67 @@ class GameScene extends Phaser.Scene {
         // 🔥 計算間距和行數
         const rows = Math.ceil(itemCount / cols);
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
-        const verticalSpacing = 0;  // 固定為0，無垂直間距
+
+        // 🔥 智能垂直間距：緊湊模式使用動態計算的間距，桌面模式使用0
+        // 📝 dynamicVerticalSpacing 已在緊湊模式中計算（字體大小的20%，最小5px）
+        const verticalSpacing = isCompactMode ? (chineseTextHeight * 0.2) : 0;
 
         // 🔥 計算頂部偏移，確保佈局垂直居中或從頂部開始（手機版減少10px）
-        // 📝 totalUnitHeight 已經包含 chineseTextHeight，所以不需要重複加
+        // 📝 totalUnitHeight 已經包含 chineseTextHeight 和 verticalSpacing，所以不需要重複加
         const totalContentHeight = rows * totalUnitHeight;
         const topOffset = isCompactMode ? 30 : Math.max(10, (height - totalContentHeight) / 2);
 
-        console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, chineseTextHeight, rows, totalContentHeight, topOffset });
+        console.log('📐 混合佈局間距:', {
+            horizontalSpacing,
+            verticalSpacing,
+            chineseTextHeight,
+            rows,
+            totalContentHeight,
+            topOffset,
+            verticalSpacingFormula: isCompactMode ? `${chineseTextHeight} * 0.2 = ${verticalSpacing.toFixed(1)}` : '0'
+        });
 
-        // 🔥 第一步：創建中文文字（固定位置，作為"框"的參考）
+        // 🔥 第一步：預先計算所有中文文字的實際字體大小（如果尚未計算）
+        // 📝 緊湊模式已經在上面計算過，桌面模式需要在這裡計算
+        let chineseFontSizesArray;
+        if (!isCompactMode) {
+            console.log('🔍 桌面模式：預先計算中文字體大小...');
+            chineseFontSizesArray = currentPagePairs.map(pair => {
+                // 計算初始字體大小
+                let fontSize = Math.max(24, Math.min(48, cardHeightInFrame * 0.6));
+
+                // 創建臨時文字對象來測量寬度
+                const tempText = this.add.text(0, 0, pair.answer, {
+                    fontSize: `${fontSize}px`,
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold'
+                });
+
+                // 如果文字寬度超過框寬度的 85%，縮小字體
+                const maxTextWidth = (frameWidth - 10) * 0.85;
+                while (tempText.width > maxTextWidth && fontSize > 18) {
+                    fontSize -= 2;
+                    tempText.setFontSize(fontSize);
+                }
+
+                // 銷毀臨時文字對象
+                tempText.destroy();
+
+                return fontSize;
+            });
+        } else {
+            // 緊湊模式使用之前計算的字體大小
+            chineseFontSizesArray = chineseFontSizes;
+        }
+
+        // 🔥 第二步：創建中文文字（固定位置，作為"框"的參考）
         const chineseFrames = [];
         currentPagePairs.forEach((pair, i) => {
             const col = i % cols;
             const row = Math.floor(i / cols);
 
             const frameX = horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
-            // 垂直間距為0，單元緊密排列，使用動態topOffset
-            // 📝 totalUnitHeight 已經包含 chineseTextHeight，所以不需要重複加
+            // 📝 使用 totalUnitHeight 計算垂直位置（已包含 chineseTextHeight 和 verticalSpacing）
             const frameY = topOffset + row * totalUnitHeight + totalUnitHeight / 2;
 
             // 🔥 創建中文文字容器（包含白色框）
@@ -1577,33 +1672,17 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 🔥 中文文字（在白色框下方，無間距）- 智能調整字體大小（與英文卡片相同邏輯）
+            // 🔥 中文文字（在白色框下方，無間距）- 使用預先計算的字體大小
             const chineseY = cardHeightInFrame / 2;  // 緊貼白色框底部，無間距
 
-            // 🔥 智能計算中文字體大小（與英文卡片完全相同的邏輯）
-            // 使用卡片高度而非 chineseTextHeight，確保與英文字體大小一致
-            let chineseActualFontSize = Math.max(24, Math.min(48, cardHeightInFrame * 0.6));
+            // 🔥 使用預先計算的字體大小（避免重複計算）
+            const chineseActualFontSize = chineseFontSizesArray[i];
 
-            // 🔥 創建臨時文字對象來測量寬度
-            const tempChineseText = this.add.text(0, 0, pair.answer, {
-                fontSize: `${chineseActualFontSize}px`,
-                fontFamily: 'Arial',
-                fontStyle: 'bold'
-            });
-
-            // 🔥 如果文字寬度超過框寬度的 85%，縮小字體
-            const maxChineseTextWidth = (frameWidth - 10) * 0.85;  // 留 15% 的邊距
-            while (tempChineseText.width > maxChineseTextWidth && chineseActualFontSize > 18) {
-                chineseActualFontSize -= 2;  // 與英文卡片相同，每次縮小2px
-                tempChineseText.setFontSize(chineseActualFontSize);
-            }
-
-            // 銷毀臨時文字對象
-            tempChineseText.destroy();
+            console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px`);
 
             // 🔥 創建最終的中文文字
             const chineseText = this.add.text(0, chineseY, pair.answer, {
-                fontSize: `${chineseActualFontSize}px`,  // 使用智能調整後的字體大小
+                fontSize: `${chineseActualFontSize}px`,  // 使用預先計算的字體大小
                 color: '#000000',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
