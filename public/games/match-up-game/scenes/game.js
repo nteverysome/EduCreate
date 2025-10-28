@@ -1449,27 +1449,27 @@ class GameScene extends Phaser.Scene {
             chineseFontSize = '15px';  // 減少字體大小以節省垂直空間
             chineseTextHeight = 15;  // 15px字體對應的高度
 
-            // 🔥 大螢幕智能配置：一列最多5個，充分利用空間
+            // 🔥 大螢幕智能配置：一列最多5個，卡片尺寸350px × 100px
             if (itemCount <= 5) {
                 cols = Math.min(5, itemCount);  // 最多5列
-                frameWidth = Math.min(350, (width - 100) / cols);  // 增加最大寬度到350px
-                frameHeight = 55;  // 增加總高度
-                cardHeightInFrame = 40;  // 增加卡片高度
+                frameWidth = Math.min(350, (width - 100) / cols);  // 最大寬度350px
+                frameHeight = 115;  // 總高度 = 卡片高度 + 中文高度
+                cardHeightInFrame = 100;  // 卡片高度100px
             } else if (itemCount <= 10) {
                 cols = Math.min(5, Math.ceil(itemCount / 2));  // 最多5列
-                frameWidth = Math.min(300, (width - 120) / cols);  // 增加最大寬度到300px
-                frameHeight = 52;  // 增加總高度
-                cardHeightInFrame = 37;  // 增加卡片高度
+                frameWidth = Math.min(350, (width - 120) / cols);  // 最大寬度350px
+                frameHeight = 115;  // 總高度 = 卡片高度 + 中文高度
+                cardHeightInFrame = 100;  // 卡片高度100px
             } else if (itemCount <= 20) {
                 cols = Math.min(5, Math.ceil(itemCount / 4));  // 最多5列，4行
-                frameWidth = Math.min(250, (width - 140) / cols);  // 增加最大寬度到250px
-                frameHeight = 50;  // 增加總高度
-                cardHeightInFrame = 35;  // 增加卡片高度
+                frameWidth = Math.min(350, (width - 140) / cols);  // 最大寬度350px
+                frameHeight = 115;  // 總高度 = 卡片高度 + 中文高度
+                cardHeightInFrame = 100;  // 卡片高度100px
             } else {
                 cols = 5;  // 固定5列
-                frameWidth = Math.min(280, (width - 100) / cols);  // 增加最大寬度到280px
-                frameHeight = 54;  // 增加總高度
-                cardHeightInFrame = 39;  // 增加卡片高度
+                frameWidth = Math.min(350, (width - 100) / cols);  // 最大寬度350px
+                frameHeight = 115;  // 總高度 = 卡片高度 + 中文高度
+                cardHeightInFrame = 100;  // 卡片高度100px
             }
         }
 
