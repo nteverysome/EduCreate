@@ -1382,40 +1382,103 @@ class GameScene extends Phaser.Scene {
         console.log('✅ 混合網格佈局創建完成');
     }
 
-    // 🔥 創建混合佈局（根據 Wordwall 設計）
+    // 🔥 創建混合佈局（英文卡片和中文框混合排列）
     createMixedLayout(currentPagePairs, width, height, cardWidth, cardHeight) {
-        console.log('🎮 創建混合佈局（Wordwall 風格）');
+        console.log('🎮 創建混合佈局（英文卡片在中文框內，可交換位置）');
 
         const itemCount = currentPagePairs.length;
 
-        // 🔥 根據匹配數決定列數和卡片尺寸
-        let cols, dynamicCardWidth, dynamicCardHeight;
+        // 🔥 根據匹配數決定列數和框的尺寸
+        let cols, frameWidth, frameHeight, cardHeightInFrame;
 
         if (itemCount <= 5) {
             // 3-5個：2-3列
             cols = Math.min(3, itemCount);
-            dynamicCardWidth = Math.min(300, (width - 100) / cols);
-            dynamicCardHeight = 80;
+            frameWidth = Math.min(280, (width - 100) / cols);
+            frameHeight = 140;  // 框的總高度
+            cardHeightInFrame = 60;  // 英文卡片高度
         } else if (itemCount <= 10) {
             // 6-10個：3-4列
             cols = Math.min(4, Math.ceil(itemCount / 2));
-            dynamicCardWidth = Math.min(250, (width - 120) / cols);
-            dynamicCardHeight = 70;
+            frameWidth = Math.min(240, (width - 120) / cols);
+            frameHeight = 130;
+            cardHeightInFrame = 55;
         } else if (itemCount <= 20) {
             // 11-20個：5-6列
             cols = Math.min(6, Math.ceil(itemCount / 3));
-            dynamicCardWidth = Math.min(200, (width - 140) / cols);
-            dynamicCardHeight = 60;
+            frameWidth = Math.min(180, (width - 140) / cols);
+            frameHeight = 110;
+            cardHeightInFrame = 45;
         } else {
             // 21-30個：使用分頁，每頁顯示較少
             cols = 4;
-            dynamicCardWidth = Math.min(280, (width - 100) / cols);
-            dynamicCardHeight = 75;
+            frameWidth = Math.min(260, (width - 100) / cols);
+            frameHeight = 135;
+            cardHeightInFrame = 58;
         }
 
-        console.log('📐 混合佈局參數:', { itemCount, cols, dynamicCardWidth, dynamicCardHeight });
+        console.log('📐 混合佈局參數:', { itemCount, cols, frameWidth, frameHeight, cardHeightInFrame });
 
-        // 🔥 隨機排列配對（根據隨機模式）
+        // 計算行數
+        const rows = Math.ceil(itemCount / cols);
+
+        // 計算間距
+        const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
+        const verticalSpacing = Math.max(20, (height - frameHeight * rows) / (rows + 1));
+
+        console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing });
+
+        // 🔥 第一步：創建中文框（固定位置）
+        const chineseFrames = [];
+        currentPagePairs.forEach((pair, i) => {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+
+            const frameX = horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
+            const frameY = verticalSpacing + row * (frameHeight + verticalSpacing) + frameHeight / 2 + 50;
+
+            // 創建中文框容器
+            const frameContainer = this.add.container(frameX, frameY);
+
+            // 白色背景框
+            const background = this.add.rectangle(0, 0, frameWidth, frameHeight, 0xffffff);
+            background.setStrokeStyle(2, 0x333333);
+            frameContainer.add(background);
+
+            // 分隔線（橫線）
+            const separatorY = -frameHeight / 4;  // 在框的上1/4處
+            const separator = this.add.text(0, separatorY, '─────────', {
+                fontSize: '16px',
+                color: '#333333',
+                fontFamily: 'Arial'
+            });
+            separator.setOrigin(0.5);
+            frameContainer.add(separator);
+
+            // 中文文字（下半部分）
+            const chineseY = frameHeight / 4;  // 在框的下1/4處
+            const chineseText = this.add.text(0, chineseY, pair.answer, {
+                fontSize: '24px',
+                color: '#000000',
+                fontFamily: 'Arial',
+                fontStyle: 'bold'
+            });
+            chineseText.setOrigin(0.5);
+            frameContainer.add(chineseText);
+
+            // 保存框的數據
+            frameContainer.setData('pairId', pair.id);  // 正確的配對 ID
+            frameContainer.setData('text', pair.answer);  // 中文文字
+            frameContainer.setData('frameIndex', i);  // 框的索引
+            frameContainer.setData('currentCardPairId', null);  // 當前框內的英文卡片的 pairId
+            frameContainer.setDepth(0);
+
+            chineseFrames.push(frameContainer);
+            this.rightCards.push(frameContainer);
+        });
+
+        // 🔥 第二步：創建英文卡片（初始隨機放在框內）
+        // 根據隨機模式決定英文卡片的初始位置
         let shuffledPairs;
         if (this.random === 'same') {
             // 固定隨機模式
@@ -1432,59 +1495,31 @@ class GameScene extends Phaser.Scene {
             console.log('🎲 混合佈局使用隨機排列模式');
         }
 
-        // 計算行數
-        const rows = Math.ceil(itemCount / cols);
-
-        // 🔥 計算間距（需要為中文文字預留空間）
-        const textHeight = 40;  // 中文文字高度
-        const textSpacing = 10;  // 卡片與文字之間的間距
-        const cellHeight = dynamicCardHeight + textHeight + textSpacing;  // 每個單元格的總高度
-
-        const horizontalSpacing = (width - dynamicCardWidth * cols) / (cols + 1);
-        const verticalSpacing = Math.max(20, (height - cellHeight * rows) / (rows + 1));
-
-        console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, cellHeight });
-
-        // 🔥 創建英文卡片和中文文字（中文在卡片下方）
+        // 創建英文卡片並放在框內
         shuffledPairs.forEach((pair, i) => {
-            const col = i % cols;
-            const row = Math.floor(i / cols);
+            const frame = chineseFrames[i];
+            const frameX = frame.x;
+            const frameY = frame.y;
 
-            // 英文卡片位置
-            const cardX = horizontalSpacing + col * (dynamicCardWidth + horizontalSpacing) + dynamicCardWidth / 2;
-            const cardY = verticalSpacing + row * (cellHeight + verticalSpacing) + dynamicCardHeight / 2 + 50;
+            // 英文卡片位置（在框的上半部分）
+            const cardY = frameY - frameHeight / 4;  // 在框的上1/4處
 
             const animationDelay = i * 100;  // 每個卡片延遲 100ms
 
             // 創建英文卡片
-            const card = this.createLeftCard(cardX, cardY, dynamicCardWidth, dynamicCardHeight, pair.question, pair.id, animationDelay);
+            const card = this.createLeftCard(frameX, cardY, frameWidth - 10, cardHeightInFrame, pair.question, pair.id, animationDelay);
+
+            // 保存卡片當前所在的框的索引
+            card.setData('currentFrameIndex', i);
+
+            // 更新框的數據
+            frame.setData('currentCardPairId', pair.id);
+
             this.leftCards.push(card);
-
-            // 🔥 創建中文文字（在卡片下方）
-            const chineseY = cardY + dynamicCardHeight / 2 + textSpacing + textHeight / 2;
-            const chineseText = this.add.text(cardX, chineseY, '—', {  // 初始顯示橫線
-                fontSize: '28px',
-                color: '#000000',
-                fontFamily: 'Arial',
-                fontStyle: 'bold'
-            });
-            chineseText.setOrigin(0.5);
-            chineseText.setDepth(10);
-
-            // 🔥 將中文文字與配對 ID 關聯
-            chineseText.setData('pairId', pair.id);
-            chineseText.setData('correctChinese', pair.answer);  // 保存正確的中文答案
-
-            // 保存中文文字對象到 rightCards（用於配對檢查）
-            const chineseContainer = this.add.container(cardX, chineseY);
-            chineseContainer.add(chineseText);
-            chineseContainer.setData('text', pair.answer);
-            chineseContainer.setData('pairId', pair.id);
-            chineseContainer.setData('textObject', chineseText);  // 保存文字對象引用
-            this.rightCards.push(chineseContainer);
         });
 
         console.log('✅ 混合佈局創建完成:', {
+            chineseFrames: chineseFrames.length,
             leftCards: this.leftCards.length,
             rightCards: this.rightCards.length
         });
@@ -1626,50 +1661,56 @@ class GameScene extends Phaser.Scene {
         container.on('dragend', (pointer) => {
             this.isDragging = false;
 
-            // 檢查是否拖回左側區域（取消配對）- 使用螢幕寬度的 45% 作為分界線
-            const isInLeftArea = pointer.x < this.scale.width * 0.45;
-
-            if (isInLeftArea && container.getData('isMatched')) {
-                // 取消配對
-                this.unmatchCard(container);
-
-                // 返回原位
-                this.tweens.add({
-                    targets: container,
-                    x: container.getData('originalX'),
-                    y: container.getData('originalY'),
-                    scaleX: 1,
-                    scaleY: 1,
-                    duration: 300,
-                    ease: 'Back.easeOut',
-                    onComplete: () => {
-                        container.setDepth(5);
-                        background.setAlpha(1);
-                    }
-                });
+            // 🔥 混合模式：只檢查拖放到中文框
+            if (this.layout === 'mixed') {
+                const dropped = this.checkDrop(pointer, container);
+                // checkDrop 會處理所有邏輯（交換或返回原位）
             } else {
-                // 先檢查是否拖曳到其他左側卡片（交換位置）
-                const swapped = this.checkSwap(pointer, container);
+                // 分離模式：檢查是否拖回左側區域（取消配對）
+                const isInLeftArea = pointer.x < this.scale.width * 0.45;
 
-                if (!swapped) {
-                    // 如果沒有交換，檢查是否拖曳到右側卡片
-                    const dropped = this.checkDrop(pointer, container);
+                if (isInLeftArea && container.getData('isMatched')) {
+                    // 取消配對
+                    this.unmatchCard(container);
 
-                    if (!dropped) {
-                        // 沒有放到正確位置，返回原位
-                        this.tweens.add({
-                            targets: container,
-                            x: container.getData('originalX'),
-                            y: container.getData('originalY'),
-                            scaleX: 1,
-                            scaleY: 1,
-                            duration: 300,
-                            ease: 'Back.easeOut',
-                            onComplete: () => {
-                                container.setDepth(5);
-                                background.setAlpha(1);
-                            }
-                        });
+                    // 返回原位
+                    this.tweens.add({
+                        targets: container,
+                        x: container.getData('originalX'),
+                        y: container.getData('originalY'),
+                        scaleX: 1,
+                        scaleY: 1,
+                        duration: 300,
+                        ease: 'Back.easeOut',
+                        onComplete: () => {
+                            container.setDepth(5);
+                            background.setAlpha(1);
+                        }
+                    });
+                } else {
+                    // 先檢查是否拖曳到其他左側卡片（交換位置）
+                    const swapped = this.checkSwap(pointer, container);
+
+                    if (!swapped) {
+                        // 如果沒有交換，檢查是否拖曳到右側卡片
+                        const dropped = this.checkDrop(pointer, container);
+
+                        if (!dropped) {
+                            // 沒有放到正確位置，返回原位
+                            this.tweens.add({
+                                targets: container,
+                                x: container.getData('originalX'),
+                                y: container.getData('originalY'),
+                                scaleX: 1,
+                                scaleY: 1,
+                                duration: 300,
+                                ease: 'Back.easeOut',
+                                onComplete: () => {
+                                    container.setDepth(5);
+                                    background.setAlpha(1);
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -1857,7 +1898,12 @@ class GameScene extends Phaser.Scene {
     checkDrop(pointer, draggedCard) {
         if (!draggedCard) return false;
 
-        // 檢查指針是否在任何右側卡片上
+        // 🔥 混合模式：檢查是否拖曳到另一個中文框
+        if (this.layout === 'mixed') {
+            return this.checkMixedModeDrop(pointer, draggedCard);
+        }
+
+        // 分離模式：檢查指針是否在任何右側卡片上
         let targetCard = null;
 
         for (const card of this.rightCards) {
@@ -1878,6 +1924,129 @@ class GameScene extends Phaser.Scene {
         return false;
     }
 
+    // 🔥 混合模式：檢查拖放到中文框（交換英文卡片）
+    checkMixedModeDrop(pointer, draggedCard) {
+        // 找到拖曳到的目標框
+        let targetFrame = null;
+
+        for (const frame of this.rightCards) {
+            const bounds = frame.getBounds();
+            if (bounds.contains(pointer.x, pointer.y)) {
+                targetFrame = frame;
+                break;
+            }
+        }
+
+        if (!targetFrame) {
+            // 沒有拖曳到任何框，返回原位
+            this.tweens.add({
+                targets: draggedCard,
+                x: draggedCard.getData('originalX'),
+                y: draggedCard.getData('originalY'),
+                scaleX: 1,
+                scaleY: 1,
+                duration: 300,
+                ease: 'Back.easeOut',
+                onComplete: () => {
+                    draggedCard.setDepth(5);
+                    draggedCard.getData('background').setAlpha(1);
+                }
+            });
+            return false;
+        }
+
+        // 獲取目標框的索引
+        const targetFrameIndex = targetFrame.getData('frameIndex');
+        const currentFrameIndex = draggedCard.getData('currentFrameIndex');
+
+        // 如果拖曳到同一個框，返回原位
+        if (targetFrameIndex === currentFrameIndex) {
+            this.tweens.add({
+                targets: draggedCard,
+                x: draggedCard.getData('originalX'),
+                y: draggedCard.getData('originalY'),
+                scaleX: 1,
+                scaleY: 1,
+                duration: 300,
+                ease: 'Back.easeOut',
+                onComplete: () => {
+                    draggedCard.setDepth(5);
+                    draggedCard.getData('background').setAlpha(1);
+                }
+            });
+            return false;
+        }
+
+        // 找到目標框內的英文卡片
+        const targetCard = this.leftCards.find(card => card.getData('currentFrameIndex') === targetFrameIndex);
+
+        if (targetCard) {
+            // 交換兩個英文卡片的位置
+            this.swapMixedModeCards(draggedCard, targetCard, currentFrameIndex, targetFrameIndex);
+            return true;
+        }
+
+        return false;
+    }
+
+    // 🔥 混合模式：交換兩個英文卡片的位置
+    swapMixedModeCards(card1, card2, frame1Index, frame2Index) {
+        console.log('🔄 混合模式：交換卡片', { frame1Index, frame2Index });
+
+        // 獲取兩個框
+        const frame1 = this.rightCards[frame1Index];
+        const frame2 = this.rightCards[frame2Index];
+
+        // 獲取兩個卡片的原始位置
+        const card1OriginalX = card1.getData('originalX');
+        const card1OriginalY = card1.getData('originalY');
+        const card2OriginalX = card2.getData('originalX');
+        const card2OriginalY = card2.getData('originalY');
+
+        // 更新卡片的框索引
+        card1.setData('currentFrameIndex', frame2Index);
+        card2.setData('currentFrameIndex', frame1Index);
+
+        // 更新卡片的原始位置
+        card1.setData('originalX', card2OriginalX);
+        card1.setData('originalY', card2OriginalY);
+        card2.setData('originalX', card1OriginalX);
+        card2.setData('originalY', card1OriginalY);
+
+        // 更新框的數據
+        frame1.setData('currentCardPairId', card2.getData('pairId'));
+        frame2.setData('currentCardPairId', card1.getData('pairId'));
+
+        // 動畫移動到新位置
+        this.tweens.add({
+            targets: card1,
+            x: card2OriginalX,
+            y: card2OriginalY,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 300,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                card1.setDepth(5);
+                card1.getData('background').setAlpha(1);
+            }
+        });
+
+        this.tweens.add({
+            targets: card2,
+            x: card1OriginalX,
+            y: card1OriginalY,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 300,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                card2.setDepth(5);
+                card2.getData('background').setAlpha(1);
+            }
+        });
+    }
+
     checkMatch(leftCard, rightCard) {
         // 🔥 新機制：無論對錯，都讓英文卡片進入中文內框
         // 不立即檢查對錯，等待用戶點擊「提交答案」按鈕
@@ -1891,56 +2060,26 @@ class GameScene extends Phaser.Scene {
         rightCard.setData('isMatched', true);
         rightCard.setData('matchedWith', leftCard);  // 記錄配對的左側卡片
 
-        // 🔥 混合模式：更新中文文字
-        if (this.layout === 'mixed') {
-            // 獲取中文文字對象
-            const chineseTextObject = rightCard.getData('textObject');
-            if (chineseTextObject) {
-                // 更新中文文字為拖曳的英文卡片的中文翻譯
-                const leftCardText = leftCard.getData('text');
-                chineseTextObject.setText(leftCardText);
-                console.log('🔥 混合模式：更新中文文字', leftCardText);
+        // 分離模式：左側卡片移動到右側空白框的位置（完全覆蓋）
+        const targetX = rightCard.x;
+        const targetY = rightCard.y;
+
+        this.tweens.add({
+            targets: leftCard,
+            x: targetX,
+            y: targetY,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 300,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                leftCard.setDepth(10);  // 提升到空白框上方
+                leftCard.getData('background').setAlpha(1);
+
+                // 🔥 檢查是否所有卡片都已配對，如果是則顯示「提交答案」按鈕
+                this.checkAllCardsMatched();
             }
-
-            // 左側卡片返回原位（混合模式不移動卡片）
-            this.tweens.add({
-                targets: leftCard,
-                x: leftCard.getData('originalX'),
-                y: leftCard.getData('originalY'),
-                scaleX: 1,
-                scaleY: 1,
-                duration: 300,
-                ease: 'Back.easeOut',
-                onComplete: () => {
-                    leftCard.setDepth(5);
-                    leftCard.getData('background').setAlpha(1);
-
-                    // 🔥 檢查是否所有卡片都已配對
-                    this.checkAllCardsMatched();
-                }
-            });
-        } else {
-            // 分離模式：左側卡片移動到右側空白框的位置（完全覆蓋）
-            const targetX = rightCard.x;
-            const targetY = rightCard.y;
-
-            this.tweens.add({
-                targets: leftCard,
-                x: targetX,
-                y: targetY,
-                scaleX: 1,
-                scaleY: 1,
-                duration: 300,
-                ease: 'Back.easeOut',
-                onComplete: () => {
-                    leftCard.setDepth(10);  // 提升到空白框上方
-                    leftCard.getData('background').setAlpha(1);
-
-                    // 🔥 檢查是否所有卡片都已配對，如果是則顯示「提交答案」按鈕
-                    this.checkAllCardsMatched();
-                }
-            });
-        }
+        });
     }
 
     unmatchCard(leftCard) {
@@ -1957,17 +2096,8 @@ class GameScene extends Phaser.Scene {
             // 從已配對集合中移除
             this.matchedPairs.delete(leftCard.getData('pairId'));
 
-            // 🔥 混合模式：恢復橫線
-            if (this.layout === 'mixed') {
-                const chineseTextObject = rightCard.getData('textObject');
-                if (chineseTextObject) {
-                    chineseTextObject.setText('—');  // 恢復橫線
-                    console.log('🔥 混合模式：恢復橫線');
-                }
-            } else {
-                // 分離模式：顯示右側空白框（如果之前被隱藏）
-                rightCard.getData('background').setVisible(true);
-            }
+            // 分離模式：顯示右側空白框（如果之前被隱藏）
+            rightCard.getData('background').setVisible(true);
         }
     }
 
