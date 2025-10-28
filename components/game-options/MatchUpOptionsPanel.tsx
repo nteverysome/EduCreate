@@ -213,7 +213,7 @@ const MatchUpOptionsPanel: React.FC<MatchUpOptionsPanelProps> = ({
                 <input
                   type="range"
                   min="3"
-                  max={Math.min(100, totalVocabulary)}
+                  max={Math.min(20, totalVocabulary)}
                   value={options.itemsPerPage}
                   onChange={(e) => updateOptions({ itemsPerPage: Number(e.target.value) })}
                   className="flex-1 cursor-pointer"
