@@ -1791,19 +1791,31 @@ class GameScene extends Phaser.Scene {
 
         // 拖曳開始
         container.on('dragstart', (pointer) => {
+            // 📝 調試訊息：記錄拖曳開始
+            console.log('🖱️ 開始拖曳卡片:', {
+                pairId: container.getData('pairId'),
+                side: container.getData('side'),
+                position: { x: container.x, y: container.y },
+                isMatched: container.getData('isMatched')
+            });
+
             // 允許已配對的卡片也可以拖動
             this.isDragging = true;
             this.dragStartCard = container;
 
-            // 卡片"飄浮"起來
-            container.setDepth(100);  // 提升到最上層
-            container.setScale(1.1);  // 稍微放大
-            background.setAlpha(0.9);  // 半透明
+            // 📝 卡片"飄浮"起來的視覺效果
+            container.setDepth(100);   // 提升到最上層（深度值100）
+            container.setScale(1.1);   // 稍微放大（110%）
+            background.setAlpha(0.9);  // 半透明（90%不透明度）
         });
 
         // 拖曳中 - 卡片跟隨鼠標
         container.on('drag', (pointer, dragX, dragY) => {
-            if (!this.isDragging) return;
+            if (!this.isDragging) {
+                // 📝 調試訊息：拖曳狀態異常
+                console.log('⚠️ 拖曳狀態異常：isDragging = false');
+                return;
+            }
 
             // 移動整個卡片
             container.x = pointer.x;
@@ -1812,13 +1824,23 @@ class GameScene extends Phaser.Scene {
 
         // 拖曳結束
         container.on('dragend', (pointer) => {
+            // 📝 調試訊息：記錄拖曳結束
+            console.log('🖱️ 結束拖曳:', {
+                pairId: container.getData('pairId'),
+                finalPosition: { x: pointer.x, y: pointer.y },
+                layout: this.layout
+            });
+
             this.isDragging = false;
 
             // 🔥 混合模式：只檢查拖放到中文框
             if (this.layout === 'mixed') {
+                console.log('🔄 混合模式：檢查拖放到中文框');
                 const dropped = this.checkDrop(pointer, container);
+                console.log('📊 拖放結果:', dropped ? '成功' : '失敗');
                 // checkDrop 會處理所有邏輯（交換或返回原位）
             } else {
+                console.log('🔄 分離模式：檢查拖放邏輯');
                 // 分離模式：檢查是否拖回左側區域（取消配對）
                 const isInLeftArea = pointer.x < this.scale.width * 0.45;
 
@@ -1985,7 +2007,16 @@ class GameScene extends Phaser.Scene {
     }
 
     checkSwap(pointer, draggedCard) {
-        if (!draggedCard) return false;
+        // 📝 調試訊息：記錄交換檢查開始
+        console.log('🔄 檢查卡片交換:', {
+            draggedCardId: draggedCard?.getData('pairId'),
+            pointerPosition: { x: pointer.x, y: pointer.y }
+        });
+
+        if (!draggedCard) {
+            console.log('⚠️ 沒有拖曳的卡片');
+            return false;
+        }
 
         // 檢查指針是否在其他左側卡片上
         let targetCard = null;
@@ -1997,16 +2028,22 @@ class GameScene extends Phaser.Scene {
             const bounds = card.getBounds();
             if (bounds.contains(pointer.x, pointer.y)) {
                 targetCard = card;
+                console.log('✅ 找到目標卡片:', card.getData('pairId'));
                 break;
             }
         }
 
         if (targetCard) {
+            console.log('🔄 執行卡片交換:', {
+                card1: draggedCard.getData('pairId'),
+                card2: targetCard.getData('pairId')
+            });
             // 交換兩張卡片的位置
             this.swapCards(draggedCard, targetCard);
             return true;
         }
 
+        console.log('❌ 沒有找到目標卡片');
         return false;
     }
 
@@ -2049,10 +2086,21 @@ class GameScene extends Phaser.Scene {
     }
 
     checkDrop(pointer, draggedCard) {
-        if (!draggedCard) return false;
+        // 📝 調試訊息：記錄拖放檢查開始
+        console.log('🎯 檢查拖放:', {
+            draggedCardId: draggedCard?.getData('pairId'),
+            layout: this.layout,
+            pointerPosition: { x: pointer.x, y: pointer.y }
+        });
+
+        if (!draggedCard) {
+            console.log('⚠️ 沒有拖曳的卡片');
+            return false;
+        }
 
         // 🔥 混合模式：檢查是否拖曳到另一個中文框
         if (this.layout === 'mixed') {
+            console.log('🔄 使用混合模式拖放邏輯');
             return this.checkMixedModeDrop(pointer, draggedCard);
         }
 
@@ -2065,20 +2113,32 @@ class GameScene extends Phaser.Scene {
             const bounds = card.getBounds();
             if (bounds.contains(pointer.x, pointer.y)) {
                 targetCard = card;
+                console.log('✅ 找到目標卡片:', card.getData('pairId'));
                 break;
             }
         }
 
         if (targetCard) {
+            console.log('🎯 執行配對檢查:', {
+                leftCard: draggedCard.getData('pairId'),
+                rightCard: targetCard.getData('pairId')
+            });
             this.checkMatch(draggedCard, targetCard);
             return true;
         }
 
+        console.log('❌ 沒有找到目標卡片');
         return false;
     }
 
     // 🔥 混合模式：檢查拖放到其他英文卡片（交換位置）
     checkMixedModeDrop(pointer, draggedCard) {
+        // 📝 調試訊息：記錄混合模式拖放檢查開始
+        console.log('🔄 混合模式拖放檢查:', {
+            draggedCardId: draggedCard.getData('pairId'),
+            pointerPosition: { x: pointer.x, y: pointer.y }
+        });
+
         // 找到拖曳到的目標英文卡片
         let targetCard = null;
 
@@ -2086,7 +2146,9 @@ class GameScene extends Phaser.Scene {
             if (card === draggedCard) continue;  // 跳過自己
 
             const bounds = card.getBounds();
-            // 擴大檢測範圍，包括卡片下方的中文文字區域
+            // 📝 擴大檢測範圍，包括卡片下方的中文文字區域
+            // 原因：中文文字在卡片下方，用戶可能拖放到中文文字上
+            // 擴大範圍：高度 + 50px（中文文字區域的高度）
             const expandedBounds = new Phaser.Geom.Rectangle(
                 bounds.x,
                 bounds.y,
@@ -2096,6 +2158,10 @@ class GameScene extends Phaser.Scene {
 
             if (expandedBounds.contains(pointer.x, pointer.y)) {
                 targetCard = card;
+                console.log('✅ 找到目標卡片（擴展範圍）:', {
+                    targetCardId: card.getData('pairId'),
+                    bounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }
+                });
                 break;
             }
         }
