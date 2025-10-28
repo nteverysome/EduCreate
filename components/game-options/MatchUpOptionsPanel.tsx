@@ -3,7 +3,7 @@
 import React from 'react';
 
 export interface MatchUpOptions {
-  itemsPerPage: number;  // 每頁顯示的詞彙數量 (3-20)
+  itemsPerPage: number;  // 每頁顯示的詞彙數量 (3-100)
   autoProceed: boolean;  // 標記後自動繼續
   timer: {
     type: 'none' | 'countUp' | 'countDown';  // 計時器類型
@@ -213,7 +213,7 @@ const MatchUpOptionsPanel: React.FC<MatchUpOptionsPanelProps> = ({
                 <input
                   type="range"
                   min="3"
-                  max={Math.min(20, totalVocabulary)}
+                  max={Math.min(100, totalVocabulary)}
                   value={options.itemsPerPage}
                   onChange={(e) => updateOptions({ itemsPerPage: Number(e.target.value) })}
                   className="flex-1 cursor-pointer"
