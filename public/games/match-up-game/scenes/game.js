@@ -1418,33 +1418,32 @@ class GameScene extends Phaser.Scene {
                 cols = Math.min(8, Math.ceil(itemCount / 3));  // 最多8列
             }
 
-            // 計算行數
-            const rows = Math.ceil(itemCount / cols);
-
-            // 🔥 優化：更激進地利用垂直空間
-            const topBottomMargin = 30;  // 減少邊距（從40px減少到30px）
-            const minVerticalSpacing = 2;
-            const availableHeight = height - topBottomMargin;
-
-            // 計算每行的高度
-            const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
-
-            // 卡片高度 = 行高 - 中文文字高度（減少最小高度以節省垂直空間）
-            cardHeightInFrame = Math.max(22, Math.floor(rowHeight - chineseTextHeight));
-
-            // 計算框寬度（增加寬度以創造更扁平的長方形）
-            const horizontalMargin = 30;  // 減少邊距（從40px減少到30px）
-            frameWidth = Math.min(250, (width - horizontalMargin) / cols);  // 增加最大寬度到250px
+            // 🔥 固定卡片高度以創造扁平長方形（不再動態計算）
+            // 根據匹配數設置固定的扁平尺寸
+            if (itemCount <= 5) {
+                cardHeightInFrame = 25;  // 固定高度
+                frameWidth = Math.min(250, (width - 30) / cols);  // 增加寬度
+            } else if (itemCount <= 10) {
+                cardHeightInFrame = 22;  // 固定高度
+                frameWidth = Math.min(200, (width - 30) / cols);  // 增加寬度
+            } else if (itemCount <= 20) {
+                cardHeightInFrame = 20;  // 固定高度
+                frameWidth = Math.min(150, (width - 30) / cols);  // 增加寬度
+            } else {
+                cardHeightInFrame = 24;  // 固定高度
+                frameWidth = Math.min(220, (width - 30) / cols);  // 增加寬度
+            }
 
             frameHeight = cardHeightInFrame + chineseTextHeight;
 
-            console.log('🔥 緊湊模式垂直空間優化:', {
-                rows,
-                availableHeight,
-                rowHeight,
+            console.log('🔥 緊湊模式固定扁平尺寸:', {
+                itemCount,
+                cols,
                 cardHeightInFrame,
+                frameWidth,
                 chineseTextHeight,
-                totalUnitHeight: cardHeightInFrame + chineseTextHeight
+                totalUnitHeight: cardHeightInFrame + chineseTextHeight,
+                ratio: (frameWidth / cardHeightInFrame).toFixed(1) + ':1'
             });
         } else {
             // 🔥 桌面或手機直向模式：扁平長方形設計 + 8列佈局
