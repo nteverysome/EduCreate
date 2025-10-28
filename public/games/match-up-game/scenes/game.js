@@ -1422,11 +1422,12 @@ class GameScene extends Phaser.Scene {
         // 計算行數
         const rows = Math.ceil(itemCount / cols);
 
-        // 計算間距
+        // 🔥 計算間距（中文文字在框外，需要額外空間）
+        const chineseTextHeight = 30;  // 中文文字高度 + 間距
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
-        const verticalSpacing = Math.max(20, (height - frameHeight * rows) / (rows + 1));
+        const verticalSpacing = Math.max(20, (height - (frameHeight + chineseTextHeight) * rows) / (rows + 1));
 
-        console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing });
+        console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, chineseTextHeight });
 
         // 🔥 第一步：創建中文框（固定位置）
         const chineseFrames = [];
@@ -1435,7 +1436,7 @@ class GameScene extends Phaser.Scene {
             const row = Math.floor(i / cols);
 
             const frameX = horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
-            const frameY = verticalSpacing + row * (frameHeight + verticalSpacing) + frameHeight / 2 + 50;
+            const frameY = verticalSpacing + row * (frameHeight + chineseTextHeight + verticalSpacing) + frameHeight / 2 + 50;
 
             // 創建中文框容器
             const frameContainer = this.add.container(frameX, frameY);
@@ -1445,15 +1446,15 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 中文文字（下半部分）
-            const chineseY = frameHeight / 4;  // 在框的下1/4處
+            // 🔥 中文文字（在框的外面下方）
+            const chineseY = frameHeight / 2 + 20;  // 在框的下方，留20px間距
             const chineseText = this.add.text(0, chineseY, pair.answer, {
                 fontSize: '24px',
                 color: '#000000',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
             });
-            chineseText.setOrigin(0.5);
+            chineseText.setOrigin(0.5, 0);  // 水平居中，垂直從上方開始
             frameContainer.add(chineseText);
 
             // 保存框的數據
@@ -1491,8 +1492,8 @@ class GameScene extends Phaser.Scene {
             const frameX = frame.x;
             const frameY = frame.y;
 
-            // 英文卡片位置（在框的上半部分）
-            const cardY = frameY - frameHeight / 4;  // 在框的上1/4處
+            // 🔥 英文卡片位置（在框的中心）
+            const cardY = frameY;  // 在框的中心
 
             const animationDelay = i * 100;  // 每個卡片延遲 100ms
 
