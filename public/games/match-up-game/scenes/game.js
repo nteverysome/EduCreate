@@ -1445,30 +1445,30 @@ class GameScene extends Phaser.Scene {
                 ratio: (frameWidth / cardHeightInFrame).toFixed(1) + ':1'
             });
         } else {
-            // 🔥 桌面或手機直向模式：扁平長方形設計 + 8列佈局
-            chineseFontSize = '15px';  // 減少字體大小以節省垂直空間
-            chineseTextHeight = 15;  // 15px字體對應的高度
+            // 🔥 桌面或手機直向模式：扁平長方形設計 + 5列佈局
+            chineseFontSize = '36px';  // 與英文卡片相同大小（60 * 0.6 = 36px）
+            chineseTextHeight = 40;  // 增加高度以容納更大的中文字
 
-            // 🔥 大螢幕智能配置：一列最多5個，卡片尺寸350px × 60px，中文15px
+            // 🔥 大螢幕智能配置：一列最多5個，卡片尺寸350px × 60px，中文與英文同大小
             if (itemCount <= 5) {
                 cols = Math.min(5, itemCount);  // 最多5列
                 frameWidth = Math.min(350, (width - 100) / cols);  // 最大寬度350px
-                frameHeight = 75;  // 總高度 = 60px（卡片）+ 15px（中文）
+                frameHeight = 100;  // 總高度 = 60px（卡片）+ 40px（中文）
                 cardHeightInFrame = 60;  // 卡片高度60px
             } else if (itemCount <= 10) {
                 cols = Math.min(5, Math.ceil(itemCount / 2));  // 最多5列
                 frameWidth = Math.min(350, (width - 120) / cols);  // 最大寬度350px
-                frameHeight = 75;  // 總高度 = 60px（卡片）+ 15px（中文）
+                frameHeight = 100;  // 總高度 = 60px（卡片）+ 40px（中文）
                 cardHeightInFrame = 60;  // 卡片高度60px
             } else if (itemCount <= 20) {
                 cols = Math.min(5, Math.ceil(itemCount / 4));  // 最多5列，4行
                 frameWidth = Math.min(350, (width - 140) / cols);  // 最大寬度350px
-                frameHeight = 75;  // 總高度 = 60px（卡片）+ 15px（中文）
+                frameHeight = 100;  // 總高度 = 60px（卡片）+ 40px（中文）
                 cardHeightInFrame = 60;  // 卡片高度60px
             } else {
                 cols = 5;  // 固定5列
                 frameWidth = Math.min(350, (width - 100) / cols);  // 最大寬度350px
-                frameHeight = 75;  // 總高度 = 60px（卡片）+ 15px（中文）
+                frameHeight = 100;  // 總高度 = 60px（卡片）+ 40px（中文）
                 cardHeightInFrame = 60;  // 卡片高度60px
             }
         }
@@ -1504,11 +1504,12 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 🔥 中文文字（在白色框下方，無間距）- 智能調整字體大小
+            // 🔥 中文文字（在白色框下方，無間距）- 智能調整字體大小（與英文卡片相同邏輯）
             const chineseY = cardHeightInFrame / 2;  // 緊貼白色框底部，無間距
 
-            // 🔥 智能計算中文字體大小（與英文卡片相同邏輯）
-            let chineseActualFontSize = Math.max(12, Math.min(24, chineseTextHeight * 0.8));
+            // 🔥 智能計算中文字體大小（與英文卡片完全相同的邏輯）
+            // 使用卡片高度而非 chineseTextHeight，確保與英文字體大小一致
+            let chineseActualFontSize = Math.max(24, Math.min(48, cardHeightInFrame * 0.6));
 
             // 🔥 創建臨時文字對象來測量寬度
             const tempChineseText = this.add.text(0, 0, pair.answer, {
@@ -1519,8 +1520,8 @@ class GameScene extends Phaser.Scene {
 
             // 🔥 如果文字寬度超過框寬度的 85%，縮小字體
             const maxChineseTextWidth = (frameWidth - 10) * 0.85;  // 留 15% 的邊距
-            while (tempChineseText.width > maxChineseTextWidth && chineseActualFontSize > 10) {
-                chineseActualFontSize -= 1;
+            while (tempChineseText.width > maxChineseTextWidth && chineseActualFontSize > 18) {
+                chineseActualFontSize -= 2;  // 與英文卡片相同，每次縮小2px
                 tempChineseText.setFontSize(chineseActualFontSize);
             }
 
