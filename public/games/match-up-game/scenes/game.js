@@ -1068,15 +1068,28 @@ class GameScene extends Phaser.Scene {
         const topAreaStartX = (width - (columns * cardWidth + (columns - 1) * horizontalSpacing)) / 2;
         const topAreaStartY = height * 0.08;
 
-        // 🔥 計算下方區域（中文）的起始位置
+        // 🔥 計算上方區域的總高度
+        const topAreaHeight = rows * cardHeight + (rows - 1) * topVerticalSpacing;
+
+        // 🔥 計算下方區域的總高度（包含文字）
+        const bottomAreaHeight = rows * cardHeight + (rows - 1) * bottomVerticalSpacing;
+
+        // 🔥 計算下方區域（中文）的起始位置，確保所有內容都能顯示
         const bottomAreaStartX = topAreaStartX;
-        const bottomAreaStartY = height * 0.52;
+        const availableBottomSpace = height - topAreaStartY - topAreaHeight - 10;  // 10px 為上下區域間距
+        const bottomAreaStartY = Math.max(
+            topAreaStartY + topAreaHeight + 10,  // 至少在上方區域下方 10px
+            height - bottomAreaHeight - 10  // 確保下方區域完全顯示
+        );
 
         console.log(`📍 區域位置:`, {
             topAreaStartX: topAreaStartX.toFixed(0),
             topAreaStartY: topAreaStartY.toFixed(0),
+            topAreaHeight: topAreaHeight.toFixed(0),
             bottomAreaStartX: bottomAreaStartX.toFixed(0),
-            bottomAreaStartY: bottomAreaStartY.toFixed(0)
+            bottomAreaStartY: bottomAreaStartY.toFixed(0),
+            bottomAreaHeight: bottomAreaHeight.toFixed(0),
+            availableBottomSpace: availableBottomSpace.toFixed(0)
         });
 
         // 🔥 根據隨機模式排列答案
