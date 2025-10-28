@@ -1656,6 +1656,9 @@ class GameScene extends Phaser.Scene {
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
 
+        // 🔥 聲明 cardText 變量（在分支外部）
+        let cardText;
+
         // 🔥 如果有圖片，創建圖片在上，文字在下的佈局
         if (imageUrl && imageUrl.trim() !== '') {
             // 圖片區域：佔據卡片上方 60%
@@ -1716,7 +1719,7 @@ class GameScene extends Phaser.Scene {
             tempText.destroy();
 
             // 🔥 創建最終的文字對象
-            const cardText = this.add.text(0, textY, text, {
+            cardText = this.add.text(0, textY, text, {
                 fontSize: `${fontSize}px`,
                 color: '#333333',
                 fontFamily: 'Arial',
@@ -1747,7 +1750,7 @@ class GameScene extends Phaser.Scene {
             tempText.destroy();
 
             // 🔥 創建最終的文字對象
-            const cardText = this.add.text(0, 0, text, {
+            cardText = this.add.text(0, 0, text, {
                 fontSize: `${fontSize}px`,
                 color: '#333333',
                 fontFamily: 'Arial',
