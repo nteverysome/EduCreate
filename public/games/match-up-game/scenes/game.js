@@ -1991,10 +1991,16 @@ class GameScene extends Phaser.Scene {
         let incorrectCount = 0;
         let unmatchedCount = 0;
 
+        // 🔥 獲取當前頁的詞彙數據
+        const startIndex = this.currentPage * this.itemsPerPage;
+        const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
+        const currentPagePairs = this.pairs.slice(startIndex, endIndex);
+
         // 檢查每個左側卡片的配對
         this.leftCards.forEach(leftCard => {
             const leftPairId = leftCard.getData('pairId');
             const rightCard = leftCard.getData('matchedWith');
+            const correctPair = currentPagePairs.find(pair => pair.id === leftPairId);
 
             if (rightCard) {
                 const rightPairId = rightCard.getData('pairId');
@@ -2003,24 +2009,87 @@ class GameScene extends Phaser.Scene {
                     // 配對正確
                     correctCount++;
                     console.log('✅ 配對正確:', leftCard.getData('text'), '-', rightCard.getData('text'));
+
+                    // 🔥 顯示正確答案，內框呈白色，標記勾勾
+                    this.showCorrectAnswer(rightCard, correctPair.chinese);
                 } else {
                     // 配對錯誤
                     incorrectCount++;
                     console.log('❌ 配對錯誤:', leftCard.getData('text'), '-', rightCard.getData('text'));
 
-                    // 顯示錯誤提示（紅色邊框）
-                    leftCard.getData('background').setStrokeStyle(3, 0xf44336);
-                    rightCard.getData('background').setStrokeStyle(3, 0xf44336);
+                    // 🔥 顯示正確答案，內框呈灰色，標記 X
+                    this.showIncorrectAnswer(rightCard, correctPair.chinese);
                 }
             } else {
                 // 未配對
                 unmatchedCount++;
                 console.log('⚠️ 未配對:', leftCard.getData('text'));
+                // 🔥 未配對的不顯示
             }
         });
 
         // 顯示總結
         this.showMatchSummary(correctCount, incorrectCount, unmatchedCount);
+    }
+
+    // 🔥 顯示正確答案（白色內框 + 勾勾）
+    showCorrectAnswer(rightCard, correctAnswer) {
+        const background = rightCard.getData('background');
+        const textObj = rightCard.getData('textObj');
+
+        // 內框呈白色
+        background.setFillStyle(0xffffff);
+        background.setStrokeStyle(2, 0x000000);
+
+        // 更新文字為正確答案
+        if (textObj) {
+            textObj.setText(correctAnswer);
+        }
+
+        // 添加勾勾標記
+        const checkMark = this.add.text(
+            rightCard.x + background.width / 2 - 15,
+            rightCard.y - background.height / 2 + 5,
+            '✓',
+            {
+                fontSize: '24px',
+                color: '#4caf50',
+                fontFamily: 'Arial',
+                fontStyle: 'bold'
+            }
+        );
+        checkMark.setOrigin(0.5).setDepth(15);
+        rightCard.add(checkMark);
+    }
+
+    // 🔥 顯示錯誤答案（灰色內框 + X）
+    showIncorrectAnswer(rightCard, correctAnswer) {
+        const background = rightCard.getData('background');
+        const textObj = rightCard.getData('textObj');
+
+        // 內框呈灰色
+        background.setFillStyle(0xcccccc);
+        background.setStrokeStyle(2, 0x000000);
+
+        // 更新文字為正確答案
+        if (textObj) {
+            textObj.setText(correctAnswer);
+        }
+
+        // 添加 X 標記
+        const xMark = this.add.text(
+            rightCard.x + background.width / 2 - 15,
+            rightCard.y - background.height / 2 + 5,
+            '✗',
+            {
+                fontSize: '24px',
+                color: '#f44336',
+                fontFamily: 'Arial',
+                fontStyle: 'bold'
+            }
+        );
+        xMark.setOrigin(0.5).setDepth(15);
+        rightCard.add(xMark);
     }
 
     // 🔥 顯示配對總結
