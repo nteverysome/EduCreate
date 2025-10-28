@@ -1596,9 +1596,9 @@ class GameScene extends Phaser.Scene {
             // 🔥 第三步：計算螢幕寬高比
             const aspectRatio = width / height;
 
-            // 🔥 第四步：計算間距
-            const horizontalSpacing = 20;
-            const verticalSpacing = 25;  // 增加5px，從20px改為25px
+            // 🔥 第四步：智能計算間距（根據螢幕高度）
+            const horizontalSpacing = Math.max(15, Math.min(30, width * 0.015));  // 15-30px，基於寬度的1.5%
+            const verticalSpacing = Math.max(20, Math.min(40, height * 0.025));   // 20-40px，基於高度的2.5%
 
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
