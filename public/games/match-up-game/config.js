@@ -36,6 +36,9 @@ const config = {
 // 啟動遊戲
 const game = new Phaser.Game(config);
 
+// 🔥 暴露遊戲實例到 window 對象，方便測試和調試
+window.matchUpGame = game;
+
 // 🔥 設定遊戲的基準螢幕尺寸，用於響應式縮放計算
 game.screenBaseSize = {
     maxWidth: MAX_SIZE_WIDTH_SCREEN,    // 最大寬度參考值
