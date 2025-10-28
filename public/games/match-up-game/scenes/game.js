@@ -1571,32 +1571,97 @@ class GameScene extends Phaser.Scene {
                 ratio: (frameWidth / cardHeightInFrame).toFixed(1) + ':1'
             });
         } else {
-            // 🔥 桌面或手機直向模式：扁平長方形設計 + 5列佈局
-            chineseFontSize = '36px';  // 與英文卡片相同大小（60 * 0.6 = 36px）
-            chineseTextHeight = 40;  // 增加高度以容納更大的中文字
+            // 🔥 桌面動態響應式佈局（含按鈕空間）
+            console.log('🖥️ 使用桌面動態響應式佈局（含按鈕空間）');
 
-            // 🔥 大螢幕智能配置：一列最多5個，卡片尺寸350px × 60px，中文與英文同大小
-            if (itemCount <= 5) {
-                cols = Math.min(5, itemCount);  // 最多5列
-                frameWidth = Math.min(350, (width - 100) / cols);  // 最大寬度350px
-                totalUnitHeight = 100;  // 📝 單元總高度 = 60px（卡片）+ 40px（中文）
-                cardHeightInFrame = 60;  // 卡片高度60px
-            } else if (itemCount <= 10) {
-                cols = Math.min(5, Math.ceil(itemCount / 2));  // 最多5列
-                frameWidth = Math.min(350, (width - 120) / cols);  // 最大寬度350px
-                totalUnitHeight = 100;  // 📝 單元總高度 = 60px（卡片）+ 40px（中文）
-                cardHeightInFrame = 60;  // 卡片高度60px
-            } else if (itemCount <= 20) {
-                cols = Math.min(5, Math.ceil(itemCount / 4));  // 最多5列，4行
-                frameWidth = Math.min(350, (width - 140) / cols);  // 最大寬度350px
-                totalUnitHeight = 100;  // 📝 單元總高度 = 60px（卡片）+ 40px（中文）
-                cardHeightInFrame = 60;  // 卡片高度60px
+            // 🔥 第一步：定義按鈕區域和邊距
+            const topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
+            const bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
+            const sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 左右邊距（30-80px）
+
+            // 🔥 第二步：計算可用空間（扣除按鈕區域）
+            const availableWidth = width - sideMargin * 2;
+            const availableHeight = height - topButtonAreaHeight - bottomButtonAreaHeight;
+
+            // 🔥 第三步：計算螢幕寬高比
+            const aspectRatio = width / height;
+
+            // 🔥 第四步：定義最小卡片大小
+            const minCardWidth = 200;
+            const minCardHeight = 100;
+
+            // 🔥 第五步：計算間距
+            const horizontalSpacing = 20;
+            const verticalSpacing = 20;
+
+            // 🔥 第六步：計算最大可能的列數和行數
+            const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
+            const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
+
+            // 🔥 第七步：智能計算最佳列數（根據寬高比和匹配數）
+            let optimalCols;
+            if (aspectRatio > 2.0) {
+                // 超寬螢幕（21:9, 32:9）
+                optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
+            } else if (aspectRatio > 1.5) {
+                // 寬螢幕（16:9, 16:10）
+                optimalCols = Math.min(6, Math.ceil(Math.sqrt(itemCount * aspectRatio / 1.5)));
+            } else if (aspectRatio > 1.2) {
+                // 標準螢幕（4:3, 3:2）
+                optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
             } else {
-                cols = 5;  // 固定5列
-                frameWidth = Math.min(350, (width - 100) / cols);  // 最大寬度350px
-                totalUnitHeight = 100;  // 📝 單元總高度 = 60px（卡片）+ 40px（中文）
-                cardHeightInFrame = 60;  // 卡片高度60px
+                // 直向螢幕（9:16）
+                optimalCols = Math.min(3, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
             }
+
+            // 確保列數在合理範圍內
+            optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
+
+            // 🔥 第八步：計算行數
+            let optimalRows = Math.ceil(itemCount / optimalCols);
+
+            // 🔥 如果行數超過最大可能行數，增加列數
+            while (optimalRows > maxPossibleRows && optimalCols < itemCount) {
+                optimalCols++;
+                optimalRows = Math.ceil(itemCount / optimalCols);
+            }
+
+            cols = optimalCols;
+            const rows = optimalRows;
+
+            // 🔥 第九步：計算卡片大小（充分利用可用空間）
+            frameWidth = (availableWidth - horizontalSpacing * (cols + 1)) / cols;
+
+            // 🔥 計算單元總高度（包含中文文字）
+            const availableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
+
+            // 🔥 卡片高度：單元總高度的60%，中文文字：40%
+            cardHeightInFrame = availableHeightPerRow * 0.6;
+            chineseTextHeight = availableHeightPerRow * 0.4;
+
+            totalUnitHeight = cardHeightInFrame + chineseTextHeight;
+
+            console.log('🔥 桌面動態響應式佈局（含按鈕空間）:', {
+                resolution: `${width}×${height}`,
+                aspectRatio: aspectRatio.toFixed(2),
+                topButtonArea: topButtonAreaHeight.toFixed(1),
+                bottomButtonArea: bottomButtonAreaHeight.toFixed(1),
+                sideMargin: sideMargin.toFixed(1),
+                availableWidth: availableWidth.toFixed(1),
+                availableHeight: availableHeight.toFixed(1),
+                cardAreaPercentage: ((availableHeight / height) * 100).toFixed(1) + '%',
+                itemCount,
+                cols,
+                rows,
+                maxPossibleCols,
+                maxPossibleRows,
+                frameWidth: frameWidth.toFixed(1),
+                cardHeightInFrame: cardHeightInFrame.toFixed(1),
+                chineseTextHeight: chineseTextHeight.toFixed(1),
+                totalUnitHeight: totalUnitHeight.toFixed(1),
+                cardRatio: (frameWidth / cardHeightInFrame).toFixed(2) + ':1',
+                screenType: aspectRatio > 2.0 ? '超寬螢幕' : aspectRatio > 1.5 ? '寬螢幕' : aspectRatio > 1.2 ? '標準螢幕' : '直向螢幕'
+            });
         }
 
         console.log('📐 混合佈局參數:', { itemCount, cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, isCompactMode });
@@ -1628,10 +1693,11 @@ class GameScene extends Phaser.Scene {
         // 📝 緊湊模式已經在上面計算過，桌面模式需要在這裡計算
         let chineseFontSizesArray;
         if (!isCompactMode) {
-            console.log('🔍 桌面模式：預先計算中文字體大小...');
-            chineseFontSizesArray = currentPagePairs.map(pair => {
-                // 計算初始字體大小
-                let fontSize = Math.max(24, Math.min(48, cardHeightInFrame * 0.6));
+            console.log('🔍 桌面模式：智能計算中文字體大小...');
+            chineseFontSizes = currentPagePairs.map(pair => {
+                // 🔥 計算初始字體大小（卡片高度的60%）
+                // 範圍：18px - 72px（允許更大的字體）
+                let fontSize = Math.max(18, Math.min(72, cardHeightInFrame * 0.6));
 
                 // 創建臨時文字對象來測量寬度
                 const tempText = this.add.text(0, 0, pair.answer, {
@@ -1652,6 +1718,20 @@ class GameScene extends Phaser.Scene {
 
                 return fontSize;
             });
+
+            // 使用最大字體大小
+            const maxChineseFontSize = Math.max(...chineseFontSizes);
+            const minChineseFontSize = Math.min(...chineseFontSizes);
+            const avgChineseFontSize = (chineseFontSizes.reduce((a, b) => a + b, 0) / chineseFontSizes.length).toFixed(1);
+
+            console.log('📊 桌面模式中文字體大小範圍:', {
+                min: minChineseFontSize,
+                max: maxChineseFontSize,
+                average: avgChineseFontSize,
+                allSizes: chineseFontSizes
+            });
+
+            chineseFontSizesArray = chineseFontSizes;
         } else {
             // 緊湊模式使用之前計算的字體大小
             chineseFontSizesArray = chineseFontSizes;
