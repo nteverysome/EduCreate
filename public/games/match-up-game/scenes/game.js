@@ -2010,15 +2010,15 @@ class GameScene extends Phaser.Scene {
                     correctCount++;
                     console.log('✅ 配對正確:', leftCard.getData('text'), '-', rightCard.getData('text'));
 
-                    // 🔥 顯示正確答案，內框呈白色，標記勾勾
-                    this.showCorrectAnswer(rightCard, correctPair.chinese);
+                    // 🔥 顯示正確的英文單字，內框呈白色，標記勾勾
+                    this.showCorrectAnswer(rightCard, correctPair.english);
                 } else {
                     // 配對錯誤
                     incorrectCount++;
                     console.log('❌ 配對錯誤:', leftCard.getData('text'), '-', rightCard.getData('text'));
 
-                    // 🔥 顯示正確答案，內框呈灰色，標記 X
-                    this.showIncorrectAnswer(rightCard, correctPair.chinese);
+                    // 🔥 顯示正確的英文單字，內框呈灰色，標記 X
+                    this.showIncorrectAnswer(rightCard, correctPair.english);
                 }
             } else {
                 // 未配對
