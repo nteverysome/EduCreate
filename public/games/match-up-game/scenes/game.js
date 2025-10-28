@@ -1479,9 +1479,9 @@ class GameScene extends Phaser.Scene {
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
         const verticalSpacing = 0;  // 固定為0，無垂直間距
 
-        // 🔥 計算頂部偏移，確保佈局垂直居中或從頂部開始（手機版增加30px）
+        // 🔥 計算頂部偏移，確保佈局垂直居中或從頂部開始（手機版減少10px）
         const totalContentHeight = rows * (frameHeight + chineseTextHeight);
-        const topOffset = isCompactMode ? 40 : Math.max(10, (height - totalContentHeight) / 2);
+        const topOffset = isCompactMode ? 30 : Math.max(10, (height - totalContentHeight) / 2);
 
         console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, chineseTextHeight, rows, totalContentHeight, topOffset });
 
