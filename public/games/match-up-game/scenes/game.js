@@ -1687,14 +1687,51 @@ class GameScene extends Phaser.Scene {
                             newSquareSize: newSquareSize.toFixed(1)
                         });
                     } else {
-                        // 使用最小尺寸
-                        squareSize = minSquareSize;
+                        // 無法通過增加列數改善，智能縮小卡片
                         cols = optimalCols;
+                        const rows = Math.ceil(itemCount / cols);
+
+                        // 計算實際需要的卡片尺寸以適應可用高度
+                        const actualAvailableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
+                        const actualSquareSize = actualAvailableHeightPerRow / 1.4;
+
+                        // 使用實際計算的尺寸，即使小於最小尺寸
+                        squareSize = actualSquareSize;
+
+                        console.log('📉 智能縮小卡片以適應可用高度:', {
+                            cols,
+                            rows,
+                            minSquareSize,
+                            actualSquareSize: actualSquareSize.toFixed(1),
+                            reason: '無法增加列數，縮小卡片以避免超出邊界'
+                        });
                     }
                 } else if (squareSize < minSquareSize) {
-                    // 使用最小尺寸
-                    squareSize = minSquareSize;
+                    // 卡片小於最小尺寸，但已經是最大列數
                     cols = optimalCols;
+                    const rows = Math.ceil(itemCount / cols);
+
+                    // 檢查使用最小尺寸是否會超出邊界
+                    const totalHeightWithMinSize = rows * (minSquareSize * 1.4) + verticalSpacing * (rows + 1);
+
+                    if (totalHeightWithMinSize > availableHeight) {
+                        // 會超出邊界，智能縮小卡片
+                        const actualAvailableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
+                        squareSize = actualAvailableHeightPerRow / 1.4;
+
+                        console.log('📉 智能縮小卡片以適應可用高度:', {
+                            cols,
+                            rows,
+                            minSquareSize,
+                            actualSquareSize: squareSize.toFixed(1),
+                            totalHeightWithMinSize: totalHeightWithMinSize.toFixed(1),
+                            availableHeight: availableHeight.toFixed(1),
+                            reason: '使用最小尺寸會超出邊界'
+                        });
+                    } else {
+                        // 不會超出邊界，使用最小尺寸
+                        squareSize = minSquareSize;
+                    }
                 } else {
                     cols = optimalCols;
                 }
