@@ -1447,42 +1447,38 @@ class GameScene extends Phaser.Scene {
                 totalUnitHeight: cardHeightInFrame + chineseTextHeight
             });
         } else {
-            // 🔥 桌面或手機直向模式：激進縮小方案（減少30-35%）
+            // 🔥 桌面或手機直向模式：激進縮小方案 + 8列佈局
             chineseFontSize = '18px';  // 使用更小的字體
             chineseTextHeight = 18;  // 18px字體對應的高度
 
             if (itemCount <= 5) {
-                cols = Math.min(3, itemCount);
-                frameWidth = Math.min(200, (width - 100) / cols);  // 從280px減少到200px
-                frameHeight = 58;  // 從140px減少到58px
-                cardHeightInFrame = 40;  // 從60px減少到40px
+                cols = Math.min(8, itemCount);  // 改為最多8列
+                frameWidth = Math.min(200, (width - 100) / cols);
+                frameHeight = 58;
+                cardHeightInFrame = 40;
             } else if (itemCount <= 10) {
-                cols = Math.min(4, Math.ceil(itemCount / 2));
-                frameWidth = Math.min(160, (width - 120) / cols);  // 從240px減少到160px
-                frameHeight = 53;  // 從130px減少到53px
-                cardHeightInFrame = 35;  // 從55px減少到35px
+                cols = Math.min(8, Math.ceil(itemCount / 2));  // 改為最多8列
+                frameWidth = Math.min(160, (width - 120) / cols);
+                frameHeight = 53;
+                cardHeightInFrame = 35;
             } else if (itemCount <= 20) {
-                cols = Math.min(6, Math.ceil(itemCount / 3));
-                frameWidth = Math.min(120, (width - 140) / cols);  // 從180px減少到120px
-                frameHeight = 46;  // 從110px減少到46px
-                cardHeightInFrame = 30;  // 從45px減少到30px
+                cols = Math.min(8, Math.ceil(itemCount / 3));  // 改為最多8列
+                frameWidth = Math.min(120, (width - 140) / cols);
+                frameHeight = 46;
+                cardHeightInFrame = 30;
             } else {
-                cols = 4;
-                frameWidth = Math.min(180, (width - 100) / cols);  // 從260px減少到180px
-                frameHeight = 56;  // 從135px減少到56px
-                cardHeightInFrame = 38;  // 從58px減少到38px
+                cols = 8;  // 改為固定8列
+                frameWidth = Math.min(180, (width - 100) / cols);
+                frameHeight = 56;
+                cardHeightInFrame = 38;
             }
         }
 
         console.log('📐 混合佈局參數:', { itemCount, cols, frameWidth, frameHeight, cardHeightInFrame, chineseFontSize, isCompactMode });
 
-        // 計算行數
-        const rows = Math.ceil(itemCount / cols);
-
-        // 🔥 計算間距（手機橫向模式使用更小的間距）
-        const minVerticalSpacing = isCompactMode ? 2 : 5;
+        // 🔥 計算間距（垂直間距設為0，無間距）
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
-        const verticalSpacing = Math.max(minVerticalSpacing, (height - (cardHeightInFrame + chineseTextHeight) * rows) / (rows + 1));
+        const verticalSpacing = 0;  // 固定為0，無垂直間距
 
         console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, chineseTextHeight });
 
@@ -1493,7 +1489,8 @@ class GameScene extends Phaser.Scene {
             const row = Math.floor(i / cols);
 
             const frameX = horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
-            const frameY = verticalSpacing + row * (frameHeight + chineseTextHeight + verticalSpacing) + frameHeight / 2 + 50;
+            // 垂直間距為0，單元緊密排列
+            const frameY = row * (frameHeight + chineseTextHeight) + frameHeight / 2 + 50;
 
             // 🔥 創建中文文字容器（包含白色框）
             const frameContainer = this.add.container(frameX, frameY);
