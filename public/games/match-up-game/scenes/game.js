@@ -1382,35 +1382,41 @@ class GameScene extends Phaser.Scene {
         console.log('✅ 混合網格佈局創建完成');
     }
 
-    // 🔥 創建混合佈局（所有卡片混合）
+    // 🔥 創建混合佈局（根據 Wordwall 設計）
     createMixedLayout(currentPagePairs, width, height, cardWidth, cardHeight) {
-        console.log('🎮 創建混合佈局');
+        console.log('🎮 創建混合佈局（Wordwall 風格）');
 
-        // 創建所有卡片數據
-        const allCards = [];
+        const itemCount = currentPagePairs.length;
 
-        // 添加英文卡片
-        currentPagePairs.forEach((pair) => {
-            allCards.push({
-                type: 'question',
-                pair: pair,
-                text: pair.question,
-                pairId: pair.id
-            });
-        });
+        // 🔥 根據匹配數決定列數和卡片尺寸
+        let cols, dynamicCardWidth, dynamicCardHeight;
 
-        // 添加中文卡片
-        currentPagePairs.forEach((pair) => {
-            allCards.push({
-                type: 'answer',
-                pair: pair,
-                text: pair.answer,
-                pairId: pair.id
-            });
-        });
+        if (itemCount <= 5) {
+            // 3-5個：2-3列
+            cols = Math.min(3, itemCount);
+            dynamicCardWidth = Math.min(300, (width - 100) / cols);
+            dynamicCardHeight = 80;
+        } else if (itemCount <= 10) {
+            // 6-10個：3-4列
+            cols = Math.min(4, Math.ceil(itemCount / 2));
+            dynamicCardWidth = Math.min(250, (width - 120) / cols);
+            dynamicCardHeight = 70;
+        } else if (itemCount <= 20) {
+            // 11-20個：5-6列
+            cols = Math.min(6, Math.ceil(itemCount / 3));
+            dynamicCardWidth = Math.min(200, (width - 140) / cols);
+            dynamicCardHeight = 60;
+        } else {
+            // 21-30個：使用分頁，每頁顯示較少
+            cols = 4;
+            dynamicCardWidth = Math.min(280, (width - 100) / cols);
+            dynamicCardHeight = 75;
+        }
 
-        // 🔥 根據隨機模式排列卡片
-        let shuffledCards;
+        console.log('📐 混合佈局參數:', { itemCount, cols, dynamicCardWidth, dynamicCardHeight });
+
+        // 🔥 隨機排列配對（根據隨機模式）
+        let shuffledPairs;
         if (this.random === 'same') {
             // 固定隨機模式
             const urlParams = new URLSearchParams(window.location.search);
@@ -1418,38 +1424,69 @@ class GameScene extends Phaser.Scene {
             const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
             const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
-            shuffledCards = rng.shuffle(allCards);
+            shuffledPairs = rng.shuffle([...currentPagePairs]);
             console.log('🎲 混合佈局使用固定隨機模式，種子:', seed);
         } else {
             // 每次不同模式
-            shuffledCards = Phaser.Utils.Array.Shuffle(allCards);
+            shuffledPairs = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
             console.log('🎲 混合佈局使用隨機排列模式');
         }
 
-        // 計算網格佈局
-        const cols = 4;  // 每行 4 個卡片
-        const rows = Math.ceil(shuffledCards.length / cols);
+        // 計算行數
+        const rows = Math.ceil(itemCount / cols);
 
-        // 計算卡片間距
-        const horizontalSpacing = (width - cardWidth * cols) / (cols + 1);
-        const verticalSpacing = (height - cardHeight * rows) / (rows + 1);
+        // 🔥 計算間距（需要為中文文字預留空間）
+        const textHeight = 40;  // 中文文字高度
+        const textSpacing = 10;  // 卡片與文字之間的間距
+        const cellHeight = dynamicCardHeight + textHeight + textSpacing;  // 每個單元格的總高度
 
-        // 🔥 創建卡片（按照順序出現動畫）
-        shuffledCards.forEach((cardData, i) => {
+        const horizontalSpacing = (width - dynamicCardWidth * cols) / (cols + 1);
+        const verticalSpacing = Math.max(20, (height - cellHeight * rows) / (rows + 1));
+
+        console.log('📐 混合佈局間距:', { horizontalSpacing, verticalSpacing, cellHeight });
+
+        // 🔥 創建英文卡片和中文文字（中文在卡片下方）
+        shuffledPairs.forEach((pair, i) => {
             const col = i % cols;
             const row = Math.floor(i / cols);
-            const x = horizontalSpacing + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = verticalSpacing + row * (cardHeight + verticalSpacing) + cardHeight / 2 + height * 0.1;
 
-            const animationDelay = i * 100;  // 🔥 每個卡片延遲 100ms
+            // 英文卡片位置
+            const cardX = horizontalSpacing + col * (dynamicCardWidth + horizontalSpacing) + dynamicCardWidth / 2;
+            const cardY = verticalSpacing + row * (cellHeight + verticalSpacing) + dynamicCardHeight / 2 + 50;
 
-            if (cardData.type === 'question') {
-                const card = this.createLeftCard(x, y, cardWidth, cardHeight, cardData.text, cardData.pairId, animationDelay);
-                this.leftCards.push(card);
-            } else {
-                const card = this.createRightCard(x, y, cardWidth, cardHeight, cardData.text, cardData.pairId);
-                this.rightCards.push(card);
-            }
+            const animationDelay = i * 100;  // 每個卡片延遲 100ms
+
+            // 創建英文卡片
+            const card = this.createLeftCard(cardX, cardY, dynamicCardWidth, dynamicCardHeight, pair.question, pair.id, animationDelay);
+            this.leftCards.push(card);
+
+            // 🔥 創建中文文字（在卡片下方）
+            const chineseY = cardY + dynamicCardHeight / 2 + textSpacing + textHeight / 2;
+            const chineseText = this.add.text(cardX, chineseY, '—', {  // 初始顯示橫線
+                fontSize: '28px',
+                color: '#000000',
+                fontFamily: 'Arial',
+                fontStyle: 'bold'
+            });
+            chineseText.setOrigin(0.5);
+            chineseText.setDepth(10);
+
+            // 🔥 將中文文字與配對 ID 關聯
+            chineseText.setData('pairId', pair.id);
+            chineseText.setData('correctChinese', pair.answer);  // 保存正確的中文答案
+
+            // 保存中文文字對象到 rightCards（用於配對檢查）
+            const chineseContainer = this.add.container(cardX, chineseY);
+            chineseContainer.add(chineseText);
+            chineseContainer.setData('text', pair.answer);
+            chineseContainer.setData('pairId', pair.id);
+            chineseContainer.setData('textObject', chineseText);  // 保存文字對象引用
+            this.rightCards.push(chineseContainer);
+        });
+
+        console.log('✅ 混合佈局創建完成:', {
+            leftCards: this.leftCards.length,
+            rightCards: this.rightCards.length
         });
     }
 
@@ -1854,26 +1891,56 @@ class GameScene extends Phaser.Scene {
         rightCard.setData('isMatched', true);
         rightCard.setData('matchedWith', leftCard);  // 記錄配對的左側卡片
 
-        // 左側卡片移動到右側空白框的位置（完全覆蓋）
-        const targetX = rightCard.x;
-        const targetY = rightCard.y;
-
-        this.tweens.add({
-            targets: leftCard,
-            x: targetX,
-            y: targetY,
-            scaleX: 1,
-            scaleY: 1,
-            duration: 300,
-            ease: 'Back.easeOut',
-            onComplete: () => {
-                leftCard.setDepth(10);  // 提升到空白框上方
-                leftCard.getData('background').setAlpha(1);
-
-                // 🔥 檢查是否所有卡片都已配對，如果是則顯示「提交答案」按鈕
-                this.checkAllCardsMatched();
+        // 🔥 混合模式：更新中文文字
+        if (this.layout === 'mixed') {
+            // 獲取中文文字對象
+            const chineseTextObject = rightCard.getData('textObject');
+            if (chineseTextObject) {
+                // 更新中文文字為拖曳的英文卡片的中文翻譯
+                const leftCardText = leftCard.getData('text');
+                chineseTextObject.setText(leftCardText);
+                console.log('🔥 混合模式：更新中文文字', leftCardText);
             }
-        });
+
+            // 左側卡片返回原位（混合模式不移動卡片）
+            this.tweens.add({
+                targets: leftCard,
+                x: leftCard.getData('originalX'),
+                y: leftCard.getData('originalY'),
+                scaleX: 1,
+                scaleY: 1,
+                duration: 300,
+                ease: 'Back.easeOut',
+                onComplete: () => {
+                    leftCard.setDepth(5);
+                    leftCard.getData('background').setAlpha(1);
+
+                    // 🔥 檢查是否所有卡片都已配對
+                    this.checkAllCardsMatched();
+                }
+            });
+        } else {
+            // 分離模式：左側卡片移動到右側空白框的位置（完全覆蓋）
+            const targetX = rightCard.x;
+            const targetY = rightCard.y;
+
+            this.tweens.add({
+                targets: leftCard,
+                x: targetX,
+                y: targetY,
+                scaleX: 1,
+                scaleY: 1,
+                duration: 300,
+                ease: 'Back.easeOut',
+                onComplete: () => {
+                    leftCard.setDepth(10);  // 提升到空白框上方
+                    leftCard.getData('background').setAlpha(1);
+
+                    // 🔥 檢查是否所有卡片都已配對，如果是則顯示「提交答案」按鈕
+                    this.checkAllCardsMatched();
+                }
+            });
+        }
     }
 
     unmatchCard(leftCard) {
@@ -1890,8 +1957,17 @@ class GameScene extends Phaser.Scene {
             // 從已配對集合中移除
             this.matchedPairs.delete(leftCard.getData('pairId'));
 
-            // 顯示右側空白框（如果之前被隱藏）
-            rightCard.getData('background').setVisible(true);
+            // 🔥 混合模式：恢復橫線
+            if (this.layout === 'mixed') {
+                const chineseTextObject = rightCard.getData('textObject');
+                if (chineseTextObject) {
+                    chineseTextObject.setText('—');  // 恢復橫線
+                    console.log('🔥 混合模式：恢復橫線');
+                }
+            } else {
+                // 分離模式：顯示右側空白框（如果之前被隱藏）
+                rightCard.getData('background').setVisible(true);
+            }
         }
     }
 
