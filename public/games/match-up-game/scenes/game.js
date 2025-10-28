@@ -1657,7 +1657,7 @@ class GameScene extends Phaser.Scene {
         background.setStrokeStyle(2, 0x333333);
 
         // 🔥 如果有圖片，創建圖片在上，文字在下的佈局
-        if (imageUrl) {
+        if (imageUrl && imageUrl.trim() !== '') {
             // 圖片區域：佔據卡片上方 60%
             const imageHeight = height * 0.6;
             const imageY = -height / 2 + imageHeight / 2;
@@ -1673,12 +1673,21 @@ class GameScene extends Phaser.Scene {
             if (!this.textures.exists(imageKey)) {
                 // 載入圖片
                 this.load.image(imageKey, imageUrl);
+
+                // 圖片載入完成
                 this.load.once('complete', () => {
-                    // 圖片載入完成後創建
-                    const cardImage = this.add.image(0, imageY, imageKey);
-                    cardImage.setDisplaySize(width - 4, imageHeight - 4);  // 留 2px 邊距
-                    container.add(cardImage);
+                    if (this.textures.exists(imageKey)) {
+                        const cardImage = this.add.image(0, imageY, imageKey);
+                        cardImage.setDisplaySize(width - 4, imageHeight - 4);  // 留 2px 邊距
+                        container.add(cardImage);
+                    }
                 });
+
+                // 圖片載入失敗
+                this.load.once('loaderror', (file) => {
+                    console.warn(`⚠️ 圖片載入失敗: ${file.key}`, imageUrl);
+                });
+
                 this.load.start();
             } else {
                 // 圖片已載入，直接創建
