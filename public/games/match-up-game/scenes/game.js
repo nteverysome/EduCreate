@@ -1574,6 +1574,16 @@ class GameScene extends Phaser.Scene {
             // 🔥 桌面動態響應式佈局（含按鈕空間）
             console.log('🖥️ 使用桌面動態響應式佈局（含按鈕空間）');
 
+            // 🔥 第零步：檢測是否有圖片
+            const hasImages = currentPagePairs.some(pair =>
+                pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId
+            );
+
+            console.log('🔍 圖片檢測:', {
+                hasImages,
+                mode: hasImages ? '🟦 正方形模式' : '🟨 長方形模式'
+            });
+
             // 🔥 第一步：定義按鈕區域和邊距
             const topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
             const bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
@@ -1586,82 +1596,163 @@ class GameScene extends Phaser.Scene {
             // 🔥 第三步：計算螢幕寬高比
             const aspectRatio = width / height;
 
-            // 🔥 第四步：定義最小卡片大小
-            const minCardWidth = 200;
-            const minCardHeight = 100;
-
-            // 🔥 第五步：計算間距
+            // 🔥 第四步：計算間距
             const horizontalSpacing = 20;
             const verticalSpacing = 20;
 
-            // 🔥 第六步：計算最大可能的列數和行數
-            const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
-            const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
+            if (hasImages) {
+                // 🟦 正方形模式（有圖片）
+                console.log('🟦 使用正方形卡片模式');
 
-            // 🔥 第七步：智能計算最佳列數（根據寬高比和匹配數）
-            let optimalCols;
-            if (aspectRatio > 2.0) {
-                // 超寬螢幕（21:9, 32:9）
-                optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
-            } else if (aspectRatio > 1.5) {
-                // 寬螢幕（16:9, 16:10）
-                optimalCols = Math.min(6, Math.ceil(Math.sqrt(itemCount * aspectRatio / 1.5)));
-            } else if (aspectRatio > 1.2) {
-                // 標準螢幕（4:3, 3:2）
-                optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
+                // 🔥 第五步：定義最小正方形卡片大小
+                const minSquareSize = 150;  // 最小正方形尺寸150×150
+
+                // 🔥 第六步：估算單元總高度（正方形卡片 + 中文文字）
+                // 假設中文文字高度為卡片高度的40%
+                const estimatedUnitHeight = availableHeight / Math.ceil(Math.sqrt(itemCount));
+                const estimatedSquareSize = estimatedUnitHeight * 0.6;  // 卡片佔60%
+
+                // 🔥 第七步：計算最大可能的列數
+                const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (Math.max(minSquareSize, estimatedSquareSize) + horizontalSpacing));
+
+                // 🔥 第八步：智能計算最佳列數（根據寬高比和匹配數）
+                let optimalCols;
+                if (aspectRatio > 2.0) {
+                    // 超寬螢幕（21:9, 32:9）
+                    optimalCols = Math.min(maxPossibleCols, Math.ceil(Math.sqrt(itemCount * 2)));
+                } else if (aspectRatio > 1.5) {
+                    // 寬螢幕（16:9, 16:10）
+                    optimalCols = Math.min(maxPossibleCols, Math.ceil(Math.sqrt(itemCount * 1.5)));
+                } else if (aspectRatio > 1.2) {
+                    // 標準螢幕（4:3, 3:2）
+                    optimalCols = Math.min(maxPossibleCols, Math.ceil(Math.sqrt(itemCount)));
+                } else {
+                    // 直向螢幕（9:16）
+                    optimalCols = Math.min(maxPossibleCols, Math.ceil(Math.sqrt(itemCount * 0.7)));
+                }
+
+                // 確保列數在合理範圍內
+                optimalCols = Math.max(1, Math.min(optimalCols, itemCount));
+
+                // 🔥 第九步：計算行數
+                const optimalRows = Math.ceil(itemCount / optimalCols);
+
+                // 🔥 第十步：計算正方形卡片尺寸
+                // 方法1：基於高度
+                const squareSizeByHeight = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows * 0.6;
+
+                // 方法2：基於寬度
+                const squareSizeByWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
+
+                // 取較小值，確保卡片不會超出邊界，且不小於最小尺寸
+                const squareSize = Math.max(minSquareSize, Math.min(squareSizeByHeight, squareSizeByWidth));
+
+                // 🔥 第十一步：設置卡片尺寸（正方形）
+                frameWidth = squareSize;
+                cardHeightInFrame = squareSize;
+                chineseTextHeight = squareSize * 0.4;  // 中文文字高度為卡片高度的40%
+                totalUnitHeight = cardHeightInFrame + chineseTextHeight;
+
+                cols = optimalCols;
+                const rows = optimalRows;
+
+                console.log('🟦 正方形卡片佈局:', {
+                    resolution: `${width}×${height}`,
+                    aspectRatio: aspectRatio.toFixed(2),
+                    topButtonArea: topButtonAreaHeight.toFixed(1),
+                    bottomButtonArea: bottomButtonAreaHeight.toFixed(1),
+                    sideMargin: sideMargin.toFixed(1),
+                    availableWidth: availableWidth.toFixed(1),
+                    availableHeight: availableHeight.toFixed(1),
+                    cardAreaPercentage: ((availableHeight / height) * 100).toFixed(1) + '%',
+                    itemCount,
+                    cols,
+                    rows,
+                    squareSize: squareSize.toFixed(1),
+                    frameWidth: frameWidth.toFixed(1),
+                    cardHeightInFrame: cardHeightInFrame.toFixed(1),
+                    chineseTextHeight: chineseTextHeight.toFixed(1),
+                    totalUnitHeight: totalUnitHeight.toFixed(1),
+                    cardRatio: '1:1 (正方形)',
+                    screenType: aspectRatio > 2.0 ? '超寬螢幕' : aspectRatio > 1.5 ? '寬螢幕' : aspectRatio > 1.2 ? '標準螢幕' : '直向螢幕'
+                });
             } else {
-                // 直向螢幕（9:16）
-                optimalCols = Math.min(3, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
+                // 🟨 長方形模式（無圖片）
+                console.log('🟨 使用長方形卡片模式');
+
+                // 🔥 第五步：定義最小卡片大小
+                const minCardWidth = 200;
+                const minCardHeight = 100;
+
+                // 🔥 第六步：計算最大可能的列數和行數
+                const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
+                const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
+
+                // 🔥 第七步：智能計算最佳列數（根據寬高比和匹配數）
+                let optimalCols;
+                if (aspectRatio > 2.0) {
+                    // 超寬螢幕（21:9, 32:9）
+                    optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
+                } else if (aspectRatio > 1.5) {
+                    // 寬螢幕（16:9, 16:10）
+                    optimalCols = Math.min(6, Math.ceil(Math.sqrt(itemCount * aspectRatio / 1.5)));
+                } else if (aspectRatio > 1.2) {
+                    // 標準螢幕（4:3, 3:2）
+                    optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
+                } else {
+                    // 直向螢幕（9:16）
+                    optimalCols = Math.min(3, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
+                }
+
+                // 確保列數在合理範圍內
+                optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
+
+                // 🔥 第八步：計算行數
+                let optimalRows = Math.ceil(itemCount / optimalCols);
+
+                // 🔥 如果行數超過最大可能行數，增加列數
+                while (optimalRows > maxPossibleRows && optimalCols < itemCount) {
+                    optimalCols++;
+                    optimalRows = Math.ceil(itemCount / optimalCols);
+                }
+
+                cols = optimalCols;
+                const rows = optimalRows;
+
+                // 🔥 第九步：計算卡片大小（充分利用可用空間）
+                frameWidth = (availableWidth - horizontalSpacing * (cols + 1)) / cols;
+
+                // 🔥 計算單元總高度（包含中文文字）
+                const availableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
+
+                // 🔥 卡片高度：單元總高度的60%，中文文字：40%
+                cardHeightInFrame = availableHeightPerRow * 0.6;
+                chineseTextHeight = availableHeightPerRow * 0.4;
+
+                totalUnitHeight = cardHeightInFrame + chineseTextHeight;
+
+                console.log('🟨 長方形卡片佈局:', {
+                    resolution: `${width}×${height}`,
+                    aspectRatio: aspectRatio.toFixed(2),
+                    topButtonArea: topButtonAreaHeight.toFixed(1),
+                    bottomButtonArea: bottomButtonAreaHeight.toFixed(1),
+                    sideMargin: sideMargin.toFixed(1),
+                    availableWidth: availableWidth.toFixed(1),
+                    availableHeight: availableHeight.toFixed(1),
+                    cardAreaPercentage: ((availableHeight / height) * 100).toFixed(1) + '%',
+                    itemCount,
+                    cols,
+                    rows,
+                    maxPossibleCols,
+                    maxPossibleRows,
+                    frameWidth: frameWidth.toFixed(1),
+                    cardHeightInFrame: cardHeightInFrame.toFixed(1),
+                    chineseTextHeight: chineseTextHeight.toFixed(1),
+                    totalUnitHeight: totalUnitHeight.toFixed(1),
+                    cardRatio: (frameWidth / cardHeightInFrame).toFixed(2) + ':1',
+                    screenType: aspectRatio > 2.0 ? '超寬螢幕' : aspectRatio > 1.5 ? '寬螢幕' : aspectRatio > 1.2 ? '標準螢幕' : '直向螢幕'
+                });
             }
-
-            // 確保列數在合理範圍內
-            optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
-
-            // 🔥 第八步：計算行數
-            let optimalRows = Math.ceil(itemCount / optimalCols);
-
-            // 🔥 如果行數超過最大可能行數，增加列數
-            while (optimalRows > maxPossibleRows && optimalCols < itemCount) {
-                optimalCols++;
-                optimalRows = Math.ceil(itemCount / optimalCols);
-            }
-
-            cols = optimalCols;
-            const rows = optimalRows;
-
-            // 🔥 第九步：計算卡片大小（充分利用可用空間）
-            frameWidth = (availableWidth - horizontalSpacing * (cols + 1)) / cols;
-
-            // 🔥 計算單元總高度（包含中文文字）
-            const availableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
-
-            // 🔥 卡片高度：單元總高度的60%，中文文字：40%
-            cardHeightInFrame = availableHeightPerRow * 0.6;
-            chineseTextHeight = availableHeightPerRow * 0.4;
-
-            totalUnitHeight = cardHeightInFrame + chineseTextHeight;
-
-            console.log('🔥 桌面動態響應式佈局（含按鈕空間）:', {
-                resolution: `${width}×${height}`,
-                aspectRatio: aspectRatio.toFixed(2),
-                topButtonArea: topButtonAreaHeight.toFixed(1),
-                bottomButtonArea: bottomButtonAreaHeight.toFixed(1),
-                sideMargin: sideMargin.toFixed(1),
-                availableWidth: availableWidth.toFixed(1),
-                availableHeight: availableHeight.toFixed(1),
-                cardAreaPercentage: ((availableHeight / height) * 100).toFixed(1) + '%',
-                itemCount,
-                cols,
-                rows,
-                maxPossibleCols,
-                maxPossibleRows,
-                frameWidth: frameWidth.toFixed(1),
-                cardHeightInFrame: cardHeightInFrame.toFixed(1),
-                chineseTextHeight: chineseTextHeight.toFixed(1),
-                totalUnitHeight: totalUnitHeight.toFixed(1),
-                cardRatio: (frameWidth / cardHeightInFrame).toFixed(2) + ':1',
-                screenType: aspectRatio > 2.0 ? '超寬螢幕' : aspectRatio > 1.5 ? '寬螢幕' : aspectRatio > 1.2 ? '標準螢幕' : '直向螢幕'
-            });
         }
 
         console.log('📐 混合佈局參數:', { itemCount, cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, isCompactMode });
