@@ -911,12 +911,13 @@ class GameScene extends Phaser.Scene {
                 cardHeight = Math.max(25, Math.min(maxCardHeight, 52));
             }
         } else {
+            // 🔥 大容器：使用更大的卡片尺寸
             if (isSmallCardSize) {
-                cardWidth = Math.max(90, Math.min(150, width * 0.13));  // 🔥 6-10 個和 16-20 個：更小的寬度
-                cardHeight = Math.max(25, Math.min(maxCardHeight, 52));  // 🔥 6-10 個和 16-20 個：更小的高度
+                cardWidth = Math.max(110, Math.min(180, width * 0.15));  // 🔥 6-10 個和 16-20 個：更大的寬度
+                cardHeight = Math.max(30, Math.min(maxCardHeight, 62));  // 🔥 6-10 個和 16-20 個：更大的高度
             } else {
-                cardWidth = Math.max(100, Math.min(170, width * 0.15));
-                cardHeight = Math.max(30, Math.min(maxCardHeight, 60));
+                cardWidth = Math.max(120, Math.min(200, width * 0.17));  // 🔥 11-15 個：更大的寬度
+                cardHeight = Math.max(35, Math.min(maxCardHeight, 70));  // 🔥 11-15 個：更大的高度
             }
         }
 
