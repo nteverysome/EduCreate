@@ -2671,15 +2671,6 @@ class GameScene extends Phaser.Scene {
             modal.add(timeValue);
         }
 
-        // 排名提示（暫時固定為 1st）
-        const rankText = this.add.text(0, -modalHeight / 2 + 200, "YOU'RE 1ST ON THE LEADERBOARD", {
-            fontSize: '16px',
-            color: '#cccccc',
-            fontFamily: 'Arial'
-        });
-        rankText.setOrigin(0.5);
-        modal.add(rankText);
-
         // 按鈕區域
         const buttonY = modalHeight / 2 - 120;
         const buttonSpacing = 60;
