@@ -1504,10 +1504,32 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 🔥 中文文字（在白色框下方，無間距）
+            // 🔥 中文文字（在白色框下方，無間距）- 智能調整字體大小
             const chineseY = cardHeightInFrame / 2;  // 緊貼白色框底部，無間距
+
+            // 🔥 智能計算中文字體大小（與英文卡片相同邏輯）
+            let chineseActualFontSize = Math.max(12, Math.min(24, chineseTextHeight * 0.8));
+
+            // 🔥 創建臨時文字對象來測量寬度
+            const tempChineseText = this.add.text(0, 0, pair.answer, {
+                fontSize: `${chineseActualFontSize}px`,
+                fontFamily: 'Arial',
+                fontStyle: 'bold'
+            });
+
+            // 🔥 如果文字寬度超過框寬度的 85%，縮小字體
+            const maxChineseTextWidth = (frameWidth - 10) * 0.85;  // 留 15% 的邊距
+            while (tempChineseText.width > maxChineseTextWidth && chineseActualFontSize > 10) {
+                chineseActualFontSize -= 1;
+                tempChineseText.setFontSize(chineseActualFontSize);
+            }
+
+            // 銷毀臨時文字對象
+            tempChineseText.destroy();
+
+            // 🔥 創建最終的中文文字
             const chineseText = this.add.text(0, chineseY, pair.answer, {
-                fontSize: chineseFontSize,  // 使用動態字體大小
+                fontSize: `${chineseActualFontSize}px`,  // 使用智能調整後的字體大小
                 color: '#000000',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
