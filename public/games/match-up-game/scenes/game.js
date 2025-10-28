@@ -48,35 +48,67 @@ class GameScene extends Phaser.Scene {
 
     // 從 API 載入詞彙數據
     async loadVocabularyFromAPI() {
+        // 📝 調試訊息：記錄函數開始
+        console.log('🔄 開始載入詞彙數據');
+
         try {
             // 從 URL 參數獲取 activityId
             const urlParams = new URLSearchParams(window.location.search);
             const activityId = urlParams.get('activityId');
             const customVocabulary = urlParams.get('customVocabulary');
 
-            console.log('🔍 Match-up 遊戲 - URL 參數:', { activityId, customVocabulary });
+            console.log('🔍 Match-up 遊戲 - URL 參數:', {
+                activityId,
+                customVocabulary,
+                fullURL: window.location.href
+            });
 
             // 🔥 修復：必須提供 activityId，不使用默認數據
             if (!activityId) {
-                throw new Error('❌ 缺少 activityId 參數，無法載入詞彙數據');
+                const error = new Error('❌ 缺少 activityId 參數，無法載入詞彙數據');
+                console.error('❌ 參數驗證失敗:', error.message);
+                throw error;
             }
 
             if (customVocabulary !== 'true') {
-                throw new Error('❌ 缺少 customVocabulary=true 參數，無法載入詞彙數據');
+                const error = new Error('❌ 缺少 customVocabulary=true 參數，無法載入詞彙數據');
+                console.error('❌ 參數驗證失敗:', error.message);
+                throw error;
             }
 
             // 從 API 載入詞彙數據
-            console.log(`🔄 從 API 載入詞彙: /api/activities/${activityId}`);
+            console.log(`🔄 發送 API 請求: /api/activities/${activityId}`);
             const response = await fetch(`/api/activities/${activityId}`);
 
+            console.log('📡 API 響應狀態:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok
+            });
+
             if (!response.ok) {
-                throw new Error(`API 請求失敗: ${response.status} ${response.statusText}`);
+                const error = new Error(`API 請求失敗: ${response.status} ${response.statusText}`);
+                console.error('❌ API 請求失敗:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    url: `/api/activities/${activityId}`
+                });
+                throw error;
             }
 
             const activity = await response.json();
-            console.log('✅ 活動數據載入成功:', activity);
+            console.log('✅ 活動數據載入成功:', {
+                id: activity.id,
+                title: activity.title,
+                hasVocabularyItems: !!activity.vocabularyItems,
+                vocabularyItemsCount: activity.vocabularyItems?.length || 0,
+                hasElements: !!activity.elements,
+                elementsCount: activity.elements?.length || 0,
+                hasContent: !!activity.content
+            });
 
             // 提取詞彙數據（支持多種數據源）
+            console.log('🔍 檢查詞彙數據來源...');
             let vocabularyData = [];
 
             if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems) && activity.vocabularyItems.length > 0) {
@@ -91,10 +123,17 @@ class GameScene extends Phaser.Scene {
                 // 舊架構：從 content 中獲取詞彙數據
                 vocabularyData = activity.content.vocabularyItems;
                 console.log('📝 從 content.vocabularyItems 載入詞彙:', vocabularyData.length, '個');
+            } else {
+                console.error('❌ 無法找到詞彙數據:', {
+                    hasVocabularyItems: !!activity.vocabularyItems,
+                    hasElements: !!activity.elements,
+                    hasContent: !!activity.content
+                });
             }
 
             // 轉換為遊戲所需的格式
             if (vocabularyData.length > 0) {
+                console.log('🔄 開始轉換詞彙數據格式...');
                 this.pairs = vocabularyData.map((item, index) => ({
                     id: index + 1,
                     question: item.english || item.word || '',
@@ -105,14 +144,27 @@ class GameScene extends Phaser.Scene {
                     chineseImageUrl: item.chineseImageUrl || null  // 🔥 添加中文圖片 URL
                 }));
 
-                console.log('✅ 詞彙數據轉換完成:', this.pairs);
+                console.log('✅ 詞彙數據轉換完成:', {
+                    totalPairs: this.pairs.length,
+                    firstPair: this.pairs[0],
+                    hasImages: this.pairs.some(p => p.imageUrl || p.chineseImageUrl)
+                });
                 return true;
             } else {
                 // 🔥 修復：不使用默認數據，拋出錯誤
-                throw new Error('❌ 活動中沒有詞彙數據，請先添加詞彙');
+                const error = new Error('❌ 活動中沒有詞彙數據，請先添加詞彙');
+                console.error('❌ 詞彙數據為空:', {
+                    activityId: activity.id,
+                    activityTitle: activity.title
+                });
+                throw error;
             }
         } catch (error) {
-            console.error('❌ 載入詞彙數據失敗:', error);
+            console.error('❌ 載入詞彙數據失敗:', {
+                message: error.message,
+                stack: error.stack,
+                url: window.location.href
+            });
             this.vocabularyLoadError = error.message;
             // 🔥 修復：不使用默認數據，直接拋出錯誤
             throw error;
@@ -1390,25 +1442,38 @@ class GameScene extends Phaser.Scene {
 
         const itemCount = currentPagePairs.length;
 
-        // 🔥 檢測手機橫向模式和極小高度
+        // 📝 響應式檢測：判斷是否需要使用緊湊模式
+        // isLandscapeMobile：手機橫向模式（寬度 > 高度 且 高度 < 500px）
+        // isTinyHeight：極小高度（高度 < 400px）
+        // isCompactMode：緊湊模式（手機橫向 或 極小高度）
         const isLandscapeMobile = width > height && height < 500;
         const isTinyHeight = height < 400;
         const isCompactMode = isLandscapeMobile || isTinyHeight;
 
-        console.log('📱 響應式檢測:', { width, height, isLandscapeMobile, isTinyHeight, isCompactMode });
+        console.log('📱 響應式檢測:', {
+            width,
+            height,
+            isLandscapeMobile,
+            isTinyHeight,
+            isCompactMode,
+            aspectRatio: (width / height).toFixed(2)
+        });
 
         // 🔥 根據匹配數和模式決定列數和框的尺寸
         let cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, chineseTextHeight;
         // 📝 totalUnitHeight = 單元總高度（包含英文卡片高度 + 中文文字高度）
 
-        // 中文文字高度會根據模式動態調整
-        // 緊湊模式：20px字體 → ~20px高度
+        // 📝 中文文字高度會根據模式動態調整
+        // 緊湊模式：16px字體 → ~16px高度
         // 正常模式：18px字體 → ~18px高度
 
         if (isCompactMode) {
-            // 🔥 手機橫向模式或極小高度：優先增加列數，減少行數，充分利用垂直空間
+            // 📝 緊湊模式（手機橫向或極小高度）
+            // 目標：減少垂直空間佔用，增加列數
+            console.log('📱 使用緊湊模式佈局');
+
             chineseFontSize = '16px';  // 減少字體大小以節省垂直空間
-            chineseTextHeight = 16;  // 16px字體對應的高度
+            chineseTextHeight = 16;    // 16px字體對應的高度
 
             // 🔥 手機橫向模式固定5列
             cols = Math.min(5, itemCount);  // 固定最多5列
@@ -1416,15 +1481,17 @@ class GameScene extends Phaser.Scene {
             // 計算行數
             const rows = Math.ceil(itemCount / cols);
 
-            // 🔥 動態計算扁平長方形尺寸
-            const topBottomMargin = 30;
-            const minVerticalSpacing = 2;
-            const availableHeight = height - topBottomMargin;
+            // 📝 計算可用垂直空間
+            const topBottomMargin = 30;  // 上下邊距
+            const minVerticalSpacing = 2;  // 最小垂直間距
+            const availableHeight = height - topBottomMargin;  // 可用高度
 
-            // 計算每行的高度
+            // 📝 計算每行的高度
+            // 公式：(可用高度 - 間距總和) / 行數
             const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
 
-            // 🔥 卡片高度 = 行高 - 中文文字高度，但限制最大高度以確保扁平長方形（每個增加10px）
+            // 📝 根據匹配數決定最大卡片高度
+            // 目標：創造扁平長方形（寬 > 高）
             const maxCardHeight = itemCount <= 5 ? 35 : itemCount <= 10 ? 32 : itemCount <= 20 ? 30 : 34;
             cardHeightInFrame = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight - chineseTextHeight)));
 
@@ -1766,13 +1833,13 @@ class GameScene extends Phaser.Scene {
             container.add([background, cardText]);
         }
 
-        // 🔥 添加淡入動畫（按照順序出現）
+        // 📝 淡入動畫配置（按照順序出現）
         this.tweens.add({
             targets: container,
-            alpha: 1,  // 從 0 淡入到 1
-            duration: 300,  // 動畫持續 300ms
-            delay: animationDelay,  // 延遲時間
-            ease: 'Power2'
+            alpha: 1,           // 從 0 淡入到 1（完全不透明）
+            duration: 300,      // 動畫持續 300ms（0.3秒）
+            delay: animationDelay,  // 延遲時間（用於順序出現效果）
+            ease: 'Power2'      // 緩動函數（平滑加速）
         });
 
         // 設置互動（整個容器可拖曳）
@@ -2326,11 +2393,26 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 檢查是否所有卡片都已配對
     checkAllCardsMatched() {
-        const allMatched = this.leftCards.every(card => card.getData('isMatched'));
+        // 📝 調試訊息：記錄配對狀態檢查
+        const matchedCount = this.leftCards.filter(card => card.getData('isMatched')).length;
+        const totalCount = this.leftCards.length;
+        const allMatched = matchedCount === totalCount;
+
+        console.log('🔍 檢查配對狀態:', {
+            matchedCount,
+            totalCount,
+            allMatched,
+            hasSubmitButton: !!this.submitButton,
+            matchedPairsSize: this.matchedPairs.size
+        });
 
         if (allMatched && !this.submitButton) {
             console.log('✅ 所有卡片都已配對，顯示提交答案按鈕');
             this.showSubmitButton();
+        } else if (!allMatched) {
+            console.log('⏳ 還有卡片未配對:', totalCount - matchedCount);
+        } else if (this.submitButton) {
+            console.log('ℹ️ 提交按鈕已存在');
         }
     }
 
