@@ -1473,8 +1473,26 @@ class GameScene extends Phaser.Scene {
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
 
-        // 創建卡片文字（響應式字體大小）
-        const fontSize = Math.max(24, Math.min(48, height * 0.6));
+        // 🔥 創建卡片文字（動態字體大小，適應內框寬度）
+        let fontSize = Math.max(24, Math.min(48, height * 0.6));
+
+        // 🔥 創建臨時文字對象來測量寬度
+        const tempText = this.add.text(0, 0, text, {
+            fontSize: `${fontSize}px`,
+            fontFamily: 'Arial'
+        });
+
+        // 🔥 如果文字寬度超過卡片寬度的 85%，縮小字體
+        const maxTextWidth = width * 0.85;  // 留 15% 的邊距
+        while (tempText.width > maxTextWidth && fontSize > 18) {
+            fontSize -= 2;
+            tempText.setFontSize(fontSize);
+        }
+
+        // 銷毀臨時文字對象
+        tempText.destroy();
+
+        // 🔥 創建最終的文字對象
         const cardText = this.add.text(0, 0, text, {
             fontSize: `${fontSize}px`,
             color: '#333333',
