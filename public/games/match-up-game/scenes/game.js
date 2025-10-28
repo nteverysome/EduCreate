@@ -122,6 +122,7 @@ class GameScene extends Phaser.Scene {
         this.matchedPairs = new Set();
         this.isDragging = false;
         this.dragStartCard = null;
+        this.submitButton = null;  // 🔥 提交答案按鈕
 
         // 顯示載入提示
         const width = this.scale.width;
@@ -1821,16 +1822,9 @@ class GameScene extends Phaser.Scene {
     }
 
     checkMatch(leftCard, rightCard) {
-        const leftPairId = leftCard.getData('pairId');
-        const rightPairId = rightCard.getData('pairId');
-
-        if (leftPairId === rightPairId) {
-            // 配對成功
-            this.onMatchSuccess(leftCard, rightCard);
-        } else {
-            // 配對失敗
-            this.onMatchFail(leftCard, rightCard);
-        }
+        // 🔥 新機制：無論對錯，都讓英文卡片進入中文內框
+        // 不立即檢查對錯，等待用戶點擊「提交答案」按鈕
+        this.onMatchSuccess(leftCard, rightCard);
     }
 
     onMatchSuccess(leftCard, rightCard) {
@@ -1839,7 +1833,6 @@ class GameScene extends Phaser.Scene {
         leftCard.setData('matchedWith', rightCard);  // 記錄配對的右側卡片
         rightCard.setData('isMatched', true);
         rightCard.setData('matchedWith', leftCard);  // 記錄配對的左側卡片
-        this.matchedPairs.add(leftCard.getData('pairId'));
 
         // 左側卡片移動到右側空白框的位置（完全覆蓋）
         const targetX = rightCard.x;
@@ -1857,23 +1850,10 @@ class GameScene extends Phaser.Scene {
                 leftCard.setDepth(10);  // 提升到空白框上方
                 leftCard.getData('background').setAlpha(1);
 
-                // 不隱藏右側空白框，保持可見（但在左側卡片下方）
-                // rightCard.getData('background').setVisible(false);  // 註釋掉這行
-
-                // 成功動畫
-                this.tweens.add({
-                    targets: leftCard,
-                    scaleX: 1.05,
-                    scaleY: 1.05,
-                    duration: 200,
-                    yoyo: true,
-                    ease: 'Power2'
-                });
+                // 🔥 檢查是否所有卡片都已配對，如果是則顯示「提交答案」按鈕
+                this.checkAllCardsMatched();
             }
         });
-
-        // 🔥 檢查當前頁是否全部配對完成
-        this.checkCurrentPageComplete();
     }
 
     unmatchCard(leftCard) {
@@ -1912,6 +1892,216 @@ class GameScene extends Phaser.Scene {
         });
 
         console.log('❌ 配對失敗（不顯示錯誤提示）');
+    }
+
+    // 🔥 檢查是否所有卡片都已配對
+    checkAllCardsMatched() {
+        const allMatched = this.leftCards.every(card => card.getData('isMatched'));
+
+        if (allMatched && !this.submitButton) {
+            console.log('✅ 所有卡片都已配對，顯示提交答案按鈕');
+            this.showSubmitButton();
+        }
+    }
+
+    // 🔥 顯示「提交答案」按鈕
+    showSubmitButton() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 按鈕尺寸（響應式）
+        const buttonWidth = Math.max(120, Math.min(200, width * 0.15));
+        const buttonHeight = Math.max(40, Math.min(60, height * 0.08));
+        const fontSize = Math.max(16, Math.min(24, width * 0.02));
+
+        // 按鈕位置（最底下中央）
+        const buttonX = width / 2;
+        const buttonY = height - buttonHeight / 2 - 20;
+
+        // 創建按鈕背景
+        const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x4caf50);
+        buttonBg.setStrokeStyle(2, 0x388e3c);
+        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setDepth(2000);
+
+        // 創建按鈕文字
+        const buttonText = this.add.text(buttonX, buttonY, '提交答案', {
+            fontSize: `${fontSize}px`,
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        buttonText.setOrigin(0.5);
+        buttonText.setDepth(2001);
+
+        // 按鈕點擊事件
+        buttonBg.on('pointerdown', () => {
+            console.log('🔍 提交答案，開始檢查配對結果');
+            this.checkAllMatches();
+        });
+
+        // 按鈕懸停效果
+        buttonBg.on('pointerover', () => {
+            buttonBg.setFillStyle(0x66bb6a);
+        });
+
+        buttonBg.on('pointerout', () => {
+            buttonBg.setFillStyle(0x4caf50);
+        });
+
+        // 保存按鈕引用
+        this.submitButton = { bg: buttonBg, text: buttonText };
+    }
+
+    // 🔥 檢查所有配對結果
+    checkAllMatches() {
+        let correctCount = 0;
+        let incorrectCount = 0;
+
+        // 檢查每個左側卡片的配對
+        this.leftCards.forEach(leftCard => {
+            const leftPairId = leftCard.getData('pairId');
+            const rightCard = leftCard.getData('matchedWith');
+
+            if (rightCard) {
+                const rightPairId = rightCard.getData('pairId');
+
+                if (leftPairId === rightPairId) {
+                    // 配對正確
+                    correctCount++;
+                    console.log('✅ 配對正確:', leftCard.getData('text'), '-', rightCard.getData('text'));
+                } else {
+                    // 配對錯誤
+                    incorrectCount++;
+                    console.log('❌ 配對錯誤:', leftCard.getData('text'), '-', rightCard.getData('text'));
+
+                    // 顯示錯誤提示（紅色邊框）
+                    leftCard.getData('background').setStrokeStyle(3, 0xf44336);
+                    rightCard.getData('background').setStrokeStyle(3, 0xf44336);
+                }
+            }
+        });
+
+        // 顯示總結
+        this.showMatchSummary(correctCount, incorrectCount);
+    }
+
+    // 🔥 顯示配對總結
+    showMatchSummary(correctCount, incorrectCount) {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 移除提交按鈕
+        if (this.submitButton) {
+            this.submitButton.bg.destroy();
+            this.submitButton.text.destroy();
+            this.submitButton = null;
+        }
+
+        // 總結文字尺寸（響應式）
+        const fontSize = Math.max(24, Math.min(36, width * 0.03));
+
+        // 顯示總結
+        const totalCount = correctCount + incorrectCount;
+        const summaryText = this.add.text(
+            width / 2,
+            height / 2 - 50,
+            `配對結果\n正確：${correctCount} / ${totalCount}\n錯誤：${incorrectCount} / ${totalCount}`,
+            {
+                fontSize: `${fontSize}px`,
+                color: correctCount === totalCount ? '#4caf50' : '#ff9800',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                align: 'center',
+                backgroundColor: correctCount === totalCount ? '#e8f5e9' : '#fff3e0',
+                padding: { x: 25, y: 15 }
+            }
+        );
+        summaryText.setOrigin(0.5).setDepth(2000);
+
+        // 如果全部正確，顯示完成動畫
+        if (correctCount === totalCount) {
+            this.tweens.add({
+                targets: summaryText,
+                scaleX: 1.1,
+                scaleY: 1.1,
+                duration: 500,
+                yoyo: true,
+                repeat: 2,
+                ease: 'Sine.easeInOut',
+                onComplete: () => {
+                    // 檢查是否有下一頁
+                    this.time.delayedCall(1000, () => {
+                        this.onGameComplete();
+                    });
+                }
+            });
+        } else {
+            // 顯示「重試」按鈕
+            this.time.delayedCall(2000, () => {
+                this.showRetryButton();
+            });
+        }
+    }
+
+    // 🔥 顯示「重試」按鈕
+    showRetryButton() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        const buttonWidth = Math.max(120, Math.min(200, width * 0.15));
+        const buttonHeight = Math.max(40, Math.min(60, height * 0.08));
+        const fontSize = Math.max(16, Math.min(24, width * 0.02));
+
+        const buttonX = width / 2;
+        const buttonY = height / 2 + 50;
+
+        const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0xff9800);
+        buttonBg.setStrokeStyle(2, 0xf57c00);
+        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setDepth(2000);
+
+        const buttonText = this.add.text(buttonX, buttonY, '重試', {
+            fontSize: `${fontSize}px`,
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        buttonText.setOrigin(0.5);
+        buttonText.setDepth(2001);
+
+        buttonBg.on('pointerdown', () => {
+            console.log('🔄 重試當前頁');
+            this.resetCurrentPage();
+        });
+
+        buttonBg.on('pointerover', () => {
+            buttonBg.setFillStyle(0xffb74d);
+        });
+
+        buttonBg.on('pointerout', () => {
+            buttonBg.setFillStyle(0xff9800);
+        });
+    }
+
+    // 🔥 重置當前頁
+    resetCurrentPage() {
+        // 清除所有卡片
+        this.leftCards.forEach(card => card.destroy());
+        this.rightCards.forEach(card => card.destroy());
+        this.leftCards = [];
+        this.rightCards = [];
+        this.matchedPairs.clear();
+
+        // 清除所有文字和按鈕
+        this.children.list.forEach(child => {
+            if (child.type === 'Text' || child.type === 'Rectangle') {
+                child.destroy();
+            }
+        });
+
+        // 重新創建當前頁
+        this.createCards();
     }
 
     onGameComplete() {
