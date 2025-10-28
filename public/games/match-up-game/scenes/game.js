@@ -978,7 +978,9 @@ class GameScene extends Phaser.Scene {
             const x = rightAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
             const y = rightAreaStartY + row * (cardHeight + rightVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 rightVerticalSpacing
 
-            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, 'right');  // 🔥 文字在框右邊
+            // 🔥 根據列號決定文字位置：第一列（col=0）文字在左邊，第二列（col=1）文字在右邊
+            const textPosition = col === 0 ? 'left' : 'right';
+            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, textPosition);
             this.rightCards.push(card);
         });
 
@@ -1581,6 +1583,12 @@ class GameScene extends Phaser.Scene {
             textX = width / 2 + 15;
             textY = 0;
             originX = 0;      // 左對齊
+            originY = 0.5;    // 垂直居中
+        } else if (textPosition === 'left') {
+            // 文字在框左邊
+            textX = -width / 2 - 15;
+            textY = 0;
+            originX = 1;      // 右對齊
             originY = 0.5;    // 垂直居中
         } else {
             // 文字在框下邊（默認）
