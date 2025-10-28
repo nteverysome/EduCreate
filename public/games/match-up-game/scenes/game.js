@@ -1467,6 +1467,9 @@ class GameScene extends Phaser.Scene {
         // 緊湊模式：16px字體 → ~16px高度
         // 正常模式：18px字體 → ~18px高度
 
+        // 🔥 預先聲明 chineseFontSizes 變量（用於存儲所有中文文字的實際字體大小）
+        let chineseFontSizes;
+
         if (isCompactMode) {
             // 📝 緊湊模式（手機橫向或極小高度）
             // 目標：減少垂直空間佔用，增加列數
@@ -1499,7 +1502,7 @@ class GameScene extends Phaser.Scene {
             // 🔥 智能預先計算所有中文文字的實際字體大小
             console.log('🔍 開始預先計算中文字體大小...');
             const tempCardHeight = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight * 0.6)));  // 臨時卡片高度
-            const chineseFontSizes = currentPagePairs.map(pair => {
+            chineseFontSizes = currentPagePairs.map(pair => {
                 // 計算初始字體大小
                 let fontSize = Math.max(24, Math.min(48, tempCardHeight * 0.6));
 
