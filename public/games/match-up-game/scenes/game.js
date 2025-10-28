@@ -1445,16 +1445,6 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 分隔線（橫線）
-            const separatorY = -frameHeight / 4;  // 在框的上1/4處
-            const separator = this.add.text(0, separatorY, '─────────', {
-                fontSize: '16px',
-                color: '#333333',
-                fontFamily: 'Arial'
-            });
-            separator.setOrigin(0.5);
-            frameContainer.add(separator);
-
             // 中文文字（下半部分）
             const chineseY = frameHeight / 4;  // 在框的下1/4處
             const chineseText = this.add.text(0, chineseY, pair.answer, {
