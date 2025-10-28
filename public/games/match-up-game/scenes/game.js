@@ -1598,7 +1598,7 @@ class GameScene extends Phaser.Scene {
 
             // 🔥 第四步：計算間距
             const horizontalSpacing = 20;
-            const verticalSpacing = 20;
+            const verticalSpacing = 25;  // 增加5px，從20px改為25px
 
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
@@ -1645,12 +1645,11 @@ class GameScene extends Phaser.Scene {
 
                 // 🔥 第十步：計算正方形卡片尺寸
                 // 方法1：基於高度
-                // totalUnitHeight = squareSize + chineseTextSpacing + chineseTextHeight
-                // totalUnitHeight = squareSize + 5 + squareSize * 0.4 = squareSize * 1.4 + 5
-                // 所以 squareSize = (totalUnitHeight - 5) / 1.4
-                const chineseTextSpacing = 5;  // 白色框到中文文字的間距
+                // totalUnitHeight = squareSize + chineseTextHeight
+                // totalUnitHeight = squareSize + squareSize * 0.4 = squareSize * 1.4
+                // 所以 squareSize = totalUnitHeight / 1.4
                 const availableHeightPerRow = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows;
-                const squareSizeByHeight = (availableHeightPerRow - chineseTextSpacing) / 1.4;  // 正確計算：考慮中文文字高度和間距
+                const squareSizeByHeight = availableHeightPerRow / 1.4;  // 正確計算：考慮中文文字高度
 
                 // 方法2：基於寬度
                 const squareSizeByWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
@@ -1662,7 +1661,7 @@ class GameScene extends Phaser.Scene {
                 frameWidth = squareSize;
                 cardHeightInFrame = squareSize;
                 chineseTextHeight = squareSize * 0.4;  // 中文文字高度為卡片高度的40%
-                totalUnitHeight = cardHeightInFrame + chineseTextSpacing + chineseTextHeight;  // = squareSize * 1.4 + 5
+                totalUnitHeight = cardHeightInFrame + chineseTextHeight;  // = squareSize * 1.4
 
                 cols = optimalCols;
                 const rows = optimalRows;
@@ -1857,8 +1856,8 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 🔥 中文文字（在白色框下方，5px間距）- 使用預先計算的字體大小
-            const chineseY = cardHeightInFrame / 2 + 5;  // 白色框底部 + 5px間距
+            // 🔥 中文文字（在白色框下方，無間距）- 使用預先計算的字體大小
+            const chineseY = cardHeightInFrame / 2;  // 緊貼白色框底部，無間距
 
             // 🔥 使用預先計算的字體大小（避免重複計算）
             const chineseActualFontSize = chineseFontSizesArray[i];
