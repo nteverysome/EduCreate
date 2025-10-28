@@ -2035,7 +2035,7 @@ class GameScene extends Phaser.Scene {
     // 🔥 顯示正確答案（白色內框 + 勾勾）
     showCorrectAnswer(rightCard, correctAnswer) {
         const background = rightCard.getData('background');
-        const textObj = rightCard.getData('textObj');
+        const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
 
         // 內框呈白色
         background.setFillStyle(0xffffff);
@@ -2065,7 +2065,7 @@ class GameScene extends Phaser.Scene {
     // 🔥 顯示錯誤答案（灰色內框 + X）
     showIncorrectAnswer(rightCard, correctAnswer) {
         const background = rightCard.getData('background');
-        const textObj = rightCard.getData('textObj');
+        const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
 
         // 內框呈灰色
         background.setFillStyle(0xcccccc);
