@@ -1449,26 +1449,27 @@ class GameScene extends Phaser.Scene {
             chineseFontSize = '15px';  // 減少字體大小以節省垂直空間
             chineseTextHeight = 15;  // 15px字體對應的高度
 
+            // 🔥 大螢幕智能配置：一列最多5個，充分利用空間
             if (itemCount <= 5) {
-                cols = Math.min(8, itemCount);  // 改為最多8列
-                frameWidth = Math.min(250, (width - 100) / cols);  // 增加寬度
-                frameHeight = 40;  // 減少總高度
-                cardHeightInFrame = 25;  // 減少卡片高度
+                cols = Math.min(5, itemCount);  // 最多5列
+                frameWidth = Math.min(350, (width - 100) / cols);  // 增加最大寬度到350px
+                frameHeight = 55;  // 增加總高度
+                cardHeightInFrame = 40;  // 增加卡片高度
             } else if (itemCount <= 10) {
-                cols = Math.min(8, Math.ceil(itemCount / 2));  // 改為最多8列
-                frameWidth = Math.min(200, (width - 120) / cols);  // 增加寬度
-                frameHeight = 37;  // 減少總高度
-                cardHeightInFrame = 22;  // 減少卡片高度
+                cols = Math.min(5, Math.ceil(itemCount / 2));  // 最多5列
+                frameWidth = Math.min(300, (width - 120) / cols);  // 增加最大寬度到300px
+                frameHeight = 52;  // 增加總高度
+                cardHeightInFrame = 37;  // 增加卡片高度
             } else if (itemCount <= 20) {
-                cols = Math.min(8, Math.ceil(itemCount / 3));  // 改為最多8列
-                frameWidth = Math.min(150, (width - 140) / cols);  // 增加寬度
-                frameHeight = 35;  // 減少總高度
-                cardHeightInFrame = 20;  // 減少卡片高度
+                cols = Math.min(5, Math.ceil(itemCount / 4));  // 最多5列，4行
+                frameWidth = Math.min(250, (width - 140) / cols);  // 增加最大寬度到250px
+                frameHeight = 50;  // 增加總高度
+                cardHeightInFrame = 35;  // 增加卡片高度
             } else {
-                cols = 8;  // 改為固定8列
-                frameWidth = Math.min(220, (width - 100) / cols);  // 增加寬度
-                frameHeight = 39;  // 減少總高度
-                cardHeightInFrame = 24;  // 減少卡片高度
+                cols = 5;  // 固定5列
+                frameWidth = Math.min(280, (width - 100) / cols);  // 增加最大寬度到280px
+                frameHeight = 54;  // 增加總高度
+                cardHeightInFrame = 39;  // 增加卡片高度
             }
         }
 
