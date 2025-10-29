@@ -2258,12 +2258,12 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 佈局函數 - 情況 A：語音按鈕（上 30%）+ 圖片（中 40%）+ 文字（下 30%）
     createCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId) {
-        console.log('🎨 佈局 A: 語音按鈕 + 圖片 + 文字', { width, height, pairId });
+        console.log('🎨 佈局 A: 語音按鈕 + 圖片 + 文字', { width, height, pairId, hasText: !!text });
 
         // 1️⃣ 語音按鈕區域（上方 30%）
         const buttonAreaHeight = height * 0.3;
         const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
-        const buttonSize = Math.max(30, Math.min(60, buttonAreaHeight * 0.7));
+        const buttonSize = Math.max(20, Math.min(40, buttonAreaHeight * 0.6));  // 🔥 減小按鈕大小，確保在框內
         this.createAudioButton(container, audioUrl, 0, buttonAreaY, buttonSize, pairId);
 
         // 2️⃣ 圖片區域（中間 40%）
@@ -2275,7 +2275,14 @@ class GameScene extends Phaser.Scene {
         // 3️⃣ 文字區域（下方 30%）
         const textAreaHeight = height * 0.3;
         const textAreaY = height / 2 - textAreaHeight / 2;
-        this.createTextElement(container, text, 0, textAreaY, width, textAreaHeight);
+
+        // 🔥 只有有效文字才創建
+        if (text && text.trim() !== '' && text.trim() !== '<br>') {
+            console.log('📝 創建文字:', { text, textAreaY, textAreaHeight });
+            this.createTextElement(container, text, 0, textAreaY, width, textAreaHeight);
+        } else {
+            console.log('⏭️ 跳過空白文字');
+        }
 
         container.add([background]);
     }
