@@ -2149,17 +2149,23 @@ class GameScene extends Phaser.Scene {
             // 銷毀臨時文字對象
             tempText.destroy();
 
-            // 🔥 創建最終的文字對象
-            cardText = this.add.text(0, textY, text, {
-                fontSize: `${fontSize}px`,
-                color: '#333333',
-                fontFamily: 'Arial',
-                fontStyle: 'normal'
-            });
-            cardText.setOrigin(0.5);
+            // 🔥 檢查文字是否為空或只包含 <br> 標籤
+            if (text && text.trim() !== '' && text.trim() !== '<br>') {
+                // 🔥 創建最終的文字對象
+                cardText = this.add.text(0, textY, text, {
+                    fontSize: `${fontSize}px`,
+                    color: '#333333',
+                    fontFamily: 'Arial',
+                    fontStyle: 'normal'
+                });
+                cardText.setOrigin(0.5);
 
-            // 添加到容器
-            container.add([background, cardText]);
+                // 添加到容器
+                container.add([background, cardText]);
+            } else {
+                // 🔥 如果沒有有效的英文文字，只添加背景
+                container.add([background]);
+            }
         } else {
             // 🔥 沒有圖片，只顯示文字（與原來相同）
             let fontSize = Math.max(24, Math.min(48, height * 0.6));
