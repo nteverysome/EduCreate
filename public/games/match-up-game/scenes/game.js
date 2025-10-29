@@ -1460,7 +1460,7 @@ class GameScene extends Phaser.Scene {
         });
 
         // 🔥 根據匹配數和模式決定列數和框的尺寸
-        let cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, chineseTextHeight;
+        let cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, chineseTextHeight, verticalSpacing;
         // 📝 totalUnitHeight = 單元總高度（包含英文卡片高度 + 中文文字高度）
 
         // 📝 中文文字高度會根據模式動態調整
@@ -1598,9 +1598,6 @@ class GameScene extends Phaser.Scene {
 
             // 🔥 第四步：智能計算水平間距（根據螢幕寬度）
             const horizontalSpacing = Math.max(15, Math.min(30, width * 0.015));  // 15-30px，基於寬度的1.5%
-
-            // 🔥 聲明 verticalSpacing 變量（在 if/else 之前）
-            let verticalSpacing;
 
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
