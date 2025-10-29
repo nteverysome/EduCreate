@@ -1994,6 +1994,14 @@ class GameScene extends Phaser.Scene {
 
             const animationDelay = i * 100;  // 每個卡片延遲 100ms
 
+            // 🔥 檢查英文內容是否為空 - 如果為空，跳過創建英文卡片
+            if (!pair.question || pair.question.trim() === '') {
+                console.log(`⏭️ 跳過空白英文卡片 [${i}]: 英文內容為空`);
+                // 更新框的數據，但不創建卡片
+                frame.setData('currentCardPairId', pair.id);
+                return;  // 跳過此項
+            }
+
             // 創建英文卡片（使用與中文文字相同的寬度）
             const card = this.createLeftCard(frameX, cardY, frameWidth - 10, cardHeightInFrame, pair.question, pair.id, animationDelay, pair.imageUrl);
 
@@ -2083,6 +2091,11 @@ class GameScene extends Phaser.Scene {
             const textHeight = height * 0.1;
             const textY = height / 2 - textHeight / 2;
 
+            // 🔥 計算正方形圖片的尺寸（取較小的邊長）
+            // 圖片必須始終保持 1:1 的寬高比
+            const squareSize = Math.min(width - 4, imageHeight - 4);  // 留 2px 邊距
+            const squareImageY = imageY;  // 圖片置中顯示
+
             // 🔥 創建圖片（使用 Phaser 的 load.image）
             const imageKey = `card-image-${pairId}`;
 
@@ -2094,8 +2107,10 @@ class GameScene extends Phaser.Scene {
                 // 圖片載入完成
                 this.load.once('complete', () => {
                     if (this.textures.exists(imageKey)) {
-                        const cardImage = this.add.image(0, imageY, imageKey);
-                        cardImage.setDisplaySize(width - 4, imageHeight - 4);  // 留 2px 邊距
+                        const cardImage = this.add.image(0, squareImageY, imageKey);
+                        // 🔥 設置正方形尺寸（寬度 = 高度）
+                        cardImage.setDisplaySize(squareSize, squareSize);
+                        cardImage.setOrigin(0.5);  // 置中
                         container.add(cardImage);
                     }
                 });
@@ -2108,8 +2123,10 @@ class GameScene extends Phaser.Scene {
                 this.load.start();
             } else {
                 // 圖片已載入，直接創建
-                const cardImage = this.add.image(0, imageY, imageKey);
-                cardImage.setDisplaySize(width - 4, imageHeight - 4);  // 留 2px 邊距
+                const cardImage = this.add.image(0, squareImageY, imageKey);
+                // 🔥 設置正方形尺寸（寬度 = 高度）
+                cardImage.setDisplaySize(squareSize, squareSize);
+                cardImage.setOrigin(0.5);  // 置中
                 container.add(cardImage);
             }
 
