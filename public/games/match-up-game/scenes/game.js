@@ -2258,13 +2258,29 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 佈局函數 - 情況 A：語音按鈕（上 30%）+ 圖片（中 40%）+ 文字（下 30%）
     createCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId) {
-        console.log('🎨 佈局 A: 語音按鈕 + 圖片 + 文字', { width, height, pairId, hasText: !!text });
+        console.log('🎨 佈局 A: 語音按鈕 + 圖片 + 文字', {
+            width,
+            height,
+            pairId,
+            hasText: !!text,
+            hasAudioUrl: !!audioUrl,
+            audioUrl: audioUrl ? audioUrl.substring(0, 50) + '...' : 'null'
+        });
 
         // 1️⃣ 語音按鈕區域（上方 30%）
         const buttonAreaHeight = height * 0.3;
         const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
         const buttonSize = Math.max(20, Math.min(40, buttonAreaHeight * 0.6));  // 🔥 減小按鈕大小，確保在框內
+
+        console.log('🔊 準備調用 createAudioButton:', {
+            audioUrl: audioUrl ? '有' : '無',
+            buttonAreaY,
+            buttonSize
+        });
+
         this.createAudioButton(container, audioUrl, 0, buttonAreaY, buttonSize, pairId);
+
+        console.log('✅ createAudioButton 調用完成');
 
         // 2️⃣ 圖片區域（中間 40%）
         const imageAreaHeight = height * 0.4;
