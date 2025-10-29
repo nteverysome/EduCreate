@@ -917,7 +917,7 @@ class GameScene extends Phaser.Scene {
             const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
 
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
-            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl);
+            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
 
@@ -1057,7 +1057,7 @@ class GameScene extends Phaser.Scene {
             const y = leftAreaStartY + row * (cardHeight + leftVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 leftVerticalSpacing
 
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
-            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl);
+            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
 
@@ -1199,7 +1199,7 @@ class GameScene extends Phaser.Scene {
             const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
 
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
-            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl);
+            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
 
@@ -1426,7 +1426,7 @@ class GameScene extends Phaser.Scene {
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
 
             if (cardData.type === 'question') {
-                const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId, animationDelay, cardData.pair.imageUrl);
+                const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId, animationDelay, cardData.pair.imageUrl, cardData.pair.audioUrl);
                 this.leftCards.push(card);
             } else {
                 const card = this.createRightCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId);
@@ -2102,10 +2102,10 @@ class GameScene extends Phaser.Scene {
             // 情況 B：只有語音按鈕
             this.createCardLayoutB(container, background, width, height, audioUrl, pairId);
         } else if (!hasImage && hasText && !hasAudio) {
-            // 情況 C：只有文字
+            // 情況 C：只有文字（已實現）
             this.createCardLayoutC(container, background, width, height, text);
         } else if (hasImage && hasText && !hasAudio) {
-            // 情況 D：圖片 + 文字
+            // 情況 D：圖片 + 文字（已實現）
             this.createCardLayoutD(container, background, width, height, text, imageUrl, pairId);
         } else if (!hasImage && hasText && hasAudio) {
             // 情況 E：語音 + 文字
@@ -2115,7 +2115,7 @@ class GameScene extends Phaser.Scene {
             this.createCardLayoutD(container, background, width, height, '', imageUrl, pairId);
         } else if (hasImage && !hasText && hasAudio) {
             // 圖片 + 語音（無文字）
-            this.createCardLayoutImageAudio(container, background, width, height, imageUrl, audioUrl, pairId);
+            this.createCardLayoutA(container, background, width, height, '', imageUrl, audioUrl, pairId);
         } else {
             // 其他情況：只顯示背景
             container.add([background]);
@@ -2468,13 +2468,74 @@ class GameScene extends Phaser.Scene {
             return;
         }
 
-        // 使用 URL 的最後部分作為 key
-        const audioKey = `audio-${audioUrl.split('/').pop().split('?')[0]}`;
+        // 防止重複點擊
+        if (buttonContainer.getData('isPlaying')) {
+            console.log('🔊 音頻正在播放中，忽略重複點擊');
+            return;
+        }
+
+        // 使用 URL 的最後部分作為 key（移除查詢參數和特殊字符）
+        const audioKey = `audio-${audioUrl.split('/').pop().split('?')[0].replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+        console.log('🔊 準備播放音頻:', { audioUrl, audioKey });
 
         try {
-            // 檢查音頻是否已載入
-            if (!this.sound.get(audioKey)) {
-                // 載入並播放音頻
+            // 檢查音頻是否已載入到 Phaser 的緩存中
+            if (!this.cache.audio.exists(audioKey)) {
+                console.log('📥 音頻未載入，開始載入:', audioKey);
+
+                // 更新按鈕狀態為載入中
+                buttonContainer.setData('isPlaying', true);
+                buttonBg.setFillStyle(0xFFC107);  // 黃色表示載入中
+
+                // 載入音頻文件
+                this.load.audio(audioKey, audioUrl);
+
+                // 音頻載入完成
+                this.load.once('complete', () => {
+                    console.log('✅ 音頻載入完成:', audioKey);
+
+                    if (this.cache.audio.exists(audioKey)) {
+                        // 創建並播放音頻
+                        const audio = this.sound.add(audioKey, { volume: 0.8 });
+                        audio.play();
+
+                        // 更新按鈕狀態為播放中
+                        buttonBg.setFillStyle(0xFF9800);  // 橙色表示播放中
+
+                        // 播放完成後恢復狀態
+                        audio.once('complete', () => {
+                            console.log('✅ 音頻播放完成:', audioKey);
+                            buttonContainer.setData('isPlaying', false);
+                            buttonBg.setFillStyle(0x4CAF50);
+                        });
+
+                        // 播放失敗處理
+                        audio.once('error', (error) => {
+                            console.error('❌ 音頻播放失敗:', error);
+                            buttonContainer.setData('isPlaying', false);
+                            buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
+                        });
+                    } else {
+                        console.error('❌ 音頻載入後仍不存在於緩存中');
+                        buttonContainer.setData('isPlaying', false);
+                        buttonBg.setFillStyle(0xF44336);
+                    }
+                });
+
+                // 音頻載入失敗
+                this.load.once('loaderror', (file) => {
+                    console.error('❌ 音頻載入失敗:', file.key, audioUrl);
+                    buttonContainer.setData('isPlaying', false);
+                    buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
+                });
+
+                // 開始載入
+                this.load.start();
+            } else {
+                console.log('✅ 音頻已載入，直接播放:', audioKey);
+
+                // 音頻已載入，直接播放
                 const audio = this.sound.add(audioKey, { volume: 0.8 });
                 audio.play();
 
@@ -2484,24 +2545,22 @@ class GameScene extends Phaser.Scene {
 
                 // 播放完成後恢復狀態
                 audio.once('complete', () => {
+                    console.log('✅ 音頻播放完成:', audioKey);
                     buttonContainer.setData('isPlaying', false);
                     buttonBg.setFillStyle(0x4CAF50);
                 });
-            } else {
-                // 音頻已載入，直接播放
-                const audio = this.sound.get(audioKey);
-                audio.play();
 
-                buttonContainer.setData('isPlaying', true);
-                buttonBg.setFillStyle(0xFF9800);
-
-                audio.once('complete', () => {
+                // 播放失敗處理
+                audio.once('error', (error) => {
+                    console.error('❌ 音頻播放失敗:', error);
                     buttonContainer.setData('isPlaying', false);
-                    buttonBg.setFillStyle(0x4CAF50);
+                    buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
                 });
             }
         } catch (error) {
-            console.error('❌ 播放音頻失敗:', error);
+            console.error('❌ 播放音頻異常:', error);
+            buttonContainer.setData('isPlaying', false);
+            buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
         }
     }
 
