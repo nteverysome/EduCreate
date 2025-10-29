@@ -141,7 +141,8 @@ class GameScene extends Phaser.Scene {
                     english: item.english || item.word || '',  // 🔥 添加 english 欄位
                     chinese: item.chinese || item.translation || '',  // 🔥 添加 chinese 欄位
                     imageUrl: item.imageUrl || null,  // 🔥 添加英文圖片 URL
-                    chineseImageUrl: item.chineseImageUrl || null  // 🔥 添加中文圖片 URL
+                    chineseImageUrl: item.chineseImageUrl || null,  // 🔥 添加中文圖片 URL
+                    audioUrl: item.audioUrl || null  // 🔥 添加音頻 URL
                 }));
 
                 console.log('✅ 詞彙數據轉換完成:', {
@@ -802,7 +803,7 @@ class GameScene extends Phaser.Scene {
         currentPagePairs.forEach((pair, index) => {
             const y = leftStartY + index * leftSpacing;
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
-            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl);
+            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
 
@@ -2003,7 +2004,7 @@ class GameScene extends Phaser.Scene {
             }
 
             // 創建英文卡片（使用與中文文字相同的寬度）
-            const card = this.createLeftCard(frameX, cardY, frameWidth - 10, cardHeightInFrame, pair.question, pair.id, animationDelay, pair.imageUrl);
+            const card = this.createLeftCard(frameX, cardY, frameWidth - 10, cardHeightInFrame, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
 
             // 保存卡片當前所在的框的索引
             card.setData('currentFrameIndex', i);
@@ -2065,7 +2066,7 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    createLeftCard(x, y, width, height, text, pairId, animationDelay = 0, imageUrl = null) {
+    createLeftCard(x, y, width, height, text, pairId, animationDelay = 0, imageUrl = null, audioUrl = null) {
         // 創建卡片容器
         const container = this.add.container(x, y);
         container.setSize(width, height);
@@ -2078,126 +2079,49 @@ class GameScene extends Phaser.Scene {
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
 
-        // 🔥 聲明 cardText 變量（在分支外部）
+        // 🔥 聲明變量（在分支外部）
         let cardText;
+        let audioButton;
 
-        // 🔥 如果有圖片，創建圖片在上，文字在下的佈局
-        if (imageUrl && imageUrl.trim() !== '') {
-            // 圖片區域：佔據卡片上方 90%
-            const imageHeight = height * 0.9;
-            const imageY = -height / 2 + imageHeight / 2;
+        // 🔥 檢查內容組合
+        const hasImage = imageUrl && imageUrl.trim() !== '';
+        const hasText = text && text.trim() !== '' && text.trim() !== '<br>';
+        const hasAudio = audioUrl && audioUrl.trim() !== '';
 
-            // 文字區域：佔據卡片下方 10%
-            const textHeight = height * 0.1;
-            const textY = height / 2 - textHeight / 2;
+        // 🔥 根據內容組合決定佈局
+        // 情況 A：圖片 + 文字 + 語音（1,1,1）
+        // 情況 B：只有語音（0,0,1）
+        // 情況 C：只有文字（0,1,0）
+        // 情況 D：圖片 + 文字（1,1,0）
+        // 情況 E：語音 + 文字（0,1,1）
 
-            // 🔥 計算正方形圖片的尺寸（取較小的邊長）
-            // 圖片必須始終保持 1:1 的寬高比
-            const squareSize = Math.min(width - 4, imageHeight - 4);  // 留 2px 邊距
-            const squareImageY = imageY;  // 圖片置中顯示
-
-            // 🔥 創建圖片（使用 Phaser 的 load.image）
-            const imageKey = `card-image-${pairId}`;
-
-            // 檢查圖片是否已經載入
-            if (!this.textures.exists(imageKey)) {
-                // 載入圖片
-                this.load.image(imageKey, imageUrl);
-
-                // 圖片載入完成
-                this.load.once('complete', () => {
-                    if (this.textures.exists(imageKey)) {
-                        const cardImage = this.add.image(0, squareImageY, imageKey);
-                        // 🔥 設置正方形尺寸（寬度 = 高度）
-                        cardImage.setDisplaySize(squareSize, squareSize);
-                        cardImage.setOrigin(0.5);  // 置中
-                        container.add(cardImage);
-                    }
-                });
-
-                // 圖片載入失敗
-                this.load.once('loaderror', (file) => {
-                    console.warn(`⚠️ 圖片載入失敗: ${file.key}`, imageUrl);
-                });
-
-                this.load.start();
-            } else {
-                // 圖片已載入，直接創建
-                const cardImage = this.add.image(0, squareImageY, imageKey);
-                // 🔥 設置正方形尺寸（寬度 = 高度）
-                cardImage.setDisplaySize(squareSize, squareSize);
-                cardImage.setOrigin(0.5);  // 置中
-                container.add(cardImage);
-            }
-
-            // 🔥 創建文字（在圖片下方）
-            let fontSize = Math.max(18, Math.min(32, textHeight * 0.5));
-
-            // 🔥 創建臨時文字對象來測量寬度
-            const tempText = this.add.text(0, 0, text, {
-                fontSize: `${fontSize}px`,
-                fontFamily: 'Arial'
-            });
-
-            // 🔥 如果文字寬度超過卡片寬度的 85%，縮小字體
-            const maxTextWidth = width * 0.85;  // 留 15% 的邊距
-            while (tempText.width > maxTextWidth && fontSize > 14) {
-                fontSize -= 2;
-                tempText.setFontSize(fontSize);
-            }
-
-            // 銷毀臨時文字對象
-            tempText.destroy();
-
-            // 🔥 檢查文字是否為空或只包含 <br> 標籤
-            if (text && text.trim() !== '' && text.trim() !== '<br>') {
-                // 🔥 創建最終的文字對象
-                cardText = this.add.text(0, textY, text, {
-                    fontSize: `${fontSize}px`,
-                    color: '#333333',
-                    fontFamily: 'Arial',
-                    fontStyle: 'normal'
-                });
-                cardText.setOrigin(0.5);
-
-                // 添加到容器
-                container.add([background, cardText]);
-            } else {
-                // 🔥 如果沒有有效的英文文字，只添加背景
-                container.add([background]);
-            }
+        if (hasImage && hasText && hasAudio) {
+            // 情況 A：圖片 + 文字 + 語音按鈕
+            this.createCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId);
+        } else if (!hasImage && !hasText && hasAudio) {
+            // 情況 B：只有語音按鈕
+            this.createCardLayoutB(container, background, width, height, audioUrl, pairId);
+        } else if (!hasImage && hasText && !hasAudio) {
+            // 情況 C：只有文字
+            this.createCardLayoutC(container, background, width, height, text);
+        } else if (hasImage && hasText && !hasAudio) {
+            // 情況 D：圖片 + 文字
+            this.createCardLayoutD(container, background, width, height, text, imageUrl, pairId);
+        } else if (!hasImage && hasText && hasAudio) {
+            // 情況 E：語音 + 文字
+            this.createCardLayoutE(container, background, width, height, text, audioUrl, pairId);
+        } else if (hasImage && !hasText && !hasAudio) {
+            // 只有圖片（無文字、無語音）
+            this.createCardLayoutD(container, background, width, height, '', imageUrl, pairId);
+        } else if (hasImage && !hasText && hasAudio) {
+            // 圖片 + 語音（無文字）
+            this.createCardLayoutImageAudio(container, background, width, height, imageUrl, audioUrl, pairId);
         } else {
-            // 🔥 沒有圖片，只顯示文字（與原來相同）
-            let fontSize = Math.max(24, Math.min(48, height * 0.6));
-
-            // 🔥 創建臨時文字對象來測量寬度
-            const tempText = this.add.text(0, 0, text, {
-                fontSize: `${fontSize}px`,
-                fontFamily: 'Arial'
-            });
-
-            // 🔥 如果文字寬度超過卡片寬度的 85%，縮小字體
-            const maxTextWidth = width * 0.85;  // 留 15% 的邊距
-            while (tempText.width > maxTextWidth && fontSize > 18) {
-                fontSize -= 2;
-                tempText.setFontSize(fontSize);
-            }
-
-            // 銷毀臨時文字對象
-            tempText.destroy();
-
-            // 🔥 創建最終的文字對象
-            cardText = this.add.text(0, 0, text, {
-                fontSize: `${fontSize}px`,
-                color: '#333333',
-                fontFamily: 'Arial',
-                fontStyle: 'normal'
-            });
-            cardText.setOrigin(0.5);
-
-            // 添加到容器
-            container.add([background, cardText]);
+            // 其他情況：只顯示背景
+            container.add([background]);
         }
+
+
 
         // 📝 淡入動畫配置（按照順序出現）
         this.tweens.add({
@@ -2330,6 +2254,255 @@ class GameScene extends Phaser.Scene {
         this.input.setDraggable(container);
 
         return container;
+    }
+
+    // 🔥 佈局函數 - 情況 A：圖片 + 文字 + 語音按鈕
+    createCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId) {
+        // 圖片區域：佔據卡片上方 85%
+        const imageHeight = height * 0.85;
+        const imageY = -height / 2 + imageHeight / 2;
+
+        // 文字區域：佔據卡片下方 15%
+        const textHeight = height * 0.15;
+        const textY = height / 2 - textHeight / 2;
+
+        // 計算正方形圖片的尺寸
+        const squareSize = Math.min(width - 4, imageHeight - 4);
+
+        // 創建圖片
+        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId);
+
+        // 創建文字
+        this.createTextElement(container, text, 0, textY, width, textHeight);
+
+        // 創建語音按鈕（右上角）
+        const buttonSize = Math.max(30, Math.min(50, width * 0.18));
+        const buttonX = width / 2 - buttonSize / 2 - 5;
+        const buttonY = -height / 2 + buttonSize / 2 + 5;
+        this.createAudioButton(container, audioUrl, buttonX, buttonY, buttonSize, pairId);
+
+        container.add([background]);
+    }
+
+    // 🔥 佈局函數 - 情況 B：只有語音按鈕
+    createCardLayoutB(container, background, width, height, audioUrl, pairId) {
+        // 語音按鈕置中並放大
+        const buttonSize = Math.max(50, Math.min(80, width * 0.6));
+        this.createAudioButton(container, audioUrl, 0, 0, buttonSize, pairId);
+
+        container.add([background]);
+    }
+
+    // 🔥 佈局函數 - 情況 C：只有文字
+    createCardLayoutC(container, background, width, height, text) {
+        // 文字置中
+        this.createTextElement(container, text, 0, 0, width, height);
+        container.add([background]);
+    }
+
+    // 🔥 佈局函數 - 情況 D：圖片 + 文字
+    createCardLayoutD(container, background, width, height, text, imageUrl, pairId) {
+        // 圖片區域：佔據卡片上方 90%
+        const imageHeight = height * 0.9;
+        const imageY = -height / 2 + imageHeight / 2;
+
+        // 文字區域：佔據卡片下方 10%
+        const textHeight = height * 0.1;
+        const textY = height / 2 - textHeight / 2;
+
+        // 計算正方形圖片的尺寸
+        const squareSize = Math.min(width - 4, imageHeight - 4);
+
+        // 創建圖片
+        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId);
+
+        // 創建文字（如果有）
+        if (text && text.trim() !== '' && text.trim() !== '<br>') {
+            this.createTextElement(container, text, 0, textY, width, textHeight);
+        }
+
+        container.add([background]);
+    }
+
+    // 🔥 佈局函數 - 情況 E：語音 + 文字
+    createCardLayoutE(container, background, width, height, text, audioUrl, pairId) {
+        // 語音按鈕在上方
+        const buttonSize = Math.max(30, Math.min(50, width * 0.25));
+        const buttonY = -height / 2 + buttonSize / 2 + 10;
+        this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
+
+        // 文字在下方
+        const textY = height / 2 - 20;
+        this.createTextElement(container, text, 0, textY, width, height * 0.4);
+
+        container.add([background]);
+    }
+
+    // 🔥 佈局函數 - 圖片 + 語音（無文字）
+    createCardLayoutImageAudio(container, background, width, height, imageUrl, audioUrl, pairId) {
+        // 圖片佔據大部分區域
+        const imageHeight = height * 0.8;
+        const imageY = -height / 2 + imageHeight / 2;
+
+        // 計算正方形圖片的尺寸
+        const squareSize = Math.min(width - 4, imageHeight - 4);
+
+        // 創建圖片
+        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId);
+
+        // 創建語音按鈕（下方）
+        const buttonSize = Math.max(30, Math.min(50, width * 0.2));
+        const buttonY = height / 2 - buttonSize / 2 - 5;
+        this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
+
+        container.add([background]);
+    }
+
+    // 🔥 輔助函數 - 載入並顯示圖片
+    loadAndDisplayImage(container, imageUrl, x, y, size, pairId) {
+        const imageKey = `card-image-${pairId}`;
+
+        if (!this.textures.exists(imageKey)) {
+            this.load.image(imageKey, imageUrl);
+
+            this.load.once('complete', () => {
+                if (this.textures.exists(imageKey)) {
+                    const cardImage = this.add.image(x, y, imageKey);
+                    cardImage.setDisplaySize(size, size);
+                    cardImage.setOrigin(0.5);
+                    container.add(cardImage);
+                }
+            });
+
+            this.load.once('loaderror', (file) => {
+                console.warn(`⚠️ 圖片載入失敗: ${file.key}`, imageUrl);
+            });
+
+            this.load.start();
+        } else {
+            const cardImage = this.add.image(x, y, imageKey);
+            cardImage.setDisplaySize(size, size);
+            cardImage.setOrigin(0.5);
+            container.add(cardImage);
+        }
+    }
+
+    // 🔥 輔助函數 - 創建文字元素
+    createTextElement(container, text, x, y, width, height) {
+        let fontSize = Math.max(14, Math.min(48, height * 0.6));
+
+        // 創建臨時文字測量寬度
+        const tempText = this.add.text(0, 0, text, {
+            fontSize: `${fontSize}px`,
+            fontFamily: 'Arial'
+        });
+
+        const maxTextWidth = width * 0.85;
+        while (tempText.width > maxTextWidth && fontSize > 12) {
+            fontSize -= 2;
+            tempText.setFontSize(fontSize);
+        }
+
+        tempText.destroy();
+
+        // 創建最終文字
+        const cardText = this.add.text(x, y, text, {
+            fontSize: `${fontSize}px`,
+            color: '#333333',
+            fontFamily: 'Arial',
+            fontStyle: 'normal'
+        });
+        cardText.setOrigin(0.5);
+        container.add(cardText);
+
+        return cardText;
+    }
+
+    // 🔥 輔助函數 - 創建語音按鈕
+    createAudioButton(container, audioUrl, x, y, size, pairId) {
+        // 創建按鈕背景
+        const buttonBg = this.add.rectangle(x, y, size, size, 0x4CAF50);
+        buttonBg.setStrokeStyle(2, 0x2E7D32);
+        buttonBg.setOrigin(0.5);
+
+        // 創建喇叭圖標
+        const speakerIcon = this.add.text(x, y, '🔊', {
+            fontSize: `${size * 0.6}px`,
+            fontFamily: 'Arial'
+        });
+        speakerIcon.setOrigin(0.5);
+
+        // 創建按鈕容器
+        const buttonContainer = this.add.container(x, y, [buttonBg, speakerIcon]);
+        buttonContainer.setSize(size, size);
+        buttonContainer.setInteractive({ useHandCursor: true });
+
+        // 儲存音頻 URL
+        buttonContainer.setData('audioUrl', audioUrl);
+        buttonContainer.setData('isPlaying', false);
+
+        // 點擊事件
+        buttonContainer.on('pointerdown', () => {
+            this.playAudio(audioUrl, buttonContainer, buttonBg);
+        });
+
+        // Hover 效果
+        buttonContainer.on('pointerover', () => {
+            buttonBg.setFillStyle(0x45a049);
+        });
+
+        buttonContainer.on('pointerout', () => {
+            if (!buttonContainer.getData('isPlaying')) {
+                buttonBg.setFillStyle(0x4CAF50);
+            }
+        });
+
+        container.add(buttonContainer);
+        return buttonContainer;
+    }
+
+    // 🔥 輔助函數 - 播放音頻
+    playAudio(audioUrl, buttonContainer, buttonBg) {
+        if (!audioUrl || audioUrl.trim() === '') {
+            console.warn('⚠️ 音頻 URL 為空');
+            return;
+        }
+
+        // 使用 URL 的最後部分作為 key
+        const audioKey = `audio-${audioUrl.split('/').pop().split('?')[0]}`;
+
+        try {
+            // 檢查音頻是否已載入
+            if (!this.sound.get(audioKey)) {
+                // 載入並播放音頻
+                const audio = this.sound.add(audioKey, { volume: 0.8 });
+                audio.play();
+
+                // 更新按鈕狀態
+                buttonContainer.setData('isPlaying', true);
+                buttonBg.setFillStyle(0xFF9800);  // 橙色表示播放中
+
+                // 播放完成後恢復狀態
+                audio.once('complete', () => {
+                    buttonContainer.setData('isPlaying', false);
+                    buttonBg.setFillStyle(0x4CAF50);
+                });
+            } else {
+                // 音頻已載入，直接播放
+                const audio = this.sound.get(audioKey);
+                audio.play();
+
+                buttonContainer.setData('isPlaying', true);
+                buttonBg.setFillStyle(0xFF9800);
+
+                audio.once('complete', () => {
+                    buttonContainer.setData('isPlaying', false);
+                    buttonBg.setFillStyle(0x4CAF50);
+                });
+            }
+        } catch (error) {
+            console.error('❌ 播放音頻失敗:', error);
+        }
     }
 
     createRightCard(x, y, width, height, text, pairId, textPosition = 'bottom') {
