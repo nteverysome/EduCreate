@@ -2423,29 +2423,38 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 輔助函數 - 創建語音按鈕
     createAudioButton(container, audioUrl, x, y, size, pairId) {
-        // 創建按鈕背景
-        const buttonBg = this.add.rectangle(x, y, size, size, 0x4CAF50);
+        console.log('🔊 創建語音按鈕:', { x, y, size, audioUrl: audioUrl ? '有' : '無', pairId });
+
+        // 🔥 創建按鈕背景（相對於 buttonContainer 的座標為 0, 0）
+        const buttonBg = this.add.rectangle(0, 0, size, size, 0x4CAF50);
         buttonBg.setStrokeStyle(2, 0x2E7D32);
         buttonBg.setOrigin(0.5);
 
-        // 創建喇叭圖標
-        const speakerIcon = this.add.text(x, y, '🔊', {
+        // 🔥 創建喇叭圖標（相對於 buttonContainer 的座標為 0, 0）
+        const speakerIcon = this.add.text(0, 0, '🔊', {
             fontSize: `${size * 0.6}px`,
             fontFamily: 'Arial'
         });
         speakerIcon.setOrigin(0.5);
 
-        // 創建按鈕容器
-        const buttonContainer = this.add.container(x, y, [buttonBg, speakerIcon]);
+        // 🔥 創建按鈕容器（使用相對於父容器的座標 x, y）
+        const buttonContainer = this.add.container(0, 0, [buttonBg, speakerIcon]);
         buttonContainer.setSize(size, size);
         buttonContainer.setInteractive({ useHandCursor: true });
+
+        // 🔥 設置按鈕容器的位置（相對於父容器）
+        buttonContainer.setPosition(x, y);
 
         // 儲存音頻 URL
         buttonContainer.setData('audioUrl', audioUrl);
         buttonContainer.setData('isPlaying', false);
+        buttonContainer.setData('pairId', pairId);
 
         // 點擊事件
-        buttonContainer.on('pointerdown', () => {
+        buttonContainer.on('pointerdown', (pointer, localX, localY, event) => {
+            console.log('🖱️ 語音按鈕被點擊:', { pairId, audioUrl });
+            // 🔥 阻止事件冒泡，避免觸發卡片拖曳
+            event.stopPropagation();
             this.playAudio(audioUrl, buttonContainer, buttonBg);
         });
 
@@ -2460,7 +2469,14 @@ class GameScene extends Phaser.Scene {
             }
         });
 
+        // 🔥 添加到父容器
         container.add(buttonContainer);
+
+        console.log('✅ 語音按鈕已添加到容器:', {
+            buttonPosition: { x: buttonContainer.x, y: buttonContainer.y },
+            containerPosition: { x: container.x, y: container.y }
+        });
+
         return buttonContainer;
     }
 
