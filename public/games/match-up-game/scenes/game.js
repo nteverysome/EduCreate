@@ -2256,30 +2256,26 @@ class GameScene extends Phaser.Scene {
         return container;
     }
 
-    // 🔥 佈局函數 - 情況 A：圖片 + 文字 + 語音按鈕
+    // 🔥 佈局函數 - 情況 A：語音按鈕（上 30%）+ 圖片（中 40%）+ 文字（下 30%）
     createCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId) {
-        // 圖片區域：佔據卡片上方 85%
-        const imageHeight = height * 0.85;
-        const imageY = -height / 2 + imageHeight / 2;
+        console.log('🎨 佈局 A: 語音按鈕 + 圖片 + 文字', { width, height, pairId });
 
-        // 文字區域：佔據卡片下方 15%
-        const textHeight = height * 0.15;
-        const textY = height / 2 - textHeight / 2;
+        // 1️⃣ 語音按鈕區域（上方 30%）
+        const buttonAreaHeight = height * 0.3;
+        const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
+        const buttonSize = Math.max(30, Math.min(60, buttonAreaHeight * 0.7));
+        this.createAudioButton(container, audioUrl, 0, buttonAreaY, buttonSize, pairId);
 
-        // 計算正方形圖片的尺寸
-        const squareSize = Math.min(width - 4, imageHeight - 4);
+        // 2️⃣ 圖片區域（中間 40%）
+        const imageAreaHeight = height * 0.4;
+        const imageAreaY = -height / 2 + buttonAreaHeight + imageAreaHeight / 2;
+        const squareSize = Math.min(width - 4, imageAreaHeight - 4);
+        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, pairId);
 
-        // 創建圖片
-        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId);
-
-        // 創建文字
-        this.createTextElement(container, text, 0, textY, width, textHeight);
-
-        // 創建語音按鈕（右上角）
-        const buttonSize = Math.max(30, Math.min(50, width * 0.18));
-        const buttonX = width / 2 - buttonSize / 2 - 5;
-        const buttonY = -height / 2 + buttonSize / 2 + 5;
-        this.createAudioButton(container, audioUrl, buttonX, buttonY, buttonSize, pairId);
+        // 3️⃣ 文字區域（下方 30%）
+        const textAreaHeight = height * 0.3;
+        const textAreaY = height / 2 - textAreaHeight / 2;
+        this.createTextElement(container, text, 0, textAreaY, width, textAreaHeight);
 
         container.add([background]);
     }
