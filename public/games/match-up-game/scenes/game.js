@@ -1599,6 +1599,9 @@ class GameScene extends Phaser.Scene {
             // 🔥 第四步：智能計算水平間距（根據螢幕寬度）
             const horizontalSpacing = Math.max(15, Math.min(30, width * 0.015));  // 15-30px，基於寬度的1.5%
 
+            // 🔥 聲明 verticalSpacing 變量（在 if/else 之前）
+            let verticalSpacing;
+
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
                 console.log('🟦 使用正方形卡片模式');
@@ -1609,7 +1612,7 @@ class GameScene extends Phaser.Scene {
                 // 🔥 第六步：計算垂直間距（基於螢幕高度）
                 // 使用固定的垂直間距，避免估算不準確導致間距太小
                 // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
-                const verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+                verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
 
                 // 🔥 第七步：計算最大可能的列數
                 // 使用最小卡片尺寸來計算最大可能列數
@@ -1767,7 +1770,12 @@ class GameScene extends Phaser.Scene {
                 const minCardWidth = 200;
                 const minCardHeight = 100;
 
-                // 🔥 第六步：計算最大可能的列數和行數
+                // 🔥 第六步：計算垂直間距（基於螢幕高度）
+                // 使用固定的垂直間距，避免估算不準確導致間距太小
+                // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
+                verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+
+                // 🔥 第七步：計算最大可能的列數和行數
                 const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
                 const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
 
@@ -1844,9 +1852,11 @@ class GameScene extends Phaser.Scene {
         const rows = Math.ceil(itemCount / cols);
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
 
-        // 🔥 智能垂直間距：緊湊模式使用動態計算的間距，桌面模式使用0
-        // 📝 dynamicVerticalSpacing 已在緊湊模式中計算（字體大小的20%，最小5px）
-        const verticalSpacing = isCompactMode ? (chineseTextHeight * 0.2) : 0;
+        // 🔥 緊湊模式需要重新計算 verticalSpacing（基於實際的中文文字高度）
+        // 桌面模式的 verticalSpacing 已在上面的 if/else 分支中定義
+        if (isCompactMode) {
+            verticalSpacing = Math.max(5, Math.floor(chineseTextHeight * 0.2));  // 字體大小的20%，最小5px
+        }
 
         // 🔥 計算頂部偏移，確保佈局垂直居中或從頂部開始（手機版減少10px）
         // 📝 totalUnitHeight 已經包含 chineseTextHeight 和 verticalSpacing，所以不需要重複加
