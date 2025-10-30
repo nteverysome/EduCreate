@@ -44,6 +44,179 @@ class GameScene extends Phaser.Scene {
         this.totalGameTime = 0;      // 總遊戲時間（秒）
         this.allPagesAnswers = [];   // 所有頁面的用戶答案記錄
         this.currentPageAnswers = []; // 當前頁面的用戶答案記錄
+
+        // Audio diagnostics and dev helpers
+        this.audioDiagnostics = null;
+        this.devLayoutDefault = null;
+        this.restartData = {};
+    }
+
+    init(data = {}) {
+        this.restartData = data || {};
+
+        if (this.restartData.devLayoutTest) {
+            console.log('🧪 GameScene: 接收到開發測試參數', this.restartData.devLayoutTest);
+        } else {
+            this.devLayoutDefault = null;
+        }
+    }
+
+    loadDevLayoutTestData(mode, urlParams) {
+        const normalizedMode = (mode || '').toLowerCase();
+        const layoutParam = urlParams ? urlParams.get('layout') : null;
+        const defaultLayout = normalizedMode === 'separated' ? 'separated' : normalizedMode === 'mixed' ? 'mixed' : 'mixed';
+
+        this.devLayoutDefault = layoutParam || defaultLayout;
+        this.vocabularyLoadError = null;
+
+        this.pairs = this.getDevLayoutSamplePairs();
+        this.audioDiagnostics = this.buildAudioDiagnostics(this.pairs);
+        window.matchUpAudioDiagnostics = this.audioDiagnostics;
+
+        console.log('🧪 GameScene: 已載入開發測試詞彙資料', {
+            defaultLayout: this.devLayoutDefault,
+            totalPairs: this.pairs.length,
+            audioDiagnostics: this.audioDiagnostics
+        });
+
+        return true;
+    }
+
+    getDevLayoutSamplePairs() {
+        const imageA = '/icons/icon-128x128.png';
+        const imageB = '/icons/icon-144x144.png';
+        const audioA = '/games/runner-game/public/assets/sounds/coin.mp3';
+        const audioB = '/games/pushpull-game/dist/assets/sounds/win.mp3';
+
+        return [
+            {
+                id: 1,
+                question: 'Apple',
+                answer: '蘋果',
+                english: 'Apple',
+                chinese: '蘋果',
+                imageUrl: imageA,
+                chineseImageUrl: null,
+                audioUrl: audioA
+            },
+            {
+                id: 2,
+                question: '',
+                answer: '語音提示',
+                english: '',
+                chinese: '語音提示',
+                imageUrl: null,
+                chineseImageUrl: null,
+                audioUrl: audioB
+            },
+            {
+                id: 3,
+                question: 'Sunshine',
+                answer: '陽光',
+                english: 'Sunshine',
+                chinese: '陽光',
+                imageUrl: null,
+                chineseImageUrl: null,
+                audioUrl: null
+            },
+            {
+                id: 4,
+                question: 'Mountain',
+                answer: '山脈',
+                english: 'Mountain',
+                chinese: '山脈',
+                imageUrl: imageB,
+                chineseImageUrl: null,
+                audioUrl: null
+            },
+            {
+                id: 5,
+                question: 'Harmony',
+                answer: '和諧',
+                english: 'Harmony',
+                chinese: '和諧',
+                imageUrl: null,
+                chineseImageUrl: null,
+                audioUrl: audioA
+            },
+            {
+                id: 6,
+                question: 'Placeholder',
+                answer: '缺少語音',
+                english: 'Placeholder',
+                chinese: '缺少語音',
+                imageUrl: imageA,
+                chineseImageUrl: null,
+                audioUrl: ''
+            }
+        ];
+    }
+
+    buildAudioDiagnostics(pairs) {
+        const diagnostics = {
+            total: pairs.length,
+            available: 0,
+            missing: 0,
+            invalid: 0,
+            missingItems: [],
+            invalidItems: []
+        };
+
+        pairs.forEach((pair) => {
+            const raw = typeof pair.audioUrl === 'string' ? pair.audioUrl.trim() : '';
+            const hasValue = !!raw;
+            const isValidFormat = hasValue ? /^(https?:\/\/|\/)/.test(raw) : false;
+
+            if (hasValue && isValidFormat) {
+                diagnostics.available += 1;
+                pair.audioUrl = raw;
+                pair.audioStatus = 'available';
+                pair.invalidAudioUrl = null;
+            } else if (hasValue && !isValidFormat) {
+                diagnostics.invalid += 1;
+                diagnostics.invalidItems.push({ id: pair.id, english: pair.english || pair.question, audioUrl: raw });
+                pair.audioUrl = null;
+                pair.audioStatus = 'invalid';
+                pair.invalidAudioUrl = raw;
+            } else {
+                diagnostics.missing += 1;
+                diagnostics.missingItems.push({ id: pair.id, english: pair.english || pair.question });
+                pair.audioUrl = null;
+                pair.audioStatus = 'missing';
+                pair.invalidAudioUrl = null;
+            }
+        });
+
+        console.log('🎧 音訊診斷結果', diagnostics);
+
+        if (diagnostics.missing || diagnostics.invalid) {
+            console.warn('⚠️ 發現缺少或無效的 audioUrl，請檢查 CMS/後端輸出');
+        }
+
+        return diagnostics;
+    }
+
+    addAudioStatusBadge(container, width, height, audioStatus) {
+        const badgeWidth = Math.min(width * 0.6, 100);
+        const badgeHeight = Math.min(height * 0.18, 26);
+        const badgeX = width / 2 - badgeWidth / 2 - 8;
+        const badgeY = -height / 2 + badgeHeight / 2 + 8;
+        const strokeColor = audioStatus === 'invalid' ? 0xf9a825 : 0xb0bec5;
+        const icon = audioStatus === 'invalid' ? '⚠️' : '🔇';
+        const label = audioStatus === 'invalid' ? 'Audio URL invalid' : 'No audio';
+
+        const badgeBg = this.add.rectangle(badgeX, badgeY, badgeWidth, badgeHeight, 0xf5f5f5, 0.92);
+        badgeBg.setOrigin(0.5);
+        badgeBg.setStrokeStyle(1.5, strokeColor);
+
+        const badgeText = this.add.text(badgeX, badgeY, `${icon} ${label}`, {
+            fontSize: `${Math.max(10, badgeHeight * 0.55)}px`,
+            color: '#546E7A',
+            fontFamily: 'Arial'
+        });
+        badgeText.setOrigin(0.5);
+
+        container.add([badgeBg, badgeText]);
     }
 
     // 從 API 載入詞彙數據
@@ -56,6 +229,12 @@ class GameScene extends Phaser.Scene {
             const urlParams = new URLSearchParams(window.location.search);
             const activityId = urlParams.get('activityId');
             const customVocabulary = urlParams.get('customVocabulary');
+            const devLayoutTest = (this.restartData && this.restartData.devLayoutTest) || urlParams.get('devLayoutTest');
+
+            if (devLayoutTest) {
+                console.warn('🧪 GameScene: 啟用開發測試資料集，跳過 API 載入', { devLayoutTest });
+                return this.loadDevLayoutTestData(devLayoutTest, urlParams);
+            }
 
             console.log('🔍 Match-up 遊戲 - URL 參數:', {
                 activityId,
@@ -145,11 +324,30 @@ class GameScene extends Phaser.Scene {
                     audioUrl: item.audioUrl || null  // 🔥 添加音頻 URL
                 }));
 
+                this.audioDiagnostics = this.buildAudioDiagnostics(this.pairs);
+                window.matchUpAudioDiagnostics = this.audioDiagnostics;
+
                 console.log('✅ 詞彙數據轉換完成:', {
                     totalPairs: this.pairs.length,
                     firstPair: this.pairs[0],
                     hasImages: this.pairs.some(p => p.imageUrl || p.chineseImageUrl)
                 });
+
+                // 🔥 調試日誌 - 詳細檢查每個詞彙項目的english字段
+                console.log('🔍 詳細詞彙數據檢查:');
+                this.pairs.forEach((pair, index) => {
+                    console.log(`詞彙 ${index + 1}:`, {
+                        id: pair.id,
+                        english: pair.english,
+                        englishType: typeof pair.english,
+                        englishLength: pair.english ? pair.english.length : 'null/undefined',
+                        chinese: pair.chinese,
+                        chineseType: typeof pair.chinese,
+                        hasImage: !!pair.imageUrl,
+                        hasAudio: !!pair.audioUrl
+                    });
+                });
+
                 return true;
             } else {
                 // 🔥 修復：不使用默認數據，拋出錯誤
@@ -365,8 +563,11 @@ class GameScene extends Phaser.Scene {
         const urlParams = new URLSearchParams(window.location.search);
 
         // 讀取佈局選項
-        this.layout = urlParams.get('layout') || 'separated';
-        console.log('🎮 佈局模式:', this.layout);
+        const layoutParam = urlParams.get('layout');
+        this.layout = layoutParam || this.devLayoutDefault || 'separated';
+        console.log('🎮 佈局模式:', this.layout, {
+            source: layoutParam ? 'url' : this.devLayoutDefault ? 'dev-default' : 'fallback'
+        });
 
         // 讀取隨機選項
         this.random = urlParams.get('random') || 'different';
@@ -2084,9 +2285,26 @@ class GameScene extends Phaser.Scene {
         let audioButton;
 
         // 🔥 檢查內容組合
+        const pairData = this.pairs.find(pair => pair.id === pairId);
         const hasImage = imageUrl && imageUrl.trim() !== '';
         const hasText = text && text.trim() !== '' && text.trim() !== '<br>';
-        const hasAudio = audioUrl && audioUrl.trim() !== '';
+        const audioStatus = pairData ? pairData.audioStatus : (audioUrl ? 'available' : 'missing');
+        const hasAudio = audioStatus === 'available';
+        const safeAudioUrl = hasAudio ? audioUrl : null;
+
+        // 🔥 調試日誌 - 查看實際數據內容
+        console.log('🔍 createLeftCard 調試信息:', {
+            pairId,
+            text: text,
+            textType: typeof text,
+            textLength: text ? text.length : 'null/undefined',
+            hasText: hasText,
+            hasImage: hasImage,
+            audioStatus: audioStatus,
+            imageUrl: imageUrl,
+            audioUrl: safeAudioUrl,
+            invalidAudioUrl: pairData ? pairData.invalidAudioUrl : null
+        });
 
         // 🔥 根據內容組合決定佈局
         // 情況 A：圖片 + 文字 + 語音（1,1,1）
@@ -2097,10 +2315,10 @@ class GameScene extends Phaser.Scene {
 
         if (hasImage && hasText && hasAudio) {
             // 情況 A：圖片 + 文字 + 語音按鈕
-            this.createCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId);
+            this.createCardLayoutA(container, background, width, height, text, imageUrl, safeAudioUrl, pairId);
         } else if (!hasImage && !hasText && hasAudio) {
             // 情況 B：只有語音按鈕
-            this.createCardLayoutB(container, background, width, height, audioUrl, pairId);
+            this.createCardLayoutB(container, background, width, height, safeAudioUrl, pairId);
         } else if (!hasImage && hasText && !hasAudio) {
             // 情況 C：只有文字（已實現）
             this.createCardLayoutC(container, background, width, height, text);
@@ -2109,19 +2327,21 @@ class GameScene extends Phaser.Scene {
             this.createCardLayoutD(container, background, width, height, text, imageUrl, pairId);
         } else if (!hasImage && hasText && hasAudio) {
             // 情況 E：語音 + 文字
-            this.createCardLayoutE(container, background, width, height, text, audioUrl, pairId);
+            this.createCardLayoutE(container, background, width, height, text, safeAudioUrl, pairId);
         } else if (hasImage && !hasText && !hasAudio) {
             // 只有圖片（無文字、無語音）
             this.createCardLayoutD(container, background, width, height, '', imageUrl, pairId);
         } else if (hasImage && !hasText && hasAudio) {
             // 圖片 + 語音（無文字）
-            this.createCardLayoutA(container, background, width, height, '', imageUrl, audioUrl, pairId);
+            this.createCardLayoutA(container, background, width, height, '', imageUrl, safeAudioUrl, pairId);
         } else {
             // 其他情況：只顯示背景
             container.add([background]);
         }
 
-
+        if (audioStatus && audioStatus !== 'available') {
+            this.addAudioStatusBadge(container, width, height, audioStatus);
+        }
 
         // 📝 淡入動畫配置（按照順序出現）
         this.tweens.add({
@@ -2143,7 +2363,10 @@ class GameScene extends Phaser.Scene {
             text: cardText,
             isMatched: false,
             originalX: x,
-            originalY: y
+            originalY: y,
+            hasAudio: hasAudio,
+            audioStatus: audioStatus,
+            invalidAudioUrl: pairData ? pairData.invalidAudioUrl : null
         });
 
         // 拖曳開始
@@ -2408,6 +2631,15 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 輔助函數 - 創建文字元素
     createTextElement(container, text, x, y, width, height) {
+        // 🔥 調試日誌 - 確認函數被調用
+        console.log('📝 createTextElement 被調用:', {
+            text: text,
+            textType: typeof text,
+            textLength: text ? text.length : 'null/undefined',
+            x, y, width, height,
+            containerExists: !!container
+        });
+
         let fontSize = Math.max(14, Math.min(48, height * 0.6));
 
         // 創建臨時文字測量寬度
@@ -2433,6 +2665,18 @@ class GameScene extends Phaser.Scene {
         });
         cardText.setOrigin(0.5);
         container.add(cardText);
+
+        // 🔥 調試日誌 - 確認文字對象創建
+        console.log('✅ 文字對象已創建:', {
+            text: text,
+            fontSize: fontSize,
+            textWidth: cardText.width,
+            textHeight: cardText.height,
+            visible: cardText.visible,
+            alpha: cardText.alpha,
+            x: cardText.x,
+            y: cardText.y
+        });
 
         return cardText;
     }
