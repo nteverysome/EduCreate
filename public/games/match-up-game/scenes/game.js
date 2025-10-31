@@ -2361,7 +2361,7 @@ class GameScene extends Phaser.Scene {
             container.add([background]);
         }
 
-        // 🔥 移除 "No audio" 標示（用戶要求）
+        // 🔥 已移除 "No audio" 標示（用戶要求）- 禁用音頻狀態徽章顯示
         // if (audioStatus && audioStatus !== 'available') {
         //     this.addAudioStatusBadge(container, width, height, audioStatus);
         // }
