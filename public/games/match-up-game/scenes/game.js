@@ -346,8 +346,8 @@ class GameScene extends Phaser.Scene {
                     audioUrl: item.audioUrl || null  // 🔥 添加音頻 URL
                 }));
 
-                // 🔥 自動為缺失的音頻生成 TTS
-                await this.generateMissingAudioUrls();
+                // 🔥 後台異步生成缺失的音頻（不阻塞遊戲加載）
+                this.generateMissingAudioUrlsInBackground();
 
                 this.audioDiagnostics = this.buildAudioDiagnostics(this.pairs);
                 window.matchUpAudioDiagnostics = this.audioDiagnostics;
@@ -2715,19 +2715,27 @@ class GameScene extends Phaser.Scene {
         return cardText;
     }
 
-    // 🔥 輔助函數 - 為缺失的音頻生成 TTS
-    async generateMissingAudioUrls() {
-        console.log('🎵 開始檢查並生成缺失的音頻...');
+    // 🔥 輔助函數 - 後台異步生成缺失的音頻（不阻塞遊戲加載）
+    generateMissingAudioUrlsInBackground() {
+        console.log('🎵 [後台] 開始檢查並生成缺失的音頻...');
 
         const missingAudioPairs = this.pairs.filter(pair => !pair.audioUrl);
 
         if (missingAudioPairs.length === 0) {
-            console.log('✅ 所有詞彙都有音頻，無需生成');
+            console.log('✅ [後台] 所有詞彙都有音頻，無需生成');
             return;
         }
 
-        console.log(`⏳ 發現 ${missingAudioPairs.length} 個缺失音頻的詞彙，開始生成...`);
+        console.log(`⏳ [後台] 發現 ${missingAudioPairs.length} 個缺失音頻的詞彙，在後台生成...`);
 
+        // 🔥 使用 Promise 在後台執行，不等待結果
+        this.generateMissingAudioUrlsAsync(missingAudioPairs).catch(error => {
+            console.error('❌ [後台] 生成缺失音頻時出錯:', error);
+        });
+    }
+
+    // 🔥 輔助函數 - 異步生成缺失的音頻
+    async generateMissingAudioUrlsAsync(missingAudioPairs) {
         try {
             for (const pair of missingAudioPairs) {
                 try {
@@ -2745,21 +2753,21 @@ class GameScene extends Phaser.Scene {
                     if (response.ok) {
                         const data = await response.json();
                         pair.audioUrl = data.audioUrl;
-                        console.log(`✅ 生成音頻: ${pair.english}`);
+                        console.log(`✅ [後台] 生成音頻: ${pair.english}`);
                     } else {
-                        console.warn(`⚠️ 生成音頻失敗: ${pair.english} (${response.status})`);
+                        console.warn(`⚠️ [後台] 生成音頻失敗: ${pair.english} (${response.status})`);
                     }
                 } catch (error) {
-                    console.error(`❌ 生成音頻異常: ${pair.english}`, error);
+                    console.error(`❌ [後台] 生成音頻異常: ${pair.english}`, error);
                 }
 
                 // 避免 API 限制，每個請求之間等待 200ms
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
 
-            console.log('✅ 音頻生成完成');
+            console.log('✅ [後台] 音頻生成完成');
         } catch (error) {
-            console.error('❌ 生成缺失音頻時出錯:', error);
+            console.error('❌ [後台] 生成缺失音頻時出錯:', error);
         }
     }
 

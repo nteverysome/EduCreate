@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "C:\\Users\\Administrator\\Tools\\node\\node-v23.9.0-win-x64\\npx.cmd",
+      "args": ["-y", "chrome-devtools-mcp@latest"],
+      "env": {
+        "NODE_PATH": "C:\\Users\\Administrator\\Tools\\node\\node-v23.9.0-win-x64",
+        "PATH": "C:\\Users\\Administrator\\Tools\\node\\node-v23.9.0-win-x64;%PATH%"
+      }
+    },
+    "sequential-thinking": {
+      "command": "C:\\Users\\Administrator\\Tools\\node\\node-v23.9.0-win-x64\\npx.cmd",
+      "args": ["-y", "sequential-thinking@latest"],
+      "env": {
+        "NODE_PATH": "C:\\Users\\Administrator\\Tools\\node\\node-v23.9.0-win-x64",
+        "PATH": "C:\\Users\\Administrator\\Tools\\node\\node-v23.9.0-win-x64;%PATH%"
+      }
+    },
+    "context7": {
+      "command": "C:\\Users\\Administrator\\Tools\\node\\node-v23.9.0-win-x64\\npx.cmd",
+      "args": ["-y", "context7@latest"],
+      "env": {
+        "NODE_PATH": "C:\\Users\\Administrator\\Tools\\node\\node-v23.9.0-win-x64",
+        "PATH": "C:\\Users\\Administrator\\Tools\\node\\node-v23.9.0-win-x64;%PATH%"
+      }
+    },
+    "mcp-feedback-collector": {
+      "command": "uvx",
+      "args": ["mcp-feedback-collector"],
+      "env": {
+        "MCP_DIALOG_TIMEOUT": "600"
+      }
+    }
+  }
+}

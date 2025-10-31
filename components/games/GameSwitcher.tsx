@@ -377,10 +377,15 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   const getGameUrlWithVocabulary = (game: GameConfig): string => {
     let url = game.url;
 
-    // 如果有自定義詞彙和活動 ID，添加到 URL 參數中
-    if (customVocabulary.length > 0 && activityId) {
+    // 如果有活動 ID，添加到 URL 參數中（不管 customVocabulary 是否載入成功）
+    if (activityId) {
       const separator = url.includes('?') ? '&' : '?';
-      url += `${separator}activityId=${activityId}&customVocabulary=true`;
+      url += `${separator}activityId=${activityId}`;
+      
+      // 只有當 customVocabulary 成功載入時才添加 customVocabulary=true 參數
+      if (customVocabulary.length > 0) {
+        url += `&customVocabulary=true`;
+      }
 
       // 優先檢查是否為學生遊戲模式（有 assignmentId）
       if (assignmentId) {

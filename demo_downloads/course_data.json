@@ -1,0 +1,24 @@
+{
+  "course_id": "AI101",
+  "title": "人工智能入門",
+  "instructor": "張教授",
+  "students": 150,
+  "modules": [
+    {
+      "id": 1,
+      "name": "AI 基礎概念",
+      "duration": "2週"
+    },
+    {
+      "id": 2,
+      "name": "機器學習",
+      "duration": "3週"
+    },
+    {
+      "id": 3,
+      "name": "深度學習",
+      "duration": "4週"
+    }
+  ],
+  "created_at": "2025-10-30T15:52:35.905773"
+}

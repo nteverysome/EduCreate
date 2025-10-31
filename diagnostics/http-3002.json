@@ -1,0 +1,14 @@
+{
+  "root": {
+    "error": "timeout"
+  },
+  "session": {
+    "error": "Error: connect ECONNREFUSED ::1:3002"
+  },
+  "matchUp": {
+    "error": "timeout"
+  },
+  "audio": {
+    "error": "timeout"
+  }
+}

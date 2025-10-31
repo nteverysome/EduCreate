@@ -882,6 +882,20 @@ export class MatchGameManager {
       if (!pair.leftItem || !pair.rightItem) {
         throw new Error('配對項目不完整');
       }
+      
+      // 檢查項目是否有有效的 id
+      if (!pair.leftItem.id || typeof pair.leftItem.id !== 'string') {
+        throw new Error(`配對項目 ${pair.id} 的左側項目缺少有效的 id`);
+      }
+      
+      if (!pair.rightItem.id || typeof pair.rightItem.id !== 'string') {
+        throw new Error(`配對項目 ${pair.id} 的右側項目缺少有效的 id`);
+      }
+      
+      // 檢查項目內容
+      if (!pair.leftItem.content || !pair.rightItem.content) {
+        throw new Error(`配對項目 ${pair.id} 缺少內容`);
+      }
     }
   }
 
@@ -895,18 +909,35 @@ export class MatchGameManager {
   }
 
   private findPairByItems(item1Id: string, item2Id: string): MatchPair | null {
-    if (!this.gameState) return null;
+    if (!this.gameState || !this.gameState.pairs) return null;
 
-    return this.gameState.pairs.find(pair =>
-      (pair.leftItem.id === item1Id && pair.rightItem.id === item2Id) ||
-      (pair.leftItem.id === item2Id && pair.rightItem.id === item1Id)
-    ) || null;
+    return this.gameState.pairs.find(pair => {
+      // 添加防護性檢查
+      if (!pair || !pair.leftItem || !pair.rightItem) {
+        console.warn('發現無效的配對項目:', pair);
+        return false;
+      }
+      
+      if (!pair.leftItem.id || !pair.rightItem.id) {
+        console.warn('配對項目缺少 id:', pair);
+        return false;
+      }
+      
+      return (pair.leftItem.id === item1Id && pair.rightItem.id === item2Id) ||
+             (pair.leftItem.id === item2Id && pair.rightItem.id === item1Id);
+    }) || null;
   }
 
   private findItemById(itemId: string): MatchItem | null {
-    if (!this.gameState) return null;
+    if (!this.gameState || !this.gameState.pairs) return null;
 
     for (const pair of this.gameState.pairs) {
+      // 添加防護性檢查
+      if (!pair || !pair.leftItem || !pair.rightItem) {
+        console.warn('發現無效的配對項目:', pair);
+        continue;
+      }
+      
       if (pair.leftItem.id === itemId) return pair.leftItem;
       if (pair.rightItem.id === itemId) return pair.rightItem;
     }
@@ -914,12 +945,17 @@ export class MatchGameManager {
   }
 
   private isItemMatched(itemId: string): boolean {
-    if (!this.gameState) return false;
+    if (!this.gameState || !this.gameState.pairs || !this.gameState.matchedPairs) return false;
 
-    return this.gameState.pairs.some(pair =>
-      this.gameState!.matchedPairs.includes(pair.id) &&
-      (pair.leftItem.id === itemId || pair.rightItem.id === itemId)
-    );
+    return this.gameState.pairs.some(pair => {
+      // 添加防護性檢查
+      if (!pair || !pair.leftItem || !pair.rightItem) {
+        return false;
+      }
+      
+      return this.gameState!.matchedPairs.includes(pair.id) &&
+             (pair.leftItem.id === itemId || pair.rightItem.id === itemId);
+    });
   }
 
   private getUnmatchedPairs(): MatchPair[] {

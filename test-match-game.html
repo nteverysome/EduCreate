@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配對遊戲測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>配對遊戲 TypeError 修復測試</h1>
+        
+        <div class="test-section">
+            <h2>測試說明</h2>
+            <p>這個頁面測試我們對 MatchGameManager 中 TypeError 的修復。我們會測試各種邊界情況和錯誤數據。</p>
+        </div>
+
+        <div class="test-section">
+            <h2>測試控制</h2>
+            <button onclick="runAllTests()">運行所有測試</button>
+            <button onclick="testValidData()">測試有效數據</button>
+            <button onclick="testInvalidData()">測試無效數據</button>
+            <button onclick="testEdgeCases()">測試邊界情況</button>
+            <button onclick="clearLog()">清除日誌</button>
+        </div>
+
+        <div class="test-section">
+            <h2>測試結果</h2>
+            <div id="testResults"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>詳細日誌</h2>
+            <div id="testLog" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // 模擬 MatchGameManager 的核心邏輯（簡化版本，包含我們的修復）
+        class MatchGameManager {
+            constructor() {
+                this.gameState = null;
+            }
+
+            initializeGame(pairs) {
+                this.log('初始化遊戲，配對數據：', pairs);
+                
+                if (!this.validatePairs(pairs)) {
+                    this.log('❌ 配對數據驗證失敗');
+                    return false;
+                }
+                
+                this.gameState = {
+                    pairs: pairs,
+                    matchedPairs: []
+                };
+                
+                this.log('✅ 遊戲初始化成功');
+                return true;
+            }
+
+            validatePairs(pairs) {
+                this.log('驗證配對數據...');
+                
+                if (!Array.isArray(pairs)) {
+                    this.log('❌ pairs 不是數組');
+                    return false;
+                }
+
+                for (let i = 0; i < pairs.length; i++) {
+                    const pair = pairs[i];
+                    
+                    // 防禦性檢查：確保 pair 存在
+                    if (!pair) {
+                        this.log(`❌ 配對 ${i} 為 null 或 undefined`);
+                        return false;
+                    }
+
+                    // 防禦性檢查：確保 leftItem 和 rightItem 存在
+                    if (!pair.leftItem || !pair.rightItem) {
+                        this.log(`❌ 配對 ${i} 缺少 leftItem 或 rightItem`);
+                        return false;
+                    }
+
+                    // 防禦性檢查：確保 id 屬性存在且為字符串
+                    if (!pair.leftItem.id || typeof pair.leftItem.id !== 'string') {
+                        this.log(`❌ 配對 ${i} 的 leftItem.id 無效`);
+                        return false;
+                    }
+
+                    if (!pair.rightItem.id || typeof pair.rightItem.id !== 'string') {
+                        this.log(`❌ 配對 ${i} 的 rightItem.id 無效`);
+                        return false;
+                    }
+
+                    // 防禦性檢查：確保 content 不為空
+                    if (!pair.leftItem.content || !pair.rightItem.content) {
+                        this.log(`❌ 配對 ${i} 的內容為空`);
+                        return false;
+                    }
+                }
+
+                this.log('✅ 配對數據驗證通過');
+                return true;
+            }
+
+            findPairByItems(leftId, rightId) {
+                this.log(`查找配對：${leftId} <-> ${rightId}`);
+                
+                // 防禦性檢查：確保遊戲狀態存在
+                if (!this.gameState || !this.gameState.pairs) {
+                    this.log('❌ 遊戲狀態無效');
+                    return null;
+                }
+
+                for (const pair of this.gameState.pairs) {
+                    // 防禦性檢查：確保 pair 及其屬性存在
+                    if (!pair || !pair.leftItem || !pair.rightItem) {
+                        this.log('⚠️ 跳過無效的配對項目');
+                        continue;
+                    }
+
+                    // 防禦性檢查：確保 id 屬性存在
+                    if (!pair.leftItem.id || !pair.rightItem.id) {
+                        this.log('⚠️ 跳過缺少 id 的配對項目');
+                        continue;
+                    }
+
+                    if (pair.leftItem.id === leftId && pair.rightItem.id === rightId) {
+                        this.log('✅ 找到匹配的配對');
+                        return pair;
+                    }
+                }
+
+                this.log('❌ 未找到匹配的配對');
+                return null;
+            }
+
+            findItemById(itemId) {
+                this.log(`查找項目：${itemId}`);
+                
+                // 防禦性檢查：確保遊戲狀態存在
+                if (!this.gameState || !this.gameState.pairs) {
+                    this.log('❌ 遊戲狀態無效');
+                    return null;
+                }
+
+                for (const pair of this.gameState.pairs) {
+                    // 防禦性檢查：確保 pair 及其屬性存在
+                    if (!pair || !pair.leftItem || !pair.rightItem) {
+                        this.log('⚠️ 跳過無效的配對項目');
+                        continue;
+                    }
+
+                    // 防禦性檢查：確保 id 屬性存在
+                    if (pair.leftItem.id && pair.leftItem.id === itemId) {
+                        this.log('✅ 在左側找到項目');
+                        return pair.leftItem;
+                    }
+                    
+                    if (pair.rightItem.id && pair.rightItem.id === itemId) {
+                        this.log('✅ 在右側找到項目');
+                        return pair.rightItem;
+                    }
+                }
+
+                this.log('❌ 未找到項目');
+                return null;
+            }
+
+            isItemMatched(itemId) {
+                this.log(`檢查項目是否已匹配：${itemId}`);
+                
+                // 防禦性檢查：確保遊戲狀態存在
+                if (!this.gameState || !this.gameState.pairs || !this.gameState.matchedPairs) {
+                    this.log('❌ 遊戲狀態無效');
+                    return false;
+                }
+
+                for (const pair of this.gameState.matchedPairs) {
+                    // 防禦性檢查：確保 pair 及其屬性存在
+                    if (!pair || !pair.leftItem || !pair.rightItem) {
+                        this.log('⚠️ 跳過無效的已匹配配對');
+                        continue;
+                    }
+
+                    // 防禦性檢查：確保 id 屬性存在
+                    if ((pair.leftItem.id && pair.leftItem.id === itemId) || 
+                        (pair.rightItem.id && pair.rightItem.id === itemId)) {
+                        this.log('✅ 項目已匹配');
+                        return true;
+                    }
+                }
+
+                this.log('❌ 項目未匹配');
+                return false;
+            }
+
+            log(message, data = null) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logMessage = `[${timestamp}] ${message}`;
+                console.log(logMessage, data || '');
+                
+                const logElement = document.getElementById('testLog');
+                if (logElement) {
+                    logElement.textContent += logMessage + (data ? ' ' + JSON.stringify(data) : '') + '\n';
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+        }
+
+        // 測試數據
+        const validPairs = [
+            {
+                leftItem: { id: "1", content: "蘋果" },
+                rightItem: { id: "2", content: "Apple" }
+            },
+            {
+                leftItem: { id: "3", content: "香蕉" },
+                rightItem: { id: "4", content: "Banana" }
+            }
+        ];
+
+        const invalidPairs = [
+            null,
+            {
+                leftItem: null,
+                rightItem: { id: "2", content: "Apple" }
+            },
+            {
+                leftItem: { id: "3", content: "香蕉" },
+                rightItem: null
+            },
+            {
+                leftItem: { content: "橘子" }, // 缺少 id
+                rightItem: { id: "6", content: "Orange" }
+            },
+            {
+                leftItem: { id: "", content: "葡萄" }, // 空 id
+                rightItem: { id: "8", content: "Grape" }
+            }
+        ];
+
+        let gameManager = new MatchGameManager();
+        let testResults = [];
+
+        function addTestResult(testName, success, message) {
+            testResults.push({ testName, success, message });
+            updateTestResults();
+        }
+
+        function updateTestResults() {
+            const resultsElement = document.getElementById('testResults');
+            resultsElement.innerHTML = '';
+            
+            testResults.forEach(result => {
+                const div = document.createElement('div');
+                div.className = `test-section ${result.success ? 'success' : 'error'}`;
+                div.innerHTML = `
+                    <strong>${result.testName}</strong>: 
+                    ${result.success ? '✅ 通過' : '❌ 失敗'} - 
+                    ${result.message}
+                `;
+                resultsElement.appendChild(div);
+            });
+        }
+
+        function testValidData() {
+            gameManager.log('=== 開始測試有效數據 ===');
+            
+            try {
+                const success = gameManager.initializeGame(validPairs);
+                if (success) {
+                    // 測試查找功能
+                    const pair = gameManager.findPairByItems("1", "2");
+                    const item = gameManager.findItemById("3");
+                    const isMatched = gameManager.isItemMatched("1");
+                    
+                    if (pair && item && !isMatched) {
+                        addTestResult('有效數據測試', true, '所有功能正常工作');
+                    } else {
+                        addTestResult('有效數據測試', false, '查找功能異常');
+                    }
+                } else {
+                    addTestResult('有效數據測試', false, '初始化失敗');
+                }
+            } catch (error) {
+                addTestResult('有效數據測試', false, `拋出異常: ${error.message}`);
+            }
+        }
+
+        function testInvalidData() {
+            gameManager.log('=== 開始測試無效數據 ===');
+            
+            try {
+                const success = gameManager.initializeGame(invalidPairs);
+                if (!success) {
+                    addTestResult('無效數據測試', true, '正確拒絕了無效數據');
+                } else {
+                    addTestResult('無效數據測試', false, '錯誤接受了無效數據');
+                }
+            } catch (error) {
+                addTestResult('無效數據測試', false, `拋出異常: ${error.message}`);
+            }
+        }
+
+        function testEdgeCases() {
+            gameManager.log('=== 開始測試邊界情況 ===');
+            
+            let allPassed = true;
+            
+            try {
+                // 測試空數組
+                let success = gameManager.initializeGame([]);
+                if (success) {
+                    allPassed = false;
+                }
+                
+                // 測試 null
+                success = gameManager.initializeGame(null);
+                if (success) {
+                    allPassed = false;
+                }
+                
+                // 測試 undefined
+                success = gameManager.initializeGame(undefined);
+                if (success) {
+                    allPassed = false;
+                }
+                
+                // 測試在未初始化狀態下調用方法
+                gameManager.gameState = null;
+                const pair = gameManager.findPairByItems("1", "2");
+                const item = gameManager.findItemById("1");
+                const isMatched = gameManager.isItemMatched("1");
+                
+                if (pair !== null || item !== null || isMatched !== false) {
+                    allPassed = false;
+                }
+                
+                if (allPassed) {
+                    addTestResult('邊界情況測試', true, '所有邊界情況處理正確');
+                } else {
+                    addTestResult('邊界情況測試', false, '某些邊界情況處理不當');
+                }
+            } catch (error) {
+                addTestResult('邊界情況測試', false, `拋出異常: ${error.message}`);
+            }
+        }
+
+        function runAllTests() {
+            testResults = [];
+            clearLog();
+            gameManager.log('=== 開始運行所有測試 ===');
+            
+            testValidData();
+            testInvalidData();
+            testEdgeCases();
+            
+            gameManager.log('=== 所有測試完成 ===');
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').textContent = '';
+        }
+
+        // 頁面加載時自動運行測試
+        window.onload = function() {
+            gameManager.log('頁面加載完成，準備運行測試');
+            setTimeout(runAllTests, 1000);
+        };
+    </script>
+</body>
+</html>

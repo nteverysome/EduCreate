@@ -1,0 +1,31 @@
+🚨 AI 助手 Chrome 控制提醒 🚨
+
+當用戶要求操作 Chrome 時，請遵循以下規則：
+
+❌ 絕對不要使用：
+- mcp_Playwright_playwright_navigate
+- mcp_Playwright_playwright_click  
+- mcp_Playwright_playwright_fill
+- mcp_Playwright_playwright_screenshot
+（這些會啟動新的 Chromium！）
+
+✅ 正確的操作方式：
+
+1. 查看 Chrome 狀態：
+   run_command: node chrome-controller.js status
+
+2. 導航到頁面：
+   run_command: node chrome-controller.js navigate [URL]
+
+3. 截圖：
+   run_command: node chrome-controller.js screenshot [filename]
+
+4. 點擊元素：
+   run_command: node chrome-controller.js click [CSS_selector]
+
+5. 僅監控（不控制）：
+   mcp_Playwright_playwright_get http://localhost:9222/json
+
+記住：用戶的 Chrome 已經登入，保持這個狀態很重要！
+
+最後更新：2025-10-30

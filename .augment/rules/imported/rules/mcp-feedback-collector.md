@@ -1,5 +1,5 @@
 ---
-type: "always_apply"
+type: "manual"
 ---
 
 “Whenever you want to ask a question, always call the mcp-feedback-collector
