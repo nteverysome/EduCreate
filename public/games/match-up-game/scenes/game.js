@@ -2594,21 +2594,29 @@ class GameScene extends Phaser.Scene {
         this.createTextElement(container, text, 0, 0, width, height);
     }
 
-    // 🔥 佈局函數 - 情況 D：圖片 + 文字
+    // 🔥 佈局函數 - 情況 D：圖片 + 文字（各佔 50%）
     createCardLayoutD(container, background, width, height, text, imageUrl, pairId) {
-        // 圖片區域：佔據卡片上方 90%
-        const imageHeight = height * 0.9;
-        const imageY = -height / 2 + imageHeight / 2;
-
-        // 文字區域：佔據卡片下方 10%
-        const textHeight = height * 0.1;
-        const textY = height / 2 - textHeight / 2;
-
-        // 計算正方形圖片的尺寸
-        const squareSize = Math.min(width - 4, imageHeight - 4);
+        console.log('🎨 佈局 D: 圖片 + 文字 (各 50%)', {
+            width,
+            height,
+            pairId,
+            hasText: !!text,
+            imageUrl: imageUrl ? imageUrl.substring(0, 50) + '...' : 'null'
+        });
 
         // 🔥 首先添加背景（最底層）
         container.add([background]);
+
+        // 圖片區域：佔據卡片上方 50%
+        const imageHeight = height * 0.5;
+        const imageY = -height / 2 + imageHeight / 2;
+
+        // 文字區域：佔據卡片下方 50%
+        const textHeight = height * 0.5;
+        const textY = height / 2 - textHeight / 2;
+
+        // 計算正方形圖片的尺寸（1:1 比例）
+        const squareSize = Math.min(width - 4, imageHeight - 4);
 
         // 創建圖片
         this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId);
