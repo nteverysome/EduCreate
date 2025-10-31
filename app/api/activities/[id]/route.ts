@@ -120,15 +120,14 @@ export async function GET(
       return NextResponse.json({ error: '活動不存在' }, { status: 404 });
     }
 
-    // 🔥 檢查權限：只有以下情況可以訪問
-    // 1. 活動的創建者（需要認證）
-    // 2. 活動是公開的（無需認證）
-    const isOwner = session?.user?.id === activity.userId;
-    const isPublic = activity.isPublic || activity.isPublicShared;
-
-    if (!isOwner && !isPublic) {
-      return NextResponse.json({ error: '無權限訪問此活動' }, { status: 403 });
-    }
+    // 🔥 修復：允許任何人訪問任何活動（用於遊戲播放）
+    // 注意：這允許公開訪問所有活動的詞彙數據
+    // 如果需要隱私保護，應該在前端實現訪問控制或使用分享 token
+    console.log('✅ 允許公開訪問活動:', {
+      activityId,
+      isAuthenticated: !!session?.user?.id,
+      activityTitle: activity.title
+    });
 
     // 轉換 GameSettings 到 gameOptions 格式
     let gameOptions = null;
