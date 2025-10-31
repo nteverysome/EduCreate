@@ -2562,14 +2562,22 @@ class GameScene extends Phaser.Scene {
         const squareSize = Math.min(width - 4, imageAreaHeight - 4);
         this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, pairId);
 
-        // 3️⃣ 文字區域（下方 30%）
+        // 3️⃣ 文字區域（下方 30%，需要留出底部間距）
         const textAreaHeight = height * 0.3;
-        const textAreaY = height / 2 - textAreaHeight / 2;
+        const bottomPadding = Math.max(6, height * 0.06);  // 底部間距：6px 或高度的 6%
+        const textHeight = textAreaHeight - bottomPadding;
+        const textAreaY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
 
         // 🔥 只有有效文字才創建
         if (text && text.trim() !== '' && text.trim() !== '<br>') {
-            console.log('📝 創建文字:', { text, textAreaY, textAreaHeight });
-            this.createTextElement(container, text, 0, textAreaY, width, textAreaHeight);
+            console.log('📝 創建文字（佈局 A）:', {
+                text,
+                textAreaY,
+                textHeight,
+                bottomPadding,
+                formula: `textAreaY = ${height / 2} - ${textAreaHeight / 2} - ${bottomPadding / 2} = ${textAreaY}`
+            });
+            this.createTextElement(container, text, 0, textAreaY, width, textHeight);
         } else {
             console.log('⏭️ 跳過空白文字');
         }
@@ -2594,9 +2602,9 @@ class GameScene extends Phaser.Scene {
         this.createTextElement(container, text, 0, 0, width, height);
     }
 
-    // 🔥 佈局函數 - 情況 D：圖片 + 文字（各佔 50%）
+    // 🔥 佈局函數 - 情況 D：圖片 + 文字（各佔 50%，文字有底部間距）
     createCardLayoutD(container, background, width, height, text, imageUrl, pairId) {
-        console.log('🎨 佈局 D: 圖片 + 文字 (各 50%)', {
+        console.log('🎨 佈局 D: 圖片 + 文字 (各 50%，智能間距)', {
             width,
             height,
             pairId,
@@ -2611,9 +2619,20 @@ class GameScene extends Phaser.Scene {
         const imageHeight = height * 0.5;
         const imageY = -height / 2 + imageHeight / 2;
 
-        // 文字區域：佔據卡片下方 50%
-        const textHeight = height * 0.5;
-        const textY = height / 2 - textHeight / 2;
+        // 🔥 文字區域：佔據卡片下方 50%，但需要留出底部間距
+        const textAreaHeight = height * 0.5;
+        const bottomPadding = Math.max(8, height * 0.08);  // 底部間距：8px 或高度的 8%
+        const textHeight = textAreaHeight - bottomPadding;
+        const textY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
+
+        console.log('📐 佈局 D 尺寸計算:', {
+            imageHeight,
+            textAreaHeight,
+            bottomPadding,
+            textHeight,
+            textY,
+            formula: `textY = ${height / 2} - ${textAreaHeight / 2} - ${bottomPadding / 2} = ${textY}`
+        });
 
         // 計算正方形圖片的尺寸（1:1 比例）
         const squareSize = Math.min(width - 4, imageHeight - 4);
@@ -2627,7 +2646,7 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // 🔥 佈局函數 - 情況 E：語音 + 文字
+    // 🔥 佈局函數 - 情況 E：語音 + 文字（文字有底部間距）
     createCardLayoutE(container, background, width, height, text, audioUrl, pairId) {
         // 🔥 首先添加背景（最底層）
         container.add([background]);
@@ -2637,9 +2656,21 @@ class GameScene extends Phaser.Scene {
         const buttonY = -height / 2 + buttonSize / 2 + 10;
         this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
 
-        // 文字在下方
-        const textY = height / 2 - 20;
-        this.createTextElement(container, text, 0, textY, width, height * 0.4);
+        // 🔥 文字在下方，需要留出底部間距
+        const textAreaHeight = height * 0.4;
+        const bottomPadding = Math.max(6, height * 0.06);  // 底部間距：6px 或高度的 6%
+        const textHeight = textAreaHeight - bottomPadding;
+        const textY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
+
+        console.log('📝 創建文字（佈局 E）:', {
+            text,
+            textY,
+            textHeight,
+            bottomPadding,
+            formula: `textY = ${height / 2} - ${textAreaHeight / 2} - ${bottomPadding / 2} = ${textY}`
+        });
+
+        this.createTextElement(container, text, 0, textY, width, textHeight);
     }
 
     // 🔥 佈局函數 - 情況 F：只有圖片（1:1 比例）
