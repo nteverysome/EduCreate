@@ -249,11 +249,14 @@ class GameScene extends Phaser.Scene {
                 throw error;
             }
 
-            if (customVocabulary !== 'true') {
-                const error = new Error('❌ 缺少 customVocabulary=true 參數，無法載入詞彙數據');
+            // 🔥 修復：如果沒有 customVocabulary 參數，默認為 true（允許公開訪問）
+            if (customVocabulary !== 'true' && customVocabulary !== null) {
+                const error = new Error('❌ customVocabulary 參數無效');
                 console.error('❌ 參數驗證失敗:', error.message);
                 throw error;
             }
+
+            console.log('✅ 參數驗證通過，允許載入詞彙數據');
 
             // 從 API 載入詞彙數據
             console.log(`🔄 發送 API 請求: /api/activities/${activityId}`);
