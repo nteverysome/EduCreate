@@ -1,5 +1,21 @@
 # Match-up 遊戲 - 中文字位置與卡片間距分析
 
+## 🎮 佈局模式
+
+### 當前模式：分離模式（Separated Layout）
+
+**代碼位置**：第 36 行
+```javascript
+this.layout = 'separated';  // 佈局模式：separated, mixed
+```
+
+**特點**：
+- 左側：英文卡片（帶圖片、文字、音頻等）
+- 右側：中文卡片（文字在框外，左邊或右邊）
+- 兩側獨立排列，互不重疊
+
+---
+
 ## 📍 中文字代碼實際路徑
 
 ### 文件位置
@@ -8,6 +24,16 @@ public/games/match-up-game/scenes/game.js
 ```
 
 ### 核心函數路徑
+
+#### 0. 分離模式佈局函數（入口）
+**路徑**：第 1165-1305 行
+```javascript
+createLeftRightMultiRows(currentPagePairs, width, height)
+```
+**功能**：
+- 計算卡片尺寸和間距
+- 創建左側英文卡片
+- 創建右側中文卡片
 
 #### 1. 右側卡片創建函數
 **路徑**：第 2992-3100 行
@@ -59,43 +85,72 @@ container.add([background, cardText]);
 
 ## 📐 中文字與下方卡片的距離計算
 
-### 卡片位置計算
+### 卡片位置計算（分離模式）
 
-#### 卡片排列公式
+#### 左側英文卡片排列
+**路徑**：第 1280-1289 行
+```javascript
+// 左側英文卡片（多行 2 列）
+currentPagePairs.forEach((pair, index) => {
+    const col = index % columns;
+    const row = Math.floor(index / columns);
+
+    // 🔥 卡片中心位置
+    const x = leftAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
+    const y = leftAreaStartY + row * (cardHeight + leftVerticalSpacing) + cardHeight / 2;
+
+    const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
+});
+```
+
+#### 右側中文卡片排列
 **路徑**：第 1292-1302 行
 ```javascript
 // 右側中文卡片（多行 2 列）
 shuffledAnswers.forEach((pair, index) => {
     const col = index % columns;
     const row = Math.floor(index / columns);
-    
+
     // 🔥 卡片中心位置
     const x = rightAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
     const y = rightAreaStartY + row * (cardHeight + rightVerticalSpacing) + cardHeight / 2;
-    
-    // 🔥 根據列號決定文字位置
+
+    // 🔥 根據列號決定文字位置：第一列在左邊，第二列在右邊
     const textPosition = col === 0 ? 'left' : 'right';
     const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, textPosition);
 });
 ```
 
+### 區域起始位置（分離模式）
+
+**路徑**：第 1236-1242 行
+```javascript
+// 🔥 計算左側區域（英文）的起始位置
+const leftAreaStartX = width * 0.08;    // 距離左邊 8%
+const leftAreaStartY = height * 0.1;    // 距離上方 10%
+
+// 🔥 計算右側區域（中文）的起始位置
+const rightAreaStartX = width * 0.52;   // 距離左邊 52%
+const rightAreaStartY = height * 0.1;   // 距離上方 10%
+```
+
 ### 間距計算
 
 #### 垂直間距公式
-**路徑**：第 1188-1189 行
+**路徑**：第 1188-1189 和 1233-1234 行
 ```javascript
 const horizontalSpacing = Math.max(5, width * 0.01);
 const verticalSpacing = Math.max(3, height * 0.008);
 
-// 🔥 右側卡片使用相同的垂直間距
+// 🔥 左側和右側卡片使用相同的垂直間距
+const leftVerticalSpacing = verticalSpacing;
 const rightVerticalSpacing = verticalSpacing;
 ```
 
-#### 示例計算（假設容器高度 800px）
+#### 示例計算（假設容器高度 800px，寬度 1200px）
 ```
-verticalSpacing = Math.max(3, 800 * 0.008)
-                = Math.max(3, 6.4)
-                = 6.4px
+horizontalSpacing = Math.max(5, 1200 * 0.01) = Math.max(5, 12) = 12px
+verticalSpacing = Math.max(3, 800 * 0.008) = Math.max(3, 6.4) = 6.4px
 ```
 
 ---
@@ -168,47 +223,72 @@ originY = 0.5 (垂直居中)
 
 ---
 
-## 🔧 關鍵代碼位置總結
+## 🔧 關鍵代碼位置總結（分離模式）
 
 | 功能 | 文件 | 行號 | 說明 |
 |------|------|------|------|
+| 分離模式入口 | game.js | 1165-1305 | createLeftRightMultiRows 函數 |
+| 左側英文卡片排列 | game.js | 1280-1289 | 左側卡片位置計算 |
+| 右側中文卡片排列 | game.js | 1292-1302 | 右側卡片位置計算 |
+| 區域起始位置 | game.js | 1236-1242 | leftAreaStartX/Y, rightAreaStartX/Y |
+| 間距計算 | game.js | 1188-1189, 1233-1234 | horizontalSpacing, verticalSpacing |
 | 右側卡片創建 | game.js | 2992-3100 | createRightCard 函數 |
 | 中文字位置計算 | game.js | 3038-3058 | textPosition 邏輯 |
 | 中文字創建 | game.js | 3060-3070 | 文字對象創建 |
-| 卡片排列 | game.js | 1292-1302 | 卡片位置計算 |
-| 間距計算 | game.js | 1188-1189 | verticalSpacing 計算 |
-| 區域起始位置 | game.js | 1240-1242 | rightAreaStartX/Y |
 
 ---
 
-## 📐 完整計算流程
+## 📐 完整計算流程（分離模式）
 
-### 步驟 1：計算間距
+### 步驟 1：計算卡片尺寸和間距
 ```javascript
 // 第 1188-1189 行
+const horizontalSpacing = Math.max(5, width * 0.01);
 const verticalSpacing = Math.max(3, height * 0.008);
 ```
 
-### 步驟 2：計算卡片位置
+### 步驟 2：計算區域起始位置
 ```javascript
-// 第 1295-1296 行
-const x = rightAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-const y = rightAreaStartY + row * (cardHeight + rightVerticalSpacing) + cardHeight / 2;
+// 第 1236-1242 行
+const leftAreaStartX = width * 0.08;
+const leftAreaStartY = height * 0.1;
+const rightAreaStartX = width * 0.52;
+const rightAreaStartY = height * 0.1;
 ```
 
-### 步驟 3：確定文字位置類型
+### 步驟 3：創建左側英文卡片
 ```javascript
-// 第 1299 行
-const textPosition = col === 0 ? 'left' : 'right';
+// 第 1280-1289 行
+currentPagePairs.forEach((pair, index) => {
+    const col = index % columns;
+    const row = Math.floor(index / columns);
+    const x = leftAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
+    const y = leftAreaStartY + row * (cardHeight + leftVerticalSpacing) + cardHeight / 2;
+    const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, ...);
+});
 ```
 
-### 步驟 4：創建卡片和文字
+### 步驟 4：創建右側中文卡片
 ```javascript
-// 第 1300 行
-const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, textPosition);
+// 第 1292-1302 行
+shuffledAnswers.forEach((pair, index) => {
+    const col = index % columns;
+    const row = Math.floor(index / columns);
+    const x = rightAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
+    const y = rightAreaStartY + row * (cardHeight + rightVerticalSpacing) + cardHeight / 2;
+    const textPosition = col === 0 ? 'left' : 'right';
+    const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, textPosition);
+});
+```
 
-// 在 createRightCard 中（第 3038-3058 行）
-// 根據 textPosition 計算 textX, textY
+### 步驟 5：在 createRightCard 中計算文字位置
+```javascript
+// 第 3038-3058 行
+if (textPosition === 'right') {
+    textX = width / 2 + 15;  // 框右邊 15px
+} else if (textPosition === 'left') {
+    textX = -width / 2 - 15; // 框左邊 15px
+}
 ```
 
 ---
