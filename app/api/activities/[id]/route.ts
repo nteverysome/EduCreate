@@ -87,19 +87,13 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: '未授權' }, { status: 401 });
-    }
-
     const activityId = params.id;
-    const userId = session.user.id;
 
-    // 獲取活動詳情
-    const activity = await prisma.activity.findFirst({
+    // 🔥 修復：支持公開訪問（當活動是公開的時）
+    // 首先嘗試獲取活動（不限制用戶）
+    const activity = await prisma.activity.findUnique({
       where: {
-        id: activityId,
-        userId: userId
+        id: activityId
       },
       include: {
         vocabularyItems: true,  // 包含詞彙項目
@@ -124,6 +118,16 @@ export async function GET(
 
     if (!activity) {
       return NextResponse.json({ error: '活動不存在' }, { status: 404 });
+    }
+
+    // 🔥 檢查權限：只有以下情況可以訪問
+    // 1. 活動的創建者（需要認證）
+    // 2. 活動是公開的（無需認證）
+    const isOwner = session?.user?.id === activity.userId;
+    const isPublic = activity.isPublic || activity.isPublicShared;
+
+    if (!isOwner && !isPublic) {
+      return NextResponse.json({ error: '無權限訪問此活動' }, { status: 403 });
     }
 
     // 轉換 GameSettings 到 gameOptions 格式
