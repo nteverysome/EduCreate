@@ -2361,9 +2361,10 @@ class GameScene extends Phaser.Scene {
             container.add([background]);
         }
 
-        if (audioStatus && audioStatus !== 'available') {
-            this.addAudioStatusBadge(container, width, height, audioStatus);
-        }
+        // 🔥 移除 "No audio" 標示（用戶要求）
+        // if (audioStatus && audioStatus !== 'available') {
+        //     this.addAudioStatusBadge(container, width, height, audioStatus);
+        // }
 
         // 📝 淡入動畫配置（按照順序出現）
         this.tweens.add({
