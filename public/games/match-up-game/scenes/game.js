@@ -2512,6 +2512,9 @@ class GameScene extends Phaser.Scene {
             audioUrl: audioUrl ? audioUrl.substring(0, 50) + '...' : 'null'
         });
 
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
         // 1️⃣ 語音按鈕區域（上方 30%）
         const buttonAreaHeight = height * 0.3;
         const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
@@ -2544,24 +2547,25 @@ class GameScene extends Phaser.Scene {
         } else {
             console.log('⏭️ 跳過空白文字');
         }
-
-        container.add([background]);
     }
 
     // 🔥 佈局函數 - 情況 B：只有語音按鈕
     createCardLayoutB(container, background, width, height, audioUrl, pairId) {
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
         // 語音按鈕置中並放大
         const buttonSize = Math.max(50, Math.min(80, width * 0.6));
         this.createAudioButton(container, audioUrl, 0, 0, buttonSize, pairId);
-
-        container.add([background]);
     }
 
     // 🔥 佈局函數 - 情況 C：只有文字
     createCardLayoutC(container, background, width, height, text) {
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
         // 文字置中
         this.createTextElement(container, text, 0, 0, width, height);
-        container.add([background]);
     }
 
     // 🔥 佈局函數 - 情況 D：圖片 + 文字
@@ -2577,6 +2581,9 @@ class GameScene extends Phaser.Scene {
         // 計算正方形圖片的尺寸
         const squareSize = Math.min(width - 4, imageHeight - 4);
 
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
         // 創建圖片
         this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId);
 
@@ -2584,12 +2591,13 @@ class GameScene extends Phaser.Scene {
         if (text && text.trim() !== '' && text.trim() !== '<br>') {
             this.createTextElement(container, text, 0, textY, width, textHeight);
         }
-
-        container.add([background]);
     }
 
     // 🔥 佈局函數 - 情況 E：語音 + 文字
     createCardLayoutE(container, background, width, height, text, audioUrl, pairId) {
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
         // 語音按鈕在上方
         const buttonSize = Math.max(30, Math.min(50, width * 0.25));
         const buttonY = -height / 2 + buttonSize / 2 + 10;
@@ -2598,12 +2606,13 @@ class GameScene extends Phaser.Scene {
         // 文字在下方
         const textY = height / 2 - 20;
         this.createTextElement(container, text, 0, textY, width, height * 0.4);
-
-        container.add([background]);
     }
 
     // 🔥 佈局函數 - 圖片 + 語音（無文字）
     createCardLayoutImageAudio(container, background, width, height, imageUrl, audioUrl, pairId) {
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
         // 圖片佔據大部分區域
         const imageHeight = height * 0.8;
         const imageY = -height / 2 + imageHeight / 2;
@@ -2618,8 +2627,6 @@ class GameScene extends Phaser.Scene {
         const buttonSize = Math.max(30, Math.min(50, width * 0.2));
         const buttonY = height / 2 - buttonSize / 2 - 5;
         this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
-
-        container.add([background]);
     }
 
     // 🔥 輔助函數 - 載入並顯示圖片
