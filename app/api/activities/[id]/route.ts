@@ -126,7 +126,10 @@ export async function GET(
     console.log('✅ 允許公開訪問活動:', {
       activityId,
       isAuthenticated: !!session?.user?.id,
-      activityTitle: activity.title
+      activityTitle: activity.title,
+      vocabularyItemsCount: activity.vocabularyItems?.length || 0,
+      hasElements: !!activity.elements,
+      hasContent: !!activity.content
     });
 
     // 轉換 GameSettings 到 gameOptions 格式
