@@ -2355,8 +2355,8 @@ class GameScene extends Phaser.Scene {
             // 情況 E：語音 + 文字
             this.createCardLayoutE(container, background, width, height, text, safeAudioUrl, pairId);
         } else if (hasImage && !hasText && !hasAudio) {
-            // 只有圖片（無文字、無語音）
-            this.createCardLayoutD(container, background, width, height, '', imageUrl, pairId);
+            // 只有圖片（無文字、無語音）- 1:1 比例顯示
+            this.createCardLayoutF(container, background, width, height, imageUrl, pairId);
         } else if (hasImage && !hasText && hasAudio) {
             // 圖片 + 語音（無文字）
             this.createCardLayoutA(container, background, width, height, '', imageUrl, safeAudioUrl, pairId);
@@ -2632,6 +2632,25 @@ class GameScene extends Phaser.Scene {
         // 文字在下方
         const textY = height / 2 - 20;
         this.createTextElement(container, text, 0, textY, width, height * 0.4);
+    }
+
+    // 🔥 佈局函數 - 情況 F：只有圖片（1:1 比例）
+    createCardLayoutF(container, background, width, height, imageUrl, pairId) {
+        console.log('🎨 佈局 F: 只有圖片 (1:1 比例)', {
+            width,
+            height,
+            pairId,
+            imageUrl: imageUrl ? imageUrl.substring(0, 50) + '...' : 'null'
+        });
+
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
+        // 計算正方形圖片的尺寸（取寬度和高度的最小值，保持 1:1）
+        const squareSize = Math.min(width - 4, height - 4);
+
+        // 圖片置中顯示
+        this.loadAndDisplayImage(container, imageUrl, 0, 0, squareSize, pairId);
     }
 
     // 🔥 佈局函數 - 圖片 + 語音（無文字）
