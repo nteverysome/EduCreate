@@ -2566,7 +2566,8 @@ class GameScene extends Phaser.Scene {
         const textAreaHeight = height * 0.3;
         const bottomPadding = Math.max(6, height * 0.06);  // 底部間距：6px 或高度的 6%
         const textHeight = textAreaHeight - bottomPadding;
-        const textAreaY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
+        // 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
+        const textAreaY = height / 2 - bottomPadding - textHeight / 2;
 
         // 🔥 只有有效文字才創建
         if (text && text.trim() !== '' && text.trim() !== '<br>') {
@@ -2575,7 +2576,8 @@ class GameScene extends Phaser.Scene {
                 textAreaY,
                 textHeight,
                 bottomPadding,
-                formula: `textAreaY = ${height / 2} - ${textAreaHeight / 2} - ${bottomPadding / 2} = ${textAreaY}`
+                cardHeight: height,
+                formula: `textAreaY = ${height / 2} - ${bottomPadding} - ${textHeight / 2} = ${textAreaY}`
             });
             this.createTextElement(container, text, 0, textAreaY, width, textHeight);
         } else {
@@ -2623,7 +2625,8 @@ class GameScene extends Phaser.Scene {
         const textAreaHeight = height * 0.5;
         const bottomPadding = Math.max(8, height * 0.08);  // 底部間距：8px 或高度的 8%
         const textHeight = textAreaHeight - bottomPadding;
-        const textY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
+        // 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
+        const textY = height / 2 - bottomPadding - textHeight / 2;
 
         console.log('📐 佈局 D 尺寸計算:', {
             imageHeight,
@@ -2631,7 +2634,8 @@ class GameScene extends Phaser.Scene {
             bottomPadding,
             textHeight,
             textY,
-            formula: `textY = ${height / 2} - ${textAreaHeight / 2} - ${bottomPadding / 2} = ${textY}`
+            cardHeight: height,
+            formula: `textY = ${height / 2} - ${bottomPadding} - ${textHeight / 2} = ${textY}`
         });
 
         // 計算正方形圖片的尺寸（1:1 比例）
@@ -2660,14 +2664,16 @@ class GameScene extends Phaser.Scene {
         const textAreaHeight = height * 0.4;
         const bottomPadding = Math.max(6, height * 0.06);  // 底部間距：6px 或高度的 6%
         const textHeight = textAreaHeight - bottomPadding;
-        const textY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
+        // 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
+        const textY = height / 2 - bottomPadding - textHeight / 2;
 
         console.log('📝 創建文字（佈局 E）:', {
             text,
             textY,
             textHeight,
             bottomPadding,
-            formula: `textY = ${height / 2} - ${textAreaHeight / 2} - ${bottomPadding / 2} = ${textY}`
+            cardHeight: height,
+            formula: `textY = ${height / 2} - ${bottomPadding} - ${textHeight / 2} = ${textY}`
         });
 
         this.createTextElement(container, text, 0, textY, width, textHeight);
