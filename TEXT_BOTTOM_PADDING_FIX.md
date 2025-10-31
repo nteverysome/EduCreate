@@ -58,7 +58,8 @@
 const textAreaHeight = height * 0.3;
 const bottomPadding = Math.max(6, height * 0.06);  // 底部間距：6px 或高度的 6%
 const textHeight = textAreaHeight - bottomPadding;
-const textAreaY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
+// 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
+const textAreaY = height / 2 - bottomPadding - textHeight / 2;
 ```
 
 #### 佈局 D：圖片 + 文字
@@ -67,7 +68,8 @@ const textAreaY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
 const textAreaHeight = height * 0.5;
 const bottomPadding = Math.max(8, height * 0.08);  // 底部間距：8px 或高度的 8%
 const textHeight = textAreaHeight - bottomPadding;
-const textY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
+// 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
+const textY = height / 2 - bottomPadding - textHeight / 2;
 ```
 
 #### 佈局 E：文字 + 音頻
@@ -76,7 +78,8 @@ const textY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
 const textAreaHeight = height * 0.4;
 const bottomPadding = Math.max(6, height * 0.06);  // 底部間距：6px 或高度的 6%
 const textHeight = textAreaHeight - bottomPadding;
-const textY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;
+// 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
+const textY = height / 2 - bottomPadding - textHeight / 2;
 ```
 
 ---
@@ -107,16 +110,49 @@ bottomPadding = Math.max(8, height * 0.08);
 const textAreaHeight = height * percentage;  // 文字區域高度
 const bottomPadding = Math.max(min, height * percent);  // 底部間距
 const textHeight = textAreaHeight - bottomPadding;  // 實際文字高度
-const textY = height / 2 - textAreaHeight / 2 - bottomPadding / 2;  // 文字位置
+// 🔥 正確的文字位置計算
+const textY = height / 2 - bottomPadding - textHeight / 2;  // 文字位置
 ```
+
+**計算說明**：
+- `height / 2` = 卡片下邊界
+- `- bottomPadding` = 向上移動底部間距
+- `- textHeight / 2` = 文字中心向上移動文字高度的一半
+- 結果：文字完全在卡片內，且與卡片底部有間距
 
 ### 示例計算
 
+**卡片高度 200px 的計算示例**：
+
+#### 佈局 D（圖片 + 文字）
+```
+textAreaHeight = 200 * 0.5 = 100px
+bottomPadding = max(8, 200 * 0.08) = 16px
+textHeight = 100 - 16 = 84px
+textY = 100 - 16 - 84/2 = 100 - 16 - 42 = 42px
+```
+
+#### 佈局 A（圖片 + 文字 + 音頻）
+```
+textAreaHeight = 200 * 0.3 = 60px
+bottomPadding = max(6, 200 * 0.06) = 12px
+textHeight = 60 - 12 = 48px
+textAreaY = 100 - 12 - 48/2 = 100 - 12 - 24 = 64px
+```
+
+#### 佈局 E（文字 + 音頻）
+```
+textAreaHeight = 200 * 0.4 = 80px
+bottomPadding = max(6, 200 * 0.06) = 12px
+textHeight = 80 - 12 = 68px
+textY = 100 - 12 - 68/2 = 100 - 12 - 34 = 54px
+```
+
 | 卡片高度 | 佈局 | 文字區域 | 底部間距 | 文字高度 | 文字位置 |
 |---------|------|---------|---------|---------|---------|
-| 200px | D | 100px | 16px | 84px | -42px |
-| 200px | A | 60px | 12px | 48px | 64px |
-| 200px | E | 80px | 12px | 68px | 54px |
+| 200px | D | 100px | 16px | 84px | 42px ✅ |
+| 200px | A | 60px | 12px | 48px | 64px ✅ |
+| 200px | E | 80px | 12px | 68px | 54px ✅ |
 
 ---
 
