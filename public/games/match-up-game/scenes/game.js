@@ -2393,7 +2393,28 @@ class GameScene extends Phaser.Scene {
             originalY: y,
             hasAudio: hasAudio,
             audioStatus: audioStatus,
-            invalidAudioUrl: pairData ? pairData.invalidAudioUrl : null
+            invalidAudioUrl: pairData ? pairData.invalidAudioUrl : null,
+            isPlaying: false,
+            clickStartTime: 0
+        });
+
+        // 🔥 點擊卡片播放音頻（短按時）
+        container.on('pointerdown', (pointer) => {
+            // 記錄點擊開始時間
+            container.setData('clickStartTime', Date.now());
+            console.log('🖱️ 卡片被點擊:', { pairId, hasAudio });
+        });
+
+        // 🔥 點擊結束時檢查是否是短按（播放音頻）
+        container.on('pointerup', (pointer) => {
+            const clickDuration = Date.now() - container.getData('clickStartTime');
+            const isDragging = this.isDragging;
+
+            // 如果點擊時間短於 200ms 且沒有拖曳，則播放音頻
+            if (clickDuration < 200 && !isDragging && hasAudio && safeAudioUrl) {
+                console.log('🔊 短按卡片，播放音頻:', { pairId, clickDuration });
+                this.playAudio(safeAudioUrl, container, background);
+            }
         });
 
         // 拖曳開始
