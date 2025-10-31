@@ -223,6 +223,7 @@ class GameScene extends Phaser.Scene {
     async loadVocabularyFromAPI() {
         // 📝 調試訊息：記錄函數開始
         console.log('🔄 開始載入詞彙數據');
+        console.log('🔍 [DEBUG] loadVocabularyFromAPI 函數已調用');
 
         try {
             // 從 URL 參數獲取 activityId
@@ -230,6 +231,13 @@ class GameScene extends Phaser.Scene {
             const activityId = urlParams.get('activityId');
             const customVocabulary = urlParams.get('customVocabulary');
             const devLayoutTest = (this.restartData && this.restartData.devLayoutTest) || urlParams.get('devLayoutTest');
+
+            console.log('🔍 [DEBUG] URL 參數:', {
+                activityId,
+                customVocabulary,
+                devLayoutTest,
+                fullURL: window.location.href
+            });
 
             if (devLayoutTest) {
                 console.warn('🧪 GameScene: 啟用開發測試資料集，跳過 API 載入', { devLayoutTest });
@@ -257,28 +265,39 @@ class GameScene extends Phaser.Scene {
             }
 
             console.log('✅ 參數驗證通過，允許載入詞彙數據');
+            console.log('🔍 [DEBUG] 準備發送 API 請求');
 
             // 從 API 載入詞彙數據
-            console.log(`🔄 發送 API 請求: /api/activities/${activityId}`);
-            const response = await fetch(`/api/activities/${activityId}`);
+            const apiUrl = `/api/activities/${activityId}`;
+            console.log(`🔄 發送 API 請求: ${apiUrl}`);
+            console.log('🔍 [DEBUG] 開始 fetch 調用');
 
+            const response = await fetch(apiUrl);
+
+            console.log('🔍 [DEBUG] fetch 完成');
             console.log('📡 API 響應狀態:', {
                 status: response.status,
                 statusText: response.statusText,
-                ok: response.ok
+                ok: response.ok,
+                headers: {
+                    contentType: response.headers.get('content-type')
+                }
             });
 
             if (!response.ok) {
+                const errorText = await response.text();
                 const error = new Error(`API 請求失敗: ${response.status} ${response.statusText}`);
                 console.error('❌ API 請求失敗:', {
                     status: response.status,
                     statusText: response.statusText,
-                    url: `/api/activities/${activityId}`
+                    url: apiUrl,
+                    errorBody: errorText
                 });
                 throw error;
             }
 
             const activity = await response.json();
+            console.log('🔍 [DEBUG] JSON 解析完成');
             console.log('✅ 活動數據載入成功:', {
                 id: activity.id,
                 title: activity.title,
