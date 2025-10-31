@@ -1962,7 +1962,7 @@ class GameScene extends Phaser.Scene {
                 frameWidth = squareSize;
                 cardHeightInFrame = squareSize;
                 chineseTextHeight = squareSize * 0.4;  // 中文文字高度為卡片高度的40%
-                totalUnitHeight = cardHeightInFrame + chineseTextHeight;  // = squareSize * 1.4
+                totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;  // = squareSize * 1.4 + verticalSpacing
 
                 // cols 已在上面的邏輯中設置
                 const rows = Math.ceil(itemCount / cols);
@@ -2045,7 +2045,7 @@ class GameScene extends Phaser.Scene {
                 cardHeightInFrame = availableHeightPerRow * 0.6;
                 chineseTextHeight = availableHeightPerRow * 0.4;
 
-                totalUnitHeight = cardHeightInFrame + chineseTextHeight;
+                totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;
 
                 console.log('🟨 長方形卡片佈局:', {
                     resolution: `${width}×${height}`,
