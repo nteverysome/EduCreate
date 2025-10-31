@@ -2830,7 +2830,7 @@ class GameScene extends Phaser.Scene {
         return buttonContainer;
     }
 
-    // 🔥 輔助函數 - 播放音頻
+    // 🔥 輔助函數 - 播放音頻（使用 HTML5 Audio API）
     playAudio(audioUrl, buttonContainer, buttonBg) {
         if (!audioUrl || audioUrl.trim() === '') {
             console.warn('⚠️ 音頻 URL 為空');
@@ -2843,91 +2843,47 @@ class GameScene extends Phaser.Scene {
             return;
         }
 
-        // 使用 URL 的最後部分作為 key（移除查詢參數和特殊字符）
-        const audioKey = `audio-${audioUrl.split('/').pop().split('?')[0].replace(/[^a-zA-Z0-9]/g, '_')}`;
-
-        console.log('🔊 準備播放音頻:', { audioUrl, audioKey });
+        console.log('🔊 準備播放音頻:', { audioUrl });
 
         try {
-            // 檢查音頻是否已載入到 Phaser 的緩存中
-            if (!this.cache.audio.exists(audioKey)) {
-                console.log('📥 音頻未載入，開始載入:', audioKey);
+            // 更新按鈕狀態為載入中
+            buttonContainer.setData('isPlaying', true);
+            buttonBg.setFillStyle(0xFFC107);  // 黃色表示載入中
 
-                // 更新按鈕狀態為載入中
-                buttonContainer.setData('isPlaying', true);
-                buttonBg.setFillStyle(0xFFC107);  // 黃色表示載入中
+            // 使用 HTML5 Audio API 直接播放
+            const audio = new Audio(audioUrl);
+            audio.volume = 0.8;
 
-                // 載入音頻文件
-                this.load.audio(audioKey, audioUrl);
-
-                // 音頻載入完成
-                this.load.once('complete', () => {
-                    console.log('✅ 音頻載入完成:', audioKey);
-
-                    if (this.cache.audio.exists(audioKey)) {
-                        // 創建並播放音頻
-                        const audio = this.sound.add(audioKey, { volume: 0.8 });
-                        audio.play();
-
-                        // 更新按鈕狀態為播放中
-                        buttonBg.setFillStyle(0xFF9800);  // 橙色表示播放中
-
-                        // 播放完成後恢復狀態
-                        audio.once('complete', () => {
-                            console.log('✅ 音頻播放完成:', audioKey);
-                            buttonContainer.setData('isPlaying', false);
-                            buttonBg.setFillStyle(0x4CAF50);
-                        });
-
-                        // 播放失敗處理
-                        audio.once('error', (error) => {
-                            console.error('❌ 音頻播放失敗:', error);
-                            buttonContainer.setData('isPlaying', false);
-                            buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
-                        });
-                    } else {
-                        console.error('❌ 音頻載入後仍不存在於緩存中');
-                        buttonContainer.setData('isPlaying', false);
-                        buttonBg.setFillStyle(0xF44336);
-                    }
-                });
-
-                // 音頻載入失敗
-                this.load.once('loaderror', (file) => {
-                    console.error('❌ 音頻載入失敗:', file.key, audioUrl);
-                    buttonContainer.setData('isPlaying', false);
-                    buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
-                });
-
-                // 開始載入
-                this.load.start();
-            } else {
-                console.log('✅ 音頻已載入，直接播放:', audioKey);
-
-                // 音頻已載入，直接播放
-                const audio = this.sound.add(audioKey, { volume: 0.8 });
-                audio.play();
-
-                // 更新按鈕狀態
-                buttonContainer.setData('isPlaying', true);
+            // 音頻可以播放時
+            audio.addEventListener('canplay', () => {
+                console.log('✅ 音頻已準備好，開始播放:', audioUrl);
                 buttonBg.setFillStyle(0xFF9800);  // 橙色表示播放中
-
-                // 播放完成後恢復狀態
-                audio.once('complete', () => {
-                    console.log('✅ 音頻播放完成:', audioKey);
-                    buttonContainer.setData('isPlaying', false);
-                    buttonBg.setFillStyle(0x4CAF50);
-                });
-
-                // 播放失敗處理
-                audio.once('error', (error) => {
+                audio.play().catch(error => {
                     console.error('❌ 音頻播放失敗:', error);
                     buttonContainer.setData('isPlaying', false);
                     buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
                 });
-            }
+            });
+
+            // 音頻播放完成
+            audio.addEventListener('ended', () => {
+                console.log('✅ 音頻播放完成:', audioUrl);
+                buttonContainer.setData('isPlaying', false);
+                buttonBg.setFillStyle(0x4CAF50);
+            });
+
+            // 音頻載入失敗
+            audio.addEventListener('error', (error) => {
+                console.error('❌ 音頻載入失敗:', error);
+                buttonContainer.setData('isPlaying', false);
+                buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
+            });
+
+            // 開始載入音頻
+            audio.load();
+
         } catch (error) {
-            console.error('❌ 播放音頻異常:', error);
+            console.error('❌ 播放音頻時發生異常:', error);
             buttonContainer.setData('isPlaying', false);
             buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
         }
