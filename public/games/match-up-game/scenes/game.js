@@ -2711,7 +2711,7 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // 🔥 輔助函數 - 創建文字元素
+    // 🔥 輔助函數 - 創建文字元素（智能計算寬度和高度）
     createTextElement(container, text, x, y, width, height) {
         // 🔥 調試日誌 - 確認函數被調用
         console.log('📝 createTextElement 被調用:', {
@@ -2722,19 +2722,30 @@ class GameScene extends Phaser.Scene {
             containerExists: !!container
         });
 
+        // 🔥 初始字體大小（基於高度的 60%）
         let fontSize = Math.max(14, Math.min(48, height * 0.6));
 
-        // 創建臨時文字測量寬度
+        // 創建臨時文字測量寬度和高度
         const tempText = this.add.text(0, 0, text, {
             fontSize: `${fontSize}px`,
             fontFamily: 'Arial'
         });
 
+        // 🔥 計算最大寬度（留 15% 邊距）
         const maxTextWidth = width * 0.85;
-        while (tempText.width > maxTextWidth && fontSize > 12) {
+
+        // 🔥 計算最大高度（留 10% 邊距）
+        const maxTextHeight = height * 0.9;
+
+        // 🔥 同時檢查寬度和高度，如果超過則縮小字體
+        while ((tempText.width > maxTextWidth || tempText.height > maxTextHeight) && fontSize > 12) {
             fontSize -= 2;
             tempText.setFontSize(fontSize);
         }
+
+        // 🔥 記錄最終的文字尺寸
+        const finalTextWidth = tempText.width;
+        const finalTextHeight = tempText.height;
 
         tempText.destroy();
 
@@ -2748,12 +2759,16 @@ class GameScene extends Phaser.Scene {
         cardText.setOrigin(0.5);
         container.add(cardText);
 
-        // 🔥 調試日誌 - 確認文字對象創建
-        console.log('✅ 文字對象已創建:', {
+        // 🔥 調試日誌 - 確認文字對象創建和尺寸
+        console.log('✅ 文字對象已創建（智能計算）:', {
             text: text,
             fontSize: fontSize,
             textWidth: cardText.width,
             textHeight: cardText.height,
+            maxTextWidth: maxTextWidth,
+            maxTextHeight: maxTextHeight,
+            widthRatio: (finalTextWidth / width * 100).toFixed(1) + '%',
+            heightRatio: (finalTextHeight / height * 100).toFixed(1) + '%',
             visible: cardText.visible,
             alpha: cardText.alpha,
             x: cardText.x,
