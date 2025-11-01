@@ -1903,7 +1903,7 @@ class GameScene extends Phaser.Scene {
                     // 重新計算卡片尺寸
                     const newSquareSizeByWidth = (availableWidth - horizontalSpacing * (newCols + 1)) / newCols;
                     const newAvailableHeightPerRow = (availableHeight - verticalSpacing * (newRows + 1)) / newRows;
-                    const newSquareSizeByHeight = newAvailableHeightPerRow / 1.4;
+                    const newSquareSizeByHeight = (newAvailableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正：考慮 verticalSpacing
                     const newSquareSize = Math.min(newSquareSizeByHeight, newSquareSizeByWidth);
 
                     // 如果新的卡片尺寸更大，使用新的佈局
