@@ -684,11 +684,23 @@ class GameScene extends Phaser.Scene {
     initializeGameOptions() {
         const urlParams = new URLSearchParams(window.location.search);
 
+        // 🔥 v10.1 詳細調試：檢查 URL 參數
+        console.log('🔍 [v10.1] URL 參數詳細檢查:', {
+            fullUrl: window.location.href,
+            search: window.location.search,
+            allParams: Array.from(urlParams.entries()),
+            layoutParam: urlParams.get('layout'),
+            randomParam: urlParams.get('random'),
+            showAnswersParam: urlParams.get('showAnswers')
+        });
+
         // 讀取佈局選項
         const layoutParam = urlParams.get('layout');
         this.layout = layoutParam || this.devLayoutDefault || 'separated';
         console.log('🎮 佈局模式:', this.layout, {
-            source: layoutParam ? 'url' : this.devLayoutDefault ? 'dev-default' : 'fallback'
+            source: layoutParam ? 'url' : this.devLayoutDefault ? 'dev-default' : 'fallback',
+            layoutParam,
+            devLayoutDefault: this.devLayoutDefault
         });
 
         // 讀取隨機選項
