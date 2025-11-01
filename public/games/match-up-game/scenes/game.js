@@ -1803,17 +1803,26 @@ class GameScene extends Phaser.Scene {
         // isMobileDevice：手機設備（寬度 < 768px）
         // isLandscapeMobile：手機橫向模式（寬度 > 高度 且 高度 < 500px）
         // isTinyHeight：極小高度（高度 < 400px）
+        // 🔥 v13.0：分離手機直向和橫向的佈局邏輯
         // isCompactMode：緊湊模式（手機直向 或 手機橫向 或 極小高度）
         const isMobileDevice = width < 768;  // 手機設備（寬度 < 768px）
-        const isLandscapeMobile = width > height && height < 500;  // 手機橫向
+        const isPortraitMode = height > width;  // 直向模式（高 > 寬）
+        const isLandscapeMode = width > height;  // 橫向模式（寬 > 高）
+        const isLandscapeMobile = isLandscapeMode && height < 500;  // 手機橫向
         const isTinyHeight = height < 400;  // 極小高度
-        const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
 
-        console.log('📱 響應式檢測:', {
+        // 🔥 v13.0：分離的緊湊模式檢測
+        const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
+        const isPortraitCompactMode = isMobileDevice && isPortraitMode;  // 手機直向緊湊模式
+        const isLandscapeCompactMode = isLandscapeMobile || isTinyHeight;  // 手機橫向緊湊模式
+
+        console.log('📱 響應式檢測 [v13.0]:', {
             width,
             height,
-            isLandscapeMobile,
-            isTinyHeight,
+            isPortraitMode,
+            isLandscapeMode,
+            isPortraitCompactMode,
+            isLandscapeCompactMode,
             isCompactMode,
             aspectRatio: (width / height).toFixed(2)
         });
@@ -1856,11 +1865,29 @@ class GameScene extends Phaser.Scene {
             const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
 
             // 📝 根據匹配數決定最大卡片高度
-            // 🔥 v12.0：保守優化 - 增加卡片尺寸到 65×65px，更好地利用垂直空間
-            // 目標：有圖片時創造正方形（寬 = 高），無圖片時創造扁平長方形（寬 > 高）
-            const maxCardHeight = hasImages
-                ? (itemCount <= 5 ? 75 : itemCount <= 10 ? 70 : itemCount <= 20 ? 65 : 70)  // 正方形模式：65-75px
-                : (itemCount <= 5 ? 55 : itemCount <= 10 ? 53 : itemCount <= 20 ? 50 : 55);  // 長方形模式：50-55px
+            // 🔥 v13.0：分離手機直向和橫向的卡片尺寸
+            // 手機直向（375×667）：卡片 65×65px，中文 18px，間距 3px → 86px/行 → 8 行
+            // 手機橫向（812×375）：卡片更小，中文更小，間距更小 → 更多行
+            let maxCardHeight;
+
+            if (isPortraitCompactMode) {
+                // 🔥 v13.0：手機直向 - 保守優化（v12.0 的設置）
+                maxCardHeight = hasImages
+                    ? (itemCount <= 5 ? 75 : itemCount <= 10 ? 70 : itemCount <= 20 ? 65 : 70)  // 正方形模式：65-75px
+                    : (itemCount <= 5 ? 55 : itemCount <= 10 ? 53 : itemCount <= 20 ? 50 : 55);  // 長方形模式：50-55px
+                console.log('📱 [v13.0] 手機直向模式 - 卡片尺寸:', { maxCardHeight, isPortraitCompactMode });
+            } else if (isLandscapeCompactMode) {
+                // 🔥 v13.0：手機橫向 - 極度緊湊（更小的卡片）
+                maxCardHeight = hasImages
+                    ? (itemCount <= 5 ? 50 : itemCount <= 10 ? 45 : itemCount <= 20 ? 40 : 45)  // 正方形模式：40-50px
+                    : (itemCount <= 5 ? 40 : itemCount <= 10 ? 38 : itemCount <= 20 ? 35 : 40);  // 長方形模式：35-40px
+                console.log('📱 [v13.0] 手機橫向模式 - 卡片尺寸:', { maxCardHeight, isLandscapeCompactMode });
+            } else {
+                // 其他模式（不應該執行到這裡）
+                maxCardHeight = hasImages
+                    ? (itemCount <= 5 ? 75 : itemCount <= 10 ? 70 : itemCount <= 20 ? 65 : 70)
+                    : (itemCount <= 5 ? 55 : itemCount <= 10 ? 53 : itemCount <= 20 ? 50 : 55);
+            }
 
             // 🔥 計算框寬度
             // v10.0：如果有圖片，框寬度 = 卡片高度（正方形）；否則框寬度 > 卡片高度（長方形）
@@ -1911,15 +1938,29 @@ class GameScene extends Phaser.Scene {
                 allSizes: chineseFontSizes
             });
 
-            // 🔥 v12.0：保守優化 - 減少中文文字框高度到 18px
-            // 之前：maxChineseFontSize + 5 ≈ 29px
-            // v11.0：20px
-            // v12.0：18px，進一步優化垂直空間利用
-            chineseTextHeight = 18;  // 固定 18px，減少 38%
-            chineseFontSize = `${Math.min(maxChineseFontSize, 15)}px`;  // 限制字體大小到 15px
+            // 🔥 v13.0：分離手機直向和橫向的中文文字高度和間距
+            let dynamicVerticalSpacing;
 
-            // 🔥 v12.0：固定垂直間距為 3px，確保穩定的行高
-            const dynamicVerticalSpacing = 3;  // 固定 3px，確保每行高度 = 65 + 18 + 3 = 86px
+            if (isPortraitCompactMode) {
+                // 🔥 v13.0：手機直向 - 保守優化（v12.0 的設置）
+                // 卡片 65px + 中文 18px + 間距 3px = 86px/行
+                chineseTextHeight = 18;  // 固定 18px
+                chineseFontSize = `${Math.min(maxChineseFontSize, 15)}px`;  // 限制字體大小到 15px
+                dynamicVerticalSpacing = 3;  // 固定 3px
+                console.log('📱 [v13.0] 手機直向模式 - 中文文字:', { chineseTextHeight, chineseFontSize, dynamicVerticalSpacing });
+            } else if (isLandscapeCompactMode) {
+                // 🔥 v13.0：手機橫向 - 極度緊湊
+                // 卡片 40px + 中文 12px + 間距 2px = 54px/行
+                chineseTextHeight = 12;  // 減少到 12px
+                chineseFontSize = `${Math.min(maxChineseFontSize, 12)}px`;  // 限制字體大小到 12px
+                dynamicVerticalSpacing = 2;  // 減少到 2px
+                console.log('📱 [v13.0] 手機橫向模式 - 中文文字:', { chineseTextHeight, chineseFontSize, dynamicVerticalSpacing });
+            } else {
+                // 其他模式（不應該執行到這裡）
+                chineseTextHeight = 18;
+                chineseFontSize = `${Math.min(maxChineseFontSize, 15)}px`;
+                dynamicVerticalSpacing = 3;
+            }
 
             console.log('📐 動態垂直間距:', {
                 chineseTextHeight,
