@@ -2175,13 +2175,15 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 🔥 中文文字（在白色框下方，無間距）- 使用預先計算的字體大小
-            const chineseY = cardHeightInFrame / 2;  // 緊貼白色框底部，無間距
-
-            // 🔥 使用預先計算的字體大小（避免重複計算）
+            // 🔥 中文文字位置計算（第六步）
+            // 公式：chineseTextY = cardY + finalCardHeight / 2 + chineseTextHeight / 2
             const chineseActualFontSize = chineseFontSizesArray[i];
+            const chineseTextHeightActual = chineseActualFontSize + 5;  // 字體大小 + 行高
 
-            console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px`);
+            // 中文文字應該在白色框下方，垂直居中
+            const chineseY = cardHeightInFrame / 2 + chineseTextHeightActual / 2;  // ✅ 改進：正確計算中文文字位置
+
+            console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${chineseY.toFixed(1)}`);
 
             // 🔥 創建最終的中文文字
             const chineseText = this.add.text(0, chineseY, pair.answer, {
@@ -2190,7 +2192,7 @@ class GameScene extends Phaser.Scene {
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
             });
-            chineseText.setOrigin(0.5, 0);  // 水平居中，垂直從上方開始
+            chineseText.setOrigin(0.5, 0.5);  // ✅ 改進：水平和垂直都居中
             frameContainer.add(chineseText);
 
             // 保存框的數據
