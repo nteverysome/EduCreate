@@ -1,4 +1,4 @@
-# 改進的混合模式佈局計算方案 v4.0
+# 改進的混合模式佈局計算方案
 
 ## 🎯 核心改進思路
 
@@ -14,25 +14,6 @@
 - 先計算 **可用空間**，再計算 **卡片尺寸**
 - 使用 **百分比 + 最小值** 的組合方式
 
-### 📋 v4.0 更新內容（基於深度分析報告）
-
-#### 🔴 P0 嚴重問題修復
-- ✅ **問題 1**：修復 horizontalSpacing 未定義就使用的問題（調整步驟順序）
-- ✅ **問題 3**：統一設備檢測邏輯（與 game.js 實際代碼保持一致）
-- ✅ **問題 8**：修正中文文字高度計算公式（考慮 verticalSpacing）
-
-#### 🟠 P1 較高問題修復
-- ✅ **問題 5**：提高手機橫向全螢幕最小卡片尺寸（70px → 80px）
-- ✅ **問題 9**：統一長方形模式的高度計算邏輯
-- ✅ **問題 11**：補充中文文字區域的位置計算
-- ✅ **問題 12**：修正事件監聽器的 this 指向和記憶體洩漏問題
-
-#### 🟡 P2 中等問題修復
-- ✅ **問題 2**：調整手機直向全螢幕的頂部按鈕區域（40px → 50px）
-- ✅ **問題 4**：簡化列數計算邏輯（移除重複分支）
-- ✅ **問題 7**：統一全螢幕按鈕區域調整原則
-- ✅ **問題 10**：修正設備類型表格中的範圍描述
-
 ---
 
 ## � 設備檢測與容器配置
@@ -42,19 +23,10 @@
 根據螢幕寬度和方向，系統自動檢測設備類型：
 
 ```javascript
-// 設備檢測函數（修正版 - 與 game.js 實際邏輯一致）
+// 設備檢測函數
 function getDeviceType(width, height) {
-    // 🔥 優先檢查緊湊模式（與 game.js 第 1677-1679 行邏輯一致）
-    // 這是為了處理特殊情況：手機橫向或極小高度
-    const isLandscapeMobile = width > height && height < 500;
-    const isTinyHeight = height < 400;
+    const aspectRatio = width / height;
 
-    // 如果符合緊湊模式條件，直接返回手機橫向
-    if (isLandscapeMobile || isTinyHeight) {
-        return 'mobile-landscape';  // 緊湊模式
-    }
-
-    // 標準設備檢測
     if (width < 768) {
         // 手機設備
         return height > width ? 'mobile-portrait' : 'mobile-landscape';
@@ -72,11 +44,11 @@ function getDeviceType(width, height) {
 
 | 設備類型 | 寬度範圍 | 高度範圍 | 佈局模式 | 特點 |
 |---------|---------|---------|---------|------|
-| **手機直向** | < 768px | > width | 緊湊模式 | 固定 5 列，扁平卡片 |
-| **手機橫向** | < 768px | < 500px 或 < 400px | 緊湊模式 | 固定 5 列，極度緊湊 |
-| **平板直向** | 768-1024px | > width | 桌面模式 | 動態列數，充分利用空間 |
-| **平板橫向** | 768-1024px | < width | 桌面模式 | 寬螢幕優化，完整功能 |
-| **桌面版** | > 1024px | 任意 | 桌面模式 | 完整功能，詳細資訊 |
+| **手機直向** | < 768px | > 768px | 緊湊模式 | 固定 5 列，扁平卡片 |
+| **手機橫向** | > 768px | < 500px | 緊湊模式 | 固定 5 列，極度緊湊 |
+| **平板直向** | 768px | 1024px | 桌面模式 | 動態列數，充分利用空間 |
+| **平板橫向** | 1024px | 768px | 桌面模式 | 寬螢幕優化，完整功能 |
+| **桌面版** | > 1024px | > 768px | 桌面模式 | 完整功能，詳細資訊 |
 
 ### 根據設備類型優化容器配置
 
@@ -84,7 +56,7 @@ function getDeviceType(width, height) {
 function getContainerConfig(deviceType, isFullscreen = false) {
     const configs = {
         'mobile-portrait': {
-            topButtonArea: isFullscreen ? 50 : 40,      // 🔥 修正：全螢幕時增加到 50px
+            topButtonArea: isFullscreen ? 40 : 40,
             bottomButtonArea: isFullscreen ? 50 : 40,
             sideMargin: isFullscreen ? 15 : 20,
             cols: 5,
@@ -97,7 +69,7 @@ function getContainerConfig(deviceType, isFullscreen = false) {
             sideMargin: isFullscreen ? 12 : 15,
             cols: 5,
             mode: 'compact',
-            minCardSize: isFullscreen ? 80 : 150        // 🔥 修正：從 70px 提高到 80px
+            minCardSize: isFullscreen ? 70 : 150
         },
         'tablet-portrait': {
             topButtonArea: isFullscreen ? 50 : 60,
@@ -142,51 +114,18 @@ function isFullscreenMode() {
     );
 }
 
-// 🔥 修正：在 Phaser 場景的 create() 方法中正確設置事件監聽器
-create() {
-    // 綁定 this 上下文，避免 this 指向問題
-    this.handleFullscreenChange = this.handleFullscreenChange.bind(this);
-    this.handleOrientationChange = this.handleOrientationChange.bind(this);
-
-    // 添加事件監聽器
-    document.addEventListener('fullscreenchange', this.handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange);
-    document.addEventListener('mozfullscreenchange', this.handleFullscreenChange);
-    document.addEventListener('MSFullscreenChange', this.handleFullscreenChange);
-
-    window.addEventListener('orientationchange', this.handleOrientationChange);
-    window.addEventListener('resize', this.handleOrientationChange);
-}
-
-// 全螢幕狀態變化處理函數
-handleFullscreenChange() {
+// 監聽全螢幕狀態變化
+document.addEventListener('fullscreenchange', () => {
     console.log('🔄 全螢幕狀態已改變，重新計算佈局');
-    if (typeof this.calculateLayout === 'function') {
-        this.calculateLayout();
-    }
-}
+    // 觸發佈局重新計算
+    this.calculateLayout();
+});
 
-// 方向變化處理函數
-handleOrientationChange() {
+// 監聽方向變化
+window.addEventListener('orientationchange', () => {
     console.log('🔄 設備方向已改變，重新計算佈局');
-    setTimeout(() => {
-        if (typeof this.calculateLayout === 'function') {
-            this.calculateLayout();
-        }
-    }, 100);
-}
-
-// 🔥 修正：在 shutdown() 或 destroy() 方法中移除監聽器，避免記憶體洩漏
-shutdown() {
-    // 移除事件監聽器
-    document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
-    document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange);
-    document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange);
-    document.removeEventListener('MSFullscreenChange', this.handleFullscreenChange);
-
-    window.removeEventListener('orientationchange', this.handleOrientationChange);
-    window.removeEventListener('resize', this.handleOrientationChange);
-}
+    setTimeout(() => this.calculateLayout(), 100);
+});
 ```
 
 ---
@@ -253,23 +192,7 @@ console.log('📐 可用空間:', {
 });
 ```
 
-### 第三步：計算間距（🔥 修正：提前到第三步）
-
-```javascript
-// 🔥 重要：必須先計算間距，因為第四步計算列數時需要使用
-// 水平間距：可用寬度的 2%，範圍 10-30px
-const horizontalSpacing = Math.max(10, Math.min(30, availableWidth * 0.02));
-
-// 垂直間距：可用高度的 3%，範圍 10-40px
-const verticalSpacing = Math.max(10, Math.min(40, availableHeight * 0.03));
-
-console.log('📏 間距計算:', {
-    horizontalSpacing: horizontalSpacing.toFixed(1),
-    verticalSpacing: verticalSpacing.toFixed(1)
-});
-```
-
-### 第四步：計算最佳列數（🔥 修正：從第三步移到第四步）
+### 第三步：計算最佳列數
 
 根據設備類型和卡片類型計算最佳列數：
 
@@ -288,33 +211,32 @@ if (containerConfig.cols !== 'dynamic') {
     if (hasImages) {
         // 🟦 正方形模式（有圖片）- 列數較少
         const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (150 + horizontalSpacing));
+        const maxColsLimit = 10;
 
-        // 🔥 修正：簡化邏輯，移除重複分支
-        let maxColsLimit;
-        if (aspectRatio > 1.5) {
-            maxColsLimit = 10;  // 寬螢幕：最多 10 列
+        if (aspectRatio > 2.0) {
+            optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
+        } else if (aspectRatio > 1.5) {
+            optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
         } else if (aspectRatio > 1.2) {
-            maxColsLimit = 8;   // 標準螢幕：最多 8 列
+            optimalCols = Math.min(maxPossibleCols, 8, itemCount);
         } else {
-            maxColsLimit = 5;   // 直向螢幕：最多 5 列
+            optimalCols = Math.min(maxPossibleCols, 5, itemCount);
         }
-
-        optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
     } else {
         // 🟨 長方形模式（無圖片）- 列數較多
         const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (200 + horizontalSpacing));
 
-        // 🔥 修正：簡化邏輯，使用統一的計算方式
-        let maxColsLimit;
-        if (aspectRatio > 1.5) {
-            maxColsLimit = 8;   // 寬螢幕：最多 8 列
+        if (aspectRatio > 2.0) {
+            optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
+        } else if (aspectRatio > 1.5) {
+            optimalCols = Math.min(6, Math.ceil(Math.sqrt(itemCount * aspectRatio / 1.5)));
         } else if (aspectRatio > 1.2) {
-            maxColsLimit = 6;   // 標準螢幕：最多 6 列
+            optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
         } else {
-            maxColsLimit = 4;   // 直向螢幕：最多 4 列
+            optimalCols = Math.min(3, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
         }
 
-        optimalCols = Math.max(1, Math.min(maxPossibleCols, maxColsLimit, itemCount));
+        optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
     }
 }
 
@@ -330,6 +252,21 @@ console.log('📊 網格佈局:', {
 });
 ```
 
+### 第四步：計算間距
+
+```javascript
+// 水平間距：基於寬度的百分比
+const horizontalSpacing = Math.max(10, Math.min(30, availableWidth * 0.02));
+
+// 垂直間距：基於高度的百分比
+const verticalSpacing = Math.max(10, Math.min(40, availableHeight * 0.03));
+
+console.log('📏 間距:', {
+    horizontalSpacing: horizontalSpacing.toFixed(1),
+    verticalSpacing: verticalSpacing.toFixed(1)
+});
+```
+
 ### 第五步：計算卡片尺寸
 
 ```javascript
@@ -342,15 +279,9 @@ if (hasImages) {
     // 🟦 正方形模式（有圖片）
     // 卡片是正方形（1:1 比例）
 
-    // 方法1：基於高度（考慮中文文字和垂直間距）
-    // 🔥 修正：正確的計算公式
-    // totalUnitHeight = cardHeight + chineseTextHeight + verticalSpacing
-    // 其中：chineseTextHeight = cardHeight * 0.4
-    // 所以：availableHeightPerRow = cardHeight + cardHeight * 0.4 + verticalSpacing
-    //      availableHeightPerRow = cardHeight * 1.4 + verticalSpacing
-    //      cardHeight = (availableHeightPerRow - verticalSpacing) / 1.4
+    // 方法1：基於高度（考慮中文文字）
     const availableHeightPerRow = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows;
-    let squareSizeByHeight = (availableHeightPerRow - verticalSpacing) / 1.4;
+    let squareSizeByHeight = availableHeightPerRow / 1.4;  // 考慮中文文字高度（40%）
 
     // 方法2：基於寬度
     const squareSizeByWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
@@ -371,9 +302,7 @@ if (hasImages) {
     console.log('🟦 正方形模式（有圖片）:', {
         isFullscreen,
         minSquareSize,
-        availableHeightPerRow: availableHeightPerRow.toFixed(1),
-        squareSizeByHeight: squareSizeByHeight.toFixed(1),
-        squareSizeByWidth: squareSizeByWidth.toFixed(1),
+        calculatedSize: Math.min(squareSizeByHeight, squareSizeByWidth).toFixed(1),
         finalSize: squareSize.toFixed(1)
     });
 
@@ -384,12 +313,9 @@ if (hasImages) {
     // 卡片寬度：充分利用可用寬度
     finalCardWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
 
-    // 🔥 修正：卡片高度計算與正方形模式保持一致
-    // totalUnitHeight = cardHeight + chineseTextHeight + verticalSpacing
-    // 其中：chineseTextHeight = cardHeight * 0.4
-    // 所以：cardHeight = (availableHeightPerRow - verticalSpacing) / 1.4
+    // 卡片高度：單元總高度的 60%
     const availableHeightPerRow = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows;
-    finalCardHeight = (availableHeightPerRow - verticalSpacing) / 1.4;
+    finalCardHeight = availableHeightPerRow * 0.6;
 
     // 確保卡片尺寸在合理範圍內
     // 全螢幕模式下使用動態最小值，非全螢幕模式下使用固定最小值
@@ -406,9 +332,8 @@ if (hasImages) {
         isFullscreen,
         minCardWidth,
         minCardHeight,
-        availableHeightPerRow: availableHeightPerRow.toFixed(1),
         calculatedWidth: ((availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols).toFixed(1),
-        calculatedHeight: ((availableHeightPerRow - verticalSpacing) / 1.4).toFixed(1),
+        calculatedHeight: (availableHeightPerRow * 0.6).toFixed(1),
         finalWidth: finalCardWidth.toFixed(1),
         finalHeight: finalCardHeight.toFixed(1)
     });
@@ -423,54 +348,34 @@ console.log('📦 卡片尺寸:', {
 });
 ```
 
-### 第六步：計算卡片和中文文字位置（🔥 補充中文文字位置計算）
+### 第六步：計算卡片位置
 
 ```javascript
-// 🔥 計算中文文字高度（與實際代碼一致）
-const chineseTextHeight = finalCardHeight * 0.4;
-
-// 計算單元總高度（包含卡片、中文文字和垂直間距）
-const totalUnitHeight = finalCardHeight + chineseTextHeight + verticalSpacing;
-
 // 計算網格起始位置（居中）
 const totalGridWidth = optimalCols * finalCardWidth + horizontalSpacing * (optimalCols + 1);
-const totalGridHeight = optimalRows * totalUnitHeight;
+const totalGridHeight = optimalRows * finalCardHeight + verticalSpacing * (optimalRows + 1);
 
 const gridStartX = (availableWidth - totalGridWidth) / 2 + sideMargin;
 const gridStartY = (availableHeight - totalGridHeight) / 2 + topButtonAreaHeight;
 
-// 創建卡片和中文文字
+// 創建卡片
 currentPagePairs.forEach((pair, index) => {
     const col = index % optimalCols;
     const row = Math.floor(index / optimalCols);
-
-    // 計算英文卡片中心位置
+    
+    // 計算卡片中心位置
     const cardX = gridStartX + horizontalSpacing + col * (finalCardWidth + horizontalSpacing) + finalCardWidth / 2;
-    const cardY = gridStartY + row * totalUnitHeight + finalCardHeight / 2;
-
-    // 🔥 計算中文文字框位置（在英文卡片下方）
-    const chineseTextY = cardY + finalCardHeight / 2 + chineseTextHeight / 2;
-
-    // 創建英文卡片
+    const cardY = gridStartY + verticalSpacing + row * (finalCardHeight + verticalSpacing) + finalCardHeight / 2;
+    
+    // 創建卡片
     const card = this.createCard(cardX, cardY, finalCardWidth, finalCardHeight, pair);
-
-    // 🔥 創建中文文字框（混合模式的核心）
-    const chineseText = this.createChineseText(
-        cardX,                  // X 座標與英文卡片對齊
-        chineseTextY,           // Y 座標在英文卡片下方
-        finalCardWidth,         // 寬度與英文卡片相同
-        chineseTextHeight,      // 高度為卡片高度的 40%
-        pair
-    );
 });
 
 console.log('📍 網格位置:', {
     gridStartX: gridStartX.toFixed(0),
     gridStartY: gridStartY.toFixed(0),
     totalGridWidth: totalGridWidth.toFixed(0),
-    totalGridHeight: totalGridHeight.toFixed(0),
-    chineseTextHeight: chineseTextHeight.toFixed(1),
-    totalUnitHeight: totalUnitHeight.toFixed(1)
+    totalGridHeight: totalGridHeight.toFixed(0)
 });
 ```
 
@@ -778,15 +683,15 @@ const {
 ✅ **改進的計算方案（6 步）**
 - 第零步：檢測全螢幕狀態、設備類型與卡片類型
 - 第二步：計算可用空間（使用設備配置）
-- 第三步：計算間距（🔥 修正：提前到第三步，避免未定義錯誤）
-- 第四步：計算最佳列數（🔥 修正：從第三步移到第四步，簡化邏輯）
-- 第五步：計算卡片尺寸（🔥 修正：正確計算中文文字高度，考慮 verticalSpacing）
-- 第六步：計算卡片和中文文字位置（🔥 補充：中文文字位置計算）
+- 第三步：計算最佳列數（支援固定和動態）
+- 第四步：計算間距
+- 第五步：計算卡片尺寸（正方形 vs 長方形，考慮全螢幕狀態）
+- 第六步：計算卡片位置
 
 ✅ **實施建議**
 - 優先級 1：核心計算（全螢幕檢測、設備檢測、容器配置、卡片類型檢測）
 - 優先級 2：設備優化（按鈕區域、邊距、列數限制）
-- 優先級 3：全螢幕優化（動態最小卡片尺寸、事件監聽器管理）
+- 優先級 3：全螢幕優化（動態最小卡片尺寸、事件監聽）
 - 優先級 4：增強功能（手動覆蓋、自定義間距、卡片對齐）
 
 ✅ **完整的測試場景**
@@ -794,28 +699,6 @@ const {
 
 ---
 
-## 📋 v4.0 修正總結
-
-### 🔴 P0 嚴重問題（已修復）
-1. ✅ **horizontalSpacing 未定義**：調整步驟順序，先計算間距（第三步）再計算列數（第四步）
-2. ✅ **設備檢測不一致**：統一設備檢測邏輯，優先檢查緊湊模式（與 game.js 一致）
-3. ✅ **中文文字高度計算錯誤**：修正公式為 `(availableHeightPerRow - verticalSpacing) / 1.4`
-
-### 🟠 P1 較高問題（已修復）
-4. ✅ **minCardSize 過小**：手機橫向全螢幕從 70px 提高到 80px
-5. ✅ **長方形高度計算不合理**：統一使用 `(availableHeightPerRow - verticalSpacing) / 1.4`
-6. ✅ **缺少中文文字位置計算**：補充完整的中文文字框位置計算邏輯
-7. ✅ **this 指向問題**：使用綁定方法和正確的事件監聽器管理，避免記憶體洩漏
-
-### 🟡 P2 中等問題（已修復）
-8. ✅ **手機直向按鈕區域**：全螢幕時 topButtonArea 從 40px 提高到 50px
-9. ✅ **列數計算複雜**：簡化邏輯，移除重複分支（aspectRatio > 2.0 和 > 1.5 合併）
-10. ✅ **按鈕區域不一致**：統一全螢幕調整原則
-11. ✅ **設備類型表格錯誤**：修正高度範圍描述（手機直向：> width，手機橫向：< 500px 或 < 400px）
-
----
-
 **最後更新**：2025-11-01
-**版本**：v4.0 - 改進的混合模式佈局計算方案（已修復深度分析報告中發現的 12 個問題）
-**基於**：IMPROVED_LAYOUT_DESIGN_ISSUES_ANALYSIS.md 深度分析報告
+**版本**：v3.0 - 改進的混合模式佈局計算方案（已整合全螢幕模式影響分析）
 
