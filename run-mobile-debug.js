@@ -12,13 +12,13 @@ async function runMobileDebug() {
         // 🔧 啟動瀏覽器
         console.log('🚀 啟動 Chromium 瀏覽器...');
         browser = await chromium.launch({
-            headless: false,  // 顯示瀏覽器窗口
+            headless: true,  // 無頭模式
             args: ['--disable-blink-features=AutomationControlled']
         });
 
         // 📱 創建手機直向上下文
         console.log('📱 創建手機直向上下文 (375×667)...\n');
-        const context = await browser.createContext({
+        const context = await browser.newContext({
             viewport: { width: 375, height: 667 },
             deviceScaleFactor: 2,
             isMobile: true,
