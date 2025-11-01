@@ -34,7 +34,8 @@ async function runMobileDebug() {
             const text = msg.text();
             consoleLogs.push({
                 type: msg.type(),
-                text: text
+                text: text,
+                args: msg.args()
             });
             console.log(`[${msg.type().toUpperCase()}] ${text}`);
         });
@@ -61,11 +62,36 @@ async function runMobileDebug() {
         let vocabularyData = null;
         let layoutInfo = null;
 
+        // 🔍 首先查找所有包含 "開始轉換詞彙數據格式" 的日誌
+        console.log('\n📋 查找詞彙數據轉換日誌...');
+        let foundTransformLog = false;
+        for (const log of consoleLogs) {
+            if (log.text.includes('開始轉換詞彙數據格式')) {
+                foundTransformLog = true;
+                console.log('✅ 找到詞彙數據轉換日誌');
+                break;
+            }
+        }
+
+        if (!foundTransformLog) {
+            console.log('⚠️ 未找到詞彙數據轉換日誌');
+        }
+
+        // 查找所有包含 "v9.0" 的日誌
+        console.log('\n📋 查找 v9.0 調試日誌...');
+        for (const log of consoleLogs) {
+            const text = log.text;
+            if (text.includes('v9.0')) {
+                console.log(`✅ 找到 v9.0 日誌: ${text.substring(0, 100)}...`);
+            }
+        }
+
+        // 查找原始詞彙數據結構檢查
+        console.log('\n📋 查找詞彙數據結構檢查...');
         for (const log of consoleLogs) {
             const text = log.text;
 
-            // 查找原始詞彙數據結構檢查
-            if (text.includes('[v9.0] 原始詞彙數據結構檢查')) {
+            if (text.includes('原始詞彙數據結構檢查')) {
                 console.log('✅ 找到詞彙數據結構檢查日誌\n');
                 try {
                     // 提取 JSON 部分
