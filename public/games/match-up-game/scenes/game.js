@@ -1682,12 +1682,15 @@ class GameScene extends Phaser.Scene {
         const itemCount = currentPagePairs.length;
 
         // 📝 響應式檢測：判斷是否需要使用緊湊模式
+        // 🔥 修復：手機直向應該也使用緊湊模式
+        // isMobileDevice：手機設備（寬度 < 768px）
         // isLandscapeMobile：手機橫向模式（寬度 > 高度 且 高度 < 500px）
         // isTinyHeight：極小高度（高度 < 400px）
-        // isCompactMode：緊湊模式（手機橫向 或 極小高度）
-        const isLandscapeMobile = width > height && height < 500;
-        const isTinyHeight = height < 400;
-        const isCompactMode = isLandscapeMobile || isTinyHeight;
+        // isCompactMode：緊湊模式（手機直向 或 手機橫向 或 極小高度）
+        const isMobileDevice = width < 768;  // 手機設備（寬度 < 768px）
+        const isLandscapeMobile = width > height && height < 500;  // 手機橫向
+        const isTinyHeight = height < 400;  // 極小高度
+        const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
 
         console.log('📱 響應式檢測:', {
             width,
