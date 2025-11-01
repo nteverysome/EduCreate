@@ -2296,11 +2296,10 @@ class GameScene extends Phaser.Scene {
         const rows = Math.ceil(itemCount / cols);
         const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
 
-        // 🔥 緊湊模式需要重新計算 verticalSpacing（基於實際的中文文字高度）
+        // 🔥 v13.0：緊湊模式的 verticalSpacing 已在前面設置，不需要重新計算
         // 桌面模式的 verticalSpacing 已在上面的 if/else 分支中定義
-        if (isCompactMode) {
-            verticalSpacing = Math.max(5, Math.floor(chineseTextHeight * 0.2));  // 字體大小的20%，最小5px
-        }
+        // 注意：緊湊模式下，verticalSpacing 已經在第 1949 行或 1956 行設置為 dynamicVerticalSpacing
+        // 不要在這裡覆蓋它！
 
         // 🔥 計算頂部偏移，確保佈局垂直居中或從頂部開始（手機版減少10px）
         // 📝 totalUnitHeight 已經包含 chineseTextHeight 和 verticalSpacing，所以不需要重複加
