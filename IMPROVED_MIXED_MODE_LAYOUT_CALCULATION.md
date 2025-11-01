@@ -53,42 +53,47 @@ function getDeviceType(width, height) {
 ### 根據設備類型優化容器配置
 
 ```javascript
-function getContainerConfig(deviceType) {
+function getContainerConfig(deviceType, isFullscreen = false) {
     const configs = {
         'mobile-portrait': {
-            topButtonArea: 40,      // 頂部按鈕區域
-            bottomButtonArea: 40,   // 底部按鈕區域
-            sideMargin: 20,         // 左右邊距
-            cols: 5,                // 固定列數
-            mode: 'compact'         // 緊湊模式
+            topButtonArea: isFullscreen ? 40 : 40,
+            bottomButtonArea: isFullscreen ? 50 : 40,
+            sideMargin: isFullscreen ? 15 : 20,
+            cols: 5,
+            mode: 'compact',
+            minCardSize: isFullscreen ? 80 : 150
         },
         'mobile-landscape': {
-            topButtonArea: 30,      // 極度緊湊
-            bottomButtonArea: 30,
-            sideMargin: 15,
+            topButtonArea: isFullscreen ? 25 : 30,
+            bottomButtonArea: isFullscreen ? 30 : 30,
+            sideMargin: isFullscreen ? 12 : 15,
             cols: 5,
-            mode: 'compact'
+            mode: 'compact',
+            minCardSize: isFullscreen ? 70 : 150
         },
         'tablet-portrait': {
-            topButtonArea: 60,
-            bottomButtonArea: 60,
-            sideMargin: 30,
-            cols: 'dynamic',        // 動態計算
-            mode: 'desktop'
+            topButtonArea: isFullscreen ? 50 : 60,
+            bottomButtonArea: isFullscreen ? 60 : 60,
+            sideMargin: isFullscreen ? 25 : 30,
+            cols: 'dynamic',
+            mode: 'desktop',
+            minCardSize: isFullscreen ? 100 : 150
         },
         'tablet-landscape': {
-            topButtonArea: 50,
-            bottomButtonArea: 50,
-            sideMargin: 40,
+            topButtonArea: isFullscreen ? 60 : 50,
+            bottomButtonArea: isFullscreen ? 80 : 50,
+            sideMargin: isFullscreen ? 35 : 40,
             cols: 'dynamic',
-            mode: 'desktop'
+            mode: 'desktop',
+            minCardSize: isFullscreen ? 110 : 150
         },
         'desktop': {
-            topButtonArea: 80,
-            bottomButtonArea: 80,
-            sideMargin: 50,
+            topButtonArea: isFullscreen ? 70 : 80,
+            bottomButtonArea: isFullscreen ? 90 : 80,
+            sideMargin: isFullscreen ? 45 : 50,
             cols: 'dynamic',
-            mode: 'desktop'
+            mode: 'desktop',
+            minCardSize: isFullscreen ? 120 : 150
         }
     };
 
@@ -96,23 +101,61 @@ function getContainerConfig(deviceType) {
 }
 ```
 
+### 全螢幕狀態檢測
+
+```javascript
+// 檢測全螢幕狀態
+function isFullscreenMode() {
+    return !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
+    );
+}
+
+// 監聽全螢幕狀態變化
+document.addEventListener('fullscreenchange', () => {
+    console.log('🔄 全螢幕狀態已改變，重新計算佈局');
+    // 觸發佈局重新計算
+    this.calculateLayout();
+});
+
+// 監聽方向變化
+window.addEventListener('orientationchange', () => {
+    console.log('🔄 設備方向已改變，重新計算佈局');
+    setTimeout(() => this.calculateLayout(), 100);
+});
+```
+
 ---
 
 ## �📐 改進的計算方案
 
-### 第零步：檢測設備類型與卡片類型
+### 第零步：檢測設備類型、全螢幕狀態與卡片類型
 
 ```javascript
+// 檢測全螢幕狀態
+const isFullscreen = !!(
+    document.fullscreenElement ||
+    (document as any).webkitFullscreenElement ||
+    (document as any).mozFullScreenElement ||
+    (document as any).msFullscreenElement
+);
+
+console.log('🖥️ 全螢幕狀態:', isFullscreen ? '✅ 全螢幕' : '❌ 非全螢幕');
+
 // 檢測設備類型
 const deviceType = getDeviceType(width, height);
-const containerConfig = getContainerConfig(deviceType);
+const containerConfig = getContainerConfig(deviceType, isFullscreen);
 
 console.log('📱 設備檢測:', {
     deviceType,
     width,
     height,
     aspectRatio: (width / height).toFixed(2),
-    mode: containerConfig.mode
+    mode: containerConfig.mode,
+    isFullscreen
 });
 
 // 檢測卡片類型
@@ -229,6 +272,9 @@ console.log('📏 間距:', {
 ```javascript
 let finalCardWidth, finalCardHeight, cardRatio;
 
+// 根據全螢幕狀態調整最小卡片尺寸
+const minCardSize = containerConfig.minCardSize;
+
 if (hasImages) {
     // 🟦 正方形模式（有圖片）
     // 卡片是正方形（1:1 比例）
@@ -244,13 +290,21 @@ if (hasImages) {
     let squareSize = Math.min(squareSizeByHeight, squareSizeByWidth);
 
     // 確保卡片尺寸在合理範圍內
-    const minSquareSize = 150;
+    // 全螢幕模式下使用動態最小值，非全螢幕模式下使用固定最小值
+    const minSquareSize = isFullscreen ? minCardSize : 150;
     const maxSquareSize = 300;
     squareSize = Math.max(minSquareSize, Math.min(maxSquareSize, squareSize));
 
     finalCardWidth = squareSize;
     finalCardHeight = squareSize;
     cardRatio = '1:1（正方形）';
+
+    console.log('🟦 正方形模式（有圖片）:', {
+        isFullscreen,
+        minSquareSize,
+        calculatedSize: Math.min(squareSizeByHeight, squareSizeByWidth).toFixed(1),
+        finalSize: squareSize.toFixed(1)
+    });
 
 } else {
     // 🟨 長方形模式（無圖片）
@@ -264,14 +318,25 @@ if (hasImages) {
     finalCardHeight = availableHeightPerRow * 0.6;
 
     // 確保卡片尺寸在合理範圍內
-    const minCardWidth = 200;
-    const minCardHeight = 100;
+    // 全螢幕模式下使用動態最小值，非全螢幕模式下使用固定最小值
+    const minCardWidth = isFullscreen ? minCardSize : 200;
+    const minCardHeight = isFullscreen ? (minCardSize * 0.5) : 100;
     const maxCardSize = 300;
 
     finalCardWidth = Math.max(minCardWidth, Math.min(maxCardSize, finalCardWidth));
     finalCardHeight = Math.max(minCardHeight, Math.min(maxCardSize, finalCardHeight));
 
     cardRatio = (finalCardWidth / finalCardHeight).toFixed(2) + ':1（長方形）';
+
+    console.log('🟨 長方形模式（無圖片）:', {
+        isFullscreen,
+        minCardWidth,
+        minCardHeight,
+        calculatedWidth: ((availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols).toFixed(1),
+        calculatedHeight: (availableHeightPerRow * 0.6).toFixed(1),
+        finalWidth: finalCardWidth.toFixed(1),
+        finalHeight: finalCardHeight.toFixed(1)
+    });
 }
 
 console.log('📦 卡片尺寸:', {
@@ -540,31 +605,59 @@ const {
 } = layout;
 ```
 
-### 步驟 4：測試所有設備類型和模式組合
+### 步驟 4：測試所有設備類型、模式和全螢幕狀態組合
 
-#### 手機直向（375×667px）
-- 正方形模式（有圖片）
-- 長方形模式（無圖片）
+#### 非全螢幕模式
 
-#### 手機橫向（812×375px）
-- 正方形模式（有圖片）
-- 長方形模式（無圖片）
+##### 手機直向（375×667px）
+- 正方形模式（有圖片）：minCardSize = 150px
+- 長方形模式（無圖片）：minCardSize = 150px
 
-#### 平板直向（768×1024px）
-- 正方形模式（有圖片）
-- 長方形模式（無圖片）
+##### 手機橫向（812×375px）
+- 正方形模式（有圖片）：minCardSize = 150px
+- 長方形模式（無圖片）：minCardSize = 150px
 
-#### 平板橫向（1024×768px）
-- 正方形模式（有圖片）
-- 長方形模式（無圖片）
+##### 平板直向（768×1024px）
+- 正方形模式（有圖片）：minCardSize = 150px
+- 長方形模式（無圖片）：minCardSize = 150px
 
-#### 桌面版（1440×900px）
-- 正方形模式（有圖片）
-- 長方形模式（無圖片）
+##### 平板橫向（1024×768px）
+- 正方形模式（有圖片）：minCardSize = 150px
+- 長方形模式（無圖片）：minCardSize = 150px
 
-#### 超寬螢幕（1920×1080px）
-- 正方形模式（有圖片）
-- 長方形模式（無圖片）
+##### 桌面版（1440×900px）
+- 正方形模式（有圖片）：minCardSize = 150px
+- 長方形模式（無圖片）：minCardSize = 150px
+
+##### 超寬螢幕（1920×1080px）
+- 正方形模式（有圖片）：minCardSize = 150px
+- 長方形模式（無圖片）：minCardSize = 150px
+
+#### 全螢幕模式
+
+##### 手機直向全螢幕（375×667px）
+- 正方形模式（有圖片）：minCardSize = 80px，按鈕區域調整
+- 長方形模式（無圖片）：minCardSize = 80px，按鈕區域調整
+
+##### 手機橫向全螢幕（812×375px）
+- 正方形模式（有圖片）：minCardSize = 70px，按鈕區域調整
+- 長方形模式（無圖片）：minCardSize = 70px，按鈕區域調整
+
+##### 平板直向全螢幕（768×1024px）
+- 正方形模式（有圖片）：minCardSize = 100px，按鈕區域調整
+- 長方形模式（無圖片）：minCardSize = 100px，按鈕區域調整
+
+##### 平板橫向全螢幕（1024×768px）
+- 正方形模式（有圖片）：minCardSize = 110px，按鈕區域調整
+- 長方形模式（無圖片）：minCardSize = 110px，按鈕區域調整
+
+##### 桌面全螢幕（1440×900px）
+- 正方形模式（有圖片）：minCardSize = 120px，按鈕區域調整
+- 長方形模式（無圖片）：minCardSize = 120px，按鈕區域調整
+
+##### 超寬螢幕全螢幕（1920×1080px）
+- 正方形模式（有圖片）：minCardSize = 120px，按鈕區域調整
+- 長方形模式（無圖片）：minCardSize = 120px，按鈕區域調整
 
 ---
 
@@ -572,28 +665,40 @@ const {
 
 本文檔已整合以下內容：
 
+✅ **全螢幕狀態檢測**
+- 檢測全螢幕狀態（document.fullscreenElement）
+- 監聽全螢幕狀態變化事件
+- 監聽設備方向變化事件
+
+✅ **全螢幕模式下的容器配置**
+- 根據全螢幕狀態調整按鈕區域高度
+- 根據全螢幕狀態調整邊距
+- 根據全螢幕狀態調整最小卡片尺寸
+
 ✅ **設備檢測與容器配置**
 - 手機直向、手機橫向、平板直向、平板橫向、桌面版
 - 根據設備類型優化按鈕區域、邊距、列數限制
+- 支援全螢幕和非全螢幕兩種模式
 
 ✅ **改進的計算方案（6 步）**
-- 第零步：檢測設備類型與卡片類型
+- 第零步：檢測全螢幕狀態、設備類型與卡片類型
 - 第二步：計算可用空間（使用設備配置）
 - 第三步：計算最佳列數（支援固定和動態）
 - 第四步：計算間距
-- 第五步：計算卡片尺寸（正方形 vs 長方形）
+- 第五步：計算卡片尺寸（正方形 vs 長方形，考慮全螢幕狀態）
 - 第六步：計算卡片位置
 
 ✅ **實施建議**
-- 優先級 1：核心計算（設備檢測、容器配置、卡片類型檢測）
+- 優先級 1：核心計算（全螢幕檢測、設備檢測、容器配置、卡片類型檢測）
 - 優先級 2：設備優化（按鈕區域、邊距、列數限制）
-- 優先級 3：增強功能（手動覆蓋、自定義間距、卡片對齐）
+- 優先級 3：全螢幕優化（動態最小卡片尺寸、事件監聽）
+- 優先級 4：增強功能（手動覆蓋、自定義間距、卡片對齐）
 
 ✅ **完整的測試場景**
-- 6 種設備類型 × 2 種卡片模式 = 12 種組合
+- 6 種設備類型 × 2 種卡片模式 × 2 種全螢幕狀態 = 24 種組合
 
 ---
 
 **最後更新**：2025-11-01
-**版本**：v2.0 - 改進的混合模式佈局計算方案（已整合設備方向與容器響應式設計）
+**版本**：v3.0 - 改進的混合模式佈局計算方案（已整合全螢幕模式影響分析）
 
