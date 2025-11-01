@@ -1983,6 +1983,9 @@ class GameScene extends Phaser.Scene {
             // 📝 單元總高度 = 英文卡片高度 + 中文文字高度 + 垂直間距
             totalUnitHeight = cardHeightInFrame + chineseTextHeight + dynamicVerticalSpacing;
 
+            // 🔥 v14.0：將 dynamicVerticalSpacing 賦值給 verticalSpacing，以便後續使用
+            verticalSpacing = dynamicVerticalSpacing;
+
             console.log('🔥 緊湊模式智能動態尺寸 [v10.0]:', {
                 rows,
                 availableHeight,
