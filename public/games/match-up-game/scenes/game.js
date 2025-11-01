@@ -2118,6 +2118,7 @@ class GameScene extends Phaser.Scene {
                 const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
 
                 // 🔥 第八步：智能計算最佳列數（根據寬高比和匹配數）
+                // v7.0 修復：直向螢幕應該允許 5 列，不是 3 列
                 let optimalCols;
                 if (aspectRatio > 2.0) {
                     // 超寬螢幕（21:9, 32:9）
@@ -2129,8 +2130,8 @@ class GameScene extends Phaser.Scene {
                     // 標準螢幕（4:3, 3:2）
                     optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
                 } else {
-                    // 直向螢幕（9:16）
-                    optimalCols = Math.min(3, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
+                    // 直向螢幕（9:16）- v7.0 修復：改為 5 列（與 Wordwall 一致）
+                    optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
                 }
 
                 // 確保列數在合理範圍內
