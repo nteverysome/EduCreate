@@ -362,7 +362,7 @@ class GameScene extends Phaser.Scene {
                 console.log('✅ 詞彙數據轉換完成:', {
                     totalPairs: this.pairs.length,
                     firstPair: this.pairs[0],
-                    hasImages: this.pairs.some(p => p.imageUrl || p.chineseImageUrl),
+                    hasImages: this.pairs.some(p => p.imageUrl || p.chineseImageUrl || p.imageId || p.chineseImageId),
                     hasAudio: this.pairs.some(p => p.audioUrl)
                 });
 
@@ -1815,6 +1815,12 @@ class GameScene extends Phaser.Scene {
             // 目標：減少垂直空間佔用，增加列數
             console.log('📱 使用緊湊模式佈局');
 
+            // 🔥 v10.0 檢測是否有圖片（只要有任何一個圖片就進入正方形模式）
+            const hasImages = currentPagePairs.some(pair =>
+                pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId
+            );
+            console.log(`🔍 [v10.0] 緊湊模式圖片檢測: hasImages=${hasImages}, mode=${hasImages ? '🟦 正方形模式' : '🟨 長方形模式'}`);
+
             // 🔥 手機橫向模式固定5列
             cols = Math.min(5, itemCount);  // 固定最多5列
 
@@ -1831,13 +1837,21 @@ class GameScene extends Phaser.Scene {
             const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
 
             // 📝 根據匹配數決定最大卡片高度
-            // 目標：創造扁平長方形（寬 > 高）
-            const maxCardHeight = itemCount <= 5 ? 35 : itemCount <= 10 ? 32 : itemCount <= 20 ? 30 : 34;
+            // 🔥 v10.0：如果有圖片，使用正方形模式；否則使用長方形模式
+            // 目標：有圖片時創造正方形（寬 = 高），無圖片時創造扁平長方形（寬 > 高）
+            const maxCardHeight = hasImages
+                ? (itemCount <= 5 ? 50 : itemCount <= 10 ? 45 : itemCount <= 20 ? 40 : 45)  // 正方形模式：更大的卡片
+                : (itemCount <= 5 ? 35 : itemCount <= 10 ? 32 : itemCount <= 20 ? 30 : 34);  // 長方形模式：扁平卡片
 
-            // 🔥 計算框寬度（增加寬度以創造扁平長方形，每個增加30px）
+            // 🔥 計算框寬度
+            // v10.0：如果有圖片，框寬度 = 卡片高度（正方形）；否則框寬度 > 卡片高度（長方形）
             const horizontalMargin = 30;
-            const maxFrameWidth = itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250;
-            frameWidth = Math.min(maxFrameWidth, (width - horizontalMargin) / cols);
+            const maxFrameWidth = hasImages
+                ? (itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250)  // 正方形模式
+                : (itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250);  // 長方形模式
+            frameWidth = hasImages
+                ? Math.min(maxCardHeight, (width - horizontalMargin) / cols)  // 正方形：frameWidth = cardHeight
+                : Math.min(maxFrameWidth, (width - horizontalMargin) / cols);  // 長方形：frameWidth 可以更寬
 
             // 🔥 智能預先計算所有中文文字的實際字體大小
             console.log('🔍 開始預先計算中文字體大小...');
@@ -1892,12 +1906,21 @@ class GameScene extends Phaser.Scene {
             });
 
             // 重新計算卡片高度（考慮實際的中文文字高度）
-            cardHeightInFrame = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight - chineseTextHeight - dynamicVerticalSpacing)));
+            // 🔥 v10.0：如果有圖片，cardHeightInFrame = frameWidth（正方形）；否則根據可用空間計算
+            if (hasImages) {
+                // 正方形模式：卡片高度 = 框寬度
+                cardHeightInFrame = frameWidth;
+                console.log(`🔥 [v10.0] 正方形模式：cardHeightInFrame = frameWidth = ${frameWidth}`);
+            } else {
+                // 長方形模式：根據可用空間計算
+                cardHeightInFrame = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight - chineseTextHeight - dynamicVerticalSpacing)));
+                console.log(`🔥 [v10.0] 長方形模式：cardHeightInFrame = ${cardHeightInFrame}`);
+            }
 
             // 📝 單元總高度 = 英文卡片高度 + 中文文字高度 + 垂直間距
             totalUnitHeight = cardHeightInFrame + chineseTextHeight + dynamicVerticalSpacing;
 
-            console.log('🔥 緊湊模式智能動態尺寸:', {
+            console.log('🔥 緊湊模式智能動態尺寸 [v10.0]:', {
                 rows,
                 availableHeight,
                 rowHeight,
@@ -1908,7 +1931,8 @@ class GameScene extends Phaser.Scene {
                 chineseTextHeight,
                 dynamicVerticalSpacing,
                 totalUnitHeight,
-                ratio: (frameWidth / cardHeightInFrame).toFixed(1) + ':1'
+                ratio: (frameWidth / cardHeightInFrame).toFixed(1) + ':1',
+                mode: hasImages ? '🟦 正方形模式' : '🟨 長方形模式'
             });
         } else {
             // 🔥 桌面動態響應式佈局（含按鈕空間）
