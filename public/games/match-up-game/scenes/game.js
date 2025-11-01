@@ -522,8 +522,19 @@ class GameScene extends Phaser.Scene {
         this.updateLayout();
         console.log('🎮 GameScene: updateLayout 完成');
 
+        // 🔥 P1-4: 綁定事件監聽器（使用 bind 確保 this 上下文正確）
         // 監聽螢幕尺寸變化
         this.scale.on('resize', this.handleResize, this);
+        console.log('✅ 已綁定 resize 事件監聽器');
+
+        // 監聽全螢幕變化
+        document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
+        console.log('✅ 已綁定 fullscreenchange 事件監聽器');
+
+        // 監聽設備方向變化
+        window.addEventListener('orientationchange', this.handleOrientationChange.bind(this));
+        console.log('✅ 已綁定 orientationchange 事件監聽器');
+
         console.log('🎮 GameScene: create 方法完成');
     }
 
@@ -1069,7 +1080,7 @@ class GameScene extends Phaser.Scene {
         // 🔥 根據容器大小和列數調整卡片尺寸
         let cardWidth, cardHeight;
         if (isSmallContainer) {
-            cardWidth = Math.max(70, Math.min(120, width * (0.85 / columns)));
+            cardWidth = Math.max(80, Math.min(120, width * (0.85 / columns)));  // ✅ 提高最小寬度從 70px 到 80px
             cardHeight = Math.max(35, Math.min(55, height * 0.15));
         } else if (isMediumContainer) {
             cardWidth = Math.max(80, Math.min(140, width * (0.88 / columns)));
@@ -1821,23 +1832,33 @@ class GameScene extends Phaser.Scene {
             const availableWidth = width - sideMargin * 2;
             const availableHeight = height - topButtonAreaHeight - bottomButtonAreaHeight;
 
-            // 🔥 第三步：計算螢幕寬高比
+            // 🔥 第三步：計算螢幕寬高比和間距
             const aspectRatio = width / height;
 
-            // 🔥 第四步：智能計算水平間距（根據螢幕寬度）
-            const horizontalSpacing = Math.max(15, Math.min(30, width * 0.015));  // 15-30px，基於寬度的1.5%
+            // 根據寬高比動態調整水平間距
+            let horizontalSpacingBase;
+            if (aspectRatio > 2.0) {
+                horizontalSpacingBase = width * 0.02;  // 超寬螢幕：2%
+            } else if (aspectRatio > 1.5) {
+                horizontalSpacingBase = width * 0.015; // 寬螢幕：1.5%
+            } else {
+                horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
+            }
+
+            // 🔥 第四步：計算水平間距
+            const horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
 
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
                 console.log('🟦 使用正方形卡片模式');
 
-                // 🔥 第五步：定義最小正方形卡片大小
-                const minSquareSize = 150;  // 最小正方形尺寸150×150
-
-                // 🔥 第六步：計算垂直間距（基於螢幕高度）
+                // 🔥 第五步：計算垂直間距（基於螢幕高度）
                 // 使用固定的垂直間距，避免估算不準確導致間距太小
                 // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
                 verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+
+                // 🔥 第六步：定義最小正方形卡片大小
+                const minSquareSize = 150;  // 最小正方形尺寸150×150
 
                 // 🔥 第七步：計算最大可能的列數
                 // 使用最小卡片尺寸來計算最大可能列數
@@ -1847,14 +1868,12 @@ class GameScene extends Phaser.Scene {
                 // 策略：盡可能多的列數，充分利用水平空間
                 let optimalCols;
 
+                // 🔥 P2-2: 簡化列數計算邏輯 - 移除重複分支
                 // 設定最大列數限制（避免卡片過小）
                 const maxColsLimit = 10;  // 最多10列
 
-                if (aspectRatio > 2.0) {
-                    // 超寬螢幕（21:9, 32:9）- 可以容納更多列
-                    optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
-                } else if (aspectRatio > 1.5) {
-                    // 寬螢幕（16:9, 16:10）- 優先使用最大可能列數
+                if (aspectRatio > 1.5) {
+                    // 寬螢幕（超寬 > 2.0 或 寬 > 1.5）- 優先使用最大可能列數
                     optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
                 } else if (aspectRatio > 1.2) {
                     // 標準螢幕（4:3, 3:2）- 稍微限制列數
@@ -1874,9 +1893,9 @@ class GameScene extends Phaser.Scene {
                 // 方法1：基於高度
                 // totalUnitHeight = squareSize + chineseTextHeight
                 // totalUnitHeight = squareSize + squareSize * 0.4 = squareSize * 1.4
-                // 所以 squareSize = totalUnitHeight / 1.4
+                // 所以 squareSize = (totalUnitHeight - verticalSpacing) / 1.4
                 let availableHeightPerRow = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows;
-                let squareSizeByHeight = availableHeightPerRow / 1.4;  // 正確計算：考慮中文文字高度
+                let squareSizeByHeight = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正：考慮 verticalSpacing
 
                 // 方法2：基於寬度
                 const squareSizeByWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
@@ -1893,7 +1912,7 @@ class GameScene extends Phaser.Scene {
                     // 重新計算卡片尺寸
                     const newSquareSizeByWidth = (availableWidth - horizontalSpacing * (newCols + 1)) / newCols;
                     const newAvailableHeightPerRow = (availableHeight - verticalSpacing * (newRows + 1)) / newRows;
-                    const newSquareSizeByHeight = newAvailableHeightPerRow / 1.4;
+                    const newSquareSizeByHeight = (newAvailableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正：考慮 verticalSpacing
                     const newSquareSize = Math.min(newSquareSizeByHeight, newSquareSizeByWidth);
 
                     // 如果新的卡片尺寸更大，使用新的佈局
@@ -1991,20 +2010,20 @@ class GameScene extends Phaser.Scene {
                 // 🟨 長方形模式（無圖片）
                 console.log('🟨 使用長方形卡片模式');
 
-                // 🔥 第五步：定義最小卡片大小
-                const minCardWidth = 200;
-                const minCardHeight = 100;
-
-                // 🔥 第六步：計算垂直間距（基於螢幕高度）
+                // 🔥 第五步：計算垂直間距（基於螢幕高度）
                 // 使用固定的垂直間距，避免估算不準確導致間距太小
                 // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
                 verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+
+                // 🔥 第六步：定義最小卡片大小
+                const minCardWidth = 200;
+                const minCardHeight = 100;
 
                 // 🔥 第七步：計算最大可能的列數和行數
                 const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
                 const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
 
-                // 🔥 第七步：智能計算最佳列數（根據寬高比和匹配數）
+                // 🔥 第八步：智能計算最佳列數（根據寬高比和匹配數）
                 let optimalCols;
                 if (aspectRatio > 2.0) {
                     // 超寬螢幕（21:9, 32:9）
@@ -2023,7 +2042,7 @@ class GameScene extends Phaser.Scene {
                 // 確保列數在合理範圍內
                 optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
 
-                // 🔥 第八步：計算行數
+                // 🔥 第九步：計算行數
                 let optimalRows = Math.ceil(itemCount / optimalCols);
 
                 // 🔥 如果行數超過最大可能行數，增加列數
@@ -2035,15 +2054,16 @@ class GameScene extends Phaser.Scene {
                 cols = optimalCols;
                 const rows = optimalRows;
 
-                // 🔥 第九步：計算卡片大小（充分利用可用空間）
+                // 🔥 第十步：計算卡片大小（充分利用可用空間）
                 frameWidth = (availableWidth - horizontalSpacing * (cols + 1)) / cols;
 
                 // 🔥 計算單元總高度（包含中文文字）
                 const availableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
 
-                // 🔥 卡片高度：單元總高度的60%，中文文字：40%
-                cardHeightInFrame = availableHeightPerRow * 0.6;
-                chineseTextHeight = availableHeightPerRow * 0.4;
+                // 🔥 卡片高度和中文文字高度計算（與正方形模式保持一致）
+                // 使用正確公式：(availableHeightPerRow - verticalSpacing) / 1.4
+                cardHeightInFrame = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正
+                chineseTextHeight = cardHeightInFrame * 0.4;  // 中文文字高度 = 卡片高度的 40%
 
                 totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;
 
@@ -2164,13 +2184,15 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 🔥 中文文字（在白色框下方，無間距）- 使用預先計算的字體大小
-            const chineseY = cardHeightInFrame / 2;  // 緊貼白色框底部，無間距
-
-            // 🔥 使用預先計算的字體大小（避免重複計算）
+            // 🔥 中文文字位置計算（第六步）
+            // 公式：chineseTextY = cardY + finalCardHeight / 2 + chineseTextHeight / 2
             const chineseActualFontSize = chineseFontSizesArray[i];
+            const chineseTextHeightActual = chineseActualFontSize + 5;  // 字體大小 + 行高
 
-            console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px`);
+            // 中文文字應該在白色框下方，垂直居中
+            const chineseY = cardHeightInFrame / 2 + chineseTextHeightActual / 2;  // ✅ 改進：正確計算中文文字位置
+
+            console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${chineseY.toFixed(1)}`);
 
             // 🔥 創建最終的中文文字
             const chineseText = this.add.text(0, chineseY, pair.answer, {
@@ -2179,7 +2201,7 @@ class GameScene extends Phaser.Scene {
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
             });
-            chineseText.setOrigin(0.5, 0);  // 水平居中，垂直從上方開始
+            chineseText.setOrigin(0.5, 0.5);  // ✅ 改進：水平和垂直都居中
             frameContainer.add(chineseText);
 
             // 保存框的數據
@@ -5075,6 +5097,55 @@ class GameScene extends Phaser.Scene {
             this.gameCompleteModal.overlay.setVisible(true);
             this.gameCompleteModal.modal.setVisible(true);
         }
+    }
+
+    // 🔥 P1-4: 修正事件監聽器管理 - shutdown 方法
+    shutdown() {
+        console.log('🎮 GameScene: shutdown 方法開始 - 清理事件監聽器');
+
+        // 移除 resize 事件監聽器
+        if (this.scale) {
+            this.scale.off('resize', this.handleResize, this);
+            console.log('✅ 已移除 resize 事件監聽器');
+        }
+
+        // 移除 fullscreen 事件監聽器（如果存在）
+        if (document) {
+            document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
+            console.log('✅ 已移除 fullscreenchange 事件監聽器');
+        }
+
+        // 移除 orientation 事件監聽器（如果存在）
+        if (window) {
+            window.removeEventListener('orientationchange', this.handleOrientationChange);
+            console.log('✅ 已移除 orientationchange 事件監聽器');
+        }
+
+        // 停止計時器
+        if (this.timerEvent) {
+            this.timerEvent.remove();
+            this.timerEvent = null;
+            console.log('✅ 已停止計時器');
+        }
+
+        // 清理遊戲狀態
+        this.sceneStopped = true;
+        console.log('🎮 GameScene: shutdown 方法完成 - 所有事件監聽器已清理');
+    }
+
+    // 🔥 P1-4: 全螢幕變化事件處理
+    handleFullscreenChange() {
+        console.log('🎮 全螢幕狀態變化:', document.fullscreenElement ? '進入全螢幕' : '退出全螢幕');
+        // 重新計算佈局
+        this.updateLayout();
+    }
+
+    // 🔥 P1-4: 設備方向變化事件處理
+    handleOrientationChange() {
+        const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+        console.log('🎮 設備方向變化:', isPortrait ? '直向' : '橫向');
+        // 重新計算佈局
+        this.updateLayout();
     }
 }
 

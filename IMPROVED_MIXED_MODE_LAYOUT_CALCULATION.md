@@ -72,10 +72,10 @@ function getDeviceType(width, height) {
 
 | 設備類型 | 寬度範圍 | 高度範圍 | 佈局模式 | 特點 |
 |---------|---------|---------|---------|------|
-| **手機直向** | < 768px | > width | 緊湊模式 | 固定 5 列，扁平卡片 |
-| **手機橫向** | < 768px | < 500px 或 < 400px | 緊湊模式 | 固定 5 列，極度緊湊 |
-| **平板直向** | 768-1024px | > width | 桌面模式 | 動態列數，充分利用空間 |
-| **平板橫向** | 768-1024px | < width | 桌面模式 | 寬螢幕優化，完整功能 |
+| **手機直向** | < 768px | height > width（直向） | 緊湊模式 | 固定 5 列，扁平卡片 |
+| **手機橫向** | < 768px | height < 500px 或 height < 400px（橫向） | 緊湊模式 | 固定 5 列，極度緊湊 |
+| **平板直向** | 768-1024px | height > width（直向） | 桌面模式 | 動態列數，充分利用空間 |
+| **平板橫向** | 768-1024px | height < width（橫向） | 桌面模式 | 寬螢幕優化，完整功能 |
 | **桌面版** | > 1024px | 任意 | 桌面模式 | 完整功能，詳細資訊 |
 
 ### 根據設備類型優化容器配置
@@ -126,6 +126,54 @@ function getContainerConfig(deviceType, isFullscreen = false) {
     };
 
     return configs[deviceType];
+}
+```
+
+### 🔥 P2-3: 全螢幕按鈕區域調整統一原則
+
+#### 設計原則
+
+全螢幕模式下的按鈕區域調整遵循以下統一原則：
+
+1. **手機設備（寬度 < 768px）**
+   - **直向模式**：topButtonArea 從 40px 增加到 50px（+25%）
+   - **橫向模式**：topButtonArea 從 30px 減少到 25px（-17%）
+   - **原因**：直向模式空間有限，需要增加按鈕區域以提高可點擊性；橫向模式空間充足，可以減少按鈕區域以增加卡片空間
+
+2. **平板設備（寬度 768-1024px）**
+   - **直向模式**：topButtonArea 從 60px 減少到 50px（-17%）
+   - **橫向模式**：topButtonArea 從 50px 增加到 60px（+20%）
+   - **原因**：直向模式已有足夠空間，可以減少按鈕區域；橫向模式需要增加按鈕區域以保持一致性
+
+3. **桌面設備（寬度 > 1024px）**
+   - **topButtonArea**：從 80px 減少到 70px（-12.5%）
+   - **bottomButtonArea**：從 80px 增加到 90px（+12.5%）
+   - **原因**：桌面設備空間充足，可以靈活調整；底部按鈕區域增加以容納更多功能
+
+#### 實施規則
+
+| 設備類型 | 方向 | 非全螢幕 | 全螢幕 | 變化 | 說明 |
+|---------|------|---------|--------|------|------|
+| **手機** | 直向 | 40px | 50px | +25% | 增加可點擊性 |
+| **手機** | 橫向 | 30px | 25px | -17% | 增加卡片空間 |
+| **平板** | 直向 | 60px | 50px | -17% | 減少冗餘空間 |
+| **平板** | 橫向 | 50px | 60px | +20% | 保持一致性 |
+| **桌面** | - | 80px | 70px | -12.5% | 靈活調整 |
+
+#### 代碼實現
+
+```javascript
+// 🔥 P2-3: 統一全螢幕按鈕調整原則
+function getFullscreenButtonAreaAdjustment(deviceType, orientation) {
+    const adjustments = {
+        'mobile-portrait': { topButtonArea: 50, bottomButtonArea: 50 },      // +25%
+        'mobile-landscape': { topButtonArea: 25, bottomButtonArea: 30 },     // -17%
+        'tablet-portrait': { topButtonArea: 50, bottomButtonArea: 60 },      // -17%
+        'tablet-landscape': { topButtonArea: 60, bottomButtonArea: 80 },     // +20%
+        'desktop': { topButtonArea: 70, bottomButtonArea: 90 }               // -12.5%
+    };
+
+    return adjustments[deviceType];
 }
 ```
 
