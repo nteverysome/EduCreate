@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+    <title>Match-up Game - 手機直向調試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 100%;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #007AFF;
+            padding-bottom: 8px;
+        }
+
+        h2 {
+            color: #555;
+            font-size: 14px;
+            margin-top: 10px;
+            margin-bottom: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #666;
+            flex: 0 0 40%;
+        }
+
+        .value {
+            color: #333;
+            flex: 1;
+            word-break: break-all;
+            text-align: right;
+        }
+
+        .value.true {
+            color: #34C759;
+            font-weight: bold;
+        }
+
+        .value.false {
+            color: #FF3B30;
+            font-weight: bold;
+        }
+
+        .value.null {
+            color: #999;
+            font-style: italic;
+        }
+
+        .button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .button:active {
+            background: #0051D5;
+        }
+
+        .game-frame {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #007AFF;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .status.loading {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .status.success {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Match-up 遊戲 - 手機直向調試</h1>
+        <div id="status" class="status loading">⏳ 正在加載遊戲...</div>
+    </div>
+
+    <div class="container">
+        <h2>📊 設備信息</h2>
+        <div class="info-row">
+            <span class="label">視窗寬度:</span>
+            <span class="value" id="windowWidth">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">視窗高度:</span>
+            <span class="value" id="windowHeight">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">寬高比:</span>
+            <span class="value" id="aspectRatio">-</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔍 圖片檢測</h2>
+        <div class="info-row">
+            <span class="label">hasImages:</span>
+            <span class="value" id="hasImages">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">佈局模式:</span>
+            <span class="value" id="layoutMode">-</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🎴 第一個卡片信息</h2>
+        <div class="info-row">
+            <span class="label">ID:</span>
+            <span class="value" id="cardId">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">英文:</span>
+            <span class="value" id="cardEnglish">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">中文:</span>
+            <span class="value" id="cardChinese">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">imageUrl:</span>
+            <span class="value" id="cardImageUrl">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">chineseImageUrl:</span>
+            <span class="value" id="cardChineseImageUrl">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">audioUrl:</span>
+            <span class="value" id="cardAudioUrl">-</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📐 卡片佈局</h2>
+        <div class="info-row">
+            <span class="label">frameWidth:</span>
+            <span class="value" id="frameWidth">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">cardHeightInFrame:</span>
+            <span class="value" id="cardHeightInFrame">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">卡片比例:</span>
+            <span class="value" id="cardRatio">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">列數:</span>
+            <span class="value" id="cols">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">行數:</span>
+            <span class="value" id="rows">-</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📄 分頁信息</h2>
+        <div class="info-row">
+            <span class="label">每頁卡片數:</span>
+            <span class="value" id="itemsPerPage">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">當前頁:</span>
+            <span class="value" id="currentPage">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">總頁數:</span>
+            <span class="value" id="totalPages">-</span>
+        </div>
+        <div class="info-row">
+            <span class="label">總卡片數:</span>
+            <span class="value" id="totalPairs">-</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <button class="button" onclick="refreshDebugInfo()">🔄 刷新信息</button>
+        <button class="button" onclick="copyToClipboard()">📋 複製所有信息</button>
+    </div>
+
+    <script>
+        function updateDebugInfo() {
+            // 更新設備信息
+            document.getElementById('windowWidth').textContent = window.innerWidth;
+            document.getElementById('windowHeight').textContent = window.innerHeight;
+            const aspectRatio = (window.innerWidth / window.innerHeight).toFixed(2);
+            document.getElementById('aspectRatio').textContent = aspectRatio;
+
+            // 獲取遊戲場景
+            const gameScene = window.matchUpGame?.scene?.scenes?.[1];
+
+            if (!gameScene) {
+                document.getElementById('status').className = 'status error';
+                document.getElementById('status').textContent = '❌ 遊戲未加載，請刷新頁面';
+                return;
+            }
+
+            // 圖片檢測信息
+            const pairs = gameScene.pairs || [];
+            const hasImages = pairs.length > 0 && pairs.some(pair =>
+                pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId
+            );
+
+            document.getElementById('hasImages').textContent = hasImages ? '✅ true' : '❌ false';
+            document.getElementById('hasImages').className = 'value ' + (hasImages ? 'true' : 'false');
+            document.getElementById('layoutMode').textContent = hasImages ? '🟦 正方形模式' : '🟨 長方形模式';
+
+            // 第一個卡片信息
+            if (pairs.length > 0) {
+                const firstPair = pairs[0];
+                document.getElementById('cardId').textContent = firstPair.id || '-';
+                document.getElementById('cardEnglish').textContent = firstPair.question || firstPair.english || '-';
+                document.getElementById('cardChinese').textContent = firstPair.answer || firstPair.chinese || '-';
+                
+                const imageUrl = firstPair.imageUrl || 'null';
+                const chineseImageUrl = firstPair.chineseImageUrl || 'null';
+                const audioUrl = firstPair.audioUrl || 'null';
+
+                document.getElementById('cardImageUrl').textContent = imageUrl;
+                document.getElementById('cardImageUrl').className = 'value ' + (imageUrl === 'null' ? 'null' : '');
+                
+                document.getElementById('cardChineseImageUrl').textContent = chineseImageUrl;
+                document.getElementById('cardChineseImageUrl').className = 'value ' + (chineseImageUrl === 'null' ? 'null' : '');
+                
+                document.getElementById('cardAudioUrl').textContent = audioUrl;
+                document.getElementById('cardAudioUrl').className = 'value ' + (audioUrl === 'null' ? 'null' : '');
+            }
+
+            // 分頁信息
+            document.getElementById('itemsPerPage').textContent = gameScene.itemsPerPage || '-';
+            document.getElementById('currentPage').textContent = (gameScene.currentPage || 0) + 1;
+            document.getElementById('totalPages').textContent = gameScene.totalPages || '-';
+            document.getElementById('totalPairs').textContent = pairs.length || '-';
+
+            // 更新狀態
+            document.getElementById('status').className = 'status success';
+            document.getElementById('status').textContent = '✅ 遊戲已加載，信息已更新';
+        }
+
+        function refreshDebugInfo() {
+            updateDebugInfo();
+        }
+
+        function copyToClipboard() {
+            const info = {
+                windowSize: `${window.innerWidth}×${window.innerHeight}`,
+                hasImages: document.getElementById('hasImages').textContent,
+                layoutMode: document.getElementById('layoutMode').textContent,
+                cardImageUrl: document.getElementById('cardImageUrl').textContent,
+                cardChineseImageUrl: document.getElementById('cardChineseImageUrl').textContent,
+                frameWidth: document.getElementById('frameWidth').textContent,
+                cardHeightInFrame: document.getElementById('cardHeightInFrame').textContent,
+                cardRatio: document.getElementById('cardRatio').textContent,
+                itemsPerPage: document.getElementById('itemsPerPage').textContent,
+                totalPages: document.getElementById('totalPages').textContent
+            };
+
+            const text = JSON.stringify(info, null, 2);
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ 信息已複製到剪貼板');
+            });
+        }
+
+        // 監聽 Console 日誌
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+
+            // 檢查是否是佈局日誌
+            const message = args.join(' ');
+            if (message.includes('正方形卡片佈局') || message.includes('長方形卡片佈局')) {
+                try {
+                    const logData = args[1];
+                    if (logData) {
+                        document.getElementById('frameWidth').textContent = logData.frameWidth?.toFixed(1) || '-';
+                        document.getElementById('cardHeightInFrame').textContent = logData.cardHeightInFrame?.toFixed(1) || '-';
+                        document.getElementById('cardRatio').textContent = logData.cardRatio || '-';
+                        document.getElementById('cols').textContent = logData.cols || '-';
+                        document.getElementById('rows').textContent = logData.rows || '-';
+                    }
+                } catch (e) {
+                    // 忽略解析錯誤
+                }
+            }
+        };
+
+        // 頁面加載完成後更新信息
+        window.addEventListener('load', () => {
+            setTimeout(updateDebugInfo, 2000);
+        });
+
+        // 定期更新
+        setInterval(updateDebugInfo, 1000);
+    </script>
+</body>
+</html>
+
