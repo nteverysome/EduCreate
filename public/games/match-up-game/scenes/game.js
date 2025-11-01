@@ -538,7 +538,83 @@ class GameScene extends Phaser.Scene {
         console.log('🎮 GameScene: create 方法完成');
     }
 
-    // 🔥 初始化分頁設置
+    // 🔥 v6.0 計算每頁能容納的最大卡片數
+    calculateMaxCardsPerPage(width, height, layout = 'mixed') {
+        // 🔥 檢測設備類型和模式
+        const isMobileDevice = width < 768;
+        const isLandscapeMobile = width > height && height < 500;
+        const isTinyHeight = height < 400;
+        const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
+
+        // 根據佈局模式決定列數
+        let cols;
+        if (layout === 'mixed') {
+            cols = isCompactMode ? 5 : 3;  // 混合模式：緊湊 5 列，正常 3 列
+        } else {
+            // 分離模式：根據寬度動態決定
+            const sideMargin = 20;
+            const availableWidth = width - sideMargin * 2;
+            cols = Math.max(1, Math.floor(availableWidth / 150));  // 假設最小卡片寬度 150px
+        }
+
+        // 計算可用高度
+        const topButtonArea = isCompactMode ? 50 : 60;
+        const bottomButtonArea = isCompactMode ? 50 : 60;
+        const availableHeight = height - topButtonArea - bottomButtonArea;
+
+        // 計算卡片尺寸和行數
+        const verticalSpacing = Math.max(5, Math.min(20, availableHeight * 0.02));
+        const cardHeight = 67;  // 混合模式卡片高度
+        const chineseTextHeight = 20;  // 中文文字高度
+        const totalUnitHeight = cardHeight + chineseTextHeight + verticalSpacing;
+
+        const maxRows = Math.max(1, Math.floor((availableHeight - verticalSpacing) / totalUnitHeight));
+        const maxCardsPerPage = cols * maxRows;
+
+        console.log('📊 每頁最大卡片數計算:', {
+            layout,
+            isCompactMode,
+            cols,
+            maxRows,
+            maxCardsPerPage,
+            availableHeight: availableHeight.toFixed(0),
+            totalUnitHeight: totalUnitHeight.toFixed(0)
+        });
+
+        return maxCardsPerPage;
+    }
+
+    // 🔥 v6.0 根據最大卡片數計算分頁
+    calculatePaginationWithLayout(totalPairs, width, height, layout = 'mixed') {
+        // 計算每頁能容納的最大卡片數
+        const maxCardsPerPage = this.calculateMaxCardsPerPage(width, height, layout);
+
+        // 確保每頁至少有 1 個卡片
+        const itemsPerPage = Math.max(1, maxCardsPerPage);
+
+        // 計算總頁數
+        const totalPages = Math.ceil(totalPairs / itemsPerPage);
+
+        // 決定是否啟用分頁
+        const enablePagination = totalPages > 1;
+
+        console.log('📄 分頁計算結果:', {
+            totalPairs,
+            maxCardsPerPage,
+            itemsPerPage,
+            totalPages,
+            enablePagination
+        });
+
+        return {
+            itemsPerPage,
+            totalPages,
+            enablePagination,
+            maxCardsPerPage
+        };
+    }
+
+    // 🔥 初始化分頁設置（v6.0 更新：使用動態計算）
     initializePagination() {
         const totalPairs = this.pairs.length;
         console.log('📄 初始化分頁設置 - 總詞彙數:', totalPairs);
@@ -550,22 +626,24 @@ class GameScene extends Phaser.Scene {
 
         // 讀取每頁顯示數量
         if (itemsPerPageParam) {
+            // 🔥 如果 URL 指定了 itemsPerPage，直接使用
             this.itemsPerPage = parseInt(itemsPerPageParam, 10);
             console.log('📄 從 URL 讀取 itemsPerPage:', this.itemsPerPage);
         } else {
-            // 根據詞彙數量自動決定每頁顯示數量
-            if (totalPairs <= 6) {
-                this.itemsPerPage = totalPairs;  // 不分頁
-            } else if (totalPairs <= 12) {
-                this.itemsPerPage = 4;  // 每頁 4 個
-            } else if (totalPairs <= 18) {
-                this.itemsPerPage = 5;  // 每頁 5 個
-            } else if (totalPairs <= 24) {
-                this.itemsPerPage = 6;  // 每頁 6 個
-            } else {
-                this.itemsPerPage = 7;  // 每頁 7 個
-            }
-            console.log('📄 自動決定 itemsPerPage:', this.itemsPerPage);
+            // 🔥 v6.0 新邏輯：根據佈局計算每頁最大卡片數
+            const width = this.scale.width;
+            const height = this.scale.height;
+            const layout = this.layout || 'mixed';
+
+            const paginationResult = this.calculatePaginationWithLayout(
+                totalPairs,
+                width,
+                height,
+                layout
+            );
+
+            this.itemsPerPage = paginationResult.itemsPerPage;
+            console.log('📄 根據佈局計算 itemsPerPage:', this.itemsPerPage);
         }
 
         // 讀取自動繼續設置
