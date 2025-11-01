@@ -522,8 +522,19 @@ class GameScene extends Phaser.Scene {
         this.updateLayout();
         console.log('🎮 GameScene: updateLayout 完成');
 
+        // 🔥 P1-4: 綁定事件監聽器（使用 bind 確保 this 上下文正確）
         // 監聽螢幕尺寸變化
         this.scale.on('resize', this.handleResize, this);
+        console.log('✅ 已綁定 resize 事件監聽器');
+
+        // 監聽全螢幕變化
+        document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
+        console.log('✅ 已綁定 fullscreenchange 事件監聽器');
+
+        // 監聽設備方向變化
+        window.addEventListener('orientationchange', this.handleOrientationChange.bind(this));
+        console.log('✅ 已綁定 orientationchange 事件監聽器');
+
         console.log('🎮 GameScene: create 方法完成');
     }
 
@@ -5088,6 +5099,55 @@ class GameScene extends Phaser.Scene {
             this.gameCompleteModal.overlay.setVisible(true);
             this.gameCompleteModal.modal.setVisible(true);
         }
+    }
+
+    // 🔥 P1-4: 修正事件監聽器管理 - shutdown 方法
+    shutdown() {
+        console.log('🎮 GameScene: shutdown 方法開始 - 清理事件監聽器');
+
+        // 移除 resize 事件監聽器
+        if (this.scale) {
+            this.scale.off('resize', this.handleResize, this);
+            console.log('✅ 已移除 resize 事件監聽器');
+        }
+
+        // 移除 fullscreen 事件監聽器（如果存在）
+        if (document) {
+            document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
+            console.log('✅ 已移除 fullscreenchange 事件監聽器');
+        }
+
+        // 移除 orientation 事件監聽器（如果存在）
+        if (window) {
+            window.removeEventListener('orientationchange', this.handleOrientationChange);
+            console.log('✅ 已移除 orientationchange 事件監聽器');
+        }
+
+        // 停止計時器
+        if (this.timerEvent) {
+            this.timerEvent.remove();
+            this.timerEvent = null;
+            console.log('✅ 已停止計時器');
+        }
+
+        // 清理遊戲狀態
+        this.sceneStopped = true;
+        console.log('🎮 GameScene: shutdown 方法完成 - 所有事件監聽器已清理');
+    }
+
+    // 🔥 P1-4: 全螢幕變化事件處理
+    handleFullscreenChange() {
+        console.log('🎮 全螢幕狀態變化:', document.fullscreenElement ? '進入全螢幕' : '退出全螢幕');
+        // 重新計算佈局
+        this.updateLayout();
+    }
+
+    // 🔥 P1-4: 設備方向變化事件處理
+    handleOrientationChange() {
+        const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+        console.log('🎮 設備方向變化:', isPortrait ? '直向' : '橫向');
+        // 重新計算佈局
+        this.updateLayout();
     }
 }
 
