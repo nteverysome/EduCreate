@@ -1821,23 +1821,33 @@ class GameScene extends Phaser.Scene {
             const availableWidth = width - sideMargin * 2;
             const availableHeight = height - topButtonAreaHeight - bottomButtonAreaHeight;
 
-            // 🔥 第三步：計算螢幕寬高比
+            // 🔥 第三步：計算螢幕寬高比和間距
             const aspectRatio = width / height;
 
-            // 🔥 第四步：智能計算水平間距（根據螢幕寬度）
-            const horizontalSpacing = Math.max(15, Math.min(30, width * 0.015));  // 15-30px，基於寬度的1.5%
+            // 根據寬高比動態調整水平間距
+            let horizontalSpacingBase;
+            if (aspectRatio > 2.0) {
+                horizontalSpacingBase = width * 0.02;  // 超寬螢幕：2%
+            } else if (aspectRatio > 1.5) {
+                horizontalSpacingBase = width * 0.015; // 寬螢幕：1.5%
+            } else {
+                horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
+            }
+
+            // 🔥 第四步：計算水平間距
+            const horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
 
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
                 console.log('🟦 使用正方形卡片模式');
 
-                // 🔥 第五步：定義最小正方形卡片大小
-                const minSquareSize = 150;  // 最小正方形尺寸150×150
-
-                // 🔥 第六步：計算垂直間距（基於螢幕高度）
+                // 🔥 第五步：計算垂直間距（基於螢幕高度）
                 // 使用固定的垂直間距，避免估算不準確導致間距太小
                 // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
                 verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+
+                // 🔥 第六步：定義最小正方形卡片大小
+                const minSquareSize = 150;  // 最小正方形尺寸150×150
 
                 // 🔥 第七步：計算最大可能的列數
                 // 使用最小卡片尺寸來計算最大可能列數
@@ -1874,9 +1884,9 @@ class GameScene extends Phaser.Scene {
                 // 方法1：基於高度
                 // totalUnitHeight = squareSize + chineseTextHeight
                 // totalUnitHeight = squareSize + squareSize * 0.4 = squareSize * 1.4
-                // 所以 squareSize = totalUnitHeight / 1.4
+                // 所以 squareSize = (totalUnitHeight - verticalSpacing) / 1.4
                 let availableHeightPerRow = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows;
-                let squareSizeByHeight = availableHeightPerRow / 1.4;  // 正確計算：考慮中文文字高度
+                let squareSizeByHeight = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正：考慮 verticalSpacing
 
                 // 方法2：基於寬度
                 const squareSizeByWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
@@ -1991,20 +2001,20 @@ class GameScene extends Phaser.Scene {
                 // 🟨 長方形模式（無圖片）
                 console.log('🟨 使用長方形卡片模式');
 
-                // 🔥 第五步：定義最小卡片大小
-                const minCardWidth = 200;
-                const minCardHeight = 100;
-
-                // 🔥 第六步：計算垂直間距（基於螢幕高度）
+                // 🔥 第五步：計算垂直間距（基於螢幕高度）
                 // 使用固定的垂直間距，避免估算不準確導致間距太小
                 // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
                 verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+
+                // 🔥 第六步：定義最小卡片大小
+                const minCardWidth = 200;
+                const minCardHeight = 100;
 
                 // 🔥 第七步：計算最大可能的列數和行數
                 const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
                 const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
 
-                // 🔥 第七步：智能計算最佳列數（根據寬高比和匹配數）
+                // 🔥 第八步：智能計算最佳列數（根據寬高比和匹配數）
                 let optimalCols;
                 if (aspectRatio > 2.0) {
                     // 超寬螢幕（21:9, 32:9）
@@ -2023,7 +2033,7 @@ class GameScene extends Phaser.Scene {
                 // 確保列數在合理範圍內
                 optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
 
-                // 🔥 第八步：計算行數
+                // 🔥 第九步：計算行數
                 let optimalRows = Math.ceil(itemCount / optimalCols);
 
                 // 🔥 如果行數超過最大可能行數，增加列數
@@ -2035,15 +2045,16 @@ class GameScene extends Phaser.Scene {
                 cols = optimalCols;
                 const rows = optimalRows;
 
-                // 🔥 第九步：計算卡片大小（充分利用可用空間）
+                // 🔥 第十步：計算卡片大小（充分利用可用空間）
                 frameWidth = (availableWidth - horizontalSpacing * (cols + 1)) / cols;
 
                 // 🔥 計算單元總高度（包含中文文字）
                 const availableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
 
-                // 🔥 卡片高度：單元總高度的60%，中文文字：40%
-                cardHeightInFrame = availableHeightPerRow * 0.6;
-                chineseTextHeight = availableHeightPerRow * 0.4;
+                // 🔥 卡片高度和中文文字高度計算（與正方形模式保持一致）
+                // 使用正確公式：(availableHeightPerRow - verticalSpacing) / 1.4
+                cardHeightInFrame = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正
+                chineseTextHeight = cardHeightInFrame * 0.4;  // 中文文字高度 = 卡片高度的 40%
 
                 totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;
 
