@@ -1069,7 +1069,7 @@ class GameScene extends Phaser.Scene {
         // 🔥 根據容器大小和列數調整卡片尺寸
         let cardWidth, cardHeight;
         if (isSmallContainer) {
-            cardWidth = Math.max(70, Math.min(120, width * (0.85 / columns)));
+            cardWidth = Math.max(80, Math.min(120, width * (0.85 / columns)));  // ✅ 提高最小寬度從 70px 到 80px
             cardHeight = Math.max(35, Math.min(55, height * 0.15));
         } else if (isMediumContainer) {
             cardWidth = Math.max(80, Math.min(140, width * (0.88 / columns)));
