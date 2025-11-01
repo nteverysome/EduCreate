@@ -78,7 +78,142 @@ const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;  // �
 
 ---
 
-## 📱 設備檢測與容器配置
+## � v6.0 新增：分頁邏輯與佈局計算整合
+
+### 核心概念
+
+**分頁邏輯應該基於「每頁能容納的最大卡片數」，而不是固定的數字**
+
+之前的分頁邏輯是固定的：
+- 6-12 個卡片 → 每頁 4 個
+- 13-18 個卡片 → 每頁 5 個
+- 19-24 個卡片 → 每頁 6 個
+
+**問題**：不考慮屏幕尺寸和佈局限制，導致分頁與實際顯示不符
+
+**解決方案**：根據設備類型、屏幕尺寸、佈局模式動態計算每頁最大卡片數
+
+### 計算流程
+
+#### 第一步：計算每頁能容納的最大卡片數
+
+```javascript
+function calculateMaxCardsPerPage(width, height, layout = 'mixed') {
+    // 🔥 檢測設備類型和模式
+    const isMobileDevice = width < 768;
+    const isLandscapeMobile = width > height && height < 500;
+    const isTinyHeight = height < 400;
+    const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
+
+    // 獲取設備配置
+    const deviceType = getDeviceType(width, height);
+    const containerConfig = getContainerConfig(deviceType, false);
+
+    // 計算可用空間
+    const availableWidth = width - containerConfig.sideMargin * 2;
+    const availableHeight = height - containerConfig.topButtonArea - containerConfig.bottomButtonArea;
+
+    // 根據佈局模式決定列數
+    let cols;
+    if (layout === 'mixed') {
+        cols = isCompactMode ? 5 : 3;  // 混合模式：緊湊 5 列，正常 3 列
+    } else {
+        cols = Math.floor(availableWidth / 150);  // 分離模式：動態列數
+    }
+
+    // 計算卡片尺寸和行數
+    const horizontalSpacing = Math.max(5, Math.min(15, availableWidth * 0.01));
+    const cardWidth = (availableWidth - horizontalSpacing * (cols + 1)) / cols;
+
+    const verticalSpacing = Math.max(5, Math.min(20, availableHeight * 0.02));
+    const cardHeight = 67;  // 混合模式卡片高度
+    const chineseTextHeight = 20;  // 中文文字高度
+    const totalUnitHeight = cardHeight + chineseTextHeight + verticalSpacing;
+
+    const maxRows = Math.floor((availableHeight - verticalSpacing) / totalUnitHeight);
+    const maxCardsPerPage = cols * maxRows;
+
+    return {
+        maxCardsPerPage,
+        cols,
+        maxRows,
+        cardWidth,
+        cardHeight,
+        availableHeight
+    };
+}
+```
+
+#### 第二步：根據最大卡片數計算分頁
+
+```javascript
+function calculatePaginationWithLayout(totalPairs, width, height, layout = 'mixed') {
+    // 計算每頁能容納的最大卡片數
+    const layoutInfo = calculateMaxCardsPerPage(width, height, layout);
+    const maxCardsPerPage = layoutInfo.maxCardsPerPage;
+
+    // 確保每頁至少有 1 個卡片
+    const itemsPerPage = Math.max(1, maxCardsPerPage);
+
+    // 計算總頁數
+    const totalPages = Math.ceil(totalPairs / itemsPerPage);
+
+    // 決定是否啟用分頁
+    const enablePagination = totalPages > 1;
+
+    return {
+        itemsPerPage,
+        totalPages,
+        enablePagination,
+        maxCardsPerPage,
+        ...layoutInfo
+    };
+}
+```
+
+### 計算示例
+
+#### 手機直向（375×667px）- 混合模式
+
+```
+輸入：20 個卡片
+
+計算：
+- cols = 5（緊湊模式）
+- availableHeight = 567px
+- totalUnitHeight = 67 + 20 + 10 = 97px
+- maxRows = floor(567 / 97) = 5 行
+- maxCardsPerPage = 5 × 5 = 25 個
+
+結果：
+- itemsPerPage = 25
+- totalPages = ceil(20 / 25) = 1 頁
+- enablePagination = false
+- 顯示全部 20 個卡片 ✅
+```
+
+#### 平板直向（768×1024px）- 分離模式
+
+```
+輸入：50 個卡片
+
+計算：
+- cols = 4（動態）
+- availableHeight = 904px
+- totalUnitHeight = 100 + 15 = 115px
+- maxRows = floor(904 / 115) = 7 行
+- maxCardsPerPage = 4 × 7 = 28 個
+
+結果：
+- itemsPerPage = 28
+- totalPages = ceil(50 / 28) = 2 頁
+- enablePagination = true
+- 第 1 頁 28 個，第 2 頁 22 個 ✅
+```
+
+---
+
+## �📱 設備檢測與容器配置
 
 ### 設備類型分類
 
