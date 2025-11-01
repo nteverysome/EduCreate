@@ -1540,22 +1540,35 @@ class GameScene extends Phaser.Scene {
         const itemCount = currentPagePairs.length;
         const totalCards = itemCount * 2;  // 英文 + 中文
 
-        // 🔥 檢測容器高度
-        const isSmallContainer = height < 600;
-        const isMediumContainer = height >= 600 && height < 800;
+        // 🔥 檢測容器高度和寬度（v7.0 修復：根據寬度判定，不只看高度）
+        const isMobilePortrait = width < 500;  // 手機直向
+        const isSmallContainer = height < 500;  // 極小高度
+        const isMediumContainer = height >= 500 && height < 800;
 
         console.log(`📐 容器尺寸: ${width} × ${height}`, {
+            isMobilePortrait,
             isSmallContainer,
             isMediumContainer,
             isLargeContainer: height >= 800,
             totalCards
         });
 
-        // 🔥 根據容器高度和總卡片數計算列數
+        // 🔥 根據容器高度和總卡片數計算列數（v7.0 修復：手機直向優先使用 5 列）
         let columns = 1;
 
-        if (isSmallContainer) {
-            // 小容器（< 600px）：更早切換到多列
+        if (isMobilePortrait) {
+            // 🔥 v7.0 新增：手機直向（寬度 < 500px）- 優先使用 5 列
+            if (totalCards > 40) {
+                columns = 5;  // 41-60 張卡片：5 列
+            } else if (totalCards > 30) {
+                columns = 5;  // 31-40 張卡片：5 列（改為 5 列）
+            } else if (totalCards > 20) {
+                columns = 5;  // 21-30 張卡片：5 列（改為 5 列）
+            } else {
+                columns = 5;  // 20 張以下卡片：5 列（改為 5 列）
+            }
+        } else if (isSmallContainer) {
+            // 小容器（高度 < 500px）：更早切換到多列
             if (totalCards > 40) {
                 columns = 5;  // 41-60 張卡片：5 列
             } else if (totalCards > 30) {
@@ -1564,7 +1577,7 @@ class GameScene extends Phaser.Scene {
                 columns = 3;  // 22-30 張卡片：3 列
             }
         } else if (isMediumContainer) {
-            // 中等容器（600-800px）：適中的切換點
+            // 中等容器（高度 500-800px）：適中的切換點
             if (totalCards > 48) {
                 columns = 6;  // 49-60 張卡片：6 列
             } else if (totalCards > 36) {
@@ -1575,7 +1588,7 @@ class GameScene extends Phaser.Scene {
                 columns = 3;  // 22-24 張卡片：3 列
             }
         } else {
-            // 大容器（>= 800px）：較晚切換到多列
+            // 大容器（高度 >= 800px）：較晚切換到多列
             if (totalCards > 48) {
                 columns = 6;  // 49-60 張卡片：6 列
             } else if (totalCards > 36) {
