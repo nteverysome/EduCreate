@@ -1856,11 +1856,11 @@ class GameScene extends Phaser.Scene {
             const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
 
             // 📝 根據匹配數決定最大卡片高度
-            // 🔥 v10.0：如果有圖片，使用正方形模式；否則使用長方形模式
+            // 🔥 v11.0：優化空間利用 - 增加卡片尺寸到 60×60px
             // 目標：有圖片時創造正方形（寬 = 高），無圖片時創造扁平長方形（寬 > 高）
             const maxCardHeight = hasImages
-                ? (itemCount <= 5 ? 50 : itemCount <= 10 ? 45 : itemCount <= 20 ? 40 : 45)  // 正方形模式：更大的卡片
-                : (itemCount <= 5 ? 35 : itemCount <= 10 ? 32 : itemCount <= 20 ? 30 : 34);  // 長方形模式：扁平卡片
+                ? (itemCount <= 5 ? 70 : itemCount <= 10 ? 65 : itemCount <= 20 ? 60 : 65)  // 正方形模式：增大到 60-70px
+                : (itemCount <= 5 ? 50 : itemCount <= 10 ? 48 : itemCount <= 20 ? 45 : 50);  // 長方形模式：增大到 45-50px
 
             // 🔥 計算框寬度
             // v10.0：如果有圖片，框寬度 = 卡片高度（正方形）；否則框寬度 > 卡片高度（長方形）
@@ -1911,12 +1911,14 @@ class GameScene extends Phaser.Scene {
                 allSizes: chineseFontSizes
             });
 
-            // 🔥 使用最大字體大小作為中文文字高度（加5px作為行高）
-            chineseTextHeight = maxChineseFontSize + 5;
-            chineseFontSize = `${maxChineseFontSize}px`;  // 保存為字符串格式
+            // 🔥 v11.0：優化空間利用 - 減少中文文字框高度到 20px
+            // 之前：maxChineseFontSize + 5 ≈ 29px
+            // 現在：固定 20px，更好地利用垂直空間
+            chineseTextHeight = 20;  // 固定 20px，減少 31%
+            chineseFontSize = `${Math.min(maxChineseFontSize, 16)}px`;  // 限制字體大小到 16px
 
             // 🔥 根據實際字體大小動態調整垂直間距
-            const dynamicVerticalSpacing = Math.max(5, Math.floor(maxChineseFontSize * 0.2));  // 字體大小的20%
+            const dynamicVerticalSpacing = Math.max(3, Math.floor(maxChineseFontSize * 0.15));  // 減少到 15%
 
             console.log('📐 動態垂直間距:', {
                 chineseTextHeight,
