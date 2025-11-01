@@ -335,6 +335,18 @@ class GameScene extends Phaser.Scene {
             // 轉換為遊戲所需的格式
             if (vocabularyData.length > 0) {
                 console.log('🔄 開始轉換詞彙數據格式...');
+
+                // 🔥 v9.0 詳細調試：檢查原始數據結構
+                console.log('🔍 [v9.0] 原始詞彙數據結構檢查:', {
+                    totalItems: vocabularyData.length,
+                    firstItemKeys: Object.keys(vocabularyData[0] || {}),
+                    firstItem: vocabularyData[0],
+                    hasImageUrl: !!vocabularyData[0]?.imageUrl,
+                    hasChineseImageUrl: !!vocabularyData[0]?.chineseImageUrl,
+                    imageUrlValue: vocabularyData[0]?.imageUrl,
+                    chineseImageUrlValue: vocabularyData[0]?.chineseImageUrl
+                });
+
                 this.pairs = vocabularyData.map((item, index) => ({
                     id: index + 1,
                     question: item.english || item.word || '',
