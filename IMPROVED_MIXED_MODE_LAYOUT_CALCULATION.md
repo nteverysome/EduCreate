@@ -16,94 +16,192 @@
 
 ---
 
-## 📐 改進的計算方案
+## � 設備檢測與容器配置
 
-### 第零步：檢測卡片類型（有圖片 vs 無圖片）
+### 設備類型分類
+
+根據螢幕寬度和方向，系統自動檢測設備類型：
 
 ```javascript
-// 根據內容自動選擇模式
-const hasImages = currentPagePairs.some(pair => pair.imageUrl);
+// 設備檢測函數
+function getDeviceType(width, height) {
+    const aspectRatio = width / height;
 
-if (hasImages) {
-    // 🟦 正方形模式（有圖片）
-    // 卡片是正方形（1:1 比例），適合展示圖片
-    // 最小尺寸：150×150px
-    // 最大列數：10 列
-    console.log('🟦 使用正方形模式（有圖片）');
-} else {
-    // 🟨 長方形模式（無圖片）
-    // 卡片是長方形（寬 > 高），充分利用寬度
-    // 最小尺寸：200×100px
-    // 最大列數：8 列
-    console.log('🟨 使用長方形模式（無圖片）');
+    if (width < 768) {
+        // 手機設備
+        return height > width ? 'mobile-portrait' : 'mobile-landscape';
+    } else if (width < 1024) {
+        // 平板設備
+        return height > width ? 'tablet-portrait' : 'tablet-landscape';
+    } else {
+        // 桌面設備
+        return 'desktop';
+    }
 }
 ```
 
-### 第一步：計算可用空間
+### 設備類型與佈局模式
+
+| 設備類型 | 寬度範圍 | 高度範圍 | 佈局模式 | 特點 |
+|---------|---------|---------|---------|------|
+| **手機直向** | < 768px | > 768px | 緊湊模式 | 固定 5 列，扁平卡片 |
+| **手機橫向** | > 768px | < 500px | 緊湊模式 | 固定 5 列，極度緊湊 |
+| **平板直向** | 768px | 1024px | 桌面模式 | 動態列數，充分利用空間 |
+| **平板橫向** | 1024px | 768px | 桌面模式 | 寬螢幕優化，完整功能 |
+| **桌面版** | > 1024px | > 768px | 桌面模式 | 完整功能，詳細資訊 |
+
+### 根據設備類型優化容器配置
 
 ```javascript
-// 定義邊距和按鈕區域
-const topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));
-const bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));
-const sideMargin = Math.max(30, Math.min(80, width * 0.03));
+function getContainerConfig(deviceType) {
+    const configs = {
+        'mobile-portrait': {
+            topButtonArea: 40,      // 頂部按鈕區域
+            bottomButtonArea: 40,   // 底部按鈕區域
+            sideMargin: 20,         // 左右邊距
+            cols: 5,                // 固定列數
+            mode: 'compact'         // 緊湊模式
+        },
+        'mobile-landscape': {
+            topButtonArea: 30,      // 極度緊湊
+            bottomButtonArea: 30,
+            sideMargin: 15,
+            cols: 5,
+            mode: 'compact'
+        },
+        'tablet-portrait': {
+            topButtonArea: 60,
+            bottomButtonArea: 60,
+            sideMargin: 30,
+            cols: 'dynamic',        // 動態計算
+            mode: 'desktop'
+        },
+        'tablet-landscape': {
+            topButtonArea: 50,
+            bottomButtonArea: 50,
+            sideMargin: 40,
+            cols: 'dynamic',
+            mode: 'desktop'
+        },
+        'desktop': {
+            topButtonArea: 80,
+            bottomButtonArea: 80,
+            sideMargin: 50,
+            cols: 'dynamic',
+            mode: 'desktop'
+        }
+    };
+
+    return configs[deviceType];
+}
+```
+
+---
+
+## �📐 改進的計算方案
+
+### 第零步：檢測設備類型與卡片類型
+
+```javascript
+// 檢測設備類型
+const deviceType = getDeviceType(width, height);
+const containerConfig = getContainerConfig(deviceType);
+
+console.log('📱 設備檢測:', {
+    deviceType,
+    width,
+    height,
+    aspectRatio: (width / height).toFixed(2),
+    mode: containerConfig.mode
+});
+
+// 檢測卡片類型
+const hasImages = currentPagePairs.some(pair => pair.imageUrl);
+
+console.log('🎨 卡片類型:', {
+    hasImages,
+    mode: hasImages ? '🟦 正方形（有圖片）' : '🟨 長方形（無圖片）'
+});
+```
+
+### 第二步：計算可用空間
+
+根據設備類型使用相應的容器配置：
+
+```javascript
+// 使用設備配置的按鈕區域和邊距
+const topButtonAreaHeight = containerConfig.topButtonArea;
+const bottomButtonAreaHeight = containerConfig.bottomButtonArea;
+const sideMargin = containerConfig.sideMargin;
 
 // 計算可用空間
 const availableWidth = width - sideMargin * 2;
 const availableHeight = height - topButtonAreaHeight - bottomButtonAreaHeight;
 
 console.log('📐 可用空間:', {
+    deviceType,
     availableWidth: availableWidth.toFixed(0),
     availableHeight: availableHeight.toFixed(0),
-    aspectRatio: (availableWidth / availableHeight).toFixed(2)
+    aspectRatio: (availableWidth / availableHeight).toFixed(2),
+    topButtonArea: topButtonAreaHeight,
+    bottomButtonArea: bottomButtonAreaHeight,
+    sideMargin: sideMargin
 });
 ```
 
-### 第二步：計算最佳列數
+### 第三步：計算最佳列數
+
+根據設備類型和卡片類型計算最佳列數：
 
 ```javascript
-// 根據匹配數、寬高比和卡片類型計算最佳列數
 const itemCount = currentPagePairs.length;
 const aspectRatio = width / height;
 
 let optimalCols;
 
-if (hasImages) {
-    // 🟦 正方形模式（有圖片）- 列數較少
-    // 策略：優先使用最大可能列數，但不超過 10 列
-    const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (150 + horizontalSpacing));
-    const maxColsLimit = 10;  // 最多 10 列
-
-    if (aspectRatio > 2.0) {
-        optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
-    } else if (aspectRatio > 1.5) {
-        optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
-    } else if (aspectRatio > 1.2) {
-        optimalCols = Math.min(maxPossibleCols, 8, itemCount);
-    } else {
-        optimalCols = Math.min(maxPossibleCols, 5, itemCount);
-    }
+// 如果設備配置指定了固定列數，直接使用
+if (containerConfig.cols !== 'dynamic') {
+    optimalCols = Math.min(containerConfig.cols, itemCount);
+    console.log('📊 使用固定列數:', optimalCols);
 } else {
-    // 🟨 長方形模式（無圖片）- 列數較多
-    // 策略：基於匹配數的平方根，更靈活
-    const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (200 + horizontalSpacing));
+    // 動態計算列數
+    if (hasImages) {
+        // 🟦 正方形模式（有圖片）- 列數較少
+        const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (150 + horizontalSpacing));
+        const maxColsLimit = 10;
 
-    if (aspectRatio > 2.0) {
-        optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
-    } else if (aspectRatio > 1.5) {
-        optimalCols = Math.min(6, Math.ceil(Math.sqrt(itemCount * aspectRatio / 1.5)));
-    } else if (aspectRatio > 1.2) {
-        optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
+        if (aspectRatio > 2.0) {
+            optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
+        } else if (aspectRatio > 1.5) {
+            optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
+        } else if (aspectRatio > 1.2) {
+            optimalCols = Math.min(maxPossibleCols, 8, itemCount);
+        } else {
+            optimalCols = Math.min(maxPossibleCols, 5, itemCount);
+        }
     } else {
-        optimalCols = Math.min(3, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
-    }
+        // 🟨 長方形模式（無圖片）- 列數較多
+        const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (200 + horizontalSpacing));
 
-    optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
+        if (aspectRatio > 2.0) {
+            optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
+        } else if (aspectRatio > 1.5) {
+            optimalCols = Math.min(6, Math.ceil(Math.sqrt(itemCount * aspectRatio / 1.5)));
+        } else if (aspectRatio > 1.2) {
+            optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
+        } else {
+            optimalCols = Math.min(3, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
+        }
+
+        optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
+    }
 }
 
 const optimalRows = Math.ceil(itemCount / optimalCols);
 
 console.log('📊 網格佈局:', {
     itemCount,
+    deviceType,
     mode: hasImages ? '正方形（有圖片）' : '長方形（無圖片）',
     optimalCols,
     optimalRows,
@@ -111,7 +209,7 @@ console.log('📊 網格佈局:', {
 });
 ```
 
-### 第三步：計算間距
+### 第四步：計算間距
 
 ```javascript
 // 水平間距：基於寬度的百分比
@@ -126,7 +224,7 @@ console.log('📏 間距:', {
 });
 ```
 
-### 第四步：計算卡片尺寸
+### 第五步：計算卡片尺寸
 
 ```javascript
 let finalCardWidth, finalCardHeight, cardRatio;
@@ -177,6 +275,7 @@ if (hasImages) {
 }
 
 console.log('📦 卡片尺寸:', {
+    deviceType,
     mode: hasImages ? '正方形（有圖片）' : '長方形（無圖片）',
     cardWidth: finalCardWidth.toFixed(1),
     cardHeight: finalCardHeight.toFixed(1),
@@ -184,7 +283,7 @@ console.log('📦 卡片尺寸:', {
 });
 ```
 
-### 第五步：計算卡片位置
+### 第六步：計算卡片位置
 
 ```javascript
 // 計算網格起始位置（居中）
@@ -335,20 +434,24 @@ console.log('📍 網格位置:', {
 ## 🎯 實施建議
 
 ### 優先級 1：核心計算
-1. ✅ 實現自動檢測卡片類型（有圖片 vs 無圖片）
-2. ✅ 實現統一的列數計算邏輯（根據模式選擇）
-3. ✅ 實現統一的卡片尺寸計算（正方形 vs 長方形）
-4. ✅ 實現統一的位置計算
+1. ✅ 實現設備類型檢測函數（getDeviceType）
+2. ✅ 實現容器配置函數（getContainerConfig）
+3. ✅ 實現自動檢測卡片類型（有圖片 vs 無圖片）
+4. ✅ 實現統一的列數計算邏輯（根據模式選擇）
+5. ✅ 實現統一的卡片尺寸計算（正方形 vs 長方形）
+6. ✅ 實現統一的位置計算
 
-### 優先級 2：優化
-1. 添加最小/最大卡片尺寸限制（已包含）
-2. 添加響應式斷點（已包含）
-3. 添加動畫延遲
+### 優先級 2：設備優化
+1. 根據設備類型優化按鈕區域高度
+2. 根據設備類型優化邊距
+3. 根據設備類型優化列數限制
+4. 測試所有設備類型和方向組合
 
 ### 優先級 3：增強
 1. 支持手動覆蓋模式選擇（URL 參數）
 2. 支持自定義間距
 3. 支持卡片對齐方式
+4. 添加動畫延遲
 
 ### 模式選擇邏輯
 
@@ -379,52 +482,118 @@ const useSquareMode = forceMode !== null ? forceMode : hasImages;
 
 ## 💡 實施步驟
 
-### 步驟 1：創建統一計算函數
+### 步驟 1：創建設備檢測和配置函數
+```javascript
+// 設備檢測函數
+function getDeviceType(width, height) {
+    if (width < 768) {
+        return height > width ? 'mobile-portrait' : 'mobile-landscape';
+    } else if (width < 1024) {
+        return height > width ? 'tablet-portrait' : 'tablet-landscape';
+    } else {
+        return 'desktop';
+    }
+}
+
+// 容器配置函數
+function getContainerConfig(deviceType) {
+    const configs = {
+        'mobile-portrait': { topButtonArea: 40, bottomButtonArea: 40, sideMargin: 20, cols: 5, mode: 'compact' },
+        'mobile-landscape': { topButtonArea: 30, bottomButtonArea: 30, sideMargin: 15, cols: 5, mode: 'compact' },
+        'tablet-portrait': { topButtonArea: 60, bottomButtonArea: 60, sideMargin: 30, cols: 'dynamic', mode: 'desktop' },
+        'tablet-landscape': { topButtonArea: 50, bottomButtonArea: 50, sideMargin: 40, cols: 'dynamic', mode: 'desktop' },
+        'desktop': { topButtonArea: 80, bottomButtonArea: 80, sideMargin: 50, cols: 'dynamic', mode: 'desktop' }
+    };
+    return configs[deviceType];
+}
+```
+
+### 步驟 2：創建統一計算函數
 ```javascript
 calculateGridLayout(itemCount, width, height, hasImages) {
+    // 檢測設備類型
+    const deviceType = getDeviceType(width, height);
+    const containerConfig = getContainerConfig(deviceType);
+
     // 返回 {
+    //   deviceType,
     //   cols, rows,
     //   cardWidth, cardHeight,
     //   horizontalSpacing, verticalSpacing,
     //   gridStartX, gridStartY,
-    //   mode: 'square' | 'rectangle'
+    //   mode: 'square' | 'rectangle',
+    //   containerConfig
     // }
 }
 ```
 
-### 步驟 2：替換現有計算邏輯
+### 步驟 3：替換現有計算邏輯
 ```javascript
-// 舊方式：多個分支
-if (hasImages) {
-    // 正方形模式計算
-} else {
-    // 長方形模式計算
-}
-
 // 新方式：統一函數
 const hasImages = currentPagePairs.some(pair => pair.imageUrl);
 const layout = this.calculateGridLayout(itemCount, width, height, hasImages);
 
 // 使用統一的結果
-const { cols, rows, cardWidth, cardHeight, horizontalSpacing, verticalSpacing, gridStartX, gridStartY, mode } = layout;
+const {
+    deviceType, cols, rows, cardWidth, cardHeight,
+    horizontalSpacing, verticalSpacing, gridStartX, gridStartY, mode
+} = layout;
 ```
 
-### 步驟 3：測試不同解析度和模式
-- **1920×1080（16:9 寬螢幕）**
-  - 正方形模式（有圖片）
-  - 長方形模式（無圖片）
-- **1280×720（16:9 標準寬螢幕）**
-  - 正方形模式（有圖片）
-  - 長方形模式（無圖片）
-- **768×1024（3:4 直向螢幕）**
-  - 正方形模式（有圖片）
-  - 長方形模式（無圖片）
-- **480×800（9:16 手機直向）**
-  - 正方形模式（有圖片）
-  - 長方形模式（無圖片）
+### 步驟 4：測試所有設備類型和模式組合
+
+#### 手機直向（375×667px）
+- 正方形模式（有圖片）
+- 長方形模式（無圖片）
+
+#### 手機橫向（812×375px）
+- 正方形模式（有圖片）
+- 長方形模式（無圖片）
+
+#### 平板直向（768×1024px）
+- 正方形模式（有圖片）
+- 長方形模式（無圖片）
+
+#### 平板橫向（1024×768px）
+- 正方形模式（有圖片）
+- 長方形模式（無圖片）
+
+#### 桌面版（1440×900px）
+- 正方形模式（有圖片）
+- 長方形模式（無圖片）
+
+#### 超寬螢幕（1920×1080px）
+- 正方形模式（有圖片）
+- 長方形模式（無圖片）
+
+---
+
+## 📋 整合內容總結
+
+本文檔已整合以下內容：
+
+✅ **設備檢測與容器配置**
+- 手機直向、手機橫向、平板直向、平板橫向、桌面版
+- 根據設備類型優化按鈕區域、邊距、列數限制
+
+✅ **改進的計算方案（6 步）**
+- 第零步：檢測設備類型與卡片類型
+- 第二步：計算可用空間（使用設備配置）
+- 第三步：計算最佳列數（支援固定和動態）
+- 第四步：計算間距
+- 第五步：計算卡片尺寸（正方形 vs 長方形）
+- 第六步：計算卡片位置
+
+✅ **實施建議**
+- 優先級 1：核心計算（設備檢測、容器配置、卡片類型檢測）
+- 優先級 2：設備優化（按鈕區域、邊距、列數限制）
+- 優先級 3：增強功能（手動覆蓋、自定義間距、卡片對齐）
+
+✅ **完整的測試場景**
+- 6 種設備類型 × 2 種卡片模式 = 12 種組合
 
 ---
 
 **最後更新**：2025-11-01
-**版本**：v1.0 - 改進的混合模式佈局計算方案
+**版本**：v2.0 - 改進的混合模式佈局計算方案（已整合設備方向與容器響應式設計）
 
