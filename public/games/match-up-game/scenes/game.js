@@ -1274,11 +1274,19 @@ class GameScene extends Phaser.Scene {
             isLargeContainer: height >= 800
         });
 
-        // 🔥 計算行數（固定 2 列）
-        const columns = 2;
+        // 🔥 v10.0 檢測是否有圖片（只要有任何一個圖片就進入正方形模式）
+        const hasImages = currentPagePairs.some(pair =>
+            pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId
+        );
+        console.log(`🔍 [v10.0] 分離佈局圖片檢測: hasImages=${hasImages}, mode=${hasImages ? '🟦 正方形模式' : '🟨 長方形模式'}`);
+
+        // 🔥 v10.0 根據圖片檢測決定列數
+        // 有圖片時：使用 5 列（正方形模式）
+        // 無圖片時：使用 2 列（長方形模式）
+        const columns = hasImages ? 5 : 2;
         const rows = Math.ceil(itemCount / columns);
 
-        console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局`);
+        console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局 [v10.0]`);
 
         // 🔥 計算間距（先計算，用於後續卡片高度計算）
         const horizontalSpacing = Math.max(5, width * 0.01);
@@ -1295,7 +1303,23 @@ class GameScene extends Phaser.Scene {
         // 🔥 6-10 個和 16-20 個匹配數使用更小的卡片尺寸
         const isSmallCardSize = itemCount <= 10 || itemCount >= 16;
 
-        if (isSmallContainer) {
+        // 🔥 v10.0 根據列數調整卡片尺寸
+        // 5 列模式（有圖片）：卡片更小
+        // 2 列模式（無圖片）：卡片更大
+        if (columns === 5) {
+            // 🔥 v10.0 正方形模式（5 列）：卡片更小
+            if (isSmallContainer) {
+                cardWidth = Math.max(50, Math.min(80, width * 0.08));
+                cardHeight = Math.max(50, Math.min(80, width * 0.08));  // 正方形
+            } else if (isMediumContainer) {
+                cardWidth = Math.max(60, Math.min(100, width * 0.10));
+                cardHeight = Math.max(60, Math.min(100, width * 0.10));  // 正方形
+            } else {
+                cardWidth = Math.max(80, Math.min(140, width * 0.12));
+                cardHeight = Math.max(80, Math.min(140, width * 0.12));  // 正方形
+            }
+        } else {
+            // 🔥 v10.0 長方形模式（2 列）：卡片更大
             if (isSmallCardSize) {
                 cardWidth = Math.max(70, Math.min(110, width * 0.11));  // 🔥 6-10 個和 16-20 個：更小的寬度
                 cardHeight = Math.max(18, Math.min(maxCardHeight, 38));  // 🔥 6-10 個和 16-20 個：更小的高度
@@ -1303,26 +1327,9 @@ class GameScene extends Phaser.Scene {
                 cardWidth = Math.max(80, Math.min(130, width * 0.13));
                 cardHeight = Math.max(20, Math.min(maxCardHeight, 45));
             }
-        } else if (isMediumContainer) {
-            if (isSmallCardSize) {
-                cardWidth = Math.max(80, Math.min(130, width * 0.12));  // 🔥 6-10 個和 16-20 個：更小的寬度
-                cardHeight = Math.max(22, Math.min(maxCardHeight, 45));  // 🔥 6-10 個和 16-20 個：更小的高度
-            } else {
-                cardWidth = Math.max(90, Math.min(150, width * 0.14));
-                cardHeight = Math.max(25, Math.min(maxCardHeight, 52));
-            }
-        } else {
-            // 🔥 大容器：使用更大的卡片尺寸
-            if (isSmallCardSize) {
-                cardWidth = Math.max(130, Math.min(210, width * 0.17));  // 🔥 6-10 個和 16-20 個：更大的寬度
-                cardHeight = Math.max(35, Math.min(maxCardHeight, 72));  // 🔥 6-10 個和 16-20 個：更大的高度
-            } else {
-                cardWidth = Math.max(140, Math.min(230, width * 0.19));  // 🔥 11-15 個：更大的寬度
-                cardHeight = Math.max(40, Math.min(maxCardHeight, 80));  // 🔥 11-15 個：更大的高度
-            }
         }
 
-        console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
+        console.log(`📐 卡片尺寸 [v10.0]: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}, 模式: ${columns === 5 ? '🟦 正方形 (5列)' : '🟨 長方形 (2列)'}`);
         console.log(`📏 可用高度: ${availableHeight.toFixed(0)}, 最大卡片高度: ${maxCardHeight.toFixed(0)}`);
 
         // 🔥 英文卡片和中文卡片的垂直間距（文字在框右邊，不需要額外間距）
