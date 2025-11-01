@@ -1912,9 +1912,19 @@ class GameScene extends Phaser.Scene {
                 pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId
             );
 
-            console.log('🔍 圖片檢測:', {
+            // 🔥 v8.0 詳細調試：檢查每個卡片的圖片字段
+            console.log('🔍 詳細圖片檢測:', {
+                totalPairs: currentPagePairs.length,
                 hasImages,
-                mode: hasImages ? '🟦 正方形模式' : '🟨 長方形模式'
+                mode: hasImages ? '🟦 正方形模式' : '🟨 長方形模式',
+                pairDetails: currentPagePairs.slice(0, 3).map((pair, idx) => ({
+                    index: idx,
+                    imageUrl: pair.imageUrl,
+                    chineseImageUrl: pair.chineseImageUrl,
+                    imageId: pair.imageId,
+                    chineseImageId: pair.chineseImageId,
+                    hasAnyImage: !!(pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId)
+                }))
             });
 
             // 🔥 第一步：定義按鈕區域和邊距
