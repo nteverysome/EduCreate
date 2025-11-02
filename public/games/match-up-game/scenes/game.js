@@ -2521,6 +2521,7 @@ class GameScene extends Phaser.Scene {
         // 創建卡片容器
         const container = this.add.container(x, y);
         container.setSize(width, height);
+        container.setOrigin(0.5, 0.5);  // 🔥 v16.0：設置容器錨點為中心，確保卡片正確定位
         container.setDepth(5);
 
         // 🔥 設置初始透明度為 0（隱藏）
