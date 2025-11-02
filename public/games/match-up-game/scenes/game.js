@@ -2075,8 +2075,9 @@ class GameScene extends Phaser.Scene {
             // 垂直間距 = 可用高度 × 0.03（範圍 10-40px）
             dynamicVerticalSpacing = Math.max(10, Math.min(40, availableHeight * 0.03));
 
-            // 📝 單元總高度 = 英文卡片高度 + 中文文字高度 + 垂直間距
-            totalUnitHeight = cardHeightInFrame + chineseTextHeight + dynamicVerticalSpacing;
+            // ✅ v26.0：方案 A - 在英文卡片和中文字之間加入 verticalSpacing
+            // 📝 單元總高度 = 英文卡片高度 + verticalSpacing + 中文文字高度 + verticalSpacing
+            totalUnitHeight = cardHeightInFrame + dynamicVerticalSpacing + chineseTextHeight + dynamicVerticalSpacing;
 
             // 🔥 v15.0：將 dynamicVerticalSpacing 賦值給 verticalSpacing，以便後續使用
             verticalSpacing = dynamicVerticalSpacing;
@@ -2540,12 +2541,13 @@ class GameScene extends Phaser.Scene {
             frameContainer.add(background);
 
             // 🔥 中文文字位置計算（第六步）
-            // 公式：chineseTextY = cardY + finalCardHeight / 2 + chineseTextHeight / 2
+            // ✅ v26.0：方案 A - 在英文卡片和中文字之間加入 verticalSpacing
+            // 新結構：英文卡片 + verticalSpacing + 中文字 + verticalSpacing
             const chineseActualFontSize = chineseFontSizesArray[i];
             const chineseTextHeightActual = chineseActualFontSize + 5;  // 字體大小 + 行高
 
-            // 中文文字應該在白色框下方，垂直居中
-            const chineseY = cardHeightInFrame / 2 + chineseTextHeightActual / 2;  // ✅ 改進：正確計算中文文字位置
+            // 中文文字位置：英文卡片下方 + verticalSpacing + 中文字高度/2
+            const chineseY = cardHeightInFrame / 2 + dynamicVerticalSpacing + chineseTextHeightActual / 2;  // ✅ v26.0：加入上方的 verticalSpacing
 
             console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${chineseY.toFixed(1)}`);
 
