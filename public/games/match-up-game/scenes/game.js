@@ -2057,6 +2057,10 @@ class GameScene extends Phaser.Scene {
                 formula: `horizontalMargin = ${cols === 5 ? 30 : cols === 4 ? 20 : 25}px (固定值)`
             });
 
+            // ✅ v26.0：先計算 dynamicVerticalSpacing，以便在 cardHeightInFrame 計算中使用
+            // 垂直間距 = 可用高度 × 0.03（範圍 10-40px）
+            dynamicVerticalSpacing = Math.max(10, Math.min(40, availableHeight * 0.03));
+
             // 重新計算卡片高度（考慮實際的中文文字高度）
             // 🔥 v10.0：如果有圖片，cardHeightInFrame = frameWidth（正方形）；否則根據可用空間計算
             if (hasImages) {
@@ -2072,8 +2076,6 @@ class GameScene extends Phaser.Scene {
             // ✅ v25.0：在 cardHeightInFrame 計算完成後，使用動態計算而不是固定值
             // 中文文字高度 = 卡片高度 × 0.4（與設計文檔一致）
             chineseTextHeight = cardHeightInFrame * 0.4;
-            // 垂直間距 = 可用高度 × 0.03（範圍 10-40px）
-            dynamicVerticalSpacing = Math.max(10, Math.min(40, availableHeight * 0.03));
 
             // ✅ v26.0：方案 A - 在英文卡片和中文字之間加入 verticalSpacing
             // 📝 單元總高度 = 英文卡片高度 + verticalSpacing + 中文文字高度 + verticalSpacing
