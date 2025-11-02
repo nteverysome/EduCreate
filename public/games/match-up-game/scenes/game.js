@@ -2014,11 +2014,9 @@ class GameScene extends Phaser.Scene {
             // 🔥 v19.0：根據列數動態調整中文文字高度和間距
             let dynamicVerticalSpacing;
 
-            // ✅ v25.0：使用動態計算而不是固定值
-            // 中文文字高度 = 卡片高度 × 0.4（與設計文檔一致）
-            chineseTextHeight = cardHeightInFrame * 0.4;
-            // 垂直間距 = 可用高度 × 0.03（範圍 10-40px）
-            dynamicVerticalSpacing = Math.max(10, Math.min(40, availableHeight * 0.03));
+            // 使用之前計算的基礎值
+            chineseTextHeight = chineseTextHeightBase;
+            dynamicVerticalSpacing = verticalSpacingBase;
 
             // 根據列數調整字體大小限制
             let maxFontSizeLimit;
@@ -2070,6 +2068,12 @@ class GameScene extends Phaser.Scene {
                 cardHeightInFrame = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight - chineseTextHeight - dynamicVerticalSpacing)));
                 console.log(`🔥 [v10.0] 長方形模式：cardHeightInFrame = ${cardHeightInFrame}`);
             }
+
+            // ✅ v25.0：在 cardHeightInFrame 計算完成後，使用動態計算而不是固定值
+            // 中文文字高度 = 卡片高度 × 0.4（與設計文檔一致）
+            chineseTextHeight = cardHeightInFrame * 0.4;
+            // 垂直間距 = 可用高度 × 0.03（範圍 10-40px）
+            dynamicVerticalSpacing = Math.max(10, Math.min(40, availableHeight * 0.03));
 
             // 📝 單元總高度 = 英文卡片高度 + 中文文字高度 + 垂直間距
             totalUnitHeight = cardHeightInFrame + chineseTextHeight + dynamicVerticalSpacing;
