@@ -1976,8 +1976,8 @@ class GameScene extends Phaser.Scene {
             console.log('🔍 開始預先計算中文字體大小...');
             const tempCardHeight = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight * 0.6)));  // 臨時卡片高度
             chineseFontSizes = currentPagePairs.map(pair => {
-                // 計算初始字體大小
-                let fontSize = Math.max(24, Math.min(48, tempCardHeight * 0.6));
+                // ✅ v27.2：計算初始字體大小（改為 × 0.4）
+                let fontSize = Math.max(24, Math.min(48, tempCardHeight * 0.4));
 
                 // ✅ v27.0：根據文字長度調整字體大小（1-2字相同，3-4字縮小）
                 const textLength = pair.answer ? pair.answer.length : 0;
