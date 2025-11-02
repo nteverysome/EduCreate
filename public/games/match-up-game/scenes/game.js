@@ -1979,10 +1979,12 @@ class GameScene extends Phaser.Scene {
                 // 計算初始字體大小
                 let fontSize = Math.max(24, Math.min(48, tempCardHeight * 0.6));
 
-                // ✅ v27.0：根據文字長度調整字體大小（1-4字都是80%）
+                // ✅ v27.0：根據文字長度調整字體大小（1-2字相同，3-4字縮小）
                 const textLength = pair.answer ? pair.answer.length : 0;
-                if (textLength <= 4) {
-                    fontSize = fontSize * 0.8;  // 1-4 個字：縮小 20%
+                if (textLength <= 2) {
+                    fontSize = fontSize * 1.0;  // 1-2 個字：100%（保持原大小）
+                } else if (textLength <= 4) {
+                    fontSize = fontSize * 0.8;  // 3-4 個字：縮小 20%
                 } else if (textLength <= 6) {
                     fontSize = fontSize * 0.7;  // 5-6 個字：縮小 30%
                 } else {
