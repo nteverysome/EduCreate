@@ -3389,12 +3389,8 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 根據文字長度調整字體大小
         let fontSize;
-        if (textLength <= 2) {
-            fontSize = baseFontSize;  // 1-2 個字：正常大小
-        } else if (textLength === 3) {
-            fontSize = baseFontSize * 0.9;  // 3 個字：縮小 10%
-        } else if (textLength === 4) {
-            fontSize = baseFontSize * 0.8;  // 4 個字：縮小 20%
+        if (textLength <= 4) {
+            fontSize = baseFontSize * 0.8;  // 1-4 個字：縮小 20%
         } else if (textLength <= 6) {
             fontSize = baseFontSize * 0.7;  // 5-6 個字：縮小 30%
         } else {
