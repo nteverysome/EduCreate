@@ -2,7 +2,7 @@
 // 螢幕尺寸常數定義
 const MAX_SIZE_WIDTH_SCREEN = 1920  // 最大螢幕寬度
 const MAX_SIZE_HEIGHT_SCREEN = 1080 // 最大螢幕高度
-const MIN_SIZE_WIDTH_SCREEN = 480   // 最小螢幕寬度
+const MIN_SIZE_WIDTH_SCREEN = 320   // 🔥 v21.0：改為 320px 以支持 iPhone 14 (390px) 和 iPhone SE (375px)
 const MIN_SIZE_HEIGHT_SCREEN = 270  // 最小螢幕高度
 const SIZE_WIDTH_SCREEN = 960       // 預設螢幕寬度
 const SIZE_HEIGHT_SCREEN = 540      // 預設螢幕高度
