@@ -1877,29 +1877,62 @@ class GameScene extends Phaser.Scene {
             // 公式：(可用高度 - 間距總和) / 行數
             const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
 
-            // 📝 根據匹配數決定最大卡片高度
-            // 🔥 v13.0：分離手機直向和橫向的卡片尺寸
-            // 手機直向（375×667）：卡片 65×65px，中文 18px，間距 3px → 86px/行 → 8 行
-            // 手機橫向（812×375）：卡片更小，中文更小，間距更小 → 更多行
+            // 📝 根據列數動態計算最大卡片高度
+            // 🔥 v19.0：根據列數自動調整卡片尺寸
+            // 5 列：65px，4 列：75px，3 列：85px，2 列：95px
             let maxCardHeight;
+            let chineseTextHeightBase;
+            let verticalSpacingBase;
 
             if (isPortraitCompactMode) {
-                // 🔥 v13.0：手機直向 - 保守優化（v12.0 的設置）
-                maxCardHeight = hasImages
-                    ? (itemCount <= 5 ? 75 : itemCount <= 10 ? 70 : itemCount <= 20 ? 65 : 70)  // 正方形模式：65-75px
-                    : (itemCount <= 5 ? 55 : itemCount <= 10 ? 53 : itemCount <= 20 ? 50 : 55);  // 長方形模式：50-55px
-                console.log('📱 [v13.0] 手機直向模式 - 卡片尺寸:', { maxCardHeight, isPortraitCompactMode });
+                // 🔥 v19.0：手機直向 - 根據列數動態調整
+                if (cols === 5) {
+                    // 5 列：緊湊排列（Wordwall 風格）
+                    maxCardHeight = hasImages ? 65 : 50;
+                    chineseTextHeightBase = 18;
+                    verticalSpacingBase = 3;
+                } else if (cols === 4) {
+                    // 4 列：中等排列
+                    maxCardHeight = hasImages ? 75 : 60;
+                    chineseTextHeightBase = 20;
+                    verticalSpacingBase = 3;
+                } else if (cols === 3) {
+                    // 3 列：寬鬆排列
+                    maxCardHeight = hasImages ? 85 : 70;
+                    chineseTextHeightBase = 22;
+                    verticalSpacingBase = 4;
+                } else {
+                    // 2 列或更少：最寬鬆排列
+                    maxCardHeight = hasImages ? 95 : 80;
+                    chineseTextHeightBase = 24;
+                    verticalSpacingBase = 5;
+                }
+                console.log('📱 [v19.0] 手機直向模式 - 根據列數調整卡片尺寸:', { cols, maxCardHeight, chineseTextHeightBase, verticalSpacingBase });
             } else if (isLandscapeCompactMode) {
-                // 🔥 v13.0：手機橫向 - 極度緊湊（更小的卡片）
-                maxCardHeight = hasImages
-                    ? (itemCount <= 5 ? 50 : itemCount <= 10 ? 45 : itemCount <= 20 ? 40 : 45)  // 正方形模式：40-50px
-                    : (itemCount <= 5 ? 40 : itemCount <= 10 ? 38 : itemCount <= 20 ? 35 : 40);  // 長方形模式：35-40px
-                console.log('📱 [v13.0] 手機橫向模式 - 卡片尺寸:', { maxCardHeight, isLandscapeCompactMode });
+                // 🔥 v19.0：手機橫向 - 根據列數動態調整（更緊湊）
+                if (cols === 5) {
+                    maxCardHeight = hasImages ? 50 : 40;
+                    chineseTextHeightBase = 12;
+                    verticalSpacingBase = 2;
+                } else if (cols === 4) {
+                    maxCardHeight = hasImages ? 60 : 50;
+                    chineseTextHeightBase = 14;
+                    verticalSpacingBase = 2;
+                } else if (cols === 3) {
+                    maxCardHeight = hasImages ? 70 : 60;
+                    chineseTextHeightBase = 16;
+                    verticalSpacingBase = 3;
+                } else {
+                    maxCardHeight = hasImages ? 80 : 70;
+                    chineseTextHeightBase = 18;
+                    verticalSpacingBase = 3;
+                }
+                console.log('📱 [v19.0] 手機橫向模式 - 根據列數調整卡片尺寸:', { cols, maxCardHeight, chineseTextHeightBase, verticalSpacingBase });
             } else {
                 // 其他模式（不應該執行到這裡）
-                maxCardHeight = hasImages
-                    ? (itemCount <= 5 ? 75 : itemCount <= 10 ? 70 : itemCount <= 20 ? 65 : 70)
-                    : (itemCount <= 5 ? 55 : itemCount <= 10 ? 53 : itemCount <= 20 ? 50 : 55);
+                maxCardHeight = hasImages ? 65 : 50;
+                chineseTextHeightBase = 18;
+                verticalSpacingBase = 3;
             }
 
             // 🔥 計算框寬度
@@ -1951,29 +1984,34 @@ class GameScene extends Phaser.Scene {
                 allSizes: chineseFontSizes
             });
 
-            // 🔥 v13.0：分離手機直向和橫向的中文文字高度和間距
+            // 🔥 v19.0：根據列數動態調整中文文字高度和間距
             let dynamicVerticalSpacing;
 
-            if (isPortraitCompactMode) {
-                // 🔥 v13.0：手機直向 - 保守優化（v12.0 的設置）
-                // 卡片 65px + 中文 18px + 間距 3px = 86px/行
-                chineseTextHeight = 18;  // 固定 18px
-                chineseFontSize = `${Math.min(maxChineseFontSize, 15)}px`;  // 限制字體大小到 15px
-                dynamicVerticalSpacing = 3;  // 固定 3px
-                console.log('📱 [v13.0] 手機直向模式 - 中文文字:', { chineseTextHeight, chineseFontSize, dynamicVerticalSpacing });
-            } else if (isLandscapeCompactMode) {
-                // 🔥 v13.0：手機橫向 - 極度緊湊
-                // 卡片 40px + 中文 12px + 間距 2px = 54px/行
-                chineseTextHeight = 12;  // 減少到 12px
-                chineseFontSize = `${Math.min(maxChineseFontSize, 12)}px`;  // 限制字體大小到 12px
-                dynamicVerticalSpacing = 2;  // 減少到 2px
-                console.log('📱 [v13.0] 手機橫向模式 - 中文文字:', { chineseTextHeight, chineseFontSize, dynamicVerticalSpacing });
+            // 使用之前計算的基礎值
+            chineseTextHeight = chineseTextHeightBase;
+            dynamicVerticalSpacing = verticalSpacingBase;
+
+            // 根據列數調整字體大小限制
+            let maxFontSizeLimit;
+            if (cols === 5) {
+                maxFontSizeLimit = isPortraitCompactMode ? 15 : 12;
+            } else if (cols === 4) {
+                maxFontSizeLimit = isPortraitCompactMode ? 17 : 14;
+            } else if (cols === 3) {
+                maxFontSizeLimit = isPortraitCompactMode ? 19 : 16;
             } else {
-                // 其他模式（不應該執行到這裡）
-                chineseTextHeight = 18;
-                chineseFontSize = `${Math.min(maxChineseFontSize, 15)}px`;
-                dynamicVerticalSpacing = 3;
+                maxFontSizeLimit = isPortraitCompactMode ? 21 : 18;
             }
+
+            chineseFontSize = `${Math.min(maxChineseFontSize, maxFontSizeLimit)}px`;
+
+            console.log('📱 [v19.0] 根據列數調整中文文字:', {
+                cols,
+                chineseTextHeight,
+                chineseFontSize,
+                dynamicVerticalSpacing,
+                maxFontSizeLimit
+            });
 
             console.log('📐 動態垂直間距:', {
                 chineseTextHeight,
