@@ -2374,6 +2374,9 @@ class GameScene extends Phaser.Scene {
             const col = i % cols;
             const row = Math.floor(i / cols);
 
+            // 🔥 v17.0：修復容器位置計算
+            // 在 Phaser 中，容器的位置是基於其左上角，不是中心
+            // 所以我們需要調整 frameX 的計算，使其正確定位容器
             const frameX = horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
             // 📝 使用 totalUnitHeight 計算垂直位置（已包含 chineseTextHeight 和 verticalSpacing）
             const frameY = topOffset + row * totalUnitHeight + totalUnitHeight / 2;
