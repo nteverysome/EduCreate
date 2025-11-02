@@ -1979,6 +1979,17 @@ class GameScene extends Phaser.Scene {
                 // 計算初始字體大小
                 let fontSize = Math.max(24, Math.min(48, tempCardHeight * 0.6));
 
+                // ✅ v27.0：根據文字長度調整字體大小（1-4字都是80%）
+                const textLength = pair.answer ? pair.answer.length : 0;
+                if (textLength <= 4) {
+                    fontSize = fontSize * 0.8;  // 1-4 個字：縮小 20%
+                } else if (textLength <= 6) {
+                    fontSize = fontSize * 0.7;  // 5-6 個字：縮小 30%
+                } else {
+                    fontSize = fontSize * 0.6;  // 7+ 個字：縮小 40%
+                }
+                fontSize = Math.max(18, fontSize);  // 最小字體大小 18px
+
                 // 創建臨時文字對象來測量寬度
                 const tempText = this.add.text(0, 0, pair.answer, {
                     fontSize: `${fontSize}px`,
@@ -1986,10 +1997,10 @@ class GameScene extends Phaser.Scene {
                     fontStyle: 'bold'
                 });
 
-                // 如果文字寬度超過框寬度的 85%，縮小字體
+                // 如果文字寬度超過框寬度的 85%，進一步縮小字體
                 const maxTextWidth = (frameWidth - 10) * 0.85;
-                while (tempText.width > maxTextWidth && fontSize > 18) {
-                    fontSize -= 2;
+                while (tempText.width > maxTextWidth && fontSize > 14) {
+                    fontSize -= 1;
                     tempText.setFontSize(fontSize);
                 }
 
