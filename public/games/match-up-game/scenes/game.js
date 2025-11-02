@@ -2388,6 +2388,20 @@ class GameScene extends Phaser.Scene {
         // 🔥 計算間距和行數
         const rows = Math.ceil(itemCount / cols);
 
+        // 🔥 v23.0：定義水平邊距，確保卡片不被切割
+        // 根據列數動態調整邊距
+        let horizontalMargin;
+        if (cols === 5) {
+            // 5 列：邊距 = 30px（確保 390px 寬度下有 330px 可用寬度）
+            horizontalMargin = 30;
+        } else if (cols === 4) {
+            // 4 列：中等邊距（20px）
+            horizontalMargin = 20;
+        } else {
+            // 3 列或更少：較大邊距（25px）
+            horizontalMargin = 25;
+        }
+
         // 🔥 v23.0：優化水平間距計算，確保卡片不被切割
         // 公式：(可用寬度 - 邊距 - 卡片總寬度) / (列數 + 1)
         // 基於實際可用寬度（width - 2 * horizontalMargin）計算
