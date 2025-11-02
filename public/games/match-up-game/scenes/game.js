@@ -2092,6 +2092,7 @@ class GameScene extends Phaser.Scene {
 
             // ✅ v26.0：方案 A - 在英文卡片和中文字之間加入 verticalSpacing
             // 📝 單元總高度 = 英文卡片高度 + verticalSpacing + 中文文字高度 + verticalSpacing
+            // ✅ v27.3：保持原始結構，上下都有 verticalSpacing
             totalUnitHeight = cardHeightInFrame + dynamicVerticalSpacing + chineseTextHeight + dynamicVerticalSpacing;
 
             // 🔥 v15.0：將 dynamicVerticalSpacing 賦值給 verticalSpacing，以便後續使用
