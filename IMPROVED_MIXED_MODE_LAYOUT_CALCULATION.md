@@ -18,9 +18,7 @@
 
 #### 🔴 P0 嚴重問題修復
 - ✅ **問題 1**：修復 horizontalSpacing 未定義就使用的問題（調整步驟順序）
-- ✅ **問題 3**：🔥 修復設備檢測邏輯（手機直向應使用緊湊模式，不是桌面模式）
-  - 之前：手機直向使用桌面模式 → 只有 3 列 ❌
-  - 修復：手機直向使用緊湊模式 → 5 列 ✅
+- ✅ **問題 3**：統一設備檢測邏輯（與 game.js 實際代碼保持一致）
 - ✅ **問題 8**：修正中文文字高度計算公式（考慮 verticalSpacing）
 
 #### 🟠 P1 較高問題修復
@@ -37,211 +35,30 @@
 
 ---
 
-## 🔥 v5.0 關鍵修復：設備檢測邏輯
-
-### 問題根源
-
-**為什麼文檔完美但實現有問題？**
-
-之前的代碼中，手機直向（375×667px）被錯誤地分類為桌面模式，導致：
-- ❌ 使用錯誤的列數計算邏輯
-- ❌ 最小卡片尺寸設置為 150px（太大）
-- ❌ 最終只顯示 3 列而不是 5 列
-- ❌ 空間利用率只有 24% 而不是 76%
-
-### 修復方案
-
-**添加 `isMobileDevice` 檢測**
-
-```javascript
-// 之前（錯誤）
-const isLandscapeMobile = width > height && height < 500;
-const isTinyHeight = height < 400;
-const isCompactMode = isLandscapeMobile || isTinyHeight;  // 手機直向不符合條件
-
-// 修復後（正確）
-const isMobileDevice = width < 768;  // 🔥 添加手機設備檢測
-const isLandscapeMobile = width > height && height < 500;
-const isTinyHeight = height < 400;
-const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;  // 手機直向現在符合條件
-```
-
-### 修復效果
-
-| 項目 | 修復前 | 修復後 |
-|------|--------|--------|
-| **手機直向檢測** | isCompactMode = false ❌ | isCompactMode = true ✅ |
-| **使用模式** | 桌面模式 ❌ | 緊湊模式 ✅ |
-| **列數** | 3 列 ❌ | 5 列 ✅ |
-| **空間利用率** | 24% ❌ | 76% ✅ |
-| **與 Wordwall 一致** | 否 ❌ | 是 ✅ |
-
----
-
-## � v6.0 新增：分頁邏輯與佈局計算整合
-
-### 核心概念
-
-**分頁邏輯應該基於「每頁能容納的最大卡片數」，而不是固定的數字**
-
-之前的分頁邏輯是固定的：
-- 6-12 個卡片 → 每頁 4 個
-- 13-18 個卡片 → 每頁 5 個
-- 19-24 個卡片 → 每頁 6 個
-
-**問題**：不考慮屏幕尺寸和佈局限制，導致分頁與實際顯示不符
-
-**解決方案**：根據設備類型、屏幕尺寸、佈局模式動態計算每頁最大卡片數
-
-### 計算流程
-
-#### 第一步：計算每頁能容納的最大卡片數
-
-```javascript
-function calculateMaxCardsPerPage(width, height, layout = 'mixed') {
-    // 🔥 檢測設備類型和模式
-    const isMobileDevice = width < 768;
-    const isLandscapeMobile = width > height && height < 500;
-    const isTinyHeight = height < 400;
-    const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
-
-    // 獲取設備配置
-    const deviceType = getDeviceType(width, height);
-    const containerConfig = getContainerConfig(deviceType, false);
-
-    // 計算可用空間
-    const availableWidth = width - containerConfig.sideMargin * 2;
-    const availableHeight = height - containerConfig.topButtonArea - containerConfig.bottomButtonArea;
-
-    // 根據佈局模式決定列數
-    let cols;
-    if (layout === 'mixed') {
-        cols = isCompactMode ? 5 : 3;  // 混合模式：緊湊 5 列，正常 3 列
-    } else {
-        cols = Math.floor(availableWidth / 150);  // 分離模式：動態列數
-    }
-
-    // 計算卡片尺寸和行數
-    const horizontalSpacing = Math.max(5, Math.min(15, availableWidth * 0.01));
-    const cardWidth = (availableWidth - horizontalSpacing * (cols + 1)) / cols;
-
-    const verticalSpacing = Math.max(5, Math.min(20, availableHeight * 0.02));
-    const cardHeight = 67;  // 混合模式卡片高度
-    const chineseTextHeight = 20;  // 中文文字高度
-    const totalUnitHeight = cardHeight + chineseTextHeight + verticalSpacing;
-
-    const maxRows = Math.floor((availableHeight - verticalSpacing) / totalUnitHeight);
-    const maxCardsPerPage = cols * maxRows;
-
-    return {
-        maxCardsPerPage,
-        cols,
-        maxRows,
-        cardWidth,
-        cardHeight,
-        availableHeight
-    };
-}
-```
-
-#### 第二步：根據最大卡片數計算分頁
-
-```javascript
-function calculatePaginationWithLayout(totalPairs, width, height, layout = 'mixed') {
-    // 計算每頁能容納的最大卡片數
-    const layoutInfo = calculateMaxCardsPerPage(width, height, layout);
-    const maxCardsPerPage = layoutInfo.maxCardsPerPage;
-
-    // 確保每頁至少有 1 個卡片
-    const itemsPerPage = Math.max(1, maxCardsPerPage);
-
-    // 計算總頁數
-    const totalPages = Math.ceil(totalPairs / itemsPerPage);
-
-    // 決定是否啟用分頁
-    const enablePagination = totalPages > 1;
-
-    return {
-        itemsPerPage,
-        totalPages,
-        enablePagination,
-        maxCardsPerPage,
-        ...layoutInfo
-    };
-}
-```
-
-### 計算示例
-
-#### 手機直向（375×667px）- 混合模式
-
-```
-輸入：20 個卡片
-
-計算：
-- cols = 5（緊湊模式）
-- availableHeight = 567px
-- totalUnitHeight = 67 + 20 + 10 = 97px
-- maxRows = floor(567 / 97) = 5 行
-- maxCardsPerPage = 5 × 5 = 25 個
-
-結果：
-- itemsPerPage = 25
-- totalPages = ceil(20 / 25) = 1 頁
-- enablePagination = false
-- 顯示全部 20 個卡片 ✅
-```
-
-#### 平板直向（768×1024px）- 分離模式
-
-```
-輸入：50 個卡片
-
-計算：
-- cols = 4（動態）
-- availableHeight = 904px
-- totalUnitHeight = 100 + 15 = 115px
-- maxRows = floor(904 / 115) = 7 行
-- maxCardsPerPage = 4 × 7 = 28 個
-
-結果：
-- itemsPerPage = 28
-- totalPages = ceil(50 / 28) = 2 頁
-- enablePagination = true
-- 第 1 頁 28 個，第 2 頁 22 個 ✅
-```
-
----
-
-## �📱 設備檢測與容器配置
+## � 設備檢測與容器配置
 
 ### 設備類型分類
 
 根據螢幕寬度和方向，系統自動檢測設備類型：
 
 ```javascript
-// 設備檢測函數（修正版 v5.0 - 修復手機直向檢測）
+// 設備檢測函數（修正版 - 與 game.js 實際邏輯一致）
 function getDeviceType(width, height) {
-    // 🔥 修復：手機直向應該也使用緊湊模式
-    // isMobileDevice：手機設備（寬度 < 768px）
-    const isMobileDevice = width < 768;  // 手機設備（寬度 < 768px）
+    // 🔥 優先檢查緊湊模式（與 game.js 第 1677-1679 行邏輯一致）
+    // 這是為了處理特殊情況：手機橫向或極小高度
+    const isLandscapeMobile = width > height && height < 500;
+    const isTinyHeight = height < 400;
 
-    // 特殊情況：手機橫向或極小高度
-    const isLandscapeMobile = width > height && height < 500;  // 手機橫向
-    const isTinyHeight = height < 400;  // 極小高度
-
-    // 🔥 修復：手機直向、手機橫向、極小高度都應該使用緊湊模式
-    if (isMobileDevice || isLandscapeMobile || isTinyHeight) {
-        // 緊湊模式：手機直向、手機橫向、極小高度
-        if (width < 768) {
-            return height > width ? 'mobile-portrait' : 'mobile-landscape';
-        } else {
-            return 'mobile-landscape';  // 其他情況下的緊湊模式
-        }
+    // 如果符合緊湊模式條件，直接返回手機橫向
+    if (isLandscapeMobile || isTinyHeight) {
+        return 'mobile-landscape';  // 緊湊模式
     }
 
-    // 標準設備檢測（非手機設備）
-    if (width < 1024) {
+    // 標準設備檢測
+    if (width < 768) {
+        // 手機設備
+        return height > width ? 'mobile-portrait' : 'mobile-landscape';
+    } else if (width < 1024) {
         // 平板設備
         return height > width ? 'tablet-portrait' : 'tablet-landscape';
     } else {
@@ -251,21 +68,15 @@ function getDeviceType(width, height) {
 }
 ```
 
-### 設備類型與佈局模式（修復版 v5.0）
+### 設備類型與佈局模式
 
 | 設備類型 | 寬度範圍 | 高度範圍 | 佈局模式 | 特點 |
 |---------|---------|---------|---------|------|
-| **手機直向** | < 768px | height > width（直向） | 🔥 緊湊模式 | 固定 5 列，扁平卡片 |
-| **手機橫向** | < 768px | height < 500px 或 height < 400px（橫向） | 緊湊模式 | 固定 5 列，極度緊湊 |
-| **極小高度** | 任意 | height < 400px（極小） | 緊湊模式 | 固定 5 列，極度緊湊 |
-| **平板直向** | 768-1024px | height > width（直向） | 桌面模式 | 動態列數，充分利用空間 |
-| **平板橫向** | 768-1024px | height < width（橫向） | 桌面模式 | 寬螢幕優化，完整功能 |
+| **手機直向** | < 768px | > width | 緊湊模式 | 固定 5 列，扁平卡片 |
+| **手機橫向** | < 768px | < 500px 或 < 400px | 緊湊模式 | 固定 5 列，極度緊湊 |
+| **平板直向** | 768-1024px | > width | 桌面模式 | 動態列數，充分利用空間 |
+| **平板橫向** | 768-1024px | < width | 桌面模式 | 寬螢幕優化，完整功能 |
 | **桌面版** | > 1024px | 任意 | 桌面模式 | 完整功能，詳細資訊 |
-
-**🔥 v5.0 修復說明**：
-- 手機直向（375×667px）現在正確使用緊湊模式
-- 之前錯誤地使用桌面模式，導致只有 3 列
-- 修復後應該顯示 5 列，與 Wordwall 一致
 
 ### 根據設備類型優化容器配置
 
@@ -315,54 +126,6 @@ function getContainerConfig(deviceType, isFullscreen = false) {
     };
 
     return configs[deviceType];
-}
-```
-
-### 🔥 P2-3: 全螢幕按鈕區域調整統一原則
-
-#### 設計原則
-
-全螢幕模式下的按鈕區域調整遵循以下統一原則：
-
-1. **手機設備（寬度 < 768px）**
-   - **直向模式**：topButtonArea 從 40px 增加到 50px（+25%）
-   - **橫向模式**：topButtonArea 從 30px 減少到 25px（-17%）
-   - **原因**：直向模式空間有限，需要增加按鈕區域以提高可點擊性；橫向模式空間充足，可以減少按鈕區域以增加卡片空間
-
-2. **平板設備（寬度 768-1024px）**
-   - **直向模式**：topButtonArea 從 60px 減少到 50px（-17%）
-   - **橫向模式**：topButtonArea 從 50px 增加到 60px（+20%）
-   - **原因**：直向模式已有足夠空間，可以減少按鈕區域；橫向模式需要增加按鈕區域以保持一致性
-
-3. **桌面設備（寬度 > 1024px）**
-   - **topButtonArea**：從 80px 減少到 70px（-12.5%）
-   - **bottomButtonArea**：從 80px 增加到 90px（+12.5%）
-   - **原因**：桌面設備空間充足，可以靈活調整；底部按鈕區域增加以容納更多功能
-
-#### 實施規則
-
-| 設備類型 | 方向 | 非全螢幕 | 全螢幕 | 變化 | 說明 |
-|---------|------|---------|--------|------|------|
-| **手機** | 直向 | 40px | 50px | +25% | 增加可點擊性 |
-| **手機** | 橫向 | 30px | 25px | -17% | 增加卡片空間 |
-| **平板** | 直向 | 60px | 50px | -17% | 減少冗餘空間 |
-| **平板** | 橫向 | 50px | 60px | +20% | 保持一致性 |
-| **桌面** | - | 80px | 70px | -12.5% | 靈活調整 |
-
-#### 代碼實現
-
-```javascript
-// 🔥 P2-3: 統一全螢幕按鈕調整原則
-function getFullscreenButtonAreaAdjustment(deviceType, orientation) {
-    const adjustments = {
-        'mobile-portrait': { topButtonArea: 50, bottomButtonArea: 50 },      // +25%
-        'mobile-landscape': { topButtonArea: 25, bottomButtonArea: 30 },     // -17%
-        'tablet-portrait': { topButtonArea: 50, bottomButtonArea: 60 },      // -17%
-        'tablet-landscape': { topButtonArea: 60, bottomButtonArea: 80 },     // +20%
-        'desktop': { topButtonArea: 70, bottomButtonArea: 90 }               // -12.5%
-    };
-
-    return adjustments[deviceType];
 }
 ```
 

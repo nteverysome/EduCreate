@@ -2014,9 +2014,11 @@ class GameScene extends Phaser.Scene {
             // 🔥 v19.0：根據列數動態調整中文文字高度和間距
             let dynamicVerticalSpacing;
 
-            // 使用之前計算的基礎值
-            chineseTextHeight = chineseTextHeightBase;
-            dynamicVerticalSpacing = verticalSpacingBase;
+            // ✅ v25.0：使用動態計算而不是固定值
+            // 中文文字高度 = 卡片高度 × 0.4（與設計文檔一致）
+            chineseTextHeight = cardHeightInFrame * 0.4;
+            // 垂直間距 = 可用高度 × 0.03（範圍 10-40px）
+            dynamicVerticalSpacing = Math.max(10, Math.min(40, availableHeight * 0.03));
 
             // 根據列數調整字體大小限制
             let maxFontSizeLimit;
