@@ -1951,25 +1951,26 @@ class GameScene extends Phaser.Scene {
 
             // 🔥 計算框寬度
             // v10.0：如果有圖片，框寬度 = 卡片高度（正方形）；否則框寬度 > 卡片高度（長方形）
-            // 🔥 v22.0：根據列數動態調整邊距，確保 5 列卡片在 iPhone 14 (390px) 上完整顯示
+            // 🔥 v23.0：根據列數動態調整邊距，確保 5 列卡片在 iPhone 14 (390px) 上完整顯示
+            // iPhone 14 直向 (390px) 應該有 330px 可用寬度，所以邊距應該是 30px × 2 = 60px
             let horizontalMargin;
             if (cols === 5) {
-                // 5 列：最小邊距（10px），確保在 390px 寬度上完整顯示
-                horizontalMargin = Math.max(10, width * 0.02);  // 最小 10px，或寬度的 2%
+                // 5 列：邊距 = 30px（確保 390px 寬度下有 330px 可用寬度）
+                horizontalMargin = 30;
             } else if (cols === 4) {
-                // 4 列：中等邊距（15px）
-                horizontalMargin = Math.max(15, width * 0.03);  // 最小 15px，或寬度的 3%
+                // 4 列：中等邊距（20px）
+                horizontalMargin = 20;
             } else {
-                // 3 列或更少：較大邊距（20px）
-                horizontalMargin = Math.max(20, width * 0.04);  // 最小 20px，或寬度的 4%
+                // 3 列或更少：較大邊距（25px）
+                horizontalMargin = 25;
             }
 
             const maxFrameWidth = hasImages
                 ? (itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250)  // 正方形模式
                 : (itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250);  // 長方形模式
             frameWidth = hasImages
-                ? Math.min(maxCardHeight, (width - horizontalMargin) / cols)  // 正方形：frameWidth = cardHeight
-                : Math.min(maxFrameWidth, (width - horizontalMargin) / cols);  // 長方形：frameWidth 可以更寬
+                ? Math.min(maxCardHeight, (width - 2 * horizontalMargin) / cols)  // 正方形：frameWidth = cardHeight
+                : Math.min(maxFrameWidth, (width - 2 * horizontalMargin) / cols);  // 長方形：frameWidth 可以更寬
 
             // 🔥 智能預先計算所有中文文字的實際字體大小
             console.log('🔍 開始預先計算中文字體大小...');
@@ -2045,15 +2046,15 @@ class GameScene extends Phaser.Scene {
                 formula: `max(5, ${maxChineseFontSize} * 0.2) = ${dynamicVerticalSpacing}`
             });
 
-            // 🔥 v22.0：添加邊距調試信息
-            console.log('🔥 [v22.0] 邊距計算:', {
+            // 🔥 v23.0：添加邊距調試信息
+            console.log('🔥 [v23.0] 邊距計算:', {
                 cols,
                 width,
                 horizontalMargin,
-                availableWidth: width - horizontalMargin,
+                availableWidth: width - 2 * horizontalMargin,
                 frameWidth,
                 totalFrameWidth: frameWidth * cols,
-                formula: `horizontalMargin = max(${cols === 5 ? 10 : cols === 4 ? 15 : 20}, width * ${cols === 5 ? 0.02 : cols === 4 ? 0.03 : 0.04}) = ${horizontalMargin}`
+                formula: `horizontalMargin = ${cols === 5 ? 30 : cols === 4 ? 20 : 25}px (固定值)`
             });
 
             // 重新計算卡片高度（考慮實際的中文文字高度）
@@ -2387,19 +2388,31 @@ class GameScene extends Phaser.Scene {
         // 🔥 計算間距和行數
         const rows = Math.ceil(itemCount / cols);
 
-        // 🔥 v22.0：優化水平間距計算，確保卡片不被切割
-        // 公式：(可用寬度 - 卡片總寬度) / (列數 + 1)
-        // 但要確保最小間距，避免卡片太擁擠
+        // 🔥 v23.0：優化水平間距計算，確保卡片不被切割
+        // 公式：(可用寬度 - 邊距 - 卡片總寬度) / (列數 + 1)
+        // 基於實際可用寬度（width - 2 * horizontalMargin）計算
+        const availableWidth = width - 2 * horizontalMargin;
+        const totalCardWidth = frameWidth * cols;
+        const availableSpace = availableWidth - totalCardWidth;
+
+        console.log('📐 [v23.0] 寬度計算詳情:', {
+            screenWidth: width,
+            horizontalMargin,
+            availableWidth,
+            cols,
+            frameWidth,
+            totalCardWidth,
+            availableSpace,
+            note: `iPhone 14 (390px) 應該有 330px 可用寬度`
+        });
+
         let horizontalSpacing;
         if (cols === 5) {
-            // 5 列：最小間距（1-3px），確保在 390px 寬度上完整顯示
-            const totalCardWidth = frameWidth * cols;
-            const availableSpace = width - totalCardWidth;
-            // 使用更小的間距範圍，確保總寬度不超過 390px
+            // 5 列：最小間距（1-3px），確保在 330px 可用寬度上完整顯示
             horizontalSpacing = Math.max(1, Math.min(3, availableSpace / (cols + 1)));
         } else {
-            // 其他列數：使用原始計算方式
-            horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
+            // 其他列數：使用計算方式
+            horizontalSpacing = Math.max(5, availableSpace / (cols + 1));
         }
 
         // 🔥 v13.0：緊湊模式的 verticalSpacing 已在前面設置，不需要重新計算
@@ -2422,16 +2435,18 @@ class GameScene extends Phaser.Scene {
             verticalSpacingFormula: isCompactMode ? `${chineseTextHeight} * 0.2 = ${verticalSpacing.toFixed(1)}` : '0'
         });
 
-        // 🔥 v22.0：添加水平間距調試信息
-        console.log('🔥 [v22.0] 水平間距計算:', {
+        // 🔥 v23.0：添加水平間距調試信息
+        console.log('🔥 [v23.0] 水平間距計算:', {
             cols,
-            width,
+            screenWidth: width,
+            horizontalMargin,
+            availableWidth,
             frameWidth,
-            totalCardWidth: frameWidth * cols,
-            availableSpace: width - frameWidth * cols,
+            totalCardWidth,
+            availableSpace,
             horizontalSpacing,
-            totalWidth: frameWidth * cols + horizontalSpacing * (cols + 1),
-            formula: cols === 5 ? `max(2, min(5, (${width} - ${frameWidth * cols}) / ${cols + 1})) = ${horizontalSpacing}` : `(${width} - ${frameWidth * cols}) / ${cols + 1} = ${horizontalSpacing}`
+            totalWidth: totalCardWidth + horizontalSpacing * (cols + 1),
+            formula: cols === 5 ? `max(1, min(3, (${availableWidth} - ${totalCardWidth}) / ${cols + 1})) = ${horizontalSpacing}` : `max(5, (${availableWidth} - ${totalCardWidth}) / ${cols + 1}) = ${horizontalSpacing}`
         });
 
         // 🔥 第一步：預先計算所有中文文字的實際字體大小（如果尚未計算）
@@ -2488,10 +2503,11 @@ class GameScene extends Phaser.Scene {
             const col = i % cols;
             const row = Math.floor(i / cols);
 
-            // 🔥 v17.0：修復容器位置計算
+            // 🔥 v23.0：修復容器位置計算，考慮邊距
             // 在 Phaser 中，容器的位置是基於其左上角，不是中心
             // 所以我們需要調整 frameX 的計算，使其正確定位容器
-            const frameX = horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
+            // 公式：邊距 + 間距 + col * (frameWidth + 間距) + frameWidth / 2
+            const frameX = horizontalMargin + horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
             // 📝 使用 totalUnitHeight 計算垂直位置（已包含 chineseTextHeight 和 verticalSpacing）
             const frameY = topOffset + row * totalUnitHeight + totalUnitHeight / 2;
 
