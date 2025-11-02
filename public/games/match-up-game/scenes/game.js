@@ -2519,9 +2519,11 @@ class GameScene extends Phaser.Scene {
 
     createLeftCard(x, y, width, height, text, pairId, animationDelay = 0, imageUrl = null, audioUrl = null) {
         // 創建卡片容器
+        // 🔥 v17.0：修復容器位置計算
+        // 在 Phaser 3 中，容器不支持 setOrigin，所以需要調整容器內部元素的位置
+        // 容器的位置是基於其子元素的位置，所以我們需要將所有子元素相對於容器中心定位
         const container = this.add.container(x, y);
         container.setSize(width, height);
-        container.setOrigin(0.5, 0.5);  // 🔥 v16.0：設置容器錨點為中心，確保卡片正確定位
         container.setDepth(5);
 
         // 🔥 設置初始透明度為 0（隱藏）
