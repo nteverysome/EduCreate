@@ -1951,7 +1951,19 @@ class GameScene extends Phaser.Scene {
 
             // 🔥 計算框寬度
             // v10.0：如果有圖片，框寬度 = 卡片高度（正方形）；否則框寬度 > 卡片高度（長方形）
-            const horizontalMargin = 30;
+            // 🔥 v22.0：根據列數動態調整邊距，確保 5 列卡片在 iPhone 14 (390px) 上完整顯示
+            let horizontalMargin;
+            if (cols === 5) {
+                // 5 列：最小邊距（10px），確保在 390px 寬度上完整顯示
+                horizontalMargin = Math.max(10, width * 0.02);  // 最小 10px，或寬度的 2%
+            } else if (cols === 4) {
+                // 4 列：中等邊距（15px）
+                horizontalMargin = Math.max(15, width * 0.03);  // 最小 15px，或寬度的 3%
+            } else {
+                // 3 列或更少：較大邊距（20px）
+                horizontalMargin = Math.max(20, width * 0.04);  // 最小 20px，或寬度的 4%
+            }
+
             const maxFrameWidth = hasImages
                 ? (itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250)  // 正方形模式
                 : (itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250);  // 長方形模式
@@ -2031,6 +2043,17 @@ class GameScene extends Phaser.Scene {
                 chineseTextHeight,
                 dynamicVerticalSpacing,
                 formula: `max(5, ${maxChineseFontSize} * 0.2) = ${dynamicVerticalSpacing}`
+            });
+
+            // 🔥 v22.0：添加邊距調試信息
+            console.log('🔥 [v22.0] 邊距計算:', {
+                cols,
+                width,
+                horizontalMargin,
+                availableWidth: width - horizontalMargin,
+                frameWidth,
+                totalFrameWidth: frameWidth * cols,
+                formula: `horizontalMargin = max(${cols === 5 ? 10 : cols === 4 ? 15 : 20}, width * ${cols === 5 ? 0.02 : cols === 4 ? 0.03 : 0.04}) = ${horizontalMargin}`
             });
 
             // 重新計算卡片高度（考慮實際的中文文字高度）
@@ -2363,7 +2386,21 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 計算間距和行數
         const rows = Math.ceil(itemCount / cols);
-        const horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
+
+        // 🔥 v22.0：優化水平間距計算，確保卡片不被切割
+        // 公式：(可用寬度 - 卡片總寬度) / (列數 + 1)
+        // 但要確保最小間距，避免卡片太擁擠
+        let horizontalSpacing;
+        if (cols === 5) {
+            // 5 列：最小間距（1-3px），確保在 390px 寬度上完整顯示
+            const totalCardWidth = frameWidth * cols;
+            const availableSpace = width - totalCardWidth;
+            // 使用更小的間距範圍，確保總寬度不超過 390px
+            horizontalSpacing = Math.max(1, Math.min(3, availableSpace / (cols + 1)));
+        } else {
+            // 其他列數：使用原始計算方式
+            horizontalSpacing = (width - frameWidth * cols) / (cols + 1);
+        }
 
         // 🔥 v13.0：緊湊模式的 verticalSpacing 已在前面設置，不需要重新計算
         // 桌面模式的 verticalSpacing 已在上面的 if/else 分支中定義
@@ -2383,6 +2420,18 @@ class GameScene extends Phaser.Scene {
             totalContentHeight,
             topOffset,
             verticalSpacingFormula: isCompactMode ? `${chineseTextHeight} * 0.2 = ${verticalSpacing.toFixed(1)}` : '0'
+        });
+
+        // 🔥 v22.0：添加水平間距調試信息
+        console.log('🔥 [v22.0] 水平間距計算:', {
+            cols,
+            width,
+            frameWidth,
+            totalCardWidth: frameWidth * cols,
+            availableSpace: width - frameWidth * cols,
+            horizontalSpacing,
+            totalWidth: frameWidth * cols + horizontalSpacing * (cols + 1),
+            formula: cols === 5 ? `max(2, min(5, (${width} - ${frameWidth * cols}) / ${cols + 1})) = ${horizontalSpacing}` : `(${width} - ${frameWidth * cols}) / ${cols + 1} = ${horizontalSpacing}`
         });
 
         // 🔥 第一步：預先計算所有中文文字的實際字體大小（如果尚未計算）

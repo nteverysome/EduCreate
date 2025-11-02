@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-11-02T10:19:38.359Z",
+  "device": {
+    "width": 390,
+    "height": 844,
+    "dpr": 3,
+    "name": "iPhone 14"
+  },
+  "calculations": {
+    "cols": 5,
+    "horizontalMargin": "10.0",
+    "availableWidth": "380.0",
+    "frameWidth": "76.0",
+    "horizontalSpacing": "1.67",
+    "totalWidth": "390.0"
+  },
+  "tests": {
+    "marginCalculation": true,
+    "frameWidthReasonable": true,
+    "spacingCalculation": true,
+    "totalWidthValid": true
+  },
+  "allTestsPassed": true
+}
