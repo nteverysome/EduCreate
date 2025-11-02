@@ -2087,8 +2087,9 @@ class GameScene extends Phaser.Scene {
             }
 
             // ✅ v25.0：在 cardHeightInFrame 計算完成後，使用動態計算而不是固定值
-            // 中文文字高度 = 卡片高度 × 0.4（與設計文檔一致）
-            chineseTextHeight = cardHeightInFrame * 0.4;
+            // ✅ v29.0：方案 B - 增加預留給中文字的高度（從 × 0.4 改為 × 0.5）
+            // 中文文字高度 = 卡片高度 × 0.5（確保中文字有足夠空間）
+            chineseTextHeight = cardHeightInFrame * 0.5;
 
             // ✅ v26.0：方案 A - 在英文卡片和中文字之間加入 verticalSpacing
             // 📝 單元總高度 = 英文卡片高度 + verticalSpacing + 中文文字高度 + verticalSpacing
