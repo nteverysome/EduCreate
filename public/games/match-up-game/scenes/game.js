@@ -1865,6 +1865,20 @@ class GameScene extends Phaser.Scene {
 
             console.log(`🔥 [v18.0] 動態列數計算: itemCount=${itemCount}, cols=${cols}`);
 
+            // 🔥 v20.0：添加詳細的設備尺寸和寬高比調試信息
+            const aspectRatio = width / height;
+            console.log(`📱 [v20.0] 設備尺寸和寬高比詳細信息:`, {
+                width,
+                height,
+                aspectRatio: aspectRatio.toFixed(3),
+                isPortraitMode,
+                isLandscapeMode,
+                isPortraitCompactMode,
+                isLandscapeCompactMode,
+                deviceType: width < 768 ? '手機' : width < 1024 ? '平板' : '桌面',
+                screenCategory: aspectRatio > 1.5 ? '寬螢幕' : aspectRatio > 1.2 ? '標準螢幕' : '直向螢幕'
+            });
+
             // 計算行數
             const rows = Math.ceil(itemCount / cols);
 
