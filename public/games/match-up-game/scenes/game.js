@@ -1849,8 +1849,21 @@ class GameScene extends Phaser.Scene {
             );
             console.log(`🔍 [v10.0] 緊湊模式圖片檢測: hasImages=${hasImages}, mode=${hasImages ? '🟦 正方形模式' : '🟨 長方形模式'}`);
 
-            // 🔥 手機橫向模式固定5列
-            cols = Math.min(5, itemCount);  // 固定最多5列
+            // 🔥 v18.0：動態列數計算
+            // 根據每頁匹配數動態調整列數和卡片尺寸
+            // 20 個 → 5 列，10 個 → 4 列，5 個 → 3 列
+            if (itemCount >= 16) {
+                cols = 5;  // 16-20 個：5 列
+            } else if (itemCount >= 9) {
+                cols = 4;  // 9-15 個：4 列
+            } else if (itemCount >= 4) {
+                cols = 3;  // 4-8 個：3 列
+            } else {
+                cols = Math.min(itemCount, 2);  // 1-3 個：2 列或更少
+            }
+            cols = Math.min(cols, itemCount);  // 確保列數不超過項目數
+
+            console.log(`🔥 [v18.0] 動態列數計算: itemCount=${itemCount}, cols=${cols}`);
 
             // 計算行數
             const rows = Math.ceil(itemCount / cols);
