@@ -2202,7 +2202,22 @@ class GameScene extends Phaser.Scene {
                 verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
 
                 // 🔥 第六步：定義最小正方形卡片大小
-                const minSquareSize = 150;  // 最小正方形尺寸150×150
+                // ✅ v39.0：iPad 動態調整最小卡片尺寸
+                let minSquareSize;
+                if (isIPad) {
+                    // iPad：根據容器寬度動態計算最小卡片尺寸
+                    // 5 列 + 6 個間距 = 5 * minSquareSize + 6 * horizontalSpacing = availableWidth
+                    // minSquareSize = (availableWidth - 6 * horizontalSpacing) / 5
+                    minSquareSize = Math.max(120, (availableWidth - 6 * horizontalSpacing) / 5);
+                    console.log('📱 [v39.0] iPad 動態卡片尺寸:', {
+                        availableWidth: availableWidth.toFixed(1),
+                        horizontalSpacing: horizontalSpacing.toFixed(1),
+                        calculatedMinSize: minSquareSize.toFixed(1)
+                    });
+                } else {
+                    // 其他設備：使用固定最小尺寸
+                    minSquareSize = 150;  // 最小正方形尺寸150×150
+                }
 
                 // 🔥 第七步：計算最大可能的列數
                 // 使用最小卡片尺寸來計算最大可能列數
@@ -2366,17 +2381,34 @@ class GameScene extends Phaser.Scene {
                 verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
 
                 // 🔥 第六步：定義最小卡片大小
-                const minCardWidth = 200;
-                const minCardHeight = 100;
+                // ✅ v39.0：iPad 動態調整最小卡片尺寸
+                let minCardWidth, minCardHeight;
+                if (isIPad) {
+                    // iPad：根據容器大小動態計算最小卡片尺寸
+                    // 5 列 + 6 個間距 = 5 * minCardWidth + 6 * horizontalSpacing = availableWidth
+                    minCardWidth = Math.max(140, (availableWidth - 6 * horizontalSpacing) / 5);
+                    minCardHeight = Math.max(70, minCardWidth * 0.5);  // 高度為寬度的 50%
+                    console.log('📱 [v39.0] iPad 長方形卡片動態尺寸:', {
+                        availableWidth: availableWidth.toFixed(1),
+                        calculatedMinWidth: minCardWidth.toFixed(1),
+                        calculatedMinHeight: minCardHeight.toFixed(1)
+                    });
+                } else {
+                    // 其他設備：使用固定最小尺寸
+                    minCardWidth = 200;
+                    minCardHeight = 100;
+                }
 
                 // 🔥 第七步：計算最大可能的列數和行數
                 const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
                 const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
 
                 // 🔥 第八步：智能計算最佳列數（根據寬高比和匹配數）
-                // v7.0 修復：直向螢幕應該允許 5 列，不是 3 列
+                // ✅ v39.0：iPad 固定 5 列
                 let optimalCols;
-                if (aspectRatio > 2.0) {
+                if (isIPad) {
+                    optimalCols = 5;  // iPad：固定 5 列
+                } else if (aspectRatio > 2.0) {
                     // 超寬螢幕（21:9, 32:9）
                     optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
                 } else if (aspectRatio > 1.5) {
