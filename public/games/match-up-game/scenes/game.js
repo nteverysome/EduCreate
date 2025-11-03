@@ -12,6 +12,8 @@ import {
     validateConfig
 } from '../responsive-config.js';
 
+import { GameResponsiveLayout } from '../responsive-layout.js';
+
 // Game 場景 - 主遊戲邏輯（卡片拖動配對）
 class GameScene extends Phaser.Scene {
     constructor() {
