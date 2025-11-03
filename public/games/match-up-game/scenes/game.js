@@ -2392,7 +2392,7 @@ class GameScene extends Phaser.Scene {
 
                 // ✅ Phase 3：使用 GameResponsiveLayout 計算的卡片尺寸
                 // 所有複雜的迭代計算已在 GameResponsiveLayout 中完成
-                const squareSize = cardSize;
+                const squareSize = cardWidth;  // 正方形模式：寬度 = 高度
                 cols = optimalCols;
                 const rows = optimalRows;
 
