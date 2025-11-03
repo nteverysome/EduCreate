@@ -2192,34 +2192,31 @@ class GameScene extends Phaser.Scene {
             // ============================================================================
 
             // 🔥 第一步：iPad 容器大小分類函數
-            // ✅ v42.2：根據設備對角線長度分類，而不是只看寬度
+            // ✅ v42.2：根據寬度和高度的組合分類，而不是只看寬度
             // 這樣 768×1024 和 1024×768 會被分類為同一個設備
             function classifyIPadSize(w, h) {
-                // 計算對角線長度（像素）
-                const diagonalPixels = Math.sqrt(w * w + h * h);
+                // 獲取寬度和高度的最小值和最大值
+                const minDim = Math.min(w, h);
+                const maxDim = Math.max(w, h);
 
-                // iPad 的 DPI 通常是 264（Retina）
-                // 對角線長度（英寸）= 對角線像素 / 264
-                const diagonalInches = diagonalPixels / 264;
-
-                // 根據對角線長度分類設備
-                // iPad mini: 7.9"
-                // iPad: 9.7"
-                // iPad Air: 10.5"
-                // iPad Pro 11": 11"
-                // iPad Pro 12.9": 12.9"
+                // 根據最小尺寸分類設備
+                // iPad mini: 768×1024 或 1024×768 → minDim = 768
+                // iPad: 810×1080 或 1080×810 → minDim = 810
+                // iPad Air: 820×1180 或 1180×820 → minDim = 820
+                // iPad Pro 11": 834×1194 或 1194×834 → minDim = 834
+                // iPad Pro 12.9": 1024×1366 或 1366×1024 → minDim = 1024
 
                 let deviceSize;
-                if (diagonalInches <= 8.5) {
-                    deviceSize = 'small';       // iPad mini: 7.9"
-                } else if (diagonalInches <= 10) {
-                    deviceSize = 'medium';      // iPad: 9.7"
-                } else if (diagonalInches <= 10.8) {
-                    deviceSize = 'medium_large'; // iPad Air: 10.5"
-                } else if (diagonalInches <= 11.5) {
-                    deviceSize = 'large';       // iPad Pro 11"
+                if (minDim <= 768) {
+                    deviceSize = 'small';       // iPad mini: 768
+                } else if (minDim <= 810) {
+                    deviceSize = 'medium';      // iPad: 810
+                } else if (minDim <= 820) {
+                    deviceSize = 'medium_large'; // iPad Air: 820
+                } else if (minDim <= 834) {
+                    deviceSize = 'large';       // iPad Pro 11": 834
                 } else {
-                    deviceSize = 'xlarge';      // iPad Pro 12.9"
+                    deviceSize = 'xlarge';      // iPad Pro 12.9": 1024
                 }
 
                 // 根據方向添加後綴
