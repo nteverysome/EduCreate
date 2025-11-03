@@ -1834,29 +1834,44 @@ class GameScene extends Phaser.Scene {
 
         const itemCount = currentPagePairs.length;
 
-        // 📝 響應式檢測：判斷是否需要使用緊湊模式
-        // 🔥 修復：手機直向應該也使用緊湊模式
-        // isMobileDevice：手機設備（寬度 < 768px）
-        // isLandscapeMobile：手機橫向模式（寬度 > 高度 且 高度 < 500px）
-        // isTinyHeight：極小高度（高度 < 400px）
-        // 🔥 v13.0：分離手機直向和橫向的佈局邏輯
-        // isCompactMode：緊湊模式（手機直向 或 手機橫向 或 極小高度）
-        const isMobileDevice = width < 768;  // 手機設備（寬度 < 768px）
-        const isPortraitMode = height > width;  // 直向模式（高 > 寬）
-        const isLandscapeMode = width > height;  // 橫向模式（寬 > 高）
-        const isLandscapeMobile = isLandscapeMode && height < 500;  // 手機橫向
-        const isTinyHeight = height < 400;  // 極小高度
+        // ============================================
+        // 🔥 Phase 3：使用 GameResponsiveLayout 統一管理佈局
+        // ============================================
 
-        // ✅ v38.0：添加 iPad 檢測（寬度 768-1280px，包括 iPad Air、iPad Pro）
+        // 1️⃣ 檢測圖片
+        const hasImages = currentPagePairs.some(pair =>
+            pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId
+        );
+        console.log(`🔍 [Phase 3] 圖片檢測: hasImages=${hasImages}, mode=${hasImages ? '🟦 正方形模式' : '🟨 長方形模式'}`);
+
+        // 2️⃣ 創建佈局引擎
         const isTablet = width >= 768 && width <= 1280;
-        const isIPad = isTablet;  // iPad 別名
+        const layout = new GameResponsiveLayout(width, height, {
+            isIPad: isTablet,
+            hasImages: hasImages,
+            itemCount: itemCount
+        });
 
-        // 🔥 v13.0：分離的緊湊模式檢測
+        // 3️⃣ 獲取完整配置
+        const config = layout.getLayoutConfig();
+        console.log('📐 [Phase 3] 佈局配置:', config);
+
+        // ============================================
+        // 從配置中提取所有需要的值
+        // ============================================
+
+        // 設備檢測信息
+        const isMobileDevice = width < 768;
+        const isPortraitMode = height > width;
+        const isLandscapeMode = width > height;
+        const isLandscapeMobile = isLandscapeMode && height < 500;
+        const isTinyHeight = height < 400;
+        const isIPad = isTablet;
         const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
-        const isPortraitCompactMode = isMobileDevice && isPortraitMode;  // 手機直向緊湊模式
-        const isLandscapeCompactMode = isLandscapeMobile || isTinyHeight;  // 手機橫向緊湊模式
+        const isPortraitCompactMode = isMobileDevice && isPortraitMode;
+        const isLandscapeCompactMode = isLandscapeMobile || isTinyHeight;
 
-        console.log('📱 響應式檢測 [v38.0]:', {
+        console.log('📱 響應式檢測 [v38.0 + Phase 3]:', {
             width,
             height,
             isPortraitMode,
@@ -2334,70 +2349,38 @@ class GameScene extends Phaser.Scene {
             }
 
             // 🔥 第三步：定義按鈕區域和邊距
-            // ✅ v42.0：使用 iPad 容器分類系統
-            let topButtonAreaHeight, bottomButtonAreaHeight, sideMargin;
-            let iPadSize = null;
-            let iPadParams = null;
+            // ✅ Phase 3：使用 GameResponsiveLayout 的配置
+            const margins = config.margins;
+            const topButtonAreaHeight = margins.top;
+            const bottomButtonAreaHeight = margins.bottom;
+            const sideMargin = margins.side;
 
-            if (isIPad) {
-                // iPad：使用容器分類系統
-                iPadSize = classifyIPadSize(width, height);
-                iPadParams = getIPadOptimalParams(iPadSize);
-
-                topButtonAreaHeight = iPadParams.topButtonArea;
-                bottomButtonAreaHeight = iPadParams.bottomButtonArea;
-                sideMargin = iPadParams.sideMargin;
-
-                console.log('📱 [v42.0] iPad 容器分類:', {
-                    size: iPadSize,
-                    width: width,
-                    height: height,
-                    margins: {
-                        top: topButtonAreaHeight,
-                        bottom: bottomButtonAreaHeight,
-                        side: sideMargin
-                    }
-                });
-            } else {
-                topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
-                bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
-                sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 左右邊距（30-80px）
-            }
+            console.log('📐 [Phase 3] 邊距配置:', {
+                top: topButtonAreaHeight,
+                bottom: bottomButtonAreaHeight,
+                side: sideMargin
+            });
 
             // 🔥 第四步：計算可用空間（扣除按鈕區域）
-            const availableWidth = width - sideMargin * 2;
-            const availableHeight = height - topButtonAreaHeight - bottomButtonAreaHeight;
+            // ✅ Phase 3：使用 GameResponsiveLayout 的配置
+            const availableWidth = config.availableWidth;
+            const availableHeight = config.availableHeight;
 
             // 🔥 第五步：計算螢幕寬高比和間距
             const aspectRatio = width / height;
 
             // 🔥 第六步：計算水平和垂直間距
-            // ✅ v42.0：iPad 使用容器分類的固定間距，其他設備保留原有邏輯
-            let horizontalSpacing, verticalSpacing;
+            // ✅ Phase 3：使用 GameResponsiveLayout 的配置
+            const gaps = config.gaps;
+            const horizontalSpacing = gaps.horizontal;
+            const verticalSpacing = gaps.vertical;
 
-            if (isIPad && iPadParams) {
-                // iPad：使用容器分類的固定間距
-                horizontalSpacing = iPadParams.horizontalSpacing;
-                verticalSpacing = iPadParams.verticalSpacing;
-
-                console.log('📱 [v42.0] iPad 間距設定:', {
-                    size: iPadSize,
-                    horizontalSpacing: horizontalSpacing,
-                    verticalSpacing: verticalSpacing
-                });
-            } else {
-                // 非 iPad 設備：保留原有邏輯
-                // 根據寬高比動態調整水平間距
-                let horizontalSpacingBase;
-                if (aspectRatio > 2.0) {
-                    horizontalSpacingBase = width * 0.02;  // 超寬螢幕：2%
-                } else if (aspectRatio > 1.5) {
-                    horizontalSpacingBase = width * 0.015; // 寬螢幕：1.5%
-                } else {
-                    horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
-                }
-                horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
-            }
+            console.log('📐 [Phase 3] 間距配置:', {
+                horizontal: horizontalSpacing,
+                vertical: verticalSpacing,
+                availableWidth: availableWidth,
+                availableHeight: availableHeight
+            });
 
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
