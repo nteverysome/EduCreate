@@ -1,50 +1,56 @@
 ﻿// ============================================
-// 灏庡叆闊挎噳寮忚ō瑷堥厤缃?// ============================================
-import {
-    RESPONSIVE_BREAKPOINTS,
-    DESIGN_TOKENS,
-    getBreakpoint,
-    getToken,
-    getAllTokens,
-    getIPadConfig,
-    classifyIPadSize,
-    validateConfig
-} from '../responsive-config.js';
+// 響應式設計配置
+// ============================================
+// 注意：RESPONSIVE_BREAKPOINTS, DESIGN_TOKENS, GameResponsiveLayout 等
+// 已在 index.html 中作為全局腳本加載，無需 import
 
-import { GameResponsiveLayout } from '../responsive-layout.js';
-
-// Game 鍫存櫙 - 涓婚亰鎴查倧杓紙鍗＄墖鎷栧嫊閰嶅皪锛?class GameScene extends Phaser.Scene {
+// Game 場景 - 主遊戲邏輯（卡片拖動配對）
+class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
 
-        // 閰嶅皪鏁告摎锛堝皣寰?API 杓夊叆锛?        this.pairs = [];
+        // 配對數據（將從 API 載入）
+        this.pairs = [];
         this.isLoadingVocabulary = false;
         this.vocabularyLoadError = null;
 
-        // 閬婃埐鐙€鎱?        this.leftCards = [];
+        // 遊戲狀態
+        this.leftCards = [];
         this.rightCards = [];
         this.matchedPairs = new Set();
         this.isDragging = false;
         this.dragStartCard = null;
-        this.sceneStopped = false;  // 馃敟 鍫存櫙鍋滄鐙€鎱嬫瑷?
-        // 馃敟 鍒嗛爜鍔熻兘
-        this.itemsPerPage = 7;  // 榛樿獚姣忛爜 7 鍊嬭褰欙紙鍙厤缃級
-        this.currentPage = 0;   // 鐣跺墠闋佺⒓锛堝緸 0 闁嬪锛?        this.totalPages = 1;    // 绺介爜鏁?        this.enablePagination = false;  // 鏄惁鍟熺敤鍒嗛爜
-        this.pageIndicatorText = null;  // 鍒嗛爜鎸囩ず鍣ㄦ枃瀛楀皪璞?
-        // 馃敟 瑷堟檪鍣ㄥ姛鑳?        this.timerType = 'none';  // 瑷堟檪鍣ㄩ鍨嬶細none, countUp, countDown
-        this.timerMinutes = 5;    // 鍊掓暩瑷堟檪鍒嗛悩鏁?        this.timerSeconds = 0;    // 鍊掓暩瑷堟檪绉掓暩
-        this.startTime = null;    // 姝ｅ悜瑷堟檪闁嬪鏅傞枔
-        this.remainingTime = 0;   // 鍊掓暩瑷堟檪鍓╅鏅傞枔锛堢锛?        this.timerText = null;    // 瑷堟檪鍣ㄦ枃瀛楀皪璞?        this.timerEvent = null;   // 瑷堟檪鍣ㄤ簨浠?
-        // 馃敟 閬婃埐閬搁爡
-        this.layout = 'separated';  // 浣堝眬妯″紡锛歴eparated, mixed
-        this.random = 'different';  // 闅ㄦ妯″紡锛歞ifferent, same
-        this.showAnswers = false;   // 閬婃埐绲愭潫鏅傞’绀虹瓟妗?
-        // 馃敟 閬婃埐绲愭潫鐙€鎱嬬鐞?        this.gameState = 'playing';  // 閬婃埐鐙€鎱嬶細playing, completed
-        this.gameStartTime = null;   // 閬婃埐闁嬪鏅傞枔
-        this.gameEndTime = null;     // 閬婃埐绲愭潫鏅傞枔
-        this.totalGameTime = 0;      // 绺介亰鎴叉檪闁擄紙绉掞級
-        this.allPagesAnswers = [];   // 鎵€鏈夐爜闈㈢殑鐢ㄦ埗绛旀瑷橀寗
-        this.currentPageAnswers = []; // 鐣跺墠闋侀潰鐨勭敤鎴剁瓟妗堣閷?
+        this.sceneStopped = false;  // 🔥 場景停止狀態標記
+
+        // 🔥 分頁功能
+        this.itemsPerPage = 7;  // 默認每頁 7 個詞彙（可配置）
+        this.currentPage = 0;   // 當前頁碼（從 0 開始）
+        this.totalPages = 1;    // 總頁數
+        this.enablePagination = false;  // 是否啟用分頁
+        this.pageIndicatorText = null;  // 分頁指示器文字對象
+
+        // 🔥 計時器功能
+        this.timerType = 'none';  // 計時器類型：none, countUp, countDown
+        this.timerMinutes = 5;    // 倒數計時分鐘數
+        this.timerSeconds = 0;    // 倒數計時秒數
+        this.startTime = null;    // 正向計時開始時間
+        this.remainingTime = 0;   // 倒數計時剩餘時間（秒）
+        this.timerText = null;    // 計時器文字對象
+        this.timerEvent = null;   // 計時器事件
+
+        // 🔥 遊戲選項
+        this.layout = 'separated';  // 佈局模式：separated, mixed
+        this.random = 'different';  // 隨機模式：different, same
+        this.showAnswers = false;   // 遊戲結束時顯示答案
+
+        // 🔥 遊戲結束狀態管理
+        this.gameState = 'playing';  // 遊戲狀態：playing, completed
+        this.gameStartTime = null;   // 遊戲開始時間
+        this.gameEndTime = null;     // 遊戲結束時間
+        this.totalGameTime = 0;      // 總遊戲時間（秒）
+        this.allPagesAnswers = [];   // 所有頁面的用戶答案記錄
+        this.currentPageAnswers = []; // 當前頁面的用戶答案記錄
+
         // Audio diagnostics and dev helpers
         this.audioDiagnostics = null;
         this.devLayoutDefault = null;
@@ -55,7 +61,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         this.restartData = data || {};
 
         if (this.restartData.devLayoutTest) {
-            console.log('馃И GameScene: 鎺ユ敹鍒伴枊鐧兼脯瑭﹀弮鏁?, this.restartData.devLayoutTest);
+            console.log('🧪 GameScene: 接收到開發測試參數', this.restartData.devLayoutTest);
         } else {
             this.devLayoutDefault = null;
         }
@@ -73,7 +79,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         this.audioDiagnostics = this.buildAudioDiagnostics(this.pairs);
         window.matchUpAudioDiagnostics = this.audioDiagnostics;
 
-        console.log('馃И GameScene: 宸茶級鍏ラ枊鐧兼脯瑭﹁褰欒硣鏂?, {
+        console.log('🧪 GameScene: 已載入開發測試詞彙資料', {
             defaultLayout: this.devLayoutDefault,
             totalPairs: this.pairs.length,
             audioDiagnostics: this.audioDiagnostics
@@ -92,9 +98,9 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             {
                 id: 1,
                 question: 'Apple',
-                answer: '铇嬫灉',
+                answer: '蘋果',
                 english: 'Apple',
-                chinese: '铇嬫灉',
+                chinese: '蘋果',
                 imageUrl: imageA,
                 chineseImageUrl: null,
                 audioUrl: audioA
@@ -102,9 +108,9 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             {
                 id: 2,
                 question: '',
-                answer: '瑾為煶鎻愮ず',
+                answer: '語音提示',
                 english: '',
-                chinese: '瑾為煶鎻愮ず',
+                chinese: '語音提示',
                 imageUrl: null,
                 chineseImageUrl: null,
                 audioUrl: audioB
@@ -112,9 +118,9 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             {
                 id: 3,
                 question: 'Sunshine',
-                answer: '闄藉厜',
+                answer: '陽光',
                 english: 'Sunshine',
-                chinese: '闄藉厜',
+                chinese: '陽光',
                 imageUrl: null,
                 chineseImageUrl: null,
                 audioUrl: null
@@ -122,9 +128,9 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             {
                 id: 4,
                 question: 'Mountain',
-                answer: '灞辫剤',
+                answer: '山脈',
                 english: 'Mountain',
-                chinese: '灞辫剤',
+                chinese: '山脈',
                 imageUrl: imageB,
                 chineseImageUrl: null,
                 audioUrl: null
@@ -132,9 +138,9 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             {
                 id: 5,
                 question: 'Harmony',
-                answer: '鍜岃',
+                answer: '和諧',
                 english: 'Harmony',
-                chinese: '鍜岃',
+                chinese: '和諧',
                 imageUrl: null,
                 chineseImageUrl: null,
                 audioUrl: audioA
@@ -142,9 +148,9 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             {
                 id: 6,
                 question: 'Placeholder',
-                answer: '缂哄皯瑾為煶',
+                answer: '缺少語音',
                 english: 'Placeholder',
-                chinese: '缂哄皯瑾為煶',
+                chinese: '缺少語音',
                 imageUrl: imageA,
                 chineseImageUrl: null,
                 audioUrl: ''
@@ -187,10 +193,10 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
         });
 
-        console.log('馃帶 闊宠▕瑷烘柗绲愭灉', diagnostics);
+        console.log('🎧 音訊診斷結果', diagnostics);
 
         if (diagnostics.missing || diagnostics.invalid) {
-            console.warn('鈿狅笍 鐧肩従缂哄皯鎴栫劇鏁堢殑 audioUrl锛岃珛妾㈡煡 CMS/寰岀杓稿嚭');
+            console.warn('⚠️ 發現缺少或無效的 audioUrl，請檢查 CMS/後端輸出');
         }
 
         return diagnostics;
@@ -202,7 +208,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         const badgeX = width / 2 - badgeWidth / 2 - 8;
         const badgeY = -height / 2 + badgeHeight / 2 + 8;
         const strokeColor = audioStatus === 'invalid' ? 0xf9a825 : 0xb0bec5;
-        const icon = audioStatus === 'invalid' ? '鈿狅笍' : '馃攪';
+        const icon = audioStatus === 'invalid' ? '⚠️' : '🔇';
         const label = audioStatus === 'invalid' ? 'Audio URL invalid' : 'No audio';
 
         const badgeBg = this.add.rectangle(badgeX, badgeY, badgeWidth, badgeHeight, 0xf5f5f5, 0.92);
@@ -219,19 +225,20 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         container.add([badgeBg, badgeText]);
     }
 
-    // 寰?API 杓夊叆瑭炲綑鏁告摎
+    // 從 API 載入詞彙數據
     async loadVocabularyFromAPI() {
-        // 馃摑 瑾胯│瑷婃伅锛氳閷勫嚱鏁搁枊濮?        console.log('馃攧 闁嬪杓夊叆瑭炲綑鏁告摎');
-        console.log('馃攳 [DEBUG] loadVocabularyFromAPI 鍑芥暩宸茶鐢?);
+        // 📝 調試訊息：記錄函數開始
+        console.log('🔄 開始載入詞彙數據');
+        console.log('🔍 [DEBUG] loadVocabularyFromAPI 函數已調用');
 
         try {
-            // 寰?URL 鍙冩暩鐛插彇 activityId
+            // 從 URL 參數獲取 activityId
             const urlParams = new URLSearchParams(window.location.search);
             const activityId = urlParams.get('activityId');
             const customVocabulary = urlParams.get('customVocabulary');
             const devLayoutTest = (this.restartData && this.restartData.devLayoutTest) || urlParams.get('devLayoutTest');
 
-            console.log('馃攳 [DEBUG] URL 鍙冩暩:', {
+            console.log('🔍 [DEBUG] URL 參數:', {
                 activityId,
                 customVocabulary,
                 devLayoutTest,
@@ -239,42 +246,42 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             });
 
             if (devLayoutTest) {
-                console.warn('馃И GameScene: 鍟熺敤闁嬬櫦娓│璩囨枡闆嗭紝璺抽亷 API 杓夊叆', { devLayoutTest });
+                console.warn('🧪 GameScene: 啟用開發測試資料集，跳過 API 載入', { devLayoutTest });
                 return this.loadDevLayoutTestData(devLayoutTest, urlParams);
             }
 
-            console.log('馃攳 Match-up 閬婃埐 - URL 鍙冩暩:', {
+            console.log('🔍 Match-up 遊戲 - URL 參數:', {
                 activityId,
                 customVocabulary,
                 fullURL: window.location.href
             });
 
-            // 馃敟 淇京锛氬繀闋堟彁渚?activityId锛屼笉浣跨敤榛樿獚鏁告摎
+            // 🔥 修復：必須提供 activityId，不使用默認數據
             if (!activityId) {
-                const error = new Error('鉂?缂哄皯 activityId 鍙冩暩锛岀劇娉曡級鍏ヨ褰欐暩鎿?);
-                console.error('鉂?鍙冩暩椹楄瓑澶辨晽:', error.message);
+                const error = new Error('❌ 缺少 activityId 參數，無法載入詞彙數據');
+                console.error('❌ 參數驗證失敗:', error.message);
                 throw error;
             }
 
-            // 馃敟 淇京锛氬鏋滄矑鏈?customVocabulary 鍙冩暩锛岄粯瑾嶇偤 true锛堝厑瑷卞叕闁嬭í鍟忥級
+            // 🔥 修復：如果沒有 customVocabulary 參數，默認為 true（允許公開訪問）
             if (customVocabulary !== 'true' && customVocabulary !== null) {
-                const error = new Error('鉂?customVocabulary 鍙冩暩鐒℃晥');
-                console.error('鉂?鍙冩暩椹楄瓑澶辨晽:', error.message);
+                const error = new Error('❌ customVocabulary 參數無效');
+                console.error('❌ 參數驗證失敗:', error.message);
                 throw error;
             }
 
-            console.log('鉁?鍙冩暩椹楄瓑閫氶亷锛屽厑瑷辫級鍏ヨ褰欐暩鎿?);
-            console.log('馃攳 [DEBUG] 婧栧倷鐧奸€?API 璜嬫眰');
+            console.log('✅ 參數驗證通過，允許載入詞彙數據');
+            console.log('🔍 [DEBUG] 準備發送 API 請求');
 
-            // 寰?API 杓夊叆瑭炲綑鏁告摎
+            // 從 API 載入詞彙數據
             const apiUrl = `/api/activities/${activityId}`;
-            console.log(`馃攧 鐧奸€?API 璜嬫眰: ${apiUrl}`);
-            console.log('馃攳 [DEBUG] 闁嬪 fetch 瑾跨敤');
+            console.log(`🔄 發送 API 請求: ${apiUrl}`);
+            console.log('🔍 [DEBUG] 開始 fetch 調用');
 
             const response = await fetch(apiUrl);
 
-            console.log('馃攳 [DEBUG] fetch 瀹屾垚');
-            console.log('馃摗 API 闊挎噳鐙€鎱?', {
+            console.log('🔍 [DEBUG] fetch 完成');
+            console.log('📡 API 響應狀態:', {
                 status: response.status,
                 statusText: response.statusText,
                 ok: response.ok,
@@ -285,8 +292,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
 
             if (!response.ok) {
                 const errorText = await response.text();
-                const error = new Error(`API 璜嬫眰澶辨晽: ${response.status} ${response.statusText}`);
-                console.error('鉂?API 璜嬫眰澶辨晽:', {
+                const error = new Error(`API 請求失敗: ${response.status} ${response.statusText}`);
+                console.error('❌ API 請求失敗:', {
                     status: response.status,
                     statusText: response.statusText,
                     url: apiUrl,
@@ -296,8 +303,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
 
             const activity = await response.json();
-            console.log('馃攳 [DEBUG] JSON 瑙ｆ瀽瀹屾垚');
-            console.log('鉁?娲诲嫊鏁告摎杓夊叆鎴愬姛:', {
+            console.log('🔍 [DEBUG] JSON 解析完成');
+            console.log('✅ 活動數據載入成功:', {
                 id: activity.id,
                 title: activity.title,
                 hasVocabularyItems: !!activity.vocabularyItems,
@@ -307,63 +314,68 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 hasContent: !!activity.content
             });
 
-            // 鎻愬彇瑭炲綑鏁告摎锛堟敮鎸佸绋暩鎿氭簮锛?            console.log('馃攳 妾㈡煡瑭炲綑鏁告摎渚嗘簮...');
+            // 提取詞彙數據（支持多種數據源）
+            console.log('🔍 檢查詞彙數據來源...');
             let vocabularyData = [];
 
             if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems) && activity.vocabularyItems.length > 0) {
-                // 鏂版灦妲嬶細寰為棞鑱〃涓嵅鍙栬褰欐暩鎿?                vocabularyData = activity.vocabularyItems;
-                console.log('馃摑 寰?vocabularyItems 杓夊叆瑭炲綑:', vocabularyData.length, '鍊?);
+                // 新架構：從關聯表中獲取詞彙數據
+                vocabularyData = activity.vocabularyItems;
+                console.log('📝 從 vocabularyItems 載入詞彙:', vocabularyData.length, '個');
             } else if (activity.elements && Array.isArray(activity.elements) && activity.elements.length > 0) {
-                // 涓枔鏋舵锛氬緸 elements 瀛楁杓夊叆瑭炲綑鏁告摎
+                // 中間架構：從 elements 字段載入詞彙數據
                 vocabularyData = activity.elements;
-                console.log('馃摑 寰?elements 杓夊叆瑭炲綑:', vocabularyData.length, '鍊?);
+                console.log('📝 從 elements 載入詞彙:', vocabularyData.length, '個');
             } else if (activity.content && activity.content.vocabularyItems && Array.isArray(activity.content.vocabularyItems)) {
-                // 鑸婃灦妲嬶細寰?content 涓嵅鍙栬褰欐暩鎿?                vocabularyData = activity.content.vocabularyItems;
-                console.log('馃摑 寰?content.vocabularyItems 杓夊叆瑭炲綑:', vocabularyData.length, '鍊?);
+                // 舊架構：從 content 中獲取詞彙數據
+                vocabularyData = activity.content.vocabularyItems;
+                console.log('📝 從 content.vocabularyItems 載入詞彙:', vocabularyData.length, '個');
             } else {
-                console.error('鉂?鐒℃硶鎵惧埌瑭炲綑鏁告摎:', {
+                console.error('❌ 無法找到詞彙數據:', {
                     hasVocabularyItems: !!activity.vocabularyItems,
                     hasElements: !!activity.elements,
                     hasContent: !!activity.content
                 });
             }
 
-            // 杞夋彌鐐洪亰鎴叉墍闇€鐨勬牸寮?            if (vocabularyData.length > 0) {
-                console.log('馃攧 闁嬪杞夋彌瑭炲綑鏁告摎鏍煎紡...');
+            // 轉換為遊戲所需的格式
+            if (vocabularyData.length > 0) {
+                console.log('🔄 開始轉換詞彙數據格式...');
 
-                // 馃敟 v9.0 瑭崇窗瑾胯│锛氭鏌ュ師濮嬫暩鎿氱祼妲?                const firstItem = vocabularyData[0] || {};
+                // 🔥 v9.0 詳細調試：檢查原始數據結構
+                const firstItem = vocabularyData[0] || {};
                 const hasImageUrl = !!firstItem.imageUrl;
                 const hasChineseImageUrl = !!firstItem.chineseImageUrl;
-                console.log(`馃攳 [v9.0] 鍘熷瑭炲綑鏁告摎绲愭妾㈡煡 - 绺介爡鐩? ${vocabularyData.length}, hasImageUrl: ${hasImageUrl}, hasChineseImageUrl: ${hasChineseImageUrl}, imageUrl: ${firstItem.imageUrl || 'null'}, chineseImageUrl: ${firstItem.chineseImageUrl || 'null'}`);
+                console.log(`🔍 [v9.0] 原始詞彙數據結構檢查 - 總項目: ${vocabularyData.length}, hasImageUrl: ${hasImageUrl}, hasChineseImageUrl: ${hasChineseImageUrl}, imageUrl: ${firstItem.imageUrl || 'null'}, chineseImageUrl: ${firstItem.chineseImageUrl || 'null'}`);
 
                 this.pairs = vocabularyData.map((item, index) => ({
                     id: index + 1,
                     question: item.english || item.word || '',
                     answer: item.chinese || item.translation || '',
-                    english: item.english || item.word || '',  // 馃敟 娣诲姞 english 娆勪綅
-                    chinese: item.chinese || item.translation || '',  // 馃敟 娣诲姞 chinese 娆勪綅
-                    imageUrl: item.imageUrl || null,  // 馃敟 娣诲姞鑻辨枃鍦栫墖 URL
-                    chineseImageUrl: item.chineseImageUrl || null,  // 馃敟 娣诲姞涓枃鍦栫墖 URL
-                    audioUrl: item.audioUrl || null  // 馃敟 娣诲姞闊抽牷 URL
+                    english: item.english || item.word || '',  // 🔥 添加 english 欄位
+                    chinese: item.chinese || item.translation || '',  // 🔥 添加 chinese 欄位
+                    imageUrl: item.imageUrl || null,  // 🔥 添加英文圖片 URL
+                    chineseImageUrl: item.chineseImageUrl || null,  // 🔥 添加中文圖片 URL
+                    audioUrl: item.audioUrl || null  // 🔥 添加音頻 URL
                 }));
 
-                // 馃敟 寰屽彴鐣版鐢熸垚缂哄け鐨勯煶闋伙紙涓嶉樆濉為亰鎴插姞杓夛級
+                // 🔥 後台異步生成缺失的音頻（不阻塞遊戲加載）
                 this.generateMissingAudioUrlsInBackground();
 
                 this.audioDiagnostics = this.buildAudioDiagnostics(this.pairs);
                 window.matchUpAudioDiagnostics = this.audioDiagnostics;
 
-                console.log('鉁?瑭炲綑鏁告摎杞夋彌瀹屾垚:', {
+                console.log('✅ 詞彙數據轉換完成:', {
                     totalPairs: this.pairs.length,
                     firstPair: this.pairs[0],
                     hasImages: this.pairs.some(p => p.imageUrl || p.chineseImageUrl || p.imageId || p.chineseImageId),
                     hasAudio: this.pairs.some(p => p.audioUrl)
                 });
 
-                // 馃敟 瑾胯│鏃ヨ獙 - 瑭崇窗妾㈡煡姣忓€嬭褰欓爡鐩殑english瀛楁
-                console.log('馃攳 瑭崇窗瑭炲綑鏁告摎妾㈡煡:');
+                // 🔥 調試日誌 - 詳細檢查每個詞彙項目的english字段
+                console.log('🔍 詳細詞彙數據檢查:');
                 this.pairs.forEach((pair, index) => {
-                    console.log(`瑭炲綑 ${index + 1}:`, {
+                    console.log(`詞彙 ${index + 1}:`, {
                         id: pair.id,
                         english: pair.english,
                         englishType: typeof pair.english,
@@ -377,86 +389,90 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
 
                 return true;
             } else {
-                // 馃敟 淇京锛氫笉浣跨敤榛樿獚鏁告摎锛屾媼鍑洪尟瑾?                const error = new Error('鉂?娲诲嫊涓矑鏈夎褰欐暩鎿氾紝璜嬪厛娣诲姞瑭炲綑');
-                console.error('鉂?瑭炲綑鏁告摎鐐虹┖:', {
+                // 🔥 修復：不使用默認數據，拋出錯誤
+                const error = new Error('❌ 活動中沒有詞彙數據，請先添加詞彙');
+                console.error('❌ 詞彙數據為空:', {
                     activityId: activity.id,
                     activityTitle: activity.title
                 });
                 throw error;
             }
         } catch (error) {
-            console.error('鉂?杓夊叆瑭炲綑鏁告摎澶辨晽:', {
+            console.error('❌ 載入詞彙數據失敗:', {
                 message: error.message,
                 stack: error.stack,
                 url: window.location.href
             });
             this.vocabularyLoadError = error.message;
-            // 馃敟 淇京锛氫笉浣跨敤榛樿獚鏁告摎锛岀洿鎺ユ媼鍑洪尟瑾?            throw error;
+            // 🔥 修復：不使用默認數據，直接拋出錯誤
+            throw error;
         }
     }
 
     async create() {
-        console.log('馃幃 GameScene: create 鏂规硶闁嬪');
-        console.log('馃幃 GameScene: 鍫存櫙灏哄', {
+        console.log('🎮 GameScene: create 方法開始');
+        console.log('🎮 GameScene: 場景尺寸', {
             width: this.scale.width,
             height: this.scale.height,
             gameWidth: this.game.config.width,
             gameHeight: this.game.config.height
         });
 
-        // 娓呯┖鏁哥祫锛堥槻姝㈤噸鏂伴枊濮嬫檪閲嶈锛?        this.leftCards = [];
+        // 清空數組（防止重新開始時重複）
+        this.leftCards = [];
         this.rightCards = [];
         this.matchedPairs = new Set();
         this.isDragging = false;
         this.dragStartCard = null;
-        this.submitButton = null;  // 馃敟 鎻愪氦绛旀鎸夐垥
+        this.submitButton = null;  // 🔥 提交答案按鈕
 
-        // 椤ず杓夊叆鎻愮ず
+        // 顯示載入提示
         const width = this.scale.width;
         const height = this.scale.height;
-        console.log('馃幃 GameScene: 鍓靛缓鐧借壊鑳屾櫙鍜岃級鍏ユ枃瀛?, { width, height });
+        console.log('🎮 GameScene: 創建白色背景和載入文字', { width, height });
 
         this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
-        const loadingText = this.add.text(width / 2, height / 2, '杓夊叆瑭炲綑涓?..', {
+        const loadingText = this.add.text(width / 2, height / 2, '載入詞彙中...', {
             fontSize: '24px',
             color: '#333333',
             fontFamily: 'Arial'
         }).setOrigin(0.5);
 
-        console.log('馃幃 GameScene: 闁嬪杓夊叆瑭炲綑鏁告摎');
+        console.log('🎮 GameScene: 開始載入詞彙數據');
 
-        // 馃敟 淇京锛氫娇鐢?try-catch 铏曠悊閷
+        // 🔥 修復：使用 try-catch 處理錯誤
         this.isLoadingVocabulary = true;
         let success = false;
 
         try {
             success = await this.loadVocabularyFromAPI();
-            console.log('馃幃 GameScene: 瑭炲綑鏁告摎杓夊叆瀹屾垚', { success, pairsCount: this.pairs.length });
+            console.log('🎮 GameScene: 詞彙數據載入完成', { success, pairsCount: this.pairs.length });
         } catch (error) {
-            console.error('鉂?GameScene: 瑭炲綑鏁告摎杓夊叆澶辨晽', error);
+            console.error('❌ GameScene: 詞彙數據載入失敗', error);
             this.vocabularyLoadError = error.message;
             success = false;
         }
 
         this.isLoadingVocabulary = false;
 
-        // 绉婚櫎杓夊叆鎻愮ず
+        // 移除載入提示
         loadingText.destroy();
-        console.log('馃幃 GameScene: 杓夊叆鏂囧瓧宸茬Щ闄?);
+        console.log('🎮 GameScene: 載入文字已移除');
 
-        // 馃敟 淇京锛氬鏋滆級鍏ュけ鏁楋紝椤ず閷淇℃伅涓﹀仠姝㈤亰鎴?        if (!success || this.vocabularyLoadError) {
-            console.warn('鈿狅笍 GameScene: 椤ず閷淇℃伅', this.vocabularyLoadError);
+        // 🔥 修復：如果載入失敗，顯示錯誤信息並停止遊戲
+        if (!success || this.vocabularyLoadError) {
+            console.warn('⚠️ GameScene: 顯示錯誤信息', this.vocabularyLoadError);
 
-            // 椤ず閷妯欓
-            this.add.text(width / 2, height / 2 - 80, '鉂?杓夊叆瑭炲綑澶辨晽', {
+            // 顯示錯誤標題
+            this.add.text(width / 2, height / 2 - 80, '❌ 載入詞彙失敗', {
                 fontSize: '32px',
                 color: '#ff0000',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
             }).setOrigin(0.5);
 
-            // 椤ず閷瑷婃伅
-            this.add.text(width / 2, height / 2 - 20, this.vocabularyLoadError || '鏈煡閷', {
+            // 顯示錯誤訊息
+            this.add.text(width / 2, height / 2 - 20, this.vocabularyLoadError || '未知錯誤', {
                 fontSize: '18px',
                 color: '#666666',
                 fontFamily: 'Arial',
@@ -464,103 +480,111 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 wordWrap: { width: width - 100 }
             }).setOrigin(0.5);
 
-            // 椤ず瑙ｆ焙鏂规
-            this.add.text(width / 2, height / 2 + 40, '璜嬬⒑瑾嶏細', {
+            // 顯示解決方案
+            this.add.text(width / 2, height / 2 + 40, '請確認：', {
                 fontSize: '16px',
                 color: '#999999',
                 fontFamily: 'Arial'
             }).setOrigin(0.5);
 
-            this.add.text(width / 2, height / 2 + 70, '1. URL 鍖呭惈姝ｇ⒑鐨?activityId 鍙冩暩', {
+            this.add.text(width / 2, height / 2 + 70, '1. URL 包含正確的 activityId 參數', {
                 fontSize: '14px',
                 color: '#999999',
                 fontFamily: 'Arial'
             }).setOrigin(0.5);
 
-            this.add.text(width / 2, height / 2 + 95, '2. URL 鍖呭惈 customVocabulary=true 鍙冩暩', {
+            this.add.text(width / 2, height / 2 + 95, '2. URL 包含 customVocabulary=true 參數', {
                 fontSize: '14px',
                 color: '#999999',
                 fontFamily: 'Arial'
             }).setOrigin(0.5);
 
-            this.add.text(width / 2, height / 2 + 120, '3. 娲诲嫊涓凡娣诲姞瑭炲綑鏁告摎', {
+            this.add.text(width / 2, height / 2 + 120, '3. 活動中已添加詞彙數據', {
                 fontSize: '14px',
                 color: '#999999',
                 fontFamily: 'Arial'
             }).setOrigin(0.5);
 
-            // 鍋滄閬婃埐锛屼笉绻肩簩鍩疯
+            // 停止遊戲，不繼續執行
             return;
         }
 
-        // 馃敟 鐛插彇 Handler 鍫存櫙寮曠敤
+        // 🔥 獲取 Handler 場景引用
         this.handlerScene = this.scene.get('handler');
-        console.log('馃幃 GameScene: Handler 鍫存櫙寮曠敤', this.handlerScene ? '鉁?瀛樺湪' : '鉂?涓嶅瓨鍦?);
+        console.log('🎮 GameScene: Handler 場景引用', this.handlerScene ? '✅ 存在' : '❌ 不存在');
 
-        // 馃敟 瑾跨敤 Handler 鐨?updateResize 鏂规硶瑷畾闊挎噳寮?        if (this.handlerScene && this.handlerScene.updateResize) {
-            console.log('馃幃 GameScene: 瑾跨敤 Handler.updateResize');
+        // 🔥 調用 Handler 的 updateResize 方法設定響應式
+        if (this.handlerScene && this.handlerScene.updateResize) {
+            console.log('🎮 GameScene: 調用 Handler.updateResize');
             this.handlerScene.updateResize(this);
         } else {
-            console.warn('鈿狅笍 GameScene: handlerScene 鏈垵濮嬪寲鎴?updateResize 鏂规硶涓嶅瓨鍦?);
+            console.warn('⚠️ GameScene: handlerScene 未初始化或 updateResize 方法不存在');
         }
 
-        // 馃敟 鍒濆鍖栧垎闋佽ō缃?        this.initializePagination();
+        // 🔥 初始化分頁設置
+        this.initializePagination();
 
-        // 馃敟 鍒濆鍖栭亰鎴查伕闋?        this.initializeGameOptions();
+        // 🔥 初始化遊戲選項
+        this.initializeGameOptions();
 
-        // 馃敟 鍒濆鍖栬▓鏅傚櫒
+        // 🔥 初始化計時器
         this.initializeTimer();
 
-        // 鐛插彇鐣跺墠铻㈠箷灏哄
-        console.log('馃幃 GameScene: 瑾跨敤 updateLayout');
+        // 獲取當前螢幕尺寸
+        console.log('🎮 GameScene: 調用 updateLayout');
         this.updateLayout();
-        console.log('馃幃 GameScene: updateLayout 瀹屾垚');
+        console.log('🎮 GameScene: updateLayout 完成');
 
-        // 馃敟 P1-4: 缍佸畾浜嬩欢鐩ｈ伣鍣紙浣跨敤 bind 纰轰繚 this 涓婁笅鏂囨纰猴級
-        // 鐩ｈ伣铻㈠箷灏哄璁婂寲
+        // 🔥 P1-4: 綁定事件監聽器（使用 bind 確保 this 上下文正確）
+        // 監聽螢幕尺寸變化
         this.scale.on('resize', this.handleResize, this);
-        console.log('鉁?宸茬秮瀹?resize 浜嬩欢鐩ｈ伣鍣?);
+        console.log('✅ 已綁定 resize 事件監聽器');
 
-        // 鐩ｈ伣鍏ㄨ灑骞曡畩鍖?        document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
-        console.log('鉁?宸茬秮瀹?fullscreenchange 浜嬩欢鐩ｈ伣鍣?);
+        // 監聽全螢幕變化
+        document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
+        console.log('✅ 已綁定 fullscreenchange 事件監聽器');
 
-        // 鐩ｈ伣瑷倷鏂瑰悜璁婂寲
+        // 監聽設備方向變化
         window.addEventListener('orientationchange', this.handleOrientationChange.bind(this));
-        console.log('鉁?宸茬秮瀹?orientationchange 浜嬩欢鐩ｈ伣鍣?);
+        console.log('✅ 已綁定 orientationchange 事件監聽器');
 
-        console.log('馃幃 GameScene: create 鏂规硶瀹屾垚');
+        console.log('🎮 GameScene: create 方法完成');
     }
 
-    // 馃敟 v6.0 瑷堢畻姣忛爜鑳藉绱嶇殑鏈€澶у崱鐗囨暩
+    // 🔥 v6.0 計算每頁能容納的最大卡片數
     calculateMaxCardsPerPage(width, height, layout = 'mixed') {
-        // 馃敟 妾㈡脯瑷倷椤炲瀷鍜屾ā寮?        const isMobileDevice = width < 768;
+        // 🔥 檢測設備類型和模式
+        const isMobileDevice = width < 768;
         const isLandscapeMobile = width > height && height < 500;
         const isTinyHeight = height < 400;
         const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
 
-        // 鏍规摎浣堝眬妯″紡姹哄畾鍒楁暩
+        // 根據佈局模式決定列數
         let cols;
         if (layout === 'mixed') {
-            cols = isCompactMode ? 5 : 3;  // 娣峰悎妯″紡锛氱穵婀?5 鍒楋紝姝ｅ父 3 鍒?        } else {
-            // 鍒嗛洟妯″紡锛氭牴鎿氬搴﹀嫊鎱嬫焙瀹?            const sideMargin = 20;
+            cols = isCompactMode ? 5 : 3;  // 混合模式：緊湊 5 列，正常 3 列
+        } else {
+            // 分離模式：根據寬度動態決定
+            const sideMargin = 20;
             const availableWidth = width - sideMargin * 2;
-            cols = Math.max(1, Math.floor(availableWidth / 150));  // 鍋囪ō鏈€灏忓崱鐗囧搴?150px
+            cols = Math.max(1, Math.floor(availableWidth / 150));  // 假設最小卡片寬度 150px
         }
 
-        // 瑷堢畻鍙敤楂樺害
+        // 計算可用高度
         const topButtonArea = isCompactMode ? 50 : 60;
         const bottomButtonArea = isCompactMode ? 50 : 60;
         const availableHeight = height - topButtonArea - bottomButtonArea;
 
-        // 瑷堢畻鍗＄墖灏哄鍜岃鏁?        const verticalSpacing = Math.max(5, Math.min(20, availableHeight * 0.02));
-        const cardHeight = 67;  // 娣峰悎妯″紡鍗＄墖楂樺害
-        const chineseTextHeight = 20;  // 涓枃鏂囧瓧楂樺害
+        // 計算卡片尺寸和行數
+        const verticalSpacing = Math.max(5, Math.min(20, availableHeight * 0.02));
+        const cardHeight = 67;  // 混合模式卡片高度
+        const chineseTextHeight = 20;  // 中文文字高度
         const totalUnitHeight = cardHeight + chineseTextHeight + verticalSpacing;
 
         const maxRows = Math.max(1, Math.floor((availableHeight - verticalSpacing) / totalUnitHeight));
         const maxCardsPerPage = cols * maxRows;
 
-        console.log('馃搳 姣忛爜鏈€澶у崱鐗囨暩瑷堢畻:', {
+        console.log('📊 每頁最大卡片數計算:', {
             layout,
             isCompactMode,
             cols,
@@ -573,19 +597,21 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         return maxCardsPerPage;
     }
 
-    // 馃敟 v6.0 鏍规摎鏈€澶у崱鐗囨暩瑷堢畻鍒嗛爜
+    // 🔥 v6.0 根據最大卡片數計算分頁
     calculatePaginationWithLayout(totalPairs, width, height, layout = 'mixed') {
-        // 瑷堢畻姣忛爜鑳藉绱嶇殑鏈€澶у崱鐗囨暩
+        // 計算每頁能容納的最大卡片數
         const maxCardsPerPage = this.calculateMaxCardsPerPage(width, height, layout);
 
-        // 纰轰繚姣忛爜鑷冲皯鏈?1 鍊嬪崱鐗?        const itemsPerPage = Math.max(1, maxCardsPerPage);
+        // 確保每頁至少有 1 個卡片
+        const itemsPerPage = Math.max(1, maxCardsPerPage);
 
-        // 瑷堢畻绺介爜鏁?        const totalPages = Math.ceil(totalPairs / itemsPerPage);
+        // 計算總頁數
+        const totalPages = Math.ceil(totalPairs / itemsPerPage);
 
-        // 姹哄畾鏄惁鍟熺敤鍒嗛爜
+        // 決定是否啟用分頁
         const enablePagination = totalPages > 1;
 
-        console.log('馃搫 鍒嗛爜瑷堢畻绲愭灉:', {
+        console.log('📄 分頁計算結果:', {
             totalPairs,
             maxCardsPerPage,
             itemsPerPage,
@@ -601,20 +627,23 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         };
     }
 
-    // 馃敟 鍒濆鍖栧垎闋佽ō缃紙v6.0 鏇存柊锛氫娇鐢ㄥ嫊鎱嬭▓绠楋級
+    // 🔥 初始化分頁設置（v6.0 更新：使用動態計算）
     initializePagination() {
         const totalPairs = this.pairs.length;
-        console.log('馃搫 鍒濆鍖栧垎闋佽ō缃?- 绺借褰欐暩:', totalPairs);
+        console.log('📄 初始化分頁設置 - 總詞彙數:', totalPairs);
 
-        // 寰?URL 鍙冩暩璁€鍙栬ō缃?        const urlParams = new URLSearchParams(window.location.search);
+        // 從 URL 參數讀取設置
+        const urlParams = new URLSearchParams(window.location.search);
         const itemsPerPageParam = urlParams.get('itemsPerPage');
         const autoProceedParam = urlParams.get('autoProceed');
 
-        // 璁€鍙栨瘡闋侀’绀烘暩閲?        if (itemsPerPageParam) {
-            // 馃敟 濡傛灉 URL 鎸囧畾浜?itemsPerPage锛岀洿鎺ヤ娇鐢?            this.itemsPerPage = parseInt(itemsPerPageParam, 10);
-            console.log('馃搫 寰?URL 璁€鍙?itemsPerPage:', this.itemsPerPage);
+        // 讀取每頁顯示數量
+        if (itemsPerPageParam) {
+            // 🔥 如果 URL 指定了 itemsPerPage，直接使用
+            this.itemsPerPage = parseInt(itemsPerPageParam, 10);
+            console.log('📄 從 URL 讀取 itemsPerPage:', this.itemsPerPage);
         } else {
-            // 馃敟 v6.0 鏂伴倧杓細鏍规摎浣堝眬瑷堢畻姣忛爜鏈€澶у崱鐗囨暩
+            // 🔥 v6.0 新邏輯：根據佈局計算每頁最大卡片數
             const width = this.scale.width;
             const height = this.scale.height;
             const layout = this.layout || 'mixed';
@@ -627,26 +656,28 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             );
 
             this.itemsPerPage = paginationResult.itemsPerPage;
-            console.log('馃搫 鏍规摎浣堝眬瑷堢畻 itemsPerPage:', this.itemsPerPage);
+            console.log('📄 根據佈局計算 itemsPerPage:', this.itemsPerPage);
         }
 
-        // 璁€鍙栬嚜鍕曠辜绾岃ō缃?        if (autoProceedParam !== null) {
+        // 讀取自動繼續設置
+        if (autoProceedParam !== null) {
             this.autoProceed = autoProceedParam === 'true';
-            console.log('馃搫 寰?URL 璁€鍙?autoProceed:', this.autoProceed);
+            console.log('📄 從 URL 讀取 autoProceed:', this.autoProceed);
         } else {
-            this.autoProceed = true;  // 榛樿獚闁嬪暉
-            console.log('馃搫 浣跨敤榛樿獚 autoProceed:', this.autoProceed);
+            this.autoProceed = true;  // 默認開啟
+            console.log('📄 使用默認 autoProceed:', this.autoProceed);
         }
 
-        // 瑷堢畻绺介爜鏁?        this.totalPages = Math.ceil(totalPairs / this.itemsPerPage);
+        // 計算總頁數
+        this.totalPages = Math.ceil(totalPairs / this.itemsPerPage);
 
-        // 姹哄畾鏄惁鍟熺敤鍒嗛爜
+        // 決定是否啟用分頁
         this.enablePagination = this.totalPages > 1;
 
-        // 閲嶇疆鐣跺墠闋佺⒓
+        // 重置當前頁碼
         this.currentPage = 0;
 
-        console.log('馃搫 鍒嗛爜瑷疆瀹屾垚:', {
+        console.log('📄 分頁設置完成:', {
             totalPairs,
             itemsPerPage: this.itemsPerPage,
             totalPages: this.totalPages,
@@ -655,11 +686,12 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         });
     }
 
-    // 馃敟 鍒濆鍖栭亰鎴查伕闋?    initializeGameOptions() {
+    // 🔥 初始化遊戲選項
+    initializeGameOptions() {
         const urlParams = new URLSearchParams(window.location.search);
 
-        // 馃敟 v10.1 瑭崇窗瑾胯│锛氭鏌?URL 鍙冩暩
-        console.log('馃攳 [v10.1] URL 鍙冩暩瑭崇窗妾㈡煡:', {
+        // 🔥 v10.1 詳細調試：檢查 URL 參數
+        console.log('🔍 [v10.1] URL 參數詳細檢查:', {
             fullUrl: window.location.href,
             search: window.location.search,
             allParams: Array.from(urlParams.entries()),
@@ -668,64 +700,68 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             showAnswersParam: urlParams.get('showAnswers')
         });
 
-        // 璁€鍙栦綀灞€閬搁爡
+        // 讀取佈局選項
         const layoutParam = urlParams.get('layout');
         this.layout = layoutParam || this.devLayoutDefault || 'separated';
-        console.log('馃幃 浣堝眬妯″紡:', this.layout, {
+        console.log('🎮 佈局模式:', this.layout, {
             source: layoutParam ? 'url' : this.devLayoutDefault ? 'dev-default' : 'fallback',
             layoutParam,
             devLayoutDefault: this.devLayoutDefault
         });
 
-        // 璁€鍙栭毃姗熼伕闋?        this.random = urlParams.get('random') || 'different';
-        console.log('馃幉 闅ㄦ妯″紡:', this.random);
+        // 讀取隨機選項
+        this.random = urlParams.get('random') || 'different';
+        console.log('🎲 隨機模式:', this.random);
 
-        // 璁€鍙栭’绀虹瓟妗堥伕闋?        this.showAnswers = urlParams.get('showAnswers') === 'true';
-        console.log('馃摑 椤ず绛旀:', this.showAnswers);
+        // 讀取顯示答案選項
+        this.showAnswers = urlParams.get('showAnswers') === 'true';
+        console.log('📝 顯示答案:', this.showAnswers);
     }
 
-    // 馃敟 鍒濆鍖栬▓鏅傚櫒
+    // 🔥 初始化計時器
     initializeTimer() {
         const urlParams = new URLSearchParams(window.location.search);
 
-        // 璁€鍙栬▓鏅傚櫒椤炲瀷
+        // 讀取計時器類型
         this.timerType = urlParams.get('timerType') || 'none';
-        console.log('鈴憋笍 瑷堟檪鍣ㄩ鍨?', this.timerType);
+        console.log('⏱️ 計時器類型:', this.timerType);
 
         if (this.timerType === 'countDown') {
-            // 璁€鍙栧€掓暩瑷堟檪鏅傞枔
+            // 讀取倒數計時時間
             this.timerMinutes = parseInt(urlParams.get('timerMinutes') || '5', 10);
             this.timerSeconds = parseInt(urlParams.get('timerSeconds') || '0', 10);
             this.remainingTime = this.timerMinutes * 60 + this.timerSeconds;
-            console.log('鈴憋笍 鍊掓暩瑷堟檪鏅傞枔:', this.timerMinutes, '鍒?, this.timerSeconds, '绉?);
+            console.log('⏱️ 倒數計時時間:', this.timerMinutes, '分', this.timerSeconds, '秒');
         } else if (this.timerType === 'countUp') {
-            // 瑷橀寗闁嬪鏅傞枔
+            // 記錄開始時間
             this.startTime = Date.now();
-            console.log('鈴憋笍 姝ｅ悜瑷堟檪闁嬪');
+            console.log('⏱️ 正向計時開始');
         }
     }
 
-    // 馃敟 鍓靛缓瑷堟檪鍣?UI
+    // 🔥 創建計時器 UI
     createTimerUI() {
         const width = this.scale.width;
 
         if (this.timerType === 'none') {
-            return;  // 涓嶉’绀鸿▓鏅傚櫒
+            return;  // 不顯示計時器
         }
 
-        // 鍓靛缓瑷堟檪鍣ㄦ枃瀛?        const timerColor = this.timerType === 'countDown' ? '#ff0000' : '#000000';
+        // 創建計時器文字
+        const timerColor = this.timerType === 'countDown' ? '#ff0000' : '#000000';
         const initialText = this.timerType === 'countDown'
             ? this.formatTime(this.remainingTime)
             : '00:00';
 
-        // 馃敟 瑷堟檪鍣ㄧ疆涓’绀?        this.timerText = this.add.text(width / 2, 20, initialText, {
+        // 🔥 計時器置中顯示
+        this.timerText = this.add.text(width / 2, 20, initialText, {
             fontSize: '28px',
             color: timerColor,
             fontFamily: 'Arial',
             fontStyle: 'bold'
         }).setOrigin(0.5, 0).setDepth(1000);
 
-        // 濡傛灉鏄€掓暩瑷堟檪锛屽暉鍕曡▓鏅傚櫒浜嬩欢
+        // 如果是倒數計時，啟動計時器事件
         if (this.timerType === 'countDown') {
             this.timerEvent = this.time.addEvent({
                 delay: 1000,
@@ -734,7 +770,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 loop: true
             });
         } else if (this.timerType === 'countUp') {
-            // 姝ｅ悜瑷堟檪姣忕鏇存柊
+            // 正向計時每秒更新
             this.timerEvent = this.time.addEvent({
                 delay: 1000,
                 callback: this.updateCountUpTimer,
@@ -743,20 +779,23 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             });
         }
 
-        console.log('鈴憋笍 瑷堟檪鍣?UI 宸插壍寤?);
+        console.log('⏱️ 計時器 UI 已創建');
     }
 
-    // 馃敟 鏇存柊鍊掓暩瑷堟檪鍣?    updateCountDownTimer() {
+    // 🔥 更新倒數計時器
+    updateCountDownTimer() {
         this.remainingTime--;
 
         if (this.remainingTime <= 0) {
-            // 鏅傞枔鍒?            this.onTimeUp();
+            // 時間到
+            this.onTimeUp();
         } else {
-            // 鏇存柊椤ず
+            // 更新顯示
             if (this.timerText) {
                 this.timerText.setText(this.formatTime(this.remainingTime));
 
-                // 鏈€寰?10 绉掕畩绱呰壊涓﹂杻鐖?                if (this.remainingTime <= 10) {
+                // 最後 10 秒變紅色並閃爍
+                if (this.remainingTime <= 10) {
                     this.timerText.setColor('#ff0000');
                     this.tweens.add({
                         targets: this.timerText,
@@ -769,52 +808,58 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         }
     }
 
-    // 馃敟 鏇存柊姝ｅ悜瑷堟檪鍣?    updateCountUpTimer() {
+    // 🔥 更新正向計時器
+    updateCountUpTimer() {
         const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
         if (this.timerText) {
             this.timerText.setText(this.formatTime(elapsed));
         }
     }
 
-    // 馃敟 鏍煎紡鍖栨檪闁擄紙绉?-> MM:SS锛?    formatTime(seconds) {
+    // 🔥 格式化時間（秒 -> MM:SS）
+    formatTime(seconds) {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
 
-    // 馃敟 鏅傞枔鍒伴仈铏曠悊
+    // 🔥 時間到達處理
     onTimeUp() {
-        console.log('鈴憋笍 鏅傞枔鍒帮紒');
+        console.log('⏱️ 時間到！');
 
-        // 鍋滄瑷堟檪鍣?        if (this.timerEvent) {
+        // 停止計時器
+        if (this.timerEvent) {
             this.timerEvent.remove();
         }
 
-        // 椤ず鏅傞枔鍒拌▕鎭?        this.showTimeUpMessage();
+        // 顯示時間到訊息
+        this.showTimeUpMessage();
     }
 
-    // 馃敟 椤ず鏅傞枔鍒拌▕鎭?    showTimeUpMessage() {
+    // 🔥 顯示時間到訊息
+    showTimeUpMessage() {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 鍓靛缓鍗婇€忔槑鑳屾櫙
+        // 創建半透明背景
         const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7)
             .setDepth(2000);
 
-        // 椤ず鏅傞枔鍒拌▕鎭?        const messageText = this.add.text(width / 2, height / 2 - 50, '鈴?鏅傞枔鍒帮紒', {
+        // 顯示時間到訊息
+        const messageText = this.add.text(width / 2, height / 2 - 50, '⏰ 時間到！', {
             fontSize: '48px',
             color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(2001);
 
-        // 椤ず瀹屾垚閫插害
+        // 顯示完成進度
         const completedCount = this.matchedPairs.size;
         const totalCount = this.getCurrentPagePairs().length;
         const progressText = this.add.text(
             width / 2,
             height / 2 + 20,
-            `宸插畬鎴?${completedCount} / ${totalCount} 鍊嬮厤灏峘,
+            `已完成 ${completedCount} / ${totalCount} 個配對`,
             {
                 fontSize: '24px',
                 color: '#ffffff',
@@ -822,11 +867,12 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
         ).setOrigin(0.5).setDepth(2001);
 
-        // 濡傛灉闁嬪暉椤ず绛旀锛岄’绀虹瓟妗堟寜閳?        if (this.showAnswers) {
+        // 如果開啟顯示答案，顯示答案按鈕
+        if (this.showAnswers) {
             const showAnswersButton = this.add.text(
                 width / 2,
                 height / 2 + 80,
-                '馃摑 鏌ョ湅绛旀',
+                '📝 查看答案',
                 {
                     fontSize: '24px',
                     color: '#ffffff',
@@ -847,60 +893,63 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
     }
 
     updateLayout() {
-        console.log('馃幃 GameScene: updateLayout 闁嬪');
-        console.log('馃幃 GameScene: 鐣跺墠鍫存櫙灏哄', {
+        console.log('🎮 GameScene: updateLayout 開始');
+        console.log('🎮 GameScene: 當前場景尺寸', {
             width: this.scale.width,
             height: this.scale.height
         });
 
-        // 娓呴櫎鎵€鏈夌従鏈夊厓绱?        console.log('馃幃 GameScene: 娓呴櫎鎵€鏈夌従鏈夊厓绱?);
+        // 清除所有現有元素
+        console.log('🎮 GameScene: 清除所有現有元素');
         this.children.removeAll(true);
 
-        // 鐛插彇鐣跺墠铻㈠箷灏哄
+        // 獲取當前螢幕尺寸
         const width = this.scale.width;
         const height = this.scale.height;
 
-        console.log('馃幃 GameScene: 娣诲姞鐧借壊鑳屾櫙', { width, height });
-        // 娣诲姞鐧借壊鑳屾櫙
+        console.log('🎮 GameScene: 添加白色背景', { width, height });
+        // 添加白色背景
         this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
 
-        // 馃敟 绉婚櫎妯欓锛氱敤鎴惰姹傛嬁鎺夐亰鎴插収鐨?"Match up" 妯欓
+        // 🔥 移除標題：用戶要求拿掉遊戲內的 "Match up" 標題
 
-        console.log('馃幃 GameScene: 鍓靛缓鍗＄墖');
-        // 鍓靛缓鍗＄墖
+        console.log('🎮 GameScene: 創建卡片');
+        // 創建卡片
         this.createCards();
-        console.log('馃幃 GameScene: 鍗＄墖鍓靛缓瀹屾垚');
+        console.log('🎮 GameScene: 卡片創建完成');
 
-        // 馃敟 瑷橀寗閬婃埐闁嬪鏅傞枔
+        // 🔥 記錄遊戲開始時間
         if (!this.gameStartTime) {
             this.gameStartTime = Date.now();
-            console.log('馃幃 GameScene: 閬婃埐闁嬪鏅傞枔宸茶閷?);
+            console.log('🎮 GameScene: 遊戲開始時間已記錄');
         }
 
-        // 馃敟 鍓靛缓瑷堟檪鍣?UI
+        // 🔥 創建計時器 UI
         this.createTimerUI();
 
-        // 馃敟 椤ず銆屾彁浜ょ瓟妗堛€嶆寜閳曪紙閬婃埐闁嬪鏅傚氨椤ず锛?        this.showSubmitButton();
+        // 🔥 顯示「提交答案」按鈕（遊戲開始時就顯示）
+        this.showSubmitButton();
 
-        // 馃敟 绉婚櫎閲嶆柊闁嬪鎸夐垥锛氱敤鎴惰姹傛嬁鎺?        console.log('馃幃 GameScene: updateLayout 瀹屾垚');
+        // 🔥 移除重新開始按鈕：用戶要求拿掉
+        console.log('🎮 GameScene: updateLayout 完成');
     }
 
     handleResize(gameSize) {
-        console.log('馃幃 GameScene: handleResize 瑙哥櫦', gameSize);
-        // 铻㈠箷灏哄鏀硅畩鏅傞噸鏂颁綀灞€
+        console.log('🎮 GameScene: handleResize 觸發', gameSize);
+        // 螢幕尺寸改變時重新佈局
         this.updateLayout();
     }
 
     createCards() {
-        console.log('馃幃 GameScene: createCards 闁嬪');
-        console.log('馃幃 GameScene: pairs 鏁告摎', this.pairs);
+        console.log('🎮 GameScene: createCards 開始');
+        console.log('🎮 GameScene: pairs 數據', this.pairs);
 
-        // 馃敟 鐛插彇鐣跺墠闋佺殑瑭炲綑鏁告摎
+        // 🔥 獲取當前頁的詞彙數據
         const startIndex = this.currentPage * this.itemsPerPage;
         const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
         const currentPagePairs = this.pairs.slice(startIndex, endIndex);
 
-        console.log('馃搫 鐣跺墠闋佹暩鎿?', {
+        console.log('📄 當前頁數據:', {
             currentPage: this.currentPage + 1,
             totalPages: this.totalPages,
             startIndex,
@@ -908,166 +957,193 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             currentPagePairs: currentPagePairs.length
         });
 
-        // 鐛插彇鐣跺墠铻㈠箷灏哄
+        // 獲取當前螢幕尺寸
         const width = this.scale.width;
         const height = this.scale.height;
 
-        console.log('馃幃 GameScene: 瑷堢畻鍗＄墖灏哄鍜屼綅缃?, { width, height });
+        console.log('🎮 GameScene: 計算卡片尺寸和位置', { width, height });
 
-        // 鉁?v40.0锛歩Pad 鍕曟厠鍗＄墖灏哄瑾挎暣
-        // 妾㈡脯 iPad锛堝搴?768-1280px锛屽寘鎷?iPad Air銆乮Pad Pro锛?        const isTablet = width >= 768 && width <= 1280;
+        // ✅ v40.0：iPad 動態卡片尺寸調整
+        // 檢測 iPad（寬度 768-1280px，包括 iPad Air、iPad Pro）
+        const isTablet = width >= 768 && width <= 1280;
         const isIPad = isTablet;
-        console.log('馃攳 [v40.0] iPad 妾㈡脯:', { width, isTablet, isIPad });
+        console.log('🔍 [v40.0] iPad 檢測:', { width, isTablet, isIPad });
 
-        // 闊挎噳寮忓崱鐗囧昂瀵革紙鏍规摎铻㈠箷瀵害瑾挎暣锛?        let cardWidth, cardHeight;
+        // 響應式卡片尺寸（根據螢幕寬度調整）
+        let cardWidth, cardHeight;
         if (isIPad) {
-            // iPad锛氭牴鎿氬鍣ㄥぇ灏忓嫊鎱嬭鏁?            // 鍒嗛洟浣堝眬锛氬乏鍙冲悇涓€鍒楋紝鎵€浠ュ崱鐗囧搴?= 鍙敤瀵害 / 2 - 閭婅窛
-            cardWidth = Math.max(140, (width - 60) / 2 - 20);  // 60px 閭婅窛锛?0px 闁撹窛
-            cardHeight = Math.max(60, height * 0.12);  // 楂樺害鐐鸿灑骞曢珮搴︾殑 12%
-            console.log('馃摫 [v40.0] iPad 鍕曟厠鍗＄墖灏哄:', {
+            // iPad：根據容器大小動態調整
+            // 分離佈局：左右各一列，所以卡片寬度 = 可用寬度 / 2 - 邊距
+            cardWidth = Math.max(140, (width - 60) / 2 - 20);  // 60px 邊距，20px 間距
+            cardHeight = Math.max(60, height * 0.12);  // 高度為螢幕高度的 12%
+            console.log('📱 [v40.0] iPad 動態卡片尺寸:', {
                 availableWidth: width - 60,
                 calculatedCardWidth: cardWidth.toFixed(1),
                 calculatedCardHeight: cardHeight.toFixed(1)
             });
         } else {
-            // 鍏朵粬瑷倷锛氫娇鐢ㄥ浐瀹氭瘮渚?            cardWidth = Math.max(150, Math.min(250, width * 0.2));
+            // 其他設備：使用固定比例
+            cardWidth = Math.max(150, Math.min(250, width * 0.2));
             cardHeight = Math.max(50, Math.min(80, height * 0.1));
         }
 
-        console.log('馃幃 GameScene: 鍗＄墖灏哄', { cardWidth, cardHeight });
+        console.log('🎮 GameScene: 卡片尺寸', { cardWidth, cardHeight });
 
-        // 闊挎噳寮忎綅缃紙浣跨敤鐧惧垎姣旓級
-        const leftX = width * 0.25;        // 宸﹀伌鍗＄墖鍦?25% 浣嶇疆
-        const rightX = width * 0.65;       // 鍙冲伌鍗＄墖鍦?65% 浣嶇疆
-        const leftStartY = height * 0.25;  // 宸﹀伌璧峰浣嶇疆鍦?25% 楂樺害
-        const rightStartY = height * 0.22; // 鍙冲伌璧峰浣嶇疆鍦?22% 楂樺害
+        // 響應式位置（使用百分比）
+        const leftX = width * 0.25;        // 左側卡片在 25% 位置
+        const rightX = width * 0.65;       // 右側卡片在 65% 位置
+        const leftStartY = height * 0.25;  // 左側起始位置在 25% 高度
+        const rightStartY = height * 0.22; // 右側起始位置在 22% 高度
 
-        console.log('馃幃 GameScene: 鍗＄墖浣嶇疆', { leftX, rightX, leftStartY, rightStartY });
+        console.log('🎮 GameScene: 卡片位置', { leftX, rightX, leftStartY, rightStartY });
 
-        // 闊挎噳寮忛枔璺?        const leftSpacing = cardHeight + Math.max(5, height * 0.01);   // 鍗＄墖楂樺害 + 5px 鎴?1% 楂樺害
-        const rightSpacing = cardHeight + Math.max(15, height * 0.03); // 鍗＄墖楂樺害 + 15px 鎴?3% 楂樺害
+        // 響應式間距
+        const leftSpacing = cardHeight + Math.max(5, height * 0.01);   // 卡片高度 + 5px 或 1% 高度
+        const rightSpacing = cardHeight + Math.max(15, height * 0.03); // 卡片高度 + 15px 或 3% 高度
 
-        console.log('馃幃 GameScene: 鍗＄墖闁撹窛', { leftSpacing, rightSpacing });
+        console.log('🎮 GameScene: 卡片間距', { leftSpacing, rightSpacing });
 
-        // 馃敟 鏍规摎浣堝眬妯″紡鍓靛缓鍗＄墖
+        // 🔥 根據佈局模式創建卡片
         if (this.layout === 'mixed') {
-            // 娣峰悎浣堝眬妯″紡
+            // 混合佈局模式
             this.createMixedLayout(currentPagePairs, width, height, cardWidth, cardHeight);
         } else {
-            // 鍒嗛洟浣堝眬妯″紡锛堥粯瑾嶏級
+            // 分離佈局模式（默認）
             this.createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
                                       cardWidth, cardHeight, leftSpacing, rightSpacing);
         }
 
-        // 馃敟 鍓靛缓鍒嗛爜鎸囩ず鍣?        if (this.enablePagination) {
+        // 🔥 創建分頁指示器
+        if (this.enablePagination) {
             this.createPageIndicator();
         }
 
-        console.log('馃幃 GameScene: createCards 瀹屾垚', {
+        console.log('🎮 GameScene: createCards 完成', {
             leftCardsCount: this.leftCards.length,
             rightCardsCount: this.rightCards.length
         });
     }
 
-    // 馃敟 鍓靛缓鍒嗛洟浣堝眬锛堟牴鎿?Wordwall 绛栫暐锛?    createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
+    // 🔥 創建分離佈局（根據 Wordwall 策略）
+    createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
                           cardWidth, cardHeight, leftSpacing, rightSpacing) {
         const width = this.scale.width;
         const height = this.scale.height;
         const itemCount = currentPagePairs.length;
 
-        // 馃敟 鏍规摎 Wordwall 绛栫暐鍒ゆ柗浣堝眬
+        // 🔥 根據 Wordwall 策略判斷佈局
         if (itemCount <= 5) {
-            // 3-5 鍊嬶細宸﹀彸鍒嗛洟锛屽柈鍒?            console.log('馃幃 浣跨敤宸﹀彸鍒嗛洟浣堝眬锛?-5鍊嬪尮閰嶆暩锛屽柈鍒楋級');
+            // 3-5 個：左右分離，單列
+            console.log('🎮 使用左右分離佈局（3-5個匹配數，單列）');
             this.createLeftRightSingleColumn(currentPagePairs, width, height);
         } else {
-            // 6-20 鍊嬶細宸﹀彸鍒嗛洟锛屽琛?2 鍒?            console.log('馃幃 浣跨敤宸﹀彸鍒嗛洟浣堝眬锛?-20鍊嬪尮閰嶆暩锛屽琛?鍒楋級');
+            // 6-20 個：左右分離，多行 2 列
+            console.log('🎮 使用左右分離佈局（6-20個匹配數，多行2列）');
             this.createLeftRightMultiRows(currentPagePairs, width, height);
         }
     }
 
-    // 馃敟 鍓靛缓宸﹀彸鍒嗛洟浣堝眬 - 鍠垪锛?-5鍊嬪尮閰嶆暩锛?    createLeftRightSingleColumn(currentPagePairs, width, height) {
-        console.log('馃搻 鍓靛缓宸﹀彸鍒嗛洟浣堝眬 - 鍠垪锛?-5鍊嬪尮閰嶆暩锛?);
+    // 🔥 創建左右分離佈局 - 單列（3-5個匹配數）
+    createLeftRightSingleColumn(currentPagePairs, width, height) {
+        console.log('📐 創建左右分離佈局 - 單列（3-5個匹配數）');
 
         const itemCount = currentPagePairs.length;
 
-        // 馃敟 妾㈡脯瀹瑰櫒楂樺害鍜屾墜姗熸┇鍚戞ā寮?        const isSmallContainer = height < 600;
+        // 🔥 檢測容器高度和手機橫向模式
+        const isSmallContainer = height < 600;
         const isMediumContainer = height >= 600 && height < 800;
-        const isLandscapeMobile = width > height && height < 450;  // 馃敟 鎵嬫姗悜妯″紡
+        const isLandscapeMobile = width > height && height < 450;  // 🔥 手機橫向模式
 
-        console.log(`馃搻 瀹瑰櫒灏哄: ${width} 脳 ${height}`, {
+        console.log(`📐 容器尺寸: ${width} × ${height}`, {
             isSmallContainer,
             isMediumContainer,
             isLargeContainer: height >= 800,
-            isLandscapeMobile  // 馃敟 椤ず鏄惁鐐烘墜姗熸┇鍚戞ā寮?        });
+            isLandscapeMobile  // 🔥 顯示是否為手機橫向模式
+        });
 
-        // 馃敟 鏍规摎瀹瑰櫒澶у皬鍕曟厠瑾挎暣鍗＄墖灏哄
+        // 🔥 根據容器大小動態調整卡片尺寸
         let cardWidth, cardHeight;
 
         if (isLandscapeMobile) {
-            // 馃敟 鎵嬫姗悜妯″紡锛氫娇鐢ㄨ秴绶婃箠浣堝眬
+            // 🔥 手機橫向模式：使用超緊湊佈局
             cardWidth = Math.max(100, Math.min(150, width * 0.15));
             cardHeight = Math.max(28, Math.min(40, height * 0.08));
-            console.log('馃摫 鎵嬫姗悜妯″紡锛氫娇鐢ㄨ秴绶婃箠浣堝眬');
+            console.log('📱 手機橫向模式：使用超緊湊佈局');
         } else if (isSmallContainer) {
-            // 灏忓鍣細鏇村皬鐨勫崱鐗?            cardWidth = Math.max(120, Math.min(200, width * 0.18));
+            // 小容器：更小的卡片
+            cardWidth = Math.max(120, Math.min(200, width * 0.18));
             cardHeight = Math.max(40, Math.min(65, height * 0.09));
         } else if (isMediumContainer) {
-            // 涓瓑瀹瑰櫒锛氶仼涓殑鍗＄墖
+            // 中等容器：適中的卡片
             cardWidth = Math.max(140, Math.min(220, width * 0.19));
             cardHeight = Math.max(45, Math.min(72, height * 0.095));
         } else {
-            // 澶у鍣細杓冨ぇ鐨勫崱鐗?            cardWidth = Math.max(150, Math.min(250, width * 0.2));
+            // 大容器：較大的卡片
+            cardWidth = Math.max(150, Math.min(250, width * 0.2));
             cardHeight = Math.max(50, Math.min(80, height * 0.1));
         }
 
-        console.log(`馃搻 鍗＄墖灏哄: ${cardWidth.toFixed(0)} 脳 ${cardHeight.toFixed(0)}`);
+        console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
 
-        // 馃敟 鏍规摎瀹瑰櫒澶у皬鍕曟厠瑾挎暣浣嶇疆
-        // 馃敟 鑻辨枃鍗€鍩熷線鍙崇Щ鍕?20%锛岃嫳鏂囧崁鍜屼腑鏂囧崁閮藉線涓嬬Щ鍕?10%
+        // 🔥 根據容器大小動態調整位置
+        // 🔥 英文區域往右移動 20%，英文區和中文區都往下移動 10%
         let leftX, rightX, leftStartY, rightStartY;
 
         if (isLandscapeMobile) {
-            // 馃敟 鎵嬫姗悜妯″紡锛氭洿绶婃箠鐨勪綅缃?            leftX = width * 0.38;
+            // 🔥 手機橫向模式：更緊湊的位置
+            leftX = width * 0.38;
             rightX = width * 0.70;
             leftStartY = height * 0.15;
             rightStartY = height * 0.12;
         } else if (isSmallContainer) {
-            // 灏忓鍣細鏇寸穵婀婄殑浣堝眬
-            leftX = width * 0.42;  // 馃敟 寰?0.22 鏀圭偤 0.42锛?20%锛?            rightX = width * 0.68;
-            leftStartY = height * 0.25;   // 馃敟 寰?0.15 鏀圭偤 0.25锛?10%锛?            rightStartY = height * 0.22;  // 馃敟 寰?0.12 鏀圭偤 0.22锛?10%锛?        } else if (isMediumContainer) {
-            // 涓瓑瀹瑰櫒锛氬钩琛＄殑浣堝眬
-            leftX = width * 0.44;  // 馃敟 寰?0.24 鏀圭偤 0.44锛?20%锛?            rightX = width * 0.66;
-            leftStartY = height * 0.3;    // 馃敟 寰?0.2 鏀圭偤 0.3锛?10%锛?            rightStartY = height * 0.27;  // 馃敟 寰?0.17 鏀圭偤 0.27锛?10%锛?        } else {
-            // 澶у鍣細鑸掗仼鐨勪綀灞€
-            leftX = width * 0.45;  // 馃敟 寰?0.25 鏀圭偤 0.45锛?20%锛?            rightX = width * 0.65;
-            leftStartY = height * 0.35;   // 馃敟 寰?0.25 鏀圭偤 0.35锛?10%锛?            rightStartY = height * 0.32;  // 馃敟 寰?0.22 鏀圭偤 0.32锛?10%锛?        }
+            // 小容器：更緊湊的佈局
+            leftX = width * 0.42;  // 🔥 從 0.22 改為 0.42（+20%）
+            rightX = width * 0.68;
+            leftStartY = height * 0.25;   // 🔥 從 0.15 改為 0.25（+10%）
+            rightStartY = height * 0.22;  // 🔥 從 0.12 改為 0.22（+10%）
+        } else if (isMediumContainer) {
+            // 中等容器：平衡的佈局
+            leftX = width * 0.44;  // 🔥 從 0.24 改為 0.44（+20%）
+            rightX = width * 0.66;
+            leftStartY = height * 0.3;    // 🔥 從 0.2 改為 0.3（+10%）
+            rightStartY = height * 0.27;  // 🔥 從 0.17 改為 0.27（+10%）
+        } else {
+            // 大容器：舒適的佈局
+            leftX = width * 0.45;  // 🔥 從 0.25 改為 0.45（+20%）
+            rightX = width * 0.65;
+            leftStartY = height * 0.35;   // 🔥 從 0.25 改為 0.35（+10%）
+            rightStartY = height * 0.32;  // 🔥 從 0.22 改為 0.32（+10%）
+        }
 
-        // 馃敟 鏍规摎瀹瑰櫒澶у皬鍕曟厠瑾挎暣闁撹窛
-        // 鑻辨枃鍗＄墖锛氬姞 cardHeight
-        // 涓枃鍗＄墖锛?-5鍊嬪尮閰嶆暩锛夛細鍙姞 cardHeight锛堜笉鍔?textHeight + oneCharSpacing锛?        let leftSpacing, rightSpacing;
+        // 🔥 根據容器大小動態調整間距
+        // 英文卡片：加 cardHeight
+        // 中文卡片（3-5個匹配數）：只加 cardHeight（不加 textHeight + oneCharSpacing）
+        let leftSpacing, rightSpacing;
 
         if (isLandscapeMobile) {
-            // 馃敟 鎵嬫姗悜妯″紡锛氳▓绠楁渶澶у彲鐢ㄩ珮搴︼紝纰轰繚鎵€鏈夊崱鐗囬兘鑳介’绀?            const availableHeight = height * 0.75;  // 浣跨敤 75% 鐨勯珮搴?            const maxSpacing = (availableHeight - cardHeight * itemCount) / (itemCount - 1);
+            // 🔥 手機橫向模式：計算最大可用高度，確保所有卡片都能顯示
+            const availableHeight = height * 0.75;  // 使用 75% 的高度
+            const maxSpacing = (availableHeight - cardHeight * itemCount) / (itemCount - 1);
 
             leftSpacing = Math.max(18, Math.min(maxSpacing, cardHeight + 3));
             rightSpacing = Math.max(18, Math.min(maxSpacing, cardHeight + 5));
-            console.log(`馃摫 鎵嬫姗悜闁撹窛: 宸﹀伌=${leftSpacing.toFixed(1)}px, 鍙冲伌=${rightSpacing.toFixed(1)}px, 鍙敤楂樺害=${availableHeight.toFixed(0)}px`);
+            console.log(`📱 手機橫向間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px, 可用高度=${availableHeight.toFixed(0)}px`);
         } else if (isSmallContainer) {
             leftSpacing = cardHeight + Math.max(3, height * 0.008);
-            rightSpacing = cardHeight + Math.max(8, height * 0.02);  // 馃敟 3-5鍊嬶細鍙姞 cardHeight
+            rightSpacing = cardHeight + Math.max(8, height * 0.02);  // 🔥 3-5個：只加 cardHeight
         } else if (isMediumContainer) {
             leftSpacing = cardHeight + Math.max(4, height * 0.009);
-            rightSpacing = cardHeight + Math.max(12, height * 0.025);  // 馃敟 3-5鍊嬶細鍙姞 cardHeight
+            rightSpacing = cardHeight + Math.max(12, height * 0.025);  // 🔥 3-5個：只加 cardHeight
         } else {
             leftSpacing = cardHeight + Math.max(5, height * 0.01);
-            rightSpacing = cardHeight + Math.max(15, height * 0.03);  // 馃敟 3-5鍊嬶細鍙姞 cardHeight
+            rightSpacing = cardHeight + Math.max(15, height * 0.03);  // 🔥 3-5個：只加 cardHeight
         }
 
         if (!isLandscapeMobile) {
-            console.log(`馃搹 闁撹窛: 宸﹀伌=${leftSpacing.toFixed(1)}px, 鍙冲伌=${rightSpacing.toFixed(1)}px`);
+            console.log(`📏 間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px`);
         }
 
-        // 馃敟 鏍规摎闅ㄦ妯″紡鎺掑垪绛旀
+        // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
         if (this.random === 'same') {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1075,57 +1151,59 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
             shuffledAnswers = rng.shuffle([...currentPagePairs]);
-            console.log('馃幉 浣跨敤鍥哄畾闅ㄦ妯″紡锛岀ó瀛?', seed);
+            console.log('🎲 使用固定隨機模式，種子:', seed);
         } else {
             shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('馃幉 浣跨敤闅ㄦ鎺掑垪妯″紡');
+            console.log('🎲 使用隨機排列模式');
         }
 
-        // 鍓靛缓宸﹀伌澶栨
+        // 創建左側外框
         this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftSpacing, itemCount);
 
-        // 馃敟 鍓靛缓宸﹀伌椤岀洰鍗＄墖锛堟寜鐓ч爢搴忓嚭鐝惧嫊鐣級
+        // 🔥 創建左側題目卡片（按照順序出現動畫）
         currentPagePairs.forEach((pair, index) => {
             const y = leftStartY + index * leftSpacing;
-            const animationDelay = index * 100;  // 馃敟 姣忓€嬪崱鐗囧欢閬?100ms
+            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
             const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
 
-        // 鍓靛缓鍙冲伌绛旀鍗＄墖锛堟枃瀛楀湪妗嗗彸閭婏級
+        // 創建右側答案卡片（文字在框右邊）
         shuffledAnswers.forEach((pair, index) => {
             const y = rightStartY + index * rightSpacing;
-            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id, 'right');  // 馃敟 鏂囧瓧鍦ㄦ鍙抽倞
+            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id, 'right');  // 🔥 文字在框右邊
             this.rightCards.push(card);
         });
 
-        console.log('鉁?宸﹀彸鍒嗛洟浣堝眬鍓靛缓瀹屾垚');
+        console.log('✅ 左右分離佈局創建完成');
     }
 
-    // 馃敟 鍓靛缓涓婁笅鍒嗛洟浣堝眬 - 2 琛岋紙6-10鍊嬪尮閰嶆暩锛?    createTopBottomTwoRows(currentPagePairs, width, height) {
-        console.log('馃搻 鍓靛缓涓婁笅鍒嗛洟浣堝眬 - 2琛岋紙6-10鍊嬪尮閰嶆暩锛?);
+    // 🔥 創建上下分離佈局 - 2 行（6-10個匹配數）
+    createTopBottomTwoRows(currentPagePairs, width, height) {
+        console.log('📐 創建上下分離佈局 - 2行（6-10個匹配數）');
 
         const itemCount = currentPagePairs.length;
 
-        // 馃敟 妾㈡脯瀹瑰櫒楂樺害
+        // 🔥 檢測容器高度
         const isSmallContainer = height < 600;
         const isMediumContainer = height >= 600 && height < 800;
 
-        console.log(`馃搻 瀹瑰櫒灏哄: ${width} 脳 ${height}`, {
+        console.log(`📐 容器尺寸: ${width} × ${height}`, {
             isSmallContainer,
             isMediumContainer,
             isLargeContainer: height >= 800
         });
 
-        // 馃敟 瑷堢畻鍒楁暩锛堝浐瀹?2 琛岋級
+        // 🔥 計算列數（固定 2 行）
         const rows = 2;
         const columns = Math.ceil(itemCount / rows);
 
-        console.log(`馃搳 鍖归厤鏁? ${itemCount}, 浣跨敤 ${rows} 琛?脳 ${columns} 鍒椾綀灞€`);
+        console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局`);
 
-        // 馃敟 鏍规摎瀹瑰櫒澶у皬鍜屽垪鏁歌鏁村崱鐗囧昂瀵?        let cardWidth, cardHeight;
+        // 🔥 根據容器大小和列數調整卡片尺寸
+        let cardWidth, cardHeight;
         if (isSmallContainer) {
-            cardWidth = Math.max(80, Math.min(120, width * (0.85 / columns)));  // 鉁?鎻愰珮鏈€灏忓搴﹀緸 70px 鍒?80px
+            cardWidth = Math.max(80, Math.min(120, width * (0.85 / columns)));  // ✅ 提高最小寬度從 70px 到 80px
             cardHeight = Math.max(35, Math.min(55, height * 0.15));
         } else if (isMediumContainer) {
             cardWidth = Math.max(80, Math.min(140, width * (0.88 / columns)));
@@ -1135,35 +1213,36 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             cardHeight = Math.max(45, Math.min(75, height * 0.17));
         }
 
-        console.log(`馃搻 鍗＄墖灏哄: ${cardWidth.toFixed(0)} 脳 ${cardHeight.toFixed(0)}`);
+        console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
 
-        // 馃敟 瑷堢畻闁撹窛
+        // 🔥 計算間距
         const horizontalSpacing = Math.max(5, width * 0.01);
 
-        // 馃敟 瑷堢畻鏂囧瓧楂樺害锛堢敤鏂间笅鏂逛腑鏂囧崱鐗囷級
+        // 🔥 計算文字高度（用於下方中文卡片）
         const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
 
-        // 馃敟 鑻辨枃鍗＄墖鐨勫瀭鐩撮枔璺濓紙涓嶅姞鏂囧瓧楂樺害锛?        const topVerticalSpacing = Math.max(5, height * 0.02);
+        // 🔥 英文卡片的垂直間距（不加文字高度）
+        const topVerticalSpacing = Math.max(5, height * 0.02);
 
-        // 馃敟 涓枃鍗＄墖鐨勫瀭鐩撮枔璺濓紙鍙姞鏂囧瓧楂樺害锛屼笉鍔犻澶栭枔璺濓級
+        // 🔥 中文卡片的垂直間距（只加文字高度，不加額外間距）
         const bottomVerticalSpacing = textHeight;
 
-        // 馃敟 瑷堢畻涓婃柟鍗€鍩燂紙鑻辨枃锛夌殑璧峰浣嶇疆
+        // 🔥 計算上方區域（英文）的起始位置
         const topAreaStartX = (width - (columns * cardWidth + (columns - 1) * horizontalSpacing)) / 2;
         const topAreaStartY = height * 0.12;
 
-        // 馃敟 瑷堢畻涓嬫柟鍗€鍩燂紙涓枃锛夌殑璧峰浣嶇疆
+        // 🔥 計算下方區域（中文）的起始位置
         const bottomAreaStartX = topAreaStartX;
         const bottomAreaStartY = height * 0.55;
 
-        console.log(`馃搷 鍗€鍩熶綅缃?`, {
+        console.log(`📍 區域位置:`, {
             topAreaStartX: topAreaStartX.toFixed(0),
             topAreaStartY: topAreaStartY.toFixed(0),
             bottomAreaStartX: bottomAreaStartX.toFixed(0),
             bottomAreaStartY: bottomAreaStartY.toFixed(0)
         });
 
-        // 馃敟 鏍规摎闅ㄦ妯″紡鎺掑垪绛旀
+        // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
         if (this.random === 'same') {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1171,131 +1250,146 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
             shuffledAnswers = rng.shuffle([...currentPagePairs]);
-            console.log('馃幉 浣跨敤鍥哄畾闅ㄦ妯″紡锛岀ó瀛?', seed);
+            console.log('🎲 使用固定隨機模式，種子:', seed);
         } else {
             shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('馃幉 浣跨敤闅ㄦ鎺掑垪妯″紡');
+            console.log('🎲 使用隨機排列模式');
         }
 
-        // 馃敟 鍓靛缓涓婃柟澶栨锛堝寘鍦嶆墍鏈夎嫳鏂囧崱鐗囷級
+        // 🔥 創建上方外框（包圍所有英文卡片）
         this.createMultiColumnContainerBox(
             topAreaStartX,
             topAreaStartY,
             cardWidth,
             cardHeight,
             horizontalSpacing,
-            topVerticalSpacing,  // 馃敟 鑻辨枃鍗＄墖浣跨敤 topVerticalSpacing
+            topVerticalSpacing,  // 🔥 英文卡片使用 topVerticalSpacing
             columns,
             rows
         );
 
-        // 馃敟 涓嶅壍寤轰笅鏂瑰妗嗭紙涓枃鍗＄墖涓嶉渶瑕佸妗嗭級
+        // 🔥 不創建下方外框（中文卡片不需要外框）
 
-        // 馃敟 鍓靛缓涓婃柟鑻辨枃鍗＄墖锛? 琛屽鍒楋紝鎸夌収闋嗗簭鍑虹従鍕曠暙锛?        currentPagePairs.forEach((pair, index) => {
+        // 🔥 創建上方英文卡片（2 行多列，按照順序出現動畫）
+        currentPagePairs.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = topAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 馃敟 鑻辨枃鍗＄墖浣跨敤 topVerticalSpacing
+            const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
 
-            const animationDelay = index * 100;  // 馃敟 姣忓€嬪崱鐗囧欢閬?100ms
+            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
             const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
 
-        // 馃敟 鍓靛缓涓嬫柟涓枃鍗＄墖锛? 琛屽鍒楋級
+        // 🔥 創建下方中文卡片（2 行多列）
         shuffledAnswers.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = bottomAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = bottomAreaStartY + row * (cardHeight + bottomVerticalSpacing) + cardHeight / 2;  // 馃敟 涓枃鍗＄墖浣跨敤 bottomVerticalSpacing
+            const y = bottomAreaStartY + row * (cardHeight + bottomVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 bottomVerticalSpacing
 
             const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id);
             this.rightCards.push(card);
         });
 
-        console.log('鉁?涓婁笅鍒嗛洟浣堝眬锛?琛岋級鍓靛缓瀹屾垚');
+        console.log('✅ 上下分離佈局（2行）創建完成');
     }
 
-    // 馃敟 鍓靛缓宸﹀彸鍒嗛洟浣堝眬 - 澶氳 2 鍒楋紙6-20鍊嬪尮閰嶆暩锛?    createLeftRightMultiRows(currentPagePairs, width, height) {
-        console.log('馃搻 鍓靛缓宸﹀彸鍒嗛洟浣堝眬 - 澶氳2鍒楋紙6-20鍊嬪尮閰嶆暩锛?);
+    // 🔥 創建左右分離佈局 - 多行 2 列（6-20個匹配數）
+    createLeftRightMultiRows(currentPagePairs, width, height) {
+        console.log('📐 創建左右分離佈局 - 多行2列（6-20個匹配數）');
 
         const itemCount = currentPagePairs.length;
 
-        // 馃敟 妾㈡脯瀹瑰櫒楂樺害
+        // 🔥 檢測容器高度
         const isSmallContainer = height < 600;
         const isMediumContainer = height >= 600 && height < 800;
 
-        console.log(`馃搻 瀹瑰櫒灏哄: ${width} 脳 ${height}`, {
+        console.log(`📐 容器尺寸: ${width} × ${height}`, {
             isSmallContainer,
             isMediumContainer,
             isLargeContainer: height >= 800
         });
 
-        // 馃敟 v10.0 妾㈡脯鏄惁鏈夊湒鐗囷紙鍙鏈変换浣曚竴鍊嬪湒鐗囧氨閫插叆姝ｆ柟褰㈡ā寮忥級
+        // 🔥 v10.0 檢測是否有圖片（只要有任何一個圖片就進入正方形模式）
         const hasImages = currentPagePairs.some(pair =>
             pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId
         );
-        console.log(`馃攳 [v10.0] 鍒嗛洟浣堝眬鍦栫墖妾㈡脯: hasImages=${hasImages}, mode=${hasImages ? '馃煢 姝ｆ柟褰㈡ā寮? : '馃煥 闀锋柟褰㈡ā寮?}`);
+        console.log(`🔍 [v10.0] 分離佈局圖片檢測: hasImages=${hasImages}, mode=${hasImages ? '🟦 正方形模式' : '🟨 長方形模式'}`);
 
-        // 馃敟 v10.0 鏍规摎鍦栫墖妾㈡脯姹哄畾鍒楁暩
-        // 鏈夊湒鐗囨檪锛氫娇鐢?5 鍒楋紙姝ｆ柟褰㈡ā寮忥級
-        // 鐒″湒鐗囨檪锛氫娇鐢?2 鍒楋紙闀锋柟褰㈡ā寮忥級
+        // 🔥 v10.0 根據圖片檢測決定列數
+        // 有圖片時：使用 5 列（正方形模式）
+        // 無圖片時：使用 2 列（長方形模式）
         const columns = hasImages ? 5 : 2;
         const rows = Math.ceil(itemCount / columns);
 
-        console.log(`馃搳 鍖归厤鏁? ${itemCount}, 浣跨敤 ${rows} 琛?脳 ${columns} 鍒椾綀灞€ [v10.0]`);
+        console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局 [v10.0]`);
 
-        // 馃敟 瑷堢畻闁撹窛锛堝厛瑷堢畻锛岀敤鏂煎緦绾屽崱鐗囬珮搴﹁▓绠楋級
+        // 🔥 計算間距（先計算，用於後續卡片高度計算）
         const horizontalSpacing = Math.max(5, width * 0.01);
         const verticalSpacing = Math.max(3, height * 0.008);
 
-        // 馃敟 鍕曟厠瑷堢畻鏈€澶у崱鐗囬珮搴︼紝纰轰繚鎵€鏈夊崱鐗囬兘鑳芥斁鍏ュ鍣?        const availableHeight = height * 0.8;  // 浣跨敤 80% 鐨勫鍣ㄩ珮搴?        const totalVerticalSpacing = (rows - 1) * verticalSpacing;
+        // 🔥 動態計算最大卡片高度，確保所有卡片都能放入容器
+        const availableHeight = height * 0.8;  // 使用 80% 的容器高度
+        const totalVerticalSpacing = (rows - 1) * verticalSpacing;
         const maxCardHeight = (availableHeight - totalVerticalSpacing) / rows;
 
-        // 馃敟 鏍规摎瀹瑰櫒澶у皬鍜屽尮閰嶆暩瑾挎暣鍗＄墖灏哄
+        // 🔥 根據容器大小和匹配數調整卡片尺寸
         let cardWidth, cardHeight;
 
-        // 馃敟 6-10 鍊嬪拰 16-20 鍊嬪尮閰嶆暩浣跨敤鏇村皬鐨勫崱鐗囧昂瀵?        const isSmallCardSize = itemCount <= 10 || itemCount >= 16;
+        // 🔥 6-10 個和 16-20 個匹配數使用更小的卡片尺寸
+        const isSmallCardSize = itemCount <= 10 || itemCount >= 16;
 
-        // 馃敟 v10.0 鏍规摎鍒楁暩瑾挎暣鍗＄墖灏哄
-        // 5 鍒楁ā寮忥紙鏈夊湒鐗囷級锛氬崱鐗囨洿灏?        // 2 鍒楁ā寮忥紙鐒″湒鐗囷級锛氬崱鐗囨洿澶?        if (columns === 5) {
-            // 馃敟 v10.0 姝ｆ柟褰㈡ā寮忥紙5 鍒楋級锛氬崱鐗囨洿灏?            if (isSmallContainer) {
+        // 🔥 v10.0 根據列數調整卡片尺寸
+        // 5 列模式（有圖片）：卡片更小
+        // 2 列模式（無圖片）：卡片更大
+        if (columns === 5) {
+            // 🔥 v10.0 正方形模式（5 列）：卡片更小
+            if (isSmallContainer) {
                 cardWidth = Math.max(50, Math.min(80, width * 0.08));
-                cardHeight = Math.max(50, Math.min(80, width * 0.08));  // 姝ｆ柟褰?            } else if (isMediumContainer) {
+                cardHeight = Math.max(50, Math.min(80, width * 0.08));  // 正方形
+            } else if (isMediumContainer) {
                 cardWidth = Math.max(60, Math.min(100, width * 0.10));
-                cardHeight = Math.max(60, Math.min(100, width * 0.10));  // 姝ｆ柟褰?            } else {
+                cardHeight = Math.max(60, Math.min(100, width * 0.10));  // 正方形
+            } else {
                 cardWidth = Math.max(80, Math.min(140, width * 0.12));
-                cardHeight = Math.max(80, Math.min(140, width * 0.12));  // 姝ｆ柟褰?            }
+                cardHeight = Math.max(80, Math.min(140, width * 0.12));  // 正方形
+            }
         } else {
-            // 馃敟 v10.0 闀锋柟褰㈡ā寮忥紙2 鍒楋級锛氬崱鐗囨洿澶?            if (isSmallCardSize) {
-                cardWidth = Math.max(70, Math.min(110, width * 0.11));  // 馃敟 6-10 鍊嬪拰 16-20 鍊嬶細鏇村皬鐨勫搴?                cardHeight = Math.max(18, Math.min(maxCardHeight, 38));  // 馃敟 6-10 鍊嬪拰 16-20 鍊嬶細鏇村皬鐨勯珮搴?            } else {
+            // 🔥 v10.0 長方形模式（2 列）：卡片更大
+            if (isSmallCardSize) {
+                cardWidth = Math.max(70, Math.min(110, width * 0.11));  // 🔥 6-10 個和 16-20 個：更小的寬度
+                cardHeight = Math.max(18, Math.min(maxCardHeight, 38));  // 🔥 6-10 個和 16-20 個：更小的高度
+            } else {
                 cardWidth = Math.max(80, Math.min(130, width * 0.13));
                 cardHeight = Math.max(20, Math.min(maxCardHeight, 45));
             }
         }
 
-        console.log(`馃搻 鍗＄墖灏哄 [v10.0]: ${cardWidth.toFixed(0)} 脳 ${cardHeight.toFixed(0)}, 妯″紡: ${columns === 5 ? '馃煢 姝ｆ柟褰?(5鍒?' : '馃煥 闀锋柟褰?(2鍒?'}`);
-        console.log(`馃搹 鍙敤楂樺害: ${availableHeight.toFixed(0)}, 鏈€澶у崱鐗囬珮搴? ${maxCardHeight.toFixed(0)}`);
+        console.log(`📐 卡片尺寸 [v10.0]: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}, 模式: ${columns === 5 ? '🟦 正方形 (5列)' : '🟨 長方形 (2列)'}`);
+        console.log(`📏 可用高度: ${availableHeight.toFixed(0)}, 最大卡片高度: ${maxCardHeight.toFixed(0)}`);
 
-        // 馃敟 鑻辨枃鍗＄墖鍜屼腑鏂囧崱鐗囩殑鍨傜洿闁撹窛锛堟枃瀛楀湪妗嗗彸閭婏紝涓嶉渶瑕侀澶栭枔璺濓級
+        // 🔥 英文卡片和中文卡片的垂直間距（文字在框右邊，不需要額外間距）
         const leftVerticalSpacing = verticalSpacing;
-        const rightVerticalSpacing = verticalSpacing;  // 馃敟 鑸囧乏鍋寸浉鍚?
-        // 馃敟 瑷堢畻宸﹀伌鍗€鍩燂紙鑻辨枃锛夌殑璧峰浣嶇疆
+        const rightVerticalSpacing = verticalSpacing;  // 🔥 與左側相同
+
+        // 🔥 計算左側區域（英文）的起始位置
         const leftAreaStartX = width * 0.08;
         const leftAreaStartY = height * 0.1;
 
-        // 馃敟 瑷堢畻鍙冲伌鍗€鍩燂紙涓枃锛夌殑璧峰浣嶇疆
+        // 🔥 計算右側區域（中文）的起始位置
         const rightAreaStartX = width * 0.52;
         const rightAreaStartY = height * 0.1;
 
-        console.log(`馃搷 鍗€鍩熶綅缃?`, {
+        console.log(`📍 區域位置:`, {
             leftAreaStartX: leftAreaStartX.toFixed(0),
             leftAreaStartY: leftAreaStartY.toFixed(0),
             rightAreaStartX: rightAreaStartX.toFixed(0),
             rightAreaStartY: rightAreaStartY.toFixed(0)
         });
 
-        // 馃敟 鏍规摎闅ㄦ妯″紡鎺掑垪绛旀
+        // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
         if (this.random === 'same') {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1303,81 +1397,86 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
             shuffledAnswers = rng.shuffle([...currentPagePairs]);
-            console.log('馃幉 浣跨敤鍥哄畾闅ㄦ妯″紡锛岀ó瀛?', seed);
+            console.log('🎲 使用固定隨機模式，種子:', seed);
         } else {
             shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('馃幉 浣跨敤闅ㄦ鎺掑垪妯″紡');
+            console.log('🎲 使用隨機排列模式');
         }
 
-        // 馃敟 鍓靛缓宸﹀伌澶栨锛堝寘鍦嶆墍鏈夎嫳鏂囧崱鐗囷級
+        // 🔥 創建左側外框（包圍所有英文卡片）
         this.createMultiColumnContainerBox(
             leftAreaStartX,
             leftAreaStartY,
             cardWidth,
             cardHeight,
             horizontalSpacing,
-            leftVerticalSpacing,  // 馃敟 鑻辨枃鍗＄墖浣跨敤 leftVerticalSpacing
+            leftVerticalSpacing,  // 🔥 英文卡片使用 leftVerticalSpacing
             columns,
             rows
         );
 
-        // 馃敟 涓嶅壍寤哄彸鍋村妗嗭紙涓枃鍗＄墖涓嶉渶瑕佸妗嗭級
+        // 🔥 不創建右側外框（中文卡片不需要外框）
 
-        // 馃敟 鍓靛缓宸﹀伌鑻辨枃鍗＄墖锛堝琛?2 鍒楋紝鎸夌収闋嗗簭鍑虹従鍕曠暙锛?        currentPagePairs.forEach((pair, index) => {
+        // 🔥 創建左側英文卡片（多行 2 列，按照順序出現動畫）
+        currentPagePairs.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = leftAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = leftAreaStartY + row * (cardHeight + leftVerticalSpacing) + cardHeight / 2;  // 馃敟 鑻辨枃鍗＄墖浣跨敤 leftVerticalSpacing
+            const y = leftAreaStartY + row * (cardHeight + leftVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 leftVerticalSpacing
 
-            const animationDelay = index * 100;  // 馃敟 姣忓€嬪崱鐗囧欢閬?100ms
+            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
             const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
 
-        // 馃敟 鍓靛缓鍙冲伌涓枃鍗＄墖锛堝琛?2 鍒楋級
+        // 🔥 創建右側中文卡片（多行 2 列）
         shuffledAnswers.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = rightAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = rightAreaStartY + row * (cardHeight + rightVerticalSpacing) + cardHeight / 2;  // 馃敟 涓枃鍗＄墖浣跨敤 rightVerticalSpacing
+            const y = rightAreaStartY + row * (cardHeight + rightVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 rightVerticalSpacing
 
-            // 馃敟 鏍规摎鍒楄櫉姹哄畾鏂囧瓧浣嶇疆锛氱涓€鍒楋紙col=0锛夋枃瀛楀湪宸﹂倞锛岀浜屽垪锛坈ol=1锛夋枃瀛楀湪鍙抽倞
+            // 🔥 根據列號決定文字位置：第一列（col=0）文字在左邊，第二列（col=1）文字在右邊
             const textPosition = col === 0 ? 'left' : 'right';
             const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, textPosition);
             this.rightCards.push(card);
         });
 
-        console.log('鉁?宸﹀彸鍒嗛洟浣堝眬锛堝琛?鍒楋級鍓靛缓瀹屾垚');
+        console.log('✅ 左右分離佈局（多行2列）創建完成');
     }
 
-    // 馃敟 鍓靛缓涓婁笅鍒嗛洟浣堝眬 - 澶氳澶氬垪锛?1-30鍊嬪尮閰嶆暩锛?    createTopBottomMultiRows(currentPagePairs, width, height) {
-        console.log('馃搻 鍓靛缓涓婁笅鍒嗛洟浣堝眬 - 澶氳澶氬垪锛?1-30鍊嬪尮閰嶆暩锛?);
+    // 🔥 創建上下分離佈局 - 多行多列（21-30個匹配數）
+    createTopBottomMultiRows(currentPagePairs, width, height) {
+        console.log('📐 創建上下分離佈局 - 多行多列（21-30個匹配數）');
 
         const itemCount = currentPagePairs.length;
 
-        // 馃敟 妾㈡脯瀹瑰櫒楂樺害
+        // 🔥 檢測容器高度
         const isSmallContainer = height < 600;
         const isMediumContainer = height >= 600 && height < 800;
 
-        console.log(`馃搻 瀹瑰櫒灏哄: ${width} 脳 ${height}`, {
+        console.log(`📐 容器尺寸: ${width} × ${height}`, {
             isSmallContainer,
             isMediumContainer,
             isLargeContainer: height >= 800
         });
 
-        // 馃敟 鏍规摎鍖归厤鏁歌▓绠楄鍒楁暩
+        // 🔥 根據匹配數計算行列數
         let rows, columns;
         if (itemCount <= 24) {
-            // 21-24 鍊嬶細3 琛?脳 8 鍒?            rows = 3;
+            // 21-24 個：3 行 × 8 列
+            rows = 3;
             columns = 8;
         } else {
-            // 25-30 鍊嬶細3 琛?脳 10 鍒?            rows = 3;
+            // 25-30 個：3 行 × 10 列
+            rows = 3;
             columns = 10;
         }
 
-        console.log(`馃搳 鍖归厤鏁? ${itemCount}, 浣跨敤 ${rows} 琛?脳 ${columns} 鍒椾綀灞€`);
+        console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局`);
 
-        // 馃敟 鏍规摎瀹瑰櫒澶у皬鍜屽垪鏁歌鏁村崱鐗囧昂瀵?        let cardWidth, cardHeight;
+        // 🔥 根據容器大小和列數調整卡片尺寸
+        let cardWidth, cardHeight;
         if (isSmallContainer) {
             cardWidth = Math.max(50, Math.min(85, width * (0.85 / columns)));
             cardHeight = Math.max(28, Math.min(42, height * 0.11));
@@ -1389,33 +1488,40 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             cardHeight = Math.max(35, Math.min(55, height * 0.13));
         }
 
-        console.log(`馃搻 鍗＄墖灏哄: ${cardWidth.toFixed(0)} 脳 ${cardHeight.toFixed(0)}`);
+        console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
 
-        // 馃敟 瑷堢畻闁撹窛
+        // 🔥 計算間距
         const horizontalSpacing = Math.max(3, width * 0.005);
 
-        // 馃敟 瑷堢畻鏂囧瓧楂樺害鍜屼竴鍊嬪瓧鐨勯枔璺濓紙鐢ㄦ柤涓嬫柟涓枃鍗＄墖锛?        const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
+        // 🔥 計算文字高度和一個字的間距（用於下方中文卡片）
+        const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
         const oneCharSpacing = textHeight;
 
-        // 馃敟 鑻辨枃鍗＄墖鐨勫瀭鐩撮枔璺濓紙涓嶅姞鏂囧瓧楂樺害锛?        const topVerticalSpacing = Math.max(3, height * 0.01);
+        // 🔥 英文卡片的垂直間距（不加文字高度）
+        const topVerticalSpacing = Math.max(3, height * 0.01);
 
-        // 馃敟 涓枃鍗＄墖鐨勫瀭鐩撮枔璺濓紙鍔犳枃瀛楅珮搴?+ 涓€鍊嬪瓧鐨勯枔璺濓級
+        // 🔥 中文卡片的垂直間距（加文字高度 + 一個字的間距）
         const bottomVerticalSpacing = textHeight + oneCharSpacing + Math.max(3, height * 0.01);
 
-        // 馃敟 瑷堢畻涓婃柟鍗€鍩燂紙鑻辨枃锛夌殑璧峰浣嶇疆
+        // 🔥 計算上方區域（英文）的起始位置
         const topAreaStartX = (width - (columns * cardWidth + (columns - 1) * horizontalSpacing)) / 2;
         const topAreaStartY = height * 0.08;
 
-        // 馃敟 瑷堢畻涓婃柟鍗€鍩熺殑绺介珮搴?        const topAreaHeight = rows * cardHeight + (rows - 1) * topVerticalSpacing;
+        // 🔥 計算上方區域的總高度
+        const topAreaHeight = rows * cardHeight + (rows - 1) * topVerticalSpacing;
 
-        // 馃敟 瑷堢畻涓嬫柟鍗€鍩熺殑绺介珮搴︼紙鍖呭惈鏂囧瓧锛?        const bottomAreaHeight = rows * cardHeight + (rows - 1) * bottomVerticalSpacing;
+        // 🔥 計算下方區域的總高度（包含文字）
+        const bottomAreaHeight = rows * cardHeight + (rows - 1) * bottomVerticalSpacing;
 
-        // 馃敟 瑷堢畻涓嬫柟鍗€鍩燂紙涓枃锛夌殑璧峰浣嶇疆锛岀⒑淇濇墍鏈夊収瀹归兘鑳介’绀?        const bottomAreaStartX = topAreaStartX;
-        const availableBottomSpace = height - topAreaStartY - topAreaHeight - 10;  // 10px 鐐轰笂涓嬪崁鍩熼枔璺?        const bottomAreaStartY = Math.max(
-            topAreaStartY + topAreaHeight + 10,  // 鑷冲皯鍦ㄤ笂鏂瑰崁鍩熶笅鏂?10px
-            height - bottomAreaHeight - 10  // 纰轰繚涓嬫柟鍗€鍩熷畬鍏ㄩ’绀?        );
+        // 🔥 計算下方區域（中文）的起始位置，確保所有內容都能顯示
+        const bottomAreaStartX = topAreaStartX;
+        const availableBottomSpace = height - topAreaStartY - topAreaHeight - 10;  // 10px 為上下區域間距
+        const bottomAreaStartY = Math.max(
+            topAreaStartY + topAreaHeight + 10,  // 至少在上方區域下方 10px
+            height - bottomAreaHeight - 10  // 確保下方區域完全顯示
+        );
 
-        console.log(`馃搷 鍗€鍩熶綅缃?`, {
+        console.log(`📍 區域位置:`, {
             topAreaStartX: topAreaStartX.toFixed(0),
             topAreaStartY: topAreaStartY.toFixed(0),
             topAreaHeight: topAreaHeight.toFixed(0),
@@ -1425,7 +1531,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             availableBottomSpace: availableBottomSpace.toFixed(0)
         });
 
-        // 馃敟 鏍规摎闅ㄦ妯″紡鎺掑垪绛旀
+        // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
         if (this.random === 'same') {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1433,63 +1539,65 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
             shuffledAnswers = rng.shuffle([...currentPagePairs]);
-            console.log('馃幉 浣跨敤鍥哄畾闅ㄦ妯″紡锛岀ó瀛?', seed);
+            console.log('🎲 使用固定隨機模式，種子:', seed);
         } else {
             shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('馃幉 浣跨敤闅ㄦ鎺掑垪妯″紡');
+            console.log('🎲 使用隨機排列模式');
         }
 
-        // 馃敟 鍓靛缓涓婃柟澶栨锛堝寘鍦嶆墍鏈夎嫳鏂囧崱鐗囷級
+        // 🔥 創建上方外框（包圍所有英文卡片）
         this.createMultiColumnContainerBox(
             topAreaStartX,
             topAreaStartY,
             cardWidth,
             cardHeight,
             horizontalSpacing,
-            topVerticalSpacing,  // 馃敟 鑻辨枃鍗＄墖浣跨敤 topVerticalSpacing
+            topVerticalSpacing,  // 🔥 英文卡片使用 topVerticalSpacing
             columns,
             rows
         );
 
-        // 馃敟 涓嶅壍寤轰笅鏂瑰妗嗭紙涓枃鍗＄墖涓嶉渶瑕佸妗嗭級
+        // 🔥 不創建下方外框（中文卡片不需要外框）
 
-        // 馃敟 鍓靛缓涓婃柟鑻辨枃鍗＄墖锛堝琛屽鍒楋紝鎸夌収闋嗗簭鍑虹従鍕曠暙锛?        currentPagePairs.forEach((pair, index) => {
+        // 🔥 創建上方英文卡片（多行多列，按照順序出現動畫）
+        currentPagePairs.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = topAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 馃敟 鑻辨枃鍗＄墖浣跨敤 topVerticalSpacing
+            const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
 
-            const animationDelay = index * 100;  // 馃敟 姣忓€嬪崱鐗囧欢閬?100ms
+            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
             const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
 
-        // 馃敟 鍓靛缓涓嬫柟涓枃鍗＄墖锛堝琛屽鍒楋級
+        // 🔥 創建下方中文卡片（多行多列）
         shuffledAnswers.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = bottomAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = bottomAreaStartY + row * (cardHeight + bottomVerticalSpacing) + cardHeight / 2;  // 馃敟 涓枃鍗＄墖浣跨敤 bottomVerticalSpacing
+            const y = bottomAreaStartY + row * (cardHeight + bottomVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 bottomVerticalSpacing
 
             const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id);
             this.rightCards.push(card);
         });
 
-        console.log('鉁?涓婁笅鍒嗛洟浣堝眬锛堝琛屽鍒楋級鍓靛缓瀹屾垚');
+        console.log('✅ 上下分離佈局（多行多列）創建完成');
     }
 
-    // 馃敟 鍓靛缓娣峰悎缍叉牸浣堝眬锛?1鍊嬩互涓婂尮閰嶆暩锛?    createMixedGridLayout(currentPagePairs, width, height) {
-        console.log('馃搻 鍓靛缓娣峰悎缍叉牸浣堝眬锛?1鍊嬩互涓婂尮閰嶆暩锛?);
+    // 🔥 創建混合網格佈局（11個以上匹配數）
+    createMixedGridLayout(currentPagePairs, width, height) {
+        console.log('📐 創建混合網格佈局（11個以上匹配數）');
 
         const itemCount = currentPagePairs.length;
-        const totalCards = itemCount * 2;  // 鑻辨枃 + 涓枃
+        const totalCards = itemCount * 2;  // 英文 + 中文
 
-        // 馃敟 妾㈡脯瀹瑰櫒楂樺害鍜屽搴︼紙v7.0 淇京锛氭牴鎿氬搴﹀垽瀹氾紝涓嶅彧鐪嬮珮搴︼級
-        const isMobilePortrait = width < 500;  // 鎵嬫鐩村悜
-        const isSmallContainer = height < 500;  // 妤靛皬楂樺害
+        // 🔥 檢測容器高度和寬度（v7.0 修復：根據寬度判定，不只看高度）
+        const isMobilePortrait = width < 500;  // 手機直向
+        const isSmallContainer = height < 500;  // 極小高度
         const isMediumContainer = height >= 500 && height < 800;
 
-        console.log(`馃搻 瀹瑰櫒灏哄: ${width} 脳 ${height}`, {
+        console.log(`📐 容器尺寸: ${width} × ${height}`, {
             isMobilePortrait,
             isSmallContainer,
             isMediumContainer,
@@ -1497,90 +1605,111 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             totalCards
         });
 
-        // 馃敟 鏍规摎瀹瑰櫒楂樺害鍜岀附鍗＄墖鏁歌▓绠楀垪鏁革紙v7.0 淇京锛氭墜姗熺洿鍚戝劒鍏堜娇鐢?5 鍒楋級
+        // 🔥 根據容器高度和總卡片數計算列數（v7.0 修復：手機直向優先使用 5 列）
         let columns = 1;
 
         if (isMobilePortrait) {
-            // 馃敟 v7.0 鏂板锛氭墜姗熺洿鍚戯紙瀵害 < 500px锛? 鍎厛浣跨敤 5 鍒?            if (totalCards > 40) {
-                columns = 5;  // 41-60 寮靛崱鐗囷細5 鍒?            } else if (totalCards > 30) {
-                columns = 5;  // 31-40 寮靛崱鐗囷細5 鍒楋紙鏀圭偤 5 鍒楋級
+            // 🔥 v7.0 新增：手機直向（寬度 < 500px）- 優先使用 5 列
+            if (totalCards > 40) {
+                columns = 5;  // 41-60 張卡片：5 列
+            } else if (totalCards > 30) {
+                columns = 5;  // 31-40 張卡片：5 列（改為 5 列）
             } else if (totalCards > 20) {
-                columns = 5;  // 21-30 寮靛崱鐗囷細5 鍒楋紙鏀圭偤 5 鍒楋級
+                columns = 5;  // 21-30 張卡片：5 列（改為 5 列）
             } else {
-                columns = 5;  // 20 寮典互涓嬪崱鐗囷細5 鍒楋紙鏀圭偤 5 鍒楋級
+                columns = 5;  // 20 張以下卡片：5 列（改為 5 列）
             }
         } else if (isSmallContainer) {
-            // 灏忓鍣紙楂樺害 < 500px锛夛細鏇存棭鍒囨彌鍒板鍒?            if (totalCards > 40) {
-                columns = 5;  // 41-60 寮靛崱鐗囷細5 鍒?            } else if (totalCards > 30) {
-                columns = 4;  // 31-40 寮靛崱鐗囷細4 鍒?            } else {
-                columns = 3;  // 22-30 寮靛崱鐗囷細3 鍒?            }
+            // 小容器（高度 < 500px）：更早切換到多列
+            if (totalCards > 40) {
+                columns = 5;  // 41-60 張卡片：5 列
+            } else if (totalCards > 30) {
+                columns = 4;  // 31-40 張卡片：4 列
+            } else {
+                columns = 3;  // 22-30 張卡片：3 列
+            }
         } else if (isMediumContainer) {
-            // 涓瓑瀹瑰櫒锛堥珮搴?500-800px锛夛細閬╀腑鐨勫垏鎻涢粸
+            // 中等容器（高度 500-800px）：適中的切換點
             if (totalCards > 48) {
-                columns = 6;  // 49-60 寮靛崱鐗囷細6 鍒?            } else if (totalCards > 36) {
-                columns = 5;  // 37-48 寮靛崱鐗囷細5 鍒?            } else if (totalCards > 24) {
-                columns = 4;  // 25-36 寮靛崱鐗囷細4 鍒?            } else {
-                columns = 3;  // 22-24 寮靛崱鐗囷細3 鍒?            }
+                columns = 6;  // 49-60 張卡片：6 列
+            } else if (totalCards > 36) {
+                columns = 5;  // 37-48 張卡片：5 列
+            } else if (totalCards > 24) {
+                columns = 4;  // 25-36 張卡片：4 列
+            } else {
+                columns = 3;  // 22-24 張卡片：3 列
+            }
         } else {
-            // 澶у鍣紙楂樺害 >= 800px锛夛細杓冩櫄鍒囨彌鍒板鍒?            if (totalCards > 48) {
-                columns = 6;  // 49-60 寮靛崱鐗囷細6 鍒?            } else if (totalCards > 36) {
-                columns = 5;  // 37-48 寮靛崱鐗囷細5 鍒?            } else {
-                columns = 4;  // 22-36 寮靛崱鐗囷細4 鍒?            }
+            // 大容器（高度 >= 800px）：較晚切換到多列
+            if (totalCards > 48) {
+                columns = 6;  // 49-60 張卡片：6 列
+            } else if (totalCards > 36) {
+                columns = 5;  // 37-48 張卡片：5 列
+            } else {
+                columns = 4;  // 22-36 張卡片：4 列
+            }
         }
 
-        console.log(`馃搳 绺藉崱鐗囨暩: ${totalCards}, 瀹瑰櫒楂樺害: ${height}px, 浣跨敤 ${columns} 鍒椾綀灞€`);
+        console.log(`📊 總卡片數: ${totalCards}, 容器高度: ${height}px, 使用 ${columns} 列佈局`);
 
-        // 馃敟 鏍规摎鍒楁暩鍜屽鍣ㄥぇ灏忚鏁村崱鐗囧搴?        let dynamicCardWidth;
+        // 🔥 根據列數和容器大小調整卡片寬度
+        let dynamicCardWidth;
         if (isSmallContainer) {
-            // 灏忓鍣細鏇村皬鐨勫崱鐗?            dynamicCardWidth = {
-                3: Math.max(80, Math.min(120, width * 0.11)),    // 11% 瀵害
-                4: Math.max(70, Math.min(100, width * 0.09)),    // 9% 瀵害
-                5: Math.max(60, Math.min(85, width * 0.075))     // 7.5% 瀵害
-            }[columns];
-        } else if (isMediumContainer) {
-            // 涓瓑瀹瑰櫒锛氶仼涓殑鍗＄墖
+            // 小容器：更小的卡片
             dynamicCardWidth = {
-                3: Math.max(90, Math.min(130, width * 0.115)),   // 11.5% 瀵害
-                4: Math.max(75, Math.min(110, width * 0.095)),   // 9.5% 瀵害
-                5: Math.max(65, Math.min(95, width * 0.08)),     // 8% 瀵害
-                6: Math.max(60, Math.min(85, width * 0.07))      // 7% 瀵害
-            }[columns];
-        } else {
-            // 澶у鍣細杓冨ぇ鐨勫崱鐗?            dynamicCardWidth = {
-                4: Math.max(80, Math.min(120, width * 0.1)),     // 10% 瀵害
-                5: Math.max(70, Math.min(100, width * 0.085)),   // 8.5% 瀵害
-                6: Math.max(60, Math.min(90, width * 0.075))     // 7.5% 瀵害
-            }[columns];
-        }
-
-        // 馃敟 鏍规摎鍒楁暩鍜屽鍣ㄥぇ灏忚鏁村崱鐗囬珮搴?        let dynamicCardHeight;
-        if (isSmallContainer) {
-            // 灏忓鍣細鏇村皬鐨勫崱鐗囬珮搴?            dynamicCardHeight = {
-                3: Math.max(35, Math.min(50, height * 0.07)),    // 7% 楂樺害
-                4: Math.max(32, Math.min(45, height * 0.06)),    // 6% 楂樺害
-                5: Math.max(30, Math.min(42, height * 0.055))    // 5.5% 楂樺害
+                3: Math.max(80, Math.min(120, width * 0.11)),    // 11% 寬度
+                4: Math.max(70, Math.min(100, width * 0.09)),    // 9% 寬度
+                5: Math.max(60, Math.min(85, width * 0.075))     // 7.5% 寬度
             }[columns];
         } else if (isMediumContainer) {
-            // 涓瓑瀹瑰櫒锛氶仼涓殑鍗＄墖楂樺害
-            dynamicCardHeight = {
-                3: Math.max(38, Math.min(55, height * 0.075)),   // 7.5% 楂樺害
-                4: Math.max(34, Math.min(48, height * 0.065)),   // 6.5% 楂樺害
-                5: Math.max(32, Math.min(45, height * 0.06)),    // 6% 楂樺害
-                6: Math.max(30, Math.min(42, height * 0.055))    // 5.5% 楂樺害
+            // 中等容器：適中的卡片
+            dynamicCardWidth = {
+                3: Math.max(90, Math.min(130, width * 0.115)),   // 11.5% 寬度
+                4: Math.max(75, Math.min(110, width * 0.095)),   // 9.5% 寬度
+                5: Math.max(65, Math.min(95, width * 0.08)),     // 8% 寬度
+                6: Math.max(60, Math.min(85, width * 0.07))      // 7% 寬度
             }[columns];
         } else {
-            // 澶у鍣細杓冨ぇ鐨勫崱鐗囬珮搴?            dynamicCardHeight = {
-                4: Math.max(35, Math.min(50, height * 0.07)),    // 7% 楂樺害
-                5: Math.max(33, Math.min(48, height * 0.065)),   // 6.5% 楂樺害
-                6: Math.max(30, Math.min(45, height * 0.06))     // 6% 楂樺害
+            // 大容器：較大的卡片
+            dynamicCardWidth = {
+                4: Math.max(80, Math.min(120, width * 0.1)),     // 10% 寬度
+                5: Math.max(70, Math.min(100, width * 0.085)),   // 8.5% 寬度
+                6: Math.max(60, Math.min(90, width * 0.075))     // 7.5% 寬度
             }[columns];
         }
 
-        console.log(`馃搻 鍗＄墖灏哄: ${dynamicCardWidth.toFixed(0)} 脳 ${dynamicCardHeight.toFixed(0)}`);
+        // 🔥 根據列數和容器大小調整卡片高度
+        let dynamicCardHeight;
+        if (isSmallContainer) {
+            // 小容器：更小的卡片高度
+            dynamicCardHeight = {
+                3: Math.max(35, Math.min(50, height * 0.07)),    // 7% 高度
+                4: Math.max(32, Math.min(45, height * 0.06)),    // 6% 高度
+                5: Math.max(30, Math.min(42, height * 0.055))    // 5.5% 高度
+            }[columns];
+        } else if (isMediumContainer) {
+            // 中等容器：適中的卡片高度
+            dynamicCardHeight = {
+                3: Math.max(38, Math.min(55, height * 0.075)),   // 7.5% 高度
+                4: Math.max(34, Math.min(48, height * 0.065)),   // 6.5% 高度
+                5: Math.max(32, Math.min(45, height * 0.06)),    // 6% 高度
+                6: Math.max(30, Math.min(42, height * 0.055))    // 5.5% 高度
+            }[columns];
+        } else {
+            // 大容器：較大的卡片高度
+            dynamicCardHeight = {
+                4: Math.max(35, Math.min(50, height * 0.07)),    // 7% 高度
+                5: Math.max(33, Math.min(48, height * 0.065)),   // 6.5% 高度
+                6: Math.max(30, Math.min(45, height * 0.06))     // 6% 高度
+            }[columns];
+        }
 
-        // 馃敟 鍓靛缓鎵€鏈夊崱鐗囨暩鎿氾紙鑻辨枃 + 涓枃锛?        const allCards = [];
+        console.log(`📐 卡片尺寸: ${dynamicCardWidth.toFixed(0)} × ${dynamicCardHeight.toFixed(0)}`);
 
-        // 娣诲姞鑻辨枃鍗＄墖
+        // 🔥 創建所有卡片數據（英文 + 中文）
+        const allCards = [];
+
+        // 添加英文卡片
         currentPagePairs.forEach((pair) => {
             allCards.push({
                 type: 'question',
@@ -1590,7 +1719,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             });
         });
 
-        // 娣诲姞涓枃鍗＄墖
+        // 添加中文卡片
         currentPagePairs.forEach((pair) => {
             allCards.push({
                 type: 'answer',
@@ -1600,76 +1729,82 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             });
         });
 
-        // 馃敟 鏍规摎闅ㄦ妯″紡鎺掑垪鎵€鏈夊崱鐗?        let shuffledCards;
+        // 🔥 根據隨機模式排列所有卡片
+        let shuffledCards;
         if (this.random === 'same') {
-            // 鍥哄畾闅ㄦ妯″紡锛氫娇鐢ㄦ椿鍕?ID 浣滅偤绋瓙
+            // 固定隨機模式：使用活動 ID 作為種子
             const urlParams = new URLSearchParams(window.location.search);
             const activityId = urlParams.get('activityId') || 'default-seed';
             const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
-            // 浣跨敤鍥哄畾绋瓙鍓靛缓闅ㄦ鏁哥敓鎴愬櫒
+            // 使用固定種子創建隨機數生成器
             const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
             shuffledCards = rng.shuffle(allCards);
-            console.log('馃幉 娣峰悎缍叉牸浣跨敤鍥哄畾闅ㄦ妯″紡锛岀ó瀛?', seed);
+            console.log('🎲 混合網格使用固定隨機模式，種子:', seed);
         } else {
-            // 姣忔涓嶅悓妯″紡锛氶毃姗熸帓鍒?            shuffledCards = Phaser.Utils.Array.Shuffle(allCards);
-            console.log('馃幉 娣峰悎缍叉牸浣跨敤闅ㄦ鎺掑垪妯″紡');
+            // 每次不同模式：隨機排列
+            shuffledCards = Phaser.Utils.Array.Shuffle(allCards);
+            console.log('🎲 混合網格使用隨機排列模式');
         }
 
-        // 馃敟 瑷堢畻琛屾暩
+        // 🔥 計算行數
         const rows = Math.ceil(totalCards / columns);
-        console.log(`馃搳 琛屾暩: ${rows}`);
+        console.log(`📊 行數: ${rows}`);
 
-        // 馃敟 鏍规摎瀹瑰櫒楂樺害鍕曟厠瑾挎暣鍙敤绌洪枔鍜岃捣濮嬩綅缃?        let availableHeightPercent, startYPercent;
+        // 🔥 根據容器高度動態調整可用空間和起始位置
+        let availableHeightPercent, startYPercent;
 
         if (isSmallContainer) {
-            // 灏忓鍣細浣跨敤鏇村绌洪枔锛屾洿绶婃箠鐨勪綀灞€
-            availableHeightPercent = 0.85;  // 浣跨敤 85% 鐨勯珮搴?            startYPercent = 0.05;  // 寰?5% 楂樺害闁嬪
+            // 小容器：使用更多空間，更緊湊的佈局
+            availableHeightPercent = 0.85;  // 使用 85% 的高度
+            startYPercent = 0.05;  // 從 5% 高度開始
         } else if (isMediumContainer) {
-            // 涓瓑瀹瑰櫒锛氬钩琛＄殑浣堝眬
-            availableHeightPercent = 0.80;  // 浣跨敤 80% 鐨勯珮搴?            startYPercent = 0.08;  // 寰?8% 楂樺害闁嬪
+            // 中等容器：平衡的佈局
+            availableHeightPercent = 0.80;  // 使用 80% 的高度
+            startYPercent = 0.08;  // 從 8% 高度開始
         } else {
-            // 澶у鍣細鑸掗仼鐨勪綀灞€
-            availableHeightPercent = 0.75;  // 浣跨敤 75% 鐨勯珮搴?            startYPercent = 0.12;  // 寰?12% 楂樺害闁嬪
+            // 大容器：舒適的佈局
+            availableHeightPercent = 0.75;  // 使用 75% 的高度
+            startYPercent = 0.12;  // 從 12% 高度開始
         }
 
         const availableHeight = height * availableHeightPercent;
         const startY = height * startYPercent;
 
-        console.log(`馃搻 浣堝眬鍙冩暩:`, {
+        console.log(`📐 佈局參數:`, {
             availableHeight: availableHeight.toFixed(0),
             startY: startY.toFixed(0),
             availableHeightPercent: `${(availableHeightPercent * 100).toFixed(0)}%`,
             startYPercent: `${(startYPercent * 100).toFixed(0)}%`
         });
 
-        // 馃敟 瑷堢畻鍨傜洿闁撹窛
+        // 🔥 計算垂直間距
         const totalCardHeight = rows * dynamicCardHeight;
         const verticalSpacing = Math.max(3, (availableHeight - totalCardHeight) / (rows + 1));
 
-        console.log(`馃搹 鍨傜洿闁撹窛: ${verticalSpacing.toFixed(1)}px`);
+        console.log(`📏 垂直間距: ${verticalSpacing.toFixed(1)}px`);
 
-        // 馃敟 瑷堢畻姘村钩闁撹窛
-        const horizontalSpacing = Math.max(5, dynamicCardWidth * 0.08);  // 鍗＄墖瀵害鐨?8%锛屾渶灏?5px
+        // 🔥 計算水平間距
+        const horizontalSpacing = Math.max(5, dynamicCardWidth * 0.08);  // 卡片寬度的 8%，最小 5px
 
-        // 馃敟 瑷堢畻缍叉牸璧峰浣嶇疆
-        const gridStartX = width * 0.05;  // 寰?5% 浣嶇疆闁嬪
+        // 🔥 計算網格起始位置
+        const gridStartX = width * 0.05;  // 從 5% 位置開始
         const gridStartY = startY;
 
-        console.log(`馃搷 缍叉牸浣嶇疆:`, {
+        console.log(`📍 網格位置:`, {
             gridStartX: gridStartX.toFixed(0),
             gridStartY: gridStartY.toFixed(0),
             horizontalSpacing: horizontalSpacing.toFixed(1)
         });
 
-        // 馃敟 鍓靛缓娣峰悎缍叉牸鍗＄墖锛堟寜鐓ч爢搴忓嚭鐝惧嫊鐣級
+        // 🔥 創建混合網格卡片（按照順序出現動畫）
         shuffledCards.forEach((cardData, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = gridStartX + col * (dynamicCardWidth + horizontalSpacing) + dynamicCardWidth / 2;
             const y = gridStartY + row * (dynamicCardHeight + verticalSpacing) + dynamicCardHeight / 2;
 
-            const animationDelay = index * 100;  // 馃敟 姣忓€嬪崱鐗囧欢閬?100ms
+            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
 
             if (cardData.type === 'question') {
                 const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId, animationDelay, cardData.pair.imageUrl, cardData.pair.audioUrl);
@@ -1680,31 +1815,38 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
         });
 
-        console.log('鉁?娣峰悎缍叉牸浣堝眬鍓靛缓瀹屾垚');
+        console.log('✅ 混合網格佈局創建完成');
     }
 
-    // 馃敟 鍓靛缓娣峰悎浣堝眬锛堣嫳鏂囧崱鐗囧拰涓枃妗嗘贩鍚堟帓鍒楋級
+    // 🔥 創建混合佈局（英文卡片和中文框混合排列）
     createMixedLayout(currentPagePairs, width, height, cardWidth, cardHeight) {
-        console.log('馃幃 鍓靛缓娣峰悎浣堝眬锛堣嫳鏂囧崱鐗囧湪涓枃妗嗗収锛屽彲浜ゆ彌浣嶇疆锛?);
+        console.log('🎮 創建混合佈局（英文卡片在中文框內，可交換位置）');
 
         const itemCount = currentPagePairs.length;
 
-        // 馃摑 闊挎噳寮忔娓細鍒ゆ柗鏄惁闇€瑕佷娇鐢ㄧ穵婀婃ā寮?        // 馃敟 淇京锛氭墜姗熺洿鍚戞噳瑭蹭篃浣跨敤绶婃箠妯″紡
-        // isMobileDevice锛氭墜姗熻ō鍌欙紙瀵害 < 768px锛?        // isLandscapeMobile锛氭墜姗熸┇鍚戞ā寮忥紙瀵害 > 楂樺害 涓?楂樺害 < 500px锛?        // isTinyHeight锛氭サ灏忛珮搴︼紙楂樺害 < 400px锛?        // 馃敟 v13.0锛氬垎闆㈡墜姗熺洿鍚戝拰姗悜鐨勪綀灞€閭忚集
-        // isCompactMode锛氱穵婀婃ā寮忥紙鎵嬫鐩村悜 鎴?鎵嬫姗悜 鎴?妤靛皬楂樺害锛?        const isMobileDevice = width < 768;  // 鎵嬫瑷倷锛堝搴?< 768px锛?        const isPortraitMode = height > width;  // 鐩村悜妯″紡锛堥珮 > 瀵級
-        const isLandscapeMode = width > height;  // 姗悜妯″紡锛堝 > 楂橈級
-        const isLandscapeMobile = isLandscapeMode && height < 500;  // 鎵嬫姗悜
-        const isTinyHeight = height < 400;  // 妤靛皬楂樺害
+        // 📝 響應式檢測：判斷是否需要使用緊湊模式
+        // 🔥 修復：手機直向應該也使用緊湊模式
+        // isMobileDevice：手機設備（寬度 < 768px）
+        // isLandscapeMobile：手機橫向模式（寬度 > 高度 且 高度 < 500px）
+        // isTinyHeight：極小高度（高度 < 400px）
+        // 🔥 v13.0：分離手機直向和橫向的佈局邏輯
+        // isCompactMode：緊湊模式（手機直向 或 手機橫向 或 極小高度）
+        const isMobileDevice = width < 768;  // 手機設備（寬度 < 768px）
+        const isPortraitMode = height > width;  // 直向模式（高 > 寬）
+        const isLandscapeMode = width > height;  // 橫向模式（寬 > 高）
+        const isLandscapeMobile = isLandscapeMode && height < 500;  // 手機橫向
+        const isTinyHeight = height < 400;  // 極小高度
 
-        // 鉁?v38.0锛氭坊鍔?iPad 妾㈡脯锛堝搴?768-1280px锛屽寘鎷?iPad Air銆乮Pad Pro锛?        const isTablet = width >= 768 && width <= 1280;
-        const isIPad = isTablet;  // iPad 鍒ュ悕
+        // ✅ v38.0：添加 iPad 檢測（寬度 768-1280px，包括 iPad Air、iPad Pro）
+        const isTablet = width >= 768 && width <= 1280;
+        const isIPad = isTablet;  // iPad 別名
 
-        // 馃敟 v13.0锛氬垎闆㈢殑绶婃箠妯″紡妾㈡脯
+        // 🔥 v13.0：分離的緊湊模式檢測
         const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
-        const isPortraitCompactMode = isMobileDevice && isPortraitMode;  // 鎵嬫鐩村悜绶婃箠妯″紡
-        const isLandscapeCompactMode = isLandscapeMobile || isTinyHeight;  // 鎵嬫姗悜绶婃箠妯″紡
+        const isPortraitCompactMode = isMobileDevice && isPortraitMode;  // 手機直向緊湊模式
+        const isLandscapeCompactMode = isLandscapeMobile || isTinyHeight;  // 手機橫向緊湊模式
 
-        console.log('馃摫 闊挎噳寮忔娓?[v38.0]:', {
+        console.log('📱 響應式檢測 [v38.0]:', {
             width,
             height,
             isPortraitMode,
@@ -1716,41 +1858,54 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             aspectRatio: (width / height).toFixed(2)
         });
 
-        // 馃敟 鏍规摎鍖归厤鏁稿拰妯″紡姹哄畾鍒楁暩鍜屾鐨勫昂瀵?        let cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, chineseTextHeight, verticalSpacing;
-        // 馃摑 totalUnitHeight = 鍠厓绺介珮搴︼紙鍖呭惈鑻辨枃鍗＄墖楂樺害 + 涓枃鏂囧瓧楂樺害锛?
-        // 馃摑 涓枃鏂囧瓧楂樺害鏈冩牴鎿氭ā寮忓嫊鎱嬭鏁?        // 绶婃箠妯″紡锛?6px瀛楅珨 鈫?~16px楂樺害
-        // 姝ｅ父妯″紡锛?8px瀛楅珨 鈫?~18px楂樺害
+        // 🔥 根據匹配數和模式決定列數和框的尺寸
+        let cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, chineseTextHeight, verticalSpacing;
+        // 📝 totalUnitHeight = 單元總高度（包含英文卡片高度 + 中文文字高度）
 
-        // 馃敟 闋愬厛鑱叉槑 chineseFontSizes 璁婇噺锛堢敤鏂煎瓨鍎叉墍鏈変腑鏂囨枃瀛楃殑瀵﹂殯瀛楅珨澶у皬锛?        let chineseFontSizes;
+        // 📝 中文文字高度會根據模式動態調整
+        // 緊湊模式：16px字體 → ~16px高度
+        // 正常模式：18px字體 → ~18px高度
+
+        // 🔥 預先聲明 chineseFontSizes 變量（用於存儲所有中文文字的實際字體大小）
+        let chineseFontSizes;
 
         if (isCompactMode) {
-            // 馃摑 绶婃箠妯″紡锛堟墜姗熸┇鍚戞垨妤靛皬楂樺害锛?            // 鐩锛氭笡灏戝瀭鐩寸┖闁撲綌鐢紝澧炲姞鍒楁暩
-            console.log('馃摫 浣跨敤绶婃箠妯″紡浣堝眬');
+            // 📝 緊湊模式（手機橫向或極小高度）
+            // 目標：減少垂直空間佔用，增加列數
+            console.log('📱 使用緊湊模式佈局');
 
-            // 馃敟 v10.0 妾㈡脯鏄惁鏈夊湒鐗囷紙鍙鏈変换浣曚竴鍊嬪湒鐗囧氨閫插叆姝ｆ柟褰㈡ā寮忥級
+            // 🔥 v10.0 檢測是否有圖片（只要有任何一個圖片就進入正方形模式）
             const hasImages = currentPagePairs.some(pair =>
                 pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId
             );
-            console.log(`馃攳 [v10.0] 绶婃箠妯″紡鍦栫墖妾㈡脯: hasImages=${hasImages}, mode=${hasImages ? '馃煢 姝ｆ柟褰㈡ā寮? : '馃煥 闀锋柟褰㈡ā寮?}`);
+            console.log(`🔍 [v10.0] 緊湊模式圖片檢測: hasImages=${hasImages}, mode=${hasImages ? '🟦 正方形模式' : '🟨 長方形模式'}`);
 
-            // 馃敟 v18.0锛氬嫊鎱嬪垪鏁歌▓绠?            // 鏍规摎姣忛爜鍖归厤鏁稿嫊鎱嬭鏁村垪鏁稿拰鍗＄墖灏哄
-            // 20 鍊?鈫?5 鍒楋紝10 鍊?鈫?4 鍒楋紝5 鍊?鈫?3 鍒?            // 鉁?v37.0锛氭┇鍚戞ā寮忓浐瀹?7 鍒楋紙3 琛岋級
+            // 🔥 v18.0：動態列數計算
+            // 根據每頁匹配數動態調整列數和卡片尺寸
+            // 20 個 → 5 列，10 個 → 4 列，5 個 → 3 列
+            // ✅ v37.0：橫向模式固定 7 列（3 行）
             if (isLandscapeCompactMode) {
-                // 姗悜妯″紡锛氬浐瀹?7 鍒楋紙鍏呭垎鍒╃敤瀵害锛?                cols = 7;  // 姗悜妯″紡锛氬浐瀹?7 鍒?            } else {
-                // 鐩村悜妯″紡锛氫繚鎸佸師鏈夐倧杓?                if (itemCount >= 16) {
-                    cols = 5;  // 16-20 鍊嬶細5 鍒?                } else if (itemCount >= 9) {
-                    cols = 4;  // 9-15 鍊嬶細4 鍒?                } else if (itemCount >= 4) {
-                    cols = 3;  // 4-8 鍊嬶細3 鍒?                } else {
-                    cols = Math.min(itemCount, 2);  // 1-3 鍊嬶細2 鍒楁垨鏇村皯
+                // 橫向模式：固定 7 列（充分利用寬度）
+                cols = 7;  // 橫向模式：固定 7 列
+            } else {
+                // 直向模式：保持原有邏輯
+                if (itemCount >= 16) {
+                    cols = 5;  // 16-20 個：5 列
+                } else if (itemCount >= 9) {
+                    cols = 4;  // 9-15 個：4 列
+                } else if (itemCount >= 4) {
+                    cols = 3;  // 4-8 個：3 列
+                } else {
+                    cols = Math.min(itemCount, 2);  // 1-3 個：2 列或更少
                 }
             }
-            cols = Math.min(cols, itemCount);  // 纰轰繚鍒楁暩涓嶈秴閬庨爡鐩暩
+            cols = Math.min(cols, itemCount);  // 確保列數不超過項目數
 
-            console.log(`馃敟 [v37.0] 鍕曟厠鍒楁暩瑷堢畻: itemCount=${itemCount}, cols=${cols}, isLandscapeCompactMode=${isLandscapeCompactMode}`);
+            console.log(`🔥 [v37.0] 動態列數計算: itemCount=${itemCount}, cols=${cols}, isLandscapeCompactMode=${isLandscapeCompactMode}`);
 
-            // 馃敟 v20.0锛氭坊鍔犺┏绱扮殑瑷倷灏哄鍜屽楂樻瘮瑾胯│淇℃伅
+            // 🔥 v20.0：添加詳細的設備尺寸和寬高比調試信息
             const aspectRatio = width / height;
-            console.log(`馃摫 [v20.0] 瑷倷灏哄鍜屽楂樻瘮瑭崇窗淇℃伅:`, {
+            console.log(`📱 [v20.0] 設備尺寸和寬高比詳細信息:`, {
                 width,
                 height,
                 aspectRatio: aspectRatio.toFixed(3),
@@ -1758,50 +1913,56 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 isLandscapeMode,
                 isPortraitCompactMode,
                 isLandscapeCompactMode,
-                deviceType: width < 768 ? '鎵嬫' : width < 1024 ? '骞虫澘' : '妗岄潰',
-                screenCategory: aspectRatio > 1.5 ? '瀵灑骞? : aspectRatio > 1.2 ? '妯欐簴铻㈠箷' : '鐩村悜铻㈠箷'
+                deviceType: width < 768 ? '手機' : width < 1024 ? '平板' : '桌面',
+                screenCategory: aspectRatio > 1.5 ? '寬螢幕' : aspectRatio > 1.2 ? '標準螢幕' : '直向螢幕'
             });
 
-            // 瑷堢畻琛屾暩
+            // 計算行數
             const rows = Math.ceil(itemCount / cols);
 
-            // 馃摑 瑷堢畻鍙敤鍨傜洿绌洪枔
-            const topBottomMargin = 30;  // 涓婁笅閭婅窛
-            const minVerticalSpacing = 2;  // 鏈€灏忓瀭鐩撮枔璺?            const availableHeight = height - topBottomMargin;  // 鍙敤楂樺害
+            // 📝 計算可用垂直空間
+            const topBottomMargin = 30;  // 上下邊距
+            const minVerticalSpacing = 2;  // 最小垂直間距
+            const availableHeight = height - topBottomMargin;  // 可用高度
 
-            // 馃摑 瑷堢畻姣忚鐨勯珮搴︼紙鍒濇浼扮畻锛?            // 鍏紡锛?鍙敤楂樺害 - 闁撹窛绺藉拰) / 琛屾暩
+            // 📝 計算每行的高度（初步估算）
+            // 公式：(可用高度 - 間距總和) / 行數
             const rowHeight = (availableHeight - minVerticalSpacing * (rows + 1)) / rows;
 
-            // 馃摑 鏍规摎鍒楁暩鍕曟厠瑷堢畻鏈€澶у崱鐗囬珮搴?            // 馃敟 v19.0锛氭牴鎿氬垪鏁歌嚜鍕曡鏁村崱鐗囧昂瀵?            // 5 鍒楋細65px锛? 鍒楋細75px锛? 鍒楋細85px锛? 鍒楋細95px
+            // 📝 根據列數動態計算最大卡片高度
+            // 🔥 v19.0：根據列數自動調整卡片尺寸
+            // 5 列：65px，4 列：75px，3 列：85px，2 列：95px
             let maxCardHeight;
             let chineseTextHeightBase;
             let verticalSpacingBase;
 
             if (isPortraitCompactMode) {
-                // 馃敟 v19.0锛氭墜姗熺洿鍚?- 鏍规摎鍒楁暩鍕曟厠瑾挎暣
+                // 🔥 v19.0：手機直向 - 根據列數動態調整
                 if (cols === 5) {
-                    // 5 鍒楋細绶婃箠鎺掑垪锛圵ordwall 棰ㄦ牸锛?                    maxCardHeight = hasImages ? 65 : 50;
+                    // 5 列：緊湊排列（Wordwall 風格）
+                    maxCardHeight = hasImages ? 65 : 50;
                     chineseTextHeightBase = 18;
                     verticalSpacingBase = 3;
                 } else if (cols === 4) {
-                    // 4 鍒楋細涓瓑鎺掑垪
+                    // 4 列：中等排列
                     maxCardHeight = hasImages ? 75 : 60;
                     chineseTextHeightBase = 20;
                     verticalSpacingBase = 3;
                 } else if (cols === 3) {
-                    // 3 鍒楋細瀵瑔鎺掑垪
+                    // 3 列：寬鬆排列
                     maxCardHeight = hasImages ? 85 : 70;
                     chineseTextHeightBase = 22;
                     verticalSpacingBase = 4;
                 } else {
-                    // 2 鍒楁垨鏇村皯锛氭渶瀵瑔鎺掑垪
+                    // 2 列或更少：最寬鬆排列
                     maxCardHeight = hasImages ? 95 : 80;
                     chineseTextHeightBase = 24;
                     verticalSpacingBase = 5;
                 }
-                console.log('馃摫 [v19.0] 鎵嬫鐩村悜妯″紡 - 鏍规摎鍒楁暩瑾挎暣鍗＄墖灏哄:', { cols, maxCardHeight, chineseTextHeightBase, verticalSpacingBase });
+                console.log('📱 [v19.0] 手機直向模式 - 根據列數調整卡片尺寸:', { cols, maxCardHeight, chineseTextHeightBase, verticalSpacingBase });
             } else if (isLandscapeCompactMode) {
-                // 馃敟 v19.0锛氭墜姗熸┇鍚?- 鏍规摎鍒楁暩鍕曟厠瑾挎暣锛堟洿绶婃箠锛?                // 鉁?v37.0锛氭坊鍔?7 鍒楃殑瑷畾
+                // 🔥 v19.0：手機橫向 - 根據列數動態調整（更緊湊）
+                // ✅ v37.0：添加 7 列的設定
                 if (cols === 7) {
                     maxCardHeight = hasImages ? 40 : 30;
                     chineseTextHeightBase = 10;
@@ -1827,88 +1988,104 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                     chineseTextHeightBase = 18;
                     verticalSpacingBase = 3;
                 }
-                console.log('馃摫 [v37.0] 鎵嬫姗悜妯″紡 - 鏍规摎鍒楁暩瑾挎暣鍗＄墖灏哄:', { cols, maxCardHeight, chineseTextHeightBase, verticalSpacingBase });
+                console.log('📱 [v37.0] 手機橫向模式 - 根據列數調整卡片尺寸:', { cols, maxCardHeight, chineseTextHeightBase, verticalSpacingBase });
             } else {
-                // 鍏朵粬妯″紡锛堜笉鎳夎┎鍩疯鍒伴€欒！锛?                maxCardHeight = hasImages ? 65 : 50;
+                // 其他模式（不應該執行到這裡）
+                maxCardHeight = hasImages ? 65 : 50;
                 chineseTextHeightBase = 18;
                 verticalSpacingBase = 3;
             }
 
-            // 馃敟 瑷堢畻妗嗗搴?            // v10.0锛氬鏋滄湁鍦栫墖锛屾瀵害 = 鍗＄墖楂樺害锛堟鏂瑰舰锛夛紱鍚﹀墖妗嗗搴?> 鍗＄墖楂樺害锛堥暦鏂瑰舰锛?            // 馃敟 v23.0锛氭牴鎿氬垪鏁稿嫊鎱嬭鏁撮倞璺濓紝纰轰繚 5 鍒楀崱鐗囧湪 iPhone 14 (390px) 涓婂畬鏁撮’绀?            // iPhone 14 鐩村悜 (390px) 鎳夎┎鏈?330px 鍙敤瀵害锛屾墍浠ラ倞璺濇噳瑭叉槸 30px 脳 2 = 60px
+            // 🔥 計算框寬度
+            // v10.0：如果有圖片，框寬度 = 卡片高度（正方形）；否則框寬度 > 卡片高度（長方形）
+            // 🔥 v23.0：根據列數動態調整邊距，確保 5 列卡片在 iPhone 14 (390px) 上完整顯示
+            // iPhone 14 直向 (390px) 應該有 330px 可用寬度，所以邊距應該是 30px × 2 = 60px
             let horizontalMargin;
-            // 鉁?v37.0锛氱偤 7 鍒楁坊鍔犻倞璺濊ō瀹?            if (cols === 7) {
-                // 7 鍒楋細鏈€灏忛倞璺濓紙10px锛? 姗悜妯″紡鍏呭垎鍒╃敤瀵害
+            // ✅ v37.0：為 7 列添加邊距設定
+            if (cols === 7) {
+                // 7 列：最小邊距（10px）- 橫向模式充分利用寬度
                 horizontalMargin = 10;
             } else if (cols === 6) {
-                // 6 鍒楋細杓冨皬閭婅窛锛?5px锛?                horizontalMargin = 15;
+                // 6 列：較小邊距（15px）
+                horizontalMargin = 15;
             } else if (cols === 5) {
-                // 5 鍒楋細閭婅窛 = 30px锛堢⒑淇?390px 瀵害涓嬫湁 330px 鍙敤瀵害锛?                horizontalMargin = 30;
+                // 5 列：邊距 = 30px（確保 390px 寬度下有 330px 可用寬度）
+                horizontalMargin = 30;
             } else if (cols === 4) {
-                // 4 鍒楋細涓瓑閭婅窛锛?0px锛?                horizontalMargin = 20;
+                // 4 列：中等邊距（20px）
+                horizontalMargin = 20;
             } else {
-                // 3 鍒楁垨鏇村皯锛氳純澶ч倞璺濓紙25px锛?                horizontalMargin = 25;
+                // 3 列或更少：較大邊距（25px）
+                horizontalMargin = 25;
             }
 
             const maxFrameWidth = hasImages
-                ? (itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250)  // 姝ｆ柟褰㈡ā寮?                : (itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250);  // 闀锋柟褰㈡ā寮?            frameWidth = hasImages
-                ? Math.min(maxCardHeight, (width - 2 * horizontalMargin) / cols)  // 姝ｆ柟褰細frameWidth = cardHeight
-                : Math.min(maxFrameWidth, (width - 2 * horizontalMargin) / cols);  // 闀锋柟褰細frameWidth 鍙互鏇村
+                ? (itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250)  // 正方形模式
+                : (itemCount <= 5 ? 280 : itemCount <= 10 ? 230 : itemCount <= 20 ? 180 : 250);  // 長方形模式
+            frameWidth = hasImages
+                ? Math.min(maxCardHeight, (width - 2 * horizontalMargin) / cols)  // 正方形：frameWidth = cardHeight
+                : Math.min(maxFrameWidth, (width - 2 * horizontalMargin) / cols);  // 長方形：frameWidth 可以更寬
 
-            // 馃敟 鏅鸿兘闋愬厛瑷堢畻鎵€鏈変腑鏂囨枃瀛楃殑瀵﹂殯瀛楅珨澶у皬
-            console.log('馃攳 闁嬪闋愬厛瑷堢畻涓枃瀛楅珨澶у皬...');
-            const tempCardHeight = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight * 0.6)));  // 鑷ㄦ檪鍗＄墖楂樺害
+            // 🔥 智能預先計算所有中文文字的實際字體大小
+            console.log('🔍 開始預先計算中文字體大小...');
+            const tempCardHeight = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight * 0.6)));  // 臨時卡片高度
             chineseFontSizes = currentPagePairs.map(pair => {
-                // 鉁?v27.2锛氳▓绠楀垵濮嬪瓧楂斿ぇ灏忥紙鏀圭偤 脳 0.4锛?                let fontSize = Math.max(24, Math.min(48, tempCardHeight * 0.4));
+                // ✅ v27.2：計算初始字體大小（改為 × 0.4）
+                let fontSize = Math.max(24, Math.min(48, tempCardHeight * 0.4));
 
-                // 鉁?v27.0锛氭牴鎿氭枃瀛楅暦搴﹁鏁村瓧楂斿ぇ灏忥紙1-2瀛楃浉鍚岋紝3-4瀛楃府灏忥級
+                // ✅ v27.0：根據文字長度調整字體大小（1-2字相同，3-4字縮小）
                 const textLength = pair.answer ? pair.answer.length : 0;
                 if (textLength <= 2) {
-                    fontSize = fontSize * 1.0;  // 1-2 鍊嬪瓧锛?00%锛堜繚鎸佸師澶у皬锛?                } else if (textLength <= 4) {
-                    fontSize = fontSize * 0.8;  // 3-4 鍊嬪瓧锛氱府灏?20%
+                    fontSize = fontSize * 1.0;  // 1-2 個字：100%（保持原大小）
+                } else if (textLength <= 4) {
+                    fontSize = fontSize * 0.8;  // 3-4 個字：縮小 20%
                 } else if (textLength <= 6) {
-                    fontSize = fontSize * 0.7;  // 5-6 鍊嬪瓧锛氱府灏?30%
+                    fontSize = fontSize * 0.7;  // 5-6 個字：縮小 30%
                 } else {
-                    fontSize = fontSize * 0.6;  // 7+ 鍊嬪瓧锛氱府灏?40%
+                    fontSize = fontSize * 0.6;  // 7+ 個字：縮小 40%
                 }
-                fontSize = Math.max(18, fontSize);  // 鏈€灏忓瓧楂斿ぇ灏?18px
+                fontSize = Math.max(18, fontSize);  // 最小字體大小 18px
 
-                // 鍓靛缓鑷ㄦ檪鏂囧瓧灏嶈薄渚嗘脯閲忓搴?                const tempText = this.add.text(0, 0, pair.answer, {
+                // 創建臨時文字對象來測量寬度
+                const tempText = this.add.text(0, 0, pair.answer, {
                     fontSize: `${fontSize}px`,
                     fontFamily: 'Arial',
                     fontStyle: 'bold'
                 });
 
-                // 濡傛灉鏂囧瓧瀵害瓒呴亷妗嗗搴︾殑 85%锛岄€蹭竴姝ョ府灏忓瓧楂?                const maxTextWidth = (frameWidth - 10) * 0.85;
+                // 如果文字寬度超過框寬度的 85%，進一步縮小字體
+                const maxTextWidth = (frameWidth - 10) * 0.85;
                 while (tempText.width > maxTextWidth && fontSize > 14) {
                     fontSize -= 1;
                     tempText.setFontSize(fontSize);
                 }
 
-                // 閵锋瘈鑷ㄦ檪鏂囧瓧灏嶈薄
+                // 銷毀臨時文字對象
                 tempText.destroy();
 
                 return fontSize;
             });
 
-            // 鎵惧嚭鏈€澶х殑瀛楅珨澶у皬
+            // 找出最大的字體大小
             const maxChineseFontSize = Math.max(...chineseFontSizes);
             const minChineseFontSize = Math.min(...chineseFontSizes);
             const avgChineseFontSize = (chineseFontSizes.reduce((a, b) => a + b, 0) / chineseFontSizes.length).toFixed(1);
 
-            console.log('馃搳 涓枃瀛楅珨澶у皬绡勫湇:', {
+            console.log('📊 中文字體大小範圍:', {
                 min: minChineseFontSize,
                 max: maxChineseFontSize,
                 average: avgChineseFontSize,
                 allSizes: chineseFontSizes
             });
 
-            // 馃敟 v19.0锛氭牴鎿氬垪鏁稿嫊鎱嬭鏁翠腑鏂囨枃瀛楅珮搴﹀拰闁撹窛
+            // 🔥 v19.0：根據列數動態調整中文文字高度和間距
             let dynamicVerticalSpacing;
 
-            // 浣跨敤涔嬪墠瑷堢畻鐨勫熀绀庡€?            chineseTextHeight = chineseTextHeightBase;
+            // 使用之前計算的基礎值
+            chineseTextHeight = chineseTextHeightBase;
             dynamicVerticalSpacing = verticalSpacingBase;
 
-            // 鏍规摎鍒楁暩瑾挎暣瀛楅珨澶у皬闄愬埗
+            // 根據列數調整字體大小限制
             let maxFontSizeLimit;
             if (cols === 5) {
                 maxFontSizeLimit = isPortraitCompactMode ? 15 : 12;
@@ -1922,7 +2099,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
 
             chineseFontSize = `${Math.min(maxChineseFontSize, maxFontSizeLimit)}px`;
 
-            console.log('馃摫 [v19.0] 鏍规摎鍒楁暩瑾挎暣涓枃鏂囧瓧:', {
+            console.log('📱 [v19.0] 根據列數調整中文文字:', {
                 cols,
                 chineseTextHeight,
                 chineseFontSize,
@@ -1930,48 +2107,55 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 maxFontSizeLimit
             });
 
-            console.log('馃搻 鍕曟厠鍨傜洿闁撹窛:', {
+            console.log('📐 動態垂直間距:', {
                 chineseTextHeight,
                 dynamicVerticalSpacing,
                 formula: `max(5, ${maxChineseFontSize} * 0.2) = ${dynamicVerticalSpacing}`
             });
 
-            // 馃敟 v23.0锛氭坊鍔犻倞璺濊瑭︿俊鎭?            console.log('馃敟 [v23.0] 閭婅窛瑷堢畻:', {
+            // 🔥 v23.0：添加邊距調試信息
+            console.log('🔥 [v23.0] 邊距計算:', {
                 cols,
                 width,
                 horizontalMargin,
                 availableWidth: width - 2 * horizontalMargin,
                 frameWidth,
                 totalFrameWidth: frameWidth * cols,
-                formula: `horizontalMargin = ${cols === 5 ? 30 : cols === 4 ? 20 : 25}px (鍥哄畾鍊?`
+                formula: `horizontalMargin = ${cols === 5 ? 30 : cols === 4 ? 20 : 25}px (固定值)`
             });
 
-            // 鉁?v26.0锛氬厛瑷堢畻 dynamicVerticalSpacing锛屼互渚垮湪 cardHeightInFrame 瑷堢畻涓娇鐢?            // 鍨傜洿闁撹窛 = 鍙敤楂樺害 脳 0.03锛堢瘎鍦?10-40px锛?            dynamicVerticalSpacing = Math.max(10, Math.min(40, availableHeight * 0.03));
+            // ✅ v26.0：先計算 dynamicVerticalSpacing，以便在 cardHeightInFrame 計算中使用
+            // 垂直間距 = 可用高度 × 0.03（範圍 10-40px）
+            dynamicVerticalSpacing = Math.max(10, Math.min(40, availableHeight * 0.03));
 
-            // 閲嶆柊瑷堢畻鍗＄墖楂樺害锛堣€冩叜瀵﹂殯鐨勪腑鏂囨枃瀛楅珮搴︼級
-            // 馃敟 v10.0锛氬鏋滄湁鍦栫墖锛宑ardHeightInFrame = frameWidth锛堟鏂瑰舰锛夛紱鍚﹀墖鏍规摎鍙敤绌洪枔瑷堢畻
+            // 重新計算卡片高度（考慮實際的中文文字高度）
+            // 🔥 v10.0：如果有圖片，cardHeightInFrame = frameWidth（正方形）；否則根據可用空間計算
             if (hasImages) {
-                // 姝ｆ柟褰㈡ā寮忥細鍗＄墖楂樺害 = 妗嗗搴?                cardHeightInFrame = frameWidth;
-                console.log(`馃敟 [v10.0] 姝ｆ柟褰㈡ā寮忥細cardHeightInFrame = frameWidth = ${frameWidth}`);
+                // 正方形模式：卡片高度 = 框寬度
+                cardHeightInFrame = frameWidth;
+                console.log(`🔥 [v10.0] 正方形模式：cardHeightInFrame = frameWidth = ${frameWidth}`);
             } else {
-                // 闀锋柟褰㈡ā寮忥細鏍规摎鍙敤绌洪枔瑷堢畻
+                // 長方形模式：根據可用空間計算
                 cardHeightInFrame = Math.min(maxCardHeight, Math.max(20, Math.floor(rowHeight - chineseTextHeight - dynamicVerticalSpacing)));
-                console.log(`馃敟 [v10.0] 闀锋柟褰㈡ā寮忥細cardHeightInFrame = ${cardHeightInFrame}`);
+                console.log(`🔥 [v10.0] 長方形模式：cardHeightInFrame = ${cardHeightInFrame}`);
             }
 
-            // 鉁?v25.0锛氬湪 cardHeightInFrame 瑷堢畻瀹屾垚寰岋紝浣跨敤鍕曟厠瑷堢畻鑰屼笉鏄浐瀹氬€?            // 鉁?v29.0锛氭柟妗?B - 澧炲姞闋愮暀绲︿腑鏂囧瓧鐨勯珮搴︼紙寰?脳 0.4 鏀圭偤 脳 0.5锛?            // 涓枃鏂囧瓧楂樺害 = 鍗＄墖楂樺害 脳 0.5锛堢⒑淇濅腑鏂囧瓧鏈夎冻澶犵┖闁擄級
+            // ✅ v25.0：在 cardHeightInFrame 計算完成後，使用動態計算而不是固定值
+            // ✅ v29.0：方案 B - 增加預留給中文字的高度（從 × 0.4 改為 × 0.5）
+            // 中文文字高度 = 卡片高度 × 0.5（確保中文字有足夠空間）
             chineseTextHeight = cardHeightInFrame * 0.5;
 
-            // 鉁?v26.0锛氭柟妗?A - 鍦ㄨ嫳鏂囧崱鐗囧拰涓枃瀛椾箣闁撳姞鍏?verticalSpacing
-            // 馃摑 鍠厓绺介珮搴?= 鑻辨枃鍗＄墖楂樺害 + verticalSpacing + 涓枃鏂囧瓧楂樺害 + verticalSpacing
-            // 鉁?v27.3锛氫繚鎸佸師濮嬬祼妲嬶紝涓婁笅閮芥湁 verticalSpacing
-            // 鉁?v35.0锛氬彇娑堜笂闈㈢殑 verticalSpacing锛堝彧淇濈暀涓嬮潰鐨勶級
+            // ✅ v26.0：方案 A - 在英文卡片和中文字之間加入 verticalSpacing
+            // 📝 單元總高度 = 英文卡片高度 + verticalSpacing + 中文文字高度 + verticalSpacing
+            // ✅ v27.3：保持原始結構，上下都有 verticalSpacing
+            // ✅ v35.0：取消上面的 verticalSpacing（只保留下面的）
             totalUnitHeight = cardHeightInFrame + chineseTextHeight + dynamicVerticalSpacing;
 
-            // 馃敟 v15.0锛氬皣 dynamicVerticalSpacing 璩﹀€肩郸 verticalSpacing锛屼互渚垮緦绾屼娇鐢?            verticalSpacing = dynamicVerticalSpacing;
-            console.log('馃敟 [v15.0] 绶婃箠妯″紡 verticalSpacing 宸茶ō缃?', { dynamicVerticalSpacing, verticalSpacing, isPortraitCompactMode });
+            // 🔥 v15.0：將 dynamicVerticalSpacing 賦值給 verticalSpacing，以便後續使用
+            verticalSpacing = dynamicVerticalSpacing;
+            console.log('🔥 [v15.0] 緊湊模式 verticalSpacing 已設置:', { dynamicVerticalSpacing, verticalSpacing, isPortraitCompactMode });
 
-            console.log('馃敟 绶婃箠妯″紡鏅鸿兘鍕曟厠灏哄 [v10.0]:', {
+            console.log('🔥 緊湊模式智能動態尺寸 [v10.0]:', {
                 rows,
                 availableHeight,
                 rowHeight,
@@ -1983,20 +2167,22 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 dynamicVerticalSpacing,
                 totalUnitHeight,
                 ratio: (frameWidth / cardHeightInFrame).toFixed(1) + ':1',
-                mode: hasImages ? '馃煢 姝ｆ柟褰㈡ā寮? : '馃煥 闀锋柟褰㈡ā寮?
+                mode: hasImages ? '🟦 正方形模式' : '🟨 長方形模式'
             });
         } else {
-            // 馃敟 妗岄潰鍕曟厠闊挎噳寮忎綀灞€锛堝惈鎸夐垥绌洪枔锛?            console.log('馃枼锔?浣跨敤妗岄潰鍕曟厠闊挎噳寮忎綀灞€锛堝惈鎸夐垥绌洪枔锛?);
+            // 🔥 桌面動態響應式佈局（含按鈕空間）
+            console.log('🖥️ 使用桌面動態響應式佈局（含按鈕空間）');
 
-            // 馃敟 绗浂姝ワ細妾㈡脯鏄惁鏈夊湒鐗?            const hasImages = currentPagePairs.some(pair =>
+            // 🔥 第零步：檢測是否有圖片
+            const hasImages = currentPagePairs.some(pair =>
                 pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId
             );
 
-            // 馃敟 v8.0 瑭崇窗瑾胯│锛氭鏌ユ瘡鍊嬪崱鐗囩殑鍦栫墖瀛楁
-            console.log('馃攳 瑭崇窗鍦栫墖妾㈡脯:', {
+            // 🔥 v8.0 詳細調試：檢查每個卡片的圖片字段
+            console.log('🔍 詳細圖片檢測:', {
                 totalPairs: currentPagePairs.length,
                 hasImages,
-                mode: hasImages ? '馃煢 姝ｆ柟褰㈡ā寮? : '馃煥 闀锋柟褰㈡ā寮?,
+                mode: hasImages ? '🟦 正方形模式' : '🟨 長方形模式',
                 pairDetails: currentPagePairs.slice(0, 3).map((pair, idx) => ({
                     index: idx,
                     imageUrl: pair.imageUrl,
@@ -2008,18 +2194,23 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             });
 
             // ============================================================================
-            // 鉁?v42.0锛歩Pad 瀹瑰櫒澶у皬鍒嗛绯荤当 - 鏍规摎瀹瑰櫒澶у皬鍕曟厠瑾挎暣鎵€鏈夊弮鏁?            // ============================================================================
+            // ✅ v42.0：iPad 容器大小分類系統 - 根據容器大小動態調整所有參數
+            // ============================================================================
 
-            // 馃敟 绗竴姝ワ細iPad 瀹瑰櫒澶у皬鍒嗛鍑芥暩
-            // 鉁?v42.2锛氭牴鎿氬搴﹀拰楂樺害鐨勭祫鍚堝垎椤烇紝鑰屼笉鏄彧鐪嬪搴?            // 閫欐ǎ 768脳1024 鍜?1024脳768 鏈冭鍒嗛鐐哄悓涓€鍊嬭ō鍌?            function classifyIPadSize(w, h) {
-                // 鐛插彇瀵害鍜岄珮搴︾殑鏈€灏忓€煎拰鏈€澶у€?                const minDim = Math.min(w, h);
+            // 🔥 第一步：iPad 容器大小分類函數
+            // ✅ v42.2：根據寬度和高度的組合分類，而不是只看寬度
+            // 這樣 768×1024 和 1024×768 會被分類為同一個設備
+            function classifyIPadSize(w, h) {
+                // 獲取寬度和高度的最小值和最大值
+                const minDim = Math.min(w, h);
                 const maxDim = Math.max(w, h);
 
-                // 鏍规摎鏈€灏忓昂瀵稿垎椤炶ō鍌?                // iPad mini: 768脳1024 鎴?1024脳768 鈫?minDim = 768
-                // iPad: 810脳1080 鎴?1080脳810 鈫?minDim = 810
-                // iPad Air: 820脳1180 鎴?1180脳820 鈫?minDim = 820
-                // iPad Pro 11": 834脳1194 鎴?1194脳834 鈫?minDim = 834
-                // iPad Pro 12.9": 1024脳1366 鎴?1366脳1024 鈫?minDim = 1024
+                // 根據最小尺寸分類設備
+                // iPad mini: 768×1024 或 1024×768 → minDim = 768
+                // iPad: 810×1080 或 1080×810 → minDim = 810
+                // iPad Air: 820×1180 或 1180×820 → minDim = 820
+                // iPad Pro 11": 834×1194 或 1194×834 → minDim = 834
+                // iPad Pro 12.9": 1024×1366 或 1366×1024 → minDim = 1024
 
                 let deviceSize;
                 if (minDim <= 768) {
@@ -2034,7 +2225,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                     deviceSize = 'xlarge';      // iPad Pro 12.9": 1024
                 }
 
-                // 鏍规摎鏂瑰悜娣诲姞寰岀洞
+                // 根據方向添加後綴
                 const aspectRatio = w / h;
                 const isPortrait = aspectRatio < 1;
                 const orientation = isPortrait ? '_portrait' : '_landscape';
@@ -2042,9 +2233,12 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 return deviceSize + orientation;
             }
 
-            // 馃敟 绗簩姝ワ細鏍规摎 iPad 澶у皬鐛插彇鏈€鍎弮鏁?            // 鉁?v42.2锛氭牴鎿氳ō鍌欏皪瑙掔窔闀峰害鍜屾柟鍚戣ō缃弮鏁?            function getIPadOptimalParams(iPadSize) {
+            // 🔥 第二步：根據 iPad 大小獲取最優參數
+            // ✅ v42.2：根據設備對角線長度和方向設置參數
+            function getIPadOptimalParams(iPadSize) {
                 const params = {
-                    // 璞庡睆妯″紡锛堥珮搴?> 瀵害锛?                    small_portrait: {
+                    // 豎屏模式（高度 > 寬度）
+                    small_portrait: {
                         sideMargin: 15,
                         topButtonArea: 35,
                         bottomButtonArea: 35,
@@ -2084,7 +2278,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                         verticalSpacing: 40,
                         chineseFontSize: 34
                     },
-                    // 姗睆妯″紡锛堝搴?> 楂樺害锛?                    small_landscape: {
+                    // 橫屏模式（寬度 > 高度）
+                    small_landscape: {
                         sideMargin: 12,
                         topButtonArea: 30,
                         bottomButtonArea: 30,
@@ -2128,21 +2323,22 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 return params[iPadSize];
             }
 
-            // 馃敟 绗笁姝ワ細瀹氱京鎸夐垥鍗€鍩熷拰閭婅窛
-            // 鉁?v42.0锛氫娇鐢?iPad 瀹瑰櫒鍒嗛绯荤当
+            // 🔥 第三步：定義按鈕區域和邊距
+            // ✅ v42.0：使用 iPad 容器分類系統
             let topButtonAreaHeight, bottomButtonAreaHeight, sideMargin;
             let iPadSize = null;
             let iPadParams = null;
 
             if (isIPad) {
-                // iPad锛氫娇鐢ㄥ鍣ㄥ垎椤炵郴绲?                iPadSize = classifyIPadSize(width, height);
+                // iPad：使用容器分類系統
+                iPadSize = classifyIPadSize(width, height);
                 iPadParams = getIPadOptimalParams(iPadSize);
 
                 topButtonAreaHeight = iPadParams.topButtonArea;
                 bottomButtonAreaHeight = iPadParams.bottomButtonArea;
                 sideMargin = iPadParams.sideMargin;
 
-                console.log('馃摫 [v42.0] iPad 瀹瑰櫒鍒嗛:', {
+                console.log('📱 [v42.0] iPad 容器分類:', {
                     size: iPadSize,
                     width: width,
                     height: height,
@@ -2153,183 +2349,211 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                     }
                 });
             } else {
-                topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 闋傞儴鎸夐垥鍗€鍩燂紙50-80px锛?                bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 搴曢儴鎸夐垥鍗€鍩燂紙50-80px锛?                sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 宸﹀彸閭婅窛锛?0-80px锛?            }
+                topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
+                bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
+                sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 左右邊距（30-80px）
+            }
 
-            // 馃敟 绗洓姝ワ細瑷堢畻鍙敤绌洪枔锛堟墸闄ゆ寜閳曞崁鍩燂級
+            // 🔥 第四步：計算可用空間（扣除按鈕區域）
             const availableWidth = width - sideMargin * 2;
             const availableHeight = height - topButtonAreaHeight - bottomButtonAreaHeight;
 
-            // 馃敟 绗簲姝ワ細瑷堢畻铻㈠箷瀵珮姣斿拰闁撹窛
+            // 🔥 第五步：計算螢幕寬高比和間距
             const aspectRatio = width / height;
 
-            // 馃敟 绗叚姝ワ細瑷堢畻姘村钩鍜屽瀭鐩撮枔璺?            // 鉁?v42.0锛歩Pad 浣跨敤瀹瑰櫒鍒嗛鐨勫浐瀹氶枔璺濓紝鍏朵粬瑷倷淇濈暀鍘熸湁閭忚集
+            // 🔥 第六步：計算水平和垂直間距
+            // ✅ v42.0：iPad 使用容器分類的固定間距，其他設備保留原有邏輯
             let horizontalSpacing, verticalSpacing;
 
             if (isIPad && iPadParams) {
-                // iPad锛氫娇鐢ㄥ鍣ㄥ垎椤炵殑鍥哄畾闁撹窛
+                // iPad：使用容器分類的固定間距
                 horizontalSpacing = iPadParams.horizontalSpacing;
                 verticalSpacing = iPadParams.verticalSpacing;
 
-                console.log('馃摫 [v42.0] iPad 闁撹窛瑷畾:', {
+                console.log('📱 [v42.0] iPad 間距設定:', {
                     size: iPadSize,
                     horizontalSpacing: horizontalSpacing,
                     verticalSpacing: verticalSpacing
                 });
             } else {
-                // 闈?iPad 瑷倷锛氫繚鐣欏師鏈夐倧杓?                // 鏍规摎瀵珮姣斿嫊鎱嬭鏁存按骞抽枔璺?                let horizontalSpacingBase;
+                // 非 iPad 設備：保留原有邏輯
+                // 根據寬高比動態調整水平間距
+                let horizontalSpacingBase;
                 if (aspectRatio > 2.0) {
-                    horizontalSpacingBase = width * 0.02;  // 瓒呭铻㈠箷锛?%
+                    horizontalSpacingBase = width * 0.02;  // 超寬螢幕：2%
                 } else if (aspectRatio > 1.5) {
-                    horizontalSpacingBase = width * 0.015; // 瀵灑骞曪細1.5%
+                    horizontalSpacingBase = width * 0.015; // 寬螢幕：1.5%
                 } else {
-                    horizontalSpacingBase = width * 0.01;  // 妯欐簴/鐩村悜锛?%
+                    horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
                 }
                 horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
             }
 
             if (hasImages) {
-                // 馃煢 姝ｆ柟褰㈡ā寮忥紙鏈夊湒鐗囷級
-                console.log('馃煢 浣跨敤姝ｆ柟褰㈠崱鐗囨ā寮?);
+                // 🟦 正方形模式（有圖片）
+                console.log('🟦 使用正方形卡片模式');
 
-                // 馃敟 绗竷姝ワ細瑷堢畻鍨傜洿闁撹窛锛堝熀鏂艰灑骞曢珮搴︼級
-                // 鉁?v42.0锛歩Pad 宸插湪涓婇潰瑷疆锛岄潪 iPad 瑷倷鍦ㄦ瑷堢畻
+                // 🔥 第七步：計算垂直間距（基於螢幕高度）
+                // ✅ v42.0：iPad 已在上面設置，非 iPad 設備在此計算
                 if (!isIPad) {
-                    // 闈?iPad 瑷倷锛氫繚鐣欏師鏈夐倧杓?                    // 浣跨敤鍥哄畾鐨勫瀭鐩撮枔璺濓紝閬垮厤浼扮畻涓嶆簴纰哄皫鑷撮枔璺濆お灏?                    // 鍨傜洿闁撹窛 = 铻㈠箷楂樺害鐨?4%锛岀瘎鍦嶏細40-80px
+                    // 非 iPad 設備：保留原有邏輯
+                    // 使用固定的垂直間距，避免估算不準確導致間距太小
+                    // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
                     verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
                 }
 
-                // 馃敟 绗叚姝ワ細瀹氱京鏈€灏忔鏂瑰舰鍗＄墖澶у皬
-                // 鉁?v39.0锛歩Pad 鍕曟厠瑾挎暣鏈€灏忓崱鐗囧昂瀵?                let minSquareSize;
+                // 🔥 第六步：定義最小正方形卡片大小
+                // ✅ v39.0：iPad 動態調整最小卡片尺寸
+                let minSquareSize;
                 if (isIPad) {
-                    // iPad锛氭牴鎿氬鍣ㄥ搴﹀嫊鎱嬭▓绠楁渶灏忓崱鐗囧昂瀵?                    // 5 鍒?+ 6 鍊嬮枔璺?= 5 * minSquareSize + 6 * horizontalSpacing = availableWidth
+                    // iPad：根據容器寬度動態計算最小卡片尺寸
+                    // 5 列 + 6 個間距 = 5 * minSquareSize + 6 * horizontalSpacing = availableWidth
                     // minSquareSize = (availableWidth - 6 * horizontalSpacing) / 5
                     minSquareSize = Math.max(120, (availableWidth - 6 * horizontalSpacing) / 5);
-                    console.log('馃摫 [v39.0] iPad 鍕曟厠鍗＄墖灏哄:', {
+                    console.log('📱 [v39.0] iPad 動態卡片尺寸:', {
                         availableWidth: availableWidth.toFixed(1),
                         horizontalSpacing: horizontalSpacing.toFixed(1),
                         calculatedMinSize: minSquareSize.toFixed(1)
                     });
                 } else {
-                    // 鍏朵粬瑷倷锛氫娇鐢ㄥ浐瀹氭渶灏忓昂瀵?                    minSquareSize = 150;  // 鏈€灏忔鏂瑰舰灏哄150脳150
+                    // 其他設備：使用固定最小尺寸
+                    minSquareSize = 150;  // 最小正方形尺寸150×150
                 }
 
-                // 馃敟 绗竷姝ワ細瑷堢畻鏈€澶у彲鑳界殑鍒楁暩
-                // 浣跨敤鏈€灏忓崱鐗囧昂瀵镐締瑷堢畻鏈€澶у彲鑳藉垪鏁?                const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minSquareSize + horizontalSpacing));
+                // 🔥 第七步：計算最大可能的列數
+                // 使用最小卡片尺寸來計算最大可能列數
+                const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minSquareSize + horizontalSpacing));
 
-                // 馃敟 绗叓姝ワ細鏅鸿兘瑷堢畻鏈€浣冲垪鏁革紙鍎厛浣跨敤鏈€澶у彲鑳藉垪鏁革級
-                // 绛栫暐锛氱洝鍙兘澶氱殑鍒楁暩锛屽厖鍒嗗埄鐢ㄦ按骞崇┖闁?                let optimalCols;
+                // 🔥 第八步：智能計算最佳列數（優先使用最大可能列數）
+                // 策略：盡可能多的列數，充分利用水平空間
+                let optimalCols;
 
-                // 鉁?v38.0锛歩Pad 鐗规畩铏曠悊 - 鍥哄畾 5 鍒楋紙鍍?Wordwall 涓€妯ｏ級
+                // ✅ v38.0：iPad 特殊處理 - 固定 5 列（像 Wordwall 一樣）
                 if (isIPad) {
-                    optimalCols = 5;  // iPad锛氬浐瀹?5 鍒?                    console.log('馃摫 [v38.0] iPad 妾㈡脯锛氬挤鍒朵娇鐢?5 鍒椾綀灞€');
+                    optimalCols = 5;  // iPad：固定 5 列
+                    console.log('📱 [v38.0] iPad 檢測：強制使用 5 列佈局');
                 } else {
-                    // 馃敟 P2-2: 绨″寲鍒楁暩瑷堢畻閭忚集 - 绉婚櫎閲嶈鍒嗘敮
-                    // 瑷畾鏈€澶у垪鏁搁檺鍒讹紙閬垮厤鍗＄墖閬庡皬锛?                    const maxColsLimit = 10;  // 鏈€澶?0鍒?
+                    // 🔥 P2-2: 簡化列數計算邏輯 - 移除重複分支
+                    // 設定最大列數限制（避免卡片過小）
+                    const maxColsLimit = 10;  // 最多10列
+
                     if (aspectRatio > 1.5) {
-                        // 瀵灑骞曪紙瓒呭 > 2.0 鎴?瀵?> 1.5锛? 鍎厛浣跨敤鏈€澶у彲鑳藉垪鏁?                        optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
+                        // 寬螢幕（超寬 > 2.0 或 寬 > 1.5）- 優先使用最大可能列數
+                        optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
                     } else if (aspectRatio > 1.2) {
-                        // 妯欐簴铻㈠箷锛?:3, 3:2锛? 绋嶅井闄愬埗鍒楁暩
+                        // 標準螢幕（4:3, 3:2）- 稍微限制列數
                         optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.8), itemCount);
                     } else {
-                        // 鐩村悜铻㈠箷锛?:16锛? 闄愬埗鍒楁暩
+                        // 直向螢幕（9:16）- 限制列數
                         optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.5), itemCount);
                     }
                 }
 
-                // 纰轰繚鍒楁暩鍦ㄥ悎鐞嗙瘎鍦嶅収
+                // 確保列數在合理範圍內
                 optimalCols = Math.max(1, Math.min(optimalCols, itemCount));
 
-                // 馃敟 绗節姝ワ細瑷堢畻琛屾暩
+                // 🔥 第九步：計算行數
                 const optimalRows = Math.ceil(itemCount / optimalCols);
 
-                // 馃敟 绗崄姝ワ細瑷堢畻姝ｆ柟褰㈠崱鐗囧昂瀵革紙杩唬瑷堢畻锛岀⒑淇濅笉瓒呭嚭閭婄晫锛?                // 鏂规硶1锛氬熀鏂奸珮搴?                // totalUnitHeight = squareSize + chineseTextHeight
+                // 🔥 第十步：計算正方形卡片尺寸（迭代計算，確保不超出邊界）
+                // 方法1：基於高度
+                // totalUnitHeight = squareSize + chineseTextHeight
                 // totalUnitHeight = squareSize + squareSize * 0.4 = squareSize * 1.4
-                // 鎵€浠?squareSize = (totalUnitHeight - verticalSpacing) / 1.4
+                // 所以 squareSize = (totalUnitHeight - verticalSpacing) / 1.4
                 let availableHeightPerRow = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows;
-                let squareSizeByHeight = (availableHeightPerRow - verticalSpacing) / 1.4;  // 鉁?淇锛氳€冩叜 verticalSpacing
+                let squareSizeByHeight = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正：考慮 verticalSpacing
 
-                // 鏂规硶2锛氬熀鏂煎搴?                const squareSizeByWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
+                // 方法2：基於寬度
+                const squareSizeByWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
 
-                // 鍙栬純灏忓€硷紝纰轰繚鍗＄墖涓嶆渻瓒呭嚭閭婄晫
+                // 取較小值，確保卡片不會超出邊界
                 let squareSize = Math.min(squareSizeByHeight, squareSizeByWidth);
 
-                // 馃敟 妾㈡煡鏄惁闇€瑕佸鍔犲垪鏁革紙濡傛灉鍗＄墖澶皬锛?                if (squareSize < minSquareSize && optimalCols < itemCount) {
-                    // 鍢楄│澧炲姞鍒楁暩锛屾笡灏戣鏁?                    const newCols = Math.min(optimalCols + 1, itemCount);
+                // 🔥 檢查是否需要增加列數（如果卡片太小）
+                if (squareSize < minSquareSize && optimalCols < itemCount) {
+                    // 嘗試增加列數，減少行數
+                    const newCols = Math.min(optimalCols + 1, itemCount);
                     const newRows = Math.ceil(itemCount / newCols);
 
-                    // 閲嶆柊瑷堢畻鍗＄墖灏哄
+                    // 重新計算卡片尺寸
                     const newSquareSizeByWidth = (availableWidth - horizontalSpacing * (newCols + 1)) / newCols;
                     const newAvailableHeightPerRow = (availableHeight - verticalSpacing * (newRows + 1)) / newRows;
-                    const newSquareSizeByHeight = (newAvailableHeightPerRow - verticalSpacing) / 1.4;  // 鉁?淇锛氳€冩叜 verticalSpacing
+                    const newSquareSizeByHeight = (newAvailableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正：考慮 verticalSpacing
                     const newSquareSize = Math.min(newSquareSizeByHeight, newSquareSizeByWidth);
 
-                    // 濡傛灉鏂扮殑鍗＄墖灏哄鏇村ぇ锛屼娇鐢ㄦ柊鐨勪綀灞€
+                    // 如果新的卡片尺寸更大，使用新的佈局
                     if (newSquareSize > squareSize) {
                         cols = newCols;
                         squareSize = newSquareSize;
                         availableHeightPerRow = newAvailableHeightPerRow;
 
-                        console.log('馃攧 澧炲姞鍒楁暩浠ラ伩鍏嶅崱鐗囬亷灏?', {
+                        console.log('🔄 增加列數以避免卡片過小:', {
                             oldCols: optimalCols,
                             newCols: newCols,
                             oldSquareSize: squareSize.toFixed(1),
                             newSquareSize: newSquareSize.toFixed(1)
                         });
                     } else {
-                        // 鐒℃硶閫氶亷澧炲姞鍒楁暩鏀瑰杽锛屾櫤鑳界府灏忓崱鐗?                        cols = optimalCols;
+                        // 無法通過增加列數改善，智能縮小卡片
+                        cols = optimalCols;
                         const rows = Math.ceil(itemCount / cols);
 
-                        // 瑷堢畻瀵﹂殯闇€瑕佺殑鍗＄墖灏哄浠ラ仼鎳夊彲鐢ㄩ珮搴?                        const actualAvailableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
+                        // 計算實際需要的卡片尺寸以適應可用高度
+                        const actualAvailableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
                         const actualSquareSize = actualAvailableHeightPerRow / 1.4;
 
-                        // 浣跨敤瀵﹂殯瑷堢畻鐨勫昂瀵革紝鍗充娇灏忔柤鏈€灏忓昂瀵?                        squareSize = actualSquareSize;
+                        // 使用實際計算的尺寸，即使小於最小尺寸
+                        squareSize = actualSquareSize;
 
-                        console.log('馃搲 鏅鸿兘绺皬鍗＄墖浠ラ仼鎳夊彲鐢ㄩ珮搴?', {
+                        console.log('📉 智能縮小卡片以適應可用高度:', {
                             cols,
                             rows,
                             minSquareSize,
                             actualSquareSize: actualSquareSize.toFixed(1),
-                            reason: '鐒℃硶澧炲姞鍒楁暩锛岀府灏忓崱鐗囦互閬垮厤瓒呭嚭閭婄晫'
+                            reason: '無法增加列數，縮小卡片以避免超出邊界'
                         });
                     }
                 } else if (squareSize < minSquareSize) {
-                    // 鍗＄墖灏忔柤鏈€灏忓昂瀵革紝浣嗗凡缍撴槸鏈€澶у垪鏁?                    cols = optimalCols;
+                    // 卡片小於最小尺寸，但已經是最大列數
+                    cols = optimalCols;
                     const rows = Math.ceil(itemCount / cols);
 
-                    // 妾㈡煡浣跨敤鏈€灏忓昂瀵告槸鍚︽渻瓒呭嚭閭婄晫
+                    // 檢查使用最小尺寸是否會超出邊界
                     const totalHeightWithMinSize = rows * (minSquareSize * 1.4) + verticalSpacing * (rows + 1);
 
                     if (totalHeightWithMinSize > availableHeight) {
-                        // 鏈冭秴鍑洪倞鐣岋紝鏅鸿兘绺皬鍗＄墖
+                        // 會超出邊界，智能縮小卡片
                         const actualAvailableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
                         squareSize = actualAvailableHeightPerRow / 1.4;
 
-                        console.log('馃搲 鏅鸿兘绺皬鍗＄墖浠ラ仼鎳夊彲鐢ㄩ珮搴?', {
+                        console.log('📉 智能縮小卡片以適應可用高度:', {
                             cols,
                             rows,
                             minSquareSize,
                             actualSquareSize: squareSize.toFixed(1),
                             totalHeightWithMinSize: totalHeightWithMinSize.toFixed(1),
                             availableHeight: availableHeight.toFixed(1),
-                            reason: '浣跨敤鏈€灏忓昂瀵告渻瓒呭嚭閭婄晫'
+                            reason: '使用最小尺寸會超出邊界'
                         });
                     } else {
-                        // 涓嶆渻瓒呭嚭閭婄晫锛屼娇鐢ㄦ渶灏忓昂瀵?                        squareSize = minSquareSize;
+                        // 不會超出邊界，使用最小尺寸
+                        squareSize = minSquareSize;
                     }
                 } else {
                     cols = optimalCols;
                 }
 
-                // 馃敟 绗崄涓€姝ワ細瑷疆鍗＄墖灏哄锛堟鏂瑰舰锛?                frameWidth = squareSize;
+                // 🔥 第十一步：設置卡片尺寸（正方形）
+                frameWidth = squareSize;
                 cardHeightInFrame = squareSize;
-                chineseTextHeight = squareSize * 0.4;  // 涓枃鏂囧瓧楂樺害鐐哄崱鐗囬珮搴︾殑40%
+                chineseTextHeight = squareSize * 0.4;  // 中文文字高度為卡片高度的40%
                 totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;  // = squareSize * 1.4 + verticalSpacing
 
-                // cols 宸插湪涓婇潰鐨勯倧杓腑瑷疆
+                // cols 已在上面的邏輯中設置
                 const rows = Math.ceil(itemCount / cols);
 
-                console.log('馃煢 姝ｆ柟褰㈠崱鐗囦綀灞€:', {
-                    resolution: `${width}脳${height}`,
+                console.log('🟦 正方形卡片佈局:', {
+                    resolution: `${width}×${height}`,
                     aspectRatio: aspectRatio.toFixed(2),
                     topButtonArea: topButtonAreaHeight.toFixed(1),
                     bottomButtonArea: bottomButtonAreaHeight.toFixed(1),
@@ -2345,59 +2569,71 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                     cardHeightInFrame: cardHeightInFrame.toFixed(1),
                     chineseTextHeight: chineseTextHeight.toFixed(1),
                     totalUnitHeight: totalUnitHeight.toFixed(1),
-                    cardRatio: '1:1 (姝ｆ柟褰?',
-                    screenType: aspectRatio > 2.0 ? '瓒呭铻㈠箷' : aspectRatio > 1.5 ? '瀵灑骞? : aspectRatio > 1.2 ? '妯欐簴铻㈠箷' : '鐩村悜铻㈠箷'
+                    cardRatio: '1:1 (正方形)',
+                    screenType: aspectRatio > 2.0 ? '超寬螢幕' : aspectRatio > 1.5 ? '寬螢幕' : aspectRatio > 1.2 ? '標準螢幕' : '直向螢幕'
                 });
             } else {
-                // 馃煥 闀锋柟褰㈡ā寮忥紙鐒″湒鐗囷級
-                console.log('馃煥 浣跨敤闀锋柟褰㈠崱鐗囨ā寮?);
+                // 🟨 長方形模式（無圖片）
+                console.log('🟨 使用長方形卡片模式');
 
-                // 馃敟 绗竷姝ワ細瑷堢畻鍨傜洿闁撹窛锛堝熀鏂艰灑骞曢珮搴︼級
-                // 鉁?v42.0锛歩Pad 宸插湪涓婇潰瑷疆锛岄潪 iPad 瑷倷鍦ㄦ瑷堢畻
+                // 🔥 第七步：計算垂直間距（基於螢幕高度）
+                // ✅ v42.0：iPad 已在上面設置，非 iPad 設備在此計算
                 if (!isIPad) {
-                    // 闈?iPad 瑷倷锛氫繚鐣欏師鏈夐倧杓?                    // 浣跨敤鍥哄畾鐨勫瀭鐩撮枔璺濓紝閬垮厤浼扮畻涓嶆簴纰哄皫鑷撮枔璺濆お灏?                    // 鍨傜洿闁撹窛 = 铻㈠箷楂樺害鐨?4%锛岀瘎鍦嶏細40-80px
+                    // 非 iPad 設備：保留原有邏輯
+                    // 使用固定的垂直間距，避免估算不準確導致間距太小
+                    // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
                     verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
                 }
 
-                // 馃敟 绗叚姝ワ細瀹氱京鏈€灏忓崱鐗囧ぇ灏?                // 鉁?v39.0锛歩Pad 鍕曟厠瑾挎暣鏈€灏忓崱鐗囧昂瀵?                let minCardWidth, minCardHeight;
+                // 🔥 第六步：定義最小卡片大小
+                // ✅ v39.0：iPad 動態調整最小卡片尺寸
+                let minCardWidth, minCardHeight;
                 if (isIPad) {
-                    // iPad锛氭牴鎿氬鍣ㄥぇ灏忓嫊鎱嬭▓绠楁渶灏忓崱鐗囧昂瀵?                    // 5 鍒?+ 6 鍊嬮枔璺?= 5 * minCardWidth + 6 * horizontalSpacing = availableWidth
+                    // iPad：根據容器大小動態計算最小卡片尺寸
+                    // 5 列 + 6 個間距 = 5 * minCardWidth + 6 * horizontalSpacing = availableWidth
                     minCardWidth = Math.max(140, (availableWidth - 6 * horizontalSpacing) / 5);
-                    minCardHeight = Math.max(70, minCardWidth * 0.5);  // 楂樺害鐐哄搴︾殑 50%
-                    console.log('馃摫 [v39.0] iPad 闀锋柟褰㈠崱鐗囧嫊鎱嬪昂瀵?', {
+                    minCardHeight = Math.max(70, minCardWidth * 0.5);  // 高度為寬度的 50%
+                    console.log('📱 [v39.0] iPad 長方形卡片動態尺寸:', {
                         availableWidth: availableWidth.toFixed(1),
                         calculatedMinWidth: minCardWidth.toFixed(1),
                         calculatedMinHeight: minCardHeight.toFixed(1)
                     });
                 } else {
-                    // 鍏朵粬瑷倷锛氫娇鐢ㄥ浐瀹氭渶灏忓昂瀵?                    minCardWidth = 200;
+                    // 其他設備：使用固定最小尺寸
+                    minCardWidth = 200;
                     minCardHeight = 100;
                 }
 
-                // 馃敟 绗竷姝ワ細瑷堢畻鏈€澶у彲鑳界殑鍒楁暩鍜岃鏁?                const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
+                // 🔥 第七步：計算最大可能的列數和行數
+                const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
                 const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
 
-                // 馃敟 绗叓姝ワ細鏅鸿兘瑷堢畻鏈€浣冲垪鏁革紙鏍规摎瀵珮姣斿拰鍖归厤鏁革級
-                // 鉁?v39.0锛歩Pad 鍥哄畾 5 鍒?                let optimalCols;
+                // 🔥 第八步：智能計算最佳列數（根據寬高比和匹配數）
+                // ✅ v39.0：iPad 固定 5 列
+                let optimalCols;
                 if (isIPad) {
-                    optimalCols = 5;  // iPad锛氬浐瀹?5 鍒?                } else if (aspectRatio > 2.0) {
-                    // 瓒呭铻㈠箷锛?1:9, 32:9锛?                    optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
+                    optimalCols = 5;  // iPad：固定 5 列
+                } else if (aspectRatio > 2.0) {
+                    // 超寬螢幕（21:9, 32:9）
+                    optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
                 } else if (aspectRatio > 1.5) {
-                    // 瀵灑骞曪紙16:9, 16:10锛?                    optimalCols = Math.min(6, Math.ceil(Math.sqrt(itemCount * aspectRatio / 1.5)));
+                    // 寬螢幕（16:9, 16:10）
+                    optimalCols = Math.min(6, Math.ceil(Math.sqrt(itemCount * aspectRatio / 1.5)));
                 } else if (aspectRatio > 1.2) {
-                    // 妯欐簴铻㈠箷锛?:3, 3:2锛?                    optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
+                    // 標準螢幕（4:3, 3:2）
+                    optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
                 } else {
-                    // 鐩村悜铻㈠箷锛?:16锛? v7.0 淇京锛氭敼鐐?5 鍒楋紙鑸?Wordwall 涓€鑷达級
+                    // 直向螢幕（9:16）- v7.0 修復：改為 5 列（與 Wordwall 一致）
                     optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
                 }
 
-                // 纰轰繚鍒楁暩鍦ㄥ悎鐞嗙瘎鍦嶅収
+                // 確保列數在合理範圍內
                 optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
 
-                // 馃敟 绗節姝ワ細瑷堢畻琛屾暩
+                // 🔥 第九步：計算行數
                 let optimalRows = Math.ceil(itemCount / optimalCols);
 
-                // 馃敟 濡傛灉琛屾暩瓒呴亷鏈€澶у彲鑳借鏁革紝澧炲姞鍒楁暩
+                // 🔥 如果行數超過最大可能行數，增加列數
                 while (optimalRows > maxPossibleRows && optimalCols < itemCount) {
                     optimalCols++;
                     optimalRows = Math.ceil(itemCount / optimalCols);
@@ -2406,20 +2642,21 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 cols = optimalCols;
                 const rows = optimalRows;
 
-                // 馃敟 绗崄姝ワ細瑷堢畻鍗＄墖澶у皬锛堝厖鍒嗗埄鐢ㄥ彲鐢ㄧ┖闁擄級
+                // 🔥 第十步：計算卡片大小（充分利用可用空間）
                 frameWidth = (availableWidth - horizontalSpacing * (cols + 1)) / cols;
 
-                // 馃敟 瑷堢畻鍠厓绺介珮搴︼紙鍖呭惈涓枃鏂囧瓧锛?                const availableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
+                // 🔥 計算單元總高度（包含中文文字）
+                const availableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
 
-                // 馃敟 鍗＄墖楂樺害鍜屼腑鏂囨枃瀛楅珮搴﹁▓绠楋紙鑸囨鏂瑰舰妯″紡淇濇寔涓€鑷达級
-                // 浣跨敤姝ｇ⒑鍏紡锛?availableHeightPerRow - verticalSpacing) / 1.4
-                cardHeightInFrame = (availableHeightPerRow - verticalSpacing) / 1.4;  // 鉁?淇
-                chineseTextHeight = cardHeightInFrame * 0.4;  // 涓枃鏂囧瓧楂樺害 = 鍗＄墖楂樺害鐨?40%
+                // 🔥 卡片高度和中文文字高度計算（與正方形模式保持一致）
+                // 使用正確公式：(availableHeightPerRow - verticalSpacing) / 1.4
+                cardHeightInFrame = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正
+                chineseTextHeight = cardHeightInFrame * 0.4;  // 中文文字高度 = 卡片高度的 40%
 
                 totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;
 
-                console.log('馃煥 闀锋柟褰㈠崱鐗囦綀灞€:', {
-                    resolution: `${width}脳${height}`,
+                console.log('🟨 長方形卡片佈局:', {
+                    resolution: `${width}×${height}`,
                     aspectRatio: aspectRatio.toFixed(2),
                     topButtonArea: topButtonAreaHeight.toFixed(1),
                     bottomButtonArea: bottomButtonAreaHeight.toFixed(1),
@@ -2437,33 +2674,38 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                     chineseTextHeight: chineseTextHeight.toFixed(1),
                     totalUnitHeight: totalUnitHeight.toFixed(1),
                     cardRatio: (frameWidth / cardHeightInFrame).toFixed(2) + ':1',
-                    screenType: aspectRatio > 2.0 ? '瓒呭铻㈠箷' : aspectRatio > 1.5 ? '瀵灑骞? : aspectRatio > 1.2 ? '妯欐簴铻㈠箷' : '鐩村悜铻㈠箷'
+                    screenType: aspectRatio > 2.0 ? '超寬螢幕' : aspectRatio > 1.5 ? '寬螢幕' : aspectRatio > 1.2 ? '標準螢幕' : '直向螢幕'
                 });
             }
         }
 
-        console.log('馃搻 娣峰悎浣堝眬鍙冩暩:', { itemCount, cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, isCompactMode });
+        console.log('📐 混合佈局參數:', { itemCount, cols, frameWidth, totalUnitHeight, cardHeightInFrame, chineseFontSize, isCompactMode });
 
-        // 馃敟 瑷堢畻闁撹窛鍜岃鏁?        const rows = Math.ceil(itemCount / cols);
+        // 🔥 計算間距和行數
+        const rows = Math.ceil(itemCount / cols);
 
-        // 馃敟 v23.0锛氬畾缇╂按骞抽倞璺濓紝纰轰繚鍗＄墖涓嶈鍒囧壊
-        // 鏍规摎鍒楁暩鍕曟厠瑾挎暣閭婅窛
+        // 🔥 v23.0：定義水平邊距，確保卡片不被切割
+        // 根據列數動態調整邊距
         let horizontalMargin;
         if (cols === 5) {
-            // 5 鍒楋細閭婅窛 = 30px锛堢⒑淇?390px 瀵害涓嬫湁 330px 鍙敤瀵害锛?            horizontalMargin = 30;
+            // 5 列：邊距 = 30px（確保 390px 寬度下有 330px 可用寬度）
+            horizontalMargin = 30;
         } else if (cols === 4) {
-            // 4 鍒楋細涓瓑閭婅窛锛?0px锛?            horizontalMargin = 20;
+            // 4 列：中等邊距（20px）
+            horizontalMargin = 20;
         } else {
-            // 3 鍒楁垨鏇村皯锛氳純澶ч倞璺濓紙25px锛?            horizontalMargin = 25;
+            // 3 列或更少：較大邊距（25px）
+            horizontalMargin = 25;
         }
 
-        // 馃敟 v23.0锛氬劒鍖栨按骞抽枔璺濊▓绠楋紝纰轰繚鍗＄墖涓嶈鍒囧壊
-        // 鍏紡锛?鍙敤瀵害 - 閭婅窛 - 鍗＄墖绺藉搴? / (鍒楁暩 + 1)
-        // 鍩烘柤瀵﹂殯鍙敤瀵害锛坵idth - 2 * horizontalMargin锛夎▓绠?        const availableWidth = width - 2 * horizontalMargin;
+        // 🔥 v23.0：優化水平間距計算，確保卡片不被切割
+        // 公式：(可用寬度 - 邊距 - 卡片總寬度) / (列數 + 1)
+        // 基於實際可用寬度（width - 2 * horizontalMargin）計算
+        const availableWidth = width - 2 * horizontalMargin;
         const totalCardWidth = frameWidth * cols;
         const availableSpace = availableWidth - totalCardWidth;
 
-        console.log('馃搻 [v23.0] 瀵害瑷堢畻瑭虫儏:', {
+        console.log('📐 [v23.0] 寬度計算詳情:', {
             screenWidth: width,
             horizontalMargin,
             availableWidth,
@@ -2471,24 +2713,29 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             frameWidth,
             totalCardWidth,
             availableSpace,
-            note: `iPhone 14 (390px) 鎳夎┎鏈?330px 鍙敤瀵害`
+            note: `iPhone 14 (390px) 應該有 330px 可用寬度`
         });
 
         let horizontalSpacing;
         if (cols === 5) {
-            // 5 鍒楋細鏈€灏忛枔璺濓紙1-3px锛夛紝纰轰繚鍦?330px 鍙敤瀵害涓婂畬鏁撮’绀?            horizontalSpacing = Math.max(1, Math.min(3, availableSpace / (cols + 1)));
+            // 5 列：最小間距（1-3px），確保在 330px 可用寬度上完整顯示
+            horizontalSpacing = Math.max(1, Math.min(3, availableSpace / (cols + 1)));
         } else {
-            // 鍏朵粬鍒楁暩锛氫娇鐢ㄨ▓绠楁柟寮?            horizontalSpacing = Math.max(5, availableSpace / (cols + 1));
+            // 其他列數：使用計算方式
+            horizontalSpacing = Math.max(5, availableSpace / (cols + 1));
         }
 
-        // 馃敟 v13.0锛氱穵婀婃ā寮忕殑 verticalSpacing 宸插湪鍓嶉潰瑷疆锛屼笉闇€瑕侀噸鏂拌▓绠?        // 妗岄潰妯″紡鐨?verticalSpacing 宸插湪涓婇潰鐨?if/else 鍒嗘敮涓畾缇?        // 娉ㄦ剰锛氱穵婀婃ā寮忎笅锛寁erticalSpacing 宸茬稉鍦ㄧ 1949 琛屾垨 1956 琛岃ō缃偤 dynamicVerticalSpacing
-        // 涓嶈鍦ㄩ€欒！瑕嗚搵瀹冿紒
+        // 🔥 v13.0：緊湊模式的 verticalSpacing 已在前面設置，不需要重新計算
+        // 桌面模式的 verticalSpacing 已在上面的 if/else 分支中定義
+        // 注意：緊湊模式下，verticalSpacing 已經在第 1949 行或 1956 行設置為 dynamicVerticalSpacing
+        // 不要在這裡覆蓋它！
 
-        // 馃敟 瑷堢畻闋傞儴鍋忕Щ锛岀⒑淇濅綀灞€鍨傜洿灞呬腑鎴栧緸闋傞儴闁嬪锛堟墜姗熺増娓涘皯10px锛?        // 馃摑 totalUnitHeight 宸茬稉鍖呭惈 chineseTextHeight 鍜?verticalSpacing锛屾墍浠ヤ笉闇€瑕侀噸瑜囧姞
+        // 🔥 計算頂部偏移，確保佈局垂直居中或從頂部開始（手機版減少10px）
+        // 📝 totalUnitHeight 已經包含 chineseTextHeight 和 verticalSpacing，所以不需要重複加
         const totalContentHeight = rows * totalUnitHeight;
         const topOffset = isCompactMode ? 30 : Math.max(10, (height - totalContentHeight) / 2);
 
-        console.log('馃搻 娣峰悎浣堝眬闁撹窛:', {
+        console.log('📐 混合佈局間距:', {
             horizontalSpacing,
             verticalSpacing,
             chineseTextHeight,
@@ -2498,7 +2745,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             verticalSpacingFormula: isCompactMode ? `${chineseTextHeight} * 0.2 = ${verticalSpacing.toFixed(1)}` : '0'
         });
 
-        // 馃敟 v23.0锛氭坊鍔犳按骞抽枔璺濊瑭︿俊鎭?        console.log('馃敟 [v23.0] 姘村钩闁撹窛瑷堢畻:', {
+        // 🔥 v23.0：添加水平間距調試信息
+        console.log('🔥 [v23.0] 水平間距計算:', {
             cols,
             screenWidth: width,
             horizontalMargin,
@@ -2511,16 +2759,17 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             formula: cols === 5 ? `max(1, min(3, (${availableWidth} - ${totalCardWidth}) / ${cols + 1})) = ${horizontalSpacing}` : `max(5, (${availableWidth} - ${totalCardWidth}) / ${cols + 1}) = ${horizontalSpacing}`
         });
 
-        // 馃敟 绗竴姝ワ細闋愬厛瑷堢畻鎵€鏈変腑鏂囨枃瀛楃殑瀵﹂殯瀛楅珨澶у皬锛堝鏋滃皻鏈▓绠楋級
-        // 馃摑 绶婃箠妯″紡宸茬稉鍦ㄤ笂闈㈣▓绠楅亷锛屾闈㈡ā寮忛渶瑕佸湪閫欒！瑷堢畻
+        // 🔥 第一步：預先計算所有中文文字的實際字體大小（如果尚未計算）
+        // 📝 緊湊模式已經在上面計算過，桌面模式需要在這裡計算
         let chineseFontSizesArray;
         if (!isCompactMode) {
-            console.log('馃攳 妗岄潰妯″紡锛氭櫤鑳借▓绠椾腑鏂囧瓧楂斿ぇ灏?..');
+            console.log('🔍 桌面模式：智能計算中文字體大小...');
 
-            // 鉁?v42.0锛歩Pad 浣跨敤瀹瑰櫒鍒嗛鐨勫浐瀹氭枃瀛楀ぇ灏?            let baseFontSize;
+            // ✅ v42.0：iPad 使用容器分類的固定文字大小
+            let baseFontSize;
             if (isIPad && iPadParams) {
                 baseFontSize = iPadParams.chineseFontSize;
-                console.log('馃摫 [v42.0] iPad 鏂囧瓧澶у皬:', {
+                console.log('📱 [v42.0] iPad 文字大小:', {
                     size: iPadSize,
                     baseFontSize: baseFontSize
                 });
@@ -2529,33 +2778,36 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
 
             chineseFontSizes = currentPagePairs.map(pair => {
-                // 馃敟 瑷堢畻鍒濆瀛楅珨澶у皬
-                // 鉁?v42.0锛歩Pad 浣跨敤鍥哄畾鍊硷紝鍏朵粬瑷倷鍩烘柤鍗＄墖楂樺害瑷堢畻
+                // 🔥 計算初始字體大小
+                // ✅ v42.0：iPad 使用固定值，其他設備基於卡片高度計算
                 let fontSize = baseFontSize;
 
-                // 鍓靛缓鑷ㄦ檪鏂囧瓧灏嶈薄渚嗘脯閲忓搴?                const tempText = this.add.text(0, 0, pair.answer, {
+                // 創建臨時文字對象來測量寬度
+                const tempText = this.add.text(0, 0, pair.answer, {
                     fontSize: `${fontSize}px`,
                     fontFamily: 'Arial',
                     fontStyle: 'bold'
                 });
 
-                // 濡傛灉鏂囧瓧瀵害瓒呴亷妗嗗搴︾殑 85%锛岀府灏忓瓧楂?                const maxTextWidth = (frameWidth - 10) * 0.85;
+                // 如果文字寬度超過框寬度的 85%，縮小字體
+                const maxTextWidth = (frameWidth - 10) * 0.85;
                 while (tempText.width > maxTextWidth && fontSize > 18) {
                     fontSize -= 2;
                     tempText.setFontSize(fontSize);
                 }
 
-                // 閵锋瘈鑷ㄦ檪鏂囧瓧灏嶈薄
+                // 銷毀臨時文字對象
                 tempText.destroy();
 
                 return fontSize;
             });
 
-            // 浣跨敤鏈€澶у瓧楂斿ぇ灏?            const maxChineseFontSize = Math.max(...chineseFontSizes);
+            // 使用最大字體大小
+            const maxChineseFontSize = Math.max(...chineseFontSizes);
             const minChineseFontSize = Math.min(...chineseFontSizes);
             const avgChineseFontSize = (chineseFontSizes.reduce((a, b) => a + b, 0) / chineseFontSizes.length).toFixed(1);
 
-            console.log('馃搳 妗岄潰妯″紡涓枃瀛楅珨澶у皬绡勫湇:', {
+            console.log('📊 桌面模式中文字體大小範圍:', {
                 min: minChineseFontSize,
                 max: maxChineseFontSize,
                 average: avgChineseFontSize,
@@ -2564,103 +2816,115 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
 
             chineseFontSizesArray = chineseFontSizes;
         } else {
-            // 绶婃箠妯″紡浣跨敤涔嬪墠瑷堢畻鐨勫瓧楂斿ぇ灏?            chineseFontSizesArray = chineseFontSizes;
+            // 緊湊模式使用之前計算的字體大小
+            chineseFontSizesArray = chineseFontSizes;
         }
 
-        // 馃敟 绗簩姝ワ細鍓靛缓涓枃鏂囧瓧锛堝浐瀹氫綅缃紝浣滅偤"妗?鐨勫弮鑰冿級
+        // 🔥 第二步：創建中文文字（固定位置，作為"框"的參考）
         const chineseFrames = [];
         currentPagePairs.forEach((pair, i) => {
             const col = i % cols;
             const row = Math.floor(i / cols);
 
-            // 馃敟 v23.0锛氫慨寰╁鍣ㄤ綅缃▓绠楋紝鑰冩叜閭婅窛
-            // 鍦?Phaser 涓紝瀹瑰櫒鐨勪綅缃槸鍩烘柤鍏跺乏涓婅锛屼笉鏄腑蹇?            // 鎵€浠ユ垜鍊戦渶瑕佽鏁?frameX 鐨勮▓绠楋紝浣垮叾姝ｇ⒑瀹氫綅瀹瑰櫒
-            // 鍏紡锛氶倞璺?+ 闁撹窛 + col * (frameWidth + 闁撹窛) + frameWidth / 2
+            // 🔥 v23.0：修復容器位置計算，考慮邊距
+            // 在 Phaser 中，容器的位置是基於其左上角，不是中心
+            // 所以我們需要調整 frameX 的計算，使其正確定位容器
+            // 公式：邊距 + 間距 + col * (frameWidth + 間距) + frameWidth / 2
             const frameX = horizontalMargin + horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
-            // 馃摑 浣跨敤 totalUnitHeight 瑷堢畻鍨傜洿浣嶇疆锛堝凡鍖呭惈 chineseTextHeight 鍜?verticalSpacing锛?            const frameY = topOffset + row * totalUnitHeight + totalUnitHeight / 2;
+            // 📝 使用 totalUnitHeight 計算垂直位置（已包含 chineseTextHeight 和 verticalSpacing）
+            const frameY = topOffset + row * totalUnitHeight + totalUnitHeight / 2;
 
-            // 馃敟 鍓靛缓涓枃鏂囧瓧瀹瑰櫒锛堝寘鍚櫧鑹叉锛?            const frameContainer = this.add.container(frameX, frameY);
+            // 🔥 創建中文文字容器（包含白色框）
+            const frameContainer = this.add.container(frameX, frameY);
 
-            // 馃敟 鐧借壊鑳屾櫙妗嗭紙鑸囪嫳鏂囧崱鐗囧悓澶у皬锛?            const background = this.add.rectangle(0, 0, frameWidth - 10, cardHeightInFrame, 0xffffff);
+            // 🔥 白色背景框（與英文卡片同大小）
+            const background = this.add.rectangle(0, 0, frameWidth - 10, cardHeightInFrame, 0xffffff);
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 馃敟 涓枃鏂囧瓧浣嶇疆瑷堢畻锛堢鍏锛?            // 鉁?v26.0锛氭柟妗?A - 鍦ㄨ嫳鏂囧崱鐗囧拰涓枃瀛椾箣闁撳姞鍏?verticalSpacing
-            // 鏂扮祼妲嬶細鑻辨枃鍗＄墖 + verticalSpacing + 涓枃瀛?+ verticalSpacing
+            // 🔥 中文文字位置計算（第六步）
+            // ✅ v26.0：方案 A - 在英文卡片和中文字之間加入 verticalSpacing
+            // 新結構：英文卡片 + verticalSpacing + 中文字 + verticalSpacing
             const chineseActualFontSize = chineseFontSizesArray[i];
-            const chineseTextHeightActual = chineseActualFontSize + 5;  // 瀛楅珨澶у皬 + 琛岄珮
+            const chineseTextHeightActual = chineseActualFontSize + 5;  // 字體大小 + 行高
 
-            // 涓枃鏂囧瓧浣嶇疆锛氳嫳鏂囧崱鐗囦笅鏂?+ 涓枃瀛楅珮搴?2
-            // 鉁?v35.0锛氬彇娑堜笂闈㈢殑 verticalSpacing锛屼腑鏂囧瓧鐩存帴璨艰憲鑻辨枃鍗＄墖
+            // 中文文字位置：英文卡片下方 + 中文字高度/2
+            // ✅ v35.0：取消上面的 verticalSpacing，中文字直接貼著英文卡片
             const chineseY = cardHeightInFrame / 2 + chineseTextHeightActual / 2;
 
-            console.log(`馃摑 鍓靛缓涓枃鏂囧瓧 [${i}]: "${pair.answer}", 瀛楅珨澶у皬: ${chineseActualFontSize}px, 浣嶇疆Y: ${chineseY.toFixed(1)}`);
+            console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${chineseY.toFixed(1)}`);
 
-            // 馃敟 鍓靛缓鏈€绲傜殑涓枃鏂囧瓧
+            // 🔥 創建最終的中文文字
             const chineseText = this.add.text(0, chineseY, pair.answer, {
-                fontSize: `${chineseActualFontSize}px`,  // 浣跨敤闋愬厛瑷堢畻鐨勫瓧楂斿ぇ灏?                color: '#000000',
+                fontSize: `${chineseActualFontSize}px`,  // 使用預先計算的字體大小
+                color: '#000000',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
             });
-            chineseText.setOrigin(0.5, 0.5);  // 鉁?鏀归€诧細姘村钩鍜屽瀭鐩撮兘灞呬腑
+            chineseText.setOrigin(0.5, 0.5);  // ✅ 改進：水平和垂直都居中
             frameContainer.add(chineseText);
 
-            // 淇濆瓨妗嗙殑鏁告摎
-            frameContainer.setData('pairId', pair.id);  // 姝ｇ⒑鐨勯厤灏?ID
-            frameContainer.setData('text', pair.answer);  // 涓枃鏂囧瓧
-            frameContainer.setData('frameIndex', i);  // 妗嗙殑绱㈠紩
-            frameContainer.setData('currentCardPairId', null);  // 鐣跺墠妗嗗収鐨勮嫳鏂囧崱鐗囩殑 pairId
+            // 保存框的數據
+            frameContainer.setData('pairId', pair.id);  // 正確的配對 ID
+            frameContainer.setData('text', pair.answer);  // 中文文字
+            frameContainer.setData('frameIndex', i);  // 框的索引
+            frameContainer.setData('currentCardPairId', null);  // 當前框內的英文卡片的 pairId
             frameContainer.setDepth(0);
 
             chineseFrames.push(frameContainer);
             this.rightCards.push(frameContainer);
         });
 
-        // 馃敟 绗簩姝ワ細鍓靛缓鑻辨枃鍗＄墖锛堝垵濮嬮毃姗熸斁鍦ㄦ鍏э級
-        // 鏍规摎闅ㄦ妯″紡姹哄畾鑻辨枃鍗＄墖鐨勫垵濮嬩綅缃?        let shuffledPairs;
+        // 🔥 第二步：創建英文卡片（初始隨機放在框內）
+        // 根據隨機模式決定英文卡片的初始位置
+        let shuffledPairs;
         if (this.random === 'same') {
-            // 鍥哄畾闅ㄦ妯″紡
+            // 固定隨機模式
             const urlParams = new URLSearchParams(window.location.search);
             const activityId = urlParams.get('activityId') || 'default-seed';
             const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
             const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
             shuffledPairs = rng.shuffle([...currentPagePairs]);
-            console.log('馃幉 娣峰悎浣堝眬浣跨敤鍥哄畾闅ㄦ妯″紡锛岀ó瀛?', seed);
+            console.log('🎲 混合佈局使用固定隨機模式，種子:', seed);
         } else {
-            // 姣忔涓嶅悓妯″紡
+            // 每次不同模式
             shuffledPairs = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('馃幉 娣峰悎浣堝眬浣跨敤闅ㄦ鎺掑垪妯″紡');
+            console.log('🎲 混合佈局使用隨機排列模式');
         }
 
-        // 鍓靛缓鑻辨枃鍗＄墖涓︽斁鍦ㄤ腑鏂囨枃瀛椾笂鏂?        shuffledPairs.forEach((pair, i) => {
+        // 創建英文卡片並放在中文文字上方
+        shuffledPairs.forEach((pair, i) => {
             const frame = chineseFrames[i];
             const frameX = frame.x;
             const frameY = frame.y;
 
-            // 馃敟 鑻辨枃鍗＄墖浣嶇疆锛堝湪涓枃鏂囧瓧涓婃柟锛?            const cardY = frameY;  // 鑸囦腑鏂囨枃瀛楀鍣ㄥ悓涓€浣嶇疆锛堣嫳鏂囧崱鐗囨渻鍦ㄤ笂鏂癸級
+            // 🔥 英文卡片位置（在中文文字上方）
+            const cardY = frameY;  // 與中文文字容器同一位置（英文卡片會在上方）
 
-            const animationDelay = i * 100;  // 姣忓€嬪崱鐗囧欢閬?100ms
+            const animationDelay = i * 100;  // 每個卡片延遲 100ms
 
-            // 馃敟 妾㈡煡鑻辨枃鍏у鏄惁鐐虹┖ - 濡傛灉鐐虹┖锛岃烦閬庡壍寤鸿嫳鏂囧崱鐗?            if (!pair.question || pair.question.trim() === '') {
-                console.log(`鈴笍 璺抽亷绌虹櫧鑻辨枃鍗＄墖 [${i}]: 鑻辨枃鍏у鐐虹┖`);
-                // 鏇存柊妗嗙殑鏁告摎锛屼絾涓嶅壍寤哄崱鐗?                frame.setData('currentCardPairId', pair.id);
-                return;  // 璺抽亷姝ら爡
+            // 🔥 檢查英文內容是否為空 - 如果為空，跳過創建英文卡片
+            if (!pair.question || pair.question.trim() === '') {
+                console.log(`⏭️ 跳過空白英文卡片 [${i}]: 英文內容為空`);
+                // 更新框的數據，但不創建卡片
+                frame.setData('currentCardPairId', pair.id);
+                return;  // 跳過此項
             }
 
-            // 鍓靛缓鑻辨枃鍗＄墖锛堜娇鐢ㄨ垏涓枃鏂囧瓧鐩稿悓鐨勫搴︼級
+            // 創建英文卡片（使用與中文文字相同的寬度）
             const card = this.createLeftCard(frameX, cardY, frameWidth - 10, cardHeightInFrame, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
 
-            // 淇濆瓨鍗＄墖鐣跺墠鎵€鍦ㄧ殑妗嗙殑绱㈠紩
+            // 保存卡片當前所在的框的索引
             card.setData('currentFrameIndex', i);
 
-            // 鏇存柊妗嗙殑鏁告摎
+            // 更新框的數據
             frame.setData('currentCardPairId', pair.id);
 
             this.leftCards.push(card);
         });
 
-        console.log('鉁?娣峰悎浣堝眬鍓靛缓瀹屾垚:', {
+        console.log('✅ 混合佈局創建完成:', {
             chineseFrames: chineseFrames.length,
             leftCards: this.leftCards.length,
             rightCards: this.rightCards.length
@@ -2668,33 +2932,40 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
     }
 
     createLeftContainerBox(x, y, cardWidth, cardHeight, spacing, count) {
-        // 瑷堢畻澶栨鐨勫昂瀵?        const padding = 10;  // 澶栨鑸囧崱鐗囦箣闁撶殑闁撹窛
+        // 計算外框的尺寸
+        const padding = 10;  // 外框與卡片之間的間距
         const boxWidth = cardWidth + padding * 2;
         const boxHeight = (cardHeight * count) + (spacing - cardHeight) * (count - 1) + padding * 2;
 
-        // 瑷堢畻澶栨鐨勪腑蹇冧綅缃?        const boxCenterY = y + (spacing * (count - 1)) / 2;
+        // 計算外框的中心位置
+        const boxCenterY = y + (spacing * (count - 1)) / 2;
 
-        // 鍓靛缓澶栨
+        // 創建外框
         const containerBox = this.add.rectangle(x, boxCenterY, boxWidth, boxHeight);
-        containerBox.setStrokeStyle(2, 0x333333);  // 榛戣壊閭婃
-        containerBox.setFillStyle(0xffffff, 0);    // 閫忔槑濉厖
-        containerBox.setDepth(0);  // 鍦ㄥ崱鐗囦笅灞?    }
+        containerBox.setStrokeStyle(2, 0x333333);  // 黑色邊框
+        containerBox.setFillStyle(0xffffff, 0);    // 透明填充
+        containerBox.setDepth(0);  // 在卡片下層
+    }
 
-    // 馃敟 鍓靛缓澶氬垪澶栨锛堟櫤鑳藉鍒椾綀灞€锛?    createMultiColumnContainerBox(startX, startY, cardWidth, cardHeight, horizontalSpacing, verticalSpacing, columns, rows) {
-        const padding = 10;  // 澶栨鑸囧崱鐗囦箣闁撶殑闁撹窛
+    // 🔥 創建多列外框（智能多列佈局）
+    createMultiColumnContainerBox(startX, startY, cardWidth, cardHeight, horizontalSpacing, verticalSpacing, columns, rows) {
+        const padding = 10;  // 外框與卡片之間的間距
 
-        // 瑷堢畻澶栨鐨勫昂瀵?        const boxWidth = columns * cardWidth + (columns - 1) * horizontalSpacing + padding * 2;
+        // 計算外框的尺寸
+        const boxWidth = columns * cardWidth + (columns - 1) * horizontalSpacing + padding * 2;
         const boxHeight = rows * cardHeight + (rows - 1) * verticalSpacing + padding * 2;
 
-        // 瑷堢畻澶栨鐨勪腑蹇冧綅缃?        const boxCenterX = startX + (columns * cardWidth + (columns - 1) * horizontalSpacing) / 2;
+        // 計算外框的中心位置
+        const boxCenterX = startX + (columns * cardWidth + (columns - 1) * horizontalSpacing) / 2;
         const boxCenterY = startY + (rows * cardHeight + (rows - 1) * verticalSpacing) / 2;
 
-        // 鍓靛缓澶栨
+        // 創建外框
         const containerBox = this.add.rectangle(boxCenterX, boxCenterY, boxWidth, boxHeight);
-        containerBox.setStrokeStyle(2, 0x333333);  // 榛戣壊閭婃
-        containerBox.setFillStyle(0xffffff, 0);    // 閫忔槑濉厖
-        containerBox.setDepth(0);  // 鍦ㄥ崱鐗囦笅灞?
-        console.log('馃摝 澶氬垪澶栨宸插壍寤?', {
+        containerBox.setStrokeStyle(2, 0x333333);  // 黑色邊框
+        containerBox.setFillStyle(0xffffff, 0);    // 透明填充
+        containerBox.setDepth(0);  // 在卡片下層
+
+        console.log('📦 多列外框已創建:', {
             columns,
             rows,
             boxWidth,
@@ -2705,23 +2976,26 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
     }
 
     createLeftCard(x, y, width, height, text, pairId, animationDelay = 0, imageUrl = null, audioUrl = null) {
-        // 鍓靛缓鍗＄墖瀹瑰櫒
-        // 馃敟 v17.0锛氫慨寰╁鍣ㄤ綅缃▓绠?        // 鍦?Phaser 3 涓紝瀹瑰櫒涓嶆敮鎸?setOrigin锛屾墍浠ラ渶瑕佽鏁村鍣ㄥ収閮ㄥ厓绱犵殑浣嶇疆
-        // 瀹瑰櫒鐨勪綅缃槸鍩烘柤鍏跺瓙鍏冪礌鐨勪綅缃紝鎵€浠ユ垜鍊戦渶瑕佸皣鎵€鏈夊瓙鍏冪礌鐩稿皪鏂煎鍣ㄤ腑蹇冨畾浣?        const container = this.add.container(x, y);
+        // 創建卡片容器
+        // 🔥 v17.0：修復容器位置計算
+        // 在 Phaser 3 中，容器不支持 setOrigin，所以需要調整容器內部元素的位置
+        // 容器的位置是基於其子元素的位置，所以我們需要將所有子元素相對於容器中心定位
+        const container = this.add.container(x, y);
         container.setSize(width, height);
         container.setDepth(5);
 
-        // 馃敟 瑷疆鍒濆閫忔槑搴︾偤 0锛堥毐钘忥級
+        // 🔥 設置初始透明度為 0（隱藏）
         container.setAlpha(0);
 
-        // 鍓靛缓鍗＄墖鑳屾櫙锛堢櫧鑹诧級
+        // 創建卡片背景（白色）
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
 
-        // 馃敟 鑱叉槑璁婇噺锛堝湪鍒嗘敮澶栭儴锛?        let cardText;
+        // 🔥 聲明變量（在分支外部）
+        let cardText;
         let audioButton;
 
-        // 馃敟 妾㈡煡鍏у绲勫悎
+        // 🔥 檢查內容組合
         const pairData = this.pairs.find(pair => pair.id === pairId);
         const hasImage = imageUrl && imageUrl.trim() !== '';
         const hasText = text && text.trim() !== '' && text.trim() !== '<br>';
@@ -2729,8 +3003,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         const hasAudio = audioStatus === 'available';
         const safeAudioUrl = hasAudio ? audioUrl : null;
 
-        // 馃敟 瑾胯│鏃ヨ獙 - 鏌ョ湅瀵﹂殯鏁告摎鍏у
-        console.log('馃攳 createLeftCard 瑾胯│淇℃伅:', {
+        // 🔥 調試日誌 - 查看實際數據內容
+        console.log('🔍 createLeftCard 調試信息:', {
             pairId,
             text: text,
             textType: typeof text,
@@ -2743,46 +3017,57 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             invalidAudioUrl: pairData ? pairData.invalidAudioUrl : null
         });
 
-        // 馃敟 鏍规摎鍏у绲勫悎姹哄畾浣堝眬
-        // 鎯呮硜 A锛氬湒鐗?+ 鏂囧瓧 + 瑾為煶锛?,1,1锛?        // 鎯呮硜 B锛氬彧鏈夎獮闊筹紙0,0,1锛?        // 鎯呮硜 C锛氬彧鏈夋枃瀛楋紙0,1,0锛?        // 鎯呮硜 D锛氬湒鐗?+ 鏂囧瓧锛?,1,0锛?        // 鎯呮硜 E锛氳獮闊?+ 鏂囧瓧锛?,1,1锛?
+        // 🔥 根據內容組合決定佈局
+        // 情況 A：圖片 + 文字 + 語音（1,1,1）
+        // 情況 B：只有語音（0,0,1）
+        // 情況 C：只有文字（0,1,0）
+        // 情況 D：圖片 + 文字（1,1,0）
+        // 情況 E：語音 + 文字（0,1,1）
+
         if (hasImage && hasText && hasAudio) {
-            // 鎯呮硜 A锛氬湒鐗?+ 鏂囧瓧 + 瑾為煶鎸夐垥
+            // 情況 A：圖片 + 文字 + 語音按鈕
             this.createCardLayoutA(container, background, width, height, text, imageUrl, safeAudioUrl, pairId);
         } else if (!hasImage && !hasText && hasAudio) {
-            // 鎯呮硜 B锛氬彧鏈夎獮闊虫寜閳?            this.createCardLayoutB(container, background, width, height, safeAudioUrl, pairId);
+            // 情況 B：只有語音按鈕
+            this.createCardLayoutB(container, background, width, height, safeAudioUrl, pairId);
         } else if (!hasImage && hasText && !hasAudio) {
-            // 鎯呮硜 C锛氬彧鏈夋枃瀛楋紙宸插鐝撅級
+            // 情況 C：只有文字（已實現）
             this.createCardLayoutC(container, background, width, height, text);
         } else if (hasImage && hasText && !hasAudio) {
-            // 鎯呮硜 D锛氬湒鐗?+ 鏂囧瓧锛堝凡瀵︾従锛?            this.createCardLayoutD(container, background, width, height, text, imageUrl, pairId);
+            // 情況 D：圖片 + 文字（已實現）
+            this.createCardLayoutD(container, background, width, height, text, imageUrl, pairId);
         } else if (!hasImage && hasText && hasAudio) {
-            // 鎯呮硜 E锛氳獮闊?+ 鏂囧瓧
+            // 情況 E：語音 + 文字
             this.createCardLayoutE(container, background, width, height, text, safeAudioUrl, pairId);
         } else if (hasImage && !hasText && !hasAudio) {
-            // 鍙湁鍦栫墖锛堢劇鏂囧瓧銆佺劇瑾為煶锛? 1:1 姣斾緥椤ず
+            // 只有圖片（無文字、無語音）- 1:1 比例顯示
             this.createCardLayoutF(container, background, width, height, imageUrl, pairId);
         } else if (hasImage && !hasText && hasAudio) {
-            // 鍦栫墖 + 瑾為煶锛堢劇鏂囧瓧锛?            this.createCardLayoutA(container, background, width, height, '', imageUrl, safeAudioUrl, pairId);
+            // 圖片 + 語音（無文字）
+            this.createCardLayoutA(container, background, width, height, '', imageUrl, safeAudioUrl, pairId);
         } else {
-            // 鍏朵粬鎯呮硜锛氬彧椤ず鑳屾櫙
+            // 其他情況：只顯示背景
             container.add([background]);
         }
 
-        // 馃敟 宸茬Щ闄?"No audio" 妯欑ず锛堢敤鎴惰姹傦級- 绂佺敤闊抽牷鐙€鎱嬪窘绔犻’绀?        // if (audioStatus && audioStatus !== 'available') {
+        // 🔥 已移除 "No audio" 標示（用戶要求）- 禁用音頻狀態徽章顯示
+        // if (audioStatus && audioStatus !== 'available') {
         //     this.addAudioStatusBadge(container, width, height, audioStatus);
         // }
 
-        // 馃摑 娣″叆鍕曠暙閰嶇疆锛堟寜鐓ч爢搴忓嚭鐝撅級
+        // 📝 淡入動畫配置（按照順序出現）
         this.tweens.add({
             targets: container,
-            alpha: 1,           // 寰?0 娣″叆鍒?1锛堝畬鍏ㄤ笉閫忔槑锛?            duration: 300,      // 鍕曠暙鎸佺簩 300ms锛?.3绉掞級
-            delay: animationDelay,  // 寤堕伈鏅傞枔锛堢敤鏂奸爢搴忓嚭鐝炬晥鏋滐級
-            ease: 'Power2'      // 绶╁嫊鍑芥暩锛堝钩婊戝姞閫燂級
+            alpha: 1,           // 從 0 淡入到 1（完全不透明）
+            duration: 300,      // 動畫持續 300ms（0.3秒）
+            delay: animationDelay,  // 延遲時間（用於順序出現效果）
+            ease: 'Power2'      // 緩動函數（平滑加速）
         });
 
-        // 瑷疆浜掑嫊锛堟暣鍊嬪鍣ㄥ彲鎷栨洺锛?        container.setInteractive({ useHandCursor: true, draggable: true });
+        // 設置互動（整個容器可拖曳）
+        container.setInteractive({ useHandCursor: true, draggable: true });
 
-        // 鍎插瓨鍘熷浣嶇疆
+        // 儲存原始位置
         container.setData({
             pairId: pairId,
             side: 'left',
@@ -2798,52 +3083,62 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             clickStartTime: 0
         });
 
-        // 馃敟 榛炴搳鍗＄墖鎾斁闊抽牷锛堢煭鎸夋檪锛?        container.on('pointerdown', (pointer) => {
-            // 瑷橀寗榛炴搳闁嬪鏅傞枔
+        // 🔥 點擊卡片播放音頻（短按時）
+        container.on('pointerdown', (pointer) => {
+            // 記錄點擊開始時間
             container.setData('clickStartTime', Date.now());
-            console.log('馃柋锔?鍗＄墖琚粸鎿?', { pairId, hasAudio });
+            console.log('🖱️ 卡片被點擊:', { pairId, hasAudio });
         });
 
-        // 馃敟 榛炴搳绲愭潫鏅傛鏌ユ槸鍚︽槸鐭寜锛堟挱鏀鹃煶闋伙級
+        // 🔥 點擊結束時檢查是否是短按（播放音頻）
         container.on('pointerup', (pointer) => {
             const clickDuration = Date.now() - container.getData('clickStartTime');
             const isDragging = this.isDragging;
 
-            // 濡傛灉榛炴搳鏅傞枔鐭柤 200ms 涓旀矑鏈夋嫋鏇筹紝鍓囨挱鏀鹃煶闋?            if (clickDuration < 200 && !isDragging && hasAudio && safeAudioUrl) {
-                console.log('馃攰 鐭寜鍗＄墖锛屾挱鏀鹃煶闋?', { pairId, clickDuration });
+            // 如果點擊時間短於 200ms 且沒有拖曳，則播放音頻
+            if (clickDuration < 200 && !isDragging && hasAudio && safeAudioUrl) {
+                console.log('🔊 短按卡片，播放音頻:', { pairId, clickDuration });
                 this.playAudio(safeAudioUrl, container, background);
             }
         });
 
-        // 鎷栨洺闁嬪
+        // 拖曳開始
         container.on('dragstart', (pointer) => {
-            // 馃摑 瑾胯│瑷婃伅锛氳閷勬嫋鏇抽枊濮?            console.log('馃柋锔?闁嬪鎷栨洺鍗＄墖:', {
+            // 📝 調試訊息：記錄拖曳開始
+            console.log('🖱️ 開始拖曳卡片:', {
                 pairId: container.getData('pairId'),
                 side: container.getData('side'),
                 position: { x: container.x, y: container.y },
                 isMatched: container.getData('isMatched')
             });
 
-            // 鍏佽ū宸查厤灏嶇殑鍗＄墖涔熷彲浠ユ嫋鍕?            this.isDragging = true;
+            // 允許已配對的卡片也可以拖動
+            this.isDragging = true;
             this.dragStartCard = container;
 
-            // 馃摑 鍗＄墖"椋勬诞"璧蜂締鐨勮瑕烘晥鏋?            container.setDepth(100);   // 鎻愬崌鍒版渶涓婂堡锛堟繁搴﹀€?00锛?            container.setScale(1.1);   // 绋嶅井鏀惧ぇ锛?10%锛?            background.setAlpha(0.9);  // 鍗婇€忔槑锛?0%涓嶉€忔槑搴︼級
+            // 📝 卡片"飄浮"起來的視覺效果
+            container.setDepth(100);   // 提升到最上層（深度值100）
+            container.setScale(1.1);   // 稍微放大（110%）
+            background.setAlpha(0.9);  // 半透明（90%不透明度）
         });
 
-        // 鎷栨洺涓?- 鍗＄墖璺熼毃榧犳
+        // 拖曳中 - 卡片跟隨鼠標
         container.on('drag', (pointer, dragX, dragY) => {
             if (!this.isDragging) {
-                // 馃摑 瑾胯│瑷婃伅锛氭嫋鏇崇媭鎱嬬暟甯?                console.log('鈿狅笍 鎷栨洺鐙€鎱嬬暟甯革細isDragging = false');
+                // 📝 調試訊息：拖曳狀態異常
+                console.log('⚠️ 拖曳狀態異常：isDragging = false');
                 return;
             }
 
-            // 绉诲嫊鏁村€嬪崱鐗?            container.x = pointer.x;
+            // 移動整個卡片
+            container.x = pointer.x;
             container.y = pointer.y;
         });
 
-        // 鎷栨洺绲愭潫
+        // 拖曳結束
         container.on('dragend', (pointer) => {
-            // 馃摑 瑾胯│瑷婃伅锛氳閷勬嫋鏇崇祼鏉?            console.log('馃柋锔?绲愭潫鎷栨洺:', {
+            // 📝 調試訊息：記錄拖曳結束
+            console.log('🖱️ 結束拖曳:', {
                 pairId: container.getData('pairId'),
                 finalPosition: { x: pointer.x, y: pointer.y },
                 layout: this.layout
@@ -2851,21 +3146,22 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
 
             this.isDragging = false;
 
-            // 馃敟 娣峰悎妯″紡锛氬彧妾㈡煡鎷栨斁鍒颁腑鏂囨
+            // 🔥 混合模式：只檢查拖放到中文框
             if (this.layout === 'mixed') {
-                console.log('馃攧 娣峰悎妯″紡锛氭鏌ユ嫋鏀惧埌涓枃妗?);
+                console.log('🔄 混合模式：檢查拖放到中文框');
                 const dropped = this.checkDrop(pointer, container);
-                console.log('馃搳 鎷栨斁绲愭灉:', dropped ? '鎴愬姛' : '澶辨晽');
-                // checkDrop 鏈冭檿鐞嗘墍鏈夐倧杓紙浜ゆ彌鎴栬繑鍥炲師浣嶏級
+                console.log('📊 拖放結果:', dropped ? '成功' : '失敗');
+                // checkDrop 會處理所有邏輯（交換或返回原位）
             } else {
-                console.log('馃攧 鍒嗛洟妯″紡锛氭鏌ユ嫋鏀鹃倧杓?);
-                // 鍒嗛洟妯″紡锛氭鏌ユ槸鍚︽嫋鍥炲乏鍋村崁鍩燂紙鍙栨秷閰嶅皪锛?                const isInLeftArea = pointer.x < this.scale.width * 0.45;
+                console.log('🔄 分離模式：檢查拖放邏輯');
+                // 分離模式：檢查是否拖回左側區域（取消配對）
+                const isInLeftArea = pointer.x < this.scale.width * 0.45;
 
                 if (isInLeftArea && container.getData('isMatched')) {
-                    // 鍙栨秷閰嶅皪
+                    // 取消配對
                     this.unmatchCard(container);
 
-                    // 杩斿洖鍘熶綅
+                    // 返回原位
                     this.tweens.add({
                         targets: container,
                         x: container.getData('originalX'),
@@ -2880,15 +3176,16 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                         }
                     });
                 } else {
-                    // 鍏堟鏌ユ槸鍚︽嫋鏇冲埌鍏朵粬宸﹀伌鍗＄墖锛堜氦鎻涗綅缃級
+                    // 先檢查是否拖曳到其他左側卡片（交換位置）
                     const swapped = this.checkSwap(pointer, container);
 
                     if (!swapped) {
-                        // 濡傛灉娌掓湁浜ゆ彌锛屾鏌ユ槸鍚︽嫋鏇冲埌鍙冲伌鍗＄墖
+                        // 如果沒有交換，檢查是否拖曳到右側卡片
                         const dropped = this.checkDrop(pointer, container);
 
                         if (!dropped) {
-                            // 娌掓湁鏀惧埌姝ｇ⒑浣嶇疆锛岃繑鍥炲師浣?                            this.tweens.add({
+                            // 沒有放到正確位置，返回原位
+                            this.tweens.add({
                                 targets: container,
                                 x: container.getData('originalX'),
                                 y: container.getData('originalY'),
@@ -2909,14 +3206,15 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             this.dragStartCard = null;
         });
 
-        // 鍟熺敤鎷栨洺
+        // 啟用拖曳
         this.input.setDraggable(container);
 
         return container;
     }
 
-    // 馃敟 浣堝眬鍑芥暩 - 鎯呮硜 A锛氳獮闊虫寜閳曪紙涓?30%锛? 鍦栫墖锛堜腑 40%锛? 鏂囧瓧锛堜笅 30%锛?    createCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId) {
-        console.log('馃帹 浣堝眬 A: 瑾為煶鎸夐垥 + 鍦栫墖 + 鏂囧瓧', {
+    // 🔥 佈局函數 - 情況 A：語音按鈕（上 30%）+ 圖片（中 40%）+ 文字（下 30%）
+    createCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId) {
+        console.log('🎨 佈局 A: 語音按鈕 + 圖片 + 文字', {
             width,
             height,
             pairId,
@@ -2925,36 +3223,40 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             audioUrl: audioUrl ? audioUrl.substring(0, 50) + '...' : 'null'
         });
 
-        // 馃敟 棣栧厛娣诲姞鑳屾櫙锛堟渶搴曞堡锛?        container.add([background]);
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
 
-        // 1锔忊儯 瑾為煶鎸夐垥鍗€鍩燂紙涓婃柟 30%锛?        const buttonAreaHeight = height * 0.3;
+        // 1️⃣ 語音按鈕區域（上方 30%）
+        const buttonAreaHeight = height * 0.3;
         const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
-        const buttonSize = Math.max(20, Math.min(40, buttonAreaHeight * 0.6));  // 馃敟 娓涘皬鎸夐垥澶у皬锛岀⒑淇濆湪妗嗗収
+        const buttonSize = Math.max(20, Math.min(40, buttonAreaHeight * 0.6));  // 🔥 減小按鈕大小，確保在框內
 
-        console.log('馃攰 婧栧倷瑾跨敤 createAudioButton:', {
-            audioUrl: audioUrl ? '鏈? : '鐒?,
+        console.log('🔊 準備調用 createAudioButton:', {
+            audioUrl: audioUrl ? '有' : '無',
             buttonAreaY,
             buttonSize
         });
 
         this.createAudioButton(container, audioUrl, 0, buttonAreaY, buttonSize, pairId);
 
-        console.log('鉁?createAudioButton 瑾跨敤瀹屾垚');
+        console.log('✅ createAudioButton 調用完成');
 
-        // 2锔忊儯 鍦栫墖鍗€鍩燂紙涓枔 40%锛?        const imageAreaHeight = height * 0.4;
+        // 2️⃣ 圖片區域（中間 40%）
+        const imageAreaHeight = height * 0.4;
         const imageAreaY = -height / 2 + buttonAreaHeight + imageAreaHeight / 2;
         const squareSize = Math.min(width - 4, imageAreaHeight - 4);
         this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, pairId);
 
-        // 3锔忊儯 鏂囧瓧鍗€鍩燂紙涓嬫柟 30%锛岄渶瑕佺暀鍑哄簳閮ㄩ枔璺濓級
+        // 3️⃣ 文字區域（下方 30%，需要留出底部間距）
         const textAreaHeight = height * 0.3;
-        const bottomPadding = Math.max(6, height * 0.06);  // 搴曢儴闁撹窛锛?px 鎴栭珮搴︾殑 6%
+        const bottomPadding = Math.max(6, height * 0.06);  // 底部間距：6px 或高度的 6%
         const textHeight = textAreaHeight - bottomPadding;
-        // 馃敟 鏂囧瓧浣嶇疆锛氬崱鐗囦笅閭婄晫 - 搴曢儴闁撹窛 - 鏂囧瓧楂樺害/2
+        // 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
         const textAreaY = height / 2 - bottomPadding - textHeight / 2;
 
-        // 馃敟 鍙湁鏈夋晥鏂囧瓧鎵嶅壍寤?        if (text && text.trim() !== '' && text.trim() !== '<br>') {
-            console.log('馃摑 鍓靛缓鏂囧瓧锛堜綀灞€ A锛?', {
+        // 🔥 只有有效文字才創建
+        if (text && text.trim() !== '' && text.trim() !== '<br>') {
+            console.log('📝 創建文字（佈局 A）:', {
                 text,
                 textAreaY,
                 textHeight,
@@ -2964,26 +3266,32 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             });
             this.createTextElement(container, text, 0, textAreaY, width, textHeight);
         } else {
-            console.log('鈴笍 璺抽亷绌虹櫧鏂囧瓧');
+            console.log('⏭️ 跳過空白文字');
         }
     }
 
-    // 馃敟 浣堝眬鍑芥暩 - 鎯呮硜 B锛氬彧鏈夎獮闊虫寜閳?    createCardLayoutB(container, background, width, height, audioUrl, pairId) {
-        // 馃敟 棣栧厛娣诲姞鑳屾櫙锛堟渶搴曞堡锛?        container.add([background]);
+    // 🔥 佈局函數 - 情況 B：只有語音按鈕
+    createCardLayoutB(container, background, width, height, audioUrl, pairId) {
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
 
-        // 瑾為煶鎸夐垥缃腑涓︽斁澶?        const buttonSize = Math.max(50, Math.min(80, width * 0.6));
+        // 語音按鈕置中並放大
+        const buttonSize = Math.max(50, Math.min(80, width * 0.6));
         this.createAudioButton(container, audioUrl, 0, 0, buttonSize, pairId);
     }
 
-    // 馃敟 浣堝眬鍑芥暩 - 鎯呮硜 C锛氬彧鏈夋枃瀛?    createCardLayoutC(container, background, width, height, text) {
-        // 馃敟 棣栧厛娣诲姞鑳屾櫙锛堟渶搴曞堡锛?        container.add([background]);
+    // 🔥 佈局函數 - 情況 C：只有文字
+    createCardLayoutC(container, background, width, height, text) {
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
 
-        // 鏂囧瓧缃腑
+        // 文字置中
         this.createTextElement(container, text, 0, 0, width, height);
     }
 
-    // 馃敟 浣堝眬鍑芥暩 - 鎯呮硜 D锛氬湒鐗?+ 鏂囧瓧锛堝悇浣?50%锛屾枃瀛楁湁搴曢儴闁撹窛锛?    createCardLayoutD(container, background, width, height, text, imageUrl, pairId) {
-        console.log('馃帹 浣堝眬 D: 鍦栫墖 + 鏂囧瓧 (鍚?50%锛屾櫤鑳介枔璺?', {
+    // 🔥 佈局函數 - 情況 D：圖片 + 文字（各佔 50%，文字有底部間距）
+    createCardLayoutD(container, background, width, height, text, imageUrl, pairId) {
+        console.log('🎨 佈局 D: 圖片 + 文字 (各 50%，智能間距)', {
             width,
             height,
             pairId,
@@ -2991,19 +3299,21 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             imageUrl: imageUrl ? imageUrl.substring(0, 50) + '...' : 'null'
         });
 
-        // 馃敟 棣栧厛娣诲姞鑳屾櫙锛堟渶搴曞堡锛?        container.add([background]);
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
 
-        // 鍦栫墖鍗€鍩燂細浣旀摎鍗＄墖涓婃柟 50%
+        // 圖片區域：佔據卡片上方 50%
         const imageHeight = height * 0.5;
         const imageY = -height / 2 + imageHeight / 2;
 
-        // 馃敟 鏂囧瓧鍗€鍩燂細浣旀摎鍗＄墖涓嬫柟 50%锛屼絾闇€瑕佺暀鍑哄簳閮ㄩ枔璺?        const textAreaHeight = height * 0.5;
-        const bottomPadding = Math.max(8, height * 0.08);  // 搴曢儴闁撹窛锛?px 鎴栭珮搴︾殑 8%
+        // 🔥 文字區域：佔據卡片下方 50%，但需要留出底部間距
+        const textAreaHeight = height * 0.5;
+        const bottomPadding = Math.max(8, height * 0.08);  // 底部間距：8px 或高度的 8%
         const textHeight = textAreaHeight - bottomPadding;
-        // 馃敟 鏂囧瓧浣嶇疆锛氬崱鐗囦笅閭婄晫 - 搴曢儴闁撹窛 - 鏂囧瓧楂樺害/2
+        // 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
         const textY = height / 2 - bottomPadding - textHeight / 2;
 
-        console.log('馃搻 浣堝眬 D 灏哄瑷堢畻:', {
+        console.log('📐 佈局 D 尺寸計算:', {
             imageHeight,
             textAreaHeight,
             bottomPadding,
@@ -3013,30 +3323,36 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             formula: `textY = ${height / 2} - ${bottomPadding} - ${textHeight / 2} = ${textY}`
         });
 
-        // 瑷堢畻姝ｆ柟褰㈠湒鐗囩殑灏哄锛?:1 姣斾緥锛?        const squareSize = Math.min(width - 4, imageHeight - 4);
+        // 計算正方形圖片的尺寸（1:1 比例）
+        const squareSize = Math.min(width - 4, imageHeight - 4);
 
-        // 鍓靛缓鍦栫墖
+        // 創建圖片
         this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId);
 
-        // 鍓靛缓鏂囧瓧锛堝鏋滄湁锛?        if (text && text.trim() !== '' && text.trim() !== '<br>') {
+        // 創建文字（如果有）
+        if (text && text.trim() !== '' && text.trim() !== '<br>') {
             this.createTextElement(container, text, 0, textY, width, textHeight);
         }
     }
 
-    // 馃敟 浣堝眬鍑芥暩 - 鎯呮硜 E锛氳獮闊?+ 鏂囧瓧锛堟枃瀛楁湁搴曢儴闁撹窛锛?    createCardLayoutE(container, background, width, height, text, audioUrl, pairId) {
-        // 馃敟 棣栧厛娣诲姞鑳屾櫙锛堟渶搴曞堡锛?        container.add([background]);
+    // 🔥 佈局函數 - 情況 E：語音 + 文字（文字有底部間距）
+    createCardLayoutE(container, background, width, height, text, audioUrl, pairId) {
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
 
-        // 瑾為煶鎸夐垥鍦ㄤ笂鏂?        const buttonSize = Math.max(30, Math.min(50, width * 0.25));
+        // 語音按鈕在上方
+        const buttonSize = Math.max(30, Math.min(50, width * 0.25));
         const buttonY = -height / 2 + buttonSize / 2 + 10;
         this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
 
-        // 馃敟 鏂囧瓧鍦ㄤ笅鏂癸紝闇€瑕佺暀鍑哄簳閮ㄩ枔璺?        const textAreaHeight = height * 0.4;
-        const bottomPadding = Math.max(6, height * 0.06);  // 搴曢儴闁撹窛锛?px 鎴栭珮搴︾殑 6%
+        // 🔥 文字在下方，需要留出底部間距
+        const textAreaHeight = height * 0.4;
+        const bottomPadding = Math.max(6, height * 0.06);  // 底部間距：6px 或高度的 6%
         const textHeight = textAreaHeight - bottomPadding;
-        // 馃敟 鏂囧瓧浣嶇疆锛氬崱鐗囦笅閭婄晫 - 搴曢儴闁撹窛 - 鏂囧瓧楂樺害/2
+        // 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
         const textY = height / 2 - bottomPadding - textHeight / 2;
 
-        console.log('馃摑 鍓靛缓鏂囧瓧锛堜綀灞€ E锛?', {
+        console.log('📝 創建文字（佈局 E）:', {
             text,
             textY,
             textHeight,
@@ -3048,41 +3364,48 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         this.createTextElement(container, text, 0, textY, width, textHeight);
     }
 
-    // 馃敟 浣堝眬鍑芥暩 - 鎯呮硜 F锛氬彧鏈夊湒鐗囷紙1:1 姣斾緥锛?    createCardLayoutF(container, background, width, height, imageUrl, pairId) {
-        console.log('馃帹 浣堝眬 F: 鍙湁鍦栫墖 (1:1 姣斾緥)', {
+    // 🔥 佈局函數 - 情況 F：只有圖片（1:1 比例）
+    createCardLayoutF(container, background, width, height, imageUrl, pairId) {
+        console.log('🎨 佈局 F: 只有圖片 (1:1 比例)', {
             width,
             height,
             pairId,
             imageUrl: imageUrl ? imageUrl.substring(0, 50) + '...' : 'null'
         });
 
-        // 馃敟 棣栧厛娣诲姞鑳屾櫙锛堟渶搴曞堡锛?        container.add([background]);
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
 
-        // 瑷堢畻姝ｆ柟褰㈠湒鐗囩殑灏哄锛堝彇瀵害鍜岄珮搴︾殑鏈€灏忓€硷紝淇濇寔 1:1锛?        const squareSize = Math.min(width - 4, height - 4);
+        // 計算正方形圖片的尺寸（取寬度和高度的最小值，保持 1:1）
+        const squareSize = Math.min(width - 4, height - 4);
 
-        // 鍦栫墖缃腑椤ず
+        // 圖片置中顯示
         this.loadAndDisplayImage(container, imageUrl, 0, 0, squareSize, pairId);
     }
 
-    // 馃敟 浣堝眬鍑芥暩 - 鍦栫墖 + 瑾為煶锛堢劇鏂囧瓧锛?    createCardLayoutImageAudio(container, background, width, height, imageUrl, audioUrl, pairId) {
-        // 馃敟 棣栧厛娣诲姞鑳屾櫙锛堟渶搴曞堡锛?        container.add([background]);
+    // 🔥 佈局函數 - 圖片 + 語音（無文字）
+    createCardLayoutImageAudio(container, background, width, height, imageUrl, audioUrl, pairId) {
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
 
-        // 鍦栫墖浣旀摎澶ч儴鍒嗗崁鍩?        const imageHeight = height * 0.8;
+        // 圖片佔據大部分區域
+        const imageHeight = height * 0.8;
         const imageY = -height / 2 + imageHeight / 2;
 
-        // 瑷堢畻姝ｆ柟褰㈠湒鐗囩殑灏哄
+        // 計算正方形圖片的尺寸
         const squareSize = Math.min(width - 4, imageHeight - 4);
 
-        // 鍓靛缓鍦栫墖
+        // 創建圖片
         this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId);
 
-        // 鍓靛缓瑾為煶鎸夐垥锛堜笅鏂癸級
+        // 創建語音按鈕（下方）
         const buttonSize = Math.max(30, Math.min(50, width * 0.2));
         const buttonY = height / 2 - buttonSize / 2 - 5;
         this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
     }
 
-    // 馃敟 杓斿姪鍑芥暩 - 杓夊叆涓﹂’绀哄湒鐗?    loadAndDisplayImage(container, imageUrl, x, y, size, pairId) {
+    // 🔥 輔助函數 - 載入並顯示圖片
+    loadAndDisplayImage(container, imageUrl, x, y, size, pairId) {
         const imageKey = `card-image-${pairId}`;
 
         if (!this.textures.exists(imageKey)) {
@@ -3098,7 +3421,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             });
 
             this.load.once('loaderror', (file) => {
-                console.warn(`鈿狅笍 鍦栫墖杓夊叆澶辨晽: ${file.key}`, imageUrl);
+                console.warn(`⚠️ 圖片載入失敗: ${file.key}`, imageUrl);
             });
 
             this.load.start();
@@ -3110,8 +3433,10 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         }
     }
 
-    // 馃敟 杓斿姪鍑芥暩 - 鍓靛缓鏂囧瓧鍏冪礌锛堟櫤鑳借▓绠楀搴﹀拰楂樺害锛?    createTextElement(container, text, x, y, width, height) {
-        // 馃敟 瑾胯│鏃ヨ獙 - 纰鸿獚鍑芥暩琚鐢?        console.log('馃摑 createTextElement 琚鐢?', {
+    // 🔥 輔助函數 - 創建文字元素（智能計算寬度和高度）
+    createTextElement(container, text, x, y, width, height) {
+        // 🔥 調試日誌 - 確認函數被調用
+        console.log('📝 createTextElement 被調用:', {
             text: text,
             textType: typeof text,
             textLength: text ? text.length : 'null/undefined',
@@ -3119,29 +3444,35 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             containerExists: !!container
         });
 
-        // 馃敟 鍒濆瀛楅珨澶у皬锛堝熀鏂奸珮搴︾殑 60%锛?        let fontSize = Math.max(14, Math.min(48, height * 0.6));
+        // 🔥 初始字體大小（基於高度的 60%）
+        let fontSize = Math.max(14, Math.min(48, height * 0.6));
 
-        // 鍓靛缓鑷ㄦ檪鏂囧瓧娓噺瀵害鍜岄珮搴?        const tempText = this.add.text(0, 0, text, {
+        // 創建臨時文字測量寬度和高度
+        const tempText = this.add.text(0, 0, text, {
             fontSize: `${fontSize}px`,
             fontFamily: 'Arial'
         });
 
-        // 馃敟 瑷堢畻鏈€澶у搴︼紙鐣?15% 閭婅窛锛?        const maxTextWidth = width * 0.85;
+        // 🔥 計算最大寬度（留 15% 邊距）
+        const maxTextWidth = width * 0.85;
 
-        // 馃敟 瑷堢畻鏈€澶ч珮搴︼紙鐣?10% 閭婅窛锛?        const maxTextHeight = height * 0.9;
+        // 🔥 計算最大高度（留 10% 邊距）
+        const maxTextHeight = height * 0.9;
 
-        // 馃敟 鍚屾檪妾㈡煡瀵害鍜岄珮搴︼紝濡傛灉瓒呴亷鍓囩府灏忓瓧楂?        while ((tempText.width > maxTextWidth || tempText.height > maxTextHeight) && fontSize > 12) {
+        // 🔥 同時檢查寬度和高度，如果超過則縮小字體
+        while ((tempText.width > maxTextWidth || tempText.height > maxTextHeight) && fontSize > 12) {
             fontSize -= 2;
             tempText.setFontSize(fontSize);
         }
 
-        // 馃敟 瑷橀寗鏈€绲傜殑鏂囧瓧灏哄
+        // 🔥 記錄最終的文字尺寸
         const finalTextWidth = tempText.width;
         const finalTextHeight = tempText.height;
 
         tempText.destroy();
 
-        // 鍓靛缓鏈€绲傛枃瀛?        const cardText = this.add.text(x, y, text, {
+        // 創建最終文字
+        const cardText = this.add.text(x, y, text, {
             fontSize: `${fontSize}px`,
             color: '#333333',
             fontFamily: 'Arial',
@@ -3150,7 +3481,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         cardText.setOrigin(0.5);
         container.add(cardText);
 
-        // 馃敟 瑾胯│鏃ヨ獙 - 纰鸿獚鏂囧瓧灏嶈薄鍓靛缓鍜屽昂瀵?        console.log('鉁?鏂囧瓧灏嶈薄宸插壍寤猴紙鏅鸿兘瑷堢畻锛?', {
+        // 🔥 調試日誌 - 確認文字對象創建和尺寸
+        console.log('✅ 文字對象已創建（智能計算）:', {
             text: text,
             fontSize: fontSize,
             textWidth: cardText.width,
@@ -3168,93 +3500,100 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         return cardText;
     }
 
-    // 馃敟 杓斿姪鍑芥暩 - 寰屽彴鐣版鐢熸垚缂哄け鐨勯煶闋伙紙涓嶉樆濉為亰鎴插姞杓夛級
+    // 🔥 輔助函數 - 後台異步生成缺失的音頻（不阻塞遊戲加載）
     generateMissingAudioUrlsInBackground() {
-        console.log('馃幍 [寰屽彴] 闁嬪妾㈡煡涓︾敓鎴愮己澶辩殑闊抽牷...');
+        console.log('🎵 [後台] 開始檢查並生成缺失的音頻...');
 
         const missingAudioPairs = this.pairs.filter(pair => !pair.audioUrl);
 
         if (missingAudioPairs.length === 0) {
-            console.log('鉁?[寰屽彴] 鎵€鏈夎褰欓兘鏈夐煶闋伙紝鐒￠渶鐢熸垚');
+            console.log('✅ [後台] 所有詞彙都有音頻，無需生成');
             return;
         }
 
-        console.log(`鈴?[寰屽彴] 鐧肩従 ${missingAudioPairs.length} 鍊嬬己澶遍煶闋荤殑瑭炲綑锛屽湪寰屽彴鐢熸垚...`);
+        console.log(`⏳ [後台] 發現 ${missingAudioPairs.length} 個缺失音頻的詞彙，在後台生成...`);
 
-        // 馃敟 浣跨敤 Promise 鍦ㄥ緦鍙板煼琛岋紝涓嶇瓑寰呯祼鏋?        this.generateMissingAudioUrlsAsync(missingAudioPairs).catch(error => {
-            console.error('鉂?[寰屽彴] 鐢熸垚缂哄け闊抽牷鏅傚嚭閷?', error);
+        // 🔥 使用 Promise 在後台執行，不等待結果
+        this.generateMissingAudioUrlsAsync(missingAudioPairs).catch(error => {
+            console.error('❌ [後台] 生成缺失音頻時出錯:', error);
         });
     }
 
-    // 馃敟 杓斿姪鍑芥暩 - 鐣版鐢熸垚缂哄け鐨勯煶闋?    async generateMissingAudioUrlsAsync(missingAudioPairs) {
+    // 🔥 輔助函數 - 異步生成缺失的音頻
+    async generateMissingAudioUrlsAsync(missingAudioPairs) {
         try {
             for (const pair of missingAudioPairs) {
                 try {
-                    // 瑾跨敤 TTS API 鐢熸垚闊抽牷
+                    // 調用 TTS API 生成音頻
                     const response = await fetch('/api/tts', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             text: pair.english,
                             language: 'en-US',
-                            voice: 'en-US-Neural2-F'  // 濂宠伈
+                            voice: 'en-US-Neural2-F'  // 女聲
                         })
                     });
 
                     if (response.ok) {
                         const data = await response.json();
                         pair.audioUrl = data.audioUrl;
-                        console.log(`鉁?[寰屽彴] 鐢熸垚闊抽牷: ${pair.english}`);
+                        console.log(`✅ [後台] 生成音頻: ${pair.english}`);
                     } else {
-                        console.warn(`鈿狅笍 [寰屽彴] 鐢熸垚闊抽牷澶辨晽: ${pair.english} (${response.status})`);
+                        console.warn(`⚠️ [後台] 生成音頻失敗: ${pair.english} (${response.status})`);
                     }
                 } catch (error) {
-                    console.error(`鉂?[寰屽彴] 鐢熸垚闊抽牷鐣板父: ${pair.english}`, error);
+                    console.error(`❌ [後台] 生成音頻異常: ${pair.english}`, error);
                 }
 
-                // 閬垮厤 API 闄愬埗锛屾瘡鍊嬭珛姹備箣闁撶瓑寰?200ms
+                // 避免 API 限制，每個請求之間等待 200ms
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
 
-            console.log('鉁?[寰屽彴] 闊抽牷鐢熸垚瀹屾垚');
+            console.log('✅ [後台] 音頻生成完成');
         } catch (error) {
-            console.error('鉂?[寰屽彴] 鐢熸垚缂哄け闊抽牷鏅傚嚭閷?', error);
+            console.error('❌ [後台] 生成缺失音頻時出錯:', error);
         }
     }
 
-    // 馃敟 杓斿姪鍑芥暩 - 鍓靛缓瑾為煶鎸夐垥
+    // 🔥 輔助函數 - 創建語音按鈕
     createAudioButton(container, audioUrl, x, y, size, pairId) {
-        console.log('馃攰 鍓靛缓瑾為煶鎸夐垥:', { x, y, size, audioUrl: audioUrl ? '鏈? : '鐒?, pairId });
+        console.log('🔊 創建語音按鈕:', { x, y, size, audioUrl: audioUrl ? '有' : '無', pairId });
 
-        // 馃敟 鍓靛缓鎸夐垥鑳屾櫙锛堢浉灏嶆柤 buttonContainer 鐨勫骇妯欑偤 0, 0锛?        const buttonBg = this.add.rectangle(0, 0, size, size, 0x4CAF50);
+        // 🔥 創建按鈕背景（相對於 buttonContainer 的座標為 0, 0）
+        const buttonBg = this.add.rectangle(0, 0, size, size, 0x4CAF50);
         buttonBg.setStrokeStyle(2, 0x2E7D32);
         buttonBg.setOrigin(0.5);
 
-        // 馃敟 鍓靛缓鍠囧彮鍦栨锛堢浉灏嶆柤 buttonContainer 鐨勫骇妯欑偤 0, 0锛?        const speakerIcon = this.add.text(0, 0, '馃攰', {
+        // 🔥 創建喇叭圖標（相對於 buttonContainer 的座標為 0, 0）
+        const speakerIcon = this.add.text(0, 0, '🔊', {
             fontSize: `${size * 0.6}px`,
             fontFamily: 'Arial'
         });
         speakerIcon.setOrigin(0.5);
 
-        // 馃敟 鍓靛缓鎸夐垥瀹瑰櫒锛堜娇鐢ㄧ浉灏嶆柤鐖跺鍣ㄧ殑搴ф x, y锛?        const buttonContainer = this.add.container(0, 0, [buttonBg, speakerIcon]);
+        // 🔥 創建按鈕容器（使用相對於父容器的座標 x, y）
+        const buttonContainer = this.add.container(0, 0, [buttonBg, speakerIcon]);
         buttonContainer.setSize(size, size);
         buttonContainer.setInteractive({ useHandCursor: true });
 
-        // 馃敟 瑷疆鎸夐垥瀹瑰櫒鐨勪綅缃紙鐩稿皪鏂肩埗瀹瑰櫒锛?        buttonContainer.setPosition(x, y);
+        // 🔥 設置按鈕容器的位置（相對於父容器）
+        buttonContainer.setPosition(x, y);
 
-        // 鍎插瓨闊抽牷 URL
+        // 儲存音頻 URL
         buttonContainer.setData('audioUrl', audioUrl);
         buttonContainer.setData('isPlaying', false);
         buttonContainer.setData('pairId', pairId);
 
-        // 榛炴搳浜嬩欢
+        // 點擊事件
         buttonContainer.on('pointerdown', (pointer, localX, localY, event) => {
-            console.log('馃柋锔?瑾為煶鎸夐垥琚粸鎿?', { pairId, audioUrl });
-            // 馃敟 闃绘浜嬩欢鍐掓场锛岄伩鍏嶈Ц鐧煎崱鐗囨嫋鏇?            event.stopPropagation();
+            console.log('🖱️ 語音按鈕被點擊:', { pairId, audioUrl });
+            // 🔥 阻止事件冒泡，避免觸發卡片拖曳
+            event.stopPropagation();
             this.playAudio(audioUrl, buttonContainer, buttonBg);
         });
 
-        // Hover 鏁堟灉
+        // Hover 效果
         buttonContainer.on('pointerover', () => {
             buttonBg.setFillStyle(0x45a049);
         });
@@ -3265,10 +3604,10 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
         });
 
-        // 馃敟 娣诲姞鍒扮埗瀹瑰櫒
+        // 🔥 添加到父容器
         container.add(buttonContainer);
 
-        console.log('鉁?瑾為煶鎸夐垥宸叉坊鍔犲埌瀹瑰櫒:', {
+        console.log('✅ 語音按鈕已添加到容器:', {
             buttonPosition: { x: buttonContainer.x, y: buttonContainer.y },
             containerPosition: { x: container.x, y: container.y }
         });
@@ -3276,116 +3615,127 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         return buttonContainer;
     }
 
-    // 馃敟 杓斿姪鍑芥暩 - 鎾斁闊抽牷锛堜娇鐢?HTML5 Audio API锛?    playAudio(audioUrl, buttonContainer, buttonBg) {
+    // 🔥 輔助函數 - 播放音頻（使用 HTML5 Audio API）
+    playAudio(audioUrl, buttonContainer, buttonBg) {
         if (!audioUrl || audioUrl.trim() === '') {
-            console.warn('鈿狅笍 闊抽牷 URL 鐐虹┖');
+            console.warn('⚠️ 音頻 URL 為空');
             return;
         }
 
-        // 闃叉閲嶈榛炴搳
+        // 防止重複點擊
         if (buttonContainer.getData('isPlaying')) {
-            console.log('馃攰 闊抽牷姝ｅ湪鎾斁涓紝蹇界暐閲嶈榛炴搳');
+            console.log('🔊 音頻正在播放中，忽略重複點擊');
             return;
         }
 
-        console.log('馃攰 婧栧倷鎾斁闊抽牷:', { audioUrl });
+        console.log('🔊 準備播放音頻:', { audioUrl });
 
         try {
-            // 鏇存柊鎸夐垥鐙€鎱嬬偤杓夊叆涓?            buttonContainer.setData('isPlaying', true);
-            buttonBg.setFillStyle(0xFFC107);  // 榛冭壊琛ㄧず杓夊叆涓?
-            // 浣跨敤 HTML5 Audio API 鐩存帴鎾斁
+            // 更新按鈕狀態為載入中
+            buttonContainer.setData('isPlaying', true);
+            buttonBg.setFillStyle(0xFFC107);  // 黃色表示載入中
+
+            // 使用 HTML5 Audio API 直接播放
             const audio = new Audio(audioUrl);
             audio.volume = 0.8;
 
-            // 闊抽牷鍙互鎾斁鏅?            audio.addEventListener('canplay', () => {
-                console.log('鉁?闊抽牷宸叉簴鍌欏ソ锛岄枊濮嬫挱鏀?', audioUrl);
-                buttonBg.setFillStyle(0xFF9800);  // 姗欒壊琛ㄧず鎾斁涓?                audio.play().catch(error => {
-                    console.error('鉂?闊抽牷鎾斁澶辨晽:', error);
+            // 音頻可以播放時
+            audio.addEventListener('canplay', () => {
+                console.log('✅ 音頻已準備好，開始播放:', audioUrl);
+                buttonBg.setFillStyle(0xFF9800);  // 橙色表示播放中
+                audio.play().catch(error => {
+                    console.error('❌ 音頻播放失敗:', error);
                     buttonContainer.setData('isPlaying', false);
-                    buttonBg.setFillStyle(0xF44336);  // 绱呰壊琛ㄧず閷
+                    buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
                 });
             });
 
-            // 闊抽牷鎾斁瀹屾垚
+            // 音頻播放完成
             audio.addEventListener('ended', () => {
-                console.log('鉁?闊抽牷鎾斁瀹屾垚:', audioUrl);
+                console.log('✅ 音頻播放完成:', audioUrl);
                 buttonContainer.setData('isPlaying', false);
                 buttonBg.setFillStyle(0x4CAF50);
             });
 
-            // 闊抽牷杓夊叆澶辨晽
+            // 音頻載入失敗
             audio.addEventListener('error', (error) => {
-                console.error('鉂?闊抽牷杓夊叆澶辨晽:', error);
+                console.error('❌ 音頻載入失敗:', error);
                 buttonContainer.setData('isPlaying', false);
-                buttonBg.setFillStyle(0xF44336);  // 绱呰壊琛ㄧず閷
+                buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
             });
 
-            // 闁嬪杓夊叆闊抽牷
+            // 開始載入音頻
             audio.load();
 
         } catch (error) {
-            console.error('鉂?鎾斁闊抽牷鏅傜櫦鐢熺暟甯?', error);
+            console.error('❌ 播放音頻時發生異常:', error);
             buttonContainer.setData('isPlaying', false);
-            buttonBg.setFillStyle(0xF44336);  // 绱呰壊琛ㄧず閷
+            buttonBg.setFillStyle(0xF44336);  // 紅色表示錯誤
         }
     }
 
     createRightCard(x, y, width, height, text, pairId, textPosition = 'bottom') {
-        // 鍓靛缓鍗＄墖瀹瑰櫒
+        // 創建卡片容器
         const container = this.add.container(x, y);
         container.setDepth(5);
 
-        // 馃敟 鍓靛缓鐧借壊妗嗭紙鍏ф锛?        const background = this.add.rectangle(0, 0, width, height, 0xffffff);
+        // 🔥 創建白色框（內框）
+        const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
         background.setDepth(1);
 
-        // 馃敟 鍓靛缓鏂囧瓧妯欑堡锛堝嫊鎱嬪瓧楂斿ぇ灏忥紝鏍规摎鏂囧瓧闀峰害鍜屽収妗嗗搴﹁鏁达級
+        // 🔥 創建文字標籤（動態字體大小，根據文字長度和內框寬度調整）
         const textLength = text.length;
         let baseFontSize = Math.max(24, Math.min(48, height * 0.6));
 
-        // 馃敟 鏍规摎鏂囧瓧闀峰害瑾挎暣瀛楅珨澶у皬
+        // 🔥 根據文字長度調整字體大小
         let fontSize;
         if (textLength <= 4) {
-            fontSize = baseFontSize * 0.8;  // 1-4 鍊嬪瓧锛氱府灏?20%
+            fontSize = baseFontSize * 0.8;  // 1-4 個字：縮小 20%
         } else if (textLength <= 6) {
-            fontSize = baseFontSize * 0.7;  // 5-6 鍊嬪瓧锛氱府灏?30%
+            fontSize = baseFontSize * 0.7;  // 5-6 個字：縮小 30%
         } else {
-            fontSize = baseFontSize * 0.6;  // 7+ 鍊嬪瓧锛氱府灏?40%
+            fontSize = baseFontSize * 0.6;  // 7+ 個字：縮小 40%
         }
 
-        fontSize = Math.max(18, fontSize);  // 鏈€灏忓瓧楂斿ぇ灏?18px
+        fontSize = Math.max(18, fontSize);  // 最小字體大小 18px
 
-        // 馃敟 鍓靛缓鑷ㄦ檪鏂囧瓧灏嶈薄渚嗘脯閲忓搴︼紙閬╂噳鍏ф瀵害锛?        const tempText = this.add.text(0, 0, text, {
+        // 🔥 創建臨時文字對象來測量寬度（適應內框寬度）
+        const tempText = this.add.text(0, 0, text, {
             fontSize: `${fontSize}px`,
             fontFamily: 'Arial'
         });
 
-        // 馃敟 濡傛灉鏂囧瓧瀵害瓒呴亷鍏ф瀵害鐨?85%锛岀府灏忓瓧楂?        const maxTextWidth = width * 0.85;  // 鐣?15% 鐨勯倞璺?        while (tempText.width > maxTextWidth && fontSize > 14) {
-            fontSize -= 1;  // 姣忔绺皬 1px
+        // 🔥 如果文字寬度超過內框寬度的 85%，縮小字體
+        const maxTextWidth = width * 0.85;  // 留 15% 的邊距
+        while (tempText.width > maxTextWidth && fontSize > 14) {
+            fontSize -= 1;  // 每次縮小 1px
             tempText.setFontSize(fontSize);
         }
 
-        // 閵锋瘈鑷ㄦ檪鏂囧瓧灏嶈薄
+        // 銷毀臨時文字對象
         tempText.destroy();
 
-        // 馃敟 鏍规摎 textPosition 瑷疆鏂囧瓧浣嶇疆
+        // 🔥 根據 textPosition 設置文字位置
         let textX, textY, originX, originY;
         if (textPosition === 'right') {
-            // 鏂囧瓧鍦ㄦ鍙抽倞
+            // 文字在框右邊
             textX = width / 2 + 15;
             textY = 0;
-            originX = 0;      // 宸﹀皪榻?            originY = 0.5;    // 鍨傜洿灞呬腑
+            originX = 0;      // 左對齊
+            originY = 0.5;    // 垂直居中
         } else if (textPosition === 'left') {
-            // 鏂囧瓧鍦ㄦ宸﹂倞
+            // 文字在框左邊
             textX = -width / 2 - 15;
             textY = 0;
-            originX = 1;      // 鍙冲皪榻?            originY = 0.5;    // 鍨傜洿灞呬腑
+            originX = 1;      // 右對齊
+            originY = 0.5;    // 垂直居中
         } else {
-            // 鏂囧瓧鍦ㄦ涓嬮倞锛堥粯瑾嶏級
+            // 文字在框下邊（默認）
             textX = 0;
             textY = height / 2 + 10;
-            originX = 0.5;    // 姘村钩灞呬腑
-            originY = 0;      // 闋傞儴灏嶉綂
+            originX = 0.5;    // 水平居中
+            originY = 0;      // 頂部對齊
         }
 
         const cardText = this.add.text(textX, textY, text, {
@@ -3395,17 +3745,18 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             fontStyle: 'normal'
         });
         cardText.setOrigin(originX, originY);
-        cardText.setDepth(10);  // 纰轰繚鏂囧瓧鍦ㄦ渶涓婂堡
+        cardText.setDepth(10);  // 確保文字在最上層
 
-        // 娣诲姞鍒板鍣?        container.add([background, cardText]);
+        // 添加到容器
+        container.add([background, cardText]);
 
-        // 瑷疆浜掑嫊锛堟帴鏀舵嫋鏇筹級
+        // 設置互動（接收拖曳）
         background.setInteractive({ useHandCursor: true });
 
-        // 鎳稿仠鏁堟灉
+        // 懸停效果
         background.on('pointerover', () => {
             if (!container.getData('isMatched') && this.isDragging) {
-                background.setStrokeStyle(3, 0xfe7606); // 姗欒壊閭婃
+                background.setStrokeStyle(3, 0xfe7606); // 橙色邊框
             }
         });
         background.on('pointerout', () => {
@@ -3414,7 +3765,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
         });
 
-        // 鍎插瓨鍗＄墖鏁告摎
+        // 儲存卡片數據
         container.setData({
             pairId: pairId,
             side: 'right',
@@ -3427,56 +3778,60 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
     }
 
     checkSwap(pointer, draggedCard) {
-        // 馃摑 瑾胯│瑷婃伅锛氳閷勪氦鎻涙鏌ラ枊濮?        console.log('馃攧 妾㈡煡鍗＄墖浜ゆ彌:', {
+        // 📝 調試訊息：記錄交換檢查開始
+        console.log('🔄 檢查卡片交換:', {
             draggedCardId: draggedCard?.getData('pairId'),
             pointerPosition: { x: pointer.x, y: pointer.y }
         });
 
         if (!draggedCard) {
-            console.log('鈿狅笍 娌掓湁鎷栨洺鐨勫崱鐗?);
+            console.log('⚠️ 沒有拖曳的卡片');
             return false;
         }
 
-        // 妾㈡煡鎸囬嚌鏄惁鍦ㄥ叾浠栧乏鍋村崱鐗囦笂
+        // 檢查指針是否在其他左側卡片上
         let targetCard = null;
 
         for (const card of this.leftCards) {
-            // 璺抽亷鑷繁鍜屽凡閰嶅皪鐨勫崱鐗?            if (card === draggedCard || card.getData('isMatched')) continue;
+            // 跳過自己和已配對的卡片
+            if (card === draggedCard || card.getData('isMatched')) continue;
 
             const bounds = card.getBounds();
             if (bounds.contains(pointer.x, pointer.y)) {
                 targetCard = card;
-                console.log('鉁?鎵惧埌鐩鍗＄墖:', card.getData('pairId'));
+                console.log('✅ 找到目標卡片:', card.getData('pairId'));
                 break;
             }
         }
 
         if (targetCard) {
-            console.log('馃攧 鍩疯鍗＄墖浜ゆ彌:', {
+            console.log('🔄 執行卡片交換:', {
                 card1: draggedCard.getData('pairId'),
                 card2: targetCard.getData('pairId')
             });
-            // 浜ゆ彌鍏╁嫉鍗＄墖鐨勪綅缃?            this.swapCards(draggedCard, targetCard);
+            // 交換兩張卡片的位置
+            this.swapCards(draggedCard, targetCard);
             return true;
         }
 
-        console.log('鉂?娌掓湁鎵惧埌鐩鍗＄墖');
+        console.log('❌ 沒有找到目標卡片');
         return false;
     }
 
     swapCards(card1, card2) {
-        // 鐛插彇鍏╁嫉鍗＄墖鐨勫師濮嬩綅缃?        const card1OriginalX = card1.getData('originalX');
+        // 獲取兩張卡片的原始位置
+        const card1OriginalX = card1.getData('originalX');
         const card1OriginalY = card1.getData('originalY');
         const card2OriginalX = card2.getData('originalX');
         const card2OriginalY = card2.getData('originalY');
 
-        // 浜ゆ彌鍘熷浣嶇疆鏁告摎
+        // 交換原始位置數據
         card1.setData('originalX', card2OriginalX);
         card1.setData('originalY', card2OriginalY);
         card2.setData('originalX', card1OriginalX);
         card2.setData('originalY', card1OriginalY);
 
-        // 鍕曠暙绉诲嫊鍒版柊浣嶇疆
+        // 動畫移動到新位置
         this.tweens.add({
             targets: card1,
             x: card2OriginalX,
@@ -3502,38 +3857,40 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
     }
 
     checkDrop(pointer, draggedCard) {
-        // 馃摑 瑾胯│瑷婃伅锛氳閷勬嫋鏀炬鏌ラ枊濮?        console.log('馃幆 妾㈡煡鎷栨斁:', {
+        // 📝 調試訊息：記錄拖放檢查開始
+        console.log('🎯 檢查拖放:', {
             draggedCardId: draggedCard?.getData('pairId'),
             layout: this.layout,
             pointerPosition: { x: pointer.x, y: pointer.y }
         });
 
         if (!draggedCard) {
-            console.log('鈿狅笍 娌掓湁鎷栨洺鐨勫崱鐗?);
+            console.log('⚠️ 沒有拖曳的卡片');
             return false;
         }
 
-        // 馃敟 娣峰悎妯″紡锛氭鏌ユ槸鍚︽嫋鏇冲埌鍙︿竴鍊嬩腑鏂囨
+        // 🔥 混合模式：檢查是否拖曳到另一個中文框
         if (this.layout === 'mixed') {
-            console.log('馃攧 浣跨敤娣峰悎妯″紡鎷栨斁閭忚集');
+            console.log('🔄 使用混合模式拖放邏輯');
             return this.checkMixedModeDrop(pointer, draggedCard);
         }
 
-        // 鍒嗛洟妯″紡锛氭鏌ユ寚閲濇槸鍚﹀湪浠讳綍鍙冲伌鍗＄墖涓?        let targetCard = null;
+        // 分離模式：檢查指針是否在任何右側卡片上
+        let targetCard = null;
 
         for (const card of this.rightCards) {
-            if (card.getData('isMatched')) continue;  // 璺抽亷宸查厤灏嶇殑鍗＄墖
+            if (card.getData('isMatched')) continue;  // 跳過已配對的卡片
 
             const bounds = card.getBounds();
             if (bounds.contains(pointer.x, pointer.y)) {
                 targetCard = card;
-                console.log('鉁?鎵惧埌鐩鍗＄墖:', card.getData('pairId'));
+                console.log('✅ 找到目標卡片:', card.getData('pairId'));
                 break;
             }
         }
 
         if (targetCard) {
-            console.log('馃幆 鍩疯閰嶅皪妾㈡煡:', {
+            console.log('🎯 執行配對檢查:', {
                 leftCard: draggedCard.getData('pairId'),
                 rightCard: targetCard.getData('pairId')
             });
@@ -3541,33 +3898,38 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             return true;
         }
 
-        console.log('鉂?娌掓湁鎵惧埌鐩鍗＄墖');
+        console.log('❌ 沒有找到目標卡片');
         return false;
     }
 
-    // 馃敟 娣峰悎妯″紡锛氭鏌ユ嫋鏀惧埌鍏朵粬鑻辨枃鍗＄墖锛堜氦鎻涗綅缃級
+    // 🔥 混合模式：檢查拖放到其他英文卡片（交換位置）
     checkMixedModeDrop(pointer, draggedCard) {
-        // 馃摑 瑾胯│瑷婃伅锛氳閷勬贩鍚堟ā寮忔嫋鏀炬鏌ラ枊濮?        console.log('馃攧 娣峰悎妯″紡鎷栨斁妾㈡煡:', {
+        // 📝 調試訊息：記錄混合模式拖放檢查開始
+        console.log('🔄 混合模式拖放檢查:', {
             draggedCardId: draggedCard.getData('pairId'),
             pointerPosition: { x: pointer.x, y: pointer.y }
         });
 
-        // 鎵惧埌鎷栨洺鍒扮殑鐩鑻辨枃鍗＄墖
+        // 找到拖曳到的目標英文卡片
         let targetCard = null;
 
         for (const card of this.leftCards) {
-            if (card === draggedCard) continue;  // 璺抽亷鑷繁
+            if (card === draggedCard) continue;  // 跳過自己
 
             const bounds = card.getBounds();
-            // 馃摑 鎿村ぇ妾㈡脯绡勫湇锛屽寘鎷崱鐗囦笅鏂圭殑涓枃鏂囧瓧鍗€鍩?            // 鍘熷洜锛氫腑鏂囨枃瀛楀湪鍗＄墖涓嬫柟锛岀敤鎴跺彲鑳芥嫋鏀惧埌涓枃鏂囧瓧涓?            // 鎿村ぇ绡勫湇锛氶珮搴?+ 50px锛堜腑鏂囨枃瀛楀崁鍩熺殑楂樺害锛?            const expandedBounds = new Phaser.Geom.Rectangle(
+            // 📝 擴大檢測範圍，包括卡片下方的中文文字區域
+            // 原因：中文文字在卡片下方，用戶可能拖放到中文文字上
+            // 擴大範圍：高度 + 50px（中文文字區域的高度）
+            const expandedBounds = new Phaser.Geom.Rectangle(
                 bounds.x,
                 bounds.y,
                 bounds.width,
-                bounds.height + 50  // 鎿村ぇ50px锛屽寘鎷腑鏂囨枃瀛楀崁鍩?            );
+                bounds.height + 50  // 擴大50px，包括中文文字區域
+            );
 
             if (expandedBounds.contains(pointer.x, pointer.y)) {
                 targetCard = card;
-                console.log('鉁?鎵惧埌鐩鍗＄墖锛堟摯灞曠瘎鍦嶏級:', {
+                console.log('✅ 找到目標卡片（擴展範圍）:', {
                     targetCardId: card.getData('pairId'),
                     bounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }
                 });
@@ -3576,7 +3938,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         }
 
         if (!targetCard) {
-            // 娌掓湁鎷栨洺鍒颁换浣曞崱鐗囷紝杩斿洖鍘熶綅
+            // 沒有拖曳到任何卡片，返回原位
             this.tweens.add({
                 targets: draggedCard,
                 x: draggedCard.getData('originalX'),
@@ -3593,42 +3955,44 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             return false;
         }
 
-        // 鐛插彇鍏╁€嬪崱鐗囩殑妗嗙储寮?        const targetFrameIndex = targetCard.getData('currentFrameIndex');
+        // 獲取兩個卡片的框索引
+        const targetFrameIndex = targetCard.getData('currentFrameIndex');
         const currentFrameIndex = draggedCard.getData('currentFrameIndex');
 
-        // 浜ゆ彌鍏╁€嬭嫳鏂囧崱鐗囩殑浣嶇疆
+        // 交換兩個英文卡片的位置
         this.swapMixedModeCards(draggedCard, targetCard, currentFrameIndex, targetFrameIndex);
         return true;
     }
 
-    // 馃敟 娣峰悎妯″紡锛氫氦鎻涘叐鍊嬭嫳鏂囧崱鐗囩殑浣嶇疆
+    // 🔥 混合模式：交換兩個英文卡片的位置
     swapMixedModeCards(card1, card2, frame1Index, frame2Index) {
-        console.log('馃攧 娣峰悎妯″紡锛氫氦鎻涘崱鐗?, { frame1Index, frame2Index });
+        console.log('🔄 混合模式：交換卡片', { frame1Index, frame2Index });
 
-        // 鐛插彇鍏╁€嬫
+        // 獲取兩個框
         const frame1 = this.rightCards[frame1Index];
         const frame2 = this.rightCards[frame2Index];
 
-        // 鐛插彇鍏╁€嬪崱鐗囩殑鍘熷浣嶇疆
+        // 獲取兩個卡片的原始位置
         const card1OriginalX = card1.getData('originalX');
         const card1OriginalY = card1.getData('originalY');
         const card2OriginalX = card2.getData('originalX');
         const card2OriginalY = card2.getData('originalY');
 
-        // 鏇存柊鍗＄墖鐨勬绱㈠紩
+        // 更新卡片的框索引
         card1.setData('currentFrameIndex', frame2Index);
         card2.setData('currentFrameIndex', frame1Index);
 
-        // 鏇存柊鍗＄墖鐨勫師濮嬩綅缃?        card1.setData('originalX', card2OriginalX);
+        // 更新卡片的原始位置
+        card1.setData('originalX', card2OriginalX);
         card1.setData('originalY', card2OriginalY);
         card2.setData('originalX', card1OriginalX);
         card2.setData('originalY', card1OriginalY);
 
-        // 鏇存柊妗嗙殑鏁告摎
+        // 更新框的數據
         frame1.setData('currentCardPairId', card2.getData('pairId'));
         frame2.setData('currentCardPairId', card1.getData('pairId'));
 
-        // 鍕曠暙绉诲嫊鍒版柊浣嶇疆
+        // 動畫移動到新位置
         this.tweens.add({
             targets: card1,
             x: card2OriginalX,
@@ -3659,16 +4023,19 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
     }
 
     checkMatch(leftCard, rightCard) {
-        // 馃敟 鏂版鍒讹細鐒¤珫灏嶉尟锛岄兘璁撹嫳鏂囧崱鐗囬€插叆涓枃鍏ф
-        // 涓嶇珛鍗虫鏌ュ皪閷紝绛夊緟鐢ㄦ埗榛炴搳銆屾彁浜ょ瓟妗堛€嶆寜閳?        this.onMatchSuccess(leftCard, rightCard);
+        // 🔥 新機制：無論對錯，都讓英文卡片進入中文內框
+        // 不立即檢查對錯，等待用戶點擊「提交答案」按鈕
+        this.onMatchSuccess(leftCard, rightCard);
     }
 
     onMatchSuccess(leftCard, rightCard) {
-        // 妯欒鐐哄凡閰嶅皪
+        // 標記為已配對
         leftCard.setData('isMatched', true);
-        leftCard.setData('matchedWith', rightCard);  // 瑷橀寗閰嶅皪鐨勫彸鍋村崱鐗?        rightCard.setData('isMatched', true);
-        rightCard.setData('matchedWith', leftCard);  // 瑷橀寗閰嶅皪鐨勫乏鍋村崱鐗?
-        // 鍒嗛洟妯″紡锛氬乏鍋村崱鐗囩Щ鍕曞埌鍙冲伌绌虹櫧妗嗙殑浣嶇疆锛堝畬鍏ㄨ钃嬶級
+        leftCard.setData('matchedWith', rightCard);  // 記錄配對的右側卡片
+        rightCard.setData('isMatched', true);
+        rightCard.setData('matchedWith', leftCard);  // 記錄配對的左側卡片
+
+        // 分離模式：左側卡片移動到右側空白框的位置（完全覆蓋）
         const targetX = rightCard.x;
         const targetY = rightCard.y;
 
@@ -3681,32 +4048,36 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             duration: 300,
             ease: 'Back.easeOut',
             onComplete: () => {
-                leftCard.setDepth(10);  // 鎻愬崌鍒扮┖鐧芥涓婃柟
+                leftCard.setDepth(10);  // 提升到空白框上方
                 leftCard.getData('background').setAlpha(1);
 
-                // 馃敟 妾㈡煡鏄惁鎵€鏈夊崱鐗囬兘宸查厤灏嶏紝濡傛灉鏄墖椤ず銆屾彁浜ょ瓟妗堛€嶆寜閳?                this.checkAllCardsMatched();
+                // 🔥 檢查是否所有卡片都已配對，如果是則顯示「提交答案」按鈕
+                this.checkAllCardsMatched();
             }
         });
     }
 
     unmatchCard(leftCard) {
-        // 鍙栨秷閰嶅皪鐙€鎱?        const rightCard = leftCard.getData('matchedWith');
+        // 取消配對狀態
+        const rightCard = leftCard.getData('matchedWith');
 
         if (rightCard) {
-            // 绉婚櫎閰嶅皪妯欒
+            // 移除配對標記
             leftCard.setData('isMatched', false);
             leftCard.setData('matchedWith', null);
             rightCard.setData('isMatched', false);
             rightCard.setData('matchedWith', null);
 
-            // 寰炲凡閰嶅皪闆嗗悎涓Щ闄?            this.matchedPairs.delete(leftCard.getData('pairId'));
+            // 從已配對集合中移除
+            this.matchedPairs.delete(leftCard.getData('pairId'));
 
-            // 鍒嗛洟妯″紡锛氶’绀哄彸鍋寸┖鐧芥锛堝鏋滀箣鍓嶈闅辫棌锛?            rightCard.getData('background').setVisible(true);
+            // 分離模式：顯示右側空白框（如果之前被隱藏）
+            rightCard.getData('background').setVisible(true);
         }
     }
 
     onMatchFail(leftCard, rightCard) {
-        // 馃敟 涓嶉’绀洪尟瑾ゆ彁绀猴紝鍙畵宸﹀伌鍗＄墖杩斿洖鍘熶綅
+        // 🔥 不顯示錯誤提示，只讓左側卡片返回原位
         this.tweens.add({
             targets: leftCard,
             x: leftCard.getData('originalX'),
@@ -3721,15 +4092,17 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
         });
 
-        console.log('鉂?閰嶅皪澶辨晽锛堜笉椤ず閷鎻愮ず锛?);
+        console.log('❌ 配對失敗（不顯示錯誤提示）');
     }
 
-    // 馃敟 妾㈡煡鏄惁鎵€鏈夊崱鐗囬兘宸查厤灏?    checkAllCardsMatched() {
-        // 馃摑 瑾胯│瑷婃伅锛氳閷勯厤灏嶇媭鎱嬫鏌?        const matchedCount = this.leftCards.filter(card => card.getData('isMatched')).length;
+    // 🔥 檢查是否所有卡片都已配對
+    checkAllCardsMatched() {
+        // 📝 調試訊息：記錄配對狀態檢查
+        const matchedCount = this.leftCards.filter(card => card.getData('isMatched')).length;
         const totalCount = this.leftCards.length;
         const allMatched = matchedCount === totalCount;
 
-        console.log('馃攳 妾㈡煡閰嶅皪鐙€鎱?', {
+        console.log('🔍 檢查配對狀態:', {
             matchedCount,
             totalCount,
             allMatched,
@@ -3738,100 +4111,108 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         });
 
         if (allMatched && !this.submitButton) {
-            console.log('鉁?鎵€鏈夊崱鐗囬兘宸查厤灏嶏紝椤ず鎻愪氦绛旀鎸夐垥');
+            console.log('✅ 所有卡片都已配對，顯示提交答案按鈕');
             this.showSubmitButton();
         } else if (!allMatched) {
-            console.log('鈴?閭勬湁鍗＄墖鏈厤灏?', totalCount - matchedCount);
+            console.log('⏳ 還有卡片未配對:', totalCount - matchedCount);
         } else if (this.submitButton) {
-            console.log('鈩癸笍 鎻愪氦鎸夐垥宸插瓨鍦?);
+            console.log('ℹ️ 提交按鈕已存在');
         }
     }
 
-    // 馃敟 椤ず銆屾彁浜ょ瓟妗堛€嶆寜閳?    showSubmitButton() {
+    // 🔥 顯示「提交答案」按鈕
+    showSubmitButton() {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        console.log('馃攳 椤ず鎻愪氦绛旀鎸夐垥', { width, height });
+        console.log('🔍 顯示提交答案按鈕', { width, height });
 
-        // 馃敟 鏅鸿兘鍒ゆ柗瀹瑰櫒澶у皬
+        // 🔥 智能判斷容器大小
         const isSmallContainer = height < 600;
         const isMediumContainer = height >= 600 && height < 800;
         const isLargeContainer = height >= 800;
 
-        // 馃敟 鎸夐垥灏哄锛堟牴鎿氬鍣ㄥぇ灏忚鏁达級
+        // 🔥 按鈕尺寸（根據容器大小調整）
         let buttonWidth, buttonHeight, fontSize;
 
         if (isSmallContainer) {
-            // 灏忓鍣細鏇村皬鐨勬寜閳?            buttonWidth = Math.max(80, Math.min(120, width * 0.12));
+            // 小容器：更小的按鈕
+            buttonWidth = Math.max(80, Math.min(120, width * 0.12));
             buttonHeight = Math.max(30, Math.min(40, height * 0.06));
             fontSize = Math.max(14, Math.min(18, width * 0.015));
         } else if (isMediumContainer) {
-            // 涓瓑瀹瑰櫒锛氫腑绛夋寜閳?            buttonWidth = Math.max(100, Math.min(150, width * 0.15));
+            // 中等容器：中等按鈕
+            buttonWidth = Math.max(100, Math.min(150, width * 0.15));
             buttonHeight = Math.max(35, Math.min(50, height * 0.07));
             fontSize = Math.max(16, Math.min(22, width * 0.02));
         } else {
-            // 澶у鍣細绋嶅ぇ鐨勬寜閳?            buttonWidth = Math.max(120, Math.min(180, width * 0.12));
+            // 大容器：稍大的按鈕
+            buttonWidth = Math.max(120, Math.min(180, width * 0.12));
             buttonHeight = Math.max(40, Math.min(55, height * 0.06));
             fontSize = Math.max(18, Math.min(24, width * 0.02));
         }
 
-        // 馃敟 鎸夐垥浣嶇疆锛堟渶搴曚笅涓ぎ锛岀暀鍑烘洿澶氱┖闁擄級
+        // 🔥 按鈕位置（最底下中央，留出更多空間）
         const buttonX = width / 2;
-        const buttonY = height - buttonHeight / 2 - 5;  // 璺濋洟搴曢儴 5px
+        const buttonY = height - buttonHeight / 2 - 5;  // 距離底部 5px
 
-        console.log('馃攳 鎸夐垥浣嶇疆', { buttonX, buttonY, buttonWidth, buttonHeight, isSmallContainer, isMediumContainer, isLargeContainer });
+        console.log('🔍 按鈕位置', { buttonX, buttonY, buttonWidth, buttonHeight, isSmallContainer, isMediumContainer, isLargeContainer });
 
-        // 鍓靛缓鎸夐垥鑳屾櫙
+        // 創建按鈕背景
         const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x4caf50);
         buttonBg.setStrokeStyle(2, 0x388e3c);
         buttonBg.setInteractive({ useHandCursor: true });
-        buttonBg.setDepth(3000);  // 馃敟 鎻愰珮娣卞害纰轰繚鍦ㄦ渶涓婂堡
-        buttonBg.setScrollFactor(0);  // 馃敟 鍥哄畾鍦ㄨ灑骞曚笂锛屼笉闅ㄧ浉姗熺Щ鍕?
-        // 鍓靛缓鎸夐垥鏂囧瓧
-        const buttonText = this.add.text(buttonX, buttonY, '鎻愪氦绛旀', {
+        buttonBg.setDepth(3000);  // 🔥 提高深度確保在最上層
+        buttonBg.setScrollFactor(0);  // 🔥 固定在螢幕上，不隨相機移動
+
+        // 創建按鈕文字
+        const buttonText = this.add.text(buttonX, buttonY, '提交答案', {
             fontSize: `${fontSize}px`,
             color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         });
         buttonText.setOrigin(0.5);
-        buttonText.setDepth(3001);  // 馃敟 鎻愰珮娣卞害纰轰繚鍦ㄦ渶涓婂堡
-        buttonText.setScrollFactor(0);  // 馃敟 鍥哄畾鍦ㄨ灑骞曚笂锛屼笉闅ㄧ浉姗熺Щ鍕?
-        console.log('鉁?鎻愪氦绛旀鎸夐垥宸插壍寤?);
+        buttonText.setDepth(3001);  // 🔥 提高深度確保在最上層
+        buttonText.setScrollFactor(0);  // 🔥 固定在螢幕上，不隨相機移動
 
-        // 鎸夐垥榛炴搳浜嬩欢
+        console.log('✅ 提交答案按鈕已創建');
+
+        // 按鈕點擊事件
         buttonBg.on('pointerdown', () => {
-            console.log('馃攳 鎻愪氦绛旀锛岄枊濮嬫鏌ラ厤灏嶇祼鏋?);
+            console.log('🔍 提交答案，開始檢查配對結果');
             this.checkAllMatches();
         });
 
-        // 鎸夐垥鎳稿仠鏁堟灉
+        // 按鈕懸停效果
         buttonBg.on('pointerover', () => {
             buttonBg.setFillStyle(0x66bb6a);
-            console.log('馃攳 鎸夐垥鎳稿仠');
+            console.log('🔍 按鈕懸停');
         });
 
         buttonBg.on('pointerout', () => {
             buttonBg.setFillStyle(0x4caf50);
         });
 
-        // 淇濆瓨鎸夐垥寮曠敤
+        // 保存按鈕引用
         this.submitButton = { bg: buttonBg, text: buttonText };
     }
 
-    // 馃敟 妾㈡煡鎵€鏈夐厤灏嶇祼鏋?    checkAllMatches() {
+    // 🔥 檢查所有配對結果
+    checkAllMatches() {
         let correctCount = 0;
         let incorrectCount = 0;
         let unmatchedCount = 0;
 
-        // 馃敟 鐛插彇鐣跺墠闋佺殑瑭炲綑鏁告摎
+        // 🔥 獲取當前頁的詞彙數據
         const startIndex = this.currentPage * this.itemsPerPage;
         const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
         const currentPagePairs = this.pairs.slice(startIndex, endIndex);
 
-        // 馃敟 娓呯┖鐣跺墠闋侀潰鐨勭瓟妗堣閷?        this.currentPageAnswers = [];
+        // 🔥 清空當前頁面的答案記錄
+        this.currentPageAnswers = [];
 
-        // 妾㈡煡姣忓€嬪乏鍋村崱鐗囩殑閰嶅皪
+        // 檢查每個左側卡片的配對
         this.leftCards.forEach(leftCard => {
             const leftPairId = leftCard.getData('pairId');
             const rightCard = leftCard.getData('matchedWith');
@@ -3841,13 +4222,14 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 const rightPairId = rightCard.getData('pairId');
                 const isCorrect = leftPairId === rightPairId;
 
-                // 馃敟 鐛插彇鐢ㄦ埗鍥炵瓟鐨勮嫳鏂囷紙寰?pairs 鏁告摎涓嵅鍙栵紝鑰屼笉鏄緸鍗＄墖灏嶈薄锛?                const userAnswerPair = currentPagePairs.find(pair => pair.id === rightPairId);
+                // 🔥 獲取用戶回答的英文（從 pairs 數據中獲取，而不是從卡片對象）
+                const userAnswerPair = currentPagePairs.find(pair => pair.id === rightPairId);
 
-                // 馃敟 瑷橀寗鐢ㄦ埗绛旀
+                // 🔥 記錄用戶答案
                 this.currentPageAnswers.push({
                     page: this.currentPage,
-                    leftText: correctPair.chinese,  // 馃敟 浣跨敤 pair.chinese 鑰屼笉鏄?getData('text')
-                    rightText: userAnswerPair ? userAnswerPair.english : '(鏈煡)',  // 馃敟 浣跨敤 pair.english
+                    leftText: correctPair.chinese,  // 🔥 使用 pair.chinese 而不是 getData('text')
+                    rightText: userAnswerPair ? userAnswerPair.english : '(未知)',  // 🔥 使用 pair.english
                     correctAnswer: correctPair.english,
                     correctChinese: correctPair.chinese,
                     isCorrect: isCorrect,
@@ -3856,28 +4238,29 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 });
 
                 if (isCorrect) {
-                    // 閰嶅皪姝ｇ⒑
+                    // 配對正確
                     correctCount++;
-                    console.log('鉁?閰嶅皪姝ｇ⒑:', correctPair.chinese, '-', userAnswerPair.english);
+                    console.log('✅ 配對正確:', correctPair.chinese, '-', userAnswerPair.english);
 
-                    // 馃敟 椤ず姝ｇ⒑鐨勮嫳鏂囧柈瀛楋紝鍏ф鍛堢櫧鑹诧紝妯欒鍕惧嬀
+                    // 🔥 顯示正確的英文單字，內框呈白色，標記勾勾
                     this.showCorrectAnswer(rightCard, correctPair.english);
                 } else {
-                    // 閰嶅皪閷
+                    // 配對錯誤
                     incorrectCount++;
-                    console.log('鉂?閰嶅皪閷:', correctPair.chinese, '-', userAnswerPair.english);
+                    console.log('❌ 配對錯誤:', correctPair.chinese, '-', userAnswerPair.english);
 
-                    // 馃敟 椤ず姝ｇ⒑鐨勮嫳鏂囧柈瀛楋紝鍏ф鍛堢伆鑹诧紝妯欒 X
+                    // 🔥 顯示正確的英文單字，內框呈灰色，標記 X
                     this.showIncorrectAnswer(rightCard, correctPair.english);
                 }
             } else {
-                // 鏈厤灏?                unmatchedCount++;
-                console.log('鈿狅笍 鏈厤灏?', correctPair.chinese);
+                // 未配對
+                unmatchedCount++;
+                console.log('⚠️ 未配對:', correctPair.chinese);
 
-                // 馃敟 瑷橀寗鏈厤灏嶇殑绛旀
+                // 🔥 記錄未配對的答案
                 this.currentPageAnswers.push({
                     page: this.currentPage,
-                    leftText: correctPair.chinese,  // 馃敟 浣跨敤 pair.chinese
+                    leftText: correctPair.chinese,  // 🔥 使用 pair.chinese
                     rightText: null,
                     correctAnswer: correctPair.english,
                     correctChinese: correctPair.chinese,
@@ -3888,42 +4271,49 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
         });
 
-        // 馃敟 灏囩暥鍓嶉爜闈㈢殑绛旀娣诲姞鍒版墍鏈夌瓟妗堣閷勪腑
+        // 🔥 將當前頁面的答案添加到所有答案記錄中
         this.allPagesAnswers.push(...this.currentPageAnswers);
 
-        console.log('馃摑 鐣跺墠闋侀潰绛旀瑷橀寗:', this.currentPageAnswers);
-        console.log('馃摑 鎵€鏈夐爜闈㈢瓟妗堣閷?', this.allPagesAnswers);
+        console.log('📝 當前頁面答案記錄:', this.currentPageAnswers);
+        console.log('📝 所有頁面答案記錄:', this.allPagesAnswers);
 
-        // 馃敟 妾㈡煡鏄惁鎵€鏈夐爜闈㈤兘宸插畬鎴?        const isLastPage = this.currentPage === this.totalPages - 1;
+        // 🔥 檢查是否所有頁面都已完成
+        const isLastPage = this.currentPage === this.totalPages - 1;
         if (isLastPage) {
-            // 閬婃埐绲愭潫
+            // 遊戲結束
             this.gameEndTime = Date.now();
-            this.totalGameTime = (this.gameEndTime - this.gameStartTime) / 1000; // 绉?            this.gameState = 'completed';
+            this.totalGameTime = (this.gameEndTime - this.gameStartTime) / 1000; // 秒
+            this.gameState = 'completed';
 
-            console.log('馃幃 閬婃埐绲愭潫锛佺附鏅傞枔:', this.totalGameTime, '绉?);
+            console.log('🎮 遊戲結束！總時間:', this.totalGameTime, '秒');
 
-            // 椤ず閬婃埐绲愭潫妯℃厠妗?            this.showGameCompleteModal();
+            // 顯示遊戲結束模態框
+            this.showGameCompleteModal();
         } else {
-            // 椤ず鐣跺墠闋侀潰鐨勭附绲?            this.showMatchSummary(correctCount, incorrectCount, unmatchedCount);
+            // 顯示當前頁面的總結
+            this.showMatchSummary(correctCount, incorrectCount, unmatchedCount);
         }
     }
 
-    // 馃敟 椤ず姝ｇ⒑绛旀锛堢櫧鑹插収妗?+ 鍕惧嬀锛?    showCorrectAnswer(rightCard, correctAnswer) {
+    // 🔥 顯示正確答案（白色內框 + 勾勾）
+    showCorrectAnswer(rightCard, correctAnswer) {
         const background = rightCard.getData('background');
-        const textObj = rightCard.getData('text');  // 馃敟 淇锛氫娇鐢?'text' 鑰岄潪 'textObj'
+        const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
 
-        // 鍏ф鍛堢櫧鑹?        background.setFillStyle(0xffffff);
+        // 內框呈白色
+        background.setFillStyle(0xffffff);
         background.setStrokeStyle(2, 0x000000);
 
-        // 鏇存柊鏂囧瓧鐐烘纰虹瓟妗?        if (textObj) {
+        // 更新文字為正確答案
+        if (textObj) {
             textObj.setText(correctAnswer);
         }
 
-        // 娣诲姞鍕惧嬀妯欒
+        // 添加勾勾標記
         const checkMark = this.add.text(
             rightCard.x + background.width / 2 - 15,
             rightCard.y - background.height / 2 + 5,
-            '鉁?,
+            '✓',
             {
                 fontSize: '24px',
                 color: '#4caf50',
@@ -3935,22 +4325,25 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         rightCard.add(checkMark);
     }
 
-    // 馃敟 椤ず閷绛旀锛堢伆鑹插収妗?+ X锛?    showIncorrectAnswer(rightCard, correctAnswer) {
+    // 🔥 顯示錯誤答案（灰色內框 + X）
+    showIncorrectAnswer(rightCard, correctAnswer) {
         const background = rightCard.getData('background');
-        const textObj = rightCard.getData('text');  // 馃敟 淇锛氫娇鐢?'text' 鑰岄潪 'textObj'
+        const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
 
-        // 鍏ф鍛堢伆鑹?        background.setFillStyle(0xcccccc);
+        // 內框呈灰色
+        background.setFillStyle(0xcccccc);
         background.setStrokeStyle(2, 0x000000);
 
-        // 鏇存柊鏂囧瓧鐐烘纰虹瓟妗?        if (textObj) {
+        // 更新文字為正確答案
+        if (textObj) {
             textObj.setText(correctAnswer);
         }
 
-        // 娣诲姞 X 妯欒
+        // 添加 X 標記
         const xMark = this.add.text(
             rightCard.x + background.width / 2 - 15,
             rightCard.y - background.height / 2 + 5,
-            '鉁?,
+            '✗',
             {
                 fontSize: '24px',
                 color: '#f44336',
@@ -3962,26 +4355,27 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         rightCard.add(xMark);
     }
 
-    // 馃敟 椤ず閰嶅皪绺界祼
+    // 🔥 顯示配對總結
     showMatchSummary(correctCount, incorrectCount, unmatchedCount = 0) {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 绉婚櫎鎻愪氦鎸夐垥
+        // 移除提交按鈕
         if (this.submitButton) {
             this.submitButton.bg.destroy();
             this.submitButton.text.destroy();
             this.submitButton = null;
         }
 
-        // 绺界祼鏂囧瓧灏哄锛堥熆鎳夊紡锛?        const fontSize = Math.max(24, Math.min(36, width * 0.03));
+        // 總結文字尺寸（響應式）
+        const fontSize = Math.max(24, Math.min(36, width * 0.03));
 
-        // 椤ず绺界祼
+        // 顯示總結
         const totalCount = this.leftCards.length;
-        let summaryMessage = `閰嶅皪绲愭灉\n姝ｇ⒑锛?{correctCount} / ${totalCount}\n閷锛?{incorrectCount} / ${totalCount}`;
+        let summaryMessage = `配對結果\n正確：${correctCount} / ${totalCount}\n錯誤：${incorrectCount} / ${totalCount}`;
 
         if (unmatchedCount > 0) {
-            summaryMessage += `\n鏈厤灏嶏細${unmatchedCount} / ${totalCount}`;
+            summaryMessage += `\n未配對：${unmatchedCount} / ${totalCount}`;
         }
 
         const summaryText = this.add.text(
@@ -4000,7 +4394,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         );
         summaryText.setOrigin(0.5).setDepth(2000);
 
-        // 濡傛灉鍏ㄩ儴姝ｇ⒑涓旀矑鏈夋湭閰嶅皪锛岄’绀哄畬鎴愬嫊鐣?        if (correctCount === totalCount && unmatchedCount === 0) {
+        // 如果全部正確且沒有未配對，顯示完成動畫
+        if (correctCount === totalCount && unmatchedCount === 0) {
             this.tweens.add({
                 targets: summaryText,
                 scaleX: 1.1,
@@ -4010,19 +4405,22 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 repeat: 2,
                 ease: 'Sine.easeInOut',
                 onComplete: () => {
-                    // 妾㈡煡鏄惁鏈変笅涓€闋?                    this.time.delayedCall(1000, () => {
+                    // 檢查是否有下一頁
+                    this.time.delayedCall(1000, () => {
                         this.onGameComplete();
                     });
                 }
             });
         } else {
-            // 椤ず銆岄噸瑭︺€嶆寜閳?            this.time.delayedCall(2000, () => {
+            // 顯示「重試」按鈕
+            this.time.delayedCall(2000, () => {
                 this.showRetryButton();
             });
         }
     }
 
-    // 馃敟 椤ず銆岄噸瑭︺€嶆寜閳?    showRetryButton() {
+    // 🔥 顯示「重試」按鈕
+    showRetryButton() {
         const width = this.scale.width;
         const height = this.scale.height;
 
@@ -4038,7 +4436,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         buttonBg.setInteractive({ useHandCursor: true });
         buttonBg.setDepth(2000);
 
-        const buttonText = this.add.text(buttonX, buttonY, '閲嶈│', {
+        const buttonText = this.add.text(buttonX, buttonY, '重試', {
             fontSize: `${fontSize}px`,
             color: '#ffffff',
             fontFamily: 'Arial',
@@ -4048,7 +4446,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         buttonText.setDepth(2001);
 
         buttonBg.on('pointerdown', () => {
-            console.log('馃攧 閲嶈│鐣跺墠闋?);
+            console.log('🔄 重試當前頁');
             this.resetCurrentPage();
         });
 
@@ -4061,51 +4459,62 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         });
     }
 
-    // 馃敟 閲嶇疆鐣跺墠闋?    resetCurrentPage() {
-        // 娓呴櫎鎵€鏈夊崱鐗?        this.leftCards.forEach(card => card.destroy());
+    // 🔥 重置當前頁
+    resetCurrentPage() {
+        // 清除所有卡片
+        this.leftCards.forEach(card => card.destroy());
         this.rightCards.forEach(card => card.destroy());
         this.leftCards = [];
         this.rightCards = [];
         this.matchedPairs.clear();
 
-        // 娓呴櫎鎵€鏈夋枃瀛楀拰鎸夐垥
+        // 清除所有文字和按鈕
         this.children.list.forEach(child => {
             if (child.type === 'Text' || child.type === 'Rectangle') {
                 child.destroy();
             }
         });
 
-        // 閲嶆柊鍓靛缓鐣跺墠闋?        this.createCards();
+        // 重新創建當前頁
+        this.createCards();
     }
 
     onGameComplete() {
-        // 馃敟 妾㈡煡鏄惁閭勬湁涓嬩竴闋?        if (this.enablePagination && this.currentPage < this.totalPages - 1) {
-            // 閭勬湁涓嬩竴闋?            if (this.autoProceed) {
-                // 鑷嫊閫插叆涓嬩竴闋?                console.log('馃搫 鐣跺墠闋佸畬鎴愶紝鑷嫊閫插叆涓嬩竴闋?);
+        // 🔥 檢查是否還有下一頁
+        if (this.enablePagination && this.currentPage < this.totalPages - 1) {
+            // 還有下一頁
+            if (this.autoProceed) {
+                // 自動進入下一頁
+                console.log('📄 當前頁完成，自動進入下一頁');
                 this.time.delayedCall(500, () => {
                     this.goToNextPage();
                 });
             } else {
-                // 椤ず銆屼笅涓€闋併€嶆寜閳?                console.log('馃搫 鐣跺墠闋佸畬鎴愶紝椤ず涓嬩竴闋佹寜閳?);
+                // 顯示「下一頁」按鈕
+                console.log('📄 當前頁完成，顯示下一頁按鈕');
                 this.showNextPageButton();
             }
         } else {
-            // 鎵€鏈夐爜闈㈤兘瀹屾垚浜嗭紝椤ず鏈€绲傚畬鎴愯▕鎭?            console.log('馃帀 鎵€鏈夐爜闈㈠畬鎴愶紒');
+            // 所有頁面都完成了，顯示最終完成訊息
+            console.log('🎉 所有頁面完成！');
             this.showFinalCompletion();
         }
     }
 
-    // 馃敟 椤ず鏈€绲傚畬鎴愯▕鎭?    showFinalCompletion() {
-        // 鍋滄瑷堟檪鍣?        if (this.timerEvent) {
+    // 🔥 顯示最終完成訊息
+    showFinalCompletion() {
+        // 停止計時器
+        if (this.timerEvent) {
             this.timerEvent.remove();
         }
 
-        // 鐛插彇鐣跺墠铻㈠箷灏哄
+        // 獲取當前螢幕尺寸
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 椤ず瀹屾垚瑷婃伅锛堥熆鎳夊紡锛?        const fontSize = Math.max(28, Math.min(48, width * 0.035));
-        const completeText = this.add.text(width / 2, height / 2 - 50, '馃帀 鍏ㄩ儴瀹屾垚锛?, {
+        // 顯示完成訊息（響應式）
+        const fontSize = Math.max(28, Math.min(48, width * 0.035));
+        const completeText = this.add.text(width / 2, height / 2 - 50, '🎉 全部完成！', {
             fontSize: `${fontSize}px`,
             color: '#4caf50',
             fontFamily: 'Arial',
@@ -4115,7 +4524,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         });
         completeText.setOrigin(0.5).setDepth(2000);
 
-        // 绺斁鍕曠暙
+        // 縮放動畫
         this.tweens.add({
             targets: completeText,
             scaleX: 1.1,
@@ -4126,11 +4535,12 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             ease: 'Sine.easeInOut'
         });
 
-        // 馃敟 濡傛灉闁嬪暉椤ず绛旀锛岄’绀虹瓟妗堟寜閳?        if (this.showAnswers) {
+        // 🔥 如果開啟顯示答案，顯示答案按鈕
+        if (this.showAnswers) {
             const showAnswersButton = this.add.text(
                 width / 2,
                 height / 2 + 30,
-                '馃摑 鏌ョ湅绛旀',
+                '📝 查看答案',
                 {
                     fontSize: '24px',
                     color: '#ffffff',
@@ -4146,7 +4556,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 this.showAnswersScreen();
             });
 
-            // 鎸夐垥鎳稿仠鏁堟灉
+            // 按鈕懸停效果
             showAnswersButton.on('pointerover', () => {
                 showAnswersButton.setBackgroundColor('#1976D2');
             });
@@ -4157,32 +4567,36 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         }
     }
 
-    // 馃敟 椤ず绛旀鐣潰
+    // 🔥 顯示答案畫面
     showAnswersScreen() {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 娓呴櫎鎵€鏈夌従鏈夊厓绱?        this.children.removeAll(true);
+        // 清除所有現有元素
+        this.children.removeAll(true);
 
-        // 娣诲姞鐧借壊鑳屾櫙
+        // 添加白色背景
         this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
 
-        // 椤ず妯欓
-        this.add.text(width / 2, 50, '馃摑 姝ｇ⒑绛旀', {
+        // 顯示標題
+        this.add.text(width / 2, 50, '📝 正確答案', {
             fontSize: '32px',
             color: '#000000',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        // 鍓靛缓婊惧嫊鍗€鍩?        const startY = 100;
+        // 創建滾動區域
+        const startY = 100;
         const lineHeight = 40;
         const maxVisibleLines = Math.floor((height - 150) / lineHeight);
 
-        // 椤ず鎵€鏈夐厤灏?        this.pairs.forEach((pair, index) => {
+        // 顯示所有配對
+        this.pairs.forEach((pair, index) => {
             const y = startY + index * lineHeight;
 
-            // 鍙’绀哄彲瑕嬬瘎鍦嶅収鐨勭瓟妗?            if (index < maxVisibleLines) {
+            // 只顯示可見範圍內的答案
+            if (index < maxVisibleLines) {
                 this.add.text(
                     width / 2,
                     y,
@@ -4196,11 +4610,12 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
         });
 
-        // 濡傛灉绛旀澶锛岄’绀烘彁绀?        if (this.pairs.length > maxVisibleLines) {
+        // 如果答案太多，顯示提示
+        if (this.pairs.length > maxVisibleLines) {
             this.add.text(
                 width / 2,
                 height - 50,
-                `锛堥’绀哄墠 ${maxVisibleLines} 鍊嬬瓟妗堬紝鍏?${this.pairs.length} 鍊嬶級`,
+                `（顯示前 ${maxVisibleLines} 個答案，共 ${this.pairs.length} 個）`,
                 {
                     fontSize: '16px',
                     color: '#999999',
@@ -4209,11 +4624,11 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             ).setOrigin(0.5);
         }
 
-        // 娣诲姞闂滈枆鎸夐垥
+        // 添加關閉按鈕
         const closeButton = this.add.text(
             width / 2,
             height - 80,
-            '鉁?闂滈枆',
+            '✖ 關閉',
             {
                 fontSize: '20px',
                 color: '#ffffff',
@@ -4224,11 +4639,11 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         ).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         closeButton.on('pointerdown', () => {
-            // 閲嶆柊杓夊叆閬婃埐
+            // 重新載入遊戲
             this.scene.restart();
         });
 
-        // 鎸夐垥鎳稿仠鏁堟灉
+        // 按鈕懸停效果
         closeButton.on('pointerover', () => {
             closeButton.setBackgroundColor('#d32f2f');
         });
@@ -4238,11 +4653,13 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         });
     }
 
-    // 馃敟 鍓靛缓鍒嗛爜鎸囩ず鍣?    createPageIndicator() {
+    // 🔥 創建分頁指示器
+    createPageIndicator() {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 鍒嗛爜鎸囩ず鍣ㄦ枃瀛楋紙渚嬪锛?/5锛?        const pageText = `${this.currentPage + 1}/${this.totalPages}`;
+        // 分頁指示器文字（例如：1/5）
+        const pageText = `${this.currentPage + 1}/${this.totalPages}`;
         const fontSize = Math.max(18, Math.min(24, width * 0.02));
 
         this.pageIndicatorText = this.add.text(width / 2, height * 0.05, pageText, {
@@ -4254,33 +4671,37 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             padding: { x: 15, y: 8 }
         });
         this.pageIndicatorText.setOrigin(0.5);
-        this.pageIndicatorText.setDepth(100);  // 纰轰繚鍦ㄦ渶涓婂堡
+        this.pageIndicatorText.setDepth(100);  // 確保在最上層
 
-        console.log('馃搫 鍒嗛爜鎸囩ず鍣ㄥ凡鍓靛缓:', pageText);
+        console.log('📄 分頁指示器已創建:', pageText);
     }
 
-    // 馃敟 鏇存柊鍒嗛爜鎸囩ず鍣?    updatePageIndicator() {
+    // 🔥 更新分頁指示器
+    updatePageIndicator() {
         if (this.pageIndicatorText) {
             const pageText = `${this.currentPage + 1}/${this.totalPages}`;
             this.pageIndicatorText.setText(pageText);
-            console.log('馃搫 鍒嗛爜鎸囩ず鍣ㄥ凡鏇存柊:', pageText);
+            console.log('📄 分頁指示器已更新:', pageText);
         }
     }
 
-    // 馃敟 閫插叆涓嬩竴闋?    goToNextPage() {
+    // 🔥 進入下一頁
+    goToNextPage() {
         if (this.currentPage < this.totalPages - 1) {
             this.currentPage++;
-            console.log('馃搫 閫插叆涓嬩竴闋?', this.currentPage + 1);
+            console.log('📄 進入下一頁:', this.currentPage + 1);
 
-            // 閲嶆柊浣堝眬锛堟渻閲嶆柊鍓靛缓鍗＄墖锛?            this.updateLayout();
+            // 重新佈局（會重新創建卡片）
+            this.updateLayout();
         }
     }
 
-    // 馃敟 椤ず銆屼笅涓€闋併€嶆寜閳?    showNextPageButton() {
+    // 🔥 顯示「下一頁」按鈕
+    showNextPageButton() {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 鍓靛缓鎸夐垥鑳屾櫙
+        // 創建按鈕背景
         const buttonWidth = 200;
         const buttonHeight = 60;
         const buttonX = width / 2;
@@ -4290,8 +4711,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         buttonBg.setInteractive({ useHandCursor: true });
         buttonBg.setDepth(100);
 
-        // 鍓靛缓鎸夐垥鏂囧瓧
-        const buttonText = this.add.text(buttonX, buttonY, '鉃★笍 涓嬩竴闋?, {
+        // 創建按鈕文字
+        const buttonText = this.add.text(buttonX, buttonY, '➡️ 下一頁', {
             fontSize: '24px',
             color: '#ffffff',
             fontFamily: 'Arial',
@@ -4300,16 +4721,17 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         buttonText.setOrigin(0.5);
         buttonText.setDepth(101);
 
-        // 榛炴搳浜嬩欢
+        // 點擊事件
         buttonBg.on('pointerdown', () => {
-            // 绉婚櫎鎸夐垥
+            // 移除按鈕
             buttonBg.destroy();
             buttonText.destroy();
 
-            // 閫插叆涓嬩竴闋?            this.goToNextPage();
+            // 進入下一頁
+            this.goToNextPage();
         });
 
-        // 鎳稿仠鏁堟灉
+        // 懸停效果
         buttonBg.on('pointerover', () => {
             buttonBg.setFillStyle(0x45a049);
         });
@@ -4318,15 +4740,18 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             buttonBg.setFillStyle(0x4caf50);
         });
 
-        console.log('馃搫 涓嬩竴闋佹寜閳曞凡椤ず');
+        console.log('📄 下一頁按鈕已顯示');
     }
 
-    // 馃敟 妾㈡煡鐣跺墠闋佹槸鍚﹀叏閮ㄩ厤灏嶅畬鎴?    checkCurrentPageComplete() {
-        // 瑷堢畻鐣跺墠闋佹噳瑭叉湁澶氬皯鍊嬮厤灏?        const startIndex = this.currentPage * this.itemsPerPage;
+    // 🔥 檢查當前頁是否全部配對完成
+    checkCurrentPageComplete() {
+        // 計算當前頁應該有多少個配對
+        const startIndex = this.currentPage * this.itemsPerPage;
         const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
         const currentPagePairsCount = endIndex - startIndex;
 
-        // 瑷堢畻鐣跺墠闋佸凡閰嶅皪鐨勬暩閲?        let currentPageMatchedCount = 0;
+        // 計算當前頁已配對的數量
+        let currentPageMatchedCount = 0;
         for (let i = startIndex; i < endIndex; i++) {
             const pairId = this.pairs[i].id;
             if (this.matchedPairs.has(pairId)) {
@@ -4334,37 +4759,42 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
         }
 
-        console.log('馃搫 鐣跺墠闋侀厤灏嶉€插害:', {
+        console.log('📄 當前頁配對進度:', {
             currentPage: this.currentPage + 1,
             matched: currentPageMatchedCount,
             total: currentPagePairsCount
         });
 
-        // 濡傛灉鐣跺墠闋佸叏閮ㄩ厤灏嶅畬鎴?        if (currentPageMatchedCount === currentPagePairsCount) {
+        // 如果當前頁全部配對完成
+        if (currentPageMatchedCount === currentPagePairsCount) {
             this.time.delayedCall(800, () => {
                 this.onGameComplete();
             });
         }
     }
 
-    // 锟?绉婚櫎 createRestartButton() 鏂规硶锛氱敤鎴惰姹傛嬁鎺夐噸鏂伴枊濮嬫寜閳?
-    // 馃敟 椤ず閬婃埐绲愭潫妯℃厠妗?    showGameCompleteModal() {
+    // � 移除 createRestartButton() 方法：用戶要求拿掉重新開始按鈕
+
+    // 🔥 顯示遊戲結束模態框
+    showGameCompleteModal() {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 瑷堢畻绺藉垎鏁?        const totalCorrect = this.allPagesAnswers.filter(answer => answer.isCorrect).length;
+        // 計算總分數
+        const totalCorrect = this.allPagesAnswers.filter(answer => answer.isCorrect).length;
         const totalQuestions = this.pairs.length;
 
-        // 鏍煎紡鍖栨檪闁?        const timeText = this.formatGameTime(this.totalGameTime);
+        // 格式化時間
+        const timeText = this.formatGameTime(this.totalGameTime);
 
-        console.log('馃幃 椤ず閬婃埐绲愭潫妯℃厠妗?, {
+        console.log('🎮 顯示遊戲結束模態框', {
             totalCorrect,
             totalQuestions,
             totalGameTime: this.totalGameTime,
             timeText
         });
 
-        // 鍓靛缓鍗婇€忔槑鑳屾櫙锛堥伄缃╋級
+        // 創建半透明背景（遮罩）
         const overlay = this.add.rectangle(
             width / 2,
             height / 2,
@@ -4376,17 +4806,19 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         overlay.setDepth(5000);
         overlay.setScrollFactor(0);
 
-        // 鍓靛缓妯℃厠妗嗗鍣?        const modalWidth = Math.min(500, width * 0.8);
+        // 創建模態框容器
+        const modalWidth = Math.min(500, width * 0.8);
         const modalHeight = Math.min(400, height * 0.7);
         const modal = this.add.container(width / 2, height / 2);
         modal.setDepth(5001);
         modal.setScrollFactor(0);
 
-        // 妯℃厠妗嗚儗鏅?        const modalBg = this.add.rectangle(0, 0, modalWidth, modalHeight, 0x2c2c2c);
+        // 模態框背景
+        const modalBg = this.add.rectangle(0, 0, modalWidth, modalHeight, 0x2c2c2c);
         modalBg.setStrokeStyle(4, 0x000000);
         modal.add(modalBg);
 
-        // 妯欓锛欸AME COMPLETE
+        // 標題：GAME COMPLETE
         const title = this.add.text(0, -modalHeight / 2 + 40, 'GAME COMPLETE', {
             fontSize: '36px',
             color: '#ffffff',
@@ -4396,7 +4828,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         title.setOrigin(0.5);
         modal.add(title);
 
-        // 鍒嗘暩妯欑堡
+        // 分數標籤
         const scoreLabel = this.add.text(-80, -modalHeight / 2 + 100, 'Score', {
             fontSize: '20px',
             color: '#4a9eff',
@@ -4405,7 +4837,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         scoreLabel.setOrigin(0.5);
         modal.add(scoreLabel);
 
-        // 鍒嗘暩鍊?        const scoreValue = this.add.text(-80, -modalHeight / 2 + 140, `${totalCorrect}/${totalQuestions}`, {
+        // 分數值
+        const scoreValue = this.add.text(-80, -modalHeight / 2 + 140, `${totalCorrect}/${totalQuestions}`, {
             fontSize: '32px',
             color: '#ffffff',
             fontFamily: 'Arial',
@@ -4414,7 +4847,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         scoreValue.setOrigin(0.5);
         modal.add(scoreValue);
 
-        // 鏅傞枔妯欑堡锛堝鏋滄湁瑷堟檪鍣級
+        // 時間標籤（如果有計時器）
         if (this.timerType !== 'none') {
             const timeLabel = this.add.text(80, -modalHeight / 2 + 100, 'Time', {
                 fontSize: '20px',
@@ -4424,7 +4857,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             timeLabel.setOrigin(0.5);
             modal.add(timeLabel);
 
-            // 鏅傞枔鍊?            const timeValue = this.add.text(80, -modalHeight / 2 + 140, timeText, {
+            // 時間值
+            const timeValue = this.add.text(80, -modalHeight / 2 + 140, timeText, {
                 fontSize: '32px',
                 color: '#ffffff',
                 fontFamily: 'Arial',
@@ -4434,7 +4868,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             modal.add(timeValue);
         }
 
-        // 馃敟 鎺掑悕鎻愮ず锛堝嫊鎱嬮’绀猴紝浣嶇疆瑾挎暣鍒版寜閳曚笂鏂癸級
+        // 🔥 排名提示（動態顯示，位置調整到按鈕上方）
         const rankText = this.add.text(0, 0, 'Loading ranking...', {
             fontSize: '16px',
             color: '#ffffff',
@@ -4443,51 +4877,57 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         rankText.setOrigin(0.5);
         modal.add(rankText);
 
-        // 馃敟 鐣版鐛插彇鎺掑悕涓︽洿鏂版枃瀛?        this.fetchUserRanking(totalCorrect, totalQuestions, this.totalGameTime).then(ranking => {
+        // 🔥 異步獲取排名並更新文字
+        this.fetchUserRanking(totalCorrect, totalQuestions, this.totalGameTime).then(ranking => {
             if (ranking && ranking.rank) {
                 const rankSuffix = this.getRankSuffix(ranking.rank);
                 rankText.setText(`YOU'RE ${ranking.rank}${rankSuffix} ON THE LEADERBOARD`);
             } else {
-                rankText.setText('');  // 濡傛灉鐒℃硶鐛插彇鎺掑悕锛岄毐钘忔枃瀛?            }
+                rankText.setText('');  // 如果無法獲取排名，隱藏文字
+            }
         });
 
-        // 鎸夐垥鍗€鍩燂紙瑾挎暣浣嶇疆锛岀偤鎺掑悕鎻愮ず鐣欏嚭绌洪枔锛?        const buttonY = modalHeight / 2 - 100;
+        // 按鈕區域（調整位置，為排名提示留出空間）
+        const buttonY = modalHeight / 2 - 100;
         const buttonSpacing = 60;
 
-        // 馃敟 瑾挎暣鎺掑悕鎻愮ず浣嶇疆鍒扮涓€鍊嬫寜閳曚笂鏂?        rankText.y = buttonY - buttonSpacing - 40;
+        // 🔥 調整排名提示位置到第一個按鈕上方
+        rankText.y = buttonY - buttonSpacing - 40;
 
-        // Leaderboard 鎸夐垥
+        // Leaderboard 按鈕
         this.createModalButton(modal, 0, buttonY - buttonSpacing, 'Leaderboard', () => {
-            console.log('馃幃 榛炴搳 Leaderboard 鎸夐垥');
+            console.log('🎮 點擊 Leaderboard 按鈕');
             this.showEnterNamePage();
         });
 
-        // Show answers 鎸夐垥
+        // Show answers 按鈕
         this.createModalButton(modal, 0, buttonY, 'Show answers', () => {
-            console.log('馃幃 榛炴搳 Show answers 鎸夐垥');
+            console.log('🎮 點擊 Show answers 按鈕');
             this.showMyAnswersPage();
         });
 
-        // Start again 鎸夐垥
+        // Start again 按鈕
         this.createModalButton(modal, 0, buttonY + buttonSpacing, 'Start again', () => {
-            console.log('馃幃 榛炴搳 Start again 鎸夐垥');
+            console.log('🎮 點擊 Start again 按鈕');
             this.restartGame();
         });
 
-        // 淇濆瓨妯℃厠妗嗗紩鐢紙鐢ㄦ柤寰岀簩闂滈枆锛?        this.gameCompleteModal = { overlay, modal };
+        // 保存模態框引用（用於後續關閉）
+        this.gameCompleteModal = { overlay, modal };
     }
 
-    // 馃敟 鍓靛缓妯℃厠妗嗘寜閳?    createModalButton(container, x, y, text, callback) {
+    // 🔥 創建模態框按鈕
+    createModalButton(container, x, y, text, callback) {
         const buttonWidth = 300;
         const buttonHeight = 45;
 
-        // 鎸夐垥鑳屾櫙
+        // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0x3c3c3c);
         buttonBg.setStrokeStyle(2, 0x000000);
         buttonBg.setInteractive({ useHandCursor: true });
         container.add(buttonBg);
 
-        // 鎸夐垥鏂囧瓧
+        // 按鈕文字
         const buttonText = this.add.text(x, y, text, {
             fontSize: '22px',
             color: '#ffffff',
@@ -4497,10 +4937,10 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         buttonText.setOrigin(0.5);
         container.add(buttonText);
 
-        // 榛炴搳浜嬩欢
+        // 點擊事件
         buttonBg.on('pointerdown', callback);
 
-        // 鎳稿仠鏁堟灉
+        // 懸停效果
         buttonBg.on('pointerover', () => {
             buttonBg.setFillStyle(0x4c4c4c);
         });
@@ -4512,31 +4952,33 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         return { buttonBg, buttonText };
     }
 
-    // 馃敟 鐛插彇鐢ㄦ埗鎺掑悕锛堢暟姝ワ級
+    // 🔥 獲取用戶排名（異步）
     async fetchUserRanking(correctCount, totalCount, timeSpent) {
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const activityId = urlParams.get('activityId');
 
             if (!activityId) {
-                console.log('鈿狅笍 鐒℃硶鐛插彇 activityId锛岀劇娉曟煡瑭㈡帓鍚?);
+                console.log('⚠️ 無法獲取 activityId，無法查詢排名');
                 return null;
             }
 
-            // 瑷堢畻鍒嗘暩鍜屾簴纰虹巼
+            // 計算分數和準確率
             const score = Math.round((correctCount / totalCount) * 100);
             const accuracy = Math.round((correctCount / totalCount) * 100);
 
-            // 鐛插彇鎺掕姒滄暩鎿?            const response = await fetch(`/api/leaderboard?activityId=${activityId}&limit=100`);
+            // 獲取排行榜數據
+            const response = await fetch(`/api/leaderboard?activityId=${activityId}&limit=100`);
             if (!response.ok) {
-                console.log('鈿狅笍 鐒℃硶鐛插彇鎺掕姒滄暩鎿?);
+                console.log('⚠️ 無法獲取排行榜數據');
                 return null;
             }
 
             const data = await response.json();
             const leaderboard = data.leaderboard || [];
 
-            // 瑷堢畻鐣跺墠鐢ㄦ埗鐨勬帓鍚?            // 鎺掑簭瑕忓墖锛氬垎鏁稿劒鍏堬紙闄嶅簭锛夛紝鏅傞枔娆′箣锛堝崌搴忥級
+            // 計算當前用戶的排名
+            // 排序規則：分數優先（降序），時間次之（升序）
             const userScore = score;
             const userTime = timeSpent;
 
@@ -4549,15 +4991,16 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                 }
             }
 
-            console.log('馃弳 鐢ㄦ埗鎺掑悕:', rank);
+            console.log('🏆 用戶排名:', rank);
             return { rank, score, accuracy, timeSpent };
         } catch (error) {
-            console.error('鉂?鐛插彇鎺掑悕澶辨晽:', error);
+            console.error('❌ 獲取排名失敗:', error);
             return null;
         }
     }
 
-    // 馃敟 鐛插彇鎺掑悕寰岀洞锛?st, 2nd, 3rd, 4th, ...锛?    getRankSuffix(rank) {
+    // 🔥 獲取排名後綴（1st, 2nd, 3rd, 4th, ...）
+    getRankSuffix(rank) {
         if (rank % 100 >= 11 && rank % 100 <= 13) {
             return 'TH';
         }
@@ -4569,7 +5012,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         }
     }
 
-    // 馃敟 鏍煎紡鍖栭亰鎴叉檪闁?    formatGameTime(seconds) {
+    // 🔥 格式化遊戲時間
+    formatGameTime(seconds) {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         const decimal = Math.floor((seconds % 1) * 10);
@@ -4581,17 +5025,19 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         }
     }
 
-    // 馃敟 閲嶆柊闁嬪閬婃埐
+    // 🔥 重新開始遊戲
     restartGame() {
-        console.log('馃幃 閲嶆柊闁嬪閬婃埐');
+        console.log('🎮 重新開始遊戲');
 
-        // 闂滈枆妯℃厠妗?        if (this.gameCompleteModal) {
+        // 關閉模態框
+        if (this.gameCompleteModal) {
             this.gameCompleteModal.overlay.destroy();
             this.gameCompleteModal.modal.destroy();
             this.gameCompleteModal = null;
         }
 
-        // 閲嶇疆閬婃埐鐙€鎱?        this.gameState = 'playing';
+        // 重置遊戲狀態
+        this.gameState = 'playing';
         this.gameStartTime = null;
         this.gameEndTime = null;
         this.totalGameTime = 0;
@@ -4600,15 +5046,16 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         this.currentPage = 0;
         this.matchedPairs.clear();
 
-        // 閲嶆柊杓夊叆閬婃埐
+        // 重新載入遊戲
         this.scene.restart();
     }
 
-    // 馃敟 椤ず My Answers 闋侀潰
+    // 🔥 顯示 My Answers 頁面
     showMyAnswersPage() {
-        console.log('馃幃 椤ず My Answers 闋侀潰');
+        console.log('🎮 顯示 My Answers 頁面');
 
-        // 闅辫棌閬婃埐绲愭潫妯℃厠妗?        if (this.gameCompleteModal) {
+        // 隱藏遊戲結束模態框
+        if (this.gameCompleteModal) {
             this.gameCompleteModal.overlay.setVisible(false);
             this.gameCompleteModal.modal.setVisible(false);
         }
@@ -4616,7 +5063,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 鍓靛缓鍗婇€忔槑鑳屾櫙锛堥伄缃╋級
+        // 創建半透明背景（遮罩）
         const overlay = this.add.rectangle(
             width / 2,
             height / 2,
@@ -4628,19 +5075,19 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         overlay.setDepth(6000);
         overlay.setScrollFactor(0);
 
-        // 鍓靛缓绛旀闋侀潰瀹瑰櫒
+        // 創建答案頁面容器
         const pageWidth = Math.min(800, width * 0.9);
         const pageHeight = Math.min(600, height * 0.9);
         const page = this.add.container(width / 2, height / 2);
         page.setDepth(6001);
         page.setScrollFactor(0);
 
-        // 闋侀潰鑳屾櫙
+        // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0xffffff);
         pageBg.setStrokeStyle(4, 0x000000);
         page.add(pageBg);
 
-        // 妯欓锛歁y Answers
+        // 標題：My Answers
         const title = this.add.text(0, -pageHeight / 2 + 40, 'My Answers', {
             fontSize: '32px',
             color: '#000000',
@@ -4650,43 +5097,45 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         title.setOrigin(0.5);
         page.add(title);
 
-        // 椤ず绛旀鍒楄〃
+        // 顯示答案列表
         const answerStartY = -pageHeight / 2 + 100;
         const answerSpacing = 80;
         const maxAnswersPerPage = Math.floor((pageHeight - 200) / answerSpacing);
 
-        // 鐛插彇鎵€鏈夌瓟妗堬紙鍖呭惈鎵€鏈夐爜闈級
+        // 獲取所有答案（包含所有頁面）
         const allAnswers = this.allPagesAnswers;
-        console.log('馃摑 鎵€鏈夌瓟妗?', allAnswers);
+        console.log('📝 所有答案:', allAnswers);
 
-        // 椤ず绛旀锛堟渶澶氶’绀?maxAnswersPerPage 鍊嬶級
+        // 顯示答案（最多顯示 maxAnswersPerPage 個）
         const answersToShow = allAnswers.slice(0, maxAnswersPerPage);
-        const cardWidth = 300;  // 馃敟 鑸?createAnswerCard 涓殑 cardWidth 涓€鑷?        const cardX = -pageWidth / 2 + cardWidth / 2 + 30;  // 馃敟 宸﹂倞璺?30px
+        const cardWidth = 300;  // 🔥 與 createAnswerCard 中的 cardWidth 一致
+        const cardX = -pageWidth / 2 + cardWidth / 2 + 30;  // 🔥 左邊距 30px
         answersToShow.forEach((answer, index) => {
             const y = answerStartY + index * answerSpacing;
             this.createAnswerCard(page, cardX, y, answer, 'myAnswer');
         });
 
-        // 搴曢儴鎸夐垥鍗€鍩?        const buttonY = pageHeight / 2 - 60;
+        // 底部按鈕區域
+        const buttonY = pageHeight / 2 - 60;
 
-        // Correct Answers 鎸夐垥
+        // Correct Answers 按鈕
         this.createAnswerPageButton(page, -150, buttonY, 'Correct Answers', () => {
-            console.log('馃幃 榛炴搳 Correct Answers 鎸夐垥');
+            console.log('🎮 點擊 Correct Answers 按鈕');
             this.hideMyAnswersPage();
             this.showCorrectAnswersPage();
         });
 
-        // Back 鎸夐垥
+        // Back 按鈕
         this.createAnswerPageButton(page, 150, buttonY, 'Back', () => {
-            console.log('馃幃 榛炴搳 Back 鎸夐垥');
+            console.log('🎮 點擊 Back 按鈕');
             this.hideMyAnswersPage();
         });
 
-        // 淇濆瓨闋侀潰寮曠敤
+        // 保存頁面引用
         this.myAnswersPage = { overlay, page };
     }
 
-    // 馃敟 闅辫棌 My Answers 闋侀潰
+    // 🔥 隱藏 My Answers 頁面
     hideMyAnswersPage() {
         if (this.myAnswersPage) {
             this.myAnswersPage.overlay.destroy();
@@ -4694,20 +5143,21 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             this.myAnswersPage = null;
         }
 
-        // 椤ず閬婃埐绲愭潫妯℃厠妗?        if (this.gameCompleteModal) {
+        // 顯示遊戲結束模態框
+        if (this.gameCompleteModal) {
             this.gameCompleteModal.overlay.setVisible(true);
             this.gameCompleteModal.modal.setVisible(true);
         }
     }
 
-    // 馃敟 椤ず Correct Answers 闋侀潰
+    // 🔥 顯示 Correct Answers 頁面
     showCorrectAnswersPage() {
-        console.log('馃幃 椤ず Correct Answers 闋侀潰');
+        console.log('🎮 顯示 Correct Answers 頁面');
 
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 鍓靛缓鍗婇€忔槑鑳屾櫙锛堥伄缃╋級
+        // 創建半透明背景（遮罩）
         const overlay = this.add.rectangle(
             width / 2,
             height / 2,
@@ -4719,19 +5169,19 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         overlay.setDepth(6000);
         overlay.setScrollFactor(0);
 
-        // 鍓靛缓绛旀闋侀潰瀹瑰櫒
+        // 創建答案頁面容器
         const pageWidth = Math.min(800, width * 0.9);
         const pageHeight = Math.min(600, height * 0.9);
         const page = this.add.container(width / 2, height / 2);
         page.setDepth(6001);
         page.setScrollFactor(0);
 
-        // 闋侀潰鑳屾櫙
+        // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0xffffff);
         pageBg.setStrokeStyle(4, 0x000000);
         page.add(pageBg);
 
-        // 妯欓锛欳orrect Answers
+        // 標題：Correct Answers
         const title = this.add.text(0, -pageHeight / 2 + 40, 'Correct Answers', {
             fontSize: '32px',
             color: '#000000',
@@ -4741,42 +5191,44 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         title.setOrigin(0.5);
         page.add(title);
 
-        // 椤ず绛旀鍒楄〃
+        // 顯示答案列表
         const answerStartY = -pageHeight / 2 + 100;
         const answerSpacing = 80;
         const maxAnswersPerPage = Math.floor((pageHeight - 200) / answerSpacing);
 
-        // 鐛插彇鎵€鏈夌瓟妗堬紙鍖呭惈鎵€鏈夐爜闈級
+        // 獲取所有答案（包含所有頁面）
         const allAnswers = this.allPagesAnswers;
 
-        // 椤ず绛旀锛堟渶澶氶’绀?maxAnswersPerPage 鍊嬶級
+        // 顯示答案（最多顯示 maxAnswersPerPage 個）
         const answersToShow = allAnswers.slice(0, maxAnswersPerPage);
-        const cardWidth = 300;  // 馃敟 鑸?createAnswerCard 涓殑 cardWidth 涓€鑷?        const cardX = -pageWidth / 2 + cardWidth / 2 + 30;  // 馃敟 宸﹂倞璺?30px
+        const cardWidth = 300;  // 🔥 與 createAnswerCard 中的 cardWidth 一致
+        const cardX = -pageWidth / 2 + cardWidth / 2 + 30;  // 🔥 左邊距 30px
         answersToShow.forEach((answer, index) => {
             const y = answerStartY + index * answerSpacing;
             this.createAnswerCard(page, cardX, y, answer, 'correctAnswer');
         });
 
-        // 搴曢儴鎸夐垥鍗€鍩?        const buttonY = pageHeight / 2 - 60;
+        // 底部按鈕區域
+        const buttonY = pageHeight / 2 - 60;
 
-        // My Answers 鎸夐垥
+        // My Answers 按鈕
         this.createAnswerPageButton(page, -150, buttonY, 'My Answers', () => {
-            console.log('馃幃 榛炴搳 My Answers 鎸夐垥');
+            console.log('🎮 點擊 My Answers 按鈕');
             this.hideCorrectAnswersPage();
             this.showMyAnswersPage();
         });
 
-        // Back 鎸夐垥
+        // Back 按鈕
         this.createAnswerPageButton(page, 150, buttonY, 'Back', () => {
-            console.log('馃幃 榛炴搳 Back 鎸夐垥');
+            console.log('🎮 點擊 Back 按鈕');
             this.hideCorrectAnswersPage();
         });
 
-        // 淇濆瓨闋侀潰寮曠敤
+        // 保存頁面引用
         this.correctAnswersPage = { overlay, page };
     }
 
-    // 馃敟 闅辫棌 Correct Answers 闋侀潰
+    // 🔥 隱藏 Correct Answers 頁面
     hideCorrectAnswersPage() {
         if (this.correctAnswersPage) {
             this.correctAnswersPage.overlay.destroy();
@@ -4784,45 +5236,48 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             this.correctAnswersPage = null;
         }
 
-        // 椤ず閬婃埐绲愭潫妯℃厠妗?        if (this.gameCompleteModal) {
+        // 顯示遊戲結束模態框
+        if (this.gameCompleteModal) {
             this.gameCompleteModal.overlay.setVisible(true);
             this.gameCompleteModal.modal.setVisible(true);
         }
     }
 
-    // 馃敟 鍓靛缓绛旀鍗＄墖
+    // 🔥 創建答案卡片
     createAnswerCard(container, x, y, answer, type) {
-        const cardWidth = 300;  // 馃敟 娓涘皬鍗＄墖瀵害浠ラ仼鎳夊鍣?        const cardHeight = 60;
-        const chineseX = x + cardWidth / 2 + 20;  // 馃敟 涓枃鍦ㄥ崱鐗囧彸閭?20px
+        const cardWidth = 300;  // 🔥 減小卡片寬度以適應容器
+        const cardHeight = 60;
+        const chineseX = x + cardWidth / 2 + 20;  // 🔥 中文在卡片右邊 20px
 
-        // 鏍规摎椤炲瀷姹哄畾椤ず鍏у
+        // 根據類型決定顯示內容
         let displayText, bgColor, markColor, markText;
 
         if (type === 'myAnswer') {
-            // My Answers 闋侀潰锛氶’绀虹敤鎴剁殑绛旀
-            displayText = answer.rightText || '(鏈厤灏?';
+            // My Answers 頁面：顯示用戶的答案
+            displayText = answer.rightText || '(未配對)';
             if (answer.isCorrect) {
-                bgColor = this.getCardColor(answer.leftPairId); // 褰╄壊鑳屾櫙
+                bgColor = this.getCardColor(answer.leftPairId); // 彩色背景
                 markColor = '#4caf50';
-                markText = '鉁?;
+                markText = '✓';
             } else {
-                bgColor = 0xcccccc; // 鐏拌壊鑳屾櫙
+                bgColor = 0xcccccc; // 灰色背景
                 markColor = '#f44336';
-                markText = '鉁?;
+                markText = '✗';
             }
         } else {
-            // Correct Answers 闋侀潰锛氶’绀烘纰虹瓟妗?            displayText = answer.correctAnswer;
-            bgColor = this.getCardColor(answer.leftPairId); // 褰╄壊鑳屾櫙
+            // Correct Answers 頁面：顯示正確答案
+            displayText = answer.correctAnswer;
+            bgColor = this.getCardColor(answer.leftPairId); // 彩色背景
             markColor = '#4caf50';
-            markText = '鉁?;
+            markText = '✓';
         }
 
-        // 鍓靛缓鍗＄墖鑳屾櫙
+        // 創建卡片背景
         const cardBg = this.add.rectangle(x, y, cardWidth, cardHeight, bgColor);
         cardBg.setStrokeStyle(2, 0x000000);
         container.add(cardBg);
 
-        // 鍓靛缓鍗＄墖鏂囧瓧
+        // 創建卡片文字
         const cardText = this.add.text(x, y, displayText, {
             fontSize: '24px',
             color: '#ffffff',
@@ -4832,7 +5287,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         cardText.setOrigin(0.5);
         container.add(cardText);
 
-        // 鍓靛缓妯欒锛堝嬀鍕炬垨 X锛?        const mark = this.add.text(x + cardWidth / 2 - 20, y - cardHeight / 2 + 10, markText, {
+        // 創建標記（勾勾或 X）
+        const mark = this.add.text(x + cardWidth / 2 - 20, y - cardHeight / 2 + 10, markText, {
             fontSize: '24px',
             color: markColor,
             fontFamily: 'Arial',
@@ -4841,7 +5297,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         mark.setOrigin(0.5);
         container.add(mark);
 
-        // 鍓靛缓涓枃鏂囧瓧锛堥’绀虹敤鎴堕伕鎿囩殑涓枃锛?        const chineseText = this.add.text(chineseX, y, answer.leftText, {
+        // 創建中文文字（顯示用戶選擇的中文）
+        const chineseText = this.add.text(chineseX, y, answer.leftText, {
             fontSize: '28px',
             color: '#000000',
             fontFamily: 'Arial',
@@ -4851,31 +5308,33 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         container.add(chineseText);
     }
 
-    // 馃敟 鐛插彇鍗＄墖椤忚壊锛堟牴鎿?pairId锛?    getCardColor(pairId) {
+    // 🔥 獲取卡片顏色（根據 pairId）
+    getCardColor(pairId) {
         const colors = [
-            0x4a9eff, // 钘嶈壊
-            0xff4a4a, // 绱呰壊
-            0xffa500, // 姗欒壊
-            0x4caf50, // 缍犺壊
-            0x9c27b0, // 绱壊
-            0xffeb3b, // 榛冭壊
-            0x00bcd4, // 闈掕壊
-            0xff9800  // 娣辨鑹?        ];
+            0x4a9eff, // 藍色
+            0xff4a4a, // 紅色
+            0xffa500, // 橙色
+            0x4caf50, // 綠色
+            0x9c27b0, // 紫色
+            0xffeb3b, // 黃色
+            0x00bcd4, // 青色
+            0xff9800  // 深橙色
+        ];
         return colors[(pairId - 1) % colors.length];
     }
 
-    // 馃敟 鍓靛缓绛旀闋侀潰鎸夐垥
+    // 🔥 創建答案頁面按鈕
     createAnswerPageButton(container, x, y, text, callback) {
         const buttonWidth = 250;
         const buttonHeight = 45;
 
-        // 鎸夐垥鑳屾櫙
+        // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0xffffff);
         buttonBg.setStrokeStyle(2, 0x000000);
         buttonBg.setInteractive({ useHandCursor: true });
         container.add(buttonBg);
 
-        // 鎸夐垥鏂囧瓧
+        // 按鈕文字
         const buttonText = this.add.text(x, y, text, {
             fontSize: '20px',
             color: '#000000',
@@ -4885,10 +5344,10 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         buttonText.setOrigin(0.5);
         container.add(buttonText);
 
-        // 榛炴搳浜嬩欢
+        // 點擊事件
         buttonBg.on('pointerdown', callback);
 
-        // 鎳稿仠鏁堟灉
+        // 懸停效果
         buttonBg.on('pointerover', () => {
             buttonBg.setFillStyle(0xf0f0f0);
         });
@@ -4900,11 +5359,12 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         return { buttonBg, buttonText };
     }
 
-    // 馃敟 椤ず杓稿叆鍚嶇ū闋侀潰
+    // 🔥 顯示輸入名稱頁面
     showEnterNamePage() {
-        console.log('馃幃 椤ず杓稿叆鍚嶇ū闋侀潰');
+        console.log('🎮 顯示輸入名稱頁面');
 
-        // 闅辫棌閬婃埐绲愭潫妯℃厠妗?        if (this.gameCompleteModal) {
+        // 隱藏遊戲結束模態框
+        if (this.gameCompleteModal) {
             this.gameCompleteModal.overlay.setVisible(false);
             this.gameCompleteModal.modal.setVisible(false);
         }
@@ -4912,7 +5372,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 鍓靛缓鍗婇€忔槑鑳屾櫙锛堥伄缃╋級
+        // 創建半透明背景（遮罩）
         const overlay = this.add.rectangle(
             width / 2,
             height / 2,
@@ -4924,19 +5384,19 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         overlay.setDepth(7000);
         overlay.setScrollFactor(0);
 
-        // 鍓靛缓杓稿叆鍚嶇ū闋侀潰瀹瑰櫒
+        // 創建輸入名稱頁面容器
         const pageWidth = Math.min(600, width * 0.9);
         const pageHeight = Math.min(500, height * 0.8);
         const page = this.add.container(width / 2, height / 2);
         page.setDepth(7001);
         page.setScrollFactor(0);
 
-        // 闋侀潰鑳屾櫙
+        // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
         pageBg.setStrokeStyle(4, 0x000000);
         page.add(pageBg);
 
-        // 妯欓锛欵NTER YOUR NAME
+        // 標題：ENTER YOUR NAME
         const title = this.add.text(0, -pageHeight / 2 + 40, 'ENTER YOUR NAME', {
             fontSize: '24px',
             color: '#ffffff',
@@ -4946,7 +5406,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         title.setOrigin(0.5);
         page.add(title);
 
-        // 鍓椤岋細You're 1st on the leaderboard
+        // 副標題：You're 1st on the leaderboard
         const subtitle = this.add.text(0, -pageHeight / 2 + 80, "You're 1st on the leaderboard", {
             fontSize: '16px',
             color: '#cccccc',
@@ -4955,7 +5415,8 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         subtitle.setOrigin(0.5);
         page.add(subtitle);
 
-        // 杓稿叆妗?        const inputWidth = pageWidth * 0.8;
+        // 輸入框
+        const inputWidth = pageWidth * 0.8;
         const inputHeight = 50;
         const inputY = -pageHeight / 2 + 130;
 
@@ -4963,7 +5424,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         inputBg.setStrokeStyle(2, 0x000000);
         page.add(inputBg);
 
-        // 杓稿叆鏂囧瓧
+        // 輸入文字
         this.playerName = '';
         const inputText = this.add.text(0, inputY, '', {
             fontSize: '24px',
@@ -4973,29 +5434,30 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         inputText.setOrigin(0.5);
         page.add(inputText);
 
-        // 鍓靛缓铏涙摤閸电洡
+        // 創建虛擬鍵盤
         const keyboardY = -pageHeight / 2 + 220;
         this.createVirtualKeyboard(page, 0, keyboardY, inputText);
 
-        // 搴曢儴鎸夐垥鍗€鍩?        const buttonY = pageHeight / 2 - 60;
+        // 底部按鈕區域
+        const buttonY = pageHeight / 2 - 60;
 
-        // Skip 鎸夐垥
+        // Skip 按鈕
         this.createModalButton(page, -120, buttonY, 'Skip', () => {
-            console.log('馃幃 榛炴搳 Skip 鎸夐垥');
+            console.log('🎮 點擊 Skip 按鈕');
             this.hideEnterNamePage();
         });
 
-        // Enter 鎸夐垥
+        // Enter 按鈕
         this.createModalButton(page, 120, buttonY, 'Enter', () => {
-            console.log('馃幃 榛炴搳 Enter 鎸夐垥锛屽悕绋?', this.playerName);
+            console.log('🎮 點擊 Enter 按鈕，名稱:', this.playerName);
             this.submitPlayerName();
         });
 
-        // 淇濆瓨闋侀潰寮曠敤
+        // 保存頁面引用
         this.enterNamePage = { overlay, page, inputText };
     }
 
-    // 馃敟 闅辫棌杓稿叆鍚嶇ū闋侀潰
+    // 🔥 隱藏輸入名稱頁面
     hideEnterNamePage() {
         if (this.enterNamePage) {
             this.enterNamePage.overlay.destroy();
@@ -5003,18 +5465,19 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             this.enterNamePage = null;
         }
 
-        // 椤ず閬婃埐绲愭潫妯℃厠妗?        if (this.gameCompleteModal) {
+        // 顯示遊戲結束模態框
+        if (this.gameCompleteModal) {
             this.gameCompleteModal.overlay.setVisible(true);
             this.gameCompleteModal.modal.setVisible(true);
         }
     }
 
-    // 馃敟 鍓靛缓铏涙摤閸电洡
+    // 🔥 創建虛擬鍵盤
     createVirtualKeyboard(container, x, y, inputText) {
         const keys = [
             ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
             ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-            ['鈫?, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '鈫?]
+            ['↑', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '←']
         ];
 
         const keyWidth = 40;
@@ -5032,21 +5495,23 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             });
         });
 
-        // 绌烘牸閸?        const spaceY = y + 3 * (keyHeight + keySpacing);
+        // 空格鍵
+        const spaceY = y + 3 * (keyHeight + keySpacing);
         this.createKeyButton(container, x, spaceY, 'Space', 200, keyHeight, inputText);
 
-        // 123 鎸夐垥锛堝垏鎻涘埌鏁稿瓧閸电洡锛?        this.createKeyButton(container, x - 120, spaceY, '123', 80, keyHeight, inputText);
+        // 123 按鈕（切換到數字鍵盤）
+        this.createKeyButton(container, x - 120, spaceY, '123', 80, keyHeight, inputText);
     }
 
-    // 馃敟 鍓靛缓閸电洡鎸夐垥
+    // 🔥 創建鍵盤按鈕
     createKeyButton(container, x, y, key, width, height, inputText) {
-        // 鎸夐垥鑳屾櫙
+        // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, width, height, 0x4c4c4c);
         buttonBg.setStrokeStyle(2, 0x000000);
         buttonBg.setInteractive({ useHandCursor: true });
         container.add(buttonBg);
 
-        // 鎸夐垥鏂囧瓧
+        // 按鈕文字
         const buttonText = this.add.text(x, y, key, {
             fontSize: '18px',
             color: '#ffffff',
@@ -5056,12 +5521,12 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         buttonText.setOrigin(0.5);
         container.add(buttonText);
 
-        // 榛炴搳浜嬩欢
+        // 點擊事件
         buttonBg.on('pointerdown', () => {
             this.handleKeyPress(key, inputText);
         });
 
-        // 鎳稿仠鏁堟灉
+        // 懸停效果
         buttonBg.on('pointerover', () => {
             buttonBg.setFillStyle(0x5c5c5c);
         });
@@ -5071,49 +5536,52 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         });
     }
 
-    // 馃敟 铏曠悊鎸夐嵉杓稿叆
+    // 🔥 處理按鍵輸入
     handleKeyPress(key, inputText) {
-        if (key === '鈫?) {
-            // 鍒櫎鏈€寰屼竴鍊嬪瓧绗?            this.playerName = this.playerName.slice(0, -1);
-        } else if (key === '鈫?) {
-            // 鍒囨彌澶у皬瀵紙鏆檪涓嶅鐝撅級
-            console.log('馃幃 鍒囨彌澶у皬瀵?);
+        if (key === '←') {
+            // 刪除最後一個字符
+            this.playerName = this.playerName.slice(0, -1);
+        } else if (key === '↑') {
+            // 切換大小寫（暫時不實現）
+            console.log('🎮 切換大小寫');
         } else if (key === 'Space') {
-            // 娣诲姞绌烘牸
+            // 添加空格
             this.playerName += ' ';
         } else if (key === '123') {
-            // 鍒囨彌鍒版暩瀛楅嵉鐩わ紙鏆檪涓嶅鐝撅級
-            console.log('馃幃 鍒囨彌鍒版暩瀛楅嵉鐩?);
+            // 切換到數字鍵盤（暫時不實現）
+            console.log('🎮 切換到數字鍵盤');
         } else {
-            // 娣诲姞瀛楃
+            // 添加字符
             if (this.playerName.length < 20) {
                 this.playerName += key;
             }
         }
 
-        // 鏇存柊杓稿叆鏂囧瓧
+        // 更新輸入文字
         inputText.setText(this.playerName);
-        console.log('馃幃 鐣跺墠鍚嶇ū:', this.playerName);
+        console.log('🎮 當前名稱:', this.playerName);
     }
 
-    // 馃敟 鎻愪氦鐜╁鍚嶇ū
+    // 🔥 提交玩家名稱
     async submitPlayerName() {
         if (!this.playerName || this.playerName.trim() === '') {
-            console.log('馃幃 鍚嶇ū鐐虹┖锛岃烦閬庢彁浜?);
+            console.log('🎮 名稱為空，跳過提交');
             this.hideEnterNamePage();
             return;
         }
 
-        console.log('馃幃 鎻愪氦鐜╁鍚嶇ū:', this.playerName);
+        console.log('🎮 提交玩家名稱:', this.playerName);
 
-        // 瑷堢畻绺藉垎鏁?        const totalCorrect = this.allPagesAnswers.filter(answer => answer.isCorrect).length;
+        // 計算總分數
+        const totalCorrect = this.allPagesAnswers.filter(answer => answer.isCorrect).length;
         const totalQuestions = this.pairs.length;
 
-        // 鐛插彇 activityId
+        // 獲取 activityId
         const urlParams = new URLSearchParams(window.location.search);
         const activityId = urlParams.get('activityId');
 
-        // 婧栧倷鎺掕姒滄暩鎿氾紙鍖归厤 API 鏍煎紡锛?        const leaderboardData = {
+        // 準備排行榜數據（匹配 API 格式）
+        const leaderboardData = {
             activityId: activityId,
             playerName: this.playerName.trim(),
             score: totalCorrect,
@@ -5127,10 +5595,10 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
             }
         };
 
-        console.log('馃幃 鎺掕姒滄暩鎿?', leaderboardData);
+        console.log('🎮 排行榜數據:', leaderboardData);
 
         try {
-            // 鐧奸€佸埌 API
+            // 發送到 API
             const response = await fetch('/api/leaderboard', {
                 method: 'POST',
                 headers: {
@@ -5141,33 +5609,35 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
 
             if (response.ok) {
                 const result = await response.json();
-                console.log('鉁?鎺掕姒滄暩鎿氬凡淇濆瓨:', result);
+                console.log('✅ 排行榜數據已保存:', result);
 
-                // 闅辫棌杓稿叆鍚嶇ū闋侀潰
+                // 隱藏輸入名稱頁面
                 this.hideEnterNamePage();
 
-                // 椤ず鎺掕姒?                this.showLeaderboard();
+                // 顯示排行榜
+                this.showLeaderboard();
             } else {
-                console.error('鉂?淇濆瓨鎺掕姒滄暩鎿氬け鏁?', response.status);
+                console.error('❌ 保存排行榜數據失敗:', response.status);
                 this.hideEnterNamePage();
             }
         } catch (error) {
-            console.error('鉂?淇濆瓨鎺掕姒滄暩鎿氶尟瑾?', error);
+            console.error('❌ 保存排行榜數據錯誤:', error);
             this.hideEnterNamePage();
         }
     }
 
-    // 馃敟 椤ず鎺掕姒?    async showLeaderboard() {
-        console.log('馃幃 椤ず鎺掕姒?);
+    // 🔥 顯示排行榜
+    async showLeaderboard() {
+        console.log('🎮 顯示排行榜');
 
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 鐛插彇 activityId
+        // 獲取 activityId
         const urlParams = new URLSearchParams(window.location.search);
         const activityId = urlParams.get('activityId');
 
-        // 鍓靛缓鍗婇€忔槑鑳屾櫙锛堥伄缃╋級
+        // 創建半透明背景（遮罩）
         const overlay = this.add.rectangle(
             width / 2,
             height / 2,
@@ -5179,18 +5649,19 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         overlay.setDepth(8000);
         overlay.setScrollFactor(0);
 
-        // 鍓靛缓鎺掕姒滈爜闈㈠鍣?        const pageWidth = Math.min(600, width * 0.9);
+        // 創建排行榜頁面容器
+        const pageWidth = Math.min(600, width * 0.9);
         const pageHeight = Math.min(700, height * 0.9);
         const page = this.add.container(width / 2, height / 2);
         page.setDepth(8001);
         page.setScrollFactor(0);
 
-        // 闋侀潰鑳屾櫙
+        // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
         pageBg.setStrokeStyle(4, 0x000000);
         page.add(pageBg);
 
-        // 妯欓锛歀EADERBOARD
+        // 標題：LEADERBOARD
         const title = this.add.text(0, -pageHeight / 2 + 40, 'LEADERBOARD', {
             fontSize: '32px',
             color: '#ffffff',
@@ -5200,14 +5671,16 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
         title.setOrigin(0.5);
         page.add(title);
 
-        // 杓夊叆鎺掕姒滄暩鎿?        try {
+        // 載入排行榜數據
+        try {
             const response = await fetch(`/api/leaderboard?activityId=${activityId}&limit=10`);
             if (response.ok) {
                 const result = await response.json();
                 const leaderboardData = result.data || [];
-                console.log('鉁?鎺掕姒滄暩鎿?', leaderboardData);
+                console.log('✅ 排行榜數據:', leaderboardData);
 
-                // 椤ず鎺掕姒滃垪琛?                const startY = -pageHeight / 2 + 100;
+                // 顯示排行榜列表
+                const startY = -pageHeight / 2 + 100;
                 const rowHeight = 50;
 
                 leaderboardData.slice(0, 10).forEach((entry, index) => {
@@ -5215,7 +5688,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                     const rank = index + 1;
                     const isCurrentPlayer = entry.playerName === this.playerName;
 
-                    // 鎺掑悕
+                    // 排名
                     const rankText = this.add.text(-pageWidth / 2 + 50, y, `${rank}.`, {
                         fontSize: '20px',
                         color: isCurrentPlayer ? '#ffeb3b' : '#ffffff',
@@ -5225,7 +5698,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                     rankText.setOrigin(0, 0.5);
                     page.add(rankText);
 
-                    // 鐜╁鍚嶇ū
+                    // 玩家名稱
                     const nameText = this.add.text(-pageWidth / 2 + 100, y, entry.playerName, {
                         fontSize: '20px',
                         color: isCurrentPlayer ? '#ffeb3b' : '#ffffff',
@@ -5234,7 +5707,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                     nameText.setOrigin(0, 0.5);
                     page.add(nameText);
 
-                    // 鍒嗘暩
+                    // 分數
                     const scoreText = this.add.text(pageWidth / 2 - 150, y, `${entry.score}/${entry.totalCount}`, {
                         fontSize: '20px',
                         color: isCurrentPlayer ? '#ffeb3b' : '#ffffff',
@@ -5243,7 +5716,7 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                     scoreText.setOrigin(1, 0.5);
                     page.add(scoreText);
 
-                    // 鏅傞枔
+                    // 時間
                     const timeText = this.add.text(pageWidth / 2 - 50, y, this.formatGameTime(entry.timeSpent), {
                         fontSize: '20px',
                         color: isCurrentPlayer ? '#ffeb3b' : '#ffffff',
@@ -5253,76 +5726,84 @@ import { GameResponsiveLayout } from '../responsive-layout.js';
                     page.add(timeText);
                 });
             } else {
-                console.error('鉂?鐛插彇鎺掕姒滄暩鎿氬け鏁?', response.status);
+                console.error('❌ 獲取排行榜數據失敗:', response.status);
             }
         } catch (error) {
-            console.error('鉂?鐛插彇鎺掕姒滄暩鎿氶尟瑾?', error);
+            console.error('❌ 獲取排行榜數據錯誤:', error);
         }
 
-        // 搴曢儴鎸夐垥
+        // 底部按鈕
         const buttonY = pageHeight / 2 - 60;
         this.createModalButton(page, 0, buttonY, 'Back', () => {
-            console.log('馃幃 榛炴搳 Back 鎸夐垥');
+            console.log('🎮 點擊 Back 按鈕');
             this.hideLeaderboard();
         });
 
-        // 淇濆瓨闋侀潰寮曠敤
+        // 保存頁面引用
         this.leaderboardPage = { overlay, page };
     }
 
-    // 馃敟 闅辫棌鎺掕姒?    hideLeaderboard() {
+    // 🔥 隱藏排行榜
+    hideLeaderboard() {
         if (this.leaderboardPage) {
             this.leaderboardPage.overlay.destroy();
             this.leaderboardPage.page.destroy();
             this.leaderboardPage = null;
         }
 
-        // 椤ず閬婃埐绲愭潫妯℃厠妗?        if (this.gameCompleteModal) {
+        // 顯示遊戲結束模態框
+        if (this.gameCompleteModal) {
             this.gameCompleteModal.overlay.setVisible(true);
             this.gameCompleteModal.modal.setVisible(true);
         }
     }
 
-    // 馃敟 P1-4: 淇浜嬩欢鐩ｈ伣鍣ㄧ鐞?- shutdown 鏂规硶
+    // 🔥 P1-4: 修正事件監聽器管理 - shutdown 方法
     shutdown() {
-        console.log('馃幃 GameScene: shutdown 鏂规硶闁嬪 - 娓呯悊浜嬩欢鐩ｈ伣鍣?);
+        console.log('🎮 GameScene: shutdown 方法開始 - 清理事件監聽器');
 
-        // 绉婚櫎 resize 浜嬩欢鐩ｈ伣鍣?        if (this.scale) {
+        // 移除 resize 事件監聽器
+        if (this.scale) {
             this.scale.off('resize', this.handleResize, this);
-            console.log('鉁?宸茬Щ闄?resize 浜嬩欢鐩ｈ伣鍣?);
+            console.log('✅ 已移除 resize 事件監聽器');
         }
 
-        // 绉婚櫎 fullscreen 浜嬩欢鐩ｈ伣鍣紙濡傛灉瀛樺湪锛?        if (document) {
+        // 移除 fullscreen 事件監聽器（如果存在）
+        if (document) {
             document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
-            console.log('鉁?宸茬Щ闄?fullscreenchange 浜嬩欢鐩ｈ伣鍣?);
+            console.log('✅ 已移除 fullscreenchange 事件監聽器');
         }
 
-        // 绉婚櫎 orientation 浜嬩欢鐩ｈ伣鍣紙濡傛灉瀛樺湪锛?        if (window) {
+        // 移除 orientation 事件監聽器（如果存在）
+        if (window) {
             window.removeEventListener('orientationchange', this.handleOrientationChange);
-            console.log('鉁?宸茬Щ闄?orientationchange 浜嬩欢鐩ｈ伣鍣?);
+            console.log('✅ 已移除 orientationchange 事件監聽器');
         }
 
-        // 鍋滄瑷堟檪鍣?        if (this.timerEvent) {
+        // 停止計時器
+        if (this.timerEvent) {
             this.timerEvent.remove();
             this.timerEvent = null;
-            console.log('鉁?宸插仠姝㈣▓鏅傚櫒');
+            console.log('✅ 已停止計時器');
         }
 
-        // 娓呯悊閬婃埐鐙€鎱?        this.sceneStopped = true;
-        console.log('馃幃 GameScene: shutdown 鏂规硶瀹屾垚 - 鎵€鏈変簨浠剁洠鑱藉櫒宸叉竻鐞?);
+        // 清理遊戲狀態
+        this.sceneStopped = true;
+        console.log('🎮 GameScene: shutdown 方法完成 - 所有事件監聽器已清理');
     }
 
-    // 馃敟 P1-4: 鍏ㄨ灑骞曡畩鍖栦簨浠惰檿鐞?    handleFullscreenChange() {
-        console.log('馃幃 鍏ㄨ灑骞曠媭鎱嬭畩鍖?', document.fullscreenElement ? '閫插叆鍏ㄨ灑骞? : '閫€鍑哄叏铻㈠箷');
-        // 閲嶆柊瑷堢畻浣堝眬
+    // 🔥 P1-4: 全螢幕變化事件處理
+    handleFullscreenChange() {
+        console.log('🎮 全螢幕狀態變化:', document.fullscreenElement ? '進入全螢幕' : '退出全螢幕');
+        // 重新計算佈局
         this.updateLayout();
     }
 
-    // 馃敟 P1-4: 瑷倷鏂瑰悜璁婂寲浜嬩欢铏曠悊
+    // 🔥 P1-4: 設備方向變化事件處理
     handleOrientationChange() {
         const isPortrait = window.matchMedia('(orientation: portrait)').matches;
-        console.log('馃幃 瑷倷鏂瑰悜璁婂寲:', isPortrait ? '鐩村悜' : '姗悜');
-        // 閲嶆柊瑷堢畻浣堝眬
+        console.log('🎮 設備方向變化:', isPortrait ? '直向' : '橫向');
+        // 重新計算佈局
         this.updateLayout();
     }
 }
