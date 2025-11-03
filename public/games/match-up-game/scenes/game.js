@@ -2386,164 +2386,30 @@ class GameScene extends Phaser.Scene {
                 // 🟦 正方形模式（有圖片）
                 console.log('🟦 使用正方形卡片模式');
 
-                // 🔥 第七步：計算垂直間距（基於螢幕高度）
-                // ✅ v42.0：iPad 已在上面設置，非 iPad 設備在此計算
-                if (!isIPad) {
-                    // 非 iPad 設備：保留原有邏輯
-                    // 使用固定的垂直間距，避免估算不準確導致間距太小
-                    // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
-                    verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
-                }
+                // ✅ Phase 3：使用 GameResponsiveLayout 的配置
+                // 所有複雜的卡片大小計算已在 GameResponsiveLayout 中完成
+                const cardSize = config.cardSize;
+                const optimalCols = config.cols;
+                const optimalRows = config.rows;
 
-                // 🔥 第六步：定義最小正方形卡片大小
-                // ✅ v39.0：iPad 動態調整最小卡片尺寸
-                let minSquareSize;
-                if (isIPad) {
-                    // iPad：根據容器寬度動態計算最小卡片尺寸
-                    // 5 列 + 6 個間距 = 5 * minSquareSize + 6 * horizontalSpacing = availableWidth
-                    // minSquareSize = (availableWidth - 6 * horizontalSpacing) / 5
-                    minSquareSize = Math.max(120, (availableWidth - 6 * horizontalSpacing) / 5);
-                    console.log('📱 [v39.0] iPad 動態卡片尺寸:', {
-                        availableWidth: availableWidth.toFixed(1),
-                        horizontalSpacing: horizontalSpacing.toFixed(1),
-                        calculatedMinSize: minSquareSize.toFixed(1)
-                    });
-                } else {
-                    // 其他設備：使用固定最小尺寸
-                    minSquareSize = 150;  // 最小正方形尺寸150×150
-                }
+                console.log('📐 [Phase 3] 正方形卡片配置:', {
+                    cardSize: cardSize.toFixed(1),
+                    cols: optimalCols,
+                    rows: optimalRows,
+                    totalCards: itemCount
+                });
 
-                // 🔥 第七步：計算最大可能的列數
-                // 使用最小卡片尺寸來計算最大可能列數
-                const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minSquareSize + horizontalSpacing));
-
-                // 🔥 第八步：智能計算最佳列數（優先使用最大可能列數）
-                // 策略：盡可能多的列數，充分利用水平空間
-                let optimalCols;
-
-                // ✅ v38.0：iPad 特殊處理 - 固定 5 列（像 Wordwall 一樣）
-                if (isIPad) {
-                    optimalCols = 5;  // iPad：固定 5 列
-                    console.log('📱 [v38.0] iPad 檢測：強制使用 5 列佈局');
-                } else {
-                    // 🔥 P2-2: 簡化列數計算邏輯 - 移除重複分支
-                    // 設定最大列數限制（避免卡片過小）
-                    const maxColsLimit = 10;  // 最多10列
-
-                    if (aspectRatio > 1.5) {
-                        // 寬螢幕（超寬 > 2.0 或 寬 > 1.5）- 優先使用最大可能列數
-                        optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
-                    } else if (aspectRatio > 1.2) {
-                        // 標準螢幕（4:3, 3:2）- 稍微限制列數
-                        optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.8), itemCount);
-                    } else {
-                        // 直向螢幕（9:16）- 限制列數
-                        optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.5), itemCount);
-                    }
-                }
-
-                // 確保列數在合理範圍內
-                optimalCols = Math.max(1, Math.min(optimalCols, itemCount));
-
-                // 🔥 第九步：計算行數
-                const optimalRows = Math.ceil(itemCount / optimalCols);
-
-                // 🔥 第十步：計算正方形卡片尺寸（迭代計算，確保不超出邊界）
-                // 方法1：基於高度
-                // totalUnitHeight = squareSize + chineseTextHeight
-                // totalUnitHeight = squareSize + squareSize * 0.4 = squareSize * 1.4
-                // 所以 squareSize = (totalUnitHeight - verticalSpacing) / 1.4
-                let availableHeightPerRow = (availableHeight - verticalSpacing * (optimalRows + 1)) / optimalRows;
-                let squareSizeByHeight = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正：考慮 verticalSpacing
-
-                // 方法2：基於寬度
-                const squareSizeByWidth = (availableWidth - horizontalSpacing * (optimalCols + 1)) / optimalCols;
-
-                // 取較小值，確保卡片不會超出邊界
-                let squareSize = Math.min(squareSizeByHeight, squareSizeByWidth);
-
-                // 🔥 檢查是否需要增加列數（如果卡片太小）
-                if (squareSize < minSquareSize && optimalCols < itemCount) {
-                    // 嘗試增加列數，減少行數
-                    const newCols = Math.min(optimalCols + 1, itemCount);
-                    const newRows = Math.ceil(itemCount / newCols);
-
-                    // 重新計算卡片尺寸
-                    const newSquareSizeByWidth = (availableWidth - horizontalSpacing * (newCols + 1)) / newCols;
-                    const newAvailableHeightPerRow = (availableHeight - verticalSpacing * (newRows + 1)) / newRows;
-                    const newSquareSizeByHeight = (newAvailableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正：考慮 verticalSpacing
-                    const newSquareSize = Math.min(newSquareSizeByHeight, newSquareSizeByWidth);
-
-                    // 如果新的卡片尺寸更大，使用新的佈局
-                    if (newSquareSize > squareSize) {
-                        cols = newCols;
-                        squareSize = newSquareSize;
-                        availableHeightPerRow = newAvailableHeightPerRow;
-
-                        console.log('🔄 增加列數以避免卡片過小:', {
-                            oldCols: optimalCols,
-                            newCols: newCols,
-                            oldSquareSize: squareSize.toFixed(1),
-                            newSquareSize: newSquareSize.toFixed(1)
-                        });
-                    } else {
-                        // 無法通過增加列數改善，智能縮小卡片
-                        cols = optimalCols;
-                        const rows = Math.ceil(itemCount / cols);
-
-                        // 計算實際需要的卡片尺寸以適應可用高度
-                        const actualAvailableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
-                        const actualSquareSize = actualAvailableHeightPerRow / 1.4;
-
-                        // 使用實際計算的尺寸，即使小於最小尺寸
-                        squareSize = actualSquareSize;
-
-                        console.log('📉 智能縮小卡片以適應可用高度:', {
-                            cols,
-                            rows,
-                            minSquareSize,
-                            actualSquareSize: actualSquareSize.toFixed(1),
-                            reason: '無法增加列數，縮小卡片以避免超出邊界'
-                        });
-                    }
-                } else if (squareSize < minSquareSize) {
-                    // 卡片小於最小尺寸，但已經是最大列數
-                    cols = optimalCols;
-                    const rows = Math.ceil(itemCount / cols);
-
-                    // 檢查使用最小尺寸是否會超出邊界
-                    const totalHeightWithMinSize = rows * (minSquareSize * 1.4) + verticalSpacing * (rows + 1);
-
-                    if (totalHeightWithMinSize > availableHeight) {
-                        // 會超出邊界，智能縮小卡片
-                        const actualAvailableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
-                        squareSize = actualAvailableHeightPerRow / 1.4;
-
-                        console.log('📉 智能縮小卡片以適應可用高度:', {
-                            cols,
-                            rows,
-                            minSquareSize,
-                            actualSquareSize: squareSize.toFixed(1),
-                            totalHeightWithMinSize: totalHeightWithMinSize.toFixed(1),
-                            availableHeight: availableHeight.toFixed(1),
-                            reason: '使用最小尺寸會超出邊界'
-                        });
-                    } else {
-                        // 不會超出邊界，使用最小尺寸
-                        squareSize = minSquareSize;
-                    }
-                } else {
-                    cols = optimalCols;
-                }
+                // ✅ Phase 3：使用 GameResponsiveLayout 計算的卡片尺寸
+                // 所有複雜的迭代計算已在 GameResponsiveLayout 中完成
+                const squareSize = cardSize;
+                cols = optimalCols;
+                const rows = optimalRows;
 
                 // 🔥 第十一步：設置卡片尺寸（正方形）
                 frameWidth = squareSize;
                 cardHeightInFrame = squareSize;
                 chineseTextHeight = squareSize * 0.4;  // 中文文字高度為卡片高度的40%
                 totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;  // = squareSize * 1.4 + verticalSpacing
-
-                // cols 已在上面的邏輯中設置
-                const rows = Math.ceil(itemCount / cols);
 
                 console.log('🟦 正方形卡片佈局:', {
                     resolution: `${width}×${height}`,
