@@ -2190,6 +2190,7 @@ class GameScene extends Phaser.Scene {
             // 🔥 第一步：定義按鈕區域和邊距
             // ✅ v40.0：iPad 特殊邊距設定，讓卡片更大
             let topButtonAreaHeight, bottomButtonAreaHeight, sideMargin;
+            console.log('🔍 [v40.0] 邊距計算前 isIPad 檢查:', { isIPad, width });
             if (isIPad) {
                 // iPad：減少邊距，讓卡片更大
                 topButtonAreaHeight = Math.max(40, Math.min(60, height * 0.06));      // 頂部按鈕區域（40-60px）
