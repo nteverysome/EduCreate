@@ -2187,48 +2187,135 @@ class GameScene extends Phaser.Scene {
                 }))
             });
 
-            // 🔥 第一步：定義按鈕區域和邊距
-            // ✅ v40.0：iPad 特殊邊距設定，讓卡片更大
+            // ============================================================================
+            // ✅ v42.0：iPad 容器大小分類系統 - 根據容器大小動態調整所有參數
+            // ============================================================================
+
+            // 🔥 第一步：iPad 容器大小分類函數
+            function classifyIPadSize(w, h) {
+                if (w <= 768) return 'small';      // iPad mini: 768×1024
+                else if (w <= 820) return 'medium'; // iPad/Air: 810×1080, 820×1180
+                else if (w <= 834) return 'large';  // iPad Pro 11": 834×1194
+                else return 'xlarge';               // iPad Pro 12.9": 1024×1366
+            }
+
+            // 🔥 第二步：根據 iPad 大小獲取最優參數
+            function getIPadOptimalParams(iPadSize) {
+                const params = {
+                    small: {
+                        sideMargin: 15,
+                        topButtonArea: 40,
+                        bottomButtonArea: 40,
+                        horizontalSpacing: 12,
+                        verticalSpacing: 35,
+                        chineseFontSize: 24
+                    },
+                    medium: {
+                        sideMargin: 18,
+                        topButtonArea: 42,
+                        bottomButtonArea: 42,
+                        horizontalSpacing: 14,
+                        verticalSpacing: 38,
+                        chineseFontSize: 28
+                    },
+                    large: {
+                        sideMargin: 20,
+                        topButtonArea: 45,
+                        bottomButtonArea: 45,
+                        horizontalSpacing: 15,
+                        verticalSpacing: 40,
+                        chineseFontSize: 32
+                    },
+                    xlarge: {
+                        sideMargin: 25,
+                        topButtonArea: 50,
+                        bottomButtonArea: 50,
+                        horizontalSpacing: 18,
+                        verticalSpacing: 45,
+                        chineseFontSize: 36
+                    }
+                };
+                return params[iPadSize];
+            }
+
+            // 🔥 第三步：定義按鈕區域和邊距
+            // ✅ v42.0：使用 iPad 容器分類系統
             let topButtonAreaHeight, bottomButtonAreaHeight, sideMargin;
+            let iPadSize = null;
+            let iPadParams = null;
+
             if (isIPad) {
-                // iPad：減少邊距，讓卡片更大
-                topButtonAreaHeight = Math.max(40, Math.min(60, height * 0.06));      // 頂部按鈕區域（40-60px）
-                bottomButtonAreaHeight = Math.max(40, Math.min(60, height * 0.08));   // 底部按鈕區域（40-60px）
-                sideMargin = Math.max(15, Math.min(40, width * 0.015));               // 左右邊距（15-40px）
+                // iPad：使用容器分類系統
+                iPadSize = classifyIPadSize(width, height);
+                iPadParams = getIPadOptimalParams(iPadSize);
+
+                topButtonAreaHeight = iPadParams.topButtonArea;
+                bottomButtonAreaHeight = iPadParams.bottomButtonArea;
+                sideMargin = iPadParams.sideMargin;
+
+                console.log('📱 [v42.0] iPad 容器分類:', {
+                    size: iPadSize,
+                    width: width,
+                    height: height,
+                    margins: {
+                        top: topButtonAreaHeight,
+                        bottom: bottomButtonAreaHeight,
+                        side: sideMargin
+                    }
+                });
             } else {
                 topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
                 bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
                 sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 左右邊距（30-80px）
             }
 
-            // 🔥 第二步：計算可用空間（扣除按鈕區域）
+            // 🔥 第四步：計算可用空間（扣除按鈕區域）
             const availableWidth = width - sideMargin * 2;
             const availableHeight = height - topButtonAreaHeight - bottomButtonAreaHeight;
 
-            // 🔥 第三步：計算螢幕寬高比和間距
+            // 🔥 第五步：計算螢幕寬高比和間距
             const aspectRatio = width / height;
 
-            // 根據寬高比動態調整水平間距
-            let horizontalSpacingBase;
-            if (aspectRatio > 2.0) {
-                horizontalSpacingBase = width * 0.02;  // 超寬螢幕：2%
-            } else if (aspectRatio > 1.5) {
-                horizontalSpacingBase = width * 0.015; // 寬螢幕：1.5%
-            } else {
-                horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
-            }
+            // 🔥 第六步：計算水平和垂直間距
+            // ✅ v42.0：iPad 使用容器分類的固定間距，其他設備保留原有邏輯
+            let horizontalSpacing, verticalSpacing;
 
-            // 🔥 第四步：計算水平間距
-            const horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
+            if (isIPad && iPadParams) {
+                // iPad：使用容器分類的固定間距
+                horizontalSpacing = iPadParams.horizontalSpacing;
+                verticalSpacing = iPadParams.verticalSpacing;
+
+                console.log('📱 [v42.0] iPad 間距設定:', {
+                    size: iPadSize,
+                    horizontalSpacing: horizontalSpacing,
+                    verticalSpacing: verticalSpacing
+                });
+            } else {
+                // 非 iPad 設備：保留原有邏輯
+                // 根據寬高比動態調整水平間距
+                let horizontalSpacingBase;
+                if (aspectRatio > 2.0) {
+                    horizontalSpacingBase = width * 0.02;  // 超寬螢幕：2%
+                } else if (aspectRatio > 1.5) {
+                    horizontalSpacingBase = width * 0.015; // 寬螢幕：1.5%
+                } else {
+                    horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
+                }
+                horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
+            }
 
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
                 console.log('🟦 使用正方形卡片模式');
 
-                // 🔥 第五步：計算垂直間距（基於螢幕高度）
-                // 使用固定的垂直間距，避免估算不準確導致間距太小
-                // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
-                verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+                // 🔥 第七步：計算垂直間距（基於螢幕高度）
+                // ✅ v42.0：iPad 已在上面設置，非 iPad 設備在此計算
+                if (!isIPad) {
+                    // 非 iPad 設備：保留原有邏輯
+                    // 使用固定的垂直間距，避免估算不準確導致間距太小
+                    // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
+                    verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+                }
 
                 // 🔥 第六步：定義最小正方形卡片大小
                 // ✅ v39.0：iPad 動態調整最小卡片尺寸
@@ -2404,10 +2491,14 @@ class GameScene extends Phaser.Scene {
                 // 🟨 長方形模式（無圖片）
                 console.log('🟨 使用長方形卡片模式');
 
-                // 🔥 第五步：計算垂直間距（基於螢幕高度）
-                // 使用固定的垂直間距，避免估算不準確導致間距太小
-                // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
-                verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+                // 🔥 第七步：計算垂直間距（基於螢幕高度）
+                // ✅ v42.0：iPad 已在上面設置，非 iPad 設備在此計算
+                if (!isIPad) {
+                    // 非 iPad 設備：保留原有邏輯
+                    // 使用固定的垂直間距，避免估算不準確導致間距太小
+                    // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
+                    verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+                }
 
                 // 🔥 第六步：定義最小卡片大小
                 // ✅ v39.0：iPad 動態調整最小卡片尺寸
@@ -2588,10 +2679,23 @@ class GameScene extends Phaser.Scene {
         let chineseFontSizesArray;
         if (!isCompactMode) {
             console.log('🔍 桌面模式：智能計算中文字體大小...');
+
+            // ✅ v42.0：iPad 使用容器分類的固定文字大小
+            let baseFontSize;
+            if (isIPad && iPadParams) {
+                baseFontSize = iPadParams.chineseFontSize;
+                console.log('📱 [v42.0] iPad 文字大小:', {
+                    size: iPadSize,
+                    baseFontSize: baseFontSize
+                });
+            } else {
+                baseFontSize = Math.max(18, Math.min(72, cardHeightInFrame * 0.6));
+            }
+
             chineseFontSizes = currentPagePairs.map(pair => {
-                // 🔥 計算初始字體大小（卡片高度的60%）
-                // 範圍：18px - 72px（允許更大的字體）
-                let fontSize = Math.max(18, Math.min(72, cardHeightInFrame * 0.6));
+                // 🔥 計算初始字體大小
+                // ✅ v42.0：iPad 使用固定值，其他設備基於卡片高度計算
+                let fontSize = baseFontSize;
 
                 // 創建臨時文字對象來測量寬度
                 const tempText = this.add.text(0, 0, pair.answer, {
