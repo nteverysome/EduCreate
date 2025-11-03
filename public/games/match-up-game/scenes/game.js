@@ -957,9 +957,28 @@ class GameScene extends Phaser.Scene {
 
         console.log('🎮 GameScene: 計算卡片尺寸和位置', { width, height });
 
+        // ✅ v40.0：iPad 動態卡片尺寸調整
+        // 檢測 iPad（寬度 768-1024px）
+        const isTablet = width >= 768 && width < 1024;
+        const isIPad = isTablet;
+
         // 響應式卡片尺寸（根據螢幕寬度調整）
-        const cardWidth = Math.max(150, Math.min(250, width * 0.2));
-        const cardHeight = Math.max(50, Math.min(80, height * 0.1));
+        let cardWidth, cardHeight;
+        if (isIPad) {
+            // iPad：根據容器大小動態調整
+            // 分離佈局：左右各一列，所以卡片寬度 = 可用寬度 / 2 - 邊距
+            cardWidth = Math.max(140, (width - 60) / 2 - 20);  // 60px 邊距，20px 間距
+            cardHeight = Math.max(60, height * 0.12);  // 高度為螢幕高度的 12%
+            console.log('📱 [v40.0] iPad 動態卡片尺寸:', {
+                availableWidth: width - 60,
+                calculatedCardWidth: cardWidth.toFixed(1),
+                calculatedCardHeight: cardHeight.toFixed(1)
+            });
+        } else {
+            // 其他設備：使用固定比例
+            cardWidth = Math.max(150, Math.min(250, width * 0.2));
+            cardHeight = Math.max(50, Math.min(80, height * 0.1));
+        }
 
         console.log('🎮 GameScene: 卡片尺寸', { cardWidth, cardHeight });
 
