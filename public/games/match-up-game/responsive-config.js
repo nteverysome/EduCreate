@@ -1,7 +1,7 @@
 /**
  * 響應式設計配置系統
  * 集中定義所有設計值和斷點
- * 
+ *
  * 基於業界標準：
  * - Bootstrap 斷點系統
  * - Tailwind CSS 設計令牌
@@ -16,7 +16,7 @@
  * 響應式斷點定義
  * 基於設備寬度分類
  */
-export const RESPONSIVE_BREAKPOINTS = {
+const RESPONSIVE_BREAKPOINTS = {
     mobile: {
         min: 0,
         max: 767,
@@ -55,7 +55,7 @@ export const RESPONSIVE_BREAKPOINTS = {
  * 統一的設計令牌
  * 單一真實來源（Single Source of Truth）
  */
-export const DESIGN_TOKENS = {
+const DESIGN_TOKENS = {
     // 基礎間距令牌
     spacing: {
         xs: 4,
@@ -186,7 +186,7 @@ export const DESIGN_TOKENS = {
  * @param {number} width - 容器寬度
  * @returns {string} 斷點名稱
  */
-export function getBreakpoint(width) {
+function getBreakpoint(width) {
     for (const [key, bp] of Object.entries(RESPONSIVE_BREAKPOINTS)) {
         if (width >= bp.min && width <= bp.max) {
             return key;
@@ -200,7 +200,7 @@ export function getBreakpoint(width) {
  * @param {string} breakpoint - 斷點名稱
  * @returns {object} 斷點信息
  */
-export function getBreakpointInfo(breakpoint) {
+function getBreakpointInfo(breakpoint) {
     return RESPONSIVE_BREAKPOINTS[breakpoint];
 }
 
@@ -211,7 +211,7 @@ export function getBreakpointInfo(breakpoint) {
  * @param {string} breakpoint - 斷點名稱（可選）
  * @returns {*} 令牌值
  */
-export function getToken(category, key, breakpoint = null) {
+function getToken(category, key, breakpoint = null) {
     const token = DESIGN_TOKENS[category];
     if (!token) return null;
 
@@ -229,7 +229,7 @@ export function getToken(category, key, breakpoint = null) {
  * @param {string} category - 令牌類別
  * @returns {object} 所有令牌
  */
-export function getAllTokens(category) {
+function getAllTokens(category) {
     return DESIGN_TOKENS[category];
 }
 
@@ -238,7 +238,7 @@ export function getAllTokens(category) {
  * @param {string} iPadSize - iPad 大小分類
  * @returns {object} iPad 配置
  */
-export function getIPadConfig(iPadSize) {
+function getIPadConfig(iPadSize) {
     return DESIGN_TOKENS.ipad[iPadSize];
 }
 
@@ -248,7 +248,7 @@ export function getIPadConfig(iPadSize) {
  * @param {number} h - 高度
  * @returns {string} iPad 大小分類
  */
-export function classifyIPadSize(w, h) {
+function classifyIPadSize(w, h) {
     const minDim = Math.min(w, h);
 
     let deviceSize;
@@ -279,7 +279,7 @@ export function classifyIPadSize(w, h) {
 /**
  * 驗證配置的完整性
  */
-export function validateConfig() {
+function validateConfig() {
     const errors = [];
 
     // 驗證斷點

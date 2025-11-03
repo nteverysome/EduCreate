@@ -6,15 +6,6 @@
  * 將複雜的計算邏輯集中在一個類中
  */
 
-import {
-    RESPONSIVE_BREAKPOINTS,
-    DESIGN_TOKENS,
-    getBreakpoint,
-    getToken,
-    getIPadConfig,
-    classifyIPadSize
-} from './responsive-config.js';
-
 /**
  * 遊戲響應式佈局引擎
  *
@@ -24,7 +15,7 @@ import {
  * 3. 計算列數和行數
  * 4. 生成完整的佈局配置
  */
-export class GameResponsiveLayout {
+class GameResponsiveLayout {
     /**
      * 構造函數
      * @param {number} containerWidth - 容器寬度

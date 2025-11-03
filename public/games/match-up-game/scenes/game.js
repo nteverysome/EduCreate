@@ -1,20 +1,9 @@
 // ============================================
-// 導入響應式設計配置
+// 遊戲場景 - 主遊戲邏輯（卡片拖動配對）
 // ============================================
-import {
-    RESPONSIVE_BREAKPOINTS,
-    DESIGN_TOKENS,
-    getBreakpoint,
-    getToken,
-    getAllTokens,
-    getIPadConfig,
-    classifyIPadSize,
-    validateConfig
-} from '../responsive-config.js';
-
-import { GameResponsiveLayout } from '../responsive-layout.js';
-
-// Game 場景 - 主遊戲邏輯（卡片拖動配對）
+// 注意：響應式配置和佈局類通過全局變量訪問
+// - RESPONSIVE_BREAKPOINTS, DESIGN_TOKENS 等來自 responsive-config.js
+// - GameResponsiveLayout 類來自 responsive-layout.js
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
