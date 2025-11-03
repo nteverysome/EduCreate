@@ -2435,83 +2435,28 @@ class GameScene extends Phaser.Scene {
                 // 🟨 長方形模式（無圖片）
                 console.log('🟨 使用長方形卡片模式');
 
-                // 🔥 第七步：計算垂直間距（基於螢幕高度）
-                // ✅ v42.0：iPad 已在上面設置，非 iPad 設備在此計算
-                if (!isIPad) {
-                    // 非 iPad 設備：保留原有邏輯
-                    // 使用固定的垂直間距，避免估算不準確導致間距太小
-                    // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
-                    verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
-                }
+                // ✅ Phase 3：使用 GameResponsiveLayout 的配置
+                // 所有複雜的卡片大小計算已在 GameResponsiveLayout 中完成
+                const cardSize = config.cardSize;
+                const optimalCols = config.cols;
+                const optimalRows = config.rows;
 
-                // 🔥 第六步：定義最小卡片大小
-                // ✅ v39.0：iPad 動態調整最小卡片尺寸
-                let minCardWidth, minCardHeight;
-                if (isIPad) {
-                    // iPad：根據容器大小動態計算最小卡片尺寸
-                    // 5 列 + 6 個間距 = 5 * minCardWidth + 6 * horizontalSpacing = availableWidth
-                    minCardWidth = Math.max(140, (availableWidth - 6 * horizontalSpacing) / 5);
-                    minCardHeight = Math.max(70, minCardWidth * 0.5);  // 高度為寬度的 50%
-                    console.log('📱 [v39.0] iPad 長方形卡片動態尺寸:', {
-                        availableWidth: availableWidth.toFixed(1),
-                        calculatedMinWidth: minCardWidth.toFixed(1),
-                        calculatedMinHeight: minCardHeight.toFixed(1)
-                    });
-                } else {
-                    // 其他設備：使用固定最小尺寸
-                    minCardWidth = 200;
-                    minCardHeight = 100;
-                }
+                console.log('📐 [Phase 3] 長方形卡片配置:', {
+                    cardWidth: cardSize.toFixed(1),
+                    cardHeight: (cardSize * 0.5).toFixed(1),
+                    cols: optimalCols,
+                    rows: optimalRows,
+                    totalCards: itemCount
+                });
 
-                // 🔥 第七步：計算最大可能的列數和行數
-                const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
-                const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
-
-                // 🔥 第八步：智能計算最佳列數（根據寬高比和匹配數）
-                // ✅ v39.0：iPad 固定 5 列
-                let optimalCols;
-                if (isIPad) {
-                    optimalCols = 5;  // iPad：固定 5 列
-                } else if (aspectRatio > 2.0) {
-                    // 超寬螢幕（21:9, 32:9）
-                    optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
-                } else if (aspectRatio > 1.5) {
-                    // 寬螢幕（16:9, 16:10）
-                    optimalCols = Math.min(6, Math.ceil(Math.sqrt(itemCount * aspectRatio / 1.5)));
-                } else if (aspectRatio > 1.2) {
-                    // 標準螢幕（4:3, 3:2）
-                    optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
-                } else {
-                    // 直向螢幕（9:16）- v7.0 修復：改為 5 列（與 Wordwall 一致）
-                    optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
-                }
-
-                // 確保列數在合理範圍內
-                optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
-
-                // 🔥 第九步：計算行數
-                let optimalRows = Math.ceil(itemCount / optimalCols);
-
-                // 🔥 如果行數超過最大可能行數，增加列數
-                while (optimalRows > maxPossibleRows && optimalCols < itemCount) {
-                    optimalCols++;
-                    optimalRows = Math.ceil(itemCount / optimalCols);
-                }
-
+                // ✅ Phase 3：使用 GameResponsiveLayout 計算的卡片尺寸
                 cols = optimalCols;
                 const rows = optimalRows;
 
-                // 🔥 第十步：計算卡片大小（充分利用可用空間）
-                frameWidth = (availableWidth - horizontalSpacing * (cols + 1)) / cols;
-
-                // 🔥 計算單元總高度（包含中文文字）
-                const availableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
-
-                // 🔥 卡片高度和中文文字高度計算（與正方形模式保持一致）
-                // 使用正確公式：(availableHeightPerRow - verticalSpacing) / 1.4
-                cardHeightInFrame = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正
+                // 🔥 第十步：設置卡片大小（使用 GameResponsiveLayout 計算的值）
+                frameWidth = cardSize;
+                cardHeightInFrame = cardSize * 0.5;  // 長方形模式：高度為寬度的 50%
                 chineseTextHeight = cardHeightInFrame * 0.4;  // 中文文字高度 = 卡片高度的 40%
-
                 totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;
 
                 console.log('🟨 長方形卡片佈局:', {
