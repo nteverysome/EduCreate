@@ -1834,7 +1834,6 @@ class GameScene extends Phaser.Scene {
         // ✅ v38.0：添加 iPad 檢測（寬度 768-1280px，包括 iPad Air、iPad Pro）
         const isTablet = width >= 768 && width <= 1280;
         const isIPad = isTablet;  // iPad 別名
-        console.log('🔍 [DEBUG] createMixedLayout 開始 - iPad 檢測:', { width, isTablet, isIPad, '768<=width<=1280': width >= 768 && width <= 1280 });
 
         // 🔥 v13.0：分離的緊湊模式檢測
         const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
@@ -2167,7 +2166,6 @@ class GameScene extends Phaser.Scene {
         } else {
             // 🔥 桌面動態響應式佈局（含按鈕空間）
             console.log('🖥️ 使用桌面動態響應式佈局（含按鈕空間）');
-            console.log('🔍 [DEBUG] 桌面模式開始，isIPad:', isIPad);
 
             // 🔥 第零步：檢測是否有圖片
             const hasImages = currentPagePairs.some(pair =>
@@ -2192,13 +2190,11 @@ class GameScene extends Phaser.Scene {
             // 🔥 第一步：定義按鈕區域和邊距
             // ✅ v40.0：iPad 特殊邊距設定，讓卡片更大
             let topButtonAreaHeight, bottomButtonAreaHeight, sideMargin;
-            console.log('🔍 [v40.0] 邊距計算前 isIPad 檢查:', { isIPad, width, isTablet, isMobileDevice, isCompactMode });
             if (isIPad) {
                 // iPad：減少邊距，讓卡片更大
                 topButtonAreaHeight = Math.max(40, Math.min(60, height * 0.06));      // 頂部按鈕區域（40-60px）
                 bottomButtonAreaHeight = Math.max(40, Math.min(60, height * 0.08));   // 底部按鈕區域（40-60px）
                 sideMargin = Math.max(15, Math.min(40, width * 0.015));               // 左右邊距（15-40px）
-                console.log('📱 [v40.0] iPad 特殊邊距設定');
             } else {
                 topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
                 bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
