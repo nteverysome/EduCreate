@@ -309,8 +309,6 @@ function validateConfig() {
         console.error('❌ 配置驗證失敗:', errors);
         return false;
     }
-
-    console.log('✅ 配置驗證成功');
     return true;
 }
 
