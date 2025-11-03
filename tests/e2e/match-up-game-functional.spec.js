@@ -57,8 +57,8 @@ test.describe('Match-up Game - Functional Tests', () => {
         // 設置視窗大小
         await page.setViewportSize({ width: 1280, height: 800 });
 
-        // 導航到遊戲
-        await page.goto('http://localhost:3000/games/match-up-game', {
+        // 導航到遊戲 - 使用 devLayoutTest 參數以支持測試模式
+        await page.goto('http://localhost:3000/games/match-up-game?devLayoutTest=square', {
             waitUntil: 'domcontentloaded'
         });
 

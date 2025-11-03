@@ -2377,12 +2377,14 @@ class GameScene extends Phaser.Scene {
 
                 // ✅ Phase 3：使用 GameResponsiveLayout 的配置
                 // 所有複雜的卡片大小計算已在 GameResponsiveLayout 中完成
-                const cardSize = config.cardSize;
+                const cardSize = config.cardSize;  // { width, height }
+                const cardWidth = config.cardWidth;
+                const cardHeight = config.cardHeight;
                 const optimalCols = config.cols;
                 const optimalRows = config.rows;
 
                 console.log('📐 [Phase 3] 正方形卡片配置:', {
-                    cardSize: cardSize.toFixed(1),
+                    cardSize: `${cardWidth.toFixed(1)}×${cardHeight.toFixed(1)}`,
                     cols: optimalCols,
                     rows: optimalRows,
                     totalCards: itemCount
@@ -2426,13 +2428,15 @@ class GameScene extends Phaser.Scene {
 
                 // ✅ Phase 3：使用 GameResponsiveLayout 的配置
                 // 所有複雜的卡片大小計算已在 GameResponsiveLayout 中完成
-                const cardSize = config.cardSize;
+                const cardSize = config.cardSize;  // { width, height }
+                const cardWidth = config.cardWidth;
+                const cardHeight = config.cardHeight;
                 const optimalCols = config.cols;
                 const optimalRows = config.rows;
 
                 console.log('📐 [Phase 3] 長方形卡片配置:', {
-                    cardWidth: cardSize.toFixed(1),
-                    cardHeight: (cardSize * 0.5).toFixed(1),
+                    cardWidth: cardWidth.toFixed(1),
+                    cardHeight: cardHeight.toFixed(1),
                     cols: optimalCols,
                     rows: optimalRows,
                     totalCards: itemCount
