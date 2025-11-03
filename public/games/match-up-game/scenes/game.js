@@ -2564,8 +2564,9 @@ class GameScene extends Phaser.Scene {
             const chineseActualFontSize = chineseFontSizesArray[i];
             const chineseTextHeightActual = chineseActualFontSize + 5;  // 字體大小 + 行高
 
-            // 中文文字位置：英文卡片下方 + verticalSpacing + 中文字高度/2
-            const chineseY = cardHeightInFrame / 2 + verticalSpacing + chineseTextHeightActual / 2;  // ✅ v26.0：加入上方的 verticalSpacing
+            // 中文文字位置：英文卡片下方 + 中文字高度/2
+            // ✅ v35.0：取消上面的 verticalSpacing，中文字直接貼著英文卡片
+            const chineseY = cardHeightInFrame / 2 + chineseTextHeightActual / 2;
 
             console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${chineseY.toFixed(1)}`);
 
