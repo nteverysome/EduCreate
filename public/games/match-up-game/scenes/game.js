@@ -2166,6 +2166,7 @@ class GameScene extends Phaser.Scene {
         } else {
             // 🔥 桌面動態響應式佈局（含按鈕空間）
             console.log('🖥️ 使用桌面動態響應式佈局（含按鈕空間）');
+            console.log('🔍 [DEBUG] 桌面模式開始，isIPad:', isIPad);
 
             // 🔥 第零步：檢測是否有圖片
             const hasImages = currentPagePairs.some(pair =>
