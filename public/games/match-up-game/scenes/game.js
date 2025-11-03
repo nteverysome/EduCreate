@@ -1811,12 +1811,16 @@ class GameScene extends Phaser.Scene {
         const isLandscapeMobile = isLandscapeMode && height < 500;  // 手機橫向
         const isTinyHeight = height < 400;  // 極小高度
 
+        // ✅ v38.0：添加 iPad 檢測（寬度 768-1024px）
+        const isTablet = width >= 768 && width < 1024;
+        const isIPad = isTablet;  // iPad 別名
+
         // 🔥 v13.0：分離的緊湊模式檢測
         const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
         const isPortraitCompactMode = isMobileDevice && isPortraitMode;  // 手機直向緊湊模式
         const isLandscapeCompactMode = isLandscapeMobile || isTinyHeight;  // 手機橫向緊湊模式
 
-        console.log('📱 響應式檢測 [v13.0]:', {
+        console.log('📱 響應式檢測 [v38.0]:', {
             width,
             height,
             isPortraitMode,
@@ -1824,6 +1828,7 @@ class GameScene extends Phaser.Scene {
             isPortraitCompactMode,
             isLandscapeCompactMode,
             isCompactMode,
+            isIPad,
             aspectRatio: (width / height).toFixed(2)
         });
 
@@ -2207,19 +2212,25 @@ class GameScene extends Phaser.Scene {
                 // 策略：盡可能多的列數，充分利用水平空間
                 let optimalCols;
 
-                // 🔥 P2-2: 簡化列數計算邏輯 - 移除重複分支
-                // 設定最大列數限制（避免卡片過小）
-                const maxColsLimit = 10;  // 最多10列
-
-                if (aspectRatio > 1.5) {
-                    // 寬螢幕（超寬 > 2.0 或 寬 > 1.5）- 優先使用最大可能列數
-                    optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
-                } else if (aspectRatio > 1.2) {
-                    // 標準螢幕（4:3, 3:2）- 稍微限制列數
-                    optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.8), itemCount);
+                // ✅ v38.0：iPad 特殊處理 - 固定 5 列（像 Wordwall 一樣）
+                if (isIPad) {
+                    optimalCols = 5;  // iPad：固定 5 列
+                    console.log('📱 [v38.0] iPad 檢測：強制使用 5 列佈局');
                 } else {
-                    // 直向螢幕（9:16）- 限制列數
-                    optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.5), itemCount);
+                    // 🔥 P2-2: 簡化列數計算邏輯 - 移除重複分支
+                    // 設定最大列數限制（避免卡片過小）
+                    const maxColsLimit = 10;  // 最多10列
+
+                    if (aspectRatio > 1.5) {
+                        // 寬螢幕（超寬 > 2.0 或 寬 > 1.5）- 優先使用最大可能列數
+                        optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
+                    } else if (aspectRatio > 1.2) {
+                        // 標準螢幕（4:3, 3:2）- 稍微限制列數
+                        optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.8), itemCount);
+                    } else {
+                        // 直向螢幕（9:16）- 限制列數
+                        optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.5), itemCount);
+                    }
                 }
 
                 // 確保列數在合理範圍內
