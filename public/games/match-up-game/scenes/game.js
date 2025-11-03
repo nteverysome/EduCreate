@@ -1852,20 +1852,10 @@ class GameScene extends Phaser.Scene {
             // 🔥 v18.0：動態列數計算
             // 根據每頁匹配數動態調整列數和卡片尺寸
             // 20 個 → 5 列，10 個 → 4 列，5 個 → 3 列
-            // ✅ v36.0：橫向模式增加列數
+            // ✅ v37.0：橫向模式固定 7 列（3 行）
             if (isLandscapeCompactMode) {
-                // 橫向模式：增加列數（寬度充足）
-                if (itemCount >= 16) {
-                    cols = 6;  // 16-20 個：6 列（橫向）
-                } else if (itemCount >= 12) {
-                    cols = 5;  // 12-15 個：5 列（橫向）
-                } else if (itemCount >= 9) {
-                    cols = 4;  // 9-11 個：4 列（橫向）
-                } else if (itemCount >= 4) {
-                    cols = 3;  // 4-8 個：3 列
-                } else {
-                    cols = Math.min(itemCount, 2);  // 1-3 個：2 列或更少
-                }
+                // 橫向模式：固定 7 列（充分利用寬度）
+                cols = 7;  // 橫向模式：固定 7 列
             } else {
                 // 直向模式：保持原有邏輯
                 if (itemCount >= 16) {
@@ -1880,7 +1870,7 @@ class GameScene extends Phaser.Scene {
             }
             cols = Math.min(cols, itemCount);  // 確保列數不超過項目數
 
-            console.log(`🔥 [v36.0] 動態列數計算: itemCount=${itemCount}, cols=${cols}, isLandscapeCompactMode=${isLandscapeCompactMode}`);
+            console.log(`🔥 [v37.0] 動態列數計算: itemCount=${itemCount}, cols=${cols}, isLandscapeCompactMode=${isLandscapeCompactMode}`);
 
             // 🔥 v20.0：添加詳細的設備尺寸和寬高比調試信息
             const aspectRatio = width / height;
@@ -1941,7 +1931,16 @@ class GameScene extends Phaser.Scene {
                 console.log('📱 [v19.0] 手機直向模式 - 根據列數調整卡片尺寸:', { cols, maxCardHeight, chineseTextHeightBase, verticalSpacingBase });
             } else if (isLandscapeCompactMode) {
                 // 🔥 v19.0：手機橫向 - 根據列數動態調整（更緊湊）
-                if (cols === 5) {
+                // ✅ v37.0：添加 7 列的設定
+                if (cols === 7) {
+                    maxCardHeight = hasImages ? 40 : 30;
+                    chineseTextHeightBase = 10;
+                    verticalSpacingBase = 1;
+                } else if (cols === 6) {
+                    maxCardHeight = hasImages ? 45 : 35;
+                    chineseTextHeightBase = 11;
+                    verticalSpacingBase = 2;
+                } else if (cols === 5) {
                     maxCardHeight = hasImages ? 50 : 40;
                     chineseTextHeightBase = 12;
                     verticalSpacingBase = 2;
@@ -1958,7 +1957,7 @@ class GameScene extends Phaser.Scene {
                     chineseTextHeightBase = 18;
                     verticalSpacingBase = 3;
                 }
-                console.log('📱 [v19.0] 手機橫向模式 - 根據列數調整卡片尺寸:', { cols, maxCardHeight, chineseTextHeightBase, verticalSpacingBase });
+                console.log('📱 [v37.0] 手機橫向模式 - 根據列數調整卡片尺寸:', { cols, maxCardHeight, chineseTextHeightBase, verticalSpacingBase });
             } else {
                 // 其他模式（不應該執行到這裡）
                 maxCardHeight = hasImages ? 65 : 50;
@@ -1971,7 +1970,14 @@ class GameScene extends Phaser.Scene {
             // 🔥 v23.0：根據列數動態調整邊距，確保 5 列卡片在 iPhone 14 (390px) 上完整顯示
             // iPhone 14 直向 (390px) 應該有 330px 可用寬度，所以邊距應該是 30px × 2 = 60px
             let horizontalMargin;
-            if (cols === 5) {
+            // ✅ v37.0：為 7 列添加邊距設定
+            if (cols === 7) {
+                // 7 列：最小邊距（10px）- 橫向模式充分利用寬度
+                horizontalMargin = 10;
+            } else if (cols === 6) {
+                // 6 列：較小邊距（15px）
+                horizontalMargin = 15;
+            } else if (cols === 5) {
                 // 5 列：邊距 = 30px（確保 390px 寬度下有 330px 可用寬度）
                 horizontalMargin = 30;
             } else if (cols === 4) {
