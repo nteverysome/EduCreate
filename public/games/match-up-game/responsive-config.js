@@ -217,10 +217,17 @@ function getToken(category, key, breakpoint = null) {
 
     // 如果指定了斷點，返回該斷點的值
     if (breakpoint && token[breakpoint]) {
+        // 如果 key 是 null，返回整個斷點對象
+        if (key === null) {
+            return token[breakpoint];
+        }
         return token[breakpoint][key];
     }
 
     // 否則返回通用值
+    if (key === null) {
+        return token;
+    }
     return token[key];
 }
 
