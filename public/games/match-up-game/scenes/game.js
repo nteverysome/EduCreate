@@ -961,6 +961,7 @@ class GameScene extends Phaser.Scene {
         // 檢測 iPad（寬度 768-1280px，包括 iPad Air、iPad Pro）
         const isTablet = width >= 768 && width <= 1280;
         const isIPad = isTablet;
+        console.log('🔍 [v40.0] iPad 檢測:', { width, isTablet, isIPad });
 
         // 響應式卡片尺寸（根據螢幕寬度調整）
         let cardWidth, cardHeight;
