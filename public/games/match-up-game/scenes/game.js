@@ -2566,8 +2566,20 @@ class GameScene extends Phaser.Scene {
             // ✅ v42.0：iPad 使用容器分類的固定文字大小
             let baseFontSize;
             if (isIPad && iPadSize) {
-                const iPadParams = getIPadOptimalParams(iPadSize);
-                baseFontSize = iPadParams ? iPadParams.chineseFontSize : Math.max(18, Math.min(72, cardHeightInFrame * 0.6));
+                // iPad 文字大小根據設備大小分類
+                const iPadFontSizes = {
+                    small_portrait: 22,
+                    medium_portrait: 26,
+                    medium_large_portrait: 28,
+                    large_portrait: 30,
+                    xlarge_portrait: 34,
+                    small_landscape: 20,
+                    medium_landscape: 24,
+                    medium_large_landscape: 26,
+                    large_landscape: 28,
+                    xlarge_landscape: 32
+                };
+                baseFontSize = iPadFontSizes[iPadSize] || Math.max(18, Math.min(72, cardHeightInFrame * 0.6));
                 console.log('📱 [v42.0] iPad 文字大小:', {
                     size: iPadSize,
                     baseFontSize: baseFontSize
