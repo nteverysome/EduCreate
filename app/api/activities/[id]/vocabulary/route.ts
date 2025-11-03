@@ -9,11 +9,6 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: '未授權' }, { status: 401 });
-    }
-
     const activityId = params.id;
 
     // 獲取活動和相關的詞彙數據
@@ -36,9 +31,18 @@ export async function GET(
       return NextResponse.json({ error: '活動不存在' }, { status: 404 });
     }
 
-    // 檢查權限（只有活動創建者或公開活動可以訪問）
-    if (activity.user.email !== session.user.email && !activity.isPublic) {
-      return NextResponse.json({ error: '無權限訪問此活動' }, { status: 403 });
+    // 🔥 修復：允許公開訪問（用於遊戲播放）
+    // 如果用戶已登錄，檢查權限
+    if (session?.user?.email) {
+      // 已登錄用戶：只能訪問自己的活動或公開活動
+      if (activity.user.email !== session.user.email && !activity.isPublic) {
+        return NextResponse.json({ error: '無權限訪問此活動' }, { status: 403 });
+      }
+    } else {
+      // 未登錄用戶：只能訪問公開活動
+      if (!activity.isPublic) {
+        return NextResponse.json({ error: '此活動不是公開的' }, { status: 403 });
+      }
     }
 
     // 從活動內容中獲取詞彙集合 ID

@@ -13,12 +13,13 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: '未授權' }, { status: 401 });
-    }
-
     const activityId = params.id;
+
+    // 🔥 修復：允許公開訪問（用於遊戲播放）
+    if (!session?.user?.id) {
+      // 未登錄用戶：返回空結果（不返回 401 錯誤）
+      return NextResponse.json([]);
+    }
 
     // 查詢該活動的所有結果
     const results = await prisma.assignmentResult.findMany({
