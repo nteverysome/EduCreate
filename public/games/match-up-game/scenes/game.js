@@ -958,8 +958,8 @@ class GameScene extends Phaser.Scene {
         console.log('🎮 GameScene: 計算卡片尺寸和位置', { width, height });
 
         // ✅ v40.0：iPad 動態卡片尺寸調整
-        // 檢測 iPad（寬度 768-1024px）
-        const isTablet = width >= 768 && width < 1024;
+        // 檢測 iPad（寬度 768-1280px，包括 iPad Air、iPad Pro）
+        const isTablet = width >= 768 && width <= 1280;
         const isIPad = isTablet;
 
         // 響應式卡片尺寸（根據螢幕寬度調整）
