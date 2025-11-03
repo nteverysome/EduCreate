@@ -1,3 +1,17 @@
+// ============================================
+// 導入響應式設計配置
+// ============================================
+import {
+    RESPONSIVE_BREAKPOINTS,
+    DESIGN_TOKENS,
+    getBreakpoint,
+    getToken,
+    getAllTokens,
+    getIPadConfig,
+    classifyIPadSize,
+    validateConfig
+} from '../responsive-config.js';
+
 // Game 場景 - 主遊戲邏輯（卡片拖動配對）
 class GameScene extends Phaser.Scene {
     constructor() {

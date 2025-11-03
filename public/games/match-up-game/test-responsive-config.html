@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>響應式配置測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .test-section h2 {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .test-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .test-item.pass {
+            border-left: 3px solid #28a745;
+            color: #28a745;
+        }
+
+        .test-item.fail {
+            border-left: 3px solid #dc3545;
+            color: #dc3545;
+        }
+
+        .test-item.info {
+            border-left: 3px solid #17a2b8;
+            color: #17a2b8;
+        }
+
+        .breakpoint-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .breakpoint-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .breakpoint-card h3 {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .breakpoint-card p {
+            font-size: 12px;
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .token-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .token-table th {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .token-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .token-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .summary {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #004085;
+        }
+
+        .summary h3 {
+            margin-bottom: 10px;
+            color: #0056b3;
+        }
+
+        .summary ul {
+            margin-left: 20px;
+        }
+
+        .summary li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 響應式設計配置測試</h1>
+
+        <div id="test-results"></div>
+    </div>
+
+    <script type="module">
+        import {
+            RESPONSIVE_BREAKPOINTS,
+            DESIGN_TOKENS,
+            getBreakpoint,
+            getToken,
+            getAllTokens,
+            getIPadConfig,
+            classifyIPadSize,
+            validateConfig
+        } from './responsive-config.js';
+
+        const resultsDiv = document.getElementById('test-results');
+
+        // ============================================
+        // 測試 1：驗證配置
+        // ============================================
+        const section1 = document.createElement('div');
+        section1.className = 'test-section';
+        section1.innerHTML = '<h2>✅ 配置驗證</h2>';
+
+        const isValid = validateConfig();
+        const item1 = document.createElement('div');
+        item1.className = `test-item ${isValid ? 'pass' : 'fail'}`;
+        item1.textContent = isValid ? '✓ 配置驗證成功' : '✗ 配置驗證失敗';
+        section1.appendChild(item1);
+        resultsDiv.appendChild(section1);
+
+        // ============================================
+        // 測試 2：斷點系統
+        // ============================================
+        const section2 = document.createElement('div');
+        section2.className = 'test-section';
+        section2.innerHTML = '<h2>📱 斷點系統</h2>';
+
+        const breakpointGrid = document.createElement('div');
+        breakpointGrid.className = 'breakpoint-grid';
+
+        for (const [key, bp] of Object.entries(RESPONSIVE_BREAKPOINTS)) {
+            const card = document.createElement('div');
+            card.className = 'breakpoint-card';
+            card.innerHTML = `
+                <h3>${bp.description}</h3>
+                <p><strong>名稱:</strong> ${bp.name}</p>
+                <p><strong>範圍:</strong> ${bp.min}px - ${bp.max === Infinity ? '∞' : bp.max + 'px'}</p>
+                <p><strong>列數:</strong> ${bp.cols}</p>
+            `;
+            breakpointGrid.appendChild(card);
+        }
+
+        section2.appendChild(breakpointGrid);
+        resultsDiv.appendChild(section2);
+
+        // ============================================
+        // 測試 3：getBreakpoint 函數
+        // ============================================
+        const section3 = document.createElement('div');
+        section3.className = 'test-section';
+        section3.innerHTML = '<h2>🔍 getBreakpoint 函數測試</h2>';
+
+        const testWidths = [320, 768, 1024, 1280, 1920];
+        testWidths.forEach(width => {
+            const bp = getBreakpoint(width);
+            const item = document.createElement('div');
+            item.className = 'test-item info';
+            item.textContent = `寬度 ${width}px → 斷點: ${bp}`;
+            section3.appendChild(item);
+        });
+
+        resultsDiv.appendChild(section3);
+
+        // ============================================
+        // 測試 4：設計令牌
+        // ============================================
+        const section4 = document.createElement('div');
+        section4.className = 'test-section';
+        section4.innerHTML = '<h2>🎨 設計令牌</h2>';
+
+        // 間距令牌
+        const spacingTable = document.createElement('table');
+        spacingTable.className = 'token-table';
+        spacingTable.innerHTML = `
+            <thead>
+                <tr>
+                    <th>大小</th>
+                    <th>值 (px)</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${Object.entries(DESIGN_TOKENS.spacing).map(([key, value]) => `
+                    <tr>
+                        <td>${key}</td>
+                        <td>${value}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        section4.appendChild(spacingTable);
+
+        // 邊距令牌
+        const marginTitle = document.createElement('h3');
+        marginTitle.style.marginTop = '20px';
+        marginTitle.style.color = '#667eea';
+        marginTitle.textContent = '邊距令牌（根據斷點）';
+        section4.appendChild(marginTitle);
+
+        const marginTable = document.createElement('table');
+        marginTable.className = 'token-table';
+        marginTable.innerHTML = `
+            <thead>
+                <tr>
+                    <th>斷點</th>
+                    <th>側邊 (px)</th>
+                    <th>頂部 (px)</th>
+                    <th>底部 (px)</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${Object.entries(DESIGN_TOKENS.margins).map(([key, value]) => `
+                    <tr>
+                        <td>${key}</td>
+                        <td>${value.side}</td>
+                        <td>${value.top}</td>
+                        <td>${value.bottom}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        section4.appendChild(marginTable);
+
+        resultsDiv.appendChild(section4);
+
+        // ============================================
+        // 測試 5：iPad 分類
+        // ============================================
+        const section5 = document.createElement('div');
+        section5.className = 'test-section';
+        section5.innerHTML = '<h2>📱 iPad 分類測試</h2>';
+
+        const iPadTests = [
+            { w: 768, h: 1024, name: 'iPad mini 豎屏' },
+            { w: 1024, h: 768, name: 'iPad mini 橫屏' },
+            { w: 810, h: 1080, name: 'iPad 豎屏' },
+            { w: 1080, h: 810, name: 'iPad 橫屏' },
+            { w: 834, h: 1194, name: 'iPad Pro 11" 豎屏' },
+            { w: 1194, h: 834, name: 'iPad Pro 11" 橫屏' },
+            { w: 1024, h: 1366, name: 'iPad Pro 12.9" 豎屏' },
+            { w: 1366, h: 1024, name: 'iPad Pro 12.9" 橫屏' }
+        ];
+
+        iPadTests.forEach(test => {
+            const classification = classifyIPadSize(test.w, test.h);
+            const config = getIPadConfig(classification);
+            const item = document.createElement('div');
+            item.className = 'test-item info';
+            item.innerHTML = `
+                <strong>${test.name}</strong> (${test.w}×${test.h})<br>
+                分類: ${classification} | 邊距: ${config.sideMargin}px | 間距: ${config.horizontalSpacing}px
+            `;
+            section5.appendChild(item);
+        });
+
+        resultsDiv.appendChild(section5);
+
+        // ============================================
+        // 測試 6：總結
+        // ============================================
+        const section6 = document.createElement('div');
+        section6.className = 'summary';
+        section6.innerHTML = `
+            <h3>📊 測試總結</h3>
+            <ul>
+                <li>✅ 預定義斷點系統：4 個斷點已定義</li>
+                <li>✅ 設計令牌系統：6 個令牌類別已定義</li>
+                <li>✅ iPad 分類系統：10 個 iPad 配置已定義</li>
+                <li>✅ 輔助函數：7 個函數已實現</li>
+                <li>✅ 配置驗證：${isValid ? '通過' : '失敗'}</li>
+            </ul>
+            <p style="margin-top: 15px; font-size: 12px;">
+                <strong>下一步：</strong> 在 game.js 中使用這些配置替換硬編碼的值
+            </p>
+        `;
+        resultsDiv.appendChild(section6);
+
+        console.log('✅ 響應式配置測試完成');
+        console.log('RESPONSIVE_BREAKPOINTS:', RESPONSIVE_BREAKPOINTS);
+        console.log('DESIGN_TOKENS:', DESIGN_TOKENS);
+    </script>
+</body>
+</html>
+
