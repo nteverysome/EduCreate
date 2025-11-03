@@ -1856,6 +1856,7 @@ class GameScene extends Phaser.Scene {
         const isLandscapeMobile = isLandscapeMode && height < 500;
         const isTinyHeight = height < 400;
         const isIPad = isTablet;
+        const iPadSize = config.iPadSize;  // 從 config 中獲取 iPad 大小分類
         const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
         const isPortraitCompactMode = isMobileDevice && isPortraitMode;
         const isLandscapeCompactMode = isLandscapeMobile || isTinyHeight;
