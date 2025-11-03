@@ -1852,18 +1852,35 @@ class GameScene extends Phaser.Scene {
             // 🔥 v18.0：動態列數計算
             // 根據每頁匹配數動態調整列數和卡片尺寸
             // 20 個 → 5 列，10 個 → 4 列，5 個 → 3 列
-            if (itemCount >= 16) {
-                cols = 5;  // 16-20 個：5 列
-            } else if (itemCount >= 9) {
-                cols = 4;  // 9-15 個：4 列
-            } else if (itemCount >= 4) {
-                cols = 3;  // 4-8 個：3 列
+            // ✅ v36.0：橫向模式增加列數
+            if (isLandscapeCompactMode) {
+                // 橫向模式：增加列數（寬度充足）
+                if (itemCount >= 16) {
+                    cols = 6;  // 16-20 個：6 列（橫向）
+                } else if (itemCount >= 12) {
+                    cols = 5;  // 12-15 個：5 列（橫向）
+                } else if (itemCount >= 9) {
+                    cols = 4;  // 9-11 個：4 列（橫向）
+                } else if (itemCount >= 4) {
+                    cols = 3;  // 4-8 個：3 列
+                } else {
+                    cols = Math.min(itemCount, 2);  // 1-3 個：2 列或更少
+                }
             } else {
-                cols = Math.min(itemCount, 2);  // 1-3 個：2 列或更少
+                // 直向模式：保持原有邏輯
+                if (itemCount >= 16) {
+                    cols = 5;  // 16-20 個：5 列
+                } else if (itemCount >= 9) {
+                    cols = 4;  // 9-15 個：4 列
+                } else if (itemCount >= 4) {
+                    cols = 3;  // 4-8 個：3 列
+                } else {
+                    cols = Math.min(itemCount, 2);  // 1-3 個：2 列或更少
+                }
             }
             cols = Math.min(cols, itemCount);  // 確保列數不超過項目數
 
-            console.log(`🔥 [v18.0] 動態列數計算: itemCount=${itemCount}, cols=${cols}`);
+            console.log(`🔥 [v36.0] 動態列數計算: itemCount=${itemCount}, cols=${cols}, isLandscapeCompactMode=${isLandscapeCompactMode}`);
 
             // 🔥 v20.0：添加詳細的設備尺寸和寬高比調試信息
             const aspectRatio = width / height;
