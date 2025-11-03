@@ -2192,30 +2192,46 @@ class GameScene extends Phaser.Scene {
             // ============================================================================
 
             // 🔥 第一步：iPad 容器大小分類函數
-            // ✅ v42.1：同時考慮寬度和高度，區分豎屏和橫屏
+            // ✅ v42.2：根據設備對角線長度分類，而不是只看寬度
+            // 這樣 768×1024 和 1024×768 會被分類為同一個設備
             function classifyIPadSize(w, h) {
-                const aspectRatio = w / h;
-                const isPortrait = aspectRatio < 1;  // 豎屏
-                const isLandscape = aspectRatio >= 1; // 橫屏
+                // 計算對角線長度（像素）
+                const diagonalPixels = Math.sqrt(w * w + h * h);
 
-                // 豎屏模式（高度 > 寬度）
-                if (isPortrait) {
-                    if (w <= 768) return 'small_portrait';      // iPad mini: 768×1024
-                    else if (w <= 820) return 'medium_portrait'; // iPad/Air: 810×1080, 820×1180
-                    else if (w <= 834) return 'large_portrait';  // iPad Pro 11": 834×1194
-                    else return 'xlarge_portrait';               // iPad Pro 12.9": 1024×1366
+                // iPad 的 DPI 通常是 264（Retina）
+                // 對角線長度（英寸）= 對角線像素 / 264
+                const diagonalInches = diagonalPixels / 264;
+
+                // 根據對角線長度分類設備
+                // iPad mini: 7.9"
+                // iPad: 9.7"
+                // iPad Air: 10.5"
+                // iPad Pro 11": 11"
+                // iPad Pro 12.9": 12.9"
+
+                let deviceSize;
+                if (diagonalInches <= 8.5) {
+                    deviceSize = 'small';       // iPad mini: 7.9"
+                } else if (diagonalInches <= 10) {
+                    deviceSize = 'medium';      // iPad: 9.7"
+                } else if (diagonalInches <= 10.8) {
+                    deviceSize = 'medium_large'; // iPad Air: 10.5"
+                } else if (diagonalInches <= 11.5) {
+                    deviceSize = 'large';       // iPad Pro 11"
+                } else {
+                    deviceSize = 'xlarge';      // iPad Pro 12.9"
                 }
-                // 橫屏模式（寬度 > 高度）
-                else {
-                    if (w <= 768) return 'small_landscape';      // iPad mini: 1024×768
-                    else if (w <= 820) return 'medium_landscape'; // iPad/Air: 1080×810, 1180×820
-                    else if (w <= 834) return 'large_landscape';  // iPad Pro 11": 1194×834
-                    else return 'xlarge_landscape';               // iPad Pro 12.9": 1366×1024
-                }
+
+                // 根據方向添加後綴
+                const aspectRatio = w / h;
+                const isPortrait = aspectRatio < 1;
+                const orientation = isPortrait ? '_portrait' : '_landscape';
+
+                return deviceSize + orientation;
             }
 
             // 🔥 第二步：根據 iPad 大小獲取最優參數
-            // ✅ v42.1：為豎屏和橫屏分別設置參數
+            // ✅ v42.2：根據設備對角線長度和方向設置參數
             function getIPadOptimalParams(iPadSize) {
                 const params = {
                     // 豎屏模式（高度 > 寬度）
@@ -2235,12 +2251,20 @@ class GameScene extends Phaser.Scene {
                         verticalSpacing: 32,
                         chineseFontSize: 26
                     },
-                    large_portrait: {
+                    medium_large_portrait: {
                         sideMargin: 20,
                         topButtonArea: 40,
                         bottomButtonArea: 40,
                         horizontalSpacing: 15,
                         verticalSpacing: 35,
+                        chineseFontSize: 28
+                    },
+                    large_portrait: {
+                        sideMargin: 22,
+                        topButtonArea: 42,
+                        bottomButtonArea: 42,
+                        horizontalSpacing: 16,
+                        verticalSpacing: 37,
                         chineseFontSize: 30
                     },
                     xlarge_portrait: {
@@ -2268,12 +2292,20 @@ class GameScene extends Phaser.Scene {
                         verticalSpacing: 28,
                         chineseFontSize: 24
                     },
-                    large_landscape: {
-                        sideMargin: 18,
-                        topButtonArea: 35,
-                        bottomButtonArea: 35,
-                        horizontalSpacing: 14,
+                    medium_large_landscape: {
+                        sideMargin: 17,
+                        topButtonArea: 34,
+                        bottomButtonArea: 34,
+                        horizontalSpacing: 13,
                         verticalSpacing: 30,
+                        chineseFontSize: 26
+                    },
+                    large_landscape: {
+                        sideMargin: 19,
+                        topButtonArea: 36,
+                        bottomButtonArea: 36,
+                        horizontalSpacing: 14,
+                        verticalSpacing: 32,
                         chineseFontSize: 28
                     },
                     xlarge_landscape: {
