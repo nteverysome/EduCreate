@@ -1509,6 +1509,11 @@ const GameSwitcherPage: React.FC = () => {
                         const data = await response.json();
                         console.log('✅ 選項保存成功:', data);
 
+                        // 🔥 v43.1：驗證返回的數據
+                        if (currentGameId === 'match-up-game' && !data.matchUpOptions) {
+                          console.warn('⚠️ 警告：API 返回的數據中缺少 matchUpOptions');
+                        }
+
                         // 顯示成功消息（根據遊戲類型顯示不同的選項）
                         let successMessage = '✅ 選項已成功保存！\n\n已保存的設置：\n';
 
@@ -1538,6 +1543,8 @@ const GameSwitcherPage: React.FC = () => {
                       } else {
                         const errorData = await response.json() as { error?: string };
                         console.error('❌ 保存失敗:', errorData);
+                        console.error('❌ 響應狀態:', response.status);
+                        console.error('❌ 響應文本:', await response.text());
 
                         // 顯示詳細錯誤信息
                         const errorMessage = errorData.error || '未知錯誤';

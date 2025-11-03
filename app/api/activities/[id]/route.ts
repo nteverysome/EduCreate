@@ -633,6 +633,14 @@ export async function PUT(
 
     console.log('✅ 活動更新成功:', updatedActivity.title);
 
+    // 🔥 v43.1：確保返回的數據包含 matchUpOptions
+    if (body.matchUpOptions !== undefined) {
+      console.log('✅ [MatchUpOptions] 保存成功，返回更新後的數據:', {
+        activityId,
+        matchUpOptions: updatedActivity.matchUpOptions
+      });
+    }
+
     return NextResponse.json(updatedActivity);
 
   } catch (error) {
