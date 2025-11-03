@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPad v42.0 遠程調試工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #4ec9b0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #4ec9b0;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #569cd6;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .section {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #1e1e1e;
+            border-left: 4px solid #4ec9b0;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 2px;
+        }
+
+        .info-box.warning {
+            border-left-color: #ce9178;
+        }
+
+        .info-box.error {
+            border-left-color: #f48771;
+        }
+
+        .info-box.success {
+            border-left-color: #6a9955;
+        }
+
+        code {
+            background: #1e1e1e;
+            padding: 2px 6px;
+            border-radius: 2px;
+            color: #ce9178;
+        }
+
+        .verification-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        .verification-table th,
+        .verification-table td {
+            border: 1px solid #3e3e42;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .verification-table th {
+            background: #2d2d30;
+            color: #569cd6;
+        }
+
+        .verification-table tr:nth-child(even) {
+            background: #252526;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-badge.pass {
+            background: #6a9955;
+            color: #fff;
+        }
+
+        .status-badge.fail {
+            background: #f48771;
+            color: #fff;
+        }
+
+        .status-badge.pending {
+            background: #ce9178;
+            color: #fff;
+        }
+
+        .console-output {
+            background: #1e1e1e;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+
+        .console-line {
+            margin: 2px 0;
+            padding: 2px 0;
+        }
+
+        .console-line.log {
+            color: #d4d4d4;
+        }
+
+        .console-line.info {
+            color: #569cd6;
+        }
+
+        .console-line.warn {
+            color: #ce9178;
+        }
+
+        .console-line.error {
+            color: #f48771;
+        }
+
+        button {
+            background: #0e639c;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        button:hover {
+            background: #1177bb;
+        }
+
+        button:active {
+            background: #0d5a8f;
+        }
+
+        .button-group {
+            margin: 10px 0;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #3e3e42;
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .checklist label {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 iPad v42.0 遠程調試工具</h1>
+
+        <div class="section">
+            <h2>🚀 快速開始</h2>
+            <div class="info-box">
+                <strong>步驟 1:</strong> 在 iPad 上打開遊戲
+                <code>https://educreate-game.vercel.app/games/match-up-game/</code>
+            </div>
+            <div class="info-box">
+                <strong>步驟 2:</strong> 打開 Safari 開發者工具
+                <code>設定 → 進階 → Web 檢查器</code>
+            </div>
+            <div class="info-box">
+                <strong>步驟 3:</strong> 在 Mac 上連接 iPad
+                <code>Safari → 開發 → [iPad 名稱] → match-up-game</code>
+            </div>
+            <div class="info-box">
+                <strong>步驟 4:</strong> 查看控制台輸出
+                <code>開發 → 顯示 JavaScript 控制台</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 iPad 尺寸分類表</h2>
+            <table class="verification-table">
+                <thead>
+                    <tr>
+                        <th>iPad 型號</th>
+                        <th>寬度</th>
+                        <th>分類</th>
+                        <th>邊距</th>
+                        <th>水平間距</th>
+                        <th>垂直間距</th>
+                        <th>文字大小</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>iPad mini</td>
+                        <td>768px</td>
+                        <td>small</td>
+                        <td>15px</td>
+                        <td>12px</td>
+                        <td>35px</td>
+                        <td>24px</td>
+                    </tr>
+                    <tr>
+                        <td>iPad 標準</td>
+                        <td>810px</td>
+                        <td>medium</td>
+                        <td>18px</td>
+                        <td>14px</td>
+                        <td>38px</td>
+                        <td>28px</td>
+                    </tr>
+                    <tr>
+                        <td>iPad Air</td>
+                        <td>820px</td>
+                        <td>medium</td>
+                        <td>18px</td>
+                        <td>14px</td>
+                        <td>38px</td>
+                        <td>28px</td>
+                    </tr>
+                    <tr>
+                        <td>iPad Pro 11"</td>
+                        <td>834px</td>
+                        <td>large</td>
+                        <td>20px</td>
+                        <td>15px</td>
+                        <td>40px</td>
+                        <td>32px</td>
+                    </tr>
+                    <tr>
+                        <td>iPad Pro 12.9"</td>
+                        <td>1024px</td>
+                        <td>xlarge</td>
+                        <td>25px</td>
+                        <td>18px</td>
+                        <td>45px</td>
+                        <td>36px</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>✅ 驗證檢查清單</h2>
+            <ul class="checklist">
+                <li>
+                    <input type="checkbox" id="check1">
+                    <label for="check1">邊距是否合理（不要太小也不要太大）</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="check2">
+                    <label for="check2">卡片之間的水平間距是否均勻</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="check3">
+                    <label for="check3">卡片之間的垂直間距是否均勻</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="check4">
+                    <label for="check4">卡片是否充分利用屏幕空間</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="check5">
+                    <label for="check5">中文文字是否清晰可讀</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="check6">
+                    <label for="check6">文字是否超出卡片邊界</label>
+                </li>
+                <li>
+                    <input type="checkbox" id="check7">
+                    <label for="check7">控制台是否有錯誤信息</label>
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🔍 預期控制台輸出</h2>
+            <div class="console-output">
+                <div class="console-line info">📱 [v42.0] iPad 容器分類: {</div>
+                <div class="console-line info">&nbsp;&nbsp;size: 'xlarge',</div>
+                <div class="console-line info">&nbsp;&nbsp;width: 1024,</div>
+                <div class="console-line info">&nbsp;&nbsp;height: 768,</div>
+                <div class="console-line info">&nbsp;&nbsp;margins: { top: 50, bottom: 50, side: 25 }</div>
+                <div class="console-line info">}</div>
+                <div class="console-line info" style="margin-top: 10px;">📱 [v42.0] iPad 間距設定: {</div>
+                <div class="console-line info">&nbsp;&nbsp;size: 'xlarge',</div>
+                <div class="console-line info">&nbsp;&nbsp;horizontalSpacing: 18,</div>
+                <div class="console-line info">&nbsp;&nbsp;verticalSpacing: 45</div>
+                <div class="console-line info">}</div>
+                <div class="console-line info" style="margin-top: 10px;">📱 [v42.0] iPad 文字大小: {</div>
+                <div class="console-line info">&nbsp;&nbsp;size: 'xlarge',</div>
+                <div class="console-line info">&nbsp;&nbsp;baseFontSize: 36</div>
+                <div class="console-line info">}</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 驗證報告</h2>
+            <div class="button-group">
+                <button onclick="generateReport()">📋 生成驗證報告</button>
+                <button onclick="copyReport()">📋 複製報告</button>
+            </div>
+            <textarea id="report" style="width: 100%; height: 200px; background: #1e1e1e; color: #d4d4d4; border: 1px solid #3e3e42; padding: 10px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 12px;" readonly></textarea>
+        </div>
+
+        <div class="section">
+            <h2>💡 調試技巧</h2>
+            <div class="info-box success">
+                <strong>✅ 如果卡片大小沒有變化：</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>清除瀏覽器緩存</li>
+                    <li>強制刷新頁面（Cmd+Shift+R）</li>
+                    <li>檢查控制台是否有 JavaScript 錯誤</li>
+                </ul>
+            </div>
+            <div class="info-box warning">
+                <strong>⚠️ 如果不同 iPad 上的卡片大小不同：</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>這是預期行為，v42.0 的目的就是根據 iPad 尺寸調整</li>
+                    <li>檢查控制台輸出的 iPad 分類是否正確</li>
+                </ul>
+            </div>
+            <div class="info-box warning">
+                <strong>⚠️ 如果文字大小看起來太大/太小：</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>檢查控制台輸出的 baseFontSize 值</li>
+                    <li>如果需要調整，修改 getIPadOptimalParams() 函數</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateReport() {
+            const checklist = document.querySelectorAll('.checklist input[type="checkbox"]');
+            const checks = Array.from(checklist).map((cb, idx) => {
+                const label = cb.nextElementSibling.textContent;
+                const status = cb.checked ? '✅' : '❌';
+                return `${status} ${label}`;
+            }).join('\n');
+
+            const report = `## iPad v42.0 驗證報告
+
+### 測試環境
+- iPad 型號: [請填寫]
+- iOS 版本: [請填寫]
+- 瀏覽器: Safari/Chrome
+- 測試時間: ${new Date().toLocaleString('zh-TW')}
+
+### 視覺驗證結果
+${checks}
+
+### 控制台輸出
+[請粘貼控制台輸出]
+
+### 建議改進
+[列出任何需要改進的地方]
+`;
+
+            document.getElementById('report').value = report;
+        }
+
+        function copyReport() {
+            const report = document.getElementById('report');
+            report.select();
+            document.execCommand('copy');
+            alert('✅ 報告已複製到剪貼板');
+        }
+
+        // 頁面加載時生成初始報告
+        window.addEventListener('load', generateReport);
+    </script>
+</body>
+</html>
+
