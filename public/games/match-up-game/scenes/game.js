@@ -1834,6 +1834,7 @@ class GameScene extends Phaser.Scene {
         // ✅ v38.0：添加 iPad 檢測（寬度 768-1280px，包括 iPad Air、iPad Pro）
         const isTablet = width >= 768 && width <= 1280;
         const isIPad = isTablet;  // iPad 別名
+        console.log('🔍 [DEBUG] createMixedLayout 開始 - iPad 檢測:', { width, isTablet, isIPad, '768<=width<=1280': width >= 768 && width <= 1280 });
 
         // 🔥 v13.0：分離的緊湊模式檢測
         const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
