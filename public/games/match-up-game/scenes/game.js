@@ -2188,9 +2188,19 @@ class GameScene extends Phaser.Scene {
             });
 
             // 🔥 第一步：定義按鈕區域和邊距
-            const topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
-            const bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
-            const sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 左右邊距（30-80px）
+            // ✅ v40.0：iPad 特殊邊距設定，讓卡片更大
+            let topButtonAreaHeight, bottomButtonAreaHeight, sideMargin;
+            if (isIPad) {
+                // iPad：減少邊距，讓卡片更大
+                topButtonAreaHeight = Math.max(40, Math.min(60, height * 0.06));      // 頂部按鈕區域（40-60px）
+                bottomButtonAreaHeight = Math.max(40, Math.min(60, height * 0.08));   // 底部按鈕區域（40-60px）
+                sideMargin = Math.max(15, Math.min(40, width * 0.015));               // 左右邊距（15-40px）
+                console.log('📱 [v40.0] iPad 特殊邊距設定');
+            } else {
+                topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
+                bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
+                sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 左右邊距（30-80px）
+            }
 
             // 🔥 第二步：計算可用空間（扣除按鈕區域）
             const availableWidth = width - sideMargin * 2;
