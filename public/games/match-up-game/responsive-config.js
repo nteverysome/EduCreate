@@ -291,7 +291,7 @@ function validateConfig() {
 
     // 驗證斷點
     for (const [key, bp] of Object.entries(RESPONSIVE_BREAKPOINTS)) {
-        if (!bp.min || bp.max === undefined) {
+        if (bp.min === undefined || bp.max === undefined) {
             errors.push(`斷點 ${key} 缺少 min 或 max`);
         }
     }
