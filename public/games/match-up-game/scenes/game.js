@@ -1831,8 +1831,8 @@ class GameScene extends Phaser.Scene {
         const isLandscapeMobile = isLandscapeMode && height < 500;  // 手機橫向
         const isTinyHeight = height < 400;  // 極小高度
 
-        // ✅ v38.0：添加 iPad 檢測（寬度 768-1024px）
-        const isTablet = width >= 768 && width < 1024;
+        // ✅ v38.0：添加 iPad 檢測（寬度 768-1280px，包括 iPad Air、iPad Pro）
+        const isTablet = width >= 768 && width <= 1280;
         const isIPad = isTablet;  // iPad 別名
 
         // 🔥 v13.0：分離的緊湊模式檢測
