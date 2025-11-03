@@ -2403,17 +2403,19 @@ class GameScene extends Phaser.Scene {
                 }
 
                 // 🔥 第六步：定義最小正方形卡片大小
-                // ✅ v39.0：iPad 動態調整最小卡片尺寸
+                // ✅ v43.0：優化 iPad 卡片尺寸 - 增加最小尺寸至 140px (+16.7%)
                 let minSquareSize;
                 if (isIPad) {
                     // iPad：根據容器寬度動態計算最小卡片尺寸
                     // 5 列 + 6 個間距 = 5 * minSquareSize + 6 * horizontalSpacing = availableWidth
                     // minSquareSize = (availableWidth - 6 * horizontalSpacing) / 5
-                    minSquareSize = Math.max(120, (availableWidth - 6 * horizontalSpacing) / 5);
-                    console.log('📱 [v39.0] iPad 動態卡片尺寸:', {
+                    // ✅ v43.0：最小尺寸從 120px 增加至 140px，使卡片更大更易點擊
+                    minSquareSize = Math.max(140, (availableWidth - 6 * horizontalSpacing) / 5);
+                    console.log('📱 [v43.0] iPad 動態卡片尺寸:', {
                         availableWidth: availableWidth.toFixed(1),
                         horizontalSpacing: horizontalSpacing.toFixed(1),
-                        calculatedMinSize: minSquareSize.toFixed(1)
+                        calculatedMinSize: minSquareSize.toFixed(1),
+                        minSizeThreshold: 140
                     });
                 } else {
                     // 其他設備：使用固定最小尺寸

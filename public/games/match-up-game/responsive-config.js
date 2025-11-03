@@ -92,86 +92,86 @@ const DESIGN_TOKENS = {
         wide: { horizontal: 20, vertical: 24 }
     },
 
-    // iPad 特殊配置（v42.2）
+    // iPad 特殊配置（v43.0 - 優化卡片大小和間距）
     ipad: {
         small_portrait: {
             sideMargin: 15,
             topButtonArea: 35,
             bottomButtonArea: 35,
-            horizontalSpacing: 12,
-            verticalSpacing: 30,
+            horizontalSpacing: 13,  // ✅ v43.0：增加 1px (+8.3%)
+            verticalSpacing: 32,    // ✅ v43.0：增加 2px (+6.7%)
             chineseFontSize: 22
         },
         medium_portrait: {
             sideMargin: 18,
             topButtonArea: 38,
             bottomButtonArea: 38,
-            horizontalSpacing: 14,
-            verticalSpacing: 32,
+            horizontalSpacing: 16,  // ✅ v43.0：增加 2px (+14.3%)
+            verticalSpacing: 35,    // ✅ v43.0：增加 3px (+9.4%)
             chineseFontSize: 26
         },
         medium_large_portrait: {
             sideMargin: 20,
             topButtonArea: 40,
             bottomButtonArea: 40,
-            horizontalSpacing: 15,
-            verticalSpacing: 35,
+            horizontalSpacing: 17,  // ✅ v43.0：增加 2px (+13.3%)
+            verticalSpacing: 37,    // ✅ v43.0：增加 2px (+5.7%)
             chineseFontSize: 28
         },
         large_portrait: {
             sideMargin: 22,
             topButtonArea: 42,
             bottomButtonArea: 42,
-            horizontalSpacing: 16,
-            verticalSpacing: 37,
+            horizontalSpacing: 18,  // ✅ v43.0：增加 2px (+12.5%)
+            verticalSpacing: 39,    // ✅ v43.0：增加 2px (+5.4%)
             chineseFontSize: 30
         },
         xlarge_portrait: {
             sideMargin: 25,
             topButtonArea: 45,
             bottomButtonArea: 45,
-            horizontalSpacing: 18,
-            verticalSpacing: 40,
+            horizontalSpacing: 20,  // ✅ v43.0：增加 2px (+11.1%)
+            verticalSpacing: 42,    // ✅ v43.0：增加 2px (+5.0%)
             chineseFontSize: 34
         },
         small_landscape: {
             sideMargin: 12,
             topButtonArea: 30,
             bottomButtonArea: 30,
-            horizontalSpacing: 10,
-            verticalSpacing: 25,
+            horizontalSpacing: 11,  // ✅ v43.0：增加 1px (+10.0%)
+            verticalSpacing: 27,    // ✅ v43.0：增加 2px (+8.0%)
             chineseFontSize: 20
         },
         medium_landscape: {
             sideMargin: 15,
             topButtonArea: 32,
             bottomButtonArea: 32,
-            horizontalSpacing: 12,
-            verticalSpacing: 28,
+            horizontalSpacing: 13,  // ✅ v43.0：增加 1px (+8.3%)
+            verticalSpacing: 30,    // ✅ v43.0：增加 2px (+7.1%)
             chineseFontSize: 24
         },
         medium_large_landscape: {
             sideMargin: 17,
             topButtonArea: 34,
             bottomButtonArea: 34,
-            horizontalSpacing: 13,
-            verticalSpacing: 30,
+            horizontalSpacing: 14,  // ✅ v43.0：增加 1px (+7.7%)
+            verticalSpacing: 32,    // ✅ v43.0：增加 2px (+6.7%)
             chineseFontSize: 26
         },
         large_landscape: {
             sideMargin: 19,
             topButtonArea: 36,
             bottomButtonArea: 36,
-            horizontalSpacing: 14,
-            verticalSpacing: 32,
+            horizontalSpacing: 15,  // ✅ v43.0：增加 1px (+7.1%)
+            verticalSpacing: 34,    // ✅ v43.0：增加 2px (+6.3%)
             chineseFontSize: 28
         },
         xlarge_landscape: {
             sideMargin: 20,
             topButtonArea: 38,
             bottomButtonArea: 38,
-            horizontalSpacing: 16,
-            verticalSpacing: 35,
+            horizontalSpacing: 17,  // ✅ v43.0：增加 1px (+6.3%)
+            verticalSpacing: 37,    // ✅ v43.0：增加 2px (+5.7%)
             chineseFontSize: 32
         }
     }
