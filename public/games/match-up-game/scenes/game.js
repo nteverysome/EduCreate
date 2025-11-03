@@ -2564,8 +2564,9 @@ class GameScene extends Phaser.Scene {
 
             // ✅ v42.0：iPad 使用容器分類的固定文字大小
             let baseFontSize;
-            if (isIPad && iPadParams) {
-                baseFontSize = iPadParams.chineseFontSize;
+            if (isIPad && iPadSize) {
+                const iPadParams = getIPadOptimalParams(iPadSize);
+                baseFontSize = iPadParams ? iPadParams.chineseFontSize : Math.max(18, Math.min(72, cardHeightInFrame * 0.6));
                 console.log('📱 [v42.0] iPad 文字大小:', {
                     size: iPadSize,
                     baseFontSize: baseFontSize
