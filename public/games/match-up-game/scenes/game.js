@@ -2192,47 +2192,97 @@ class GameScene extends Phaser.Scene {
             // ============================================================================
 
             // 🔥 第一步：iPad 容器大小分類函數
+            // ✅ v42.1：同時考慮寬度和高度，區分豎屏和橫屏
             function classifyIPadSize(w, h) {
-                if (w <= 768) return 'small';      // iPad mini: 768×1024
-                else if (w <= 820) return 'medium'; // iPad/Air: 810×1080, 820×1180
-                else if (w <= 834) return 'large';  // iPad Pro 11": 834×1194
-                else return 'xlarge';               // iPad Pro 12.9": 1024×1366
+                const aspectRatio = w / h;
+                const isPortrait = aspectRatio < 1;  // 豎屏
+                const isLandscape = aspectRatio >= 1; // 橫屏
+
+                // 豎屏模式（高度 > 寬度）
+                if (isPortrait) {
+                    if (w <= 768) return 'small_portrait';      // iPad mini: 768×1024
+                    else if (w <= 820) return 'medium_portrait'; // iPad/Air: 810×1080, 820×1180
+                    else if (w <= 834) return 'large_portrait';  // iPad Pro 11": 834×1194
+                    else return 'xlarge_portrait';               // iPad Pro 12.9": 1024×1366
+                }
+                // 橫屏模式（寬度 > 高度）
+                else {
+                    if (w <= 768) return 'small_landscape';      // iPad mini: 1024×768
+                    else if (w <= 820) return 'medium_landscape'; // iPad/Air: 1080×810, 1180×820
+                    else if (w <= 834) return 'large_landscape';  // iPad Pro 11": 1194×834
+                    else return 'xlarge_landscape';               // iPad Pro 12.9": 1366×1024
+                }
             }
 
             // 🔥 第二步：根據 iPad 大小獲取最優參數
+            // ✅ v42.1：為豎屏和橫屏分別設置參數
             function getIPadOptimalParams(iPadSize) {
                 const params = {
-                    small: {
+                    // 豎屏模式（高度 > 寬度）
+                    small_portrait: {
                         sideMargin: 15,
+                        topButtonArea: 35,
+                        bottomButtonArea: 35,
+                        horizontalSpacing: 12,
+                        verticalSpacing: 30,
+                        chineseFontSize: 22
+                    },
+                    medium_portrait: {
+                        sideMargin: 18,
+                        topButtonArea: 38,
+                        bottomButtonArea: 38,
+                        horizontalSpacing: 14,
+                        verticalSpacing: 32,
+                        chineseFontSize: 26
+                    },
+                    large_portrait: {
+                        sideMargin: 20,
                         topButtonArea: 40,
                         bottomButtonArea: 40,
-                        horizontalSpacing: 12,
+                        horizontalSpacing: 15,
                         verticalSpacing: 35,
-                        chineseFontSize: 24
+                        chineseFontSize: 30
                     },
-                    medium: {
-                        sideMargin: 18,
-                        topButtonArea: 42,
-                        bottomButtonArea: 42,
-                        horizontalSpacing: 14,
-                        verticalSpacing: 38,
-                        chineseFontSize: 28
-                    },
-                    large: {
-                        sideMargin: 20,
+                    xlarge_portrait: {
+                        sideMargin: 25,
                         topButtonArea: 45,
                         bottomButtonArea: 45,
-                        horizontalSpacing: 15,
-                        verticalSpacing: 40,
-                        chineseFontSize: 32
-                    },
-                    xlarge: {
-                        sideMargin: 25,
-                        topButtonArea: 50,
-                        bottomButtonArea: 50,
                         horizontalSpacing: 18,
-                        verticalSpacing: 45,
-                        chineseFontSize: 36
+                        verticalSpacing: 40,
+                        chineseFontSize: 34
+                    },
+                    // 橫屏模式（寬度 > 高度）
+                    small_landscape: {
+                        sideMargin: 12,
+                        topButtonArea: 30,
+                        bottomButtonArea: 30,
+                        horizontalSpacing: 10,
+                        verticalSpacing: 25,
+                        chineseFontSize: 20
+                    },
+                    medium_landscape: {
+                        sideMargin: 15,
+                        topButtonArea: 32,
+                        bottomButtonArea: 32,
+                        horizontalSpacing: 12,
+                        verticalSpacing: 28,
+                        chineseFontSize: 24
+                    },
+                    large_landscape: {
+                        sideMargin: 18,
+                        topButtonArea: 35,
+                        bottomButtonArea: 35,
+                        horizontalSpacing: 14,
+                        verticalSpacing: 30,
+                        chineseFontSize: 28
+                    },
+                    xlarge_landscape: {
+                        sideMargin: 20,
+                        topButtonArea: 38,
+                        bottomButtonArea: 38,
+                        horizontalSpacing: 16,
+                        verticalSpacing: 35,
+                        chineseFontSize: 32
                     }
                 };
                 return params[iPadSize];
