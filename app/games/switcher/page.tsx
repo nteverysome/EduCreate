@@ -1509,9 +1509,17 @@ const GameSwitcherPage: React.FC = () => {
                         const data = await response.json();
                         console.log('✅ 選項保存成功:', data);
 
-                        // 🔥 v43.1：驗證返回的數據
-                        if (currentGameId === 'match-up-game' && !data.matchUpOptions) {
-                          console.warn('⚠️ 警告：API 返回的數據中缺少 matchUpOptions');
+                        // 🔥 v44.0：驗證返回的數據格式
+                        if (!data.success) {
+                          console.warn('⚠️ 警告：API 返回的 success 標誌為 false');
+                        }
+
+                        if (currentGameId === 'match-up-game') {
+                          if (!data.matchUpOptions && !data.activity?.matchUpOptions) {
+                            console.warn('⚠️ 警告：API 返回的數據中缺少 matchUpOptions');
+                          } else {
+                            console.log('✅ [MatchUpOptions] 驗證成功:', data.matchUpOptions || data.activity?.matchUpOptions);
+                          }
                         }
 
                         // 顯示成功消息（根據遊戲類型顯示不同的選項）

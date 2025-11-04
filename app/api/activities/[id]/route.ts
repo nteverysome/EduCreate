@@ -633,15 +633,25 @@ export async function PUT(
 
     console.log('✅ 活動更新成功:', updatedActivity.title);
 
-    // 🔥 v43.1：確保返回的數據包含 matchUpOptions
+    // 🔥 v44.0：確保返回的數據包含 matchUpOptions，並使用一致的響應格式
     if (body.matchUpOptions !== undefined) {
       console.log('✅ [MatchUpOptions] 保存成功，返回更新後的數據:', {
         activityId,
         matchUpOptions: updatedActivity.matchUpOptions
       });
+
+      // 返回一致的格式，包含 success 標誌
+      return NextResponse.json({
+        success: true,
+        activity: updatedActivity,
+        matchUpOptions: updatedActivity.matchUpOptions
+      });
     }
 
-    return NextResponse.json(updatedActivity);
+    return NextResponse.json({
+      success: true,
+      activity: updatedActivity
+    });
 
   } catch (error) {
     console.error('更新活動時出錯:', error);
