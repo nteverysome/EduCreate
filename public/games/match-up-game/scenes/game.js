@@ -697,7 +697,9 @@ class GameScene extends Phaser.Scene {
             allParams: Array.from(urlParams.entries()),
             layoutParam: urlParams.get('layout'),
             randomParam: urlParams.get('random'),
-            showAnswersParam: urlParams.get('showAnswers')
+            showAnswersParam: urlParams.get('showAnswers'),
+            audioEnabledParam: urlParams.get('audioEnabled'),
+            audioVolumeParam: urlParams.get('audioVolume')
         });
 
         // 讀取佈局選項
@@ -716,6 +718,17 @@ class GameScene extends Phaser.Scene {
         // 讀取顯示答案選項
         this.showAnswers = urlParams.get('showAnswers') === 'true';
         console.log('📝 顯示答案:', this.showAnswers);
+
+        // ✅ v44.0：讀取聲音選項
+        this.audioEnabled = urlParams.get('audioEnabled') === 'true';
+        this.audioVolume = parseInt(urlParams.get('audioVolume') || '70', 10);
+        this.audioAutoPlay = urlParams.get('audioAutoPlay') === 'true';
+
+        console.log('🔊 [v44.0] 聲音選項:', {
+            enabled: this.audioEnabled,
+            volume: this.audioVolume,
+            autoPlay: this.audioAutoPlay
+        });
     }
 
     // 🔥 初始化計時器
@@ -3504,6 +3517,12 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 輔助函數 - 後台異步生成缺失的音頻（不阻塞遊戲加載）
     generateMissingAudioUrlsInBackground() {
+        // ✅ v44.0：檢查聲音是否啟用
+        if (!this.audioEnabled) {
+            console.log('🔇 [後台] 聲音已禁用，跳過音頻生成');
+            return;
+        }
+
         console.log('🎵 [後台] 開始檢查並生成缺失的音頻...');
 
         const missingAudioPairs = this.pairs.filter(pair => !pair.audioUrl);
@@ -3624,13 +3643,19 @@ class GameScene extends Phaser.Scene {
             return;
         }
 
+        // ✅ v44.0：檢查聲音是否啟用
+        if (!this.audioEnabled) {
+            console.log('🔇 聲音已禁用，無法播放音頻');
+            return;
+        }
+
         // 防止重複點擊
         if (buttonContainer.getData('isPlaying')) {
             console.log('🔊 音頻正在播放中，忽略重複點擊');
             return;
         }
 
-        console.log('🔊 準備播放音頻:', { audioUrl });
+        console.log('🔊 準備播放音頻:', { audioUrl, volume: this.audioVolume });
 
         try {
             // 更新按鈕狀態為載入中
@@ -3639,7 +3664,8 @@ class GameScene extends Phaser.Scene {
 
             // 使用 HTML5 Audio API 直接播放
             const audio = new Audio(audioUrl);
-            audio.volume = 0.8;
+            // ✅ v44.0：使用遊戲設置的音量
+            audio.volume = Math.max(0, Math.min(1, this.audioVolume / 100));
 
             // 音頻可以播放時
             audio.addEventListener('canplay', () => {

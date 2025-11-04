@@ -13,6 +13,11 @@ export interface MatchUpOptions {
   layout: 'separated' | 'mixed';  // 佈局：分離（左右）或混合
   random: 'different' | 'same';  // 隨機：每次不同或總是相同
   showAnswers: boolean;  // 遊戲結束時顯示答案
+  audio?: {  // ✅ v44.0：添加聲音選項
+    enabled: boolean;  // 啟用聲音
+    volume: number;  // 音量 (0-100)
+    autoPlay?: boolean;  // 自動播放詞彙音頻
+  };
 }
 
 export const DEFAULT_MATCH_UP_OPTIONS: MatchUpOptions = {
@@ -26,6 +31,11 @@ export const DEFAULT_MATCH_UP_OPTIONS: MatchUpOptions = {
   layout: 'separated',
   random: 'different',
   showAnswers: false,
+  audio: {  // ✅ v44.0：默認聲音配置
+    enabled: true,
+    volume: 70,
+    autoPlay: false,
+  },
 };
 
 interface MatchUpOptionsPanelProps {
@@ -224,7 +234,7 @@ const MatchUpOptionsPanel: React.FC<MatchUpOptionsPanelProps> = ({
           </tr>
 
           {/* 標記後自動繼續選項 */}
-          <tr>
+          <tr className="border-b border-gray-200">
             <td className="py-3 pr-4 font-medium">標記後自動繼續</td>
             <td className="py-3">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -236,6 +246,66 @@ const MatchUpOptionsPanel: React.FC<MatchUpOptionsPanelProps> = ({
                 />
                 <span>完成當前頁後自動進入下一頁</span>
               </label>
+            </td>
+          </tr>
+
+          {/* 聲音選項 - v44.0 */}
+          <tr className="border-b border-gray-200">
+            <td className="py-3 pr-4 font-medium">聲音</td>
+            <td className="py-3">
+              <div className="flex flex-col gap-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={options.audio?.enabled ?? true}
+                    onChange={(e) => updateOptions({
+                      audio: {
+                        ...options.audio,
+                        enabled: e.target.checked
+                      }
+                    })}
+                    className="cursor-pointer"
+                  />
+                  <span>啟用聲音</span>
+                </label>
+
+                {options.audio?.enabled && (
+                  <div className="flex items-center gap-3 ml-6">
+                    <label className="text-sm text-gray-600">音量：</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={options.audio?.volume ?? 70}
+                      onChange={(e) => updateOptions({
+                        audio: {
+                          ...options.audio,
+                          volume: Number(e.target.value)
+                        }
+                      })}
+                      className="flex-1 cursor-pointer"
+                    />
+                    <span className="w-12 text-center font-semibold">{options.audio?.volume ?? 70}%</span>
+                  </div>
+                )}
+
+                {options.audio?.enabled && (
+                  <label className="flex items-center gap-2 cursor-pointer ml-6">
+                    <input
+                      type="checkbox"
+                      checked={options.audio?.autoPlay ?? false}
+                      onChange={(e) => updateOptions({
+                        audio: {
+                          ...options.audio,
+                          autoPlay: e.target.checked
+                        }
+                      })}
+                      className="cursor-pointer"
+                    />
+                    <span className="text-sm">自動播放詞彙音頻</span>
+                  </label>
+                )}
+              </div>
             </td>
           </tr>
         </tbody>

@@ -432,6 +432,16 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         url += `&layout=${matchUpOptions.layout}`;
         url += `&random=${matchUpOptions.random}`;
         url += `&showAnswers=${matchUpOptions.showAnswers}`;
+
+        // ✅ v44.0：添加聲音選項到 URL
+        if (matchUpOptions.audio) {
+          url += `&audioEnabled=${matchUpOptions.audio.enabled}`;
+          url += `&audioVolume=${matchUpOptions.audio.volume}`;
+          if (matchUpOptions.audio.autoPlay) {
+            url += `&audioAutoPlay=true`;
+          }
+        }
+
         console.log('🎮 Match-up 選項已添加到 URL:', matchUpOptions);
       }
     }
