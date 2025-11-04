@@ -3432,48 +3432,51 @@ class GameScene extends Phaser.Scene {
     }
 
     // 🔥 輔助函數 - 載入並顯示圖片
-    // ✅ v44.0：修復圖片載入失敗 - 使用 Promise 和特定文件事件
+    // ✅ v44.0：修復圖片載入失敗 - 使用 Fetch API 直接載入圖片
     loadAndDisplayImage(container, imageUrl, x, y, size, pairId) {
         const imageKey = `card-image-${pairId}`;
 
         if (!this.textures.exists(imageKey)) {
-            // ✅ v44.0：使用 Promise 包裝，確保每個圖片都能正確載入
+            // ✅ v44.0：使用 Fetch API 直接載入圖片，避免 Phaser 加載器問題
             return new Promise((resolve, reject) => {
-                this.load.image(imageKey, imageUrl);
+                fetch(imageUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // 將 Blob 轉換為 Object URL
+                        const objectUrl = URL.createObjectURL(blob);
 
-                // ✅ v44.0：使用特定文件事件而不是全局 complete 事件
-                const onFileComplete = (file) => {
-                    if (file.key === imageKey) {
-                        console.log(`✅ 圖片載入完成: ${imageKey}`);
+                        // 使用 Phaser 的紋理管理器直接添加圖片
+                        const image = new Image();
+                        image.onload = () => {
+                            // 將圖片添加到 Phaser 的紋理管理器
+                            this.textures.addImage(imageKey, image);
 
-                        if (this.textures.exists(imageKey)) {
+                            // 創建並顯示卡片圖片
                             const cardImage = this.add.image(x, y, imageKey);
                             cardImage.setDisplaySize(size, size);
                             cardImage.setOrigin(0.5);
                             container.add(cardImage);
 
-                            // 移除監聽器
-                            this.load.off('filecomplete', onFileComplete);
-                            this.load.off('loaderror', onFileError);
+                            console.log(`✅ 圖片載入完成: ${imageKey}`);
                             resolve();
-                        }
-                    }
-                };
+                        };
 
-                const onFileError = (file) => {
-                    if (file.key === imageKey) {
-                        console.warn(`⚠️ 圖片載入失敗: ${file.key}`, imageUrl);
+                        image.onerror = () => {
+                            console.warn(`⚠️ 圖片載入失敗: ${imageKey}`, imageUrl);
+                            reject(new Error(`Failed to load image: ${imageKey}`));
+                        };
 
-                        // 移除監聽器
-                        this.load.off('filecomplete', onFileComplete);
-                        this.load.off('loaderror', onFileError);
-                        reject(new Error(`Failed to load image: ${imageKey}`));
-                    }
-                };
-
-                this.load.on('filecomplete', onFileComplete);
-                this.load.on('loaderror', onFileError);
-                this.load.start();
+                        image.src = objectUrl;
+                    })
+                    .catch(error => {
+                        console.warn(`⚠️ 圖片載入失敗: ${imageKey}`, imageUrl, error);
+                        reject(error);
+                    });
             });
         } else {
             // 如果已經載入過，直接使用
