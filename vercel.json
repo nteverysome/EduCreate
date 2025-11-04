@@ -33,7 +33,7 @@
         },
         {
           "key": "X-Frame-Options",
-          "value": "DENY"
+          "value": "SAMEORIGIN"
         },
         {
           "key": "X-XSS-Protection",
@@ -82,6 +82,19 @@
     },
     {
       "source": "/games/starshake-game/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
+      ]
+    },
+    {
+      "source": "/games/match-up-game/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -288,6 +301,18 @@
     {
       "source": "/games/math-attack-game/(.*)",
       "destination": "/games/math-attack-game/$1"
+    },
+    {
+      "source": "/games/match-up-game",
+      "destination": "/games/match-up-game/index.html"
+    },
+    {
+      "source": "/games/match-up-game/",
+      "destination": "/games/match-up-game/index.html"
+    },
+    {
+      "source": "/games/match-up-game/(.*)",
+      "destination": "/games/match-up-game/$1"
     },
     {
       "source": "/mobile-test",
