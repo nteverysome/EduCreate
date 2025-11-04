@@ -1391,13 +1391,16 @@ class GameScene extends Phaser.Scene {
         const leftAreaStartX = width * 0.08;
         const leftAreaStartY = height * 0.1;
 
-        // 🔥 計算右側區域（中文）的起始位置
-        const rightAreaStartX = width * 0.52;
+        // 🔥 v44.2：修復右側卡片被切到邊緣的問題
+        // 計算左側區域的寬度，然後右側區域從中間開始
+        const leftAreaWidth = cardWidth * columns + horizontalSpacing * (columns - 1);
+        const rightAreaStartX = leftAreaStartX + leftAreaWidth / 2 + width * 0.02;  // 加 2% 的間距
         const rightAreaStartY = height * 0.1;
 
-        console.log(`📍 區域位置:`, {
+        console.log(`📍 區域位置 [v44.2]:`, {
             leftAreaStartX: leftAreaStartX.toFixed(0),
             leftAreaStartY: leftAreaStartY.toFixed(0),
+            leftAreaWidth: leftAreaWidth.toFixed(0),
             rightAreaStartX: rightAreaStartX.toFixed(0),
             rightAreaStartY: rightAreaStartY.toFixed(0)
         });
