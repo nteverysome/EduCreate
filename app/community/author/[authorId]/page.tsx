@@ -131,19 +131,6 @@ export default function AuthorProfilePage() {
     return 'grid'; // 默認值
   });
 
-  // 檢查關注狀態
-  const checkFollowStatus = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/community/authors/${authorId}/follow-status`);
-      if (response.ok) {
-        const data = await response.json();
-        setIsFollowing(data.isFollowing);
-      }
-    } catch (err) {
-      console.error('檢查關注狀態失敗:', err);
-    }
-  }, [authorId]);
-
   // 載入作者信息和活動
   const loadAuthorData = useCallback(async () => {
     try {
@@ -182,7 +169,15 @@ export default function AuthorProfilePage() {
 
       // 如果已登入，檢查是否已關注
       if (session?.user) {
-        checkFollowStatus();
+        try {
+          const followResponse = await fetch(`/api/community/authors/${authorId}/follow-status`);
+          if (followResponse.ok) {
+            const followData = await followResponse.json();
+            setIsFollowing(followData.isFollowing);
+          }
+        } catch (err) {
+          console.error('檢查關注狀態失敗:', err);
+        }
       }
     } catch (err) {
       console.error('載入作者信息失敗:', err);
@@ -190,7 +185,7 @@ export default function AuthorProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [authorId, sortBy, page, currentFolderId, session, checkFollowStatus]);
+  }, [authorId, sortBy, page, currentFolderId, session]);
 
   // 保存視圖模式到 localStorage
   useEffect(() => {
