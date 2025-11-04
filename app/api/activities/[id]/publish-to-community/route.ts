@@ -61,6 +61,7 @@ export async function POST(
     const updatedActivity = await prisma.activity.update({
       where: { id: params.id },
       data: {
+        isPublic: true,  // ✅ 發布到社區時自動設為公開
         isPublicShared: true,
         shareToken,
         publishedToCommunityAt: new Date(),
