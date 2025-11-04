@@ -2036,9 +2036,11 @@ class GameScene extends Phaser.Scene {
         const isLandscapeMobile = isLandscapeMode && height < 500;  // 手機橫向
         const isTinyHeight = height < 400;  // 極小高度
 
-        // ✅ v38.0：添加 iPad 檢測（寬度 768-1280px，包括 iPad Air、iPad Pro）
-        const isTablet = width >= 768 && width <= 1280;
-        const isIPad = isTablet;  // iPad 別名
+        // ✅ v46.0：改進的設備檢測邏輯 - 排除桌面 XGA 分辨率
+        const isDesktopXGA = width === 1024 && height === 768;  // 特殊情況：舊 XGA 標準
+        const isRealTablet = width >= 768 && width <= 1024 && height >= 600 && !isDesktopXGA;
+        const isTablet = isRealTablet;
+        const isIPad = isRealTablet;  // iPad 別名
 
         // 🔥 v13.0：分離的緊湊模式檢測
         const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
@@ -2092,28 +2094,40 @@ class GameScene extends Phaser.Scene {
             );
             console.log(`🔍 [v10.0] 緊湊模式圖片檢測: hasImages=${hasImages}, mode=${hasImages ? '🟦 正方形模式' : '🟨 長方形模式'}`);
 
-            // 🔥 v18.0：動態列數計算
-            // 根據每頁匹配數動態調整列數和卡片尺寸
-            // 20 個 → 5 列，10 個 → 4 列，5 個 → 3 列
-            // ✅ v37.0：橫向模式固定 7 列（3 行）
-            if (isLandscapeCompactMode) {
-                // 橫向模式：固定 7 列（充分利用寬度）
-                cols = 7;  // 橫向模式：固定 7 列
-            } else {
-                // 直向模式：保持原有邏輯
-                if (itemCount >= 16) {
-                    cols = 5;  // 16-20 個：5 列
-                } else if (itemCount >= 9) {
-                    cols = 4;  // 9-15 個：4 列
-                } else if (itemCount >= 4) {
-                    cols = 3;  // 4-8 個：3 列
+            // 🔥 v47.0：根據容器寬度動態計算列數
+            // 不再使用固定的列數，而是根據容器寬度和卡片寬度計算最優列數
+            const calculateOptimalCols = (containerWidth, itemCount, minCardWidth = 60, spacing = 10) => {
+                // 計算最大可能的列數
+                const maxPossibleCols = Math.floor((containerWidth - 20) / (minCardWidth + spacing));
+
+                // 根據 itemCount 和 maxPossibleCols 計算最優列數
+                if (itemCount <= 3) {
+                    return Math.min(itemCount, 2);
+                } else if (itemCount <= 5) {
+                    return Math.min(itemCount, 3);
+                } else if (itemCount <= 10) {
+                    return Math.min(itemCount, Math.max(3, Math.min(4, maxPossibleCols)));
+                } else if (itemCount <= 15) {
+                    return Math.min(itemCount, Math.max(4, Math.min(5, maxPossibleCols)));
                 } else {
-                    cols = Math.min(itemCount, 2);  // 1-3 個：2 列或更少
+                    return Math.min(itemCount, Math.max(5, Math.min(7, maxPossibleCols)));
                 }
+            };
+
+            // 🔥 v18.0：動態列數計算
+            // 根據每頁匹配數和容器寬度動態調整列數和卡片尺寸
+            if (isLandscapeCompactMode) {
+                // 橫向模式：根據容器寬度動態計算列數
+                cols = calculateOptimalCols(width, itemCount, 40, 8);  // 手機橫向：更小的卡片
+                console.log(`🔥 [v47.0] 手機橫向模式 - 根據容器寬度計算列數: width=${width}, itemCount=${itemCount}, cols=${cols}`);
+            } else {
+                // 直向模式：根據容器寬度動態計算列數
+                cols = calculateOptimalCols(width, itemCount, 50, 10);  // 手機直向：標準卡片
+                console.log(`🔥 [v47.0] 手機直向模式 - 根據容器寬度計算列數: width=${width}, itemCount=${itemCount}, cols=${cols}`);
             }
             cols = Math.min(cols, itemCount);  // 確保列數不超過項目數
 
-            console.log(`🔥 [v37.0] 動態列數計算: itemCount=${itemCount}, cols=${cols}, isLandscapeCompactMode=${isLandscapeCompactMode}`);
+            console.log(`🔥 [v47.0] 動態列數計算完成: itemCount=${itemCount}, cols=${cols}, isLandscapeCompactMode=${isLandscapeCompactMode}`);
 
             // 🔥 v20.0：添加詳細的設備尺寸和寬高比調試信息
             const aspectRatio = width / height;
