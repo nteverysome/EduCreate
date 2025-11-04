@@ -2446,10 +2446,15 @@ class GameScene extends Phaser.Scene {
                 // 策略：盡可能多的列數，充分利用水平空間
                 let optimalCols;
 
-                // ✅ v38.0：iPad 特殊處理 - 固定 5 列（像 Wordwall 一樣）
-                if (isIPad) {
-                    optimalCols = 5;  // iPad：固定 5 列
-                    console.log('📱 [v38.0] iPad 檢測：強制使用 5 列佈局');
+                // ✅ v44.0：iPad 動態列數優化 - 根據 iPad 尺寸調整
+                if (isIPad && iPadParams && iPadParams.optimalCols) {
+                    optimalCols = iPadParams.optimalCols;
+                    console.log('📱 [v44.0] iPad 動態列數優化:', {
+                        size: iPadSize,
+                        optimalCols: optimalCols,
+                        availableWidth: availableWidth.toFixed(1),
+                        minCardSize: minSquareSize.toFixed(1)
+                    });
                 } else {
                     // 🔥 P2-2: 簡化列數計算邏輯 - 移除重複分支
                     // 設定最大列數限制（避免卡片過小）
