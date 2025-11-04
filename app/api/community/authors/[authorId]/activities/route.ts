@@ -230,16 +230,24 @@ export async function GET(
       }
     }
 
+    // 構建 where 條件
+    const whereCondition: any = {
+      userId: authorId,
+      publishedToCommunityAt: {
+        not: null,
+      },
+      deletedAt: null,
+    };
+
+    // 只有當 folderId 有值時才添加 folderId 過濾
+    // 如果 folderId 為 null，則查詢所有已發布的活動（不限制 folderId）
+    if (folderId) {
+      whereCondition.folderId = folderId;
+    }
+
     // 獲取活動列表（根據 folderId 過濾）
     const activities = await prisma.activity.findMany({
-      where: {
-        userId: authorId,
-        publishedToCommunityAt: {
-          not: null,
-        },
-        deletedAt: null,
-        folderId: folderId,
-      },
+      where: whereCondition,
       include: {
         user: {
           select: {
@@ -257,14 +265,7 @@ export async function GET(
 
     // 獲取總數（根據 folderId 過濾）
     const total = await prisma.activity.count({
-      where: {
-        userId: authorId,
-        publishedToCommunityAt: {
-          not: null,
-        },
-        deletedAt: null,
-        folderId: folderId,
-      },
+      where: whereCondition,
     });
 
     // 獲取作者統計
