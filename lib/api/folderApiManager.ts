@@ -65,8 +65,10 @@ export class FolderApiManager {
 
     try {
       const params = new URLSearchParams({ type });
-      if (parentId !== undefined) {
-        params.append('parentId', parentId || '');
+      // 只有當 parentId 不是 undefined 且不是 null 時才添加參數
+      // 如果 parentId 是 null，表示獲取根目錄資料夾，不應該添加 parentId 參數
+      if (parentId !== undefined && parentId !== null) {
+        params.append('parentId', parentId);
       }
       if (includeBreadcrumbs) {
         params.append('includeBreadcrumbs', 'true');

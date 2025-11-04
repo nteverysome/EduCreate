@@ -64,19 +64,15 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const result = await signIn('google', {
+      console.log('🔐 開始 Google 登入，callbackUrl:', callbackUrl);
+      // 使用 redirect: true 讓 NextAuth 自動處理重定向
+      await signIn('google', {
         callbackUrl,
-        redirect: false
+        redirect: true
       });
-
-      if (result?.error) {
-        setError('登入失敗，請稍後再試');
-      } else if (result?.url) {
-        router.push(result.url);
-      }
     } catch (error) {
+      console.error('❌ Google 登入錯誤:', error);
       setError('登入過程中發生錯誤');
-    } finally {
       setIsLoading(false);
     }
   };

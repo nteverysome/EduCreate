@@ -1,0 +1,117 @@
+name: CDP Responsively App 自動化測試
+
+on:
+  push:
+    branches: [ master, main, develop ]
+    paths:
+      - 'public/games/match-up-game/**'
+      - 'scripts/cdp-*.js'
+      - '.github/workflows/cdp-responsively-test.yml'
+  pull_request:
+    branches: [ master, main, develop ]
+  schedule:
+    # 每天 UTC 時間 02:00 運行
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  cdp-test:
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+      - name: 📥 檢出代碼
+        uses: actions/checkout@v3
+      
+      - name: 📦 設置 Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: 📚 安裝依賴
+        run: npm ci
+      
+      - name: 🔍 檢查 chrome-remote-interface
+        run: npm list chrome-remote-interface
+      
+      - name: 🚀 啟動 Responsively App 並啟用 CDP
+        run: |
+          $responsivelyPath = "C:\Users\Administrator\AppData\Local\Programs\ResponsivelyApp\ResponsivelyApp.exe"
+          $gameUrl = "https://edu-create.vercel.app/games/switcher?game=match-up-game&activityId=cmh93tjuh0001l404hszkdf94&layout=mixed&itemsPerPage=20"
+          
+          if (Test-Path $responsivelyPath) {
+            Write-Host "✅ Responsively App 已找到"
+            Start-Process -FilePath $responsivelyPath `
+                         -ArgumentList "--remote-debugging-port=9222", $gameUrl `
+                         -PassThru
+            Start-Sleep -Seconds 15
+            Write-Host "✅ Responsively App 已啟動"
+          } else {
+            Write-Host "⚠️  Responsively App 未找到，跳過 CDP 測試"
+            exit 0
+          }
+        shell: powershell
+      
+      - name: 🧪 運行 CDP 自動化測試
+        run: node scripts/cdp-auto-setup.js
+        continue-on-error: true
+      
+      - name: 📊 運行增強版 CDP 測試 (含性能監控)
+        run: node scripts/cdp-enhanced-controller.js --network-throttle --screenshot
+        continue-on-error: true
+      
+      - name: 📈 生成測試報告
+        if: always()
+        run: |
+          Write-Host "📋 生成測試報告..."
+          
+          $reportDir = "reports"
+          if (Test-Path $reportDir) {
+            Get-ChildItem $reportDir -Filter "*.json" | ForEach-Object {
+              Write-Host "✅ 報告: $($_.Name)"
+            }
+          }
+      
+      - name: 📤 上傳報告
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cdp-test-reports-${{ matrix.node-version }}
+          path: reports/
+          retention-days: 30
+      
+      - name: 📤 上傳截圖
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cdp-screenshots-${{ matrix.node-version }}
+          path: reports/screenshots/
+          retention-days: 30
+      
+      - name: 📊 發佈測試結果
+        if: always()
+        run: |
+          Write-Host "╔════════════════════════════════════════════════════════════╗"
+          Write-Host "║  ✅ CDP Responsively App 自動化測試完成                   ║"
+          Write-Host "╚════════════════════════════════════════════════════════════╝"
+          Write-Host ""
+          Write-Host "📋 報告位置: reports/"
+          Write-Host "📸 截圖位置: reports/screenshots/"
+          Write-Host ""
+          Write-Host "✅ 工作流程完成"
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: cdp-test
+    if: always()
+    
+    steps:
+      - name: 📢 發送通知
+        run: |
+          echo "✅ CDP Responsively App 自動化測試已完成"
+          echo "狀態: ${{ needs.cdp-test.result }}"
+

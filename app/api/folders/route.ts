@@ -1,44 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 // 遞歸計算資料夾中的活動數量（包括所有子資料夾）
 async function getRecursiveActivityCount(folderId: string, type: 'activities' | 'results'): Promise<number> {
-  // 計算直接在該資料夾中的活動/結果數量
-  const directCount = type === 'activities'
-    ? await prisma.activity.count({
-        where: {
-          folderId: folderId,
-          deletedAt: null,
-        },
-      })
-    : await prisma.assignmentResult.count({
-        where: {
-          folderId: folderId,
-        },
-      });
+  try {
+    // 計算直接在該資料夾中的活動/結果數量
+    const directCount = type === 'activities'
+      ? await prisma.activity.count({
+          where: {
+            folderId: folderId,
+            deletedAt: null,
+          },
+        })
+      : await prisma.assignmentResult.count({
+          where: {
+            folderId: folderId,
+          },
+        });
 
-  // 獲取所有子資料夾
-  const subfolders = await prisma.folder.findMany({
-    where: {
-      parentId: folderId,
-      deletedAt: null,
-    },
-    select: {
-      id: true,
-    },
-  });
+    // 獲取所有子資料夾
+    const subfolders = await prisma.folder.findMany({
+      where: {
+        parentId: folderId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+      },
+    });
 
-  // 遞歸計算所有子資料夾的活動/結果數量
-  let totalCount = directCount;
-  for (const subfolder of subfolders) {
-    totalCount += await getRecursiveActivityCount(subfolder.id, type);
+    // 遞歸計算所有子資料夾的活動/結果數量
+    let totalCount = directCount;
+    for (const subfolder of subfolders) {
+      totalCount += await getRecursiveActivityCount(subfolder.id, type);
+    }
+
+    return totalCount;
+  } catch (error) {
+    console.error('❌ [ERROR] getRecursiveActivityCount 失敗:', folderId, error);
+    // 返回 0 而不是拋出錯誤，以便 API 可以繼續
+    return 0;
   }
-
-  return totalCount;
 }
 
 // GET - 獲取用戶的所有資料夾
@@ -84,67 +88,76 @@ export async function GET(request: NextRequest) {
     console.log('🔍 [API DEBUG] parentId === null:', parentId === null);
     console.log('🔍 [API DEBUG] typeof parentId:', typeof parentId);
 
-    // 只有當 parentId 參數存在時才過濾
-    // 如果 parentId 不存在（null），返回所有資料夾（用於移動資料夾模態框）
+    // ✅ 恢復 parentId 過濾功能
+    // 只有當 parentId 參數存在且不是空字符串時才過濾
+    // 如果 parentId 不存在（null）或是空字符串，返回根目錄資料夾
     // 注意：searchParams.get() 返回 null（不是 undefined）當參數不存在時
-    if (parentId !== null) {
+    if (parentId !== null && parentId !== '') {
       console.log('✅ [API DEBUG] parentId 參數存在，添加過濾條件');
-      whereCondition.parentId = parentId || null;
+      whereCondition.parentId = parentId;
     } else {
-      console.log('✅ [API DEBUG] parentId 參數不存在（null），不過濾 parentId');
+      console.log('✅ [API DEBUG] parentId 參數不存在或為空，過濾根目錄資料夾 (parentId = null)');
+      whereCondition.parentId = null;
     }
 
     console.log('🔍 [API DEBUG] 最終查詢條件:', JSON.stringify(whereCondition, null, 2));
 
-    const folders = await prisma.folder.findMany({
-      where: whereCondition,
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        color: true,
-        icon: true,
-        parentId: true,
-        depth: true,
-        path: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    let folders: any[] = [];
+    try {
+      // ✅ 恢復完整的 select 字段，包括 parentId、depth、path
+      folders = await prisma.folder.findMany({
+        where: whereCondition,
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          color: true,
+          icon: true,
+          createdAt: true,
+          updatedAt: true,
+          parentId: true,
+          depth: true,
+          path: true,
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+      console.log('✅ [API DEBUG] 成功獲取', folders.length, '個資料夾');
+    } catch (dbError) {
+      console.error('❌ [API ERROR] Prisma 查詢失敗:', dbError);
+      throw dbError;
+    }
 
     // 計算每個資料夾的活動數量和結果數量（遞歸計算包括所有子資料夾）
-    const foldersWithCount = await Promise.all(
-      folders.map(async (folder) => {
-        const activityCount = type === 'activities'
-          ? await getRecursiveActivityCount(folder.id, 'activities')
-          : 0;
-        const resultCount = type === 'results'
-          ? await getRecursiveActivityCount(folder.id, 'results')
-          : 0;
+    console.log('🔍 [API DEBUG] 開始計算資料夾計數，共有', folders.length, '個資料夾');
 
-        return {
-          id: folder.id,
-          name: folder.name,
-          description: folder.description,
-          color: folder.color,
-          icon: folder.icon,
-          parentId: folder.parentId,
-          depth: folder.depth,
-          path: folder.path,
-          createdAt: folder.createdAt,
-          updatedAt: folder.updatedAt,
-          activityCount: activityCount,
-          resultCount: resultCount,
-          _count: {
-            activities: activityCount,
-            results: resultCount,
-          },
-        };
-      })
-    );
+    // ✅ 恢復遞歸計數功能
+    const foldersWithCount = await Promise.all(folders.map(async (folder) => {
+      const activityCount = await getRecursiveActivityCount(folder.id, 'activities');
+      const resultCount = await getRecursiveActivityCount(folder.id, 'results');
+
+      return {
+        id: folder.id,
+        name: folder.name,
+        description: folder.description,
+        color: folder.color,
+        icon: folder.icon,
+        createdAt: folder.createdAt,
+        updatedAt: folder.updatedAt,
+        parentId: folder.parentId,
+        depth: folder.depth,
+        path: folder.path,
+        activityCount,
+        resultCount,
+        _count: {
+          activities: activityCount,
+          results: resultCount,
+        },
+      };
+    }));
+
+    console.log('✅ [API DEBUG] 所有資料夾計數完成');
 
     // 如果需要包含麵包屑導航，構建麵包屑路徑
     if (includeBreadcrumbs && parentId) {
@@ -198,10 +211,19 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(foldersWithCount);
   } catch (error) {
-    console.error('獲取資料夾失敗:', error);
+    console.error('❌ 獲取資料夾失敗:', error);
+    console.error('❌ 錯誤堆棧:', error instanceof Error ? error.stack : '無堆棧');
+
     // 返回詳細錯誤信息以便調試
     const errorMessage = error instanceof Error ? error.message : '未知錯誤';
     const errorStack = error instanceof Error ? error.stack : '';
+
+    console.error('❌ 返回錯誤響應:', {
+      error: '獲取資料夾失敗',
+      details: errorMessage,
+      stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
+    });
+
     return NextResponse.json({
       error: '獲取資料夾失敗',
       details: errorMessage,

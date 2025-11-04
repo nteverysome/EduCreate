@@ -252,6 +252,19 @@ const nextConfig = {
         source: '/games/math-attack-game/:path*',
         destination: '/games/math-attack-game/:path*'
       },
+      // Match-up 配對遊戲路由
+      {
+        source: '/games/match-up-game',
+        destination: '/games/match-up-game/index.html'
+      },
+      {
+        source: '/games/match-up-game/',
+        destination: '/games/match-up-game/index.html'
+      },
+      {
+        source: '/games/match-up-game/:path*',
+        destination: '/games/match-up-game/:path*'
+      },
       // Reports API mapping (HTML index + all assets)
       {
         source: '/_reports',

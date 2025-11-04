@@ -8,13 +8,15 @@ import PusherClient from 'pusher-js';
  */
 
 // 服務端 Pusher 實例（用於發送事件）
-export const pusherServer = new Pusher({
-  appId: process.env.PUSHER_APP_ID!,
-  key: process.env.NEXT_PUBLIC_PUSHER_KEY!,
-  secret: process.env.PUSHER_SECRET!,
-  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
-  useTLS: true,
-});
+export const pusherServer = process.env.PUSHER_APP_ID && process.env.NEXT_PUBLIC_PUSHER_KEY && process.env.PUSHER_SECRET && process.env.NEXT_PUBLIC_PUSHER_CLUSTER
+  ? new Pusher({
+      appId: process.env.PUSHER_APP_ID,
+      key: process.env.NEXT_PUBLIC_PUSHER_KEY,
+      secret: process.env.PUSHER_SECRET,
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+      useTLS: true,
+    })
+  : null;
 
 // 客戶端 Pusher 實例（用於接收事件）
 export const getPusherClient = () => {
@@ -22,8 +24,13 @@ export const getPusherClient = () => {
     return null;
   }
 
-  return new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
-    cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+  if (!process.env.NEXT_PUBLIC_PUSHER_KEY || !process.env.NEXT_PUBLIC_PUSHER_CLUSTER) {
+    console.warn('[Pusher] Pusher environment variables not configured');
+    return null;
+  }
+
+  return new PusherClient(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+    cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
     authEndpoint: '/api/pusher/auth', // 私有頻道認證端點
   });
 };
@@ -47,6 +54,11 @@ export async function pushScreenshotUpdate(
   }
 ) {
   try {
+    if (!pusherServer) {
+      console.warn('[Pusher] Pusher not configured, skipping screenshot update');
+      return;
+    }
+
     await pusherServer.trigger(
       `private-user-${userId}`, // 私有頻道，只有該用戶能接收
       'screenshot-update', // 事件名稱

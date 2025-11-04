@@ -9,18 +9,24 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
+  // 使用 PrismaAdapter 以正確處理 OAuth 用戶
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: 'jwt', // 使用 JWT 策略以支持 CredentialsProvider
+    strategy: 'jwt', // 使用 JWT 策略
+    maxAge: 30 * 24 * 60 * 60, // 30 天
   },
+  secret: process.env.NEXTAUTH_SECRET,
+  // 本地開發使用 HTTP，需要禁用安全 Cookie
+  useSecureCookies: process.env.NODE_ENV === 'production',
   providers: [
     CredentialsProvider({
+      id: 'credentials',
       name: 'Credentials',
       credentials: {
         email: { label: "電子郵件", type: "email" },
         password: { label: "密碼", type: "password" }
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         console.log('🔐 NextAuth authorize 被調用:', {
           email: credentials?.email,
           hasPassword: !!credentials?.password,
@@ -81,8 +87,7 @@ export const authOptions: NextAuthOptions = {
             id: user.id,
             email: user.email,
             name: user.name,
-            image: user.image,
-            role: user.role
+            image: user.image || null,
           };
         } catch (error) {
           console.error('❌ NextAuth authorize 錯誤:', error);
@@ -104,7 +109,6 @@ export const authOptions: NextAuthOptions = {
       })
     ] : []),
   ],
-  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: '/login',
     signOut: '/',
@@ -114,31 +118,30 @@ export const authOptions: NextAuthOptions = {
   allowDangerousEmailAccountLinking: true,
   callbacks: {
     async signIn({ user, account, profile }) {
-      // 簡化登入邏輯，讓 NextAuth 和 PrismaAdapter 處理用戶創建和關聯
-      console.log('🔍 NextAuth signIn callback:', {
+      console.log('🔐 SignIn callback:', {
         provider: account?.provider,
-        email: profile?.email || user?.email,
-        name: profile?.name || user?.name
+        hasUser: !!user,
+        email: user?.email
       });
       return true;
     },
-    async jwt({ token, user }) {
-      // 當用戶首次登入時，將用戶信息添加到 token
+    async jwt({ token, user, account }) {
+      console.log('🔐 JWT callback:', { hasUser: !!user, hasAccount: !!account });
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        token.role = user.role;
+        token.role = (user as any).role;
       }
       return token;
     },
     async session({ session, token }) {
-      // 使用 JWT 策略時，從 token 獲取用戶信息
+      console.log('📋 Session callback:', { hasToken: !!token });
       if (token && session.user) {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
-        session.user.role = token.role as string;
+        (session.user as any).role = token.role as string;
       }
       return session;
     }

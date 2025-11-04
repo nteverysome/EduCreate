@@ -10,9 +10,9 @@
       }
     },
     "playwright-mcp": {
-      "command": "node", 
+      "command": "node",
       "args": [
-        "C:\\Users\\Administrator\\Desktop\\EduCreate\\playwright-mcp-microsoft\\index.js"
+        "C:\\Users\\Administrator\\Desktop\\EduCreate\\playwright-mcp-microsoft\\cli.js"
       ],
       "env": {
         "NODE_ENV": "production"

@@ -30,7 +30,10 @@ export function useScreenshotUpdates(
     if (!userId) return;
 
     const pusher = getPusherClient();
-    if (!pusher) return;
+    if (!pusher) {
+      console.warn('[Pusher] Pusher client not available');
+      return;
+    }
 
     // 訂閱用戶私有頻道
     const channel = pusher.subscribe(`private-user-${userId}`);
@@ -49,9 +52,9 @@ export function useScreenshotUpdates(
     // 監聽單個截圖更新事件
     channel.bind('screenshot-update', (data: ScreenshotUpdate) => {
       console.log('[Pusher] Screenshot update received:', data);
-      
+
       setUpdates((prev) => [...prev, data]);
-      
+
       if (onUpdate) {
         onUpdate(data);
       }
@@ -60,9 +63,9 @@ export function useScreenshotUpdates(
     // 監聽批量截圖更新事件
     channel.bind('screenshot-batch-update', (data: { updates: ScreenshotUpdate[] }) => {
       console.log('[Pusher] Batch screenshot updates received:', data.updates);
-      
+
       setUpdates((prev) => [...prev, ...data.updates]);
-      
+
       if (onUpdate) {
         data.updates.forEach((update) => onUpdate(update));
       }

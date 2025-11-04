@@ -176,8 +176,21 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: 'desc'
       },
-      include: {
-        vocabularyItems: true,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        type: true,
+        templateType: true,
+        content: true,
+        isPublic: true,
+        createdAt: true,
+        updatedAt: true,
+        playCount: true,
+        shareCount: true,
+        geptLevel: true,
+        totalWords: true,
+        folderId: true,
         _count: {
           select: {
             versions: true,

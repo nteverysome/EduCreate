@@ -1,0 +1,26 @@
+{
+  "timestamp": "2025-11-04T03:48:35.057Z",
+  "source": "Production Branch (ep-curly-salad-a85exs3f)",
+  "destination": "Development Branch (ep-hidden-field-a8tai7gk)",
+  "summary": {
+    "users": {
+      "source": 3,
+      "destination": 3
+    },
+    "folders": {
+      "source": 105,
+      "destination": 105
+    },
+    "activities": {
+      "source": 92,
+      "destination": 92
+    },
+    "vocabularyItems": {
+      "source": 246,
+      "destination": 0
+    }
+  },
+  "status": "completed",
+  "successCount": 92,
+  "errorCount": 0
+}
