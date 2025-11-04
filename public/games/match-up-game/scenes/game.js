@@ -549,12 +549,14 @@ class GameScene extends Phaser.Scene {
             throttleMs: 100
         });
 
-        // 🔥 P1-4: 綁定事件監聽器（使用 bind 確保 this 上下文正確）
-        // 監聽螢幕尺寸變化 - 使用響應式管理器的防抖機制
+        // 🔥 v49.0: 實時 resize 事件 - 無防抖延遲，布局立即反應
+        // 監聽螢幕尺寸變化 - 直接調用 updateLayout，無 300ms 防抖延遲
         this.scale.on('resize', (gameSize) => {
-            this.responsiveManager.onResize(gameSize.width, gameSize.height);
+            // 🔥 v49.0: 直接更新布局，無防抖延遲
+            console.log('🔥 [v49.0] 實時 resize 事件觸發:', { width: gameSize.width, height: gameSize.height });
+            this.updateLayout();
         }, this);
-        console.log('✅ 已綁定 resize 事件監聽器（使用防抖機制）');
+        console.log('✅ 已綁定 resize 事件監聽器（v49.0 實時反應，無防抖延遲）');
 
         // 監聽全螢幕變化
         document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
