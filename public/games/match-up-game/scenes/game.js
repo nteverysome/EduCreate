@@ -2504,30 +2504,51 @@ class GameScene extends Phaser.Scene {
                 // 策略：盡可能多的列數，充分利用水平空間
                 let optimalCols;
 
-                // ✅ v44.0：iPad 動態列數優化 - 根據 iPad 尺寸調整
-                if (isIPad && iPadParams && iPadParams.optimalCols) {
-                    optimalCols = iPadParams.optimalCols;
-                    console.log('📱 [v44.0] iPad 動態列數優化:', {
+                // 🔥 v50.0：iPad 統一列數計算 - 根據容器寬度動態計算
+                // 移除硬編碼的 optimalCols，使用統一的容器寬度計算
+                if (isIPad) {
+                    // iPad：使用統一列數計算，根據容器寬度動態調整
+                    const minCardWidth = hasImages ? 60 : 80;
+                    const calculatedCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
+                    optimalCols = Math.min(calculatedCols, 10, itemCount);  // 最多 10 列
+
+                    console.log(`🔥 [v50.0] iPad 統一列數計算:`, {
                         size: iPadSize,
-                        optimalCols: optimalCols,
+                        width: width.toFixed(1),
+                        height: height.toFixed(1),
                         availableWidth: availableWidth.toFixed(1),
-                        minCardSize: minSquareSize.toFixed(1)
+                        minCardWidth: minCardWidth,
+                        horizontalSpacing: horizontalSpacing,
+                        calculatedCols: calculatedCols,
+                        optimalCols: optimalCols,
+                        itemCount: itemCount
                     });
                 } else {
-                    // 🔥 P2-2: 簡化列數計算邏輯 - 移除重複分支
-                    // 設定最大列數限制（避免卡片過小）
-                    const maxColsLimit = 10;  // 最多10列
+                    // 🔥 v50.0: 統一列數計算 - 根據容器寬度動態計算，不再基於寬高比
+                    // 移除寬高比邏輯，使用統一的容器寬度計算
+                    // 這樣 1024×1366 和 1024×768 都會根據 1024px 寬度動態調整
 
-                    if (aspectRatio > 1.5) {
-                        // 寬螢幕（超寬 > 2.0 或 寬 > 1.5）- 優先使用最大可能列數
-                        optimalCols = Math.min(maxPossibleCols, maxColsLimit, itemCount);
-                    } else if (aspectRatio > 1.2) {
-                        // 標準螢幕（4:3, 3:2）- 稍微限制列數
-                        optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.8), itemCount);
-                    } else {
-                        // 直向螢幕（9:16）- 限制列數
-                        optimalCols = Math.min(maxPossibleCols, Math.ceil(maxColsLimit * 0.5), itemCount);
-                    }
+                    // 計算最優列數：基於容器寬度和最小卡片尺寸
+                    // 公式：optimalCols = floor((availableWidth + spacing) / (minCardWidth + spacing))
+                    const minCardWidth = hasImages ? 60 : 80;  // 有圖片時卡片更小
+                    const calculatedCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
+
+                    // 限制最大列數（避免卡片過小）
+                    const maxColsLimit = 10;
+                    optimalCols = Math.min(calculatedCols, maxColsLimit, itemCount);
+
+                    console.log(`🔥 [v50.0] 統一列數計算（非 iPad）:`, {
+                        width: width.toFixed(1),
+                        height: height.toFixed(1),
+                        aspectRatio: aspectRatio.toFixed(2),
+                        availableWidth: availableWidth.toFixed(1),
+                        minCardWidth: minCardWidth,
+                        horizontalSpacing: horizontalSpacing,
+                        calculatedCols: calculatedCols,
+                        maxColsLimit: maxColsLimit,
+                        optimalCols: optimalCols,
+                        itemCount: itemCount
+                    });
                 }
 
                 // 確保列數在合理範圍內
