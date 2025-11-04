@@ -538,10 +538,23 @@ class GameScene extends Phaser.Scene {
         this.updateLayout();
         console.log('🎮 GameScene: updateLayout 完成');
 
+        // 🔥 v1.0 新增：初始化響應式管理器
+        this.responsiveManager = new ResponsiveManager(this, {
+            debounceMs: 300,
+            throttleMs: 100,
+            enableLogging: true
+        });
+        ResponsiveLogger.log('info', 'GameScene', '響應式管理器初始化完成', {
+            debounceMs: 300,
+            throttleMs: 100
+        });
+
         // 🔥 P1-4: 綁定事件監聽器（使用 bind 確保 this 上下文正確）
-        // 監聽螢幕尺寸變化
-        this.scale.on('resize', this.handleResize, this);
-        console.log('✅ 已綁定 resize 事件監聽器');
+        // 監聽螢幕尺寸變化 - 使用響應式管理器的防抖機制
+        this.scale.on('resize', (gameSize) => {
+            this.responsiveManager.onResize(gameSize.width, gameSize.height);
+        }, this);
+        console.log('✅ 已綁定 resize 事件監聽器（使用防抖機制）');
 
         // 監聽全螢幕變化
         document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
@@ -915,39 +928,63 @@ class GameScene extends Phaser.Scene {
             height: this.scale.height
         });
 
-        // 清除所有現有元素
-        console.log('🎮 GameScene: 清除所有現有元素');
-        this.children.removeAll(true);
+        try {
+            // 清除所有現有元素
+            console.log('🎮 GameScene: 清除所有現有元素');
+            this.children.removeAll(true);
 
-        // 獲取當前螢幕尺寸
-        const width = this.scale.width;
-        const height = this.scale.height;
+            // 獲取當前螢幕尺寸
+            const width = this.scale.width;
+            const height = this.scale.height;
 
-        console.log('🎮 GameScene: 添加白色背景', { width, height });
-        // 添加白色背景
-        this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
+            console.log('🎮 GameScene: 添加白色背景', { width, height });
+            // 添加白色背景
+            this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
 
-        // 🔥 移除標題：用戶要求拿掉遊戲內的 "Match up" 標題
+            // 🔥 移除標題：用戶要求拿掉遊戲內的 "Match up" 標題
 
-        console.log('🎮 GameScene: 創建卡片');
-        // 創建卡片
-        this.createCards();
-        console.log('🎮 GameScene: 卡片創建完成');
+            console.log('🎮 GameScene: 創建卡片');
+            // 創建卡片
+            this.createCards();
+            console.log('🎮 GameScene: 卡片創建完成');
 
-        // 🔥 記錄遊戲開始時間
-        if (!this.gameStartTime) {
-            this.gameStartTime = Date.now();
-            console.log('🎮 GameScene: 遊戲開始時間已記錄');
+            // 🔥 記錄遊戲開始時間
+            if (!this.gameStartTime) {
+                this.gameStartTime = Date.now();
+                console.log('🎮 GameScene: 遊戲開始時間已記錄');
+            }
+
+            // 🔥 創建計時器 UI
+            this.createTimerUI();
+
+            // 🔥 顯示「提交答案」按鈕（遊戲開始時就顯示）
+            this.showSubmitButton();
+
+            // 🔥 移除重新開始按鈕：用戶要求拿掉
+            console.log('🎮 GameScene: updateLayout 完成');
+        } catch (error) {
+            console.error('❌ GameScene: updateLayout 失敗', error);
+            console.error('❌ 錯誤堆棧:', error.stack);
+
+            // 顯示錯誤信息
+            const width = this.scale.width;
+            const height = this.scale.height;
+
+            this.add.text(width / 2, height / 2 - 50, '❌ 佈局更新失敗', {
+                fontSize: '28px',
+                color: '#ff0000',
+                fontFamily: 'Arial',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+
+            this.add.text(width / 2, height / 2 + 20, error.message, {
+                fontSize: '16px',
+                color: '#666666',
+                fontFamily: 'Arial',
+                align: 'center',
+                wordWrap: { width: width - 100 }
+            }).setOrigin(0.5);
         }
-
-        // 🔥 創建計時器 UI
-        this.createTimerUI();
-
-        // 🔥 顯示「提交答案」按鈕（遊戲開始時就顯示）
-        this.showSubmitButton();
-
-        // 🔥 移除重新開始按鈕：用戶要求拿掉
-        console.log('🎮 GameScene: updateLayout 完成');
     }
 
     handleResize(gameSize) {
@@ -979,21 +1016,37 @@ class GameScene extends Phaser.Scene {
 
         console.log('🎮 GameScene: 計算卡片尺寸和位置', { width, height });
 
-        // ✅ v40.0：iPad 動態卡片尺寸調整
-        // 檢測 iPad（寬度 768-1280px，包括 iPad Air、iPad Pro）
-        const isTablet = width >= 768 && width <= 1280;
-        const isIPad = isTablet;
-        console.log('🔍 [v40.0] iPad 檢測:', { width, isTablet, isIPad });
+        // 🔥 v46.0：邊界檢查
+        if (width < 320 || height < 270) {
+            console.error('❌ 螢幕尺寸過小:', { width, height });
+            throw new Error(`螢幕尺寸過小: ${width}×${height}，最小要求 320×270`);
+        }
+
+        // ✅ v46.0：改進的設備檢測邏輯
+        // 修復 1024×768 白屏問題：排除桌面 XGA 分辨率
+        const isDesktopXGA = width === 1024 && height === 768;  // 特殊情況：舊 XGA 標準
+        const isRealTablet = width >= 768 && width <= 1024 && height >= 600 && !isDesktopXGA;
+        const isIPad = isRealTablet;
+
+        console.log('🔍 [v46.0] 設備檢測:', {
+            width,
+            height,
+            isDesktopXGA,
+            isRealTablet,
+            isIPad
+        });
 
         // 響應式卡片尺寸（根據螢幕寬度調整）
         let cardWidth, cardHeight;
         if (isIPad) {
             // iPad：根據容器大小動態調整
             // 分離佈局：左右各一列，所以卡片寬度 = 可用寬度 / 2 - 邊距
-            cardWidth = Math.max(140, (width - 60) / 2 - 20);  // 60px 邊距，20px 間距
+            const maxCardWidth = (width - 60) * 0.4;  // 限制最大寬度為 40%
+            cardWidth = Math.max(140, Math.min(maxCardWidth, (width - 60) / 2 - 20));
             cardHeight = Math.max(60, height * 0.12);  // 高度為螢幕高度的 12%
-            console.log('📱 [v40.0] iPad 動態卡片尺寸:', {
+            console.log('📱 [v46.0] iPad 動態卡片尺寸:', {
                 availableWidth: width - 60,
+                maxCardWidth: maxCardWidth.toFixed(1),
                 calculatedCardWidth: cardWidth.toFixed(1),
                 calculatedCardHeight: cardHeight.toFixed(1)
             });
