@@ -131,33 +131,20 @@ export default function AuthorProfilePage() {
     return 'grid'; // 默認值
   });
 
-  // 保存視圖模式到 localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('communityAuthorViewMode', viewMode);
-      console.log('💾 保存視圖模式偏好 (community-author):', viewMode);
+  // 檢查關注狀態
+  const checkFollowStatus = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/community/authors/${authorId}/follow-status`);
+      if (response.ok) {
+        const data = await response.json();
+        setIsFollowing(data.isFollowing);
+      }
+    } catch (err) {
+      console.error('檢查關注狀態失敗:', err);
     }
-  }, [viewMode]);
-
-  // 從 URL 讀取 folderId
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const folderIdFromUrl = params.get('folderId');
-    setCurrentFolderId(folderIdFromUrl);
-  }, []);
+  }, [authorId]);
 
   // 載入作者信息和活動
-  useEffect(() => {
-    loadAuthorData();
-  }, [loadAuthorData]);
-
-  // 檢查是否為作者本人
-  useEffect(() => {
-    if (session?.user && author) {
-      setIsOwner(session.user.email === author.email);
-    }
-  }, [session, author]);
-
   const loadAuthorData = useCallback(async () => {
     try {
       setLoading(true);
@@ -203,19 +190,34 @@ export default function AuthorProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [authorId, sortBy, page, currentFolderId, session]);
+  }, [authorId, sortBy, page, currentFolderId, session, checkFollowStatus]);
 
-  const checkFollowStatus = async () => {
-    try {
-      const response = await fetch(`/api/community/authors/${authorId}/follow-status`);
-      if (response.ok) {
-        const data = await response.json();
-        setIsFollowing(data.isFollowing);
-      }
-    } catch (err) {
-      console.error('檢查關注狀態失敗:', err);
+  // 保存視圖模式到 localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('communityAuthorViewMode', viewMode);
+      console.log('💾 保存視圖模式偏好 (community-author):', viewMode);
     }
-  };
+  }, [viewMode]);
+
+  // 從 URL 讀取 folderId
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const folderIdFromUrl = params.get('folderId');
+    setCurrentFolderId(folderIdFromUrl);
+  }, []);
+
+  // 載入作者信息和活動
+  useEffect(() => {
+    loadAuthorData();
+  }, [loadAuthorData]);
+
+  // 檢查是否為作者本人
+  useEffect(() => {
+    if (session?.user && author) {
+      setIsOwner(session.user.email === author.email);
+    }
+  }, [session, author]);
 
   const handleFollow = async () => {
     if (!session?.user) {
