@@ -3260,7 +3260,10 @@ class GameScene extends Phaser.Scene {
         const imageAreaHeight = height * 0.4;
         const imageAreaY = -height / 2 + buttonAreaHeight + imageAreaHeight / 2;
         const squareSize = Math.min(width - 4, imageAreaHeight - 4);
-        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, pairId);
+        // ✅ v44.0：添加錯誤處理
+        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, pairId).catch(error => {
+            console.error('❌ 圖片載入失敗 (佈局 A):', error);
+        });
 
         // 3️⃣ 文字區域（下方 30%，需要留出底部間距）
         const textAreaHeight = height * 0.3;
@@ -3342,7 +3345,10 @@ class GameScene extends Phaser.Scene {
         const squareSize = Math.min(width - 4, imageHeight - 4);
 
         // 創建圖片
-        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId);
+        // ✅ v44.0：添加錯誤處理
+        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId).catch(error => {
+            console.error('❌ 圖片載入失敗 (佈局 B):', error);
+        });
 
         // 創建文字（如果有）
         if (text && text.trim() !== '' && text.trim() !== '<br>') {
@@ -3395,7 +3401,10 @@ class GameScene extends Phaser.Scene {
         const squareSize = Math.min(width - 4, height - 4);
 
         // 圖片置中顯示
-        this.loadAndDisplayImage(container, imageUrl, 0, 0, squareSize, pairId);
+        // ✅ v44.0：添加錯誤處理
+        this.loadAndDisplayImage(container, imageUrl, 0, 0, squareSize, pairId).catch(error => {
+            console.error('❌ 圖片載入失敗 (佈局 F):', error);
+        });
     }
 
     // 🔥 佈局函數 - 圖片 + 語音（無文字）
@@ -3411,7 +3420,10 @@ class GameScene extends Phaser.Scene {
         const squareSize = Math.min(width - 4, imageHeight - 4);
 
         // 創建圖片
-        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId);
+        // ✅ v44.0：添加錯誤處理
+        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId).catch(error => {
+            console.error('❌ 圖片載入失敗 (佈局 ImageAudio):', error);
+        });
 
         // 創建語音按鈕（下方）
         const buttonSize = Math.max(30, Math.min(50, width * 0.2));
@@ -3420,31 +3432,56 @@ class GameScene extends Phaser.Scene {
     }
 
     // 🔥 輔助函數 - 載入並顯示圖片
+    // ✅ v44.0：修復圖片載入失敗 - 使用 Promise 和特定文件事件
     loadAndDisplayImage(container, imageUrl, x, y, size, pairId) {
         const imageKey = `card-image-${pairId}`;
 
         if (!this.textures.exists(imageKey)) {
-            this.load.image(imageKey, imageUrl);
+            // ✅ v44.0：使用 Promise 包裝，確保每個圖片都能正確載入
+            return new Promise((resolve, reject) => {
+                this.load.image(imageKey, imageUrl);
 
-            this.load.once('complete', () => {
-                if (this.textures.exists(imageKey)) {
-                    const cardImage = this.add.image(x, y, imageKey);
-                    cardImage.setDisplaySize(size, size);
-                    cardImage.setOrigin(0.5);
-                    container.add(cardImage);
-                }
+                // ✅ v44.0：使用特定文件事件而不是全局 complete 事件
+                const onFileComplete = (file) => {
+                    if (file.key === imageKey) {
+                        console.log(`✅ 圖片載入完成: ${imageKey}`);
+
+                        if (this.textures.exists(imageKey)) {
+                            const cardImage = this.add.image(x, y, imageKey);
+                            cardImage.setDisplaySize(size, size);
+                            cardImage.setOrigin(0.5);
+                            container.add(cardImage);
+
+                            // 移除監聽器
+                            this.load.off('filecomplete', onFileComplete);
+                            this.load.off('loaderror', onFileError);
+                            resolve();
+                        }
+                    }
+                };
+
+                const onFileError = (file) => {
+                    if (file.key === imageKey) {
+                        console.warn(`⚠️ 圖片載入失敗: ${file.key}`, imageUrl);
+
+                        // 移除監聽器
+                        this.load.off('filecomplete', onFileComplete);
+                        this.load.off('loaderror', onFileError);
+                        reject(new Error(`Failed to load image: ${imageKey}`));
+                    }
+                };
+
+                this.load.on('filecomplete', onFileComplete);
+                this.load.on('loaderror', onFileError);
+                this.load.start();
             });
-
-            this.load.once('loaderror', (file) => {
-                console.warn(`⚠️ 圖片載入失敗: ${file.key}`, imageUrl);
-            });
-
-            this.load.start();
         } else {
+            // 如果已經載入過，直接使用
             const cardImage = this.add.image(x, y, imageKey);
             cardImage.setDisplaySize(size, size);
             cardImage.setOrigin(0.5);
             container.add(cardImage);
+            return Promise.resolve();
         }
     }
 
