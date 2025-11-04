@@ -4,6 +4,9 @@
 // 注意：RESPONSIVE_BREAKPOINTS, DESIGN_TOKENS, GameResponsiveLayout 等
 // 已在 index.html 中作為全局腳本加載，無需 import
 
+// 🔥 v45.1 版本標記 - 強制 Vercel 重新部署
+const GAME_VERSION = 'v45.1-ipad-fix';
+
 // Game 場景 - 主遊戲邏輯（卡片拖動配對）
 class GameScene extends Phaser.Scene {
     constructor() {
