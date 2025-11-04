@@ -2504,15 +2504,16 @@ class GameScene extends Phaser.Scene {
                 // 策略：盡可能多的列數，充分利用水平空間
                 let optimalCols;
 
-                // 🔥 v50.0：iPad 統一列數計算 - 根據容器寬度動態計算
+                // 🔥 v51.0：iPad 統一列數計算 - 根據容器寬度動態計算
                 // 移除硬編碼的 optimalCols，使用統一的容器寬度計算
                 if (isIPad) {
                     // iPad：使用統一列數計算，根據容器寬度動態調整
+                    // 🔥 v51.0 修正公式：考慮邊距計算方式
                     const minCardWidth = hasImages ? 60 : 80;
-                    const calculatedCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
+                    const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (minCardWidth + horizontalSpacing));
                     optimalCols = Math.min(calculatedCols, 10, itemCount);  // 最多 10 列
 
-                    console.log(`🔥 [v50.0] iPad 統一列數計算:`, {
+                    console.log(`🔥 [v51.0] iPad 統一列數計算:`, {
                         size: iPadSize,
                         width: width.toFixed(1),
                         height: height.toFixed(1),
@@ -2524,20 +2525,23 @@ class GameScene extends Phaser.Scene {
                         itemCount: itemCount
                     });
                 } else {
-                    // 🔥 v50.0: 統一列數計算 - 根據容器寬度動態計算，不再基於寬高比
+                    // 🔥 v51.0: 統一列數計算 - 根據容器寬度動態計算，不再基於寬高比
                     // 移除寬高比邏輯，使用統一的容器寬度計算
                     // 這樣 1024×1366 和 1024×768 都會根據 1024px 寬度動態調整
 
                     // 計算最優列數：基於容器寬度和最小卡片尺寸
-                    // 公式：optimalCols = floor((availableWidth + spacing) / (minCardWidth + spacing))
+                    // 🔥 v51.0 修正公式：考慮邊距計算方式
+                    // 實際卡片寬度 = (availableWidth - horizontalSpacing * (cols + 1)) / cols
+                    // 要求 frameWidth >= minCardWidth，推導得：
+                    // cols <= (availableWidth - horizontalSpacing) / (minCardWidth + horizontalSpacing)
                     const minCardWidth = hasImages ? 60 : 80;  // 有圖片時卡片更小
-                    const calculatedCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
+                    const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (minCardWidth + horizontalSpacing));
 
                     // 限制最大列數（避免卡片過小）
                     const maxColsLimit = 10;
                     optimalCols = Math.min(calculatedCols, maxColsLimit, itemCount);
 
-                    console.log(`🔥 [v50.0] 統一列數計算（非 iPad）:`, {
+                    console.log(`🔥 [v51.0] 統一列數計算（非 iPad）:`, {
                         width: width.toFixed(1),
                         height: height.toFixed(1),
                         aspectRatio: aspectRatio.toFixed(2),
