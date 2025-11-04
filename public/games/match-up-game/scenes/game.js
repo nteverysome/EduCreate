@@ -2785,23 +2785,20 @@ class GameScene extends Phaser.Scene {
         // 🔥 計算間距和行數
         const rows = Math.ceil(itemCount / cols);
 
-        // 🔥 v23.0：定義水平邊距，確保卡片不被切割
-        // 根據列數動態調整邊距
+        // 🔥 v51.0：使用與列數計算相同的邊距系統
+        // 確保混合佈局使用的邊距與列數計算一致
+        // 這樣可以避免卡片被裁切
         let horizontalMargin;
-        if (cols === 5) {
-            // 5 列：邊距 = 30px（確保 390px 寬度下有 330px 可用寬度）
-            horizontalMargin = 30;
-        } else if (cols === 4) {
-            // 4 列：中等邊距（20px）
-            horizontalMargin = 20;
+        if (isCompactMode) {
+            // 緊湊模式：使用較小的邊距
+            horizontalMargin = Math.max(15, Math.min(30, width * 0.02));
         } else {
-            // 3 列或更少：較大邊距（25px）
-            horizontalMargin = 25;
+            // 桌面模式：使用與列數計算相同的邊距
+            horizontalMargin = Math.max(30, Math.min(80, width * 0.03));
         }
 
-        // 🔥 v23.0：優化水平間距計算，確保卡片不被切割
-        // 公式：(可用寬度 - 邊距 - 卡片總寬度) / (列數 + 1)
-        // 基於實際可用寬度（width - 2 * horizontalMargin）計算
+        // 🔥 v51.0：使用與列數計算相同的 availableWidth
+        // 這樣可以確保 frameWidth 計算正確
         const availableWidth = width - 2 * horizontalMargin;
         const totalCardWidth = frameWidth * cols;
         const availableSpace = availableWidth - totalCardWidth;
