@@ -1387,13 +1387,18 @@ class GameScene extends Phaser.Scene {
         );
         console.log(`🔍 [v10.0] 分離佈局圖片檢測: hasImages=${hasImages}, mode=${hasImages ? '🟦 正方形模式' : '🟨 長方形模式'}`);
 
-        // 🔥 v10.0 根據圖片檢測決定列數
-        // 有圖片時：使用 5 列（正方形模式）
-        // 無圖片時：使用 2 列（長方形模式）
-        const columns = hasImages ? 5 : 2;
+        // 🔥 v48.0 使用統一列數計算系統（替代硬編碼的列數規則）
+        const minCardWidth = hasImages ? 60 : 80;  // 有圖片時卡片更小
+        const columns = UnifiedColumnCalculator.calculateOptimalColumns(
+            width,
+            itemCount,
+            minCardWidth,
+            10,  // spacing
+            30   // horizontalMargin
+        );
         const rows = Math.ceil(itemCount / columns);
 
-        console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局 [v10.0]`);
+        console.log(`📊 [v48.0] 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局 (動態計算)`);
 
         // 🔥 計算間距（先計算，用於後續卡片高度計算）
         const horizontalSpacing = Math.max(5, width * 0.01);
@@ -1533,19 +1538,17 @@ class GameScene extends Phaser.Scene {
             isLargeContainer: height >= 800
         });
 
-        // 🔥 根據匹配數計算行列數
-        let rows, columns;
-        if (itemCount <= 24) {
-            // 21-24 個：3 行 × 8 列
-            rows = 3;
-            columns = 8;
-        } else {
-            // 25-30 個：3 行 × 10 列
-            rows = 3;
-            columns = 10;
-        }
+        // 🔥 v48.0 使用統一列數計算系統（替代硬編碼的列數規則）
+        const columns = UnifiedColumnCalculator.calculateOptimalColumns(
+            width,
+            itemCount,
+            50,   // minCardWidth
+            5,    // spacing
+            30    // horizontalMargin
+        );
+        const rows = Math.ceil(itemCount / columns);
 
-        console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局`);
+        console.log(`📊 [v48.0] 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局 (動態計算)`);
 
         // 🔥 根據容器大小和列數調整卡片尺寸
         let cardWidth, cardHeight;
@@ -1677,52 +1680,21 @@ class GameScene extends Phaser.Scene {
             totalCards
         });
 
-        // 🔥 根據容器高度和總卡片數計算列數（v7.0 修復：手機直向優先使用 5 列）
-        let columns = 1;
+        // 🔥 v48.0 使用統一列數計算系統（替代硬編碼的列數規則）
+        const columns = UnifiedColumnCalculator.calculateOptimalColumnsWithAspectRatio(
+            width,
+            height,
+            totalCards,
+            {
+                minCardWidth: 60,
+                spacing: 10,
+                horizontalMargin: 30,
+                minCardHeight: 50,
+                verticalMargin: 30
+            }
+        );
 
-        if (isMobilePortrait) {
-            // 🔥 v7.0 新增：手機直向（寬度 < 500px）- 優先使用 5 列
-            if (totalCards > 40) {
-                columns = 5;  // 41-60 張卡片：5 列
-            } else if (totalCards > 30) {
-                columns = 5;  // 31-40 張卡片：5 列（改為 5 列）
-            } else if (totalCards > 20) {
-                columns = 5;  // 21-30 張卡片：5 列（改為 5 列）
-            } else {
-                columns = 5;  // 20 張以下卡片：5 列（改為 5 列）
-            }
-        } else if (isSmallContainer) {
-            // 小容器（高度 < 500px）：更早切換到多列
-            if (totalCards > 40) {
-                columns = 5;  // 41-60 張卡片：5 列
-            } else if (totalCards > 30) {
-                columns = 4;  // 31-40 張卡片：4 列
-            } else {
-                columns = 3;  // 22-30 張卡片：3 列
-            }
-        } else if (isMediumContainer) {
-            // 中等容器（高度 500-800px）：適中的切換點
-            if (totalCards > 48) {
-                columns = 6;  // 49-60 張卡片：6 列
-            } else if (totalCards > 36) {
-                columns = 5;  // 37-48 張卡片：5 列
-            } else if (totalCards > 24) {
-                columns = 4;  // 25-36 張卡片：4 列
-            } else {
-                columns = 3;  // 22-24 張卡片：3 列
-            }
-        } else {
-            // 大容器（高度 >= 800px）：較晚切換到多列
-            if (totalCards > 48) {
-                columns = 6;  // 49-60 張卡片：6 列
-            } else if (totalCards > 36) {
-                columns = 5;  // 37-48 張卡片：5 列
-            } else {
-                columns = 4;  // 22-36 張卡片：4 列
-            }
-        }
-
-        console.log(`📊 總卡片數: ${totalCards}, 容器高度: ${height}px, 使用 ${columns} 列佈局`);
+        console.log(`📊 [v48.0] 總卡片數: ${totalCards}, 容器: ${width}×${height}px, 使用 ${columns} 列佈局 (動態計算)`);
 
         // 🔥 根據列數和容器大小調整卡片寬度
         let dynamicCardWidth;
@@ -2715,24 +2687,19 @@ class GameScene extends Phaser.Scene {
                 const maxPossibleCols = Math.floor((availableWidth + horizontalSpacing) / (minCardWidth + horizontalSpacing));
                 const maxPossibleRows = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
 
-                // 🔥 第八步：智能計算最佳列數（根據寬高比和匹配數）
-                // ✅ v39.0：iPad 固定 5 列
-                let optimalCols;
-                if (isIPad) {
-                    optimalCols = 5;  // iPad：固定 5 列
-                } else if (aspectRatio > 2.0) {
-                    // 超寬螢幕（21:9, 32:9）
-                    optimalCols = Math.min(8, Math.ceil(Math.sqrt(itemCount * aspectRatio)));
-                } else if (aspectRatio > 1.5) {
-                    // 寬螢幕（16:9, 16:10）
-                    optimalCols = Math.min(6, Math.ceil(Math.sqrt(itemCount * aspectRatio / 1.5)));
-                } else if (aspectRatio > 1.2) {
-                    // 標準螢幕（4:3, 3:2）
-                    optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount)));
-                } else {
-                    // 直向螢幕（9:16）- v7.0 修復：改為 5 列（與 Wordwall 一致）
-                    optimalCols = Math.min(5, Math.ceil(Math.sqrt(itemCount / aspectRatio)));
-                }
+                // 🔥 v48.0 使用統一列數計算系統（替代硬編碼的列數規則）
+                let optimalCols = UnifiedColumnCalculator.calculateOptimalColumnsWithAspectRatio(
+                    width,
+                    height,
+                    itemCount,
+                    {
+                        minCardWidth: 80,
+                        spacing: horizontalSpacing,
+                        horizontalMargin: sideMargin,
+                        minCardHeight: 60,
+                        verticalMargin: topButtonAreaHeight + bottomButtonAreaHeight
+                    }
+                );
 
                 // 確保列數在合理範圍內
                 optimalCols = Math.max(1, Math.min(optimalCols, maxPossibleCols, itemCount));
