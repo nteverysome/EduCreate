@@ -1838,6 +1838,133 @@ class GameScene extends Phaser.Scene {
     createMixedLayout(currentPagePairs, width, height, cardWidth, cardHeight) {
         console.log('🎮 創建混合佈局（英文卡片在中文框內，可交換位置）');
 
+        // ✅ v45.1：修復 - 在方法開始處定義 iPad 分類函數
+        // 🔥 第一步：iPad 容器大小分類函數
+        // ✅ v42.2：根據寬度和高度的組合分類，而不是只看寬度
+        // 這樣 768×1024 和 1024×768 會被分類為同一個設備
+        const classifyIPadSize = (w, h) => {
+            // 獲取寬度和高度的最小值和最大值
+            const minDim = Math.min(w, h);
+            const maxDim = Math.max(w, h);
+
+            // 根據最小尺寸分類設備
+            // iPad mini: 768×1024 或 1024×768 → minDim = 768
+            // iPad: 810×1080 或 1080×810 → minDim = 810
+            // iPad Air: 820×1180 或 1180×820 → minDim = 820
+            // iPad Pro 11": 834×1194 或 1194×834 → minDim = 834
+            // iPad Pro 12.9": 1024×1366 或 1366×1024 → minDim = 1024
+
+            let deviceSize;
+            if (minDim <= 768) {
+                deviceSize = 'small';       // iPad mini: 768
+            } else if (minDim <= 810) {
+                deviceSize = 'medium';      // iPad: 810
+            } else if (minDim <= 820) {
+                deviceSize = 'medium_large'; // iPad Air: 820
+            } else if (minDim <= 834) {
+                deviceSize = 'large';       // iPad Pro 11": 834
+            } else {
+                deviceSize = 'xlarge';      // iPad Pro 12.9": 1024
+            }
+
+            // 根據方向添加後綴
+            const aspectRatio = w / h;
+            const isPortrait = aspectRatio < 1;
+            const orientation = isPortrait ? '_portrait' : '_landscape';
+
+            return deviceSize + orientation;
+        };
+
+        // 🔥 第二步：根據 iPad 大小獲取最優參數
+        // ✅ v42.2：根據設備對角線長度和方向設置參數
+        const getIPadOptimalParams = (iPadSize) => {
+            const params = {
+                // 豎屏模式（高度 > 寬度）
+                small_portrait: {
+                    sideMargin: 15,
+                    topButtonArea: 35,
+                    bottomButtonArea: 35,
+                    horizontalSpacing: 12,
+                    verticalSpacing: 30,
+                    chineseFontSize: 22
+                },
+                medium_portrait: {
+                    sideMargin: 18,
+                    topButtonArea: 38,
+                    bottomButtonArea: 38,
+                    horizontalSpacing: 14,
+                    verticalSpacing: 32,
+                    chineseFontSize: 26
+                },
+                medium_large_portrait: {
+                    sideMargin: 20,
+                    topButtonArea: 40,
+                    bottomButtonArea: 40,
+                    horizontalSpacing: 15,
+                    verticalSpacing: 35,
+                    chineseFontSize: 28
+                },
+                large_portrait: {
+                    sideMargin: 22,
+                    topButtonArea: 42,
+                    bottomButtonArea: 42,
+                    horizontalSpacing: 16,
+                    verticalSpacing: 37,
+                    chineseFontSize: 30
+                },
+                xlarge_portrait: {
+                    sideMargin: 25,
+                    topButtonArea: 45,
+                    bottomButtonArea: 45,
+                    horizontalSpacing: 18,
+                    verticalSpacing: 40,
+                    chineseFontSize: 34
+                },
+                // 橫屏模式（寬度 > 高度）
+                small_landscape: {
+                    sideMargin: 12,
+                    topButtonArea: 30,
+                    bottomButtonArea: 30,
+                    horizontalSpacing: 10,
+                    verticalSpacing: 25,
+                    chineseFontSize: 20
+                },
+                medium_landscape: {
+                    sideMargin: 15,
+                    topButtonArea: 32,
+                    bottomButtonArea: 32,
+                    horizontalSpacing: 12,
+                    verticalSpacing: 28,
+                    chineseFontSize: 24
+                },
+                medium_large_landscape: {
+                    sideMargin: 17,
+                    topButtonArea: 34,
+                    bottomButtonArea: 34,
+                    horizontalSpacing: 13,
+                    verticalSpacing: 30,
+                    chineseFontSize: 26
+                },
+                large_landscape: {
+                    sideMargin: 19,
+                    topButtonArea: 36,
+                    bottomButtonArea: 36,
+                    horizontalSpacing: 14,
+                    verticalSpacing: 32,
+                    chineseFontSize: 28
+                },
+                xlarge_landscape: {
+                    sideMargin: 20,
+                    topButtonArea: 38,
+                    bottomButtonArea: 38,
+                    horizontalSpacing: 16,
+                    verticalSpacing: 35,
+                    chineseFontSize: 32
+                }
+            };
+            return params[iPadSize];
+        };
+
         const itemCount = currentPagePairs.length;
 
         // 📝 響應式檢測：判斷是否需要使用緊湊模式
@@ -2225,132 +2352,6 @@ class GameScene extends Phaser.Scene {
             // ============================================================================
             // ✅ v42.0：iPad 容器大小分類系統 - 根據容器大小動態調整所有參數
             // ============================================================================
-
-            // 🔥 第一步：iPad 容器大小分類函數
-            // ✅ v42.2：根據寬度和高度的組合分類，而不是只看寬度
-            // 這樣 768×1024 和 1024×768 會被分類為同一個設備
-            function classifyIPadSize(w, h) {
-                // 獲取寬度和高度的最小值和最大值
-                const minDim = Math.min(w, h);
-                const maxDim = Math.max(w, h);
-
-                // 根據最小尺寸分類設備
-                // iPad mini: 768×1024 或 1024×768 → minDim = 768
-                // iPad: 810×1080 或 1080×810 → minDim = 810
-                // iPad Air: 820×1180 或 1180×820 → minDim = 820
-                // iPad Pro 11": 834×1194 或 1194×834 → minDim = 834
-                // iPad Pro 12.9": 1024×1366 或 1366×1024 → minDim = 1024
-
-                let deviceSize;
-                if (minDim <= 768) {
-                    deviceSize = 'small';       // iPad mini: 768
-                } else if (minDim <= 810) {
-                    deviceSize = 'medium';      // iPad: 810
-                } else if (minDim <= 820) {
-                    deviceSize = 'medium_large'; // iPad Air: 820
-                } else if (minDim <= 834) {
-                    deviceSize = 'large';       // iPad Pro 11": 834
-                } else {
-                    deviceSize = 'xlarge';      // iPad Pro 12.9": 1024
-                }
-
-                // 根據方向添加後綴
-                const aspectRatio = w / h;
-                const isPortrait = aspectRatio < 1;
-                const orientation = isPortrait ? '_portrait' : '_landscape';
-
-                return deviceSize + orientation;
-            }
-
-            // 🔥 第二步：根據 iPad 大小獲取最優參數
-            // ✅ v42.2：根據設備對角線長度和方向設置參數
-            function getIPadOptimalParams(iPadSize) {
-                const params = {
-                    // 豎屏模式（高度 > 寬度）
-                    small_portrait: {
-                        sideMargin: 15,
-                        topButtonArea: 35,
-                        bottomButtonArea: 35,
-                        horizontalSpacing: 12,
-                        verticalSpacing: 30,
-                        chineseFontSize: 22
-                    },
-                    medium_portrait: {
-                        sideMargin: 18,
-                        topButtonArea: 38,
-                        bottomButtonArea: 38,
-                        horizontalSpacing: 14,
-                        verticalSpacing: 32,
-                        chineseFontSize: 26
-                    },
-                    medium_large_portrait: {
-                        sideMargin: 20,
-                        topButtonArea: 40,
-                        bottomButtonArea: 40,
-                        horizontalSpacing: 15,
-                        verticalSpacing: 35,
-                        chineseFontSize: 28
-                    },
-                    large_portrait: {
-                        sideMargin: 22,
-                        topButtonArea: 42,
-                        bottomButtonArea: 42,
-                        horizontalSpacing: 16,
-                        verticalSpacing: 37,
-                        chineseFontSize: 30
-                    },
-                    xlarge_portrait: {
-                        sideMargin: 25,
-                        topButtonArea: 45,
-                        bottomButtonArea: 45,
-                        horizontalSpacing: 18,
-                        verticalSpacing: 40,
-                        chineseFontSize: 34
-                    },
-                    // 橫屏模式（寬度 > 高度）
-                    small_landscape: {
-                        sideMargin: 12,
-                        topButtonArea: 30,
-                        bottomButtonArea: 30,
-                        horizontalSpacing: 10,
-                        verticalSpacing: 25,
-                        chineseFontSize: 20
-                    },
-                    medium_landscape: {
-                        sideMargin: 15,
-                        topButtonArea: 32,
-                        bottomButtonArea: 32,
-                        horizontalSpacing: 12,
-                        verticalSpacing: 28,
-                        chineseFontSize: 24
-                    },
-                    medium_large_landscape: {
-                        sideMargin: 17,
-                        topButtonArea: 34,
-                        bottomButtonArea: 34,
-                        horizontalSpacing: 13,
-                        verticalSpacing: 30,
-                        chineseFontSize: 26
-                    },
-                    large_landscape: {
-                        sideMargin: 19,
-                        topButtonArea: 36,
-                        bottomButtonArea: 36,
-                        horizontalSpacing: 14,
-                        verticalSpacing: 32,
-                        chineseFontSize: 28
-                    },
-                    xlarge_landscape: {
-                        sideMargin: 20,
-                        topButtonArea: 38,
-                        bottomButtonArea: 38,
-                        horizontalSpacing: 16,
-                        verticalSpacing: 35,
-                        chineseFontSize: 32
-                    }
-                };
-                return params[iPadSize];
-            }
 
             // 🔥 第三步：定義按鈕區域和邊距
             // ✅ v42.0：使用 iPad 容器分類系統
