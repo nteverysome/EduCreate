@@ -14,7 +14,7 @@
  * - 分頁功能
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
@@ -149,7 +149,7 @@ export default function AuthorProfilePage() {
   // 載入作者信息和活動
   useEffect(() => {
     loadAuthorData();
-  }, [authorId, sortBy, page, currentFolderId]);
+  }, [loadAuthorData]);
 
   // 檢查是否為作者本人
   useEffect(() => {
@@ -158,7 +158,7 @@ export default function AuthorProfilePage() {
     }
   }, [session, author]);
 
-  const loadAuthorData = async () => {
+  const loadAuthorData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -203,7 +203,7 @@ export default function AuthorProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authorId, sortBy, page, currentFolderId, session]);
 
   const checkFollowStatus = async () => {
     try {
