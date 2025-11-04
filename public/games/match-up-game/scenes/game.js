@@ -1862,6 +1862,19 @@ class GameScene extends Phaser.Scene {
         const isPortraitCompactMode = isMobileDevice && isPortraitMode;  // 手機直向緊湊模式
         const isLandscapeCompactMode = isLandscapeMobile || isTinyHeight;  // 手機橫向緊湊模式
 
+        // ✅ v45.0：修復 iPad 參數初始化 - 在 createMixedLayout 中定義 iPadParams
+        let iPadSize = null;
+        let iPadParams = null;
+        if (isIPad) {
+            iPadSize = classifyIPadSize(width, height);
+            iPadParams = getIPadOptimalParams(iPadSize);
+            console.log('📱 [v45.0] iPad 參數已初始化:', {
+                size: iPadSize,
+                width: width,
+                height: height
+            });
+        }
+
         console.log('📱 響應式檢測 [v38.0]:', {
             width,
             height,
