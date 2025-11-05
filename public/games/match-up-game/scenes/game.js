@@ -3017,7 +3017,7 @@ class GameScene extends Phaser.Scene {
             const hasChineseImage = pair.chineseImageUrl && pair.chineseImageUrl.trim() !== '';
 
             if (hasChineseImage) {
-                // 🔥 [v66.0] 如果有中文圖片，加載並顯示圖片
+                // 🔥 [v70.0] 修復：即使有圖片，也要顯示中文文字
                 console.log(`🖼️ [v66.0] 混合佈局中文框 [${i}] 有圖片: ${pair.chineseImageUrl.substring(0, 50)}...`);
 
                 // 計算正方形圖片的尺寸（與卡片高度相同）
@@ -3027,6 +3027,24 @@ class GameScene extends Phaser.Scene {
                 this.loadAndDisplayImage(frameContainer, pair.chineseImageUrl, 0, 0, squareSize, `chinese-${pair.id}`).catch(error => {
                     console.error(`❌ [v66.0] 混合佈局中文圖片載入失敗 [${i}]:`, error);
                 });
+
+                // 🔥 [v70.0] 新增：即使有圖片，也要顯示中文文字（在圖片下方）
+                const chineseActualFontSize = chineseFontSizesArray[i];
+                const chineseTextHeightActual = chineseActualFontSize + 5;
+
+                // 中文文字位置：在圖片下方
+                const chineseY = cardHeightInFrame / 2 + chineseTextHeightActual / 2;
+
+                console.log(`📝 [v70.0] 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${chineseY.toFixed(1)}`);
+
+                const chineseText = this.add.text(0, chineseY, pair.answer, {
+                    fontSize: `${chineseActualFontSize}px`,
+                    color: '#000000',
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold'
+                });
+                chineseText.setOrigin(0.5, 0.5);
+                frameContainer.add(chineseText);
             } else {
                 // 🔥 [v66.0] 如果沒有圖片，顯示中文文字
                 // 🔥 中文文字位置計算（第六步）
