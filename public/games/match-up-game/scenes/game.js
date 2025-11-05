@@ -3013,68 +3013,78 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 🔥 [v66.0] 檢查是否有中文圖片
+            // 🔥 [v74.0] 改進中文框佈局 - 和英文圖片一樣的模式
             const hasChineseImage = pair.chineseImageUrl && pair.chineseImageUrl.trim() !== '';
+            const hasChineseText = pair.answer && pair.answer.trim() !== '' && pair.answer.trim() !== '<br>';
 
-            if (hasChineseImage) {
-                // 🔥 [v72.0] 修復：圖片在上，文字在下
-                console.log(`🖼️ [v66.0] 混合佈局中文框 [${i}] 有圖片: ${pair.chineseImageUrl.substring(0, 50)}...`);
+            console.log(`🔍 [v74.0] 混合佈局中文框 [${i}] 內容檢查:`, {
+                hasImage: hasChineseImage,
+                hasText: hasChineseText,
+                text: pair.answer
+            });
 
-                // 計算圖片和文字的尺寸
-                const chineseActualFontSize = chineseFontSizesArray[i];
-                const chineseTextHeightActual = chineseActualFontSize + 5;  // 字體大小 + 行高
+            if (hasChineseImage && hasChineseText) {
+                // 🔥 [v74.0] 情況 1：圖片 + 文字（圖片 70%，文字 30%）
+                console.log(`🖼️ [v74.0] 混合佈局中文框 [${i}] 圖片 + 文字模式`);
 
-                // 計算可用空間：總高度 - 文字高度 - 間距
-                const textBottomPadding = 5;  // 文字下方間距
-                const availableHeightForImage = cardHeightInFrame - chineseTextHeightActual - textBottomPadding;
-
-                // 圖片尺寸：正方形，寬度受限於框寬度
-                const imageSize = Math.min(frameWidth - 10 - 4, availableHeightForImage);
-
-                // 圖片位置：上方居中
-                const imageY = -cardHeightInFrame / 2 + imageSize / 2 + 2;
+                // 圖片佔據上方 70%
+                const imageAreaHeight = cardHeightInFrame * 0.7;
+                const imageAreaY = -cardHeightInFrame / 2 + imageAreaHeight / 2;
+                const squareSize = Math.min(frameWidth - 10 - 4, imageAreaHeight - 4);
 
                 // 🔥 [v68.0] 修復：使用 chinese-${pair.id} 作為 imageKey，避免與英文圖片衝突
-                this.loadAndDisplayImage(frameContainer, pair.chineseImageUrl, 0, imageY, imageSize, `chinese-${pair.id}`).catch(error => {
-                    console.error(`❌ [v66.0] 混合佈局中文圖片載入失敗 [${i}]:`, error);
+                this.loadAndDisplayImage(frameContainer, pair.chineseImageUrl, 0, imageAreaY, squareSize, `chinese-${pair.id}`).catch(error => {
+                    console.error(`❌ [v74.0] 混合佈局中文圖片載入失敗 [${i}]:`, error);
                 });
 
-                // 文字位置：下方居中
-                const textY = cardHeightInFrame / 2 - chineseTextHeightActual / 2 - 2;
+                // 文字佔據下方 30%
+                const chineseActualFontSize = chineseFontSizesArray[i];
+                const textAreaHeight = cardHeightInFrame * 0.3;
+                const bottomPadding = Math.max(6, cardHeightInFrame * 0.06);
+                const textHeight = textAreaHeight - bottomPadding;
+                const textAreaY = cardHeightInFrame / 2 - bottomPadding - textHeight / 2;
 
-                console.log(`📝 [v72.0] 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${textY.toFixed(1)}`);
+                console.log(`📝 [v74.0] 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px`);
 
-                const chineseText = this.add.text(0, textY, pair.answer, {
+                const chineseText = this.add.text(0, textAreaY, pair.answer, {
                     fontSize: `${chineseActualFontSize}px`,
                     color: '#000000',
                     fontFamily: 'Arial',
-                    fontStyle: 'bold'
+                    fontStyle: 'bold',
+                    align: 'center',
+                    wordWrap: { width: frameWidth - 10 }
+                });
+                chineseText.setOrigin(0.5, 0.5);
+                frameContainer.add(chineseText);
+            } else if (hasChineseImage && !hasChineseText) {
+                // 🔥 [v74.0] 情況 2：只有圖片
+                console.log(`🖼️ [v74.0] 混合佈局中文框 [${i}] 只有圖片模式`);
+
+                // 圖片置中顯示
+                const squareSize = Math.min(frameWidth - 10 - 4, cardHeightInFrame - 4);
+                this.loadAndDisplayImage(frameContainer, pair.chineseImageUrl, 0, 0, squareSize, `chinese-${pair.id}`).catch(error => {
+                    console.error(`❌ [v74.0] 混合佈局中文圖片載入失敗 [${i}]:`, error);
+                });
+            } else if (!hasChineseImage && hasChineseText) {
+                // 🔥 [v74.0] 情況 3：只有文字
+                console.log(`📝 [v74.0] 混合佈局中文框 [${i}] 只有文字模式`);
+
+                const chineseActualFontSize = chineseFontSizesArray[i];
+
+                // 文字置中顯示
+                const chineseText = this.add.text(0, 0, pair.answer, {
+                    fontSize: `${chineseActualFontSize}px`,
+                    color: '#000000',
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold',
+                    align: 'center',
+                    wordWrap: { width: frameWidth - 10 }
                 });
                 chineseText.setOrigin(0.5, 0.5);
                 frameContainer.add(chineseText);
             } else {
-                // 🔥 [v66.0] 如果沒有圖片，顯示中文文字
-                // 🔥 中文文字位置計算（第六步）
-                // ✅ v26.0：方案 A - 在英文卡片和中文字之間加入 verticalSpacing
-                // 新結構：英文卡片 + verticalSpacing + 中文字 + verticalSpacing
-                const chineseActualFontSize = chineseFontSizesArray[i];
-                const chineseTextHeightActual = chineseActualFontSize + 5;  // 字體大小 + 行高
-
-                // 中文文字位置：英文卡片下方 + 中文字高度/2
-                // ✅ v35.0：取消上面的 verticalSpacing，中文字直接貼著英文卡片
-                const chineseY = cardHeightInFrame / 2 + chineseTextHeightActual / 2;
-
-                console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${chineseY.toFixed(1)}`);
-
-                // 🔥 創建最終的中文文字
-                const chineseText = this.add.text(0, chineseY, pair.answer, {
-                    fontSize: `${chineseActualFontSize}px`,  // 使用預先計算的字體大小
-                    color: '#000000',
-                    fontFamily: 'Arial',
-                    fontStyle: 'bold'
-                });
-                chineseText.setOrigin(0.5, 0.5);  // ✅ 改進：水平和垂直都居中
-                frameContainer.add(chineseText);
+                // 🔥 [v74.0] 情況 4：既沒有圖片也沒有文字（空框）
+                console.log(`⚠️ [v74.0] 混合佈局中文框 [${i}] 空框`);
             }
 
             // 保存框的數據
