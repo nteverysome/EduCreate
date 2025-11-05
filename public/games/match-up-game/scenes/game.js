@@ -2799,10 +2799,11 @@ class GameScene extends Phaser.Scene {
                 // 🔥 計算單元總高度（包含中文文字）
                 const availableHeightPerRow = (availableHeight - verticalSpacing * (rows + 1)) / rows;
 
-                // 🔥 卡片高度和中文文字高度計算（與正方形模式保持一致）
+                // 🔥 [v79.0] 卡片高度和中文文字高度計算（與正方形模式保持一致）
                 // 使用正確公式：(availableHeightPerRow - verticalSpacing) / 1.4
                 cardHeightInFrame = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正
-                chineseTextHeight = cardHeightInFrame * 0.4;  // 中文文字高度 = 卡片高度的 40%
+                // 🔥 [v79.0] 增加下方區域高度 - 從 0.4 改為 0.55，提供更多空間給圖片和文字
+                chineseTextHeight = cardHeightInFrame * 0.55;  // 中文文字高度 = 卡片高度的 55%（增加空間）
 
                 totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;
 
@@ -3045,28 +3046,28 @@ class GameScene extends Phaser.Scene {
                 labelContainer.add(labelBackground);
 
                 if (hasChineseImage && hasChineseText) {
-                    // 🔥 [v78.0] 改進佈局 - 圖片 60%，文字 40%（更清晰可辨識）
-                    console.log(`🖼️📝 [v78.0] 下方區域 [${i}] 圖片 + 文字模式（改進版）`);
+                    // 🔥 [v79.0] 改進佈局 - 圖片 75%，文字 25%（更清晰可辨識，空間更寬敞）
+                    console.log(`🖼️📝 [v79.0] 下方區域 [${i}] 圖片 + 文字模式（v79.0 優化版）`);
 
-                    // 圖片佔據上方 60%
-                    const imageAreaHeight = chineseTextHeight * 0.6;
+                    // 圖片佔據上方 75%（增加圖片空間）
+                    const imageAreaHeight = chineseTextHeight * 0.75;
                     const imageAreaY = -chineseTextHeight / 2 + imageAreaHeight / 2;
                     const squareSize = Math.min(frameWidth - 10 - 4, imageAreaHeight - 4);
 
                     this.loadAndDisplayImage(labelContainer, pair.chineseImageUrl, 0, imageAreaY, squareSize, `chinese-${pair.id}`).catch(error => {
-                        console.error(`❌ [v78.0] 下方區域圖片載入失敗 [${i}]:`, error);
+                        console.error(`❌ [v79.0] 下方區域圖片載入失敗 [${i}]:`, error);
                     });
 
-                    // 文字佔據下方 40%（增加空間）
+                    // 文字佔據下方 25%（減少文字空間，但字體更大）
                     const chineseActualFontSize = chineseFontSizesArray[i];
-                    const textAreaHeight = chineseTextHeight * 0.4;
-                    const bottomPadding = Math.max(2, chineseTextHeight * 0.03);
+                    const textAreaHeight = chineseTextHeight * 0.25;
+                    const bottomPadding = Math.max(2, chineseTextHeight * 0.02);
                     const textHeight = textAreaHeight - bottomPadding;
                     const textAreaY = chineseTextHeight / 2 - bottomPadding - textHeight / 2;
 
-                    // 🔥 [v78.0] 增加字體大小 - 從 0.6 倍改為 0.75 倍，讓文字更清晰
+                    // 🔥 [v79.0] 增加字體大小 - 從 0.75 倍改為 0.9 倍，讓文字更清晰且不被壓縮
                     const chineseText = this.add.text(0, textAreaY, pair.answer, {
-                        fontSize: `${Math.max(12, chineseActualFontSize * 0.75)}px`,
+                        fontSize: `${Math.max(14, chineseActualFontSize * 0.9)}px`,
                         color: '#000000',
                         fontFamily: 'Arial',
                         fontStyle: 'bold',
