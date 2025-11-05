@@ -3017,16 +3017,41 @@ class GameScene extends Phaser.Scene {
             const hasChineseImage = pair.chineseImageUrl && pair.chineseImageUrl.trim() !== '';
 
             if (hasChineseImage) {
-                // 🔥 [v71.0] 修復：有圖片時只顯示圖片，不顯示文字
+                // 🔥 [v72.0] 修復：圖片在上，文字在下
                 console.log(`🖼️ [v66.0] 混合佈局中文框 [${i}] 有圖片: ${pair.chineseImageUrl.substring(0, 50)}...`);
 
-                // 計算正方形圖片的尺寸（與卡片高度相同）
-                const squareSize = Math.min(frameWidth - 10 - 4, cardHeightInFrame - 4);
+                // 計算圖片和文字的尺寸
+                const chineseActualFontSize = chineseFontSizesArray[i];
+                const chineseTextHeightActual = chineseActualFontSize + 5;  // 字體大小 + 行高
+
+                // 計算可用空間：總高度 - 文字高度 - 間距
+                const textBottomPadding = 5;  // 文字下方間距
+                const availableHeightForImage = cardHeightInFrame - chineseTextHeightActual - textBottomPadding;
+
+                // 圖片尺寸：正方形，寬度受限於框寬度
+                const imageSize = Math.min(frameWidth - 10 - 4, availableHeightForImage);
+
+                // 圖片位置：上方居中
+                const imageY = -cardHeightInFrame / 2 + imageSize / 2 + 2;
 
                 // 🔥 [v68.0] 修復：使用 chinese-${pair.id} 作為 imageKey，避免與英文圖片衝突
-                this.loadAndDisplayImage(frameContainer, pair.chineseImageUrl, 0, 0, squareSize, `chinese-${pair.id}`).catch(error => {
+                this.loadAndDisplayImage(frameContainer, pair.chineseImageUrl, 0, imageY, imageSize, `chinese-${pair.id}`).catch(error => {
                     console.error(`❌ [v66.0] 混合佈局中文圖片載入失敗 [${i}]:`, error);
                 });
+
+                // 文字位置：下方居中
+                const textY = cardHeightInFrame / 2 - chineseTextHeightActual / 2 - 2;
+
+                console.log(`📝 [v72.0] 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${textY.toFixed(1)}`);
+
+                const chineseText = this.add.text(0, textY, pair.answer, {
+                    fontSize: `${chineseActualFontSize}px`,
+                    color: '#000000',
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold'
+                });
+                chineseText.setOrigin(0.5, 0.5);
+                frameContainer.add(chineseText);
             } else {
                 // 🔥 [v66.0] 如果沒有圖片，顯示中文文字
                 // 🔥 中文文字位置計算（第六步）
