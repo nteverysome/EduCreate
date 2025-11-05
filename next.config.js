@@ -49,6 +49,32 @@ const nextConfig = {
   // HTTP 頭配置 - 允許 iframe 嵌入
   async headers() {
     return [
+      // 🔥 Match-up 遊戲：禁用快取，確保每次都加載最新代碼
+      {
+        source: '/games/match-up-game/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate, max-age=0',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self'",
+          },
+        ],
+      },
       {
         source: '/games/:path*',
         headers: [
