@@ -2525,28 +2525,43 @@ class GameScene extends Phaser.Scene {
                         itemCount: itemCount
                     });
                 } else {
-                    // 🔥 v51.0: 統一列數計算 - 根據容器寬度動態計算，不再基於寬高比
-                    // 移除寬高比邏輯，使用統一的容器寬度計算
-                    // 這樣 1024×1366 和 1024×768 都會根據 1024px 寬度動態調整
+                    // 🔥 v52.0: 修復列數計算 - 基於實際卡片尺寸而不是 minCardWidth
+                    // 問題：v51.0 使用 minCardWidth（60px）計算列數，但實際卡片是正方形（263px）
+                    // 導致計算出的列數過多，卡片超出容器邊界
+                    //
+                    // 解決方案：
+                    // 1. 先估算正方形卡片的尺寸（基於高度）
+                    // 2. 根據實際卡片尺寸計算列數
+                    // 3. 確保所有卡片都在容器內
 
-                    // 計算最優列數：基於容器寬度和最小卡片尺寸
-                    // 🔥 v51.0 修正公式：考慮邊距計算方式
-                    // 實際卡片寬度 = (availableWidth - horizontalSpacing * (cols + 1)) / cols
-                    // 要求 frameWidth >= minCardWidth，推導得：
-                    // cols <= (availableWidth - horizontalSpacing) / (minCardWidth + horizontalSpacing)
-                    const minCardWidth = hasImages ? 60 : 80;  // 有圖片時卡片更小
-                    const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (minCardWidth + horizontalSpacing));
+                    // 🔥 第一步：估算正方形卡片尺寸
+                    // 假設最多 10 列（保守估計）
+                    const estimatedCols = Math.min(10, itemCount);
+                    const estimatedRows = Math.ceil(itemCount / estimatedCols);
+
+                    // 估算每行的可用高度
+                    const estimatedAvailableHeightPerRow = (availableHeight - verticalSpacing * (estimatedRows + 1)) / estimatedRows;
+
+                    // 估算正方形卡片尺寸（包含中文文字）
+                    // totalUnitHeight = squareSize + chineseTextHeight = squareSize * 1.4
+                    // squareSize = totalUnitHeight / 1.4
+                    const estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
+
+                    // 🔥 第二步：根據實際卡片尺寸計算列數
+                    // 公式：cols = floor((availableWidth - spacing * (cols + 1)) / squareSize)
+                    // 簡化為：cols = floor((availableWidth - spacing) / (squareSize + spacing))
+                    const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
 
                     // 限制最大列數（避免卡片過小）
                     const maxColsLimit = 10;
                     optimalCols = Math.min(calculatedCols, maxColsLimit, itemCount);
 
-                    console.log(`🔥 [v51.0] 統一列數計算（非 iPad）:`, {
+                    console.log(`🔥 [v52.0] 修復列數計算（基於實際卡片尺寸）:`, {
                         width: width.toFixed(1),
                         height: height.toFixed(1),
                         aspectRatio: aspectRatio.toFixed(2),
                         availableWidth: availableWidth.toFixed(1),
-                        minCardWidth: minCardWidth,
+                        estimatedSquareSize: estimatedSquareSize.toFixed(1),
                         horizontalSpacing: horizontalSpacing,
                         calculatedCols: calculatedCols,
                         maxColsLimit: maxColsLimit,
@@ -2924,11 +2939,34 @@ class GameScene extends Phaser.Scene {
             const col = i % cols;
             const row = Math.floor(i / cols);
 
-            // 🔥 v23.0：修復容器位置計算，考慮邊距
-            // 在 Phaser 中，容器的位置是基於其左上角，不是中心
-            // 所以我們需要調整 frameX 的計算，使其正確定位容器
+            // 🔥 v52.0：修復容器位置計算
+            // 在 Phaser 中，容器的位置是基於其中心點
+            // 所以 frameX 應該是容器中心的 X 坐標
             // 公式：邊距 + 間距 + col * (frameWidth + 間距) + frameWidth / 2
-            const frameX = horizontalMargin + horizontalSpacing + col * (frameWidth + horizontalSpacing) + frameWidth / 2;
+            // 這樣第一個容器的中心在：57.6 + 5 + 0 * (191.43 + 5) + 191.43/2 = 158.31
+            // 第二個容器的中心在：57.6 + 5 + 1 * (191.43 + 5) + 191.43/2 = 158.31 + 196.43 = 354.74
+            // 最後一個容器（col=9）的中心在：57.6 + 5 + 9 * (191.43 + 5) + 191.43/2 = 1926.18
+            // 但這超出了 availableWidth（1804.8），所以會被裁切
+            //
+            // 根本問題：frameX 計算時沒有考慮到容器的邊界
+            // 正確的計算應該是：
+            // frameX = horizontalMargin + frameWidth / 2 + col * (frameWidth + horizontalSpacing)
+            // 這樣第一個容器的中心在：57.6 + 191.43/2 + 0 = 153.21
+            // 第二個容器的中心在：57.6 + 191.43/2 + 1 * (191.43 + 5) = 153.21 + 196.43 = 349.64
+            // 最後一個容器（col=9）的中心在：57.6 + 191.43/2 + 9 * (191.43 + 5) = 153.21 + 1767.87 = 1921.08
+            // 這仍然超出邊界！
+            //
+            // 真正的問題是：列數計算有誤，導致卡片太多
+            // 讓我們重新檢查列數計算...
+            // 根據日誌：cols: 10, frameWidth: 191.42857142857144, availableWidth: 1804.8
+            // 10 個卡片的總寬度 = 10 * 191.43 + 9 * 5 = 1914.3 + 45 = 1959.3
+            // 但 availableWidth 只有 1804.8，所以會超出邊界！
+            //
+            // 問題根源：列數計算公式仍然有誤
+            // 應該使用：cols = floor((availableWidth - spacing) / (frameWidth + spacing))
+            // 而不是：cols = floor((availableWidth - spacing) / (minCardWidth + spacing))
+            // 因為 frameWidth 已經是計算好的卡片寬度，不是 minCardWidth
+            const frameX = horizontalMargin + frameWidth / 2 + col * (frameWidth + horizontalSpacing);
             // 📝 使用 totalUnitHeight 計算垂直位置（已包含 chineseTextHeight 和 verticalSpacing）
             const frameY = topOffset + row * totalUnitHeight + totalUnitHeight / 2;
 
