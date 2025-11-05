@@ -4435,11 +4435,33 @@ class GameScene extends Phaser.Scene {
         // 🔥 清空當前頁面的答案記錄
         this.currentPageAnswers = [];
 
+        // 🔥 [v56.0] 詳細調試日誌
+        console.log('🔍 [v56.0] 開始檢查所有配對:', {
+            currentPage: this.currentPage,
+            startIndex,
+            endIndex,
+            currentPagePairsCount: currentPagePairs.length,
+            leftCardsCount: this.leftCards.length,
+            totalPairs: this.pairs.length
+        });
+
         // 檢查每個左側卡片的配對
-        this.leftCards.forEach(leftCard => {
+        this.leftCards.forEach((leftCard, cardIndex) => {
             const leftPairId = leftCard.getData('pairId');
             const rightCard = leftCard.getData('matchedWith');
             const correctPair = currentPagePairs.find(pair => pair.id === leftPairId);
+
+            // 🔥 [v56.0] 詳細調試：記錄每個卡片的配對信息
+            console.log(`🔍 [v56.0] 卡片 ${cardIndex + 1}:`, {
+                leftPairId,
+                leftCardText: leftCard.getData('text'),
+                hasRightCard: !!rightCard,
+                rightPairId: rightCard ? rightCard.getData('pairId') : null,
+                rightCardText: rightCard ? rightCard.getData('text') : null,
+                correctPairId: correctPair ? correctPair.id : null,
+                correctPairEnglish: correctPair ? correctPair.english : null,
+                correctPairChinese: correctPair ? correctPair.chinese : null
+            });
 
             if (rightCard) {
                 const rightPairId = rightCard.getData('pairId');
@@ -4447,6 +4469,16 @@ class GameScene extends Phaser.Scene {
 
                 // 🔥 獲取用戶回答的英文（從 pairs 數據中獲取，而不是從卡片對象）
                 const userAnswerPair = currentPagePairs.find(pair => pair.id === rightPairId);
+
+                // 🔥 [v56.0] 詳細調試：記錄答案驗證結果
+                console.log(`🔍 [v56.0] 答案驗證 - 卡片 ${cardIndex + 1}:`, {
+                    leftPairId,
+                    rightPairId,
+                    isCorrect,
+                    correctPairChinese: correctPair ? correctPair.chinese : null,
+                    userAnswerEnglish: userAnswerPair ? userAnswerPair.english : null,
+                    correctAnswerEnglish: correctPair ? correctPair.english : null
+                });
 
                 // 🔥 記錄用戶答案
                 this.currentPageAnswers.push({
@@ -4497,8 +4529,15 @@ class GameScene extends Phaser.Scene {
         // 🔥 將當前頁面的答案添加到所有答案記錄中
         this.allPagesAnswers.push(...this.currentPageAnswers);
 
+        // 🔥 [v56.0] 詳細調試：記錄最終分數
         console.log('📝 當前頁面答案記錄:', this.currentPageAnswers);
         console.log('📝 所有頁面答案記錄:', this.allPagesAnswers);
+        console.log('📊 [v56.0] 當前頁面分數:', {
+            correctCount,
+            incorrectCount,
+            unmatchedCount,
+            totalCount: correctCount + incorrectCount + unmatchedCount
+        });
 
         // 🔥 檢查是否所有頁面都已完成
         const isLastPage = this.currentPage === this.totalPages - 1;
@@ -5003,18 +5042,32 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 計算總分數
-        const totalCorrect = this.allPagesAnswers.filter(answer => answer.isCorrect).length;
+        // 🔥 [v56.0] 改進分數計算邏輯
+        // 計算總分數：只計算有效的答案（已配對的答案）
+        const totalCorrect = this.allPagesAnswers.filter(answer => answer.isCorrect && answer.rightPairId !== null).length;
+        const totalAnswered = this.allPagesAnswers.filter(answer => answer.rightPairId !== null).length;
         const totalQuestions = this.pairs.length;
 
         // 格式化時間
         const timeText = this.formatGameTime(this.totalGameTime);
 
-        console.log('🎮 顯示遊戲結束模態框', {
+        // 🔥 [v56.0] 詳細調試：記錄分數計算過程
+        console.log('🎮 [v56.0] 顯示遊戲結束模態框', {
             totalCorrect,
+            totalAnswered,
             totalQuestions,
             totalGameTime: this.totalGameTime,
-            timeText
+            timeText,
+            allPagesAnswersCount: this.allPagesAnswers.length,
+            allPagesAnswers: this.allPagesAnswers.map((a, i) => ({
+                index: i,
+                leftText: a.leftText,
+                rightText: a.rightText,
+                correctAnswer: a.correctAnswer,
+                isCorrect: a.isCorrect,
+                leftPairId: a.leftPairId,
+                rightPairId: a.rightPairId
+            }))
         });
 
         // 創建半透明背景（遮罩）
