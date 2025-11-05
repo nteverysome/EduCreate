@@ -1216,13 +1216,19 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
+        console.log('🔍 [v52.0 DEBUG] 洗牌前:', {
+            randomMode: this.random,
+            originalOrder: currentPagePairs.map(p => p.id),
+            arrayLength: currentPagePairs.length
+        });
+
         if (this.random === 'same') {
             const urlParams = new URLSearchParams(window.location.search);
             const activityId = urlParams.get('activityId') || 'default-seed';
             const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
             shuffledAnswers = rng.shuffle([...currentPagePairs]);
-            console.log('🎲 使用固定隨機模式，種子:', seed);
+            console.log('🎲 使用固定隨機模式，種子:', seed, '洗牌後:', shuffledAnswers.map(p => p.id));
         } else {
             // 🔥 v52.0：使用 Fisher-Yates 算法實現真正的隨機排列
             shuffledAnswers = [...currentPagePairs];
@@ -1230,7 +1236,7 @@ class GameScene extends Phaser.Scene {
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffledAnswers[i], shuffledAnswers[j]] = [shuffledAnswers[j], shuffledAnswers[i]];
             }
-            console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）');
+            console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）', '洗牌後:', shuffledAnswers.map(p => p.id));
         }
 
         // 創建左側外框
