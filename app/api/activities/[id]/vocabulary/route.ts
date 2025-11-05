@@ -49,6 +49,7 @@ export async function GET(
 
     // 🔥 [v63.0] 優先從 vocabularyItems 關聯獲取詞彙（最新方式）
     let vocabularyItems = [];
+    const content = activity.content as any;
 
     if (activity.vocabularyItems && activity.vocabularyItems.length > 0) {
       // 🔥 [v63.0] 從 vocabularyItems 關聯獲取詞彙，包含所有圖片字段
@@ -74,7 +75,6 @@ export async function GET(
       }));
     } else {
       // 向後兼容：從舊的存儲方式獲取詞彙
-      const content = activity.content as any;
       const vocabularySetId = content?.vocabularySetId;
 
       if (vocabularySetId) {
