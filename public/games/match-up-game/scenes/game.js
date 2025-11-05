@@ -3633,10 +3633,16 @@ class GameScene extends Phaser.Scene {
                             // 將圖片添加到 Phaser 的紋理管理器
                             this.textures.addImage(imageKey, image);
 
-                            // 創建並顯示卡片圖片
-                            const cardImage = this.add.image(x, y, imageKey);
+                            // 🔥 [v67.0] 修復：先創建圖片，再添加到容器
+                            // 這樣圖片會使用容器的坐標系，而不是場景坐標系
+                            const cardImage = this.add.image(0, 0, imageKey);
                             cardImage.setDisplaySize(size, size);
                             cardImage.setOrigin(0.5);
+
+                            // 🔥 [v67.0] 設置圖片在容器中的位置
+                            cardImage.setPosition(x, y);
+
+                            // 🔥 [v67.0] 添加到容器
                             container.add(cardImage);
 
                             console.log(`✅ 圖片載入完成: ${imageKey}`);
