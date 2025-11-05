@@ -3023,8 +3023,8 @@ class GameScene extends Phaser.Scene {
                 // 計算正方形圖片的尺寸（與卡片高度相同）
                 const squareSize = Math.min(frameWidth - 10 - 4, cardHeightInFrame - 4);
 
-                // 加載並顯示圖片
-                this.loadAndDisplayImage(frameContainer, pair.chineseImageUrl, 0, 0, squareSize, pair.id).catch(error => {
+                // 🔥 [v68.0] 修復：使用 chinese-${pair.id} 作為 imageKey，避免與英文圖片衝突
+                this.loadAndDisplayImage(frameContainer, pair.chineseImageUrl, 0, 0, squareSize, `chinese-${pair.id}`).catch(error => {
                     console.error(`❌ [v66.0] 混合佈局中文圖片載入失敗 [${i}]:`, error);
                 });
             } else {
@@ -3438,7 +3438,8 @@ class GameScene extends Phaser.Scene {
         const imageAreaY = -height / 2 + buttonAreaHeight + imageAreaHeight / 2;
         const squareSize = Math.min(width - 4, imageAreaHeight - 4);
         // ✅ v44.0：添加錯誤處理
-        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, pairId).catch(error => {
+        // 🔥 [v68.0] 修復：使用 english-${pairId} 作為 imageKey，避免與中文圖片衝突
+        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, `english-${pairId}`).catch(error => {
             console.error('❌ 圖片載入失敗 (佈局 A):', error);
         });
 
@@ -3523,7 +3524,8 @@ class GameScene extends Phaser.Scene {
 
         // 創建圖片
         // ✅ v44.0：添加錯誤處理
-        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId).catch(error => {
+        // 🔥 [v68.0] 修復：使用 english-${pairId} 作為 imageKey，避免與中文圖片衝突
+        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, `english-${pairId}`).catch(error => {
             console.error('❌ 圖片載入失敗 (佈局 B):', error);
         });
 
@@ -3579,7 +3581,8 @@ class GameScene extends Phaser.Scene {
 
         // 圖片置中顯示
         // ✅ v44.0：添加錯誤處理
-        this.loadAndDisplayImage(container, imageUrl, 0, 0, squareSize, pairId).catch(error => {
+        // 🔥 [v68.0] 修復：使用 english-${pairId} 作為 imageKey，避免與中文圖片衝突
+        this.loadAndDisplayImage(container, imageUrl, 0, 0, squareSize, `english-${pairId}`).catch(error => {
             console.error('❌ 圖片載入失敗 (佈局 F):', error);
         });
     }
@@ -3598,7 +3601,8 @@ class GameScene extends Phaser.Scene {
 
         // 創建圖片
         // ✅ v44.0：添加錯誤處理
-        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId).catch(error => {
+        // 🔥 [v68.0] 修復：使用 english-${pairId} 作為 imageKey，避免與中文圖片衝突
+        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, `english-${pairId}`).catch(error => {
             console.error('❌ 圖片載入失敗 (佈局 ImageAudio):', error);
         });
 
@@ -4128,7 +4132,8 @@ class GameScene extends Phaser.Scene {
         const imageAreaY = -height / 2 + buttonAreaHeight + imageAreaHeight / 2;
         const squareSize = Math.min(width - 4, imageAreaHeight - 4);
 
-        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, pairId).catch(error => {
+        // 🔥 [v68.0] 修復：使用 chinese-${pairId} 作為 imageKey，避免與英文圖片衝突
+        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, `chinese-${pairId}`).catch(error => {
             console.error('❌ 圖片載入失敗 (右側佈局 A):', error);
         });
 
@@ -4177,7 +4182,8 @@ class GameScene extends Phaser.Scene {
         const imageAreaY = -height / 2 + imageAreaHeight / 2;
         const squareSize = Math.min(width - 4, imageAreaHeight - 4);
 
-        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, pairId).catch(error => {
+        // 🔥 [v68.0] 修復：使用 chinese-${pairId} 作為 imageKey，避免與英文圖片衝突
+        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, `chinese-${pairId}`).catch(error => {
             console.error('❌ 圖片載入失敗 (右側佈局 D):', error);
         });
 
@@ -4235,7 +4241,8 @@ class GameScene extends Phaser.Scene {
         const squareSize = Math.min(width - 4, height - 4);
 
         // 圖片置中顯示
-        this.loadAndDisplayImage(container, imageUrl, 0, 0, squareSize, pairId).catch(error => {
+        // 🔥 [v68.0] 修復：使用 chinese-${pairId} 作為 imageKey，避免與英文圖片衝突
+        this.loadAndDisplayImage(container, imageUrl, 0, 0, squareSize, `chinese-${pairId}`).catch(error => {
             console.error('❌ 圖片載入失敗 (右側佈局 F):', error);
         });
     }
@@ -4259,7 +4266,8 @@ class GameScene extends Phaser.Scene {
         const squareSize = Math.min(width - 4, imageHeight - 4);
 
         // 創建圖片
-        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId).catch(error => {
+        // 🔥 [v68.0] 修復：使用 chinese-${pairId} 作為 imageKey，避免與英文圖片衝突
+        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, `chinese-${pairId}`).catch(error => {
             console.error('❌ 圖片載入失敗 (右側佈局 ImageAudio):', error);
         });
 
