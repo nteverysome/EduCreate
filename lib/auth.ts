@@ -143,8 +143,8 @@ export const authOptions: NextAuthOptions = {
         tokenEmail: (token as any)?.email
       });
 
-      // 🔥 [v54.0] 修復：確保 session.user 存在，即使初始為 undefined
-      if (token) {
+      // 🔥 [v54.1] 修復：確保 session.user 存在，並只填充有效的 token 數據
+      if (token && (token.id || token.email)) {
         // 如果 session.user 不存在，創建它
         if (!session.user) {
           session.user = {
@@ -155,17 +155,33 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
-        // 從 token 填充 session.user
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
-        session.user.image = (token as any).image as string | null;
-        (session.user as any).role = token.role as string;
+        // 從 token 填充 session.user（只填充非空值）
+        if (token.id) {
+          session.user.id = token.id as string;
+        }
+        if (token.email) {
+          session.user.email = token.email as string;
+        }
+        if (token.name) {
+          session.user.name = token.name as string;
+        }
+        if ((token as any).image) {
+          session.user.image = (token as any).image as string | null;
+        }
+        if ((token as any).role) {
+          (session.user as any).role = token.role as string;
+        }
 
         console.log('✅ Session 已更新:', {
           userId: session.user.id,
           userEmail: session.user.email,
           userName: session.user.name
+        });
+      } else {
+        console.warn('⚠️ Token 無效或缺少必要字段:', {
+          hasToken: !!token,
+          tokenId: (token as any)?.id,
+          tokenEmail: (token as any)?.email
         });
       }
       return session;

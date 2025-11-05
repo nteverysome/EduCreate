@@ -518,11 +518,39 @@ export default function CreateGamePage() {
         });
 
         if (response.ok) {
-          const activity = await response.json() as { id?: string };
+          const activity = await response.json() as { id?: string; error?: string };
+
+          // 🔥 [v55.0] 驗證 activity.id 是否存在
+          if (!activity.id) {
+            console.error('❌ API 返回的活動 ID 為空:', activity);
+            alert('保存失敗：無法獲取活動 ID，請重試');
+            return;
+          }
+
+          console.log('✅ 活動創建成功:', {
+            id: activity.id,
+            title: activity.title,
+            totalWords: activity.totalWords
+          });
+
           // 跳轉到遊戲頁面，並傳遞活動 ID
           router.push(`/games/switcher?game=${templateId}&activityId=${activity.id}`);
         } else {
-          alert('保存失敗，請重試');
+          const errorData = await response.json() as { error?: string };
+          console.error('❌ 保存失敗:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorData.error
+          });
+
+          // 🔥 [v55.0] 根據錯誤類型提供更詳細的提示
+          if (response.status === 401) {
+            alert('保存失敗：請先登入才能保存活動');
+          } else if (response.status === 400) {
+            alert('保存失敗：' + (errorData.error || '缺少必要字段'));
+          } else {
+            alert('保存失敗，請重試');
+          }
         }
       }
     } catch (error) {
