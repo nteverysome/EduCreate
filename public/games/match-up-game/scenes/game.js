@@ -3039,9 +3039,9 @@ class GameScene extends Phaser.Scene {
                 // 創建下方區域容器
                 const labelContainer = this.add.container(frameX, labelAreaY);
 
-                // 下方區域的背景（可選，用於視覺效果）
+                // 🔥 [v77.0] 移除灰框邊框 - 只保留白色背景，不顯示邊框
                 const labelBackground = this.add.rectangle(0, 0, frameWidth - 10, chineseTextHeight, 0xffffff);
-                labelBackground.setStrokeStyle(1, 0xcccccc);
+                // labelBackground.setStrokeStyle(1, 0xcccccc);  // 🔥 [v77.0] 移除邊框
                 labelContainer.add(labelBackground);
 
                 if (hasChineseImage && hasChineseText) {

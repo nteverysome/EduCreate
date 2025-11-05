@@ -1,12 +1,18 @@
 /**
  * 圖片上傳測試 API 端點
  * 專門用於測試環境，不需要登錄
- * 
+ *
  * ⚠️ 警告：此端點僅用於測試，不應在生產環境中使用
+ *
+ * 🔥 [v77.0] 添加本地存儲回退機制
+ * 當 Vercel Blob 失敗時，自動使用本地文件系統存儲
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { existsSync } from 'fs';
 
 // 允許的圖片類型
 const ALLOWED_IMAGE_TYPES = [
