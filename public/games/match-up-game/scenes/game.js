@@ -1253,7 +1253,8 @@ class GameScene extends Phaser.Scene {
         // 創建右側答案卡片（文字在框右邊）
         shuffledAnswers.forEach((pair, index) => {
             const y = rightStartY + index * rightSpacing;
-            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id, 'right');  // 🔥 文字在框右邊
+            // 🔥 [v62.0] 傳遞 imageUrl 和 audioUrl
+            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl, 'right');  // 🔥 文字在框右邊
             this.rightCards.push(card);
         });
 
@@ -1376,7 +1377,8 @@ class GameScene extends Phaser.Scene {
             const x = bottomAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
             const y = bottomAreaStartY + row * (cardHeight + bottomVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 bottomVerticalSpacing
 
-            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id);
+            // 🔥 [v62.0] 傳遞 imageUrl 和 audioUrl
+            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl);
             this.rightCards.push(card);
         });
 
@@ -1538,7 +1540,8 @@ class GameScene extends Phaser.Scene {
 
             // 🔥 根據列號決定文字位置：第一列（col=0）文字在左邊，第二列（col=1）文字在右邊
             const textPosition = col === 0 ? 'left' : 'right';
-            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, textPosition);
+            // 🔥 [v62.0] 傳遞 imageUrl 和 audioUrl
+            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl, textPosition);
             this.rightCards.push(card);
         });
 
@@ -1681,7 +1684,8 @@ class GameScene extends Phaser.Scene {
             const x = bottomAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
             const y = bottomAreaStartY + row * (cardHeight + bottomVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 bottomVerticalSpacing
 
-            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id);
+            // 🔥 [v62.0] 傳遞 imageUrl 和 audioUrl
+            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl);
             this.rightCards.push(card);
         });
 
@@ -1886,7 +1890,8 @@ class GameScene extends Phaser.Scene {
                 const card = this.createLeftCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId, animationDelay, cardData.pair.imageUrl, cardData.pair.audioUrl);
                 this.leftCards.push(card);
             } else {
-                const card = this.createRightCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId);
+                // 🔥 [v62.0] 傳遞 imageUrl 和 audioUrl
+                const card = this.createRightCard(x, y, dynamicCardWidth, dynamicCardHeight, cardData.text, cardData.pairId, cardData.pair.chineseImageUrl, cardData.pair.audioUrl);
                 this.rightCards.push(card);
             }
         });
@@ -3897,7 +3902,16 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    createRightCard(x, y, width, height, text, pairId, textPosition = 'bottom') {
+    createRightCard(x, y, width, height, text, pairId, imageUrl = null, audioUrl = null, textPosition = 'bottom') {
+        // 🔥 [v62.0] 改進右側卡片以支持圖片和語音
+        console.log('🎨 [v62.0] createRightCard 被調用:', {
+            pairId,
+            hasText: !!text && text.trim() !== '',
+            hasImage: !!imageUrl && imageUrl.trim() !== '',
+            hasAudio: !!audioUrl && audioUrl.trim() !== '',
+            textPosition
+        });
+
         // 創建卡片容器
         const container = this.add.container(x, y);
         container.setDepth(5);
@@ -3906,6 +3920,81 @@ class GameScene extends Phaser.Scene {
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
         background.setDepth(1);
+
+        // 🔥 [v62.0] 檢查內容組合
+        const hasImage = imageUrl && imageUrl.trim() !== '';
+        const hasText = text && text.trim() !== '' && text.trim() !== '<br>';
+        const hasAudio = audioUrl && audioUrl.trim() !== '';
+
+        console.log('🔍 [v62.0] 右側卡片內容檢查:', {
+            pairId,
+            hasImage,
+            hasText,
+            hasAudio,
+            combination: `${hasImage ? 'I' : '-'}${hasText ? 'T' : '-'}${hasAudio ? 'A' : '-'}`
+        });
+
+        // 🔥 [v62.0] 根據內容組合決定佈局
+        if (hasImage && hasText && hasAudio) {
+            // 情況 A：圖片 + 文字 + 語音
+            this.createRightCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId);
+        } else if (hasImage && hasText && !hasAudio) {
+            // 情況 D：圖片 + 文字
+            this.createRightCardLayoutD(container, background, width, height, text, imageUrl, pairId);
+        } else if (hasImage && !hasText && hasAudio) {
+            // 圖片 + 語音（無文字）
+            this.createRightCardLayoutImageAudio(container, background, width, height, imageUrl, audioUrl, pairId);
+        } else if (hasImage && !hasText && !hasAudio) {
+            // 情況 F：只有圖片
+            this.createRightCardLayoutF(container, background, width, height, imageUrl, pairId);
+        } else if (!hasImage && hasText && hasAudio) {
+            // 情況 E：文字 + 語音
+            this.createRightCardLayoutE(container, background, width, height, text, audioUrl, pairId);
+        } else if (!hasImage && !hasText && hasAudio) {
+            // 情況 B：只有語音
+            this.createRightCardLayoutB(container, background, width, height, audioUrl, pairId);
+        } else {
+            // 情況 C：只有文字（現有邏輯）
+            this.createRightCardLayoutC(container, background, width, height, text, textPosition);
+        }
+
+        // 設置互動（接收拖曳）
+        background.setInteractive({ useHandCursor: true });
+
+        // 懸停效果
+        background.on('pointerover', () => {
+            if (!container.getData('isMatched') && this.isDragging) {
+                background.setStrokeStyle(3, 0xfe7606); // 橙色邊框
+            }
+        });
+        background.on('pointerout', () => {
+            if (!container.getData('isMatched')) {
+                background.setStrokeStyle(2, 0x333333);
+            }
+        });
+
+        // 儲存卡片數據
+        container.setData({
+            pairId: pairId,
+            side: 'right',
+            background: background,
+            isMatched: false
+        });
+
+        return container;
+    }
+
+    // 🔥 [v62.0] 右側卡片佈局函數 - 情況 C：只有文字
+    createRightCardLayoutC(container, background, width, height, text, textPosition = 'bottom') {
+        console.log('🎨 [v62.0] 右側卡片佈局 C: 只有文字', {
+            width,
+            height,
+            text,
+            textPosition
+        });
+
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
 
         // 🔥 創建文字標籤（動態字體大小，根據文字長度和內框寬度調整）
         const textLength = text.length;
@@ -3971,33 +4060,173 @@ class GameScene extends Phaser.Scene {
         cardText.setDepth(10);  // 確保文字在最上層
 
         // 添加到容器
-        container.add([background, cardText]);
+        container.add(cardText);
+    }
 
-        // 設置互動（接收拖曳）
-        background.setInteractive({ useHandCursor: true });
-
-        // 懸停效果
-        background.on('pointerover', () => {
-            if (!container.getData('isMatched') && this.isDragging) {
-                background.setStrokeStyle(3, 0xfe7606); // 橙色邊框
-            }
-        });
-        background.on('pointerout', () => {
-            if (!container.getData('isMatched')) {
-                background.setStrokeStyle(2, 0x333333);
-            }
+    // 🔥 [v62.0] 右側卡片佈局函數 - 情況 A：圖片 + 文字 + 語音
+    createRightCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId) {
+        console.log('🎨 [v62.0] 右側卡片佈局 A: 圖片 + 文字 + 語音', {
+            width,
+            height,
+            pairId,
+            hasText: !!text,
+            hasAudioUrl: !!audioUrl
         });
 
-        // 儲存卡片數據
-        container.setData({
-            pairId: pairId,
-            side: 'right',
-            background: background,
-            text: cardText,
-            isMatched: false
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
+        // 1️⃣ 語音按鈕區域（上方 30%）
+        const buttonAreaHeight = height * 0.3;
+        const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
+        const buttonSize = Math.max(20, Math.min(40, buttonAreaHeight * 0.6));
+
+        this.createAudioButton(container, audioUrl, 0, buttonAreaY, buttonSize, pairId);
+
+        // 2️⃣ 圖片區域（中間 40%）
+        const imageAreaHeight = height * 0.4;
+        const imageAreaY = -height / 2 + buttonAreaHeight + imageAreaHeight / 2;
+        const squareSize = Math.min(width - 4, imageAreaHeight - 4);
+
+        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, pairId).catch(error => {
+            console.error('❌ 圖片載入失敗 (右側佈局 A):', error);
         });
 
-        return container;
+        // 3️⃣ 文字區域（下方 30%）
+        if (text && text.trim() !== '' && text.trim() !== '<br>') {
+            const textAreaHeight = height * 0.3;
+            const bottomPadding = Math.max(6, height * 0.06);
+            const textHeight = textAreaHeight - bottomPadding;
+            const textAreaY = height / 2 - bottomPadding - textHeight / 2;
+
+            this.createTextElement(container, text, 0, textAreaY, width, textHeight);
+        }
+    }
+
+    // 🔥 [v62.0] 右側卡片佈局函數 - 情況 B：只有語音
+    createRightCardLayoutB(container, background, width, height, audioUrl, pairId) {
+        console.log('🎨 [v62.0] 右側卡片佈局 B: 只有語音', {
+            width,
+            height,
+            pairId,
+            audioUrl: audioUrl ? '有' : '無'
+        });
+
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
+        // 語音按鈕置中
+        const buttonSize = Math.max(40, Math.min(80, Math.min(width, height) * 0.6));
+        this.createAudioButton(container, audioUrl, 0, 0, buttonSize, pairId);
+    }
+
+    // 🔥 [v62.0] 右側卡片佈局函數 - 情況 D：圖片 + 文字
+    createRightCardLayoutD(container, background, width, height, text, imageUrl, pairId) {
+        console.log('🎨 [v62.0] 右側卡片佈局 D: 圖片 + 文字', {
+            width,
+            height,
+            pairId,
+            hasText: !!text
+        });
+
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
+        // 圖片佔據上方 60%
+        const imageAreaHeight = height * 0.6;
+        const imageAreaY = -height / 2 + imageAreaHeight / 2;
+        const squareSize = Math.min(width - 4, imageAreaHeight - 4);
+
+        this.loadAndDisplayImage(container, imageUrl, 0, imageAreaY, squareSize, pairId).catch(error => {
+            console.error('❌ 圖片載入失敗 (右側佈局 D):', error);
+        });
+
+        // 文字佔據下方 40%
+        if (text && text.trim() !== '' && text.trim() !== '<br>') {
+            const textAreaHeight = height * 0.4;
+            const bottomPadding = Math.max(6, height * 0.06);
+            const textHeight = textAreaHeight - bottomPadding;
+            const textAreaY = height / 2 - bottomPadding - textHeight / 2;
+
+            this.createTextElement(container, text, 0, textAreaY, width, textHeight);
+        }
+    }
+
+    // 🔥 [v62.0] 右側卡片佈局函數 - 情況 E：文字 + 語音
+    createRightCardLayoutE(container, background, width, height, text, audioUrl, pairId) {
+        console.log('🎨 [v62.0] 右側卡片佈局 E: 文字 + 語音', {
+            width,
+            height,
+            pairId,
+            text
+        });
+
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
+        // 文字在上方 70%
+        if (text && text.trim() !== '' && text.trim() !== '<br>') {
+            const textAreaHeight = height * 0.7;
+            const textHeight = textAreaHeight - 10;
+            const textAreaY = -height / 2 + textAreaHeight / 2;
+
+            this.createTextElement(container, text, 0, textAreaY, width, textHeight);
+        }
+
+        // 語音按鈕在下方 30%
+        const buttonSize = Math.max(30, Math.min(50, width * 0.25));
+        const buttonY = height / 2 - buttonSize / 2 - 5;
+        this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
+    }
+
+    // 🔥 [v62.0] 右側卡片佈局函數 - 情況 F：只有圖片
+    createRightCardLayoutF(container, background, width, height, imageUrl, pairId) {
+        console.log('🎨 [v62.0] 右側卡片佈局 F: 只有圖片 (1:1 比例)', {
+            width,
+            height,
+            pairId,
+            imageUrl: imageUrl ? imageUrl.substring(0, 50) + '...' : 'null'
+        });
+
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
+        // 計算正方形圖片的尺寸（取寬度和高度的最小值，保持 1:1）
+        const squareSize = Math.min(width - 4, height - 4);
+
+        // 圖片置中顯示
+        this.loadAndDisplayImage(container, imageUrl, 0, 0, squareSize, pairId).catch(error => {
+            console.error('❌ 圖片載入失敗 (右側佈局 F):', error);
+        });
+    }
+
+    // 🔥 [v62.0] 右側卡片佈局函數 - 圖片 + 語音（無文字）
+    createRightCardLayoutImageAudio(container, background, width, height, imageUrl, audioUrl, pairId) {
+        console.log('🎨 [v62.0] 右側卡片佈局 ImageAudio: 圖片 + 語音', {
+            width,
+            height,
+            pairId
+        });
+
+        // 🔥 首先添加背景（最底層）
+        container.add([background]);
+
+        // 圖片佔據大部分區域
+        const imageHeight = height * 0.8;
+        const imageY = -height / 2 + imageHeight / 2;
+
+        // 計算正方形圖片的尺寸
+        const squareSize = Math.min(width - 4, imageHeight - 4);
+
+        // 創建圖片
+        this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, pairId).catch(error => {
+            console.error('❌ 圖片載入失敗 (右側佈局 ImageAudio):', error);
+        });
+
+        // 創建語音按鈕（下方）
+        const buttonSize = Math.max(30, Math.min(50, width * 0.2));
+        const buttonY = height / 2 - buttonSize / 2 - 5;
+        this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
     }
 
     checkSwap(pointer, draggedCard) {
