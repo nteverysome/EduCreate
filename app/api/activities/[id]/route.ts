@@ -3,6 +3,22 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+// 🔥 CORS 头配置
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': '86400',
+};
+
+// 🔥 OPTIONS 处理 (CORS preflight)
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -11,7 +27,10 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return NextResponse.json({ error: '未授權' }, { status: 401 });
+      return NextResponse.json({ error: '未授權' }, {
+        status: 401,
+        headers: corsHeaders,
+      });
     }
 
     const activityId = params.id;
@@ -34,7 +53,10 @@ export async function DELETE(
 
     if (!activity) {
       console.log('❌ 活動不存在、無權限或已刪除:', { activityId, userId });
-      return NextResponse.json({ error: '活動不存在或無權限刪除' }, { status: 404 });
+      return NextResponse.json({ error: '活動不存在或無權限刪除' }, {
+        status: 404,
+        headers: corsHeaders,
+      });
     }
 
     // 軟刪除 - 設置 deletedAt 時間戳，並同步取消社區發布
@@ -70,13 +92,18 @@ export async function DELETE(
       message: '活動已移至回收桶',
       deletedActivityId: activityId,
       deletedAt: deletedActivity.deletedAt
+    }, {
+      headers: corsHeaders,
     });
 
   } catch (error) {
     console.error('刪除活動時出錯:', error);
     return NextResponse.json(
-      { error: '刪除活動失敗' },
-      { status: 500 }
+      { error: '刪除活動失敗', details: error instanceof Error ? error.message : '未知錯誤' },
+      {
+        status: 500,
+        headers: corsHeaders,
+      }
     );
   }
 }
@@ -117,7 +144,10 @@ export async function GET(
     });
 
     if (!activity) {
-      return NextResponse.json({ error: '活動不存在' }, { status: 404 });
+      return NextResponse.json({ error: '活動不存在' }, {
+        status: 404,
+        headers: corsHeaders,
+      });
     }
 
     // 🔥 修復：允許任何人訪問任何活動（用於遊戲播放）
@@ -176,13 +206,18 @@ export async function GET(
       matchUpOptions: activity.matchUpOptions || null  // 🔥 添加 matchUpOptions
     };
 
-    return NextResponse.json(responseData);
+    return NextResponse.json(responseData, {
+      headers: corsHeaders,
+    });
 
   } catch (error) {
     console.error('獲取活動詳情時出錯:', error);
     return NextResponse.json(
-      { error: '獲取活動詳情失敗' },
-      { status: 500 }
+      { error: '獲取活動詳情失敗', details: error instanceof Error ? error.message : '未知錯誤' },
+      {
+        status: 500,
+        headers: corsHeaders,
+      }
     );
   }
 }

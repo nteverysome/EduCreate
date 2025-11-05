@@ -49,6 +49,28 @@ const nextConfig = {
   // HTTP 頭配置 - 允許 iframe 嵌入
   async headers() {
     return [
+      // 🔥 API 路由：添加 CORS 頭
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+          {
+            key: 'Access-Control-Max-Age',
+            value: '86400',
+          },
+        ],
+      },
       // 🔥 Match-up 遊戲：禁用快取，確保每次都加載最新代碼
       {
         source: '/games/match-up-game/:path*',
