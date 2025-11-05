@@ -23,7 +23,9 @@ export async function GET(
             name: true,
             email: true
           }
-        }
+        },
+        // 🔥 [v63.0] 新增：包含 vocabularyItems 關聯，以便獲取所有圖片字段
+        vocabularyItems: true
       }
     });
 
@@ -45,43 +47,68 @@ export async function GET(
       }
     }
 
-    // 從活動內容中獲取詞彙集合 ID
-    const content = activity.content as any;
-    const vocabularySetId = content?.vocabularySetId;
-
+    // 🔥 [v63.0] 優先從 vocabularyItems 關聯獲取詞彙（最新方式）
     let vocabularyItems = [];
 
-    if (vocabularySetId) {
-      // 從詞彙集合中獲取詞彙
-      const vocabularySet = await prisma.vocabularySet.findUnique({
-        where: {
-          id: vocabularySetId
-        },
-        include: {
-          items: true
-        }
-      });
+    if (activity.vocabularyItems && activity.vocabularyItems.length > 0) {
+      // 🔥 [v63.0] 從 vocabularyItems 關聯獲取詞彙，包含所有圖片字段
+      vocabularyItems = activity.vocabularyItems.map(item => ({
+        id: item.id,
+        english: item.english,
+        chinese: item.chinese,
+        phonetic: item.phonetic,
+        partOfSpeech: item.partOfSpeech,
+        difficultyLevel: item.difficultyLevel,
+        exampleSentence: item.exampleSentence,
+        notes: item.notes,
+        // 英文圖片字段
+        imageId: item.imageId,
+        imageUrl: item.imageUrl,
+        imageSize: item.imageSize,
+        // 🔥 [v63.0] 新增：中文圖片字段
+        chineseImageId: item.chineseImageId,
+        chineseImageUrl: item.chineseImageUrl,
+        chineseImageSize: item.chineseImageSize,
+        // 語音字段
+        audioUrl: item.audioUrl
+      }));
+    } else {
+      // 向後兼容：從舊的存儲方式獲取詞彙
+      const content = activity.content as any;
+      const vocabularySetId = content?.vocabularySetId;
 
-      if (vocabularySet) {
-        vocabularyItems = vocabularySet.items.map(item => ({
-          id: item.id,
-          english: item.english,
-          chinese: item.chinese,
-          phonetic: item.phonetic,
-          partOfSpeech: item.partOfSpeech,
-          difficultyLevel: item.difficultyLevel,
-          exampleSentence: item.exampleSentence,
-          notes: item.notes,
-          imageUrl: item.imageUrl,
-          audioUrl: item.audioUrl
-        }));
+      if (vocabularySetId) {
+        // 從詞彙集合中獲取詞彙
+        const vocabularySet = await prisma.vocabularySet.findUnique({
+          where: {
+            id: vocabularySetId
+          },
+          include: {
+            items: true
+          }
+        });
+
+        if (vocabularySet) {
+          vocabularyItems = vocabularySet.items.map(item => ({
+            id: item.id,
+            english: item.english,
+            chinese: item.chinese,
+            phonetic: item.phonetic,
+            partOfSpeech: item.partOfSpeech,
+            difficultyLevel: item.difficultyLevel,
+            exampleSentence: item.exampleSentence,
+            notes: item.notes,
+            imageUrl: item.imageUrl,
+            audioUrl: item.audioUrl
+          }));
+        }
+      } else if (content?.vocabularyItems && content.vocabularyItems.length > 0) {
+        // 從活動內容中直接獲取詞彙（向後兼容）
+        vocabularyItems = content.vocabularyItems;
+      } else if (activity.elements && Array.isArray(activity.elements) && activity.elements.length > 0) {
+        // 從 elements 字段獲取詞彙（向後兼容）
+        vocabularyItems = activity.elements as any[];
       }
-    } else if (content?.vocabularyItems && content.vocabularyItems.length > 0) {
-      // 從活動內容中直接獲取詞彙（向後兼容）
-      vocabularyItems = content.vocabularyItems;
-    } else if (activity.elements && Array.isArray(activity.elements) && activity.elements.length > 0) {
-      // 從 elements 字段獲取詞彙（向後兼容）
-      vocabularyItems = activity.elements as any[];
     }
 
     return NextResponse.json({
