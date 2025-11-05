@@ -136,12 +136,37 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      console.log('📋 Session callback:', { hasToken: !!token });
-      if (token && session.user) {
+      console.log('📋 Session callback:', {
+        hasToken: !!token,
+        hasSessionUser: !!session.user,
+        tokenId: (token as any)?.id,
+        tokenEmail: (token as any)?.email
+      });
+
+      // 🔥 [v54.0] 修復：確保 session.user 存在，即使初始為 undefined
+      if (token) {
+        // 如果 session.user 不存在，創建它
+        if (!session.user) {
+          session.user = {
+            id: '',
+            email: '',
+            name: '',
+            image: null
+          };
+        }
+
+        // 從 token 填充 session.user
         session.user.id = token.id as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
+        session.user.image = (token as any).image as string | null;
         (session.user as any).role = token.role as string;
+
+        console.log('✅ Session 已更新:', {
+          userId: session.user.id,
+          userEmail: session.user.email,
+          userName: session.user.name
+        });
       }
       return session;
     }

@@ -318,14 +318,58 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
+    const activityId = params.id;
+    const body = await request.json();
 
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: '未授權' }, { status: 401 });
+    // 🔥 [v53.0] 允許未登錄用戶保存遊戲選項（matchUpOptions）
+    // 但不允許編輯活動內容（title, vocabularyItems）
+    if (body.matchUpOptions !== undefined && !body.title && !body.vocabularyItems && !body.gameOptions) {
+      console.log('🎮 [v53.0] 允許未登錄用戶保存 Match-up 遊戲選項:', {
+        activityId,
+        matchUpOptions: body.matchUpOptions,
+        isAuthenticated: !!session?.user?.id
+      });
+
+      try {
+        // 直接保存到 Activity 的 matchUpOptions 字段
+        const updatedActivity = await prisma.activity.update({
+          where: { id: activityId },
+          data: {
+            matchUpOptions: body.matchUpOptions,
+            updatedAt: new Date()
+          }
+        });
+
+        console.log('✅ [v53.0] Match-up 遊戲選項保存成功:', {
+          activityId,
+          matchUpOptions: updatedActivity.matchUpOptions
+        });
+
+        return NextResponse.json({
+          success: true,
+          activity: updatedActivity,
+          matchUpOptions: updatedActivity.matchUpOptions
+        }, {
+          headers: corsHeaders,
+        });
+      } catch (error) {
+        console.error('❌ [v53.0] 保存 Match-up 遊戲選項失敗:', error);
+        return NextResponse.json(
+          { error: '保存遊戲選項失敗' },
+          { status: 500, headers: corsHeaders }
+        );
+      }
     }
 
-    const activityId = params.id;
+    // 其他操作需要認證
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: '未授權' }, {
+        status: 401,
+        headers: corsHeaders,
+      });
+    }
+
     const userId = session.user.id;
-    const body = await request.json();
 
     console.log('🔍 PUT API 調用:', {
       activityId,
