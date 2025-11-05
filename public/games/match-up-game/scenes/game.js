@@ -3903,8 +3903,8 @@ class GameScene extends Phaser.Scene {
     }
 
     createRightCard(x, y, width, height, text, pairId, imageUrl = null, audioUrl = null, textPosition = 'bottom') {
-        // 🔥 [v62.0] 改進右側卡片以支持圖片和語音
-        console.log('🎨 [v62.0] createRightCard 被調用:', {
+        // 🔥 [v65.0] 改進右側卡片 - 參考英文卡片實現
+        console.log('🎨 [v65.0] createRightCard 被調用:', {
             pairId,
             hasText: !!text && text.trim() !== '',
             hasImage: !!imageUrl && imageUrl.trim() !== '',
@@ -3916,47 +3916,64 @@ class GameScene extends Phaser.Scene {
         const container = this.add.container(x, y);
         container.setDepth(5);
 
+        // 🔥 [v65.0] 設置初始透明度為 0（隱藏），用於淡入動畫
+        container.setAlpha(0);
+
         // 🔥 創建白色框（內框）
         const background = this.add.rectangle(0, 0, width, height, 0xffffff);
         background.setStrokeStyle(2, 0x333333);
         background.setDepth(1);
 
+        // 🔥 [v65.0] 查找 pairData 以獲取音頻狀態（參考英文卡片）
+        const pairData = this.pairs.find(pair => pair.id === pairId);
+        const audioStatus = pairData ? pairData.audioStatus : (audioUrl ? 'available' : 'missing');
+        const hasAudio = audioStatus === 'available';
+        const safeAudioUrl = hasAudio ? audioUrl : null;
+
         // 🔥 [v62.0] 檢查內容組合
         const hasImage = imageUrl && imageUrl.trim() !== '';
         const hasText = text && text.trim() !== '' && text.trim() !== '<br>';
-        const hasAudio = audioUrl && audioUrl.trim() !== '';
 
-        console.log('🔍 [v62.0] 右側卡片內容檢查:', {
+        console.log('🔍 [v65.0] 右側卡片內容檢查:', {
             pairId,
             hasImage,
             hasText,
             hasAudio,
+            audioStatus,
             combination: `${hasImage ? 'I' : '-'}${hasText ? 'T' : '-'}${hasAudio ? 'A' : '-'}`
         });
 
         // 🔥 [v62.0] 根據內容組合決定佈局
         if (hasImage && hasText && hasAudio) {
             // 情況 A：圖片 + 文字 + 語音
-            this.createRightCardLayoutA(container, background, width, height, text, imageUrl, audioUrl, pairId);
+            this.createRightCardLayoutA(container, background, width, height, text, imageUrl, safeAudioUrl, pairId);
         } else if (hasImage && hasText && !hasAudio) {
             // 情況 D：圖片 + 文字
             this.createRightCardLayoutD(container, background, width, height, text, imageUrl, pairId);
         } else if (hasImage && !hasText && hasAudio) {
             // 圖片 + 語音（無文字）
-            this.createRightCardLayoutImageAudio(container, background, width, height, imageUrl, audioUrl, pairId);
+            this.createRightCardLayoutImageAudio(container, background, width, height, imageUrl, safeAudioUrl, pairId);
         } else if (hasImage && !hasText && !hasAudio) {
             // 情況 F：只有圖片
             this.createRightCardLayoutF(container, background, width, height, imageUrl, pairId);
         } else if (!hasImage && hasText && hasAudio) {
             // 情況 E：文字 + 語音
-            this.createRightCardLayoutE(container, background, width, height, text, audioUrl, pairId);
+            this.createRightCardLayoutE(container, background, width, height, text, safeAudioUrl, pairId);
         } else if (!hasImage && !hasText && hasAudio) {
             // 情況 B：只有語音
-            this.createRightCardLayoutB(container, background, width, height, audioUrl, pairId);
+            this.createRightCardLayoutB(container, background, width, height, safeAudioUrl, pairId);
         } else {
             // 情況 C：只有文字（現有邏輯）
             this.createRightCardLayoutC(container, background, width, height, text, textPosition);
         }
+
+        // 🔥 [v65.0] 添加淡入動畫（參考英文卡片）
+        this.tweens.add({
+            targets: container,
+            alpha: 1,           // 從 0 淡入到 1（完全不透明）
+            duration: 300,      // 動畫持續 300ms（0.3秒）
+            ease: 'Power2'      // 緩動函數（平滑加速）
+        });
 
         // 設置互動（接收拖曳）
         background.setInteractive({ useHandCursor: true });
