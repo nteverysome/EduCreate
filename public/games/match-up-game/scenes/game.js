@@ -3045,27 +3045,28 @@ class GameScene extends Phaser.Scene {
                 labelContainer.add(labelBackground);
 
                 if (hasChineseImage && hasChineseText) {
-                    // 🔥 [v76.0] 情況 1：圖片 + 文字（圖片 70%，文字 30%）
-                    console.log(`🖼️📝 [v76.0] 下方區域 [${i}] 圖片 + 文字模式`);
+                    // 🔥 [v78.0] 改進佈局 - 圖片 60%，文字 40%（更清晰可辨識）
+                    console.log(`🖼️📝 [v78.0] 下方區域 [${i}] 圖片 + 文字模式（改進版）`);
 
-                    // 圖片佔據上方 70%
-                    const imageAreaHeight = chineseTextHeight * 0.7;
+                    // 圖片佔據上方 60%
+                    const imageAreaHeight = chineseTextHeight * 0.6;
                     const imageAreaY = -chineseTextHeight / 2 + imageAreaHeight / 2;
                     const squareSize = Math.min(frameWidth - 10 - 4, imageAreaHeight - 4);
 
                     this.loadAndDisplayImage(labelContainer, pair.chineseImageUrl, 0, imageAreaY, squareSize, `chinese-${pair.id}`).catch(error => {
-                        console.error(`❌ [v76.0] 下方區域圖片載入失敗 [${i}]:`, error);
+                        console.error(`❌ [v78.0] 下方區域圖片載入失敗 [${i}]:`, error);
                     });
 
-                    // 文字佔據下方 30%
+                    // 文字佔據下方 40%（增加空間）
                     const chineseActualFontSize = chineseFontSizesArray[i];
-                    const textAreaHeight = chineseTextHeight * 0.3;
-                    const bottomPadding = Math.max(2, chineseTextHeight * 0.05);
+                    const textAreaHeight = chineseTextHeight * 0.4;
+                    const bottomPadding = Math.max(2, chineseTextHeight * 0.03);
                     const textHeight = textAreaHeight - bottomPadding;
                     const textAreaY = chineseTextHeight / 2 - bottomPadding - textHeight / 2;
 
+                    // 🔥 [v78.0] 增加字體大小 - 從 0.6 倍改為 0.75 倍，讓文字更清晰
                     const chineseText = this.add.text(0, textAreaY, pair.answer, {
-                        fontSize: `${Math.max(10, chineseActualFontSize * 0.6)}px`,
+                        fontSize: `${Math.max(12, chineseActualFontSize * 0.75)}px`,
                         color: '#000000',
                         fontFamily: 'Arial',
                         fontStyle: 'bold',
