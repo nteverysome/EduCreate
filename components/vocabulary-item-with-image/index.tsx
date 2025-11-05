@@ -280,11 +280,14 @@ export default function VocabularyItemWithImage({
   };
 
   // 🎯 生成只帶英文文字的圖片（用於英文輸入框的圖片）
+  // 🔥 [v73.0] 改進錯誤處理和日誌記錄
   const generateImageWithText = async (imageUrl: string) => {
     if (!item.english) return;
 
     setIsGenerating(true);
     try {
+      console.log(`📝 [v73.0] 開始生成帶英文文字的圖片: ${item.english}`);
+
       // 🎯 只使用英文文字
       const text = item.english;
 
@@ -298,7 +301,9 @@ export default function VocabularyItemWithImage({
       };
 
       // 生成圖片 Blob
+      console.log(`🎨 [v73.0] 調用 overlayTextOnImage...`);
       const generatedImageBlob = await overlayTextOnImage(imageUrl, options);
+      console.log(`✅ [v73.0] 圖片生成成功，大小: ${generatedImageBlob.size} bytes`);
 
       // 創建預覽 URL
       const previewUrl = URL.createObjectURL(generatedImageBlob);
@@ -325,10 +330,12 @@ export default function VocabularyItemWithImage({
       });
 
       if (uploadResponse.ok) {
-        const uploadData = await uploadResponse.json();
+        const uploadData = await uploadResponse.json() as any;
 
         // 檢查響應結構
         const imageData = uploadData.image || uploadData;
+
+        console.log(`✅ [v73.0] 英文圖片上傳成功: ${imageData.url}`);
 
         // 更新為永久 URL
         onChange({
@@ -355,9 +362,9 @@ export default function VocabularyItemWithImage({
         }
       } else {
         // 處理上傳失敗
-        console.error('圖片上傳失敗:', uploadResponse.status, uploadResponse.statusText);
-        const errorData = await uploadResponse.json().catch(() => ({}));
-        console.error('錯誤詳情:', errorData);
+        console.error(`❌ [v73.0] 圖片上傳失敗:`, uploadResponse.status, uploadResponse.statusText);
+        const errorData = await uploadResponse.json().catch(() => ({})) as any;
+        console.error(`❌ [v73.0] 錯誤詳情:`, errorData);
 
         // 顯示錯誤信息給用戶
         alert(`圖片上傳失敗: ${errorData.error || '未知錯誤'}`);
@@ -370,11 +377,14 @@ export default function VocabularyItemWithImage({
   };
 
   // 生成帶中文文字的圖片
+  // 🔥 [v73.0] 改進錯誤處理和日誌記錄
   const generateChineseImageWithText = async (imageUrl: string) => {
     if (!item.chinese) return;
 
     setIsGeneratingChinese(true);
     try {
+      console.log(`📝 [v73.0] 開始生成帶中文文字的圖片: ${item.chinese}`);
+
       // 文字疊加選項
       const options: TextOverlayOptions = {
         text: item.chinese,
@@ -385,7 +395,9 @@ export default function VocabularyItemWithImage({
       };
 
       // 生成圖片 Blob
+      console.log(`🎨 [v73.0] 調用 overlayTextOnImage...`);
       const generatedImageBlob = await overlayTextOnImage(imageUrl, options);
+      console.log(`✅ [v73.0] 圖片生成成功，大小: ${generatedImageBlob.size} bytes`);
 
       // 創建預覽 URL
       const previewUrl = URL.createObjectURL(generatedImageBlob);
@@ -401,7 +413,7 @@ export default function VocabularyItemWithImage({
       formData.append('file', generatedImageBlob, `vocabulary-chinese-${item.id}-${Date.now()}.png`);
 
       const uploadEndpoint = '/api/images/upload-test';
-      console.log(`📤 上傳中文圖片到: ${uploadEndpoint}`);
+      console.log(`📤 [v73.0] 上傳中文圖片到: ${uploadEndpoint}`);
 
       const uploadResponse = await fetch(uploadEndpoint, {
         method: 'POST',
@@ -409,8 +421,10 @@ export default function VocabularyItemWithImage({
       });
 
       if (uploadResponse.ok) {
-        const uploadData = await uploadResponse.json();
+        const uploadData = await uploadResponse.json() as any;
         const imageData = uploadData.image || uploadData;
+
+        console.log(`✅ [v73.0] 中文圖片上傳成功: ${imageData.url}`);
 
         // 更新為永久 URL
         onChange({
@@ -422,13 +436,16 @@ export default function VocabularyItemWithImage({
         // 釋放預覽 URL
         URL.revokeObjectURL(previewUrl);
       } else {
-        console.error('中文圖片上傳失敗:', uploadResponse.status, uploadResponse.statusText);
-        const errorData = await uploadResponse.json().catch(() => ({}));
-        console.error('錯誤詳情:', errorData);
+        console.error(`❌ [v73.0] 中文圖片上傳失敗:`, uploadResponse.status, uploadResponse.statusText);
+        const errorData = await uploadResponse.json().catch(() => ({})) as any;
+        console.error(`❌ [v73.0] 錯誤詳情:`, errorData);
         alert(`中文圖片上傳失敗: ${errorData.error || '未知錯誤'}`);
       }
     } catch (error) {
-      console.error('生成中文圖片失敗:', error);
+      console.error(`❌ [v73.0] 生成中文圖片失敗:`, error);
+      // 🔥 [v73.0] 提供更詳細的錯誤提示
+      const errorMessage = error instanceof Error ? error.message : '未知錯誤';
+      alert(`生成中文圖片失敗: ${errorMessage}`);
     } finally {
       setIsGeneratingChinese(false);
     }

@@ -30,22 +30,31 @@ function getFontSizePixels(fontSize: 'small' | 'medium' | 'large', canvasWidth: 
 
 /**
  * Load image from URL and return as HTMLImageElement
+ * 🔥 [v73.0] 改進 CORS 處理，支持跨域圖片
  */
 function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
 
-    // 只對跨域圖片設置 crossOrigin
-    // 對於同域或 Blob URL，不需要設置
+    // 🔥 [v73.0] 對所有跨域圖片設置 crossOrigin
+    // 這樣可以避免 CORS 錯誤，特別是對於 Unsplash 等圖片服務
     if (!url.startsWith('blob:') && !url.startsWith(window.location.origin)) {
       img.crossOrigin = 'anonymous';
+      console.log(`🔄 [v73.0] 設置 CORS 跨域圖片: ${url.substring(0, 50)}...`);
     }
 
-    img.onload = () => resolve(img);
-    img.onerror = (error) => {
-      console.error('圖片載入失敗:', url, error);
-      reject(new Error(`Failed to load image: ${url}`));
+    img.onload = () => {
+      console.log(`✅ [v73.0] 圖片載入成功: ${url.substring(0, 50)}...`);
+      resolve(img);
     };
+
+    img.onerror = (error) => {
+      console.error(`❌ [v73.0] 圖片載入失敗: ${url}`, error);
+      // 🔥 [v73.0] 提供更詳細的錯誤信息
+      const errorMessage = `Failed to load image: ${url}. 可能是 CORS 問題或圖片不存在`;
+      reject(new Error(errorMessage));
+    };
+
     img.src = url;
   });
 }
@@ -83,26 +92,32 @@ function wrapText(
 
 /**
  * Overlay text on image and return as Blob
+ * 🔥 [v73.0] 改進錯誤處理和日誌記錄
  */
 export async function overlayTextOnImage(
   imageUrl: string,
   options: TextOverlayOptions
 ): Promise<Blob> {
-  // Load the image
-  const img = await loadImage(imageUrl);
-  
-  // Create canvas with same dimensions as image
-  const canvas = document.createElement('canvas');
-  canvas.width = img.width;
-  canvas.height = img.height;
-  
-  const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    throw new Error('Failed to get canvas context');
-  }
-  
-  // Draw the image
-  ctx.drawImage(img, 0, 0);
+  try {
+    console.log(`📝 [v73.0] 開始疊加文字到圖片: ${options.text}`);
+
+    // Load the image
+    const img = await loadImage(imageUrl);
+    console.log(`✅ [v73.0] 圖片尺寸: ${img.width}x${img.height}`);
+
+    // Create canvas with same dimensions as image
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Failed to get canvas context');
+    }
+
+    // Draw the image
+    ctx.drawImage(img, 0, 0);
+    console.log(`✅ [v73.0] 圖片已繪製到 Canvas`);
   
   // Calculate text position (convert percentage to pixels)
   const x = (options.position.x / 100) * canvas.width;
@@ -146,16 +161,21 @@ export async function overlayTextOnImage(
     ctx.fillText(line, x, lineY);
   });
   
-  // Convert canvas to Blob
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) {
-        resolve(blob);
-      } else {
-        reject(new Error('Failed to convert canvas to blob'));
-      }
-    }, 'image/png');
-  });
+    // Convert canvas to Blob
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          console.log(`✅ [v73.0] 文字疊加完成，Blob 大小: ${blob.size} bytes`);
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to convert canvas to blob'));
+        }
+      }, 'image/png');
+    });
+  } catch (error) {
+    console.error(`❌ [v73.0] 文字疊加失敗:`, error);
+    throw error;
+  }
 }
 
 /**
