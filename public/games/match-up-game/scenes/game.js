@@ -3046,28 +3046,28 @@ class GameScene extends Phaser.Scene {
                 labelContainer.add(labelBackground);
 
                 if (hasChineseImage && hasChineseText) {
-                    // 🔥 [v80.0] 改進佈局 - 圖片 85%，文字 15%（圖片單獨空間，文字在下方）
-                    console.log(`🖼️📝 [v80.0] 下方區域 [${i}] 圖片 + 文字模式（v80.0 分離版）`);
+                    // 🔥 [v81.0] 業界標準卡片設計 - 圖片 70%，文字 30%（垂直排列，不疊）
+                    console.log(`🖼️📝 [v81.0] 下方區域 [${i}] 卡片設計模式（圖片70% + 文字30%）`);
 
-                    // 圖片佔據上方 85%（圖片單獨空間，更大）
-                    const imageAreaHeight = chineseTextHeight * 0.85;
+                    // 圖片佔據上方 70%（清晰可見）
+                    const imageAreaHeight = chineseTextHeight * 0.70;
                     const imageAreaY = -chineseTextHeight / 2 + imageAreaHeight / 2;
                     const squareSize = Math.min(frameWidth - 10 - 4, imageAreaHeight - 4);
 
                     this.loadAndDisplayImage(labelContainer, pair.chineseImageUrl, 0, imageAreaY, squareSize, `chinese-${pair.id}`).catch(error => {
-                        console.error(`❌ [v80.0] 下方區域圖片載入失敗 [${i}]:`, error);
+                        console.error(`❌ [v81.0] 下方區域圖片載入失敗 [${i}]:`, error);
                     });
 
-                    // 文字佔據下方 15%（文字單獨一行，更小）
+                    // 文字佔據下方 30%（在圖片下方，不疊）
                     const chineseActualFontSize = chineseFontSizesArray[i];
-                    const textAreaHeight = chineseTextHeight * 0.15;
-                    const bottomPadding = Math.max(1, chineseTextHeight * 0.01);
+                    const textAreaHeight = chineseTextHeight * 0.30;
+                    const bottomPadding = Math.max(2, chineseTextHeight * 0.02);
                     const textHeight = textAreaHeight - bottomPadding;
                     const textAreaY = chineseTextHeight / 2 - bottomPadding - textHeight / 2;
 
-                    // 🔥 [v80.0] 減小字體大小 - 從 0.9 倍改為 0.5 倍，讓文字更小
+                    // 🔥 [v81.0] 字體大小 0.75 倍（比 0.5 倍大，比 0.9 倍小）- 業界標準
                     const chineseText = this.add.text(0, textAreaY, pair.answer, {
-                        fontSize: `${Math.max(10, chineseActualFontSize * 0.5)}px`,
+                        fontSize: `${Math.max(12, chineseActualFontSize * 0.75)}px`,
                         color: '#000000',
                         fontFamily: 'Arial',
                         fontStyle: 'bold',
