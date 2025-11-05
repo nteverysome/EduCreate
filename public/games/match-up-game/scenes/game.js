@@ -3013,27 +3013,44 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
-            // 🔥 中文文字位置計算（第六步）
-            // ✅ v26.0：方案 A - 在英文卡片和中文字之間加入 verticalSpacing
-            // 新結構：英文卡片 + verticalSpacing + 中文字 + verticalSpacing
-            const chineseActualFontSize = chineseFontSizesArray[i];
-            const chineseTextHeightActual = chineseActualFontSize + 5;  // 字體大小 + 行高
+            // 🔥 [v66.0] 檢查是否有中文圖片
+            const hasChineseImage = pair.chineseImageUrl && pair.chineseImageUrl.trim() !== '';
 
-            // 中文文字位置：英文卡片下方 + 中文字高度/2
-            // ✅ v35.0：取消上面的 verticalSpacing，中文字直接貼著英文卡片
-            const chineseY = cardHeightInFrame / 2 + chineseTextHeightActual / 2;
+            if (hasChineseImage) {
+                // 🔥 [v66.0] 如果有中文圖片，加載並顯示圖片
+                console.log(`🖼️ [v66.0] 混合佈局中文框 [${i}] 有圖片: ${pair.chineseImageUrl.substring(0, 50)}...`);
 
-            console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${chineseY.toFixed(1)}`);
+                // 計算正方形圖片的尺寸（與卡片高度相同）
+                const squareSize = Math.min(frameWidth - 10 - 4, cardHeightInFrame - 4);
 
-            // 🔥 創建最終的中文文字
-            const chineseText = this.add.text(0, chineseY, pair.answer, {
-                fontSize: `${chineseActualFontSize}px`,  // 使用預先計算的字體大小
-                color: '#000000',
-                fontFamily: 'Arial',
-                fontStyle: 'bold'
-            });
-            chineseText.setOrigin(0.5, 0.5);  // ✅ 改進：水平和垂直都居中
-            frameContainer.add(chineseText);
+                // 加載並顯示圖片
+                this.loadAndDisplayImage(frameContainer, pair.chineseImageUrl, 0, 0, squareSize, pair.id).catch(error => {
+                    console.error(`❌ [v66.0] 混合佈局中文圖片載入失敗 [${i}]:`, error);
+                });
+            } else {
+                // 🔥 [v66.0] 如果沒有圖片，顯示中文文字
+                // 🔥 中文文字位置計算（第六步）
+                // ✅ v26.0：方案 A - 在英文卡片和中文字之間加入 verticalSpacing
+                // 新結構：英文卡片 + verticalSpacing + 中文字 + verticalSpacing
+                const chineseActualFontSize = chineseFontSizesArray[i];
+                const chineseTextHeightActual = chineseActualFontSize + 5;  // 字體大小 + 行高
+
+                // 中文文字位置：英文卡片下方 + 中文字高度/2
+                // ✅ v35.0：取消上面的 verticalSpacing，中文字直接貼著英文卡片
+                const chineseY = cardHeightInFrame / 2 + chineseTextHeightActual / 2;
+
+                console.log(`📝 創建中文文字 [${i}]: "${pair.answer}", 字體大小: ${chineseActualFontSize}px, 位置Y: ${chineseY.toFixed(1)}`);
+
+                // 🔥 創建最終的中文文字
+                const chineseText = this.add.text(0, chineseY, pair.answer, {
+                    fontSize: `${chineseActualFontSize}px`,  // 使用預先計算的字體大小
+                    color: '#000000',
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold'
+                });
+                chineseText.setOrigin(0.5, 0.5);  // ✅ 改進：水平和垂直都居中
+                frameContainer.add(chineseText);
+            }
 
             // 保存框的數據
             frameContainer.setData('pairId', pair.id);  // 正確的配對 ID
