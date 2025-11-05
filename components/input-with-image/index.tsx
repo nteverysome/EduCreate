@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import FormattableInput from './FormattableInput';
 
 /**
@@ -12,6 +12,7 @@ export interface InputWithImageProps {
   imageUrl?: string;
   onImageIconClick: () => void;
   onThumbnailClick: () => void;
+  onImageUrlChange?: (url: string) => void;  // 🔥 [v63.0] 新增：URL 直接輸入回調
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -49,6 +50,7 @@ export default function InputWithImage({
   imageUrl,
   onImageIconClick,
   onThumbnailClick,
+  onImageUrlChange,  // 🔥 [v63.0] 新增
   placeholder,
   disabled = false,
   className = '',
@@ -57,6 +59,36 @@ export default function InputWithImage({
   audioUrl,
   onAudioThumbnailClick
 }: InputWithImageProps) {
+  // 🔥 [v63.0] 新增：URL 輸入框狀態
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [urlInput, setUrlInput] = useState('');
+  const [urlError, setUrlError] = useState('');
+
+  // 🔥 [v63.0] 驗證 URL
+  const validateUrl = (url: string): boolean => {
+    if (!url.trim()) {
+      setUrlError('URL 不能為空');
+      return false;
+    }
+    try {
+      new URL(url);
+      setUrlError('');
+      return true;
+    } catch {
+      setUrlError('無效的 URL 格式');
+      return false;
+    }
+  };
+
+  // 🔥 [v63.0] 處理 URL 提交
+  const handleUrlSubmit = () => {
+    if (validateUrl(urlInput)) {
+      onImageUrlChange?.(urlInput);
+      setShowUrlInput(false);
+      setUrlInput('');
+    }
+  };
+
   // 計算左側 padding（根據是否有語音和圖片）- 手機版增加間距
   const leftPadding = audioUrl && imageUrl
     ? 'pl-20 sm:pl-20'
@@ -148,25 +180,97 @@ export default function InputWithImage({
 
         {/* 圖片圖標（只在沒有圖片時顯示） */}
         {!imageUrl && (
-          <button
-            type="button"
-            onClick={onImageIconClick}
-            disabled={disabled}
-            className={`
-              w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center
-              text-gray-400 hover:text-blue-500
-              transition-colors duration-200
-              ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
-              rounded-md hover:bg-blue-50
-            `}
-            title="添加圖片"
-            aria-label="添加圖片"
-          >
-            <span className="text-xl sm:text-lg">🖼️</span>
-          </button>
+          <div className="flex items-center gap-1">
+            {/* 🔥 [v63.0] URL 輸入按鈕 */}
+            {onImageUrlChange && (
+              <button
+                type="button"
+                onClick={() => setShowUrlInput(!showUrlInput)}
+                disabled={disabled}
+                className={`
+                  w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center
+                  text-gray-400 hover:text-green-500
+                  transition-colors duration-200
+                  ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+                  focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1
+                  rounded-md hover:bg-green-50
+                `}
+                title="輸入圖片 URL"
+                aria-label="輸入圖片 URL"
+              >
+                <span className="text-xl sm:text-lg">🔗</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onImageIconClick}
+              disabled={disabled}
+              className={`
+                w-8 h-8 sm:w-6 sm:h-6 flex items-center justify-center
+                text-gray-400 hover:text-blue-500
+                transition-colors duration-200
+                ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+                rounded-md hover:bg-blue-50
+              `}
+              title="添加圖片"
+              aria-label="添加圖片"
+            >
+              <span className="text-xl sm:text-lg">🖼️</span>
+            </button>
+          </div>
         )}
       </div>
+
+      {/* 🔥 [v63.0] URL 輸入框 */}
+      {showUrlInput && onImageUrlChange && (
+        <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              輸入圖片 URL
+            </label>
+            <input
+              type="text"
+              value={urlInput}
+              onChange={(e) => {
+                setUrlInput(e.target.value);
+                setUrlError('');
+              }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleUrlSubmit();
+                }
+              }}
+              placeholder="https://example.com/image.jpg"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {urlError && (
+              <p className="text-sm text-red-600">{urlError}</p>
+            )}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleUrlSubmit}
+                className="flex-1 px-3 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors"
+              >
+                確認
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUrlInput(false);
+                  setUrlInput('');
+                  setUrlError('');
+                }}
+                className="flex-1 px-3 py-2 bg-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-400 transition-colors"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

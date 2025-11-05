@@ -473,6 +473,8 @@ export default function VocabularyItemWithImage({
             imageUrl={item.imageUrl}
             onImageIconClick={() => setShowImagePicker(true)}
             onThumbnailClick={() => setShowImageEditor(true)}
+            // 🔥 [v63.0] 新增：URL 直接輸入支持
+            onImageUrlChange={(url) => onChange({ ...item, imageUrl: url })}
             onAddSoundClick={() => setShowAddSoundDialog(true)}
             hasAudio={!!item.audioUrl}
             audioUrl={item.audioUrl}
@@ -498,6 +500,8 @@ export default function VocabularyItemWithImage({
             imageUrl={item.chineseImageUrl}
             onImageIconClick={() => setShowChineseImagePicker(true)}
             onThumbnailClick={() => setShowChineseImageEditor(true)}
+            // 🔥 [v63.0] 新增：URL 直接輸入支持
+            onImageUrlChange={(url) => onChange({ ...item, chineseImageUrl: url })}
             placeholder="輸入匹配物件..."
             disabled={isGeneratingChinese}
           />
