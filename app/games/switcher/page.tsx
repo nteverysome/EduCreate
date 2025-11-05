@@ -685,7 +685,14 @@ const GameSwitcherPage: React.FC = () => {
       }
     }
 
-    if (activityIdParam) {
+    // 🔥 [v57.3] 驗證 activityId 不是字符串 "undefined" 或 "null"
+    const isValidActivityId =
+      activityIdParam &&
+      activityIdParam !== 'undefined' &&
+      activityIdParam !== 'null' &&
+      activityIdParam.trim() !== '';
+
+    if (isValidActivityId) {
       setActivityId(activityIdParam);
 
       // 載入活動信息
@@ -728,6 +735,11 @@ const GameSwitcherPage: React.FC = () => {
         setAssignmentId(null);
         loadCustomVocabulary(activityIdParam);
       }
+    } else if (activityIdParam === 'undefined' || activityIdParam === 'null') {
+      // 🔥 [v57.3] 如果 activityId 是 "undefined" 或 "null"，清空狀態
+      console.warn('⚠️ [v57.3] 檢測到無效的 activityId:', activityIdParam);
+      setActivityId(null);
+      setCustomVocabulary([]);
     }
   }, [searchParams, loadActivityInfo]);
 
@@ -738,6 +750,15 @@ const GameSwitcherPage: React.FC = () => {
       loadActivityInfo(activityId);
     }
   }, [session, activityId, loadActivityInfo]);
+
+  // 🔥 [v60.0] 當 customVocabulary 變化時，強制重新渲染 GameSwitcher
+  // 這確保編輯後返回時，遊戲會使用最新的詞彙數據
+  useEffect(() => {
+    if (customVocabulary.length > 0) {
+      console.log('🔄 [v60.0] 詞彙已更新，強制重新渲染遊戲:', customVocabulary.length, '個詞彙');
+      setGameKey(prev => prev + 1);
+    }
+  }, [customVocabulary]);
 
   // 載入自定義詞彙的函數（需要身份驗證）
   const loadCustomVocabulary = async (activityId: string) => {
