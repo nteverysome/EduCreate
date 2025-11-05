@@ -490,12 +490,31 @@ export default function CreateGamePage() {
         });
 
         if (response.ok) {
-          const activity = await response.json() as { id?: string };
+          // 🔥 [v61.0] 正確處理 API 返回的嵌套結構
+          const data = await response.json() as any;
+
+          // ✅ 提取 activity 對象（API 返回 { success: true, activity: {...} }）
+          const activity = data.activity || data;
+
+          // ✅ [v61.0] 驗證 activity.id 存在
+          if (!activity?.id) {
+            console.error('❌ [v61.0] API 返回的活動 ID 為空:', data);
+            alert('保存失敗：無法獲取活動 ID，請重試');
+            return;
+          }
+
+          console.log('✅ [v61.0] 活動更新成功，準備重定向:', {
+            activityId: activity.id,
+            gameId: gameIdToUse
+          });
+
           alert('活動更新成功！');
-          // 🔥 跳轉到遊戲頁面，使用實際的 gameTemplateId
+          // 🔥 跳轉到遊戲頁面，使用實際的 gameTemplateId 和正確的 activityId
           router.push(`/games/switcher?game=${gameIdToUse}&activityId=${activity.id}`);
         } else {
-          alert('更新失敗，請重試');
+          const errorData = await response.json() as any;
+          console.error('❌ [v61.0] 更新失敗:', errorData);
+          alert('更新失敗：' + (errorData.error || '請重試'));
         }
       } else {
         // 創建模式：創建新活動
@@ -518,19 +537,21 @@ export default function CreateGamePage() {
         });
 
         if (response.ok) {
-          const activity = await response.json() as { id?: string; error?: string };
+          // 🔥 [v61.0] 正確處理 API 返回的嵌套結構
+          const data = await response.json() as any;
+          const activity = data.activity || data;
 
           // 🔥 [v55.0] 驗證 activity.id 是否存在
-          if (!activity.id) {
-            console.error('❌ API 返回的活動 ID 為空:', activity);
+          if (!activity?.id) {
+            console.error('❌ [v61.0] API 返回的活動 ID 為空:', data);
             alert('保存失敗：無法獲取活動 ID，請重試');
             return;
           }
 
-          console.log('✅ 活動創建成功:', {
+          console.log('✅ [v61.0] 活動創建成功:', {
             id: activity.id,
-            title: activity.title,
-            totalWords: activity.totalWords
+            title: activity.title || '無標題',
+            totalWords: activity.totalWords || 0
           });
 
           // 跳轉到遊戲頁面，並傳遞活動 ID
