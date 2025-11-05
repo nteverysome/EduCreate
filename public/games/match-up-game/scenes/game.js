@@ -1224,8 +1224,13 @@ class GameScene extends Phaser.Scene {
             shuffledAnswers = rng.shuffle([...currentPagePairs]);
             console.log('🎲 使用固定隨機模式，種子:', seed);
         } else {
-            shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('🎲 使用隨機排列模式');
+            // 🔥 v52.0：使用 Fisher-Yates 算法實現真正的隨機排列
+            shuffledAnswers = [...currentPagePairs];
+            for (let i = shuffledAnswers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledAnswers[i], shuffledAnswers[j]] = [shuffledAnswers[j], shuffledAnswers[i]];
+            }
+            console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）');
         }
 
         // 創建左側外框
@@ -1323,8 +1328,13 @@ class GameScene extends Phaser.Scene {
             shuffledAnswers = rng.shuffle([...currentPagePairs]);
             console.log('🎲 使用固定隨機模式，種子:', seed);
         } else {
-            shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('🎲 使用隨機排列模式');
+            // 🔥 v52.0：使用 Fisher-Yates 算法實現真正的隨機排列
+            shuffledAnswers = [...currentPagePairs];
+            for (let i = shuffledAnswers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledAnswers[i], shuffledAnswers[j]] = [shuffledAnswers[j], shuffledAnswers[i]];
+            }
+            console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）');
         }
 
         // 🔥 創建上方外框（包圍所有英文卡片）
@@ -1478,8 +1488,13 @@ class GameScene extends Phaser.Scene {
             shuffledAnswers = rng.shuffle([...currentPagePairs]);
             console.log('🎲 使用固定隨機模式，種子:', seed);
         } else {
-            shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('🎲 使用隨機排列模式');
+            // 🔥 v52.0：使用 Fisher-Yates 算法實現真正的隨機排列
+            shuffledAnswers = [...currentPagePairs];
+            for (let i = shuffledAnswers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledAnswers[i], shuffledAnswers[j]] = [shuffledAnswers[j], shuffledAnswers[i]];
+            }
+            console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）');
         }
 
         // 🔥 創建左側外框（包圍所有英文卡片）
@@ -1618,8 +1633,13 @@ class GameScene extends Phaser.Scene {
             shuffledAnswers = rng.shuffle([...currentPagePairs]);
             console.log('🎲 使用固定隨機模式，種子:', seed);
         } else {
-            shuffledAnswers = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('🎲 使用隨機排列模式');
+            // 🔥 v52.0：使用 Fisher-Yates 算法實現真正的隨機排列
+            shuffledAnswers = [...currentPagePairs];
+            for (let i = shuffledAnswers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledAnswers[i], shuffledAnswers[j]] = [shuffledAnswers[j], shuffledAnswers[i]];
+            }
+            console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）');
         }
 
         // 🔥 創建上方外框（包圍所有英文卡片）
@@ -1788,9 +1808,13 @@ class GameScene extends Phaser.Scene {
             shuffledCards = rng.shuffle(allCards);
             console.log('🎲 混合網格使用固定隨機模式，種子:', seed);
         } else {
-            // 每次不同模式：隨機排列
-            shuffledCards = Phaser.Utils.Array.Shuffle(allCards);
-            console.log('🎲 混合網格使用隨機排列模式');
+            // 🔥 v52.0：使用 Fisher-Yates 算法實現真正的隨機排列
+            shuffledCards = [...allCards];
+            for (let i = shuffledCards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledCards[i], shuffledCards[j]] = [shuffledCards[j], shuffledCards[i]];
+            }
+            console.log('🎲 混合網格使用隨機排列模式（Fisher-Yates 算法）');
         }
 
         // 🔥 計算行數
@@ -3024,9 +3048,13 @@ class GameScene extends Phaser.Scene {
             shuffledPairs = rng.shuffle([...currentPagePairs]);
             console.log('🎲 混合佈局使用固定隨機模式，種子:', seed);
         } else {
-            // 每次不同模式
-            shuffledPairs = Phaser.Utils.Array.Shuffle([...currentPagePairs]);
-            console.log('🎲 混合佈局使用隨機排列模式');
+            // 🔥 v52.0：使用 Fisher-Yates 算法實現真正的隨機排列
+            shuffledPairs = [...currentPagePairs];
+            for (let i = shuffledPairs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledPairs[i], shuffledPairs[j]] = [shuffledPairs[j], shuffledPairs[i]];
+            }
+            console.log('🎲 混合佈局使用隨機排列模式（Fisher-Yates 算法）');
         }
 
         // 創建英文卡片並放在中文文字上方
