@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match-up Game - Resize Fix Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #666;
+            margin-top: 20px;
+        }
+        .test-instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            margin: 15px 0;
+        }
+        .test-steps {
+            list-style: none;
+            padding: 0;
+        }
+        .test-steps li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f9f9f9;
+            border-left: 3px solid #4CAF50;
+        }
+        .test-steps li.important {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .game-frame {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .info-box {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Match-up Game - Resize Fix Test</h1>
+        
+        <div class="test-section">
+            <h2>📋 測試目標</h2>
+            <p>驗證改變瀏覽器尺寸時，遊戲不會重新載入詞彙，只會調整卡片位置。</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 測試步驟</h2>
+            <div class="test-instructions">
+                <strong>v50.0 改進：只調整位置，不重新創建卡片</strong>
+            </div>
+            <ol class="test-steps">
+                <li>打開遊戲（下方 iframe）</li>
+                <li>等待遊戲完全載入</li>
+                <li class="important">配對幾個卡片（記住已配對的卡片）</li>
+                <li class="important">改變瀏覽器窗口大小（拖動邊角或按 F12 開發者工具調整）</li>
+                <li>檢查已配對的卡片是否仍然保持配對狀態</li>
+                <li>檢查瀏覽器控制台是否有 "repositionCards" 日誌</li>
+                <li>檢查是否沒有 "清除所有現有元素" 的日誌</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h2>✅ 預期結果</h2>
+            <ul>
+                <li>✓ 改變尺寸時，已配對的卡片保持配對狀態</li>
+                <li>✓ 卡片位置和大小會根據新尺寸調整</li>
+                <li>✓ 控制台顯示 "[v50.0] repositionCards" 日誌</li>
+                <li>✓ 控制台不顯示 "清除所有現有元素" 日誌</li>
+                <li>✓ 遊戲流暢，沒有閃爍</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>🎮 遊戲測試區域</h2>
+            <p>使用以下 URL 測試遊戲（需要有效的 activityId）：</p>
+            <div class="info-box">
+                http://localhost:3000/games/switcher?game=match-up-game&activityId=YOUR_ACTIVITY_ID
+            </div>
+            <p>或使用開發測試模式：</p>
+            <div class="info-box">
+                http://localhost:3000/games/switcher?game=match-up-game&devLayoutTest=separated
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔍 調試信息</h2>
+            <p>打開瀏覽器開發者工具（F12）查看控制台日誌：</p>
+            <ul>
+                <li>搜索 "[v50.0]" 查看新的位置調整日誌</li>
+                <li>搜索 "repositionCards" 查看位置調整過程</li>
+                <li>搜索 "resize 事件觸發" 查看 resize 事件</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 測試注意事項</h2>
+            <ul>
+                <li>混合佈局（mixed layout）暫時回退到完整重建</li>
+                <li>分離佈局（separated layout）支持位置調整</li>
+                <li>如果位置調整失敗，會自動回退到完整重建</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+
