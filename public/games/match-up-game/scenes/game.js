@@ -2496,6 +2496,10 @@ class GameScene extends Phaser.Scene {
                     horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
                 }
                 horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
+
+                // 🔥 [v82.0] 修復：非 iPad 設備也需要設置 verticalSpacing
+                // 之前只設置了 horizontalSpacing，導致 verticalSpacing 為 undefined
+                verticalSpacing = Math.max(40, Math.min(80, height * 0.04));  // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
             }
 
             if (hasImages) {
