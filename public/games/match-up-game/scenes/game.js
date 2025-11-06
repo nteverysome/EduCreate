@@ -2485,7 +2485,7 @@ class GameScene extends Phaser.Scene {
                     verticalSpacing: verticalSpacing
                 });
             } else {
-                // 非 iPad 設備：保留原有邏輯
+                // 非 iPad 設備或 iPad 但 iPadParams 為 null：保留原有邏輯
                 // 根據寬高比動態調整水平間距
                 let horizontalSpacingBase;
                 if (aspectRatio > 2.0) {
@@ -2497,9 +2497,16 @@ class GameScene extends Phaser.Scene {
                 }
                 horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
 
-                // 🔥 [v82.0] 修復：非 iPad 設備也需要設置 verticalSpacing
+                // 🔥 [v82.0] 修復：所有非 iPad 設備或 iPad 但 iPadParams 為 null 的情況都需要設置 verticalSpacing
                 // 之前只設置了 horizontalSpacing，導致 verticalSpacing 為 undefined
                 verticalSpacing = Math.max(40, Math.min(80, height * 0.04));  // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
+
+                console.log('🔥 [v82.0] 混合佈局 verticalSpacing 已設置:', {
+                    isIPad,
+                    iPadParams: iPadParams ? '有值' : 'null',
+                    verticalSpacing: verticalSpacing.toFixed(1),
+                    height
+                });
             }
 
             if (hasImages) {
