@@ -5349,7 +5349,7 @@ class GameScene extends Phaser.Scene {
         this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
 
         // 顯示標題
-        this.add.text(width / 2, 50, '📝 正確答案', {
+        this.add.text(width / 2, 50, '📝 我的答案 vs 正確答案', {
             fontSize: '32px',
             color: '#000000',
             fontFamily: 'Arial',
@@ -5358,34 +5358,80 @@ class GameScene extends Phaser.Scene {
 
         // 創建滾動區域
         const startY = 100;
-        const lineHeight = 40;
+        const lineHeight = 50;
         const maxVisibleLines = Math.floor((height - 150) / lineHeight);
 
-        // 顯示所有配對
-        this.pairs.forEach((pair, index) => {
+        console.log('🔍 [v63.0] showAnswersScreen 調試:', {
+            currentPageAnswersLength: this.currentPageAnswers.length,
+            allPagesAnswersLength: this.allPagesAnswers.length,
+            pairsLength: this.pairs.length
+        });
+
+        // 🔥 [v63.0] 顯示用戶的答案和正確答案的對比
+        this.currentPageAnswers.forEach((answer, index) => {
             const y = startY + index * lineHeight;
 
             // 只顯示可見範圍內的答案
             if (index < maxVisibleLines) {
+                // 用戶的答案
+                const userAnswerText = answer.rightText || '(未配對)';
+                const correctAnswerText = answer.correctAnswer || '(無)';
+                const isCorrect = answer.isCorrect;
+
+                // 顯示用戶的答案
+                const userAnswerColor = isCorrect ? '#4CAF50' : '#f44336';  // 綠色正確，紅色錯誤
+                const statusIcon = isCorrect ? '✓' : '✗';
+
                 this.add.text(
                     width / 2,
                     y,
-                    `${pair.question} = ${pair.answer}`,
+                    `${statusIcon} 我的: ${userAnswerText} → 正確: ${correctAnswerText}`,
                     {
-                        fontSize: '20px',
-                        color: '#333333',
-                        fontFamily: 'Arial'
+                        fontSize: '16px',
+                        color: userAnswerColor,
+                        fontFamily: 'Arial',
+                        fontStyle: 'bold'
                     }
                 ).setOrigin(0.5);
+
+                console.log(`🔍 [v63.0] 答案 ${index + 1}:`, {
+                    userAnswer: userAnswerText,
+                    correctAnswer: correctAnswerText,
+                    isCorrect,
+                    statusIcon
+                });
             }
         });
 
+        // 如果沒有用戶答案，顯示所有正確答案
+        if (this.currentPageAnswers.length === 0) {
+            console.log('⚠️ [v63.0] 沒有用戶答案，顯示所有正確答案');
+            this.pairs.forEach((pair, index) => {
+                const y = startY + index * lineHeight;
+
+                // 只顯示可見範圍內的答案
+                if (index < maxVisibleLines) {
+                    this.add.text(
+                        width / 2,
+                        y,
+                        `${pair.question} = ${pair.answer}`,
+                        {
+                            fontSize: '16px',
+                            color: '#333333',
+                            fontFamily: 'Arial'
+                        }
+                    ).setOrigin(0.5);
+                }
+            });
+        }
+
         // 如果答案太多，顯示提示
-        if (this.pairs.length > maxVisibleLines) {
+        const totalAnswers = this.currentPageAnswers.length > 0 ? this.currentPageAnswers.length : this.pairs.length;
+        if (totalAnswers > maxVisibleLines) {
             this.add.text(
                 width / 2,
                 height - 50,
-                `（顯示前 ${maxVisibleLines} 個答案，共 ${this.pairs.length} 個）`,
+                `（顯示前 ${maxVisibleLines} 個答案，共 ${totalAnswers} 個）`,
                 {
                     fontSize: '16px',
                     color: '#999999',
