@@ -596,7 +596,7 @@ class GameScene extends Phaser.Scene {
         // 計算卡片尺寸和行數
         const verticalSpacing = Math.max(5, Math.min(20, availableHeight * 0.02));
         const cardHeight = 67;  // 混合模式卡片高度
-        const chineseTextHeight = 20;  // 中文文字高度
+        const chineseTextHeight = 30;  // 🔥 [v79.0] 中文文字高度增加 50%（20 → 30）
         const totalUnitHeight = cardHeight + chineseTextHeight + verticalSpacing;
 
         const maxRows = Math.max(1, Math.floor((availableHeight - verticalSpacing) / totalUnitHeight));
@@ -2718,8 +2718,8 @@ class GameScene extends Phaser.Scene {
                 // 🔥 第十一步：設置卡片尺寸（正方形）
                 frameWidth = squareSize;
                 cardHeightInFrame = squareSize;
-                chineseTextHeight = squareSize * 0.4;  // 中文文字高度為卡片高度的40%
-                totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;  // = squareSize * 1.4 + verticalSpacing
+                chineseTextHeight = squareSize * 0.6;  // 🔥 [v79.0] 中文文字高度增加 50%（0.4 → 0.6）
+                totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;  // = squareSize * 1.6 + verticalSpacing
 
                 // cols 已在上面的邏輯中設置
                 const rows = Math.ceil(itemCount / cols);
