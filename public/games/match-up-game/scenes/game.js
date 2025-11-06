@@ -3086,9 +3086,9 @@ class GameScene extends Phaser.Scene {
                     const textHeight = textAreaHeight - bottomPadding;
                     const textAreaY = chineseTextHeight / 2 - bottomPadding - textHeight / 2;
 
-                    // 🔥 [v81.0] 字體大小 0.75 倍（比 0.5 倍大，比 0.9 倍小）- 業界標準
+                    // 🔥 [v80.0] 字體大小 0.5 倍 - 移除 12px 最小值限制，防止文字超出灰框
                     const chineseText = this.add.text(0, textAreaY, pair.answer, {
-                        fontSize: `${Math.max(12, chineseActualFontSize * 0.75)}px`,
+                        fontSize: `${Math.max(6, chineseActualFontSize * 0.5)}px`,
                         color: '#000000',
                         fontFamily: 'Arial',
                         fontStyle: 'bold',
@@ -3112,9 +3112,9 @@ class GameScene extends Phaser.Scene {
 
                     const chineseActualFontSize = chineseFontSizesArray[i];
 
-                    // 文字置中顯示
+                    // 🔥 [v80.0] 文字置中顯示 - 字體大小 0.5 倍，移除最小值限制
                     const chineseText = this.add.text(0, 0, pair.answer, {
-                        fontSize: `${Math.max(10, chineseActualFontSize * 0.6)}px`,
+                        fontSize: `${Math.max(6, chineseActualFontSize * 0.5)}px`,
                         color: '#000000',
                         fontFamily: 'Arial',
                         fontStyle: 'bold',
