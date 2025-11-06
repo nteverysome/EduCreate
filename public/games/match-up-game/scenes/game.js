@@ -5001,6 +5001,13 @@ class GameScene extends Phaser.Scene {
     // 🔥 顯示正確答案（白色內框 + 勾勾）
     showCorrectAnswer(rightCard, correctAnswer) {
         const background = rightCard.getData('background');
+
+        // 🔥 [v58.0] 修復：檢查 background 是否存在
+        if (!background) {
+            console.warn('⚠️ [v58.0] showCorrectAnswer: background 不存在，跳過視覺效果');
+            return;
+        }
+
         const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
 
         // 內框呈白色
@@ -5031,6 +5038,13 @@ class GameScene extends Phaser.Scene {
     // 🔥 顯示錯誤答案（灰色內框 + X）
     showIncorrectAnswer(rightCard, correctAnswer) {
         const background = rightCard.getData('background');
+
+        // 🔥 [v58.0] 修復：檢查 background 是否存在
+        if (!background) {
+            console.warn('⚠️ [v58.0] showIncorrectAnswer: background 不存在，跳過視覺效果');
+            return;
+        }
+
         const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
 
         // 內框呈灰色
