@@ -2802,8 +2802,8 @@ class GameScene extends Phaser.Scene {
                 // 🔥 [v79.0] 卡片高度和中文文字高度計算（與正方形模式保持一致）
                 // 使用正確公式：(availableHeightPerRow - verticalSpacing) / 1.4
                 cardHeightInFrame = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正
-                // 🔥 [v79.0] 增加下方區域高度 - 從 0.4 改為 0.55，提供更多空間給圖片和文字
-                chineseTextHeight = cardHeightInFrame * 0.55;  // 中文文字高度 = 卡片高度的 55%（增加空間）
+                // 🔥 [v82.0] 擴大下方區域高度 - 從 0.55 改為 0.70，讓圖片和文字都變大
+                chineseTextHeight = cardHeightInFrame * 0.70;  // 中文文字高度 = 卡片高度的 70%（圖片+文字都變大）
 
                 totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;
 
