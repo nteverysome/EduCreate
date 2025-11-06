@@ -4697,6 +4697,14 @@ class GameScene extends Phaser.Scene {
         rightCard.setData('isMatched', true);
         rightCard.setData('matchedWith', leftCard);  // 記錄配對的左側卡片
 
+        // 🔥 [v59.0] 修復：將配對的卡片添加到 matchedPairs 集合中
+        const pairId = leftCard.getData('pairId');
+        this.matchedPairs.add(pairId);
+        console.log('🔥 [v59.0] 已添加配對到 matchedPairs:', {
+            pairId,
+            matchedPairsSize: this.matchedPairs.size
+        });
+
         // 分離模式：左側卡片移動到右側空白框的位置（完全覆蓋）
         const targetX = rightCard.x;
         const targetY = rightCard.y;
