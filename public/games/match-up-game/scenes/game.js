@@ -4926,13 +4926,16 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 [v64.0] 在混合模式中，檢查所有卡片的當前位置
         // 而不僅僅依賴 matchedPairs 集合（因為未被交換的卡片不會被記錄）
-        if (this.layout === 'mixed') {
-            console.log('🔍 [v64.0] 混合模式：檢查所有右卡片的當前位置');
+        if (this.layout === 'mixed' && this.chineseFrames && this.chineseFrames.length > 0) {
+            console.log('🔍 [v64.0] 混合模式：檢查所有右卡片的當前位置', {
+                chineseFramesLength: this.chineseFrames.length,
+                currentPagePairsLength: currentPagePairs.length
+            });
 
             currentPagePairs.forEach((pair, pairIndex) => {
                 // 找到對應的中文框
                 const chineseFrameIndex = pairIndex;
-                const chineseFrame = this.chineseFrames[chineseFrameIndex];
+                const chineseFrame = this.chineseFrames ? this.chineseFrames[chineseFrameIndex] : null;
 
                 if (chineseFrame) {
                     // 找到當前在這個中文框內的英文卡片
