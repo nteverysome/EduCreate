@@ -4896,6 +4896,17 @@ class GameScene extends Phaser.Scene {
             totalPairs: this.pairs.length
         });
 
+        // 🔥 [v61.0] 添加詳細的 leftCards 檢查日誌
+        console.log('🔍 [v61.0] leftCards 詳細檢查:', {
+            leftCardsCount: this.leftCards.length,
+            leftCardsData: this.leftCards.map((card, index) => ({
+                index,
+                pairId: card.getData('pairId'),
+                isMatched: card.getData('isMatched'),
+                matchedWith: card.getData('matchedWith') ? card.getData('matchedWith').getData('pairId') : null
+            }))
+        });
+
         // 🔥 [v60.0] 只檢查當前頁面的詞彙對
         currentPagePairs.forEach((pair, pairIndex) => {
             // 🔥 [v60.0] 檢查該詞彙對是否在 matchedPairs 集合中
