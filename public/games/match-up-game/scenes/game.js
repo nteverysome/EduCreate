@@ -2504,10 +2504,15 @@ class GameScene extends Phaser.Scene {
 
                 // 🔥 第七步：計算垂直間距（基於螢幕高度）
                 // ✅ v42.0：iPad 已在上面設置，非 iPad 設備在此計算
+                // 🔥 [v82.0] 修復：確保 iPad 在正方形模式下也設置 verticalSpacing
                 if (!isIPad) {
                     // 非 iPad 設備：保留原有邏輯
                     // 使用固定的垂直間距，避免估算不準確導致間距太小
                     // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
+                    verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+                } else if (verticalSpacing === undefined) {
+                    // 🔥 [v82.0] iPad 在正方形模式下也需要設置 verticalSpacing
+                    // 如果 iPad 沒有設置 verticalSpacing，使用預設值
                     verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
                 }
 
