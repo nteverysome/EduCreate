@@ -4654,6 +4654,23 @@ class GameScene extends Phaser.Scene {
         frame1.setData('currentCardPairId', card2.getData('pairId'));
         frame2.setData('currentCardPairId', card1.getData('pairId'));
 
+        // 🔥 [v62.0] 在交換後檢查配對是否正確
+        // 檢查 card1 是否與 frame2 配對正確
+        const card1PairId = card1.getData('pairId');
+        const frame2PairId = frame2.getData('pairId');
+        if (card1PairId === frame2PairId) {
+            console.log('✅ [v62.0] 混合模式配對正確（card1）:', { card1PairId, frame2PairId });
+            this.onMatchSuccess(card1, frame2);
+        }
+
+        // 檢查 card2 是否與 frame1 配對正確
+        const card2PairId = card2.getData('pairId');
+        const frame1PairId = frame1.getData('pairId');
+        if (card2PairId === frame1PairId) {
+            console.log('✅ [v62.0] 混合模式配對正確（card2）:', { card2PairId, frame1PairId });
+            this.onMatchSuccess(card2, frame1);
+        }
+
         // 動畫移動到新位置
         this.tweens.add({
             targets: card1,
