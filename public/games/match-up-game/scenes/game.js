@@ -5931,7 +5931,10 @@ class GameScene extends Phaser.Scene {
         modal.setDepth(5001);
         modal.setScrollFactor(0);
         modal.setSize(modalWidth, modalHeight);
-        modal.setInteractive();
+        modal.setInteractive({
+            hitArea: new Phaser.Geom.Rectangle(-modalWidth / 2, -modalHeight / 2, modalWidth, modalHeight),
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains
+        });
 
         // 模態框背景
         const modalBg = this.add.rectangle(0, 0, modalWidth, modalHeight, 0x2c2c2c);
@@ -6044,7 +6047,11 @@ class GameScene extends Phaser.Scene {
         // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0x3c3c3c);
         buttonBg.setStrokeStyle(2, 0x000000);
-        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setInteractive({
+            useHandCursor: true,
+            hitArea: new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains
+        });
         container.add(buttonBg);
 
         // 按鈕文字
@@ -6206,7 +6213,10 @@ class GameScene extends Phaser.Scene {
         page.setDepth(6001);
         page.setScrollFactor(0);
         page.setSize(pageWidth, pageHeight);
-        page.setInteractive();
+        page.setInteractive({
+            hitArea: new Phaser.Geom.Rectangle(-pageWidth / 2, -pageHeight / 2, pageWidth, pageHeight),
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains
+        });
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0xffffff);
@@ -6457,7 +6467,11 @@ class GameScene extends Phaser.Scene {
         // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0xffffff);
         buttonBg.setStrokeStyle(2, 0x000000);
-        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setInteractive({
+            useHandCursor: true,
+            hitArea: new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains
+        });
         container.add(buttonBg);
 
         // 按鈕文字
@@ -6517,7 +6531,10 @@ class GameScene extends Phaser.Scene {
         page.setDepth(7001);
         page.setScrollFactor(0);
         page.setSize(pageWidth, pageHeight);
-        page.setInteractive();
+        page.setInteractive({
+            hitArea: new Phaser.Geom.Rectangle(-pageWidth / 2, -pageHeight / 2, pageWidth, pageHeight),
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains
+        });
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
@@ -6784,7 +6801,10 @@ class GameScene extends Phaser.Scene {
         page.setDepth(8001);
         page.setScrollFactor(0);
         page.setSize(pageWidth, pageHeight);
-        page.setInteractive();
+        page.setInteractive({
+            hitArea: new Phaser.Geom.Rectangle(-pageWidth / 2, -pageHeight / 2, pageWidth, pageHeight),
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains
+        });
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
