@@ -3435,7 +3435,8 @@ class GameScene extends Phaser.Scene {
         // 設置互動（整個容器可拖曳）
         // 🔥 必須先設置容器大小，否則 hit area 無法正確計算
         container.setSize(width, height);
-        container.setInteractive({ useHandCursor: true });
+        // ✅ 為 Container 明確指定 hitArea 與回調，避免 Phaser 對 config 的誤判導致 hitAreaCallback 錯誤
+        container.setInteractive(new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height), Phaser.Geom.Rectangle.Contains);
         // 🔥 使用 setDraggable() 而不是在 setInteractive() 中設置 draggable
         this.input.setDraggable(container);
 
@@ -4003,7 +4004,8 @@ class GameScene extends Phaser.Scene {
         // 🔥 創建按鈕容器（使用相對於父容器的座標 x, y）
         const buttonContainer = this.add.container(0, 0, [buttonBg, speakerIcon]);
         buttonContainer.setSize(size, size);
-        buttonContainer.setInteractive({ useHandCursor: true });
+        // ✅ 為 Container 明確指定 hitArea 與回調，避免 hitAreaCallback 錯誤
+        buttonContainer.setInteractive(new Phaser.Geom.Rectangle(-size / 2, -size / 2, size, size), Phaser.Geom.Rectangle.Contains);
 
         // 🔥 設置按鈕容器的位置（相對於父容器）
         buttonContainer.setPosition(x, y);
