@@ -6019,8 +6019,18 @@ class GameScene extends Phaser.Scene {
             this.showAnswersOnCards();
         });
 
+        // 🔥 v89.0: Show all answers 按鈕 - 顯示所有卡片的正確名稱
+        this.createModalButton(modal, 0, buttonY + buttonSpacing, 'Show all answers', () => {
+            console.log('🎮 點擊 Show all answers 按鈕');
+            // 隱藏模態框，回到遊戲場景並顯示所有卡片的正確名稱
+            overlay.destroy();
+            modal.destroy();
+            this.gameCompleteModal = null;
+            this.showAllCorrectAnswers();
+        });
+
         // Start again 按鈕
-        this.createModalButton(modal, 0, buttonY + buttonSpacing, 'Start again', () => {
+        this.createModalButton(modal, 0, buttonY + buttonSpacing * 2, 'Start again', () => {
             console.log('🎮 點擊 Start again 按鈕');
             this.restartGame();
         });
@@ -6276,6 +6286,24 @@ class GameScene extends Phaser.Scene {
         }
 
         card.correctPairingText = pairingText;
+    }
+
+    // 🔥 v89.0: 顯示所有卡片的正確名稱
+    showAllCorrectAnswers() {
+        console.log('🎮 [v89.0] 顯示所有卡片的正確名稱');
+
+        // 遍歷所有左卡片（英文卡片），在每個卡片下方顯示正確的配對物件
+        if (this.leftCards && this.leftCards.length > 0) {
+            this.leftCards.forEach((card) => {
+                // 根據 pairId 找到對應的配對
+                const pair = this.pairs.find(p => p.id === card.pairId);
+
+                if (pair) {
+                    // 在卡片下方顯示正確的配對物件（中文）
+                    this.showCorrectPairingOnCard(card, pair.rightText);
+                }
+            });
+        }
     }
 
     // 🔥 v88.0: 顯示 My Answers 頁面
