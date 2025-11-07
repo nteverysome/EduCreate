@@ -6086,8 +6086,11 @@ class GameScene extends Phaser.Scene {
         const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0x3c3c3c);
         buttonBg.setStrokeStyle(2, 0x000000);
         // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
-        buttonBg.setSize(buttonWidth, buttonHeight);
-        buttonBg.setInteractive({ useHandCursor: true });
+        // ✅ 使用明確的 Rectangle hitArea 避免 Phaser 3.55.2 的 hitAreaCallback 錯誤
+        buttonBg.setInteractive(
+            new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
+            Phaser.Geom.Rectangle.Contains
+        );
         container.add(buttonBg);
 
         // 按鈕文字
