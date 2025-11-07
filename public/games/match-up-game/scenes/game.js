@@ -68,6 +68,227 @@ class GameScene extends Phaser.Scene {
         } else {
             this.devLayoutDefault = null;
         }
+
+        // 🔥 v96.0: 初始化進度保存系統
+        this.sessionId = this.generateSessionId();
+        this.autoSaveInterval = null;
+        this.lastSaveTime = 0;
+        this.saveDebounceMs = 1000;  // 防抖延遲 1 秒
+        this.enableAutoSave = true;  // 啟用自動保存
+        this.enableCloudSave = true; // 啟用雲端保存
+        console.log('🎮 GameScene: 進度保存系統初始化完成，sessionId:', this.sessionId);
+    }
+
+    // 🔥 v96.0: 生成唯一的會話 ID
+    generateSessionId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activityId = urlParams.get('activityId') || 'unknown';
+        return `match-up-${activityId}-${Date.now()}`;
+    }
+
+    // 🔥 v96.0: 獲取本地存儲的 key
+    getLocalStorageKey() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activityId = urlParams.get('activityId') || 'unknown';
+        return `matchUpGameProgress_${activityId}`;
+    }
+
+    // 🔥 v96.0: 保存遊戲進度到本地存儲
+    saveGameProgressLocally() {
+        if (!this.enableAutoSave) return;
+
+        try {
+            const now = Date.now();
+            if (now - this.lastSaveTime < this.saveDebounceMs) {
+                return;  // 防抖：1 秒內不重複保存
+            }
+            this.lastSaveTime = now;
+
+            const gameProgress = {
+                sessionId: this.sessionId,
+                activityId: new URLSearchParams(window.location.search).get('activityId'),
+                currentPage: this.currentPage,
+                matchedPairs: Array.from(this.matchedPairs),
+                allPagesAnswers: this.allPagesAnswers,
+                currentPageAnswers: this.currentPageAnswers,
+                gameStartTime: this.gameStartTime,
+                totalGameTime: this.totalGameTime,
+                gameState: this.gameState,
+                timerType: this.timerType,
+                remainingTime: this.remainingTime,
+                layout: this.layout,
+                random: this.random,
+                timestamp: new Date().toISOString()
+            };
+
+            localStorage.setItem(this.getLocalStorageKey(), JSON.stringify(gameProgress));
+            console.log('💾 [v96.0] 遊戲進度已保存到本地存儲', {
+                currentPage: this.currentPage,
+                matchedPairs: this.matchedPairs.size,
+                timestamp: gameProgress.timestamp
+            });
+        } catch (error) {
+            console.error('❌ [v96.0] 保存遊戲進度失敗:', error);
+        }
+    }
+
+    // 🔥 v96.0: 從本地存儲恢復遊戲進度
+    loadGameProgressLocally() {
+        try {
+            const saved = localStorage.getItem(this.getLocalStorageKey());
+            if (!saved) {
+                console.log('ℹ️ [v96.0] 沒有找到本地保存的遊戲進度');
+                return null;
+            }
+
+            const gameProgress = JSON.parse(saved);
+            console.log('✅ [v96.0] 從本地存儲恢復遊戲進度', gameProgress);
+            return gameProgress;
+        } catch (error) {
+            console.error('❌ [v96.0] 恢復遊戲進度失敗:', error);
+            return null;
+        }
+    }
+
+    // 🔥 v96.0: 清除本地保存的遊戲進度
+    clearGameProgressLocally() {
+        try {
+            localStorage.removeItem(this.getLocalStorageKey());
+            console.log('🗑️ [v96.0] 本地遊戲進度已清除');
+        } catch (error) {
+            console.error('❌ [v96.0] 清除遊戲進度失敗:', error);
+        }
+    }
+
+    // 🔥 v96.0: 保存遊戲進度到雲端（伺服器）
+    async saveGameProgressToCloud() {
+        if (!this.enableCloudSave) return;
+
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId');
+
+            if (!activityId) {
+                console.warn('⚠️ [v96.0] 無法保存到雲端：缺少 activityId');
+                return;
+            }
+
+            const gameData = {
+                activityId: activityId,
+                sessionId: this.sessionId,
+                currentPage: this.currentPage,
+                matchedPairs: Array.from(this.matchedPairs),
+                allPagesAnswers: this.allPagesAnswers,
+                currentPageAnswers: this.currentPageAnswers,
+                gameStartTime: this.gameStartTime,
+                totalGameTime: this.totalGameTime,
+                gameState: this.gameState,
+                timerType: this.timerType,
+                remainingTime: this.remainingTime,
+                layout: this.layout,
+                random: this.random,
+                timestamp: new Date().toISOString()
+            };
+
+            const response = await fetch('/api/game-progress', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(gameData)
+            });
+
+            if (response.ok) {
+                console.log('☁️ [v96.0] 遊戲進度已保存到雲端');
+            } else {
+                console.warn('⚠️ [v96.0] 保存到雲端失敗:', response.status);
+            }
+        } catch (error) {
+            console.error('❌ [v96.0] 保存到雲端時發生錯誤:', error);
+        }
+    }
+
+    // 🔥 v96.0: 從雲端恢復遊戲進度
+    async loadGameProgressFromCloud() {
+        if (!this.enableCloudSave) return null;
+
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId');
+
+            if (!activityId) {
+                console.warn('⚠️ [v96.0] 無法從雲端恢復：缺少 activityId');
+                return null;
+            }
+
+            const response = await fetch(`/api/game-progress?activityId=${activityId}`);
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('☁️ [v96.0] 從雲端恢復遊戲進度', data);
+                return data;
+            } else {
+                console.warn('⚠️ [v96.0] 從雲端恢復失敗:', response.status);
+                return null;
+            }
+        } catch (error) {
+            console.error('❌ [v96.0] 從雲端恢復時發生錯誤:', error);
+            return null;
+        }
+    }
+
+    // 🔥 v96.0: 上傳遊戲完成進度到伺服器（用於排行榜）
+    async uploadGameProgressToCloud() {
+        if (!this.enableCloudSave) return;
+
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId');
+
+            if (!activityId) {
+                console.warn('⚠️ [v96.0] 無法上傳到伺服器：缺少 activityId');
+                return;
+            }
+
+            // 計算分數
+            const totalCorrect = this.allPagesAnswers.filter(answer => answer.isCorrect && answer.rightPairId !== null).length;
+            const totalQuestions = this.pairs.length;
+            const accuracy = totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0;
+
+            const gameData = {
+                activityId: activityId,
+                sessionId: this.sessionId,
+                score: totalCorrect,
+                correctCount: totalCorrect,
+                totalCount: totalQuestions,
+                accuracy: accuracy,
+                timeSpent: this.totalGameTime,
+                allPagesAnswers: this.allPagesAnswers,
+                currentPage: this.currentPage,
+                matchedPairs: Array.from(this.matchedPairs),
+                layout: this.layout,
+                random: this.random,
+                timestamp: new Date().toISOString()
+            };
+
+            const response = await fetch('/api/game-progress/complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(gameData)
+            });
+
+            if (response.ok) {
+                console.log('☁️ [v96.0] 遊戲完成進度已上傳到伺服器');
+                // 上傳成功後清除本地進度
+                this.clearGameProgressLocally();
+            } else {
+                console.warn('⚠️ [v96.0] 上傳到伺服器失敗:', response.status);
+            }
+        } catch (error) {
+            console.error('❌ [v96.0] 上傳到伺服器時發生錯誤:', error);
+        }
     }
 
     loadDevLayoutTestData(mode, urlParams) {
@@ -584,7 +805,32 @@ class GameScene extends Phaser.Scene {
         window.addEventListener('orientationchange', this.handleOrientationChange.bind(this));
         console.log('✅ 已綁定 orientationchange 事件監聽器');
 
+        // 🔥 v96.0: 設置自動保存進度
+        this.setupAutoSave();
+
+        // 🔥 v96.0: 監聽頁面可見性變化（用戶最小化或切換標籤時保存）
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log('👁️ [v96.0] 頁面隱藏，保存進度到本地');
+                this.saveGameProgressLocally();
+            } else {
+                console.log('👁️ [v96.0] 頁面顯示，檢查進度');
+            }
+        });
+
         console.log('🎮 GameScene: create 方法完成');
+    }
+
+    // 🔥 v96.0: 設置自動保存進度
+    setupAutoSave() {
+        // 每 5 秒自動保存一次進度
+        this.autoSaveInterval = setInterval(() => {
+            if (this.gameState === 'playing' && !this.sceneStopped) {
+                this.saveGameProgressLocally();
+            }
+        }, 5000);
+
+        console.log('✅ [v96.0] 自動保存已設置（每 5 秒保存一次）');
     }
 
     // 🔥 v6.0 計算每頁能容納的最大卡片數
@@ -4885,6 +5131,9 @@ class GameScene extends Phaser.Scene {
             matchedPairsSize: this.matchedPairs.size
         });
 
+        // 🔥 v96.0: 配對成功時立即保存進度
+        this.saveGameProgressLocally();
+
         // 分離模式：左側卡片移動到右側空白框的位置（完全覆蓋）
         const targetX = rightCard.x;
         const targetY = rightCard.y;
@@ -5876,6 +6125,9 @@ class GameScene extends Phaser.Scene {
     showGameCompleteModal() {
         const width = this.scale.width;
         const height = this.scale.height;
+
+        // 🔥 v96.0: 遊戲完成時上傳進度到伺服器
+        this.uploadGameProgressToCloud();
 
         // 🔥 [v56.0] 改進分數計算邏輯
         // 計算總分數：只計算有效的答案（已配對的答案）
@@ -7051,6 +7303,13 @@ class GameScene extends Phaser.Scene {
     // 🔥 P1-4: 修正事件監聽器管理 - shutdown 方法
     shutdown() {
         console.log('🎮 GameScene: shutdown 方法開始 - 清理事件監聽器');
+
+        // 🔥 v96.0: 清理自動保存定時器
+        if (this.autoSaveInterval) {
+            clearInterval(this.autoSaveInterval);
+            this.autoSaveInterval = null;
+            console.log('✅ [v96.0] 自動保存定時器已清理');
+        }
 
         // 移除 resize 事件監聽器
         if (this.scale) {
