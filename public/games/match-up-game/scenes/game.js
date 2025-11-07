@@ -5105,37 +5105,53 @@ class GameScene extends Phaser.Scene {
             markAbsoluteY: rightCard.y + markY
         });
 
-        // 🔥 [v80.4] 先創建標記（在場景坐標系中）
+        // 🔥 [v80.5] 先創建標記（在場景坐標系中）
         const checkMark = this.add.text(
             0,
             0,
             '✓',
             {
-                fontSize: '32px',
+                fontSize: '40px',
                 color: '#4caf50',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
             }
         );
-        checkMark.setOrigin(0.5, 0.5).setDepth(15);
+        checkMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
 
-        // 🔥 [v80.4] 調試日誌 - 標記創建
-        console.log('✅ [v80.4] 勾勾標記已創建:', {
+        // 🔥 [v80.5] 調試日誌 - 標記創建
+        console.log('✅ [v80.5] 勾勾標記已創建:', {
             text: checkMark.text,
             x: checkMark.x,
             y: checkMark.y,
-            color: checkMark.color,
-            depth: checkMark.depth
+            fontSize: checkMark.fontSize,
+            visible: checkMark.visible,
+            depth: checkMark.depth,
+            displayOriginX: checkMark.displayOriginX,
+            displayOriginY: checkMark.displayOriginY
         });
 
-        // 🔥 [v80.4] 添加到容器後，設置相對位置
+        // 🔥 [v80.5] 添加到容器後，設置相對位置
         rightCard.add(checkMark);
         checkMark.setPosition(markX, markY);
 
-        // 🔥 [v80.0] 調試日誌 - 標記添加後
-        console.log('✅ [v80.0] 勾勾標記已添加到容器:', {
+        // 🔥 [v80.5] 調試日誌 - 標記添加後的詳細信息
+        console.log('✅ [v80.5] 勾勾標記已添加到容器:', {
             containerChildren: rightCard.list.length,
-            markInContainer: rightCard.list.includes(checkMark)
+            markInContainer: rightCard.list.includes(checkMark),
+            markX: checkMark.x,
+            markY: checkMark.y,
+            markVisible: checkMark.visible,
+            markDepth: checkMark.depth,
+            containerX: rightCard.x,
+            containerY: rightCard.y,
+            containerVisible: rightCard.visible,
+            containerDepth: rightCard.depth,
+            backgroundX: background.x,
+            backgroundY: background.y,
+            backgroundVisible: background.visible,
+            backgroundWidth: background.width,
+            backgroundHeight: background.height
         });
     }
 
@@ -5195,37 +5211,53 @@ class GameScene extends Phaser.Scene {
             markAbsoluteY: rightCard.y + markY
         });
 
-        // 🔥 [v80.4] 先創建標記（在場景坐標系中）
+        // 🔥 [v80.5] 先創建標記（在場景坐標系中）
         const xMark = this.add.text(
             0,
             0,
             '✗',
             {
-                fontSize: '32px',
+                fontSize: '40px',
                 color: '#f44336',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
             }
         );
-        xMark.setOrigin(0.5, 0.5).setDepth(15);
+        xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
 
-        // 🔥 [v80.4] 調試日誌 - 標記創建
-        console.log('✅ [v80.4] 叉叉標記已創建:', {
+        // 🔥 [v80.5] 調試日誌 - 標記創建
+        console.log('✅ [v80.5] 叉叉標記已創建:', {
             text: xMark.text,
             x: xMark.x,
             y: xMark.y,
-            color: xMark.color,
-            depth: xMark.depth
+            fontSize: xMark.fontSize,
+            visible: xMark.visible,
+            depth: xMark.depth,
+            displayOriginX: xMark.displayOriginX,
+            displayOriginY: xMark.displayOriginY
         });
 
-        // 🔥 [v80.4] 添加到容器後，設置相對位置
+        // 🔥 [v80.5] 添加到容器後，設置相對位置
         rightCard.add(xMark);
         xMark.setPosition(markX, markY);
 
-        // 🔥 [v80.0] 調試日誌 - 標記添加後
-        console.log('✅ [v80.0] 叉叉標記已添加到容器:', {
+        // 🔥 [v80.5] 調試日誌 - 標記添加後的詳細信息
+        console.log('✅ [v80.5] 叉叉標記已添加到容器:', {
             containerChildren: rightCard.list.length,
-            markInContainer: rightCard.list.includes(xMark)
+            markInContainer: rightCard.list.includes(xMark),
+            markX: xMark.x,
+            markY: xMark.y,
+            markVisible: xMark.visible,
+            markDepth: xMark.depth,
+            containerX: rightCard.x,
+            containerY: rightCard.y,
+            containerVisible: rightCard.visible,
+            containerDepth: rightCard.depth,
+            backgroundX: background.x,
+            backgroundY: background.y,
+            backgroundVisible: background.visible,
+            backgroundWidth: background.width,
+            backgroundHeight: background.height
         });
     }
 
