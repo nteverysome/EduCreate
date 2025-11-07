@@ -946,7 +946,10 @@ class GameScene extends Phaser.Scene {
             // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
             const bounds = showAnswersButton.getBounds();
             showAnswersButton.setSize(bounds.width, bounds.height);
-            showAnswersButton.setInteractive({ useHandCursor: true });
+            showAnswersButton.setInteractive(
+                new Phaser.Geom.Rectangle(-bounds.width / 2, -bounds.height / 2, bounds.width, bounds.height),
+                Phaser.Geom.Rectangle.Contains
+            );
 
             showAnswersButton.on('pointerdown', () => {
                 overlay.destroy();
@@ -4187,7 +4190,10 @@ class GameScene extends Phaser.Scene {
         // 設置互動（接收拖曳）
         // 🔥 確保 hit area 正確設置
         background.setSize(width, height);
-        background.setInteractive({ useHandCursor: true });
+        background.setInteractive(
+            new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
+            Phaser.Geom.Rectangle.Contains
+        );
 
         // 懸停效果
         background.on('pointerover', () => {
@@ -4877,7 +4883,10 @@ class GameScene extends Phaser.Scene {
         buttonBg.setStrokeStyle(2, 0x388e3c);
         // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
         buttonBg.setSize(buttonWidth, buttonHeight);
-        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setInteractive(
+            new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
+            Phaser.Geom.Rectangle.Contains
+        );
         buttonBg.setDepth(3000);  // 🔥 提高深度確保在最上層
         buttonBg.setScrollFactor(0);  // 🔥 固定在螢幕上，不隨相機移動
 
@@ -5425,7 +5434,10 @@ class GameScene extends Phaser.Scene {
         buttonBg.setStrokeStyle(2, 0xf57c00);
         // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
         buttonBg.setSize(buttonWidth, buttonHeight);
-        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setInteractive(
+            new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
+            Phaser.Geom.Rectangle.Contains
+        );
         buttonBg.setDepth(2000);
 
         const buttonText = this.add.text(buttonX, buttonY, '重試', {
@@ -5545,7 +5557,10 @@ class GameScene extends Phaser.Scene {
             // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
             const bounds = showAnswersButton.getBounds();
             showAnswersButton.setSize(bounds.width, bounds.height);
-            showAnswersButton.setInteractive({ useHandCursor: true });
+            showAnswersButton.setInteractive(
+                new Phaser.Geom.Rectangle(-bounds.width / 2, -bounds.height / 2, bounds.width, bounds.height),
+                Phaser.Geom.Rectangle.Contains
+            );
 
             showAnswersButton.on('pointerdown', () => {
                 completeText.destroy();
@@ -5640,7 +5655,10 @@ class GameScene extends Phaser.Scene {
         // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
         const backBounds = backButton.getBounds();
         backButton.setSize(backBounds.width, backBounds.height);
-        backButton.setInteractive({ useHandCursor: true });
+        backButton.setInteractive(
+            new Phaser.Geom.Rectangle(-backBounds.width / 2, -backBounds.height / 2, backBounds.width, backBounds.height),
+            Phaser.Geom.Rectangle.Contains
+        );
 
         backButton.on('pointerdown', () => {
             this.scene.restart();
@@ -5767,7 +5785,10 @@ class GameScene extends Phaser.Scene {
         // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
         const closeBounds = closeButton.getBounds();
         closeButton.setSize(closeBounds.width, closeBounds.height);
-        closeButton.setInteractive({ useHandCursor: true });
+        closeButton.setInteractive(
+            new Phaser.Geom.Rectangle(-closeBounds.width / 2, -closeBounds.height / 2, closeBounds.width, closeBounds.height),
+            Phaser.Geom.Rectangle.Contains
+        );
 
         closeButton.on('pointerdown', () => {
             // 清除分頁狀態
@@ -5846,7 +5867,10 @@ class GameScene extends Phaser.Scene {
         const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x4caf50);
         // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
         buttonBg.setSize(buttonWidth, buttonHeight);
-        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setInteractive(
+            new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
+            Phaser.Geom.Rectangle.Contains
+        );
         buttonBg.setDepth(100);
 
         // 創建按鈕文字
@@ -6507,7 +6531,10 @@ class GameScene extends Phaser.Scene {
         buttonBg.setStrokeStyle(2, 0x000000);
         // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
         buttonBg.setSize(buttonWidth, buttonHeight);
-        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setInteractive(
+            new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
+            Phaser.Geom.Rectangle.Contains
+        );
         container.add(buttonBg);
 
         // 按鈕文字
@@ -6689,7 +6716,10 @@ class GameScene extends Phaser.Scene {
         buttonBg.setStrokeStyle(2, 0x000000);
         // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
         buttonBg.setSize(width, height);
-        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setInteractive(
+            new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
+            Phaser.Geom.Rectangle.Contains
+        );
         container.add(buttonBg);
 
         // 按鈕文字
