@@ -5003,6 +5003,11 @@ class GameScene extends Phaser.Scene {
                                     userAnswerPairId = currentCardPairId;
                                 }
                             }
+
+                            // 🔥 [v83.0] 未配對也要顯示叉叉標記
+                            if (frame) {
+                                this.showIncorrectAnswer(frame, pair.english);
+                            }
                         }
                     }
 
