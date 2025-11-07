@@ -5002,20 +5002,48 @@ class GameScene extends Phaser.Scene {
                     });
                 }
             } else {
-                // 未配對
+                // 未配對 - 但在混合模式中，我們仍然可以查看用戶選擇了什麼
                 unmatchedCount++;
                 console.log('⚠️ 未配對:', pair.chinese);
+
+                // 🔥 [v68.0] 在混合模式中，檢查用戶選擇了什麼
+                let userAnswerText = null;
+                let userAnswerPairId = null;
+
+                if (this.layout === 'mixed' && this.rightCards && this.rightCards.length > 0) {
+                    // 在混合模式中，查找對應的框
+                    const frameIndex = pairIndex;
+                    if (frameIndex < this.rightCards.length) {
+                        const frame = this.rightCards[frameIndex];
+                        const currentCardPairId = frame.getData('currentCardPairId');
+
+                        if (currentCardPairId) {
+                            // 找到用戶選擇的答案
+                            const userAnswerPair = this.pairs.find(p => p.id === currentCardPairId);
+                            if (userAnswerPair) {
+                                userAnswerText = userAnswerPair.english;
+                                userAnswerPairId = currentCardPairId;
+                                console.log('🔍 [v68.0] 未配對但有用戶選擇:', {
+                                    pairId: pair.id,
+                                    chinese: pair.chinese,
+                                    userSelected: userAnswerText,
+                                    correct: pair.english
+                                });
+                            }
+                        }
+                    }
+                }
 
                 // 🔥 記錄未配對的答案
                 this.currentPageAnswers.push({
                     page: this.currentPage,
                     leftText: pair.chinese,
-                    rightText: null,
+                    rightText: userAnswerText,
                     correctAnswer: pair.english,
                     correctChinese: pair.chinese,
                     isCorrect: false,
                     leftPairId: pair.id,
-                    rightPairId: null
+                    rightPairId: userAnswerPairId
                 });
             }
         });
