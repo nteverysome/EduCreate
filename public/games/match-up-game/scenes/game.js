@@ -6020,7 +6020,14 @@ class GameScene extends Phaser.Scene {
         // Leaderboard 按鈕
         this.createModalButton(modal, 0, buttonY - buttonSpacing, 'Leaderboard', () => {
             console.log('🎮 點擊 Leaderboard 按鈕');
-            this.showEnterNamePage();
+            // 隱藏遊戲結束模態框
+            if (this.gameCompleteModal) {
+                this.gameCompleteModal.overlay.destroy();
+                this.gameCompleteModal.modal.destroy();
+                this.gameCompleteModal = null;
+            }
+            // 顯示排行榜
+            this.showLeaderboard();
         });
 
         // Show answers 按鈕
