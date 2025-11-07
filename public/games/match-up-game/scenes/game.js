@@ -5021,7 +5021,7 @@ class GameScene extends Phaser.Scene {
                                 fontFamily: 'Arial',
                                 fontStyle: 'bold'
                             });
-                            xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
+                            xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true).setInteractive(false);
 
                             englishCard.add(xMark);
                             xMark.setPosition(markX, markY);
@@ -5147,7 +5147,7 @@ class GameScene extends Phaser.Scene {
                         fontFamily: 'Arial',
                         fontStyle: 'bold'
                     });
-                    checkMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
+                    checkMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true).setInteractive(false);
 
                     englishCard.add(checkMark);
                     checkMark.setPosition(markX, markY);
@@ -5188,7 +5188,7 @@ class GameScene extends Phaser.Scene {
                 fontStyle: 'bold'
             }
         );
-        checkMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
+        checkMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true).setInteractive(false);
 
         // 🔥 [v81.0] 添加到容器並設置位置
         rightCard.add(checkMark);
@@ -5273,7 +5273,7 @@ class GameScene extends Phaser.Scene {
                         fontFamily: 'Arial',
                         fontStyle: 'bold'
                     });
-                    xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
+                    xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true).setInteractive(false);
 
                     englishCard.add(xMark);
                     xMark.setPosition(markX, markY);
@@ -5314,7 +5314,7 @@ class GameScene extends Phaser.Scene {
                 fontStyle: 'bold'
             }
         );
-        xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
+        xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true).setInteractive(false);
 
         // 🔥 [v81.0] 添加到容器並設置位置
         rightCard.add(xMark);
