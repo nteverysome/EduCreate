@@ -6167,11 +6167,11 @@ class GameScene extends Phaser.Scene {
         this.scene.restart();
     }
 
-    // 🔥 v88.0: 顯示所有卡片上的勾勾和叉叉
+    // 🔥 v88.0: 顯示所有卡片上的勾勾和叉叉，以及正確的配對物件
     showAnswersOnCards() {
-        console.log('🎮 [v88.0] 顯示所有卡片上的勾勾和叉叉');
+        console.log('🎮 [v88.0] 顯示所有卡片上的勾勾和叉叉，以及正確的配對物件');
 
-        // 遍歷所有答案，在對應的卡片上顯示勾勾或叉叉
+        // 遍歷所有答案，在對應的卡片上顯示勾勾或叉叉，以及正確的配對物件
         if (this.allPagesAnswers && this.allPagesAnswers.length > 0) {
             this.allPagesAnswers.forEach((answer) => {
                 // 根據 leftPairId 找到對應的左卡片（英文卡片）
@@ -6184,6 +6184,9 @@ class GameScene extends Phaser.Scene {
                     } else {
                         this.showIncorrectAnswerOnCard(leftCard);
                     }
+
+                    // 🔥 v88.0: 在英文卡片下方顯示正確的配對物件（中文）
+                    this.showCorrectPairingOnCard(leftCard, answer.correctAnswer);
                 }
             });
         }
@@ -6243,6 +6246,36 @@ class GameScene extends Phaser.Scene {
         }
 
         card.xMark = xMark;
+    }
+
+    // 🔥 v88.0: 在卡片下方顯示正確的配對物件（中文）
+    showCorrectPairingOnCard(card, correctAnswer) {
+        // 移除舊的配對文字（如果存在）
+        if (card.correctPairingText) {
+            card.correctPairingText.destroy();
+        }
+
+        // 創建正確配對的文字
+        const pairingText = this.add.text(0, 0, correctAnswer, {
+            fontSize: '20px',
+            color: '#000000',
+            fontFamily: 'Arial',
+            fontStyle: 'bold',
+            wordWrap: { width: 100 },
+            align: 'center'
+        });
+        pairingText.setOrigin(0.5);
+        pairingText.setDepth(99);
+
+        // 定位到卡片下方
+        const background = card.list[0]; // 卡片背景
+        if (background) {
+            const textX = card.x;
+            const textY = card.y + background.height / 2 + 30;
+            pairingText.setPosition(textX, textY);
+        }
+
+        card.correctPairingText = pairingText;
     }
 
     // 🔥 v88.0: 顯示 My Answers 頁面
