@@ -5403,6 +5403,8 @@ class GameScene extends Phaser.Scene {
                 isCorrect: false
             }));
 
+        const itemsPerCol = Math.ceil(allAnswers.length / cols);
+
         console.log('🔍 [v72.0] showAnswersScreen 3列顯示調試:', {
             width,
             height,
