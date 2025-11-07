@@ -549,42 +549,30 @@ class GameScene extends Phaser.Scene {
             throttleMs: 100
         });
 
-        // 🔥 v54.0: 改進的 resize 事件 - 保存已配對狀態和洗牌順序，重新創建卡片但保持詞彙數據和卡片順序
-        // 監聽螢幕尺寸變化 - 重新創建卡片但保持已配對狀態和卡片順序
+        // 🔥 v87.0: 改進的 resize 事件 - 只調整卡片位置，不重新載入詞彙
+        // 監聽螢幕尺寸變化 - 只調整卡片位置和大小，保持詞彙數據和已配對狀態
         this.resizeTimeout = null;
         this.shuffledPairsCache = null;  // 🔥 v54.0: 緩存洗牌後的順序
         this.scale.on('resize', (gameSize) => {
-            // 🔥 v54.0: 使用防抖延遲，保存已配對狀態和洗牌順序後重新創建卡片
-            console.log('🔥 [v54.0] resize 事件觸發:', { width: gameSize.width, height: gameSize.height });
+            // 🔥 v87.0: 使用防抖延遲，只調整卡片位置（不重新創建卡片）
+            console.log('🔥 [v87.0] resize 事件觸發:', { width: gameSize.width, height: gameSize.height });
 
             // 清除之前的超時
             if (this.resizeTimeout) {
                 clearTimeout(this.resizeTimeout);
             }
 
-            // 設置新的超時，300ms 後才執行重新佈局
+            // 設置新的超時，300ms 後才執行位置調整
             this.resizeTimeout = setTimeout(() => {
-                console.log('🔥 [v54.0] 防抖延遲後執行 updateLayout（保存已配對狀態和洗牌順序）');
+                console.log('🔥 [v87.0] 防抖延遲後執行 repositionCards（只調整位置，不重新載入詞彙）');
 
-                // 🔥 v54.0: 保存已配對的卡片信息
-                const savedMatchedPairs = new Set(this.matchedPairs);
-                console.log('🔥 [v54.0] 已保存已配對卡片:', Array.from(savedMatchedPairs));
+                // 🔥 v87.0: 只調整卡片位置，保持詞彙數據和已配對狀態
+                this.repositionCards();
 
-                // 🔥 v54.0: 注意：不清除 shuffledPairsCache，這樣 resize 時會使用相同的洗牌順序
-                console.log('🔥 [v54.0] 使用緩存的洗牌順序（如果存在）');
-
-                // 執行重新佈局
-                this.updateLayout();
-
-                // 🔥 v54.0: 恢復已配對的卡片狀態
-                this.matchedPairs = savedMatchedPairs;
-                console.log('🔥 [v54.0] 已恢復已配對卡片狀態');
-
-                // 🔥 v54.0: 重新應用已配對卡片的視覺效果
-                this.restoreMatchedPairsVisuals();
+                console.log('🔥 [v87.0] 卡片位置調整完成');
             }, 300);
         }, this);
-        console.log('✅ 已綁定 resize 事件監聽器（v54.0 防抖延遲 300ms，保存已配對狀態和洗牌順序）');
+        console.log('✅ 已綁定 resize 事件監聽器（v87.0 防抖延遲 300ms，只調整位置不重新載入詞彙）');
 
         // 監聽全螢幕變化
         document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
@@ -1058,6 +1046,177 @@ class GameScene extends Phaser.Scene {
         } catch (error) {
             console.error('❌ [v53.0] 恢復已配對卡片視覺效果失敗:', error);
         }
+    }
+
+    // 🔥 v87.0: 只調整卡片位置，不重新載入詞彙
+    repositionCards() {
+        try {
+            console.log('🔄 [v87.0] repositionCards 開始 - 只調整位置，不重新載入詞彙');
+
+            const width = this.scale.width;
+            const height = this.scale.height;
+
+            if (this.layout === 'mixed') {
+                this.repositionMixedLayout(width, height);
+            } else {
+                this.repositionSeparatedLayout(width, height);
+            }
+
+            console.log('✅ [v87.0] repositionCards 完成');
+        } catch (error) {
+            console.error('❌ [v87.0] repositionCards 失敗:', error);
+            // 如果位置調整失敗，回退到完整重建
+            console.warn('⚠️ [v87.0] 位置調整失敗，回退到完整重建');
+            this.updateLayout();
+        }
+    }
+
+    // 🔥 v87.0: 調整混合佈局中的卡片位置
+    repositionMixedLayout(width, height) {
+        console.log('🔄 [v87.0] 調整混合佈局卡片位置');
+
+        // 🔥 重新計算卡片尺寸
+        const cardHeightInFrame = (height * 0.6) / 7;  // 假設最多 7 行
+        const chineseTextHeight = 30;
+        const verticalSpacing = Math.max(5, Math.min(20, height * 0.02));
+        const totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;
+
+        // 🔥 計算佈局參數
+        const frameWidth = Math.min(width * 0.9, 600);
+        const frameHeight = height * 0.8;
+        const frameX = width / 2;
+        const frameY = height / 2;
+
+        // 🔥 調整所有卡片位置
+        if (this.leftCards && this.leftCards.length > 0) {
+            this.leftCards.forEach((card, index) => {
+                const y = frameY - frameHeight / 2 + 50 + index * totalUnitHeight;
+                card.setPosition(frameX - frameWidth / 2 - 100, y);
+            });
+        }
+
+        if (this.rightCards && this.rightCards.length > 0) {
+            this.rightCards.forEach((card, index) => {
+                const y = frameY - frameHeight / 2 + 50 + index * totalUnitHeight;
+                card.setPosition(frameX + frameWidth / 2 + 100, y);
+            });
+        }
+
+        console.log('✅ [v87.0] 混合佈局卡片位置調整完成');
+    }
+
+    // 🔥 v87.0: 調整分離佈局中的卡片位置
+    repositionSeparatedLayout(width, height) {
+        console.log('🔄 [v87.0] 調整分離佈局卡片位置');
+
+        // 🔥 重新計算卡片尺寸和位置
+        const itemCount = this.leftCards?.length || 0;
+
+        if (itemCount <= 5) {
+            // 左右分離，單列
+            this.repositionLeftRightSingleColumn(width, height, itemCount);
+        } else {
+            // 左右分離，多行 2 列
+            this.repositionLeftRightMultiRows(width, height, itemCount);
+        }
+
+        console.log('✅ [v87.0] 分離佈局卡片位置調整完成');
+    }
+
+    // 🔥 v87.0: 調整左右分離佈局 - 單列
+    repositionLeftRightSingleColumn(width, height, itemCount) {
+        console.log('🔄 [v87.0] 調整左右分離佈局 - 單列');
+
+        // 🔥 檢測容器高度
+        const isSmallContainer = height < 600;
+        const isMediumContainer = height >= 600 && height < 800;
+        const isLandscapeMobile = width > height && height < 450;
+
+        // 🔥 根據容器大小動態調整卡片尺寸（用於計算間距）
+        let cardHeight;
+
+        if (isLandscapeMobile) {
+            cardHeight = Math.max(28, Math.min(40, height * 0.08));
+        } else if (isSmallContainer) {
+            cardHeight = Math.max(40, Math.min(65, height * 0.09));
+        } else if (isMediumContainer) {
+            cardHeight = Math.max(45, Math.min(72, height * 0.095));
+        } else {
+            cardHeight = Math.max(50, Math.min(80, height * 0.1));
+        }
+
+        // 🔥 根據容器大小動態調整位置
+        let leftX, rightX, leftStartY, rightStartY;
+
+        if (isLandscapeMobile) {
+            leftX = width * 0.38;
+            rightX = width * 0.70;
+            leftStartY = height * 0.15;
+            rightStartY = height * 0.12;
+        } else if (isSmallContainer) {
+            leftX = width * 0.42;
+            rightX = width * 0.68;
+            leftStartY = height * 0.25;
+            rightStartY = height * 0.22;
+        } else if (isMediumContainer) {
+            leftX = width * 0.44;
+            rightX = width * 0.66;
+            leftStartY = height * 0.3;
+            rightStartY = height * 0.27;
+        } else {
+            leftX = width * 0.45;
+            rightX = width * 0.65;
+            leftStartY = height * 0.35;
+            rightStartY = height * 0.32;
+        }
+
+        // 🔥 根據容器大小動態調整間距
+        let leftSpacing, rightSpacing;
+
+        if (isLandscapeMobile) {
+            const availableHeight = height * 0.75;
+            const maxSpacing = (availableHeight - cardHeight * itemCount) / (itemCount - 1);
+            leftSpacing = Math.max(18, Math.min(maxSpacing, cardHeight + 3));
+            rightSpacing = Math.max(18, Math.min(maxSpacing, cardHeight + 5));
+        } else if (isSmallContainer) {
+            leftSpacing = cardHeight + Math.max(3, height * 0.008);
+            rightSpacing = cardHeight + Math.max(8, height * 0.02);
+        } else if (isMediumContainer) {
+            leftSpacing = cardHeight + Math.max(4, height * 0.009);
+            rightSpacing = cardHeight + Math.max(12, height * 0.025);
+        } else {
+            leftSpacing = cardHeight + Math.max(5, height * 0.01);
+            rightSpacing = cardHeight + Math.max(15, height * 0.03);
+        }
+
+        // 🔥 調整左側卡片位置
+        if (this.leftCards && this.leftCards.length > 0) {
+            this.leftCards.forEach((card, index) => {
+                const y = leftStartY + index * leftSpacing;
+                card.setPosition(leftX, y);
+            });
+        }
+
+        // 🔥 調整右側卡片位置
+        if (this.rightCards && this.rightCards.length > 0) {
+            this.rightCards.forEach((card, index) => {
+                const y = rightStartY + index * rightSpacing;
+                card.setPosition(rightX, y);
+            });
+        }
+
+        console.log('✅ [v87.0] 左右分離佈局 - 單列位置調整完成');
+    }
+
+    // 🔥 v87.0: 調整左右分離佈局 - 多行
+    repositionLeftRightMultiRows(width, height, itemCount) {
+        console.log('🔄 [v87.0] 調整左右分離佈局 - 多行');
+
+        // 🔥 簡化版本：使用與單列相同的邏輯
+        // 實際應用中可以根據需要進一步優化
+        this.repositionLeftRightSingleColumn(width, height, itemCount);
+
+        console.log('✅ [v87.0] 左右分離佈局 - 多行位置調整完成');
     }
 
     createCards() {
