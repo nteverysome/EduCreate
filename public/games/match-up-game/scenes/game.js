@@ -6012,7 +6012,11 @@ class GameScene extends Phaser.Scene {
         // Show answers 按鈕
         this.createModalButton(modal, 0, buttonY, 'Show answers', () => {
             console.log('🎮 點擊 Show answers 按鈕');
-            this.showMyAnswersPage();
+            // 🔥 v88.0: 隱藏模態框，直接在遊戲頁面上顯示答案
+            overlay.destroy();
+            modal.destroy();
+            this.gameCompleteModal = null;
+            this.displayAnswersOnGameBoard();
         });
 
         // Start again 按鈕
@@ -6163,7 +6167,211 @@ class GameScene extends Phaser.Scene {
         this.scene.restart();
     }
 
-    // 🔥 顯示 My Answers 頁面
+    // 🔥 v88.0: 在遊戲頁面上直接顯示答案（帶著勾勾和叉叉）
+    displayAnswersOnGameBoard() {
+        console.log('🎮 [v88.0] 在遊戲頁面上顯示答案');
+
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 清除所有現有卡片
+        this.children.removeAll(true);
+
+        // 添加白色背景
+        this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
+
+        // 添加標題
+        this.add.text(width / 2, 30, 'Answer Review', {
+            fontSize: '32px',
+            color: '#000000',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(10);
+
+        // 根據佈局模式顯示答案
+        if (this.layout === 'mixed') {
+            this.displayAnswersOnMixedLayout();
+        } else {
+            this.displayAnswersOnSeparatedLayout();
+        }
+
+        // 添加返回按鈕
+        this.createReturnButton();
+    }
+
+    // 🔥 v88.0: 在混合佈局上顯示答案
+    displayAnswersOnMixedLayout() {
+        console.log('🎮 [v88.0] 在混合佈局上顯示答案');
+
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 計算卡片尺寸
+        const cardHeightInFrame = (height * 0.6) / 7;
+        const chineseTextHeight = 30;
+        const verticalSpacing = Math.max(5, Math.min(20, height * 0.02));
+        const totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;
+
+        const frameWidth = Math.min(width * 0.9, 600);
+        const frameHeight = height * 0.8;
+        const frameX = width / 2;
+        const frameY = height / 2 + 30;
+
+        // 遍歷所有答案並顯示
+        if (this.allPagesAnswers && this.allPagesAnswers.length > 0) {
+            this.allPagesAnswers.forEach((answer, index) => {
+                const y = frameY - frameHeight / 2 + 80 + index * totalUnitHeight;
+
+                // 英文卡片位置
+                const englishX = frameX - frameWidth / 2 - 100;
+
+                // 中文卡片位置
+                const chineseX = frameX + frameWidth / 2 + 100;
+
+                // 顯示英文卡片（用戶的答案）
+                this.displayAnswerCard(englishX, y, answer.rightText || '(未配對)', answer.isCorrect, 'english');
+
+                // 顯示中文卡片（正確答案）
+                this.displayAnswerCard(chineseX, y, answer.correctAnswer, true, 'chinese');
+
+                // 顯示中文文字
+                this.add.text(chineseX, y + 60, answer.leftText, {
+                    fontSize: '20px',
+                    color: '#000000',
+                    fontFamily: 'Arial',
+                    fontStyle: 'normal'
+                }).setOrigin(0.5).setDepth(10);
+            });
+        }
+    }
+
+    // 🔥 v88.0: 在分離佈局上顯示答案
+    displayAnswersOnSeparatedLayout() {
+        console.log('🎮 [v88.0] 在分離佈局上顯示答案');
+
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 計算卡片尺寸
+        const cardHeight = Math.max(50, Math.min(80, height * 0.1));
+
+        // 左側卡片位置
+        const leftX = width * 0.25;
+        const leftStartY = height * 0.15;
+        const leftSpacing = cardHeight + Math.max(5, height * 0.01);
+
+        // 右側卡片位置
+        const rightX = width * 0.75;
+        const rightStartY = height * 0.15;
+        const rightSpacing = cardHeight + Math.max(5, height * 0.01);
+
+        // 遍歷所有答案並顯示
+        if (this.allPagesAnswers && this.allPagesAnswers.length > 0) {
+            this.allPagesAnswers.forEach((answer, index) => {
+                // 左側：用戶的答案
+                const leftY = leftStartY + index * leftSpacing;
+                this.displayAnswerCard(leftX, leftY, answer.rightText || '(未配對)', answer.isCorrect, 'english');
+
+                // 右側：正確答案
+                const rightY = rightStartY + index * rightSpacing;
+                this.displayAnswerCard(rightX, rightY, answer.correctAnswer, true, 'chinese');
+
+                // 中文文字
+                this.add.text(rightX, rightY + 50, answer.leftText, {
+                    fontSize: '16px',
+                    color: '#000000',
+                    fontFamily: 'Arial',
+                    fontStyle: 'normal'
+                }).setOrigin(0.5).setDepth(10);
+            });
+        }
+    }
+
+    // 🔥 v88.0: 顯示單個答案卡片
+    displayAnswerCard(x, y, text, isCorrect, type) {
+        const cardWidth = 120;
+        const cardHeight = 50;
+
+        // 決定背景顏色
+        let bgColor;
+        if (type === 'english') {
+            bgColor = isCorrect ? 0x4caf50 : 0xcccccc; // 綠色或灰色
+        } else {
+            bgColor = 0xffffff; // 白色
+        }
+
+        // 創建卡片背景
+        const cardBg = this.add.rectangle(x, y, cardWidth, cardHeight, bgColor);
+        cardBg.setStrokeStyle(2, 0x333333);
+        cardBg.setDepth(10);
+
+        // 創建卡片文字
+        const cardText = this.add.text(x, y, text, {
+            fontSize: '18px',
+            color: type === 'english' ? '#ffffff' : '#000000',
+            fontFamily: 'Arial',
+            fontStyle: 'bold',
+            wordWrap: { width: cardWidth - 10 }
+        });
+        cardText.setOrigin(0.5);
+        cardText.setDepth(11);
+
+        // 創建標記（勾勾或叉叉）
+        const markText = isCorrect ? '✓' : '✗';
+        const markColor = isCorrect ? '#4caf50' : '#f44336';
+        const mark = this.add.text(x + cardWidth / 2 - 15, y - cardHeight / 2 + 8, markText, {
+            fontSize: '32px',
+            color: markColor,
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        mark.setOrigin(0.5);
+        mark.setDepth(12);
+    }
+
+    // 🔥 v88.0: 創建返回按鈕
+    createReturnButton() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        const buttonWidth = 200;
+        const buttonHeight = 45;
+        const buttonX = width / 2;
+        const buttonY = height - 50;
+
+        // 按鈕背景
+        const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x2196F3);
+        buttonBg.setStrokeStyle(2, 0x000000);
+        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setDepth(20);
+
+        // 按鈕文字
+        const buttonText = this.add.text(buttonX, buttonY, 'Back to Results', {
+            fontSize: '20px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        buttonText.setOrigin(0.5);
+        buttonText.setDepth(21);
+
+        // 點擊事件
+        buttonBg.on('pointerdown', () => {
+            console.log('🎮 [v88.0] 返回遊戲結束畫面');
+            this.showGameCompleteScreen();
+        });
+
+        // 懸停效果
+        buttonBg.on('pointerover', () => {
+            buttonBg.setFillStyle(0x1976D2);
+        });
+
+        buttonBg.on('pointerout', () => {
+            buttonBg.setFillStyle(0x2196F3);
+        });
+    }
+
+    // 🔥 v88.0: 顯示 My Answers 頁面
     showMyAnswersPage() {
         console.log('🎮 顯示 My Answers 頁面');
 
