@@ -5351,7 +5351,7 @@ class GameScene extends Phaser.Scene {
             showAnswersButton.on('pointerdown', () => {
                 completeText.destroy();
                 showAnswersButton.destroy();
-                this.showAnswersScreen();
+                this.showAnswersOverlay();  // 🔥 [v73.0] 改為使用 showAnswersOverlay
             });
 
             // 按鈕懸停效果
@@ -5363,6 +5363,92 @@ class GameScene extends Phaser.Scene {
                 showAnswersButton.setBackgroundColor('#2196F3');
             });
         }
+    }
+
+    // 🔥 [v73.0] 在遊戲界面上直接顯示答案結果（✓ 和 ✗ 標記）
+    showAnswersOverlay() {
+        console.log('🎨 [v73.0] showAnswersOverlay 開始');
+
+        // 禁用所有卡片的交互
+        this.leftCards.forEach(card => {
+            card.setInteractive(false);
+        });
+        this.rightCards.forEach(card => {
+            card.setInteractive(false);
+        });
+
+        // 在每個卡片上添加 ✓ 或 ✗ 標記
+        this.currentPageAnswers.forEach((answer) => {
+            // 查找對應的卡片
+            const leftCard = this.leftCards.find(card => card.getData('pairId') === answer.leftPairId);
+            const rightCard = this.rightCards.find(card => card.getData('pairId') === answer.rightPairId);
+
+            if (leftCard) {
+                this.addResultMarker(leftCard, answer.isCorrect);
+            }
+            if (rightCard) {
+                this.addResultMarker(rightCard, answer.isCorrect);
+            }
+        });
+
+        // 添加"返回"按鈕
+        this.showBackButton();
+    }
+
+    // 🔥 [v73.0] 在卡片上添加結果標記（✓ 或 ✗）
+    addResultMarker(card, isCorrect) {
+        const x = card.x;
+        const y = card.y;
+        const size = Math.max(40, card.width * 0.4);
+
+        const icon = isCorrect ? '✓' : '✗';
+        const bgColor = isCorrect ? 0x4CAF50 : 0xf44336;
+
+        // 添加背景圓形
+        const circle = this.add.circle(x, y - card.height / 2 - 15, size / 2, bgColor);
+        circle.setDepth(1000);
+
+        // 添加文字標記
+        const marker = this.add.text(x, y - card.height / 2 - 15, icon, {
+            fontSize: `${size}px`,
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        marker.setOrigin(0.5).setDepth(1001);
+
+        console.log(`✓ [v73.0] 添加標記: ${icon} 在卡片 (${x}, ${y})`);
+    }
+
+    // 🔥 [v73.0] 顯示"返回"按鈕
+    showBackButton() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        const backButton = this.add.text(
+            width / 2,
+            height - 40,
+            '← 返回',
+            {
+                fontSize: '16px',
+                color: '#ffffff',
+                fontFamily: 'Arial',
+                backgroundColor: '#2196F3',
+                padding: { x: 20, y: 10 }
+            }
+        ).setOrigin(0.5).setDepth(2000).setInteractive({ useHandCursor: true });
+
+        backButton.on('pointerdown', () => {
+            this.scene.restart();
+        });
+
+        backButton.on('pointerover', () => {
+            backButton.setBackgroundColor('#1976D2');
+        });
+
+        backButton.on('pointerout', () => {
+            backButton.setBackgroundColor('#2196F3');
+        });
     }
 
     // 🔥 顯示答案畫面 - v72.0：3 列緊湊型顯示，一頁顯示全部 20 個答案
