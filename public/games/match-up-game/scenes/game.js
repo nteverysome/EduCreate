@@ -6296,11 +6296,15 @@ class GameScene extends Phaser.Scene {
         if (this.leftCards && this.leftCards.length > 0) {
             this.leftCards.forEach((card) => {
                 // 根據 pairId 找到對應的配對
-                const pair = this.pairs.find(p => p.id === card.pairId);
+                const pairId = card.getData('pairId');
+                const pair = this.pairs.find(p => p.id === pairId);
 
                 if (pair) {
                     // 在卡片下方顯示正確的配對物件（中文）
-                    this.showCorrectPairingOnCard(card, pair.rightText);
+                    // 使用 pair.answer 或 pair.chinese（都是中文翻譯）
+                    const correctAnswer = pair.answer || pair.chinese || '';
+                    this.showCorrectPairingOnCard(card, correctAnswer);
+                    console.log('🎮 [v89.0] 顯示配對:', { pairId, correctAnswer });
                 }
             });
         }
