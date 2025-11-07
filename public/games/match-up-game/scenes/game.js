@@ -5930,6 +5930,8 @@ class GameScene extends Phaser.Scene {
         const modal = this.add.container(width / 2, height / 2);
         modal.setDepth(5001);
         modal.setScrollFactor(0);
+        modal.setSize(modalWidth, modalHeight);
+        modal.setInteractive();
 
         // 模態框背景
         const modalBg = this.add.rectangle(0, 0, modalWidth, modalHeight, 0x2c2c2c);
@@ -6203,6 +6205,8 @@ class GameScene extends Phaser.Scene {
         const page = this.add.container(width / 2, height / 2);
         page.setDepth(6001);
         page.setScrollFactor(0);
+        page.setSize(pageWidth, pageHeight);
+        page.setInteractive();
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0xffffff);
@@ -6512,6 +6516,8 @@ class GameScene extends Phaser.Scene {
         const page = this.add.container(width / 2, height / 2);
         page.setDepth(7001);
         page.setScrollFactor(0);
+        page.setSize(pageWidth, pageHeight);
+        page.setInteractive();
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
@@ -6777,6 +6783,8 @@ class GameScene extends Phaser.Scene {
         const page = this.add.container(width / 2, height / 2);
         page.setDepth(8001);
         page.setScrollFactor(0);
+        page.setSize(pageWidth, pageHeight);
+        page.setInteractive();
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
