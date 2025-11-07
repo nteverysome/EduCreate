@@ -5087,31 +5087,42 @@ class GameScene extends Phaser.Scene {
         }
 
         // 🔥 [v82.0] 在混合佈局中，找到英文卡片容器並在其中添加勾勾
+        console.log('🔍 [v82.0] 檢查佈局類型:', {
+            layout: this.layout,
+            rightCardType: rightCard.type,
+            rightCardHasList: !!rightCard.list,
+            rightCardListLength: rightCard.list ? rightCard.list.length : 0
+        });
+
         if (this.layout === 'mixed') {
-            // 在混合佈局中，rightCard 是 frameContainer
-            // 我們需要找到英文卡片容器（通常是 frameContainer 的第一個子容器）
             const englishCardContainer = rightCard.list && rightCard.list.length > 0 ? rightCard.list[0] : null;
 
+            console.log('🔍 [v82.0] 英文卡片容器檢查:', {
+                hasEnglishCardContainer: !!englishCardContainer,
+                englishCardContainerType: englishCardContainer ? englishCardContainer.type : 'N/A',
+                englishCardContainerHasList: englishCardContainer ? !!englishCardContainer.list : false,
+                englishCardContainerListLength: englishCardContainer && englishCardContainer.list ? englishCardContainer.list.length : 0
+            });
+
             if (englishCardContainer && englishCardContainer.list) {
-                // 找到英文卡片中的文字對象
                 const englishTextObj = englishCardContainer.list.find(child => child.type === 'Text');
 
-                if (englishTextObj) {
-                    // 在英文卡片中添加勾勾
-                    const markX = 0;  // 水平居中
-                    const markY = englishTextObj.y + 25;  // 在文字下方
+                console.log('🔍 [v82.0] 英文文字對象檢查:', {
+                    hasEnglishTextObj: !!englishTextObj,
+                    englishTextObjText: englishTextObj ? englishTextObj.text : 'N/A',
+                    englishTextObjY: englishTextObj ? englishTextObj.y : 'N/A'
+                });
 
-                    const checkMark = this.add.text(
-                        0,
-                        0,
-                        '✓',
-                        {
-                            fontSize: '32px',
-                            color: '#4caf50',
-                            fontFamily: 'Arial',
-                            fontStyle: 'bold'
-                        }
-                    );
+                if (englishTextObj) {
+                    const markX = 0;
+                    const markY = englishTextObj.y + 25;
+
+                    const checkMark = this.add.text(0, 0, '✓', {
+                        fontSize: '32px',
+                        color: '#4caf50',
+                        fontFamily: 'Arial',
+                        fontStyle: 'bold'
+                    });
                     checkMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
 
                     englishCardContainer.add(checkMark);
