@@ -5085,13 +5085,15 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v80.4] 修正位置計算 - 將標記放在背景內部的右上角
+        // 🔥 [v80.6] 修正位置計算 - 將標記放在背景內部的右上角
         // 標記應該相對於容器的中心位置
         // background 的中心在 (0, 0)，所以：
         // - 右邊界在 background.width / 2
         // - 上邊界在 -background.height / 2
+        // - 下邊界在 background.height / 2
+        // 標記應該在背景內部，所以 markY 應該是負數但不能太負
         const markX = background.width / 2 - 20;  // 容器內相對位置，距離右邊 20 像素
-        const markY = -background.height / 2 + 20;  // 容器內相對位置，距離上邊 20 像素
+        const markY = -background.height / 2 + 35;  // 容器內相對位置，距離上邊 35 像素（在背景內部）
 
         // 🔥 [v80.4] 調試日誌 - 標記位置
         console.log('🔍 [v80.4] 標記位置計算:', {
@@ -5191,13 +5193,15 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v80.4] 修正位置計算 - 將標記放在背景內部的右上角
+        // 🔥 [v80.6] 修正位置計算 - 將標記放在背景內部的右上角
         // 標記應該相對於容器的中心位置
         // background 的中心在 (0, 0)，所以：
         // - 右邊界在 background.width / 2
         // - 上邊界在 -background.height / 2
+        // - 下邊界在 background.height / 2
+        // 標記應該在背景內部，所以 markY 應該是負數但不能太負
         const markX = background.width / 2 - 20;  // 容器內相對位置，距離右邊 20 像素
-        const markY = -background.height / 2 + 20;  // 容器內相對位置，距離上邊 20 像素
+        const markY = -background.height / 2 + 35;  // 容器內相對位置，距離上邊 35 像素（在背景內部）
 
         // 🔥 [v80.4] 調試日誌 - 標記位置
         console.log('🔍 [v80.4] 標記位置計算:', {
