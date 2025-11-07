@@ -4133,12 +4133,17 @@ class GameScene extends Phaser.Scene {
         });
 
         // 🔥 [v62.0] 根據內容組合決定佈局
+        let textObj = null;
         if (hasImage && hasText && hasAudio) {
             // 情況 A：圖片 + 文字 + 語音
             this.createRightCardLayoutA(container, background, width, height, text, imageUrl, safeAudioUrl, pairId);
+            // 在佈局 A 中，文字是通過 createTextElement 創建的
+            textObj = container.list.find(child => child.type === 'Text' && child.text === text);
         } else if (hasImage && hasText && !hasAudio) {
             // 情況 D：圖片 + 文字
             this.createRightCardLayoutD(container, background, width, height, text, imageUrl, pairId);
+            // 在佈局 D 中，文字是通過 createTextElement 創建的
+            textObj = container.list.find(child => child.type === 'Text' && child.text === text);
         } else if (hasImage && !hasText && hasAudio) {
             // 圖片 + 語音（無文字）
             this.createRightCardLayoutImageAudio(container, background, width, height, imageUrl, safeAudioUrl, pairId);
@@ -4148,12 +4153,19 @@ class GameScene extends Phaser.Scene {
         } else if (!hasImage && hasText && hasAudio) {
             // 情況 E：文字 + 語音
             this.createRightCardLayoutE(container, background, width, height, text, safeAudioUrl, pairId);
+            // 在佈局 E 中，文字是通過 createTextElement 創建的
+            textObj = container.list.find(child => child.type === 'Text' && child.text === text);
         } else if (!hasImage && !hasText && hasAudio) {
             // 情況 B：只有語音
             this.createRightCardLayoutB(container, background, width, height, safeAudioUrl, pairId);
         } else {
             // 情況 C：只有文字（現有邏輯）
-            this.createRightCardLayoutC(container, background, width, height, text, textPosition);
+            textObj = this.createRightCardLayoutC(container, background, width, height, text, textPosition);
+        }
+
+        // 🔥 [v74.0] 確保文字對象被存儲到容器
+        if (textObj) {
+            container.setData('text', textObj);
         }
 
         // 🔥 [v65.0] 添加淡入動畫（參考英文卡片）
@@ -4267,6 +4279,11 @@ class GameScene extends Phaser.Scene {
 
         // 添加到容器
         container.add(cardText);
+
+        // 🔥 [v74.0] 存儲文字對象到容器，以便後續訪問（用於 showCorrectAnswer/showIncorrectAnswer）
+        container.setData('text', cardText);
+
+        return cardText;
     }
 
     // 🔥 [v62.0] 右側卡片佈局函數 - 情況 A：圖片 + 文字 + 語音
