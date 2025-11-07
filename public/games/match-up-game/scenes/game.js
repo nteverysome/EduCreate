@@ -5417,6 +5417,8 @@ class GameScene extends Phaser.Scene {
 
         const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0xff9800);
         buttonBg.setStrokeStyle(2, 0xf57c00);
+        // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
+        buttonBg.setSize(buttonWidth, buttonHeight);
         buttonBg.setInteractive({ useHandCursor: true });
         buttonBg.setDepth(2000);
 
@@ -5821,6 +5823,8 @@ class GameScene extends Phaser.Scene {
         const buttonY = height / 2;
 
         const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x4caf50);
+        // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
+        buttonBg.setSize(buttonWidth, buttonHeight);
         buttonBg.setInteractive({ useHandCursor: true });
         buttonBg.setDepth(100);
 
@@ -6474,6 +6478,8 @@ class GameScene extends Phaser.Scene {
         // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0xffffff);
         buttonBg.setStrokeStyle(2, 0x000000);
+        // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
+        buttonBg.setSize(buttonWidth, buttonHeight);
         buttonBg.setInteractive({ useHandCursor: true });
         container.add(buttonBg);
 
@@ -6653,6 +6659,8 @@ class GameScene extends Phaser.Scene {
         // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, width, height, 0x4c4c4c);
         buttonBg.setStrokeStyle(2, 0x000000);
+        // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
+        buttonBg.setSize(width, height);
         buttonBg.setInteractive({ useHandCursor: true });
         container.add(buttonBg);
 
