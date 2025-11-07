@@ -941,11 +941,7 @@ class GameScene extends Phaser.Scene {
                     backgroundColor: '#4CAF50',
                     padding: { x: 20, y: 10 }
                 }
-            ).setOrigin(0.5).setDepth(2001).setInteractive({
-                useHandCursor: true,
-                hitArea: new Phaser.Geom.Rectangle(-100, -20, 200, 40),
-                hitAreaCallback: Phaser.Geom.Rectangle.Contains
-            });
+            ).setOrigin(0.5).setDepth(2001).setInteractive({ useHandCursor: true });
 
             showAnswersButton.on('pointerdown', () => {
                 overlay.destroy();
@@ -3432,11 +3428,11 @@ class GameScene extends Phaser.Scene {
         });
 
         // 設置互動（整個容器可拖曳）
+        // 🔥 必須先設置容器大小，否則 hit area 無法正確計算
+        container.setSize(width, height);
         container.setInteractive({
             useHandCursor: true,
-            draggable: true,
-            hitArea: new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
+            draggable: true
         });
 
         // 儲存原始位置
@@ -4003,11 +3999,7 @@ class GameScene extends Phaser.Scene {
         // 🔥 創建按鈕容器（使用相對於父容器的座標 x, y）
         const buttonContainer = this.add.container(0, 0, [buttonBg, speakerIcon]);
         buttonContainer.setSize(size, size);
-        buttonContainer.setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Rectangle(-size / 2, -size / 2, size, size),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        buttonContainer.setInteractive({ useHandCursor: true });
 
         // 🔥 設置按鈕容器的位置（相對於父容器）
         buttonContainer.setPosition(x, y);
@@ -4187,11 +4179,9 @@ class GameScene extends Phaser.Scene {
         });
 
         // 設置互動（接收拖曳）
-        background.setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        // 🔥 確保 hit area 正確設置
+        background.setSize(width, height);
+        background.setInteractive({ useHandCursor: true });
 
         // 懸停效果
         background.on('pointerover', () => {
@@ -4879,11 +4869,9 @@ class GameScene extends Phaser.Scene {
         // 創建按鈕背景
         const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x4caf50);
         buttonBg.setStrokeStyle(2, 0x388e3c);
-        buttonBg.setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
+        buttonBg.setSize(buttonWidth, buttonHeight);
+        buttonBg.setInteractive({ useHandCursor: true });
         buttonBg.setDepth(3000);  // 🔥 提高深度確保在最上層
         buttonBg.setScrollFactor(0);  // 🔥 固定在螢幕上，不隨相機移動
 
@@ -5429,11 +5417,7 @@ class GameScene extends Phaser.Scene {
 
         const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0xff9800);
         buttonBg.setStrokeStyle(2, 0xf57c00);
-        buttonBg.setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        buttonBg.setInteractive({ useHandCursor: true });
         buttonBg.setDepth(2000);
 
         const buttonText = this.add.text(buttonX, buttonY, '重試', {
@@ -5548,11 +5532,7 @@ class GameScene extends Phaser.Scene {
                     backgroundColor: '#2196F3',
                     padding: { x: 20, y: 10 }
                 }
-            ).setOrigin(0.5).setDepth(2001).setInteractive({
-                useHandCursor: true,
-                hitArea: new Phaser.Geom.Rectangle(-100, -20, 200, 40),
-                hitAreaCallback: Phaser.Geom.Rectangle.Contains
-            });
+            ).setOrigin(0.5).setDepth(2001).setInteractive({ useHandCursor: true });
 
             showAnswersButton.on('pointerdown', () => {
                 completeText.destroy();
@@ -5642,11 +5622,7 @@ class GameScene extends Phaser.Scene {
                 backgroundColor: '#2196F3',
                 padding: { x: 20, y: 10 }
             }
-        ).setOrigin(0.5).setDepth(2000).setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Rectangle(-80, -20, 160, 40),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        ).setOrigin(0.5).setDepth(2000).setInteractive({ useHandCursor: true });
 
         backButton.on('pointerdown', () => {
             this.scene.restart();
@@ -5768,11 +5744,7 @@ class GameScene extends Phaser.Scene {
                 backgroundColor: '#f44336',
                 padding: { x: 20, y: 8 }
             }
-        ).setOrigin(0.5).setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Rectangle(-80, -20, 160, 40),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        ).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         closeButton.on('pointerdown', () => {
             // 清除分頁狀態
@@ -5849,11 +5821,7 @@ class GameScene extends Phaser.Scene {
         const buttonY = height / 2;
 
         const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x4caf50);
-        buttonBg.setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        buttonBg.setInteractive({ useHandCursor: true });
         buttonBg.setDepth(100);
 
         // 創建按鈕文字
@@ -5972,10 +5940,7 @@ class GameScene extends Phaser.Scene {
         modal.setDepth(5001);
         modal.setScrollFactor(0);
         modal.setSize(modalWidth, modalHeight);
-        modal.setInteractive({
-            hitArea: new Phaser.Geom.Rectangle(-modalWidth / 2, -modalHeight / 2, modalWidth, modalHeight),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        modal.setInteractive();
 
         // 模態框背景
         const modalBg = this.add.rectangle(0, 0, modalWidth, modalHeight, 0x2c2c2c);
@@ -6094,11 +6059,9 @@ class GameScene extends Phaser.Scene {
         // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0x3c3c3c);
         buttonBg.setStrokeStyle(2, 0x000000);
-        buttonBg.setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
+        buttonBg.setSize(buttonWidth, buttonHeight);
+        buttonBg.setInteractive({ useHandCursor: true });
         container.add(buttonBg);
 
         // 按鈕文字
@@ -6260,10 +6223,7 @@ class GameScene extends Phaser.Scene {
         page.setDepth(6001);
         page.setScrollFactor(0);
         page.setSize(pageWidth, pageHeight);
-        page.setInteractive({
-            hitArea: new Phaser.Geom.Rectangle(-pageWidth / 2, -pageHeight / 2, pageWidth, pageHeight),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        page.setInteractive();
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0xffffff);
@@ -6514,11 +6474,7 @@ class GameScene extends Phaser.Scene {
         // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0xffffff);
         buttonBg.setStrokeStyle(2, 0x000000);
-        buttonBg.setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        buttonBg.setInteractive({ useHandCursor: true });
         container.add(buttonBg);
 
         // 按鈕文字
@@ -6578,10 +6534,7 @@ class GameScene extends Phaser.Scene {
         page.setDepth(7001);
         page.setScrollFactor(0);
         page.setSize(pageWidth, pageHeight);
-        page.setInteractive({
-            hitArea: new Phaser.Geom.Rectangle(-pageWidth / 2, -pageHeight / 2, pageWidth, pageHeight),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        page.setInteractive();
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
@@ -6700,11 +6653,7 @@ class GameScene extends Phaser.Scene {
         // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, width, height, 0x4c4c4c);
         buttonBg.setStrokeStyle(2, 0x000000);
-        buttonBg.setInteractive({
-            useHandCursor: true,
-            hitArea: new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        buttonBg.setInteractive({ useHandCursor: true });
         container.add(buttonBg);
 
         // 按鈕文字
@@ -6852,10 +6801,7 @@ class GameScene extends Phaser.Scene {
         page.setDepth(8001);
         page.setScrollFactor(0);
         page.setSize(pageWidth, pageHeight);
-        page.setInteractive({
-            hitArea: new Phaser.Geom.Rectangle(-pageWidth / 2, -pageHeight / 2, pageWidth, pageHeight),
-            hitAreaCallback: Phaser.Geom.Rectangle.Contains
-        });
+        page.setInteractive();
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
