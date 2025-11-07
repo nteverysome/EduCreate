@@ -34,12 +34,14 @@ class PreloadScene extends Phaser.Scene {
 
         this.handlerScene = this.scene.get('handler');
 
-        if (this.handlerScene && this.handlerScene.updateResize) {
-            console.log('🎮 PreloadScene: 調用 Handler.updateResize');
-            this.handlerScene.updateResize(this);
-        } else {
-            console.warn('⚠️ PreloadScene: handlerScene 未初始化或 updateResize 方法不存在');
-        }
+        // 🔥 v94.0: 修復 - PreloadScene 不應該監聽 resize 事件
+        // 只有 GameScene 應該監聽 resize 事件，避免場景重新載入
+        // if (this.handlerScene && this.handlerScene.updateResize) {
+        //     console.log('🎮 PreloadScene: 調用 Handler.updateResize');
+        //     this.handlerScene.updateResize(this);
+        // } else {
+        //     console.warn('⚠️ PreloadScene: handlerScene 未初始化或 updateResize 方法不存在');
+        // }
 
         try {
             await this.loadVisualStyleResources();
