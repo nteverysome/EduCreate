@@ -6102,31 +6102,22 @@ class GameScene extends Phaser.Scene {
         const buttonWidth = 300;
         const buttonHeight = 45;
 
-        // 🔥 [v85.0] 修復：創建一個子容器來保存按鈕和文字
-        // 這樣可以確保按鈕的位置相對於父容器正確
-        const buttonContainer = this.add.container(x, y);
-        container.add(buttonContainer);
-
-        // 按鈕背景（相對於子容器的坐標為 0, 0）
-        const buttonBg = this.add.rectangle(0, 0, buttonWidth, buttonHeight, 0x3c3c3c);
+        // 按鈕背景
+        const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0x3c3c3c);
         buttonBg.setStrokeStyle(2, 0x000000);
-        // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
-        // ✅ 使用明確的 Rectangle hitArea 避免 Phaser 3.55.2 的 hitAreaCallback 錯誤
-        buttonBg.setInteractive(
-            new Phaser.Geom.Rectangle(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight),
-            Phaser.Geom.Rectangle.Contains
-        );
-        buttonContainer.add(buttonBg);
+        // ✅ 回到 c18795d 的簡單實現 - 直接使用 setInteractive({ useHandCursor: true })
+        buttonBg.setInteractive({ useHandCursor: true });
+        container.add(buttonBg);
 
-        // 按鈕文字（相對於子容器的坐標為 0, 0）
-        const buttonText = this.add.text(0, 0, text, {
+        // 按鈕文字
+        const buttonText = this.add.text(x, y, text, {
             fontSize: '22px',
             color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         });
         buttonText.setOrigin(0.5);
-        buttonContainer.add(buttonText);
+        container.add(buttonText);
 
         // 點擊事件
         buttonBg.on('pointerdown', callback);
