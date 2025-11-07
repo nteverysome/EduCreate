@@ -2888,8 +2888,10 @@ class GameScene extends Phaser.Scene {
                 // 🔥 [v79.0] 卡片高度和中文文字高度計算（與正方形模式保持一致）
                 // 使用正確公式：(availableHeightPerRow - verticalSpacing) / 1.4
                 cardHeightInFrame = (availableHeightPerRow - verticalSpacing) / 1.4;  // ✅ 修正
-                // 🔥 [v82.0] 擴大下方區域高度 - 從 0.55 改為 0.70，讓圖片和文字都變大
-                chineseTextHeight = cardHeightInFrame * 0.70;  // 中文文字高度 = 卡片高度的 70%（圖片+文字都變大）
+                // 🔥 [v80.0] 優化：中文卡片高度固定為 30px（符合 v80.0 設計規格）
+                // 原本：chineseTextHeight = cardHeightInFrame * 0.70
+                // 新規則：chineseTextHeight = 30px（固定值，確保一致性）
+                chineseTextHeight = 30;  // 🔥 [v80.0] 固定高度 30px
 
                 totalUnitHeight = cardHeightInFrame + chineseTextHeight + verticalSpacing;
 
@@ -5131,10 +5133,11 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 添加勾勾標記
+        // 🔥 [v80.0] 優化勾勾標記位置 - 放在英文卡片右上角
+        // 位置計算：卡片右邊界 - 24px（48px 標記的一半）
         const checkMark = this.add.text(
-            rightCard.x + background.width / 2 - 15,
-            rightCard.y - background.height / 2 + 5,
+            rightCard.x + background.width / 2 - 24,
+            rightCard.y - background.height / 2 + 24,
             '✓',
             {
                 fontSize: '48px',
@@ -5168,10 +5171,11 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 添加 X 標記
+        // 🔥 [v80.0] 優化叉叉標記位置 - 放在英文卡片右上角
+        // 位置計算：卡片右邊界 - 24px（48px 標記的一半）
         const xMark = this.add.text(
-            rightCard.x + background.width / 2 - 15,
-            rightCard.y - background.height / 2 + 5,
+            rightCard.x + background.width / 2 - 24,
+            rightCard.y - background.height / 2 + 24,
             '✗',
             {
                 fontSize: '48px',
