@@ -5917,8 +5917,8 @@ class GameScene extends Phaser.Scene {
 
         // 創建模態框容器
         const modalWidth = Math.min(500, width * 0.8);
-        // 🔥 v90.0: 增加模態框高度以容納 4 個按鈕
-        const modalHeight = Math.min(520, height * 0.8);
+        // 🔥 v91.0: 優化排版，合理運用空間 - 減少模態框高度，緊湊排列內容
+        const modalHeight = Math.min(420, height * 0.7);
         const modal = this.add.container(width / 2, height / 2);
         modal.setDepth(5001);
         modal.setScrollFactor(0);
@@ -5929,7 +5929,7 @@ class GameScene extends Phaser.Scene {
         modal.add(modalBg);
 
         // 標題：GAME COMPLETE
-        const title = this.add.text(0, -modalHeight / 2 + 35, 'GAME COMPLETE', {
+        const title = this.add.text(0, -modalHeight / 2 + 30, 'GAME COMPLETE', {
             fontSize: '36px',
             color: '#ffffff',
             fontFamily: 'Arial',
@@ -5939,8 +5939,8 @@ class GameScene extends Phaser.Scene {
         modal.add(title);
 
         // 分數標籤
-        const scoreLabel = this.add.text(-80, -modalHeight / 2 + 85, 'Score', {
-            fontSize: '20px',
+        const scoreLabel = this.add.text(-80, -modalHeight / 2 + 70, 'Score', {
+            fontSize: '18px',
             color: '#4a9eff',
             fontFamily: 'Arial'
         });
@@ -5948,8 +5948,8 @@ class GameScene extends Phaser.Scene {
         modal.add(scoreLabel);
 
         // 分數值
-        const scoreValue = this.add.text(-80, -modalHeight / 2 + 120, `${totalCorrect}/${totalQuestions}`, {
-            fontSize: '32px',
+        const scoreValue = this.add.text(-80, -modalHeight / 2 + 100, `${totalCorrect}/${totalQuestions}`, {
+            fontSize: '28px',
             color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
@@ -5959,8 +5959,8 @@ class GameScene extends Phaser.Scene {
 
         // 時間標籤（如果有計時器）
         if (this.timerType !== 'none') {
-            const timeLabel = this.add.text(80, -modalHeight / 2 + 85, 'Time', {
-                fontSize: '20px',
+            const timeLabel = this.add.text(80, -modalHeight / 2 + 70, 'Time', {
+                fontSize: '18px',
                 color: '#4a9eff',
                 fontFamily: 'Arial'
             });
@@ -5968,8 +5968,8 @@ class GameScene extends Phaser.Scene {
             modal.add(timeLabel);
 
             // 時間值
-            const timeValue = this.add.text(80, -modalHeight / 2 + 120, timeText, {
-                fontSize: '32px',
+            const timeValue = this.add.text(80, -modalHeight / 2 + 100, timeText, {
+                fontSize: '28px',
                 color: '#ffffff',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
@@ -5980,7 +5980,7 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 排名提示（動態顯示，位置調整到按鈕上方）
         const rankText = this.add.text(0, 0, 'Loading ranking...', {
-            fontSize: '16px',
+            fontSize: '14px',
             color: '#ffffff',
             fontFamily: 'Arial'
         });
@@ -5997,12 +5997,12 @@ class GameScene extends Phaser.Scene {
             }
         });
 
-        // 🔥 v90.0: 優化按鈕排版 - 調整按鈕位置和間距
-        const buttonY = modalHeight / 2 - 110;
-        const buttonSpacing = 50;
+        // 🔥 v91.0: 優化按鈕排版 - 緊湊排列，合理運用空間
+        const buttonY = modalHeight / 2 - 95;
+        const buttonSpacing = 45;
 
-        // 🔥 調整排名提示位置到第一個按鈕上方
-        rankText.y = buttonY - buttonSpacing - 30;
+        // 🔥 v91.0: 排名提示位置緊接著分數下方
+        rankText.y = buttonY - buttonSpacing - 20;
 
         // Leaderboard 按鈕
         this.createModalButton(modal, 0, buttonY - buttonSpacing, 'Leaderboard', () => {
