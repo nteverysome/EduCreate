@@ -5365,7 +5365,7 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // 🔥 顯示答案畫面 - v71.0：一頁顯示全部 20 個答案
+    // 🔥 顯示答案畫面 - v72.0：3 列緊湊型顯示，一頁顯示全部 20 個答案
     showAnswersScreen() {
         const width = this.scale.width;
         const height = this.scale.height;
@@ -5377,17 +5377,22 @@ class GameScene extends Phaser.Scene {
         this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
 
         // 顯示標題
-        this.add.text(width / 2, 50, '📝 我的答案 vs 正確答案', {
-            fontSize: '32px',
+        this.add.text(width / 2, 40, '📝 我的答案 vs 正確答案', {
+            fontSize: '28px',
             color: '#000000',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        // 🔥 [v71.0] 一頁顯示全部答案
-        const lineHeight = 28;  // 減小行高以容納更多答案
-        const contentStartY = 100;
-        const contentHeight = height - 150;  // 為按鈕預留空間
+        // 🔥 [v72.0] 3 列緊湊型佈局
+        const cols = 3;
+        const lineHeight = 26;  // 行高
+        const contentStartY = 85;
+
+        // 計算列寬
+        const horizontalMargin = 40;
+        const colWidth = (width - horizontalMargin * 2) / cols;
+        const colStartX = horizontalMargin + colWidth / 2;
 
         // 獲取所有答案
         const allAnswers = this.currentPageAnswers.length > 0 ? this.currentPageAnswers :
@@ -5398,18 +5403,24 @@ class GameScene extends Phaser.Scene {
                 isCorrect: false
             }));
 
-        console.log('🔍 [v71.0] showAnswersScreen 一頁顯示調試:', {
+        console.log('🔍 [v72.0] showAnswersScreen 3列顯示調試:', {
             width,
             height,
-            lineHeight,
-            contentHeight,
+            cols,
+            itemsPerCol,
+            colWidth,
             totalAnswers: allAnswers.length,
-            maxAnswersPerPage: Math.floor(contentHeight / lineHeight)
+            lineHeight
         });
 
-        // 顯示所有答案
-        let currentY = contentStartY;
-        allAnswers.forEach((answer) => {
+        // 顯示所有答案（3 列佈局）
+        allAnswers.forEach((answer, index) => {
+            const col = index % cols;
+            const row = Math.floor(index / cols);
+
+            const xPos = colStartX + col * colWidth;
+            const yPos = contentStartY + row * lineHeight;
+
             const userAnswerText = answer.rightText || '(未配對)';
             const correctAnswerText = answer.correctAnswer || '(無)';
             const isCorrect = answer.isCorrect;
@@ -5417,46 +5428,47 @@ class GameScene extends Phaser.Scene {
             const userAnswerColor = isCorrect ? '#4CAF50' : '#f44336';
             const statusIcon = isCorrect ? '✓' : '✗';
 
+            // 創建答案文本
+            const answerText = `${statusIcon} ${userAnswerText} → ${correctAnswerText}`;
+
             this.add.text(
-                width / 2,
-                currentY,
-                `${statusIcon} 我的: ${userAnswerText} → 正確: ${correctAnswerText}`,
+                xPos,
+                yPos,
+                answerText,
                 {
-                    fontSize: '12px',
+                    fontSize: '11px',
                     color: userAnswerColor,
                     fontFamily: 'Arial',
                     fontStyle: 'bold',
-                    align: 'center',
-                    wordWrap: { width: width - 100 }
+                    align: 'left'
                 }
-            ).setOrigin(0.5);
-
-            currentY += lineHeight;
+            ).setOrigin(0, 0.5);
         });
 
         // 顯示答案統計
         this.add.text(
             width / 2,
-            height - 100,
-            `共 ${allAnswers.length} 個答案`,
+            height - 80,
+            `✅ 共 ${allAnswers.length} 個答案`,
             {
-                fontSize: '12px',
-                color: '#666666',
-                fontFamily: 'Arial'
+                fontSize: '13px',
+                color: '#333333',
+                fontFamily: 'Arial',
+                fontStyle: 'bold'
             }
         ).setOrigin(0.5);
 
         // 添加關閉按鈕
         const closeButton = this.add.text(
             width / 2,
-            height - 50,
+            height - 40,
             '✖ 關閉',
             {
-                fontSize: '16px',
+                fontSize: '14px',
                 color: '#ffffff',
                 fontFamily: 'Arial',
                 backgroundColor: '#f44336',
-                padding: { x: 15, y: 8 }
+                padding: { x: 20, y: 8 }
             }
         ).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
