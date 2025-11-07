@@ -5929,7 +5929,7 @@ class GameScene extends Phaser.Scene {
         modal.add(modalBg);
 
         // 標題：GAME COMPLETE
-        const title = this.add.text(0, -modalHeight / 2 + 30, 'GAME COMPLETE', {
+        const title = this.add.text(0, -modalHeight / 2 + 20, 'GAME COMPLETE', {
             fontSize: '36px',
             color: '#ffffff',
             fontFamily: 'Arial',
@@ -5939,7 +5939,7 @@ class GameScene extends Phaser.Scene {
         modal.add(title);
 
         // 分數標籤
-        const scoreLabel = this.add.text(-80, -modalHeight / 2 + 70, 'Score', {
+        const scoreLabel = this.add.text(-80, -modalHeight / 2 + 55, 'Score', {
             fontSize: '18px',
             color: '#4a9eff',
             fontFamily: 'Arial'
@@ -5948,7 +5948,7 @@ class GameScene extends Phaser.Scene {
         modal.add(scoreLabel);
 
         // 分數值
-        const scoreValue = this.add.text(-80, -modalHeight / 2 + 100, `${totalCorrect}/${totalQuestions}`, {
+        const scoreValue = this.add.text(-80, -modalHeight / 2 + 80, `${totalCorrect}/${totalQuestions}`, {
             fontSize: '28px',
             color: '#ffffff',
             fontFamily: 'Arial',
@@ -5959,7 +5959,7 @@ class GameScene extends Phaser.Scene {
 
         // 時間標籤（如果有計時器）
         if (this.timerType !== 'none') {
-            const timeLabel = this.add.text(80, -modalHeight / 2 + 70, 'Time', {
+            const timeLabel = this.add.text(80, -modalHeight / 2 + 55, 'Time', {
                 fontSize: '18px',
                 color: '#4a9eff',
                 fontFamily: 'Arial'
@@ -5968,7 +5968,7 @@ class GameScene extends Phaser.Scene {
             modal.add(timeLabel);
 
             // 時間值
-            const timeValue = this.add.text(80, -modalHeight / 2 + 100, timeText, {
+            const timeValue = this.add.text(80, -modalHeight / 2 + 80, timeText, {
                 fontSize: '28px',
                 color: '#ffffff',
                 fontFamily: 'Arial',
@@ -5997,12 +5997,12 @@ class GameScene extends Phaser.Scene {
             }
         });
 
-        // 🔥 v91.0: 優化按鈕排版 - 緊湊排列，合理運用空間
-        const buttonY = modalHeight / 2 - 95;
-        const buttonSpacing = 45;
+        // 🔥 v92.0: 優化按鈕排版 - 所有內容往上靠，減少空白
+        const buttonY = modalHeight / 2 - 75;
+        const buttonSpacing = 42;
 
-        // 🔥 v91.0: 排名提示位置緊接著分數下方
-        rankText.y = buttonY - buttonSpacing - 20;
+        // 🔥 v92.0: 排名提示位置緊接著分數下方
+        rankText.y = -modalHeight / 2 + 115;
 
         // Leaderboard 按鈕
         this.createModalButton(modal, 0, buttonY - buttonSpacing, 'Leaderboard', () => {
