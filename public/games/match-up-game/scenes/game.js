@@ -5003,11 +5003,35 @@ class GameScene extends Phaser.Scene {
                                     userAnswerPairId = currentCardPairId;
                                 }
                             }
+                        }
+                    }
 
-                            // 🔥 [v83.0] 未配對也要顯示叉叉標記
-                            if (frame) {
-                                this.showIncorrectAnswer(frame, pair.english);
-                            }
+                    // 🔥 [v83.0] 未配對也要顯示叉叉標記 - 在英文卡片上
+                    const englishCard = this.leftCards.find(card => card.getData('pairId') === pair.id);
+                    if (englishCard && englishCard.list) {
+                        const englishTextObj = englishCard.list.find(child => child.type === 'Text');
+
+                        if (englishTextObj) {
+                            const markX = 0;
+                            const markY = englishTextObj.y + 25;
+
+                            const xMark = this.add.text(0, 0, '✗', {
+                                fontSize: '32px',
+                                color: '#f44336',
+                                fontFamily: 'Arial',
+                                fontStyle: 'bold'
+                            });
+                            xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
+
+                            englishCard.add(xMark);
+                            xMark.setPosition(markX, markY);
+
+                            console.log('✅ [v83.0] 未配對 - 叉叉標記已添加到英文卡片文字下方:', {
+                                englishTextY: englishTextObj.y,
+                                markX,
+                                markY,
+                                containerChildren: englishCard.list.length
+                            });
                         }
                     }
 
