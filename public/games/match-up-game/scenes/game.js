@@ -5365,7 +5365,7 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // 🔥 顯示答案畫面 - v70.0：使用分頁方式顯示所有答案
+    // 🔥 顯示答案畫面 - v71.0：一頁顯示全部 20 個答案
     showAnswersScreen() {
         const width = this.scale.width;
         const height = this.scale.height;
@@ -5384,11 +5384,10 @@ class GameScene extends Phaser.Scene {
             fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        // 🔥 [v70.0] 使用分頁方式顯示答案
-        const lineHeight = 35;  // 每行高度
+        // 🔥 [v71.0] 一頁顯示全部答案
+        const lineHeight = 28;  // 減小行高以容納更多答案
         const contentStartY = 100;
-        const contentHeight = height - 200;  // 為按鈕預留空間
-        const answersPerPage = Math.floor(contentHeight / lineHeight);  // 每頁顯示的答案數
+        const contentHeight = height - 150;  // 為按鈕預留空間
 
         // 獲取所有答案
         const allAnswers = this.currentPageAnswers.length > 0 ? this.currentPageAnswers :
@@ -5399,35 +5398,18 @@ class GameScene extends Phaser.Scene {
                 isCorrect: false
             }));
 
-        // 初始化分頁狀態
-        if (!this.answersPageState) {
-            this.answersPageState = {
-                currentPage: 0,
-                totalPages: Math.ceil(allAnswers.length / answersPerPage),
-                allAnswers: allAnswers,
-                answersPerPage: answersPerPage
-            };
-        }
-
-        const pageState = this.answersPageState;
-        const startIndex = pageState.currentPage * pageState.answersPerPage;
-        const endIndex = Math.min(startIndex + pageState.answersPerPage, pageState.allAnswers.length);
-        const pageAnswers = pageState.allAnswers.slice(startIndex, endIndex);
-
-        console.log('🔍 [v70.0] showAnswersScreen 分頁調試:', {
+        console.log('🔍 [v71.0] showAnswersScreen 一頁顯示調試:', {
             width,
             height,
             lineHeight,
-            answersPerPage,
-            currentPage: pageState.currentPage,
-            totalPages: pageState.totalPages,
-            totalAnswers: pageState.allAnswers.length,
-            pageAnswersCount: pageAnswers.length
+            contentHeight,
+            totalAnswers: allAnswers.length,
+            maxAnswersPerPage: Math.floor(contentHeight / lineHeight)
         });
 
-        // 顯示當前頁的答案
+        // 顯示所有答案
         let currentY = contentStartY;
-        pageAnswers.forEach((answer) => {
+        allAnswers.forEach((answer) => {
             const userAnswerText = answer.rightText || '(未配對)';
             const correctAnswerText = answer.correctAnswer || '(無)';
             const isCorrect = answer.isCorrect;
@@ -5440,7 +5422,7 @@ class GameScene extends Phaser.Scene {
                 currentY,
                 `${statusIcon} 我的: ${userAnswerText} → 正確: ${correctAnswerText}`,
                 {
-                    fontSize: '14px',
+                    fontSize: '12px',
                     color: userAnswerColor,
                     fontFamily: 'Arial',
                     fontStyle: 'bold',
@@ -5452,75 +5434,17 @@ class GameScene extends Phaser.Scene {
             currentY += lineHeight;
         });
 
-        // 顯示頁碼信息
+        // 顯示答案統計
         this.add.text(
             width / 2,
-            height - 120,
-            `第 ${pageState.currentPage + 1} / ${pageState.totalPages} 頁 (共 ${pageState.allAnswers.length} 個答案)`,
+            height - 100,
+            `共 ${allAnswers.length} 個答案`,
             {
                 fontSize: '12px',
                 color: '#666666',
                 fontFamily: 'Arial'
             }
         ).setOrigin(0.5);
-
-        // 添加上一頁按鈕
-        if (pageState.currentPage > 0) {
-            const prevButton = this.add.text(
-                width / 2 - 120,
-                height - 50,
-                '← 上一頁',
-                {
-                    fontSize: '16px',
-                    color: '#ffffff',
-                    fontFamily: 'Arial',
-                    backgroundColor: '#2196F3',
-                    padding: { x: 15, y: 8 }
-                }
-            ).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-            prevButton.on('pointerdown', () => {
-                pageState.currentPage--;
-                this.showAnswersScreen();
-            });
-
-            prevButton.on('pointerover', () => {
-                prevButton.setBackgroundColor('#1976D2');
-            });
-
-            prevButton.on('pointerout', () => {
-                prevButton.setBackgroundColor('#2196F3');
-            });
-        }
-
-        // 添加下一頁按鈕
-        if (pageState.currentPage < pageState.totalPages - 1) {
-            const nextButton = this.add.text(
-                width / 2 + 120,
-                height - 50,
-                '下一頁 →',
-                {
-                    fontSize: '16px',
-                    color: '#ffffff',
-                    fontFamily: 'Arial',
-                    backgroundColor: '#2196F3',
-                    padding: { x: 15, y: 8 }
-                }
-            ).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-            nextButton.on('pointerdown', () => {
-                pageState.currentPage++;
-                this.showAnswersScreen();
-            });
-
-            nextButton.on('pointerover', () => {
-                nextButton.setBackgroundColor('#1976D2');
-            });
-
-            nextButton.on('pointerout', () => {
-                nextButton.setBackgroundColor('#2196F3');
-            });
-        }
 
         // 添加關閉按鈕
         const closeButton = this.add.text(
