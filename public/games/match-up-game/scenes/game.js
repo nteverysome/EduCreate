@@ -5079,8 +5079,9 @@ class GameScene extends Phaser.Scene {
         background.setFillStyle(0xffffff);
         background.setStrokeStyle(2, 0x000000);
 
-        // 更新文字為正確答案
-        if (textObj) {
+        // 🔥 [v80.1] 修復：在混合佈局中，textObj 可能不支持 setText
+        // 只有在分離佈局中才更新文字
+        if (textObj && typeof textObj.setText === 'function') {
             textObj.setText(correctAnswer);
         }
 
@@ -5160,8 +5161,9 @@ class GameScene extends Phaser.Scene {
         background.setFillStyle(0xcccccc);
         background.setStrokeStyle(2, 0x000000);
 
-        // 更新文字為正確答案
-        if (textObj) {
+        // 🔥 [v80.1] 修復：在混合佈局中，textObj 可能不支持 setText
+        // 只有在分離佈局中才更新文字
+        if (textObj && typeof textObj.setText === 'function') {
             textObj.setText(correctAnswer);
         }
 
