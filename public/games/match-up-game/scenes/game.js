@@ -5016,7 +5016,7 @@ class GameScene extends Phaser.Scene {
                             const markY = englishTextObj.y + 25;
 
                             const xMark = this.add.text(0, 0, '✗', {
-                                fontSize: '32px',
+                                fontSize: '64px',
                                 color: '#f44336',
                                 fontFamily: 'Arial',
                                 fontStyle: 'bold'
@@ -5142,7 +5142,7 @@ class GameScene extends Phaser.Scene {
                     const markY = englishTextObj.y + 25;
 
                     const checkMark = this.add.text(0, 0, '✓', {
-                        fontSize: '32px',
+                        fontSize: '64px',
                         color: '#4caf50',
                         fontFamily: 'Arial',
                         fontStyle: 'bold'
@@ -5182,7 +5182,7 @@ class GameScene extends Phaser.Scene {
             0,
             '✓',
             {
-                fontSize: '32px',
+                fontSize: '64px',
                 color: '#4caf50',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
@@ -5268,7 +5268,7 @@ class GameScene extends Phaser.Scene {
                     const markY = englishTextObj.y + 25;
 
                     const xMark = this.add.text(0, 0, '✗', {
-                        fontSize: '32px',
+                        fontSize: '64px',
                         color: '#f44336',
                         fontFamily: 'Arial',
                         fontStyle: 'bold'
@@ -5308,7 +5308,7 @@ class GameScene extends Phaser.Scene {
             0,
             '✗',
             {
-                fontSize: '32px',
+                fontSize: '64px',
                 color: '#f44336',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
