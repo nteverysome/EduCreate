@@ -4938,8 +4938,9 @@ class GameScene extends Phaser.Scene {
                 // 在混合模式中，每個詞彙對應一個框位置（pairIndex）
                 const frameIndex = pairIndex;
 
+                // 🔥 [v80.0] 修復：在混合模式中，英文卡片在 leftCards 中，不在 rightCards 中
                 // 找到當前在這個框位置的英文卡片
-                const currentCardInFrame = this.rightCards.find(card =>
+                const currentCardInFrame = this.leftCards.find(card =>
                     card.getData('currentFrameIndex') === frameIndex
                 );
 
