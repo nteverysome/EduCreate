@@ -941,7 +941,12 @@ class GameScene extends Phaser.Scene {
                     backgroundColor: '#4CAF50',
                     padding: { x: 20, y: 10 }
                 }
-            ).setOrigin(0.5).setDepth(2001).setInteractive({ useHandCursor: true });
+            ).setOrigin(0.5).setDepth(2001);
+
+            // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
+            const bounds = showAnswersButton.getBounds();
+            showAnswersButton.setSize(bounds.width, bounds.height);
+            showAnswersButton.setInteractive({ useHandCursor: true });
 
             showAnswersButton.on('pointerdown', () => {
                 overlay.destroy();
@@ -5533,7 +5538,12 @@ class GameScene extends Phaser.Scene {
                     backgroundColor: '#2196F3',
                     padding: { x: 20, y: 10 }
                 }
-            ).setOrigin(0.5).setDepth(2001).setInteractive({ useHandCursor: true });
+            ).setOrigin(0.5).setDepth(2001);
+
+            // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
+            const bounds = showAnswersButton.getBounds();
+            showAnswersButton.setSize(bounds.width, bounds.height);
+            showAnswersButton.setInteractive({ useHandCursor: true });
 
             showAnswersButton.on('pointerdown', () => {
                 completeText.destroy();
@@ -5623,7 +5633,12 @@ class GameScene extends Phaser.Scene {
                 backgroundColor: '#2196F3',
                 padding: { x: 20, y: 10 }
             }
-        ).setOrigin(0.5).setDepth(2000).setInteractive({ useHandCursor: true });
+        ).setOrigin(0.5).setDepth(2000);
+
+        // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
+        const backBounds = backButton.getBounds();
+        backButton.setSize(backBounds.width, backBounds.height);
+        backButton.setInteractive({ useHandCursor: true });
 
         backButton.on('pointerdown', () => {
             this.scene.restart();
@@ -5745,7 +5760,12 @@ class GameScene extends Phaser.Scene {
                 backgroundColor: '#f44336',
                 padding: { x: 20, y: 8 }
             }
-        ).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        ).setOrigin(0.5);
+
+        // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
+        const closeBounds = closeButton.getBounds();
+        closeButton.setSize(closeBounds.width, closeBounds.height);
+        closeButton.setInteractive({ useHandCursor: true });
 
         closeButton.on('pointerdown', () => {
             // 清除分頁狀態
