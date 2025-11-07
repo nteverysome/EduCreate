@@ -3430,10 +3430,9 @@ class GameScene extends Phaser.Scene {
         // 設置互動（整個容器可拖曳）
         // 🔥 必須先設置容器大小，否則 hit area 無法正確計算
         container.setSize(width, height);
-        container.setInteractive({
-            useHandCursor: true,
-            draggable: true
-        });
+        container.setInteractive({ useHandCursor: true });
+        // 🔥 使用 setDraggable() 而不是在 setInteractive() 中設置 draggable
+        this.input.setDraggable(container);
 
         // 儲存原始位置
         container.setData({
