@@ -5085,15 +5085,19 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v80.3] 修正位置計算 - 先創建標記，再添加到容器
+        // 🔥 [v80.4] 修正位置計算 - 將標記放在背景內部的右上角
         // 標記應該相對於容器的中心位置
-        const markX = 0;  // 容器內相對位置
-        const markY = -background.height / 2 - 15;  // 容器內相對位置，放在背景上方
+        // background 的中心在 (0, 0)，所以：
+        // - 右邊界在 background.width / 2
+        // - 上邊界在 -background.height / 2
+        const markX = background.width / 2 - 20;  // 容器內相對位置，距離右邊 20 像素
+        const markY = -background.height / 2 + 20;  // 容器內相對位置，距離上邊 20 像素
 
-        // 🔥 [v80.3] 調試日誌 - 標記位置
-        console.log('🔍 [v80.3] 標記位置計算:', {
+        // 🔥 [v80.4] 調試日誌 - 標記位置
+        console.log('🔍 [v80.4] 標記位置計算:', {
             markX,
             markY,
+            backgroundWidth: background.width,
             backgroundHeight: background.height,
             rightCardX: rightCard.x,
             rightCardY: rightCard.y,
@@ -5101,7 +5105,7 @@ class GameScene extends Phaser.Scene {
             markAbsoluteY: rightCard.y + markY
         });
 
-        // 🔥 [v80.3] 先創建標記（在場景坐標系中）
+        // 🔥 [v80.4] 先創建標記（在場景坐標系中）
         const checkMark = this.add.text(
             0,
             0,
@@ -5115,8 +5119,8 @@ class GameScene extends Phaser.Scene {
         );
         checkMark.setOrigin(0.5, 0.5).setDepth(15);
 
-        // 🔥 [v80.3] 調試日誌 - 標記創建
-        console.log('✅ [v80.3] 勾勾標記已創建:', {
+        // 🔥 [v80.4] 調試日誌 - 標記創建
+        console.log('✅ [v80.4] 勾勾標記已創建:', {
             text: checkMark.text,
             x: checkMark.x,
             y: checkMark.y,
@@ -5124,7 +5128,7 @@ class GameScene extends Phaser.Scene {
             depth: checkMark.depth
         });
 
-        // 🔥 [v80.3] 添加到容器後，設置相對位置
+        // 🔥 [v80.4] 添加到容器後，設置相對位置
         rightCard.add(checkMark);
         checkMark.setPosition(markX, markY);
 
@@ -5171,15 +5175,19 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v80.3] 修正位置計算 - 先創建標記，再添加到容器
+        // 🔥 [v80.4] 修正位置計算 - 將標記放在背景內部的右上角
         // 標記應該相對於容器的中心位置
-        const markX = 0;  // 容器內相對位置
-        const markY = -background.height / 2 - 15;  // 容器內相對位置，放在背景上方
+        // background 的中心在 (0, 0)，所以：
+        // - 右邊界在 background.width / 2
+        // - 上邊界在 -background.height / 2
+        const markX = background.width / 2 - 20;  // 容器內相對位置，距離右邊 20 像素
+        const markY = -background.height / 2 + 20;  // 容器內相對位置，距離上邊 20 像素
 
-        // 🔥 [v80.3] 調試日誌 - 標記位置
-        console.log('🔍 [v80.3] 標記位置計算:', {
+        // 🔥 [v80.4] 調試日誌 - 標記位置
+        console.log('🔍 [v80.4] 標記位置計算:', {
             markX,
             markY,
+            backgroundWidth: background.width,
             backgroundHeight: background.height,
             rightCardX: rightCard.x,
             rightCardY: rightCard.y,
@@ -5187,7 +5195,7 @@ class GameScene extends Phaser.Scene {
             markAbsoluteY: rightCard.y + markY
         });
 
-        // 🔥 [v80.3] 先創建標記（在場景坐標系中）
+        // 🔥 [v80.4] 先創建標記（在場景坐標系中）
         const xMark = this.add.text(
             0,
             0,
@@ -5201,8 +5209,8 @@ class GameScene extends Phaser.Scene {
         );
         xMark.setOrigin(0.5, 0.5).setDepth(15);
 
-        // 🔥 [v80.3] 調試日誌 - 標記創建
-        console.log('✅ [v80.3] 叉叉標記已創建:', {
+        // 🔥 [v80.4] 調試日誌 - 標記創建
+        console.log('✅ [v80.4] 叉叉標記已創建:', {
             text: xMark.text,
             x: xMark.x,
             y: xMark.y,
@@ -5210,7 +5218,7 @@ class GameScene extends Phaser.Scene {
             depth: xMark.depth
         });
 
-        // 🔥 [v80.3] 添加到容器後，設置相對位置
+        // 🔥 [v80.4] 添加到容器後，設置相對位置
         rightCard.add(xMark);
         xMark.setPosition(markX, markY);
 
