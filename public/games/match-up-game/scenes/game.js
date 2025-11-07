@@ -944,10 +944,9 @@ class GameScene extends Phaser.Scene {
             ).setOrigin(0.5).setDepth(2001);
 
             // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
-            const bounds = showAnswersButton.getBounds();
-            showAnswersButton.setSize(bounds.width, bounds.height);
+            // ✅ 使用 Text 物件的 displayWidth 和 displayHeight 而不是 getBounds()
             showAnswersButton.setInteractive(
-                new Phaser.Geom.Rectangle(-bounds.width / 2, -bounds.height / 2, bounds.width, bounds.height),
+                new Phaser.Geom.Rectangle(-showAnswersButton.displayWidth / 2, -showAnswersButton.displayHeight / 2, showAnswersButton.displayWidth, showAnswersButton.displayHeight),
                 Phaser.Geom.Rectangle.Contains
             );
 
@@ -5555,10 +5554,9 @@ class GameScene extends Phaser.Scene {
             ).setOrigin(0.5).setDepth(2001);
 
             // 🔥 設置按鈕的 hit area（確保整個按鈕都可以點擊）
-            const bounds = showAnswersButton.getBounds();
-            showAnswersButton.setSize(bounds.width, bounds.height);
+            // ✅ 使用 Text 物件的 displayWidth 和 displayHeight 而不是 getBounds()
             showAnswersButton.setInteractive(
-                new Phaser.Geom.Rectangle(-bounds.width / 2, -bounds.height / 2, bounds.width, bounds.height),
+                new Phaser.Geom.Rectangle(-showAnswersButton.displayWidth / 2, -showAnswersButton.displayHeight / 2, showAnswersButton.displayWidth, showAnswersButton.displayHeight),
                 Phaser.Geom.Rectangle.Contains
             );
 
