@@ -6343,6 +6343,7 @@ class GameScene extends Phaser.Scene {
         const page = this.add.container(width / 2, height / 2);
         page.setDepth(6001);
         page.setScrollFactor(0);
+        page.setSize(pageWidth, pageHeight);  // 🔥 設置容器大小以確保 hit area 正確計算
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0xffffff);
