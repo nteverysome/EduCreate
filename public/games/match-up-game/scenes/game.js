@@ -5085,36 +5085,38 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v80.0] 修正位置計算 - 使用相對於容器的坐標
-        // 因為 rightCard 是容器，background 是容器內的元素
+        // 🔥 [v80.3] 修正位置計算 - 先創建標記，再添加到容器
         // 標記應該相對於容器的中心位置
-        const markX = background.width / 2 - 15;  // 相對於容器
-        const markY = -background.height / 2 + 5;  // 相對於容器
+        const markX = 0;  // 容器內相對位置
+        const markY = -background.height / 2 - 15;  // 容器內相對位置，放在背景上方
 
-        // 🔥 [v80.0] 調試日誌 - 標記位置
-        console.log('🔍 [v80.0] 標記位置計算:', {
+        // 🔥 [v80.3] 調試日誌 - 標記位置
+        console.log('🔍 [v80.3] 標記位置計算:', {
             markX,
             markY,
+            backgroundHeight: background.height,
+            rightCardX: rightCard.x,
+            rightCardY: rightCard.y,
             markAbsoluteX: rightCard.x + markX,
             markAbsoluteY: rightCard.y + markY
         });
 
-        // 添加勾勾標記
+        // 🔥 [v80.3] 先創建標記（在場景坐標系中）
         const checkMark = this.add.text(
-            markX,
-            markY,
+            0,
+            0,
             '✓',
             {
-                fontSize: '24px',
+                fontSize: '32px',
                 color: '#4caf50',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
             }
         );
-        checkMark.setOrigin(0.5).setDepth(15);
+        checkMark.setOrigin(0.5, 0.5).setDepth(15);
 
-        // 🔥 [v80.0] 調試日誌 - 標記創建
-        console.log('✅ [v80.0] 勾勾標記已創建:', {
+        // 🔥 [v80.3] 調試日誌 - 標記創建
+        console.log('✅ [v80.3] 勾勾標記已創建:', {
             text: checkMark.text,
             x: checkMark.x,
             y: checkMark.y,
@@ -5122,7 +5124,9 @@ class GameScene extends Phaser.Scene {
             depth: checkMark.depth
         });
 
+        // 🔥 [v80.3] 添加到容器後，設置相對位置
         rightCard.add(checkMark);
+        checkMark.setPosition(markX, markY);
 
         // 🔥 [v80.0] 調試日誌 - 標記添加後
         console.log('✅ [v80.0] 勾勾標記已添加到容器:', {
@@ -5161,42 +5165,44 @@ class GameScene extends Phaser.Scene {
         background.setFillStyle(0xcccccc);
         background.setStrokeStyle(2, 0x000000);
 
-        // 🔥 [v80.1] 修復：在混合佈局中，textObj 可能不支持 setText
+        // 🔥 [v80.3] 修復：在混合佈局中，textObj 可能不支持 setText
         // 只有在分離佈局中才更新文字
         if (textObj && typeof textObj.setText === 'function') {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v80.0] 修正位置計算 - 使用相對於容器的坐標
-        // 因為 rightCard 是容器，background 是容器內的元素
+        // 🔥 [v80.3] 修正位置計算 - 先創建標記，再添加到容器
         // 標記應該相對於容器的中心位置
-        const markX = background.width / 2 - 15;  // 相對於容器
-        const markY = -background.height / 2 + 5;  // 相對於容器
+        const markX = 0;  // 容器內相對位置
+        const markY = -background.height / 2 - 15;  // 容器內相對位置，放在背景上方
 
-        // 🔥 [v80.0] 調試日誌 - 標記位置
-        console.log('🔍 [v80.0] 標記位置計算:', {
+        // 🔥 [v80.3] 調試日誌 - 標記位置
+        console.log('🔍 [v80.3] 標記位置計算:', {
             markX,
             markY,
+            backgroundHeight: background.height,
+            rightCardX: rightCard.x,
+            rightCardY: rightCard.y,
             markAbsoluteX: rightCard.x + markX,
             markAbsoluteY: rightCard.y + markY
         });
 
-        // 添加 X 標記
+        // 🔥 [v80.3] 先創建標記（在場景坐標系中）
         const xMark = this.add.text(
-            markX,
-            markY,
+            0,
+            0,
             '✗',
             {
-                fontSize: '24px',
+                fontSize: '32px',
                 color: '#f44336',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
             }
         );
-        xMark.setOrigin(0.5).setDepth(15);
+        xMark.setOrigin(0.5, 0.5).setDepth(15);
 
-        // 🔥 [v80.0] 調試日誌 - 標記創建
-        console.log('✅ [v80.0] 叉叉標記已創建:', {
+        // 🔥 [v80.3] 調試日誌 - 標記創建
+        console.log('✅ [v80.3] 叉叉標記已創建:', {
             text: xMark.text,
             x: xMark.x,
             y: xMark.y,
@@ -5204,7 +5210,9 @@ class GameScene extends Phaser.Scene {
             depth: xMark.depth
         });
 
+        // 🔥 [v80.3] 添加到容器後，設置相對位置
         rightCard.add(xMark);
+        xMark.setPosition(markX, markY);
 
         // 🔥 [v80.0] 調試日誌 - 標記添加後
         console.log('✅ [v80.0] 叉叉標記已添加到容器:', {
