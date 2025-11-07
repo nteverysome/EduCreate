@@ -3100,6 +3100,9 @@ class GameScene extends Phaser.Scene {
             background.setStrokeStyle(2, 0x333333);
             frameContainer.add(background);
 
+            // 🔥 [v80.0] 存儲 background 到容器數據，以便 showCorrectAnswer/showIncorrectAnswer 能訪問
+            frameContainer.setData('background', background);
+
             // 🔥 [v76.0] 改進中文框佈局 - 中文框內顯示空白，下方添加圖片+文字區域
             const hasChineseImage = pair.chineseImageUrl && pair.chineseImageUrl.trim() !== '';
             const hasChineseText = pair.answer && pair.answer.trim() !== '' && pair.answer.trim() !== '<br>';
@@ -3162,6 +3165,9 @@ class GameScene extends Phaser.Scene {
                     });
                     chineseText.setOrigin(0.5, 0.5);
                     labelContainer.add(chineseText);
+
+                    // 🔥 [v80.0] 存儲文字對象到 frameContainer，以便 showCorrectAnswer/showIncorrectAnswer 能訪問
+                    frameContainer.setData('text', chineseText);
                 } else if (hasChineseImage && !hasChineseText) {
                     // 🔥 [v76.0] 情況 2：只有圖片
                     console.log(`🖼️ [v76.0] 下方區域 [${i}] 只有圖片模式`);
@@ -3188,6 +3194,9 @@ class GameScene extends Phaser.Scene {
                     });
                     chineseText.setOrigin(0.5, 0.5);
                     labelContainer.add(chineseText);
+
+                    // 🔥 [v80.0] 存儲文字對象到 frameContainer，以便 showCorrectAnswer/showIncorrectAnswer 能訪問
+                    frameContainer.setData('text', chineseText);
                 }
 
                 labelContainer.setDepth(0);
