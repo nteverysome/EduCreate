@@ -5944,7 +5944,8 @@ class GameScene extends Phaser.Scene {
         modal.setDepth(5001);
         modal.setScrollFactor(0);
         modal.setSize(modalWidth, modalHeight);
-        modal.setInteractive();
+        // 🔥 不需要設置 modal 為 interactive，因為按鈕已經是 interactive 的
+        // modal.setInteractive();
 
         // 模態框背景
         const modalBg = this.add.rectangle(0, 0, modalWidth, modalHeight, 0x2c2c2c);
@@ -6227,7 +6228,8 @@ class GameScene extends Phaser.Scene {
         page.setDepth(6001);
         page.setScrollFactor(0);
         page.setSize(pageWidth, pageHeight);
-        page.setInteractive();
+        // 🔥 不需要設置 page 為 interactive，因為按鈕已經是 interactive 的
+        // page.setInteractive();
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0xffffff);
@@ -6540,7 +6542,8 @@ class GameScene extends Phaser.Scene {
         page.setDepth(7001);
         page.setScrollFactor(0);
         page.setSize(pageWidth, pageHeight);
-        page.setInteractive();
+        // 🔥 不需要設置 page 為 interactive，因為按鈕已經是 interactive 的
+        // page.setInteractive();
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
@@ -6809,7 +6812,8 @@ class GameScene extends Phaser.Scene {
         page.setDepth(8001);
         page.setScrollFactor(0);
         page.setSize(pageWidth, pageHeight);
-        page.setInteractive();
+        // 🔥 不需要設置 page 為 interactive，因為按鈕已經是 interactive 的
+        // page.setInteractive();
 
         // 頁面背景
         const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
