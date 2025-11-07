@@ -6022,12 +6022,11 @@ class GameScene extends Phaser.Scene {
             console.log('🎮 點擊 Leaderboard 按鈕');
             // 隱藏遊戲結束模態框
             if (this.gameCompleteModal) {
-                this.gameCompleteModal.overlay.destroy();
-                this.gameCompleteModal.modal.destroy();
-                this.gameCompleteModal = null;
+                this.gameCompleteModal.overlay.setVisible(false);
+                this.gameCompleteModal.modal.setVisible(false);
             }
-            // 顯示排行榜
-            this.showLeaderboard();
+            // 顯示輸入名稱頁面（用於提交到排行榜）
+            this.showEnterNamePage();
         });
 
         // Show answers 按鈕
@@ -6660,7 +6659,11 @@ class GameScene extends Phaser.Scene {
         // 按鈕背景
         const buttonBg = this.add.rectangle(x, y, width, height, 0x4c4c4c);
         buttonBg.setStrokeStyle(2, 0x000000);
-        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setInteractive({
+            useHandCursor: true,
+            hitArea: new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains
+        });
         container.add(buttonBg);
 
         // 按鈕文字
