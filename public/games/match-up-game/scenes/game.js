@@ -6288,23 +6288,45 @@ class GameScene extends Phaser.Scene {
         card.correctPairingText = pairingText;
     }
 
-    // 🔥 v89.0: 顯示所有卡片的正確名稱
+    // 🔥 v89.0: 顯示所有卡片的正確名稱 - 英文卡片移動到匹配的中文位置
     showAllCorrectAnswers() {
-        console.log('🎮 [v89.0] 顯示所有卡片的正確名稱');
+        console.log('🎮 [v89.0] 顯示所有卡片的正確名稱 - 英文卡片移動到匹配的中文位置');
 
-        // 遍歷所有左卡片（英文卡片），在每個卡片下方顯示正確的配對物件
+        // 遍歷所有左卡片（英文卡片），將其移動到對應的中文位置
         if (this.leftCards && this.leftCards.length > 0) {
             this.leftCards.forEach((card) => {
                 // 根據 pairId 找到對應的配對
                 const pairId = card.getData('pairId');
-                const pair = this.pairs.find(p => p.id === pairId);
 
-                if (pair) {
-                    // 在卡片下方顯示正確的配對物件（中文）
-                    // 使用 pair.answer 或 pair.chinese（都是中文翻譯）
-                    const correctAnswer = pair.answer || pair.chinese || '';
-                    this.showCorrectPairingOnCard(card, correctAnswer);
-                    console.log('🎮 [v89.0] 顯示配對:', { pairId, correctAnswer });
+                // 根據佈局模式，找到對應的中文卡片位置
+                if (this.layout === 'mixed') {
+                    // 混合佈局：找到對應的中文框
+                    const rightCard = this.rightCards.find(rc => rc.getData('pairId') === pairId);
+                    if (rightCard) {
+                        // 移動英文卡片到中文框的位置
+                        this.tweens.add({
+                            targets: card,
+                            x: rightCard.x,
+                            y: rightCard.y,
+                            duration: 500,
+                            ease: 'Power2.inOut'
+                        });
+                        console.log('🎮 [v89.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+                    }
+                } else {
+                    // 分離佈局：根據 pairId 找到對應的右側卡片
+                    const rightCard = this.rightCards.find(rc => rc.getData('pairId') === pairId);
+                    if (rightCard) {
+                        // 移動英文卡片到右側卡片的位置
+                        this.tweens.add({
+                            targets: card,
+                            x: rightCard.x,
+                            y: rightCard.y,
+                            duration: 500,
+                            ease: 'Power2.inOut'
+                        });
+                        console.log('🎮 [v89.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+                    }
                 }
             });
         }
