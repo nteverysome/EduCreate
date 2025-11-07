@@ -4133,17 +4133,12 @@ class GameScene extends Phaser.Scene {
         });
 
         // 🔥 [v62.0] 根據內容組合決定佈局
-        let textObj = null;
         if (hasImage && hasText && hasAudio) {
             // 情況 A：圖片 + 文字 + 語音
             this.createRightCardLayoutA(container, background, width, height, text, imageUrl, safeAudioUrl, pairId);
-            // 在佈局 A 中，文字是通過 createTextElement 創建的
-            textObj = container.list.find(child => child.type === 'Text' && child.text === text);
         } else if (hasImage && hasText && !hasAudio) {
             // 情況 D：圖片 + 文字
             this.createRightCardLayoutD(container, background, width, height, text, imageUrl, pairId);
-            // 在佈局 D 中，文字是通過 createTextElement 創建的
-            textObj = container.list.find(child => child.type === 'Text' && child.text === text);
         } else if (hasImage && !hasText && hasAudio) {
             // 圖片 + 語音（無文字）
             this.createRightCardLayoutImageAudio(container, background, width, height, imageUrl, safeAudioUrl, pairId);
@@ -4153,19 +4148,12 @@ class GameScene extends Phaser.Scene {
         } else if (!hasImage && hasText && hasAudio) {
             // 情況 E：文字 + 語音
             this.createRightCardLayoutE(container, background, width, height, text, safeAudioUrl, pairId);
-            // 在佈局 E 中，文字是通過 createTextElement 創建的
-            textObj = container.list.find(child => child.type === 'Text' && child.text === text);
         } else if (!hasImage && !hasText && hasAudio) {
             // 情況 B：只有語音
             this.createRightCardLayoutB(container, background, width, height, safeAudioUrl, pairId);
         } else {
             // 情況 C：只有文字（現有邏輯）
-            textObj = this.createRightCardLayoutC(container, background, width, height, text, textPosition);
-        }
-
-        // 🔥 [v74.0] 確保文字對象被存儲到容器
-        if (textObj) {
-            container.setData('text', textObj);
+            this.createRightCardLayoutC(container, background, width, height, text, textPosition);
         }
 
         // 🔥 [v65.0] 添加淡入動畫（參考英文卡片）
@@ -5064,6 +5052,20 @@ class GameScene extends Phaser.Scene {
 
         const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
 
+        // 🔥 [v80.0] 調試日誌 - 卡片信息
+        console.log('🔍 [v80.0] showCorrectAnswer 調試信息:', {
+            rightCardX: rightCard.x,
+            rightCardY: rightCard.y,
+            rightCardWidth: rightCard.width,
+            rightCardHeight: rightCard.height,
+            backgroundX: background.x,
+            backgroundY: background.y,
+            backgroundWidth: background.width,
+            backgroundHeight: background.height,
+            hasTextObj: !!textObj,
+            textObjText: textObj ? textObj.text : 'N/A'
+        });
+
         // 內框呈白色
         background.setFillStyle(0xffffff);
         background.setStrokeStyle(2, 0x000000);
@@ -5073,10 +5075,24 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
+        // 🔥 [v80.0] 修正位置計算 - 使用相對於容器的坐標
+        // 因為 rightCard 是容器，background 是容器內的元素
+        // 標記應該相對於容器的中心位置
+        const markX = background.width / 2 - 15;  // 相對於容器
+        const markY = -background.height / 2 + 5;  // 相對於容器
+
+        // 🔥 [v80.0] 調試日誌 - 標記位置
+        console.log('🔍 [v80.0] 標記位置計算:', {
+            markX,
+            markY,
+            markAbsoluteX: rightCard.x + markX,
+            markAbsoluteY: rightCard.y + markY
+        });
+
         // 添加勾勾標記
         const checkMark = this.add.text(
-            rightCard.x + background.width / 2 - 15,
-            rightCard.y - background.height / 2 + 5,
+            markX,
+            markY,
             '✓',
             {
                 fontSize: '24px',
@@ -5086,7 +5102,23 @@ class GameScene extends Phaser.Scene {
             }
         );
         checkMark.setOrigin(0.5).setDepth(15);
+
+        // 🔥 [v80.0] 調試日誌 - 標記創建
+        console.log('✅ [v80.0] 勾勾標記已創建:', {
+            text: checkMark.text,
+            x: checkMark.x,
+            y: checkMark.y,
+            color: checkMark.color,
+            depth: checkMark.depth
+        });
+
         rightCard.add(checkMark);
+
+        // 🔥 [v80.0] 調試日誌 - 標記添加後
+        console.log('✅ [v80.0] 勾勾標記已添加到容器:', {
+            containerChildren: rightCard.list.length,
+            markInContainer: rightCard.list.includes(checkMark)
+        });
     }
 
     // 🔥 顯示錯誤答案（灰色內框 + X）
@@ -5101,6 +5133,20 @@ class GameScene extends Phaser.Scene {
 
         const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
 
+        // 🔥 [v80.0] 調試日誌 - 卡片信息
+        console.log('🔍 [v80.0] showIncorrectAnswer 調試信息:', {
+            rightCardX: rightCard.x,
+            rightCardY: rightCard.y,
+            rightCardWidth: rightCard.width,
+            rightCardHeight: rightCard.height,
+            backgroundX: background.x,
+            backgroundY: background.y,
+            backgroundWidth: background.width,
+            backgroundHeight: background.height,
+            hasTextObj: !!textObj,
+            textObjText: textObj ? textObj.text : 'N/A'
+        });
+
         // 內框呈灰色
         background.setFillStyle(0xcccccc);
         background.setStrokeStyle(2, 0x000000);
@@ -5110,10 +5156,24 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
+        // 🔥 [v80.0] 修正位置計算 - 使用相對於容器的坐標
+        // 因為 rightCard 是容器，background 是容器內的元素
+        // 標記應該相對於容器的中心位置
+        const markX = background.width / 2 - 15;  // 相對於容器
+        const markY = -background.height / 2 + 5;  // 相對於容器
+
+        // 🔥 [v80.0] 調試日誌 - 標記位置
+        console.log('🔍 [v80.0] 標記位置計算:', {
+            markX,
+            markY,
+            markAbsoluteX: rightCard.x + markX,
+            markAbsoluteY: rightCard.y + markY
+        });
+
         // 添加 X 標記
         const xMark = this.add.text(
-            rightCard.x + background.width / 2 - 15,
-            rightCard.y - background.height / 2 + 5,
+            markX,
+            markY,
             '✗',
             {
                 fontSize: '24px',
@@ -5123,7 +5183,23 @@ class GameScene extends Phaser.Scene {
             }
         );
         xMark.setOrigin(0.5).setDepth(15);
+
+        // 🔥 [v80.0] 調試日誌 - 標記創建
+        console.log('✅ [v80.0] 叉叉標記已創建:', {
+            text: xMark.text,
+            x: xMark.x,
+            y: xMark.y,
+            color: xMark.color,
+            depth: xMark.depth
+        });
+
         rightCard.add(xMark);
+
+        // 🔥 [v80.0] 調試日誌 - 標記添加後
+        console.log('✅ [v80.0] 叉叉標記已添加到容器:', {
+            containerChildren: rightCard.list.length,
+            markInContainer: rightCard.list.includes(xMark)
+        });
     }
 
     // 🔥 顯示配對總結
