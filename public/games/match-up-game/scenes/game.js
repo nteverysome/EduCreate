@@ -516,13 +516,15 @@ class GameScene extends Phaser.Scene {
         this.handlerScene = this.scene.get('handler');
         console.log('🎮 GameScene: Handler 場景引用', this.handlerScene ? '✅ 存在' : '❌ 不存在');
 
-        // 🔥 調用 Handler 的 updateResize 方法設定響應式
-        if (this.handlerScene && this.handlerScene.updateResize) {
-            console.log('🎮 GameScene: 調用 Handler.updateResize');
-            this.handlerScene.updateResize(this);
-        } else {
-            console.warn('⚠️ GameScene: handlerScene 未初始化或 updateResize 方法不存在');
-        }
+        // 🔥 v95.0: 修復 - GameScene 不應該調用 updateResize
+        // 因為 GameScene 已經在下面自己添加了 resize 事件監聽（第 556 行）
+        // 調用 updateResize 會導致重複的 resize 事件監聽，造成場景重新啟動
+        // if (this.handlerScene && this.handlerScene.updateResize) {
+        //     console.log('🎮 GameScene: 調用 Handler.updateResize');
+        //     this.handlerScene.updateResize(this);
+        // } else {
+        //     console.warn('⚠️ GameScene: handlerScene 未初始化或 updateResize 方法不存在');
+        // }
 
         // 🔥 初始化分頁設置
         this.initializePagination();
