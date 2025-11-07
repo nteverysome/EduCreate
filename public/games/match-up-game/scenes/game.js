@@ -4924,40 +4924,42 @@ class GameScene extends Phaser.Scene {
             }))
         });
 
-        // 🔥 [v66.0] 在混合模式中，檢查所有卡片的當前位置
-        // 不依賴 chineseFrames 數組，直接通過 currentFrameIndex 檢查卡片位置
-        if (this.layout === 'mixed') {
-            console.log('🔍 [v66.0] 混合模式：檢查所有右卡片的當前位置', {
-                rightCardsLength: this.rightCards ? this.rightCards.length : 0,
-                currentPagePairsLength: currentPagePairs.length
+        // 🔥 [v60.0] 只檢查當前頁面的詞彙對
+        currentPagePairs.forEach((pair, pairIndex) => {
+            // 🔥 [v60.0] 檢查該詞彙對是否在 matchedPairs 集合中
+            const isMatched = this.matchedPairs.has(pair.id);
+
+            // 🔥 [v60.0] 詳細調試：記錄每個詞彙對的配對信息
+            console.log(`🔍 [v60.0] 詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
+                pairId: pair.id,
+                chinese: pair.chinese,
+                english: pair.english,
+                isMatched: isMatched
             });
 
-            currentPagePairs.forEach((pair, pairIndex) => {
-                // 在混合模式中，每個詞彙對應一個框位置（pairIndex）
-                const frameIndex = pairIndex;
+            if (isMatched) {
+                // 🔥 [v60.0] 配對已記錄，現在需要找到配對的右卡片以獲取用戶的選擇
+                const leftCard = this.leftCards.find(card => card.getData('pairId') === pair.id);
+                const rightCard = leftCard ? leftCard.getData('matchedWith') : null;
 
-                // 找到當前在這個框位置的英文卡片
-                const currentCardInFrame = this.rightCards.find(card =>
-                    card.getData('currentFrameIndex') === frameIndex
-                );
+                if (rightCard) {
+                    const rightPairId = rightCard.getData('pairId');
+                    const isCorrect = pair.id === rightPairId;
 
-                if (currentCardInFrame) {
-                    const currentCardPairId = currentCardInFrame.getData('pairId');
-                    const isCorrect = pair.id === currentCardPairId;
+                    // 🔥 獲取用戶回答的英文（從 pairs 數據中獲取）
+                    const userAnswerPair = this.pairs.find(p => p.id === rightPairId);
 
-                    // 獲取用戶選擇的英文單字
-                    const userAnswerPair = this.pairs.find(p => p.id === currentCardPairId);
-
-                    console.log(`🔍 [v66.0] 混合模式 - 詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
-                        pairId: pair.id,
-                        chinese: pair.chinese,
+                    // 🔥 [v60.0] 詳細調試：記錄答案驗證結果
+                    console.log(`🔍 [v60.0] 答案驗證 - 詞彙對 ${pairIndex + 1}:`, {
+                        expectedPairId: pair.id,
+                        selectedPairId: rightPairId,
+                        isCorrect,
+                        expectedChinese: pair.chinese,
                         expectedEnglish: pair.english,
-                        currentCardPairId: currentCardPairId,
-                        userAnswerEnglish: userAnswerPair ? userAnswerPair.english : null,
-                        isCorrect
+                        userAnswerEnglish: userAnswerPair ? userAnswerPair.english : null
                     });
 
-                    // 記錄用戶答案
+                    // 🔥 記錄用戶答案
                     this.currentPageAnswers.push({
                         page: this.currentPage,
                         leftText: pair.chinese,
@@ -4966,23 +4968,28 @@ class GameScene extends Phaser.Scene {
                         correctChinese: pair.chinese,
                         isCorrect: isCorrect,
                         leftPairId: pair.id,
-                        rightPairId: currentCardPairId
+                        rightPairId: rightPairId
                     });
 
                     if (isCorrect) {
+                        // 配對正確
                         correctCount++;
-                        console.log('✅ [v66.0] 配對正確:', pair.chinese, '-', userAnswerPair.english);
-                        this.showCorrectAnswer(currentCardInFrame, pair.english);
+                        console.log('✅ 配對正確:', pair.chinese, '-', userAnswerPair.english);
+
+                        // 🔥 顯示正確的英文單字，內框呈白色，標記勾勾
+                        this.showCorrectAnswer(rightCard, pair.english);
                     } else {
+                        // 配對錯誤
                         incorrectCount++;
-                        console.log('❌ [v66.0] 配對錯誤:', pair.chinese, '-', userAnswerPair.english);
-                        this.showIncorrectAnswer(currentCardInFrame, pair.english);
+                        console.log('❌ 配對錯誤:', pair.chinese, '-', userAnswerPair.english);
+
+                        // 🔥 顯示正確的英文單字，內框呈灰色，標記 X
+                        this.showIncorrectAnswer(rightCard, pair.english);
                     }
                 } else {
-                    // 沒有卡片在這個框位置
+                    // 🔥 [v60.0] 配對已記錄但找不到右卡片（不應該發生）
+                    console.warn('⚠️ [v60.0] 配對已記錄但找不到右卡片:', pair.id);
                     unmatchedCount++;
-                    console.log('⚠️ [v66.0] 未配對:', pair.chinese);
-
                     this.currentPageAnswers.push({
                         page: this.currentPage,
                         leftText: pair.chinese,
@@ -4994,90 +5001,24 @@ class GameScene extends Phaser.Scene {
                         rightPairId: null
                     });
                 }
-            });
-        } else {
-            // 分離模式：使用原有的邏輯
-            console.log('🔍 [v64.0] 分離模式：使用 matchedPairs 集合檢查');
+            } else {
+                // 未配對
+                unmatchedCount++;
+                console.log('⚠️ 未配對:', pair.chinese);
 
-            currentPagePairs.forEach((pair, pairIndex) => {
-                const isMatched = this.matchedPairs.has(pair.id);
-
-                console.log(`🔍 [v64.0] 詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
-                    pairId: pair.id,
-                    chinese: pair.chinese,
-                    english: pair.english,
-                    isMatched: isMatched
+                // 🔥 記錄未配對的答案
+                this.currentPageAnswers.push({
+                    page: this.currentPage,
+                    leftText: pair.chinese,
+                    rightText: null,
+                    correctAnswer: pair.english,
+                    correctChinese: pair.chinese,
+                    isCorrect: false,
+                    leftPairId: pair.id,
+                    rightPairId: null
                 });
-
-                if (isMatched) {
-                    const leftCard = this.leftCards.find(card => card.getData('pairId') === pair.id);
-                    const rightCard = leftCard ? leftCard.getData('matchedWith') : null;
-
-                    if (rightCard) {
-                        const rightPairId = rightCard.getData('pairId');
-                        const isCorrect = pair.id === rightPairId;
-                        const userAnswerPair = this.pairs.find(p => p.id === rightPairId);
-
-                        console.log(`🔍 [v64.0] 答案驗證 - 詞彙對 ${pairIndex + 1}:`, {
-                            expectedPairId: pair.id,
-                            selectedPairId: rightPairId,
-                            isCorrect,
-                            expectedChinese: pair.chinese,
-                            expectedEnglish: pair.english,
-                            userAnswerEnglish: userAnswerPair ? userAnswerPair.english : null
-                        });
-
-                        this.currentPageAnswers.push({
-                            page: this.currentPage,
-                            leftText: pair.chinese,
-                            rightText: userAnswerPair ? userAnswerPair.english : '(未知)',
-                            correctAnswer: pair.english,
-                            correctChinese: pair.chinese,
-                            isCorrect: isCorrect,
-                            leftPairId: pair.id,
-                            rightPairId: rightPairId
-                        });
-
-                        if (isCorrect) {
-                            correctCount++;
-                            console.log('✅ 配對正確:', pair.chinese, '-', userAnswerPair.english);
-                            this.showCorrectAnswer(rightCard, pair.english);
-                        } else {
-                            incorrectCount++;
-                            console.log('❌ 配對錯誤:', pair.chinese, '-', userAnswerPair.english);
-                            this.showIncorrectAnswer(rightCard, pair.english);
-                        }
-                    } else {
-                        console.warn('⚠️ [v64.0] 配對已記錄但找不到右卡片:', pair.id);
-                        unmatchedCount++;
-                        this.currentPageAnswers.push({
-                            page: this.currentPage,
-                            leftText: pair.chinese,
-                            rightText: null,
-                            correctAnswer: pair.english,
-                            correctChinese: pair.chinese,
-                            isCorrect: false,
-                            leftPairId: pair.id,
-                            rightPairId: null
-                        });
-                    }
-                } else {
-                    unmatchedCount++;
-                    console.log('⚠️ 未配對:', pair.chinese);
-
-                    this.currentPageAnswers.push({
-                        page: this.currentPage,
-                        leftText: pair.chinese,
-                        rightText: null,
-                        correctAnswer: pair.english,
-                        correctChinese: pair.chinese,
-                        isCorrect: false,
-                        leftPairId: pair.id,
-                        rightPairId: null
-                    });
-                }
-            });
-        }
+            }
+        });
 
         // 🔥 將當前頁面的答案添加到所有答案記錄中
         this.allPagesAnswers.push(...this.currentPageAnswers);
