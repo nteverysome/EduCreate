@@ -5997,21 +5997,26 @@ class GameScene extends Phaser.Scene {
             }
         });
 
-        // 🔥 v92.0: 優化按鈕排版 - 所有內容往上靠，減少空白
-        const buttonY = modalHeight / 2 - 75;
+        // 🔥 v93.0: 優化按鈕排版 - 減少上半部分和按鈕之間的空白到約 40px
         const buttonSpacing = 42;
 
-        // 🔥 v92.0: 排名提示位置緊接著分數下方
+        // 🔥 v93.0: 排名提示位置緊接著分數下方
         rankText.y = -modalHeight / 2 + 115;
 
+        // 🔥 v93.0: 計算按鈕起始位置
+        // 排名提示在 -modalHeight / 2 + 115
+        // 中間空白約 40px
+        // 第一個按鈕（Leaderboard）應該在 -modalHeight / 2 + 115 + 40 = -modalHeight / 2 + 155
+        const firstButtonY = -modalHeight / 2 + 155;
+
         // Leaderboard 按鈕
-        this.createModalButton(modal, 0, buttonY - buttonSpacing, 'Leaderboard', () => {
+        this.createModalButton(modal, 0, firstButtonY, 'Leaderboard', () => {
             console.log('🎮 點擊 Leaderboard 按鈕');
             this.showEnterNamePage();
         });
 
         // Show answers 按鈕
-        this.createModalButton(modal, 0, buttonY, 'Show answers', () => {
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing, 'Show answers', () => {
             console.log('🎮 點擊 Show answers 按鈕');
             // 🔥 v88.0: 隱藏模態框，回到遊戲場景並顯示所有卡片的勾勾和叉叉
             overlay.destroy();
@@ -6021,7 +6026,7 @@ class GameScene extends Phaser.Scene {
         });
 
         // 🔥 v89.0: Show all answers 按鈕 - 顯示所有卡片的正確名稱
-        this.createModalButton(modal, 0, buttonY + buttonSpacing, 'Show all answers', () => {
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 2, 'Show all answers', () => {
             console.log('🎮 點擊 Show all answers 按鈕');
             // 隱藏模態框，回到遊戲場景並顯示所有卡片的正確名稱
             overlay.destroy();
@@ -6031,7 +6036,7 @@ class GameScene extends Phaser.Scene {
         });
 
         // Start again 按鈕
-        this.createModalButton(modal, 0, buttonY + buttonSpacing * 2, 'Start again', () => {
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 3, 'Start again', () => {
             console.log('🎮 點擊 Start again 按鈕');
             this.restartGame();
         });
