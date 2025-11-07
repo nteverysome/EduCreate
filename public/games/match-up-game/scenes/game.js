@@ -5061,8 +5061,8 @@ class GameScene extends Phaser.Scene {
 
         const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
 
-        // 🔥 [v80.0] 調試日誌 - 卡片信息
-        console.log('🔍 [v80.0] showCorrectAnswer 調試信息:', {
+        // 🔥 [v82.0] 調試日誌 - 卡片信息
+        console.log('🔍 [v82.0] showCorrectAnswer 調試信息:', {
             rightCardX: rightCard.x,
             rightCardY: rightCard.y,
             rightCardWidth: rightCard.width,
@@ -5072,7 +5072,8 @@ class GameScene extends Phaser.Scene {
             backgroundWidth: background.width,
             backgroundHeight: background.height,
             hasTextObj: !!textObj,
-            textObjText: textObj ? textObj.text : 'N/A'
+            textObjText: textObj ? textObj.text : 'N/A',
+            layout: this.layout
         });
 
         // 內框呈白色
@@ -5085,8 +5086,49 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v81.0] 新策略：將勾勾放在文字下方
-        // 首先找到文字對象的位置
+        // 🔥 [v82.0] 在混合佈局中，找到英文卡片容器並在其中添加勾勾
+        if (this.layout === 'mixed') {
+            // 在混合佈局中，rightCard 是 frameContainer
+            // 我們需要找到英文卡片容器（通常是 frameContainer 的第一個子容器）
+            const englishCardContainer = rightCard.list && rightCard.list.length > 0 ? rightCard.list[0] : null;
+
+            if (englishCardContainer && englishCardContainer.list) {
+                // 找到英文卡片中的文字對象
+                const englishTextObj = englishCardContainer.list.find(child => child.type === 'Text');
+
+                if (englishTextObj) {
+                    // 在英文卡片中添加勾勾
+                    const markX = 0;  // 水平居中
+                    const markY = englishTextObj.y + 25;  // 在文字下方
+
+                    const checkMark = this.add.text(
+                        0,
+                        0,
+                        '✓',
+                        {
+                            fontSize: '32px',
+                            color: '#4caf50',
+                            fontFamily: 'Arial',
+                            fontStyle: 'bold'
+                        }
+                    );
+                    checkMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
+
+                    englishCardContainer.add(checkMark);
+                    checkMark.setPosition(markX, markY);
+
+                    console.log('✅ [v82.0] 勾勾標記已添加到英文卡片文字下方:', {
+                        englishTextY: englishTextObj.y,
+                        markX,
+                        markY,
+                        containerChildren: englishCardContainer.list.length
+                    });
+                    return;
+                }
+            }
+        }
+
+        // 🔥 [v81.0] 分離佈局：將勾勾放在文字下方
         let textY = 0;
         if (textObj) {
             textY = textObj.y;  // 文字的 Y 位置（相對於容器）
@@ -5139,8 +5181,8 @@ class GameScene extends Phaser.Scene {
 
         const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
 
-        // 🔥 [v80.0] 調試日誌 - 卡片信息
-        console.log('🔍 [v80.0] showIncorrectAnswer 調試信息:', {
+        // 🔥 [v82.0] 調試日誌 - 卡片信息
+        console.log('🔍 [v82.0] showIncorrectAnswer 調試信息:', {
             rightCardX: rightCard.x,
             rightCardY: rightCard.y,
             rightCardWidth: rightCard.width,
@@ -5150,7 +5192,8 @@ class GameScene extends Phaser.Scene {
             backgroundWidth: background.width,
             backgroundHeight: background.height,
             hasTextObj: !!textObj,
-            textObjText: textObj ? textObj.text : 'N/A'
+            textObjText: textObj ? textObj.text : 'N/A',
+            layout: this.layout
         });
 
         // 內框呈灰色
@@ -5163,8 +5206,49 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v81.0] 新策略：將叉叉放在文字下方
-        // 首先找到文字對象的位置
+        // 🔥 [v82.0] 在混合佈局中，找到英文卡片容器並在其中添加叉叉
+        if (this.layout === 'mixed') {
+            // 在混合佈局中，rightCard 是 frameContainer
+            // 我們需要找到英文卡片容器（通常是 frameContainer 的第一個子容器）
+            const englishCardContainer = rightCard.list && rightCard.list.length > 0 ? rightCard.list[0] : null;
+
+            if (englishCardContainer && englishCardContainer.list) {
+                // 找到英文卡片中的文字對象
+                const englishTextObj = englishCardContainer.list.find(child => child.type === 'Text');
+
+                if (englishTextObj) {
+                    // 在英文卡片中添加叉叉
+                    const markX = 0;  // 水平居中
+                    const markY = englishTextObj.y + 25;  // 在文字下方
+
+                    const xMark = this.add.text(
+                        0,
+                        0,
+                        '✗',
+                        {
+                            fontSize: '32px',
+                            color: '#f44336',
+                            fontFamily: 'Arial',
+                            fontStyle: 'bold'
+                        }
+                    );
+                    xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
+
+                    englishCardContainer.add(xMark);
+                    xMark.setPosition(markX, markY);
+
+                    console.log('✅ [v82.0] 叉叉標記已添加到英文卡片文字下方:', {
+                        englishTextY: englishTextObj.y,
+                        markX,
+                        markY,
+                        containerChildren: englishCardContainer.list.length
+                    });
+                    return;
+                }
+            }
+        }
+
+        // 🔥 [v81.0] 分離佈局：將叉叉放在文字下方
         let textY = 0;
         if (textObj) {
             textY = textObj.y;  // 文字的 Y 位置（相對於容器）
