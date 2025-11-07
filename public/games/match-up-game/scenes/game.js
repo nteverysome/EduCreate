@@ -5384,84 +5384,102 @@ class GameScene extends Phaser.Scene {
             fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        // 創建滾動區域
+        // 🔥 [v69.0] 使用滾動容器顯示所有答案
         const startY = 100;
-        const lineHeight = 50;
-        const maxVisibleLines = Math.floor((height - 150) / lineHeight);
+        const lineHeight = 40;  // 減小行高以容納更多答案
+        const containerHeight = height - 200;  // 為按鈕預留空間
+        const maxVisibleLines = Math.floor(containerHeight / lineHeight);
 
-        console.log('🔍 [v63.0] showAnswersScreen 調試:', {
+        console.log('🔍 [v69.0] showAnswersScreen 調試:', {
+            width,
+            height,
+            containerHeight,
+            lineHeight,
+            maxVisibleLines,
             currentPageAnswersLength: this.currentPageAnswers.length,
             allPagesAnswersLength: this.allPagesAnswers.length,
             pairsLength: this.pairs.length
         });
 
+        // 🔥 [v69.0] 創建滾動容器
+        const scrollContainer = this.add.container(width / 2, startY);
+        let currentY = 0;
+
         // 🔥 [v63.0] 顯示用戶的答案和正確答案的對比
         this.currentPageAnswers.forEach((answer, index) => {
-            const y = startY + index * lineHeight;
+            // 用戶的答案
+            const userAnswerText = answer.rightText || '(未配對)';
+            const correctAnswerText = answer.correctAnswer || '(無)';
+            const isCorrect = answer.isCorrect;
 
-            // 只顯示可見範圍內的答案
-            if (index < maxVisibleLines) {
-                // 用戶的答案
-                const userAnswerText = answer.rightText || '(未配對)';
-                const correctAnswerText = answer.correctAnswer || '(無)';
-                const isCorrect = answer.isCorrect;
+            // 顯示用戶的答案
+            const userAnswerColor = isCorrect ? '#4CAF50' : '#f44336';  // 綠色正確，紅色錯誤
+            const statusIcon = isCorrect ? '✓' : '✗';
 
-                // 顯示用戶的答案
-                const userAnswerColor = isCorrect ? '#4CAF50' : '#f44336';  // 綠色正確，紅色錯誤
-                const statusIcon = isCorrect ? '✓' : '✗';
+            const answerText = this.add.text(
+                0,
+                currentY,
+                `${statusIcon} 我的: ${userAnswerText} → 正確: ${correctAnswerText}`,
+                {
+                    fontSize: '14px',
+                    color: userAnswerColor,
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold'
+                }
+            ).setOrigin(0.5);
 
-                this.add.text(
-                    width / 2,
-                    y,
-                    `${statusIcon} 我的: ${userAnswerText} → 正確: ${correctAnswerText}`,
-                    {
-                        fontSize: '16px',
-                        color: userAnswerColor,
-                        fontFamily: 'Arial',
-                        fontStyle: 'bold'
-                    }
-                ).setOrigin(0.5);
+            scrollContainer.add(answerText);
+            currentY += lineHeight;
 
-                console.log(`🔍 [v63.0] 答案 ${index + 1}:`, {
-                    userAnswer: userAnswerText,
-                    correctAnswer: correctAnswerText,
-                    isCorrect,
-                    statusIcon
-                });
-            }
+            console.log(`🔍 [v69.0] 答案 ${index + 1}:`, {
+                userAnswer: userAnswerText,
+                correctAnswer: correctAnswerText,
+                isCorrect,
+                statusIcon
+            });
         });
 
         // 如果沒有用戶答案，顯示所有正確答案
         if (this.currentPageAnswers.length === 0) {
-            console.log('⚠️ [v63.0] 沒有用戶答案，顯示所有正確答案');
+            console.log('⚠️ [v69.0] 沒有用戶答案，顯示所有正確答案');
             this.pairs.forEach((pair, index) => {
-                const y = startY + index * lineHeight;
+                const answerText = this.add.text(
+                    0,
+                    currentY,
+                    `${pair.question} = ${pair.answer}`,
+                    {
+                        fontSize: '14px',
+                        color: '#333333',
+                        fontFamily: 'Arial'
+                    }
+                ).setOrigin(0.5);
 
-                // 只顯示可見範圍內的答案
-                if (index < maxVisibleLines) {
-                    this.add.text(
-                        width / 2,
-                        y,
-                        `${pair.question} = ${pair.answer}`,
-                        {
-                            fontSize: '16px',
-                            color: '#333333',
-                            fontFamily: 'Arial'
-                        }
-                    ).setOrigin(0.5);
-                }
+                scrollContainer.add(answerText);
+                currentY += lineHeight;
             });
         }
 
+        // 🔥 [v69.0] 設置滾動容器的裁剪區域
+        scrollContainer.setMask(this.make.graphics({ x: 0, y: 0, add: false })
+            .fillStyle(0xffffff)
+            .fillRect(width / 2 - width * 0.4, startY, width * 0.8, containerHeight)
+            .createGeometryMask());
+
         // 如果答案太多，顯示提示
         const totalAnswers = this.currentPageAnswers.length > 0 ? this.currentPageAnswers.length : this.pairs.length;
+        console.log('🔍 [v69.0] 答案統計:', {
+            totalAnswers,
+            maxVisibleLines,
+            needsScroll: totalAnswers > maxVisibleLines
+        });
+
         if (totalAnswers > maxVisibleLines) {
             this.add.text(
                 width / 2,
-                height - 50,
-                `（顯示前 ${maxVisibleLines} 個答案，共 ${totalAnswers} 個）`,
+                height - 100,
+                `（顯示全部 ${totalAnswers} 個答案）`,
                 {
-                    fontSize: '16px',
+                    fontSize: '14px',
                     color: '#999999',
                     fontFamily: 'Arial'
                 }
@@ -5471,7 +5489,7 @@ class GameScene extends Phaser.Scene {
         // 添加關閉按鈕
         const closeButton = this.add.text(
             width / 2,
-            height - 80,
+            height - 50,
             '✖ 關閉',
             {
                 fontSize: '20px',
