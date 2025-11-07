@@ -5085,35 +5085,27 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v80.6] 修正位置計算 - 將標記放在背景內部的右上角
-        // 標記應該相對於容器的中心位置
-        // background 的中心在 (0, 0)，所以：
-        // - 右邊界在 background.width / 2
-        // - 上邊界在 -background.height / 2
-        // - 下邊界在 background.height / 2
-        // 標記應該在背景內部，所以 markY 應該是負數但不能太負
-        const markX = background.width / 2 - 20;  // 容器內相對位置，距離右邊 20 像素
-        const markY = -background.height / 2 + 35;  // 容器內相對位置，距離上邊 35 像素（在背景內部）
+        // 🔥 [v81.0] 新策略：將勾勾放在文字下方
+        // 首先找到文字對象的位置
+        let textY = 0;
+        if (textObj) {
+            textY = textObj.y;  // 文字的 Y 位置（相對於容器）
+        } else {
+            // 如果沒有文字對象，使用默認位置（框下方）
+            textY = background.height / 2 + 10;
+        }
 
-        // 🔥 [v80.4] 調試日誌 - 標記位置
-        console.log('🔍 [v80.4] 標記位置計算:', {
-            markX,
-            markY,
-            backgroundWidth: background.width,
-            backgroundHeight: background.height,
-            rightCardX: rightCard.x,
-            rightCardY: rightCard.y,
-            markAbsoluteX: rightCard.x + markX,
-            markAbsoluteY: rightCard.y + markY
-        });
+        // 🔥 [v81.0] 勾勾位置：在文字下方 15 像素
+        const markX = 0;  // 水平居中
+        const markY = textY + 25;  // 在文字下方
 
-        // 🔥 [v80.5] 先創建標記（在場景坐標系中）
+        // 🔥 [v81.0] 先創建標記
         const checkMark = this.add.text(
             0,
             0,
             '✓',
             {
-                fontSize: '40px',
+                fontSize: '32px',
                 color: '#4caf50',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
@@ -5121,39 +5113,17 @@ class GameScene extends Phaser.Scene {
         );
         checkMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
 
-        // 🔥 [v80.5] 調試日誌 - 標記創建
-        console.log('✅ [v80.5] 勾勾標記已創建:', {
-            text: checkMark.text,
-            x: checkMark.x,
-            y: checkMark.y,
-            fontSize: checkMark.fontSize,
-            visible: checkMark.visible,
-            depth: checkMark.depth,
-            displayOriginX: checkMark.displayOriginX,
-            displayOriginY: checkMark.displayOriginY
-        });
-
-        // 🔥 [v80.5] 添加到容器後，設置相對位置
+        // 🔥 [v81.0] 添加到容器並設置位置
         rightCard.add(checkMark);
         checkMark.setPosition(markX, markY);
 
-        // 🔥 [v80.5] 調試日誌 - 標記添加後的詳細信息
-        console.log('✅ [v80.5] 勾勾標記已添加到容器:', {
-            containerChildren: rightCard.list.length,
-            markInContainer: rightCard.list.includes(checkMark),
-            markX: checkMark.x,
-            markY: checkMark.y,
-            markVisible: checkMark.visible,
-            markDepth: checkMark.depth,
-            containerX: rightCard.x,
-            containerY: rightCard.y,
-            containerVisible: rightCard.visible,
-            containerDepth: rightCard.depth,
-            backgroundX: background.x,
-            backgroundY: background.y,
-            backgroundVisible: background.visible,
-            backgroundWidth: background.width,
-            backgroundHeight: background.height
+        // 🔥 [v81.0] 調試日誌
+        console.log('✅ [v81.0] 勾勾標記已添加到文字下方:', {
+            textY,
+            markX,
+            markY,
+            backgroundHeight: background.height,
+            containerChildren: rightCard.list.length
         });
     }
 
@@ -5193,35 +5163,27 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v80.6] 修正位置計算 - 將標記放在背景內部的右上角
-        // 標記應該相對於容器的中心位置
-        // background 的中心在 (0, 0)，所以：
-        // - 右邊界在 background.width / 2
-        // - 上邊界在 -background.height / 2
-        // - 下邊界在 background.height / 2
-        // 標記應該在背景內部，所以 markY 應該是負數但不能太負
-        const markX = background.width / 2 - 20;  // 容器內相對位置，距離右邊 20 像素
-        const markY = -background.height / 2 + 35;  // 容器內相對位置，距離上邊 35 像素（在背景內部）
+        // 🔥 [v81.0] 新策略：將叉叉放在文字下方
+        // 首先找到文字對象的位置
+        let textY = 0;
+        if (textObj) {
+            textY = textObj.y;  // 文字的 Y 位置（相對於容器）
+        } else {
+            // 如果沒有文字對象，使用默認位置（框下方）
+            textY = background.height / 2 + 10;
+        }
 
-        // 🔥 [v80.4] 調試日誌 - 標記位置
-        console.log('🔍 [v80.4] 標記位置計算:', {
-            markX,
-            markY,
-            backgroundWidth: background.width,
-            backgroundHeight: background.height,
-            rightCardX: rightCard.x,
-            rightCardY: rightCard.y,
-            markAbsoluteX: rightCard.x + markX,
-            markAbsoluteY: rightCard.y + markY
-        });
+        // 🔥 [v81.0] 叉叉位置：在文字下方 15 像素
+        const markX = 0;  // 水平居中
+        const markY = textY + 25;  // 在文字下方
 
-        // 🔥 [v80.5] 先創建標記（在場景坐標系中）
+        // 🔥 [v81.0] 先創建標記
         const xMark = this.add.text(
             0,
             0,
             '✗',
             {
-                fontSize: '40px',
+                fontSize: '32px',
                 color: '#f44336',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
@@ -5229,39 +5191,17 @@ class GameScene extends Phaser.Scene {
         );
         xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
 
-        // 🔥 [v80.5] 調試日誌 - 標記創建
-        console.log('✅ [v80.5] 叉叉標記已創建:', {
-            text: xMark.text,
-            x: xMark.x,
-            y: xMark.y,
-            fontSize: xMark.fontSize,
-            visible: xMark.visible,
-            depth: xMark.depth,
-            displayOriginX: xMark.displayOriginX,
-            displayOriginY: xMark.displayOriginY
-        });
-
-        // 🔥 [v80.5] 添加到容器後，設置相對位置
+        // 🔥 [v81.0] 添加到容器並設置位置
         rightCard.add(xMark);
         xMark.setPosition(markX, markY);
 
-        // 🔥 [v80.5] 調試日誌 - 標記添加後的詳細信息
-        console.log('✅ [v80.5] 叉叉標記已添加到容器:', {
-            containerChildren: rightCard.list.length,
-            markInContainer: rightCard.list.includes(xMark),
-            markX: xMark.x,
-            markY: xMark.y,
-            markVisible: xMark.visible,
-            markDepth: xMark.depth,
-            containerX: rightCard.x,
-            containerY: rightCard.y,
-            containerVisible: rightCard.visible,
-            containerDepth: rightCard.depth,
-            backgroundX: background.x,
-            backgroundY: background.y,
-            backgroundVisible: background.visible,
-            backgroundWidth: background.width,
-            backgroundHeight: background.height
+        // 🔥 [v81.0] 調試日誌
+        console.log('✅ [v81.0] 叉叉標記已添加到文字下方:', {
+            textY,
+            markX,
+            markY,
+            backgroundHeight: background.height,
+            containerChildren: rightCard.list.length
         });
     }
 
