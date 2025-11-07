@@ -5106,7 +5106,7 @@ class GameScene extends Phaser.Scene {
             rightCard.y - background.height / 2 + 5,
             '✓',
             {
-                fontSize: '24px',
+                fontSize: '48px',
                 color: '#4caf50',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
@@ -5143,7 +5143,7 @@ class GameScene extends Phaser.Scene {
             rightCard.y - background.height / 2 + 5,
             '✗',
             {
-                fontSize: '24px',
+                fontSize: '48px',
                 color: '#f44336',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
@@ -6234,7 +6234,7 @@ class GameScene extends Phaser.Scene {
 
         // 創建標記（勾勾或 X）
         const mark = this.add.text(x + cardWidth / 2 - 20, y - cardHeight / 2 + 10, markText, {
-            fontSize: '24px',
+            fontSize: '48px',
             color: markColor,
             fontFamily: 'Arial',
             fontStyle: 'bold'
