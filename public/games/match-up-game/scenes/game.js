@@ -5134,21 +5134,47 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v80.0] 優化勾勾標記位置 - 放在英文卡片右上角
-        // 位置計算：卡片右邊界 - 24px（48px 標記的一半）
-        const checkMark = this.add.text(
-            rightCard.x + background.width / 2 - 24,
-            rightCard.y - background.height / 2 + 24,
-            '✓',
-            {
-                fontSize: '48px',
-                color: '#4caf50',
-                fontFamily: 'Arial',
-                fontStyle: 'bold'
+        // 🔥 [v84.0] 參考 df3e620 版本 - 勾勾標記放大到 64px
+        // 在混合佈局中，根據 pairId 找到英文卡片並在其中添加勾勾
+        if (this.layout === 'mixed') {
+            const pairId = rightCard.getData('pairId');
+            const englishCard = this.leftCards.find(card => card.getData('pairId') === pairId);
+
+            if (englishCard && englishCard.list) {
+                const englishTextObj = englishCard.list.find(child => child.type === 'Text');
+
+                if (englishTextObj) {
+                    const markX = 0;
+                    const markY = englishTextObj.y + 25;
+
+                    const checkMark = this.add.text(0, 0, '✓', {
+                        fontSize: '64px',
+                        color: '#4caf50',
+                        fontFamily: 'Arial',
+                        fontStyle: 'bold'
+                    });
+                    checkMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
+
+                    englishCard.add(checkMark);
+                    checkMark.setPosition(markX, markY);
+                }
             }
-        );
-        checkMark.setOrigin(0.5).setDepth(15);
-        rightCard.add(checkMark);
+        } else {
+            // 分離模式：在右卡片上顯示勾勾
+            const checkMark = this.add.text(
+                rightCard.x + background.width / 2 - 32,
+                rightCard.y - background.height / 2 + 32,
+                '✓',
+                {
+                    fontSize: '64px',
+                    color: '#4caf50',
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold'
+                }
+            );
+            checkMark.setOrigin(0.5).setDepth(15);
+            rightCard.add(checkMark);
+        }
     }
 
     // 🔥 顯示錯誤答案（灰色內框 + X）
@@ -5172,21 +5198,47 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v80.0] 優化叉叉標記位置 - 放在英文卡片右上角
-        // 位置計算：卡片右邊界 - 24px（48px 標記的一半）
-        const xMark = this.add.text(
-            rightCard.x + background.width / 2 - 24,
-            rightCard.y - background.height / 2 + 24,
-            '✗',
-            {
-                fontSize: '48px',
-                color: '#f44336',
-                fontFamily: 'Arial',
-                fontStyle: 'bold'
+        // 🔥 [v84.0] 參考 df3e620 版本 - 叉叉標記放大到 64px
+        // 在混合佈局中，根據 pairId 找到英文卡片並在其中添加叉叉
+        if (this.layout === 'mixed') {
+            const pairId = rightCard.getData('pairId');
+            const englishCard = this.leftCards.find(card => card.getData('pairId') === pairId);
+
+            if (englishCard && englishCard.list) {
+                const englishTextObj = englishCard.list.find(child => child.type === 'Text');
+
+                if (englishTextObj) {
+                    const markX = 0;
+                    const markY = englishTextObj.y + 25;
+
+                    const xMark = this.add.text(0, 0, '✗', {
+                        fontSize: '64px',
+                        color: '#f44336',
+                        fontFamily: 'Arial',
+                        fontStyle: 'bold'
+                    });
+                    xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
+
+                    englishCard.add(xMark);
+                    xMark.setPosition(markX, markY);
+                }
             }
-        );
-        xMark.setOrigin(0.5).setDepth(15);
-        rightCard.add(xMark);
+        } else {
+            // 分離模式：在右卡片上顯示叉叉
+            const xMark = this.add.text(
+                rightCard.x + background.width / 2 - 32,
+                rightCard.y - background.height / 2 + 32,
+                '✗',
+                {
+                    fontSize: '64px',
+                    color: '#f44336',
+                    fontFamily: 'Arial',
+                    fontStyle: 'bold'
+                }
+            );
+            xMark.setOrigin(0.5).setDepth(15);
+            rightCard.add(xMark);
+        }
     }
 
     // 🔥 顯示配對總結
