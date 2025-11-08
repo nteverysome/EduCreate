@@ -800,18 +800,35 @@ class GameScene extends Phaser.Scene {
         window.addEventListener('orientationchange', this.handleOrientationChange.bind(this));
         console.log('✅ 已綁定 orientationchange 事件監聽器');
 
+        // 🔥 v100.0: 監聽 Phaser 場景的 pause/resume 事件，防止在這些事件中觸發重新載入
+        this.events.on('pause', () => {
+            console.log('⏸️ [v100.0] Phaser 場景暫停');
+            this.isScenePaused = true;
+        });
+
+        this.events.on('resume', () => {
+            console.log('▶️ [v100.0] Phaser 場景恢復');
+            this.isScenePaused = false;
+        });
+
+        console.log('✅ [v100.0] 已綁定 Phaser pause/resume 事件監聽器');
+
         // 🔥 v96.0: 設置自動保存進度
         this.setupAutoSave();
 
         // 🔥 v96.0: 監聽頁面可見性變化（用戶最小化或切換標籤時保存）
         // 🔥 v97.0: 改進 - 只保存進度，不觸發任何重新洗牌的操作
+        // 🔥 v100.0: 添加標誌防止 Phaser 事件觸發重新載入
+        this.isPageHidden = false;
         this.visibilityChangeListener = () => {
             if (document.hidden) {
                 console.log('👁️ [v97.0] 頁面隱藏，保存進度到本地');
+                this.isPageHidden = true;
                 this.saveGameProgressLocally();
             } else {
                 console.log('👁️ [v97.0] 頁面顯示，進度已保存');
                 // 🔥 v97.0: 頁面顯示時不做任何操作，避免觸發 resize 或其他事件
+                this.isPageHidden = false;
             }
         };
         document.addEventListener('visibilitychange', this.visibilityChangeListener);
@@ -1296,8 +1313,15 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 v87.0: 只調整卡片位置，不重新載入詞彙
     // 🔥 v97.0: 改進 - 不回退到 updateLayout()，避免重新洗牌
+    // 🔥 v100.0: 添加檢查防止在頁面隱藏或場景暫停時調用 updateLayout
     repositionCards() {
         try {
+            // 🔥 v100.0: 如果頁面隱藏或場景暫停，跳過位置調整
+            if (this.isPageHidden || this.isScenePaused) {
+                console.log('⏭️ [v100.0] 頁面隱藏或場景暫停，跳過位置調整');
+                return;
+            }
+
             console.log('🔄 [v97.0] repositionCards 開始 - 只調整位置，不重新載入詞彙');
 
             const width = this.scale.width;
@@ -7368,17 +7392,29 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 P1-4: 全螢幕變化事件處理
     // 🔥 v99.0: 改為只調整位置，不重新載入
+    // 🔥 v100.0: 添加檢查防止在頁面隱藏時調用
     handleFullscreenChange() {
         console.log('🎮 全螢幕狀態變化:', document.fullscreenElement ? '進入全螢幕' : '退出全螢幕');
+        // 🔥 v100.0: 如果頁面隱藏，跳過位置調整
+        if (this.isPageHidden) {
+            console.log('⏭️ [v100.0] 頁面隱藏，跳過全螢幕事件處理');
+            return;
+        }
         // 🔥 v99.0: 改為 repositionCards，只調整位置不重新載入
         this.repositionCards();
     }
 
     // 🔥 P1-4: 設備方向變化事件處理
     // 🔥 v99.0: 改為只調整位置，不重新載入
+    // 🔥 v100.0: 添加檢查防止在頁面隱藏時調用
     handleOrientationChange() {
         const isPortrait = window.matchMedia('(orientation: portrait)').matches;
         console.log('🎮 設備方向變化:', isPortrait ? '直向' : '橫向');
+        // 🔥 v100.0: 如果頁面隱藏，跳過位置調整
+        if (this.isPageHidden) {
+            console.log('⏭️ [v100.0] 頁面隱藏，跳過方向變化事件處理');
+            return;
+        }
         // 🔥 v99.0: 改為 repositionCards，只調整位置不重新載入
         this.repositionCards();
     }
