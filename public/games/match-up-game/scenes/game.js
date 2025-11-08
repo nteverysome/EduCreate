@@ -5837,27 +5837,33 @@ class GameScene extends Phaser.Scene {
             }
         });
 
-        // 按鈕區域（調整位置，為排名提示留出空間）
-        const buttonY = modalHeight / 2 - 100;
-        const buttonSpacing = 60;
+        // 🔥 [v93.0] 按鈕區域（調整位置，為排名提示留出空間）
+        const buttonSpacing = 50;  // 🔥 [v93.0] 減少按鈕間距到 50px
+        const firstButtonY = modalHeight / 2 - 120;  // 🔥 [v93.0] 第一個按鈕位置
 
         // 🔥 調整排名提示位置到第一個按鈕上方
-        rankText.y = buttonY - buttonSpacing - 40;
+        rankText.y = firstButtonY - buttonSpacing - 40;
 
         // Leaderboard 按鈕
-        this.createModalButton(modal, 0, buttonY - buttonSpacing, 'Leaderboard', () => {
+        this.createModalButton(modal, 0, firstButtonY, 'Leaderboard', () => {
             console.log('🎮 點擊 Leaderboard 按鈕');
             this.showEnterNamePage();
         });
 
         // Show answers 按鈕
-        this.createModalButton(modal, 0, buttonY, 'Show answers', () => {
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing, 'Show answers', () => {
             console.log('🎮 點擊 Show answers 按鈕');
             this.showMyAnswersPage();
         });
 
+        // 🔥 [v93.0] Show all answers 按鈕
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 2, 'Show all answers', () => {
+            console.log('🎮 點擊 Show all answers 按鈕');
+            this.showCorrectAnswersPage();
+        });
+
         // Start again 按鈕
-        this.createModalButton(modal, 0, buttonY + buttonSpacing, 'Start again', () => {
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 3, 'Start again', () => {
             console.log('🎮 點擊 Start again 按鈕');
             this.restartGame();
         });
