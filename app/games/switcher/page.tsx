@@ -741,7 +741,7 @@ const GameSwitcherPage: React.FC = () => {
       setActivityId(null);
       setCustomVocabulary([]);
     }
-  }, [searchParams, loadActivityInfo]);
+  }, [searchParams]);  // 🔥 [v102.5] 移除 loadActivityInfo 從依賴項
 
   // 當 session 載入完成後，重新檢查 isOwner
   // 🔥 [v102.5] 修復：移除 loadActivityInfo 從依賴項
