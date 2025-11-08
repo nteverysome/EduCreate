@@ -462,14 +462,30 @@ class GameScene extends Phaser.Scene {
             // 從 URL 參數獲取 activityId
             const urlParams = new URLSearchParams(window.location.search);
             const activityId = urlParams.get('activityId');
-            const customVocabulary = urlParams.get('customVocabulary');
+            let customVocabulary = urlParams.get('customVocabulary');
             const devLayoutTest = (this.restartData && this.restartData.devLayoutTest) || urlParams.get('devLayoutTest');
+
+            // 🔥 v102.3: 檢查 localStorage 中是否有 gameCustomVocabulary
+            // 如果有，說明詞彙已經通過 GameSwitcher 更新
+            let customVocabFromStorage = null;
+            try {
+                const stored = localStorage.getItem('gameCustomVocabulary');
+                if (stored) {
+                    customVocabFromStorage = JSON.parse(stored);
+                    console.log('✅ [v102.3] 從 localStorage 讀取 gameCustomVocabulary:', customVocabFromStorage.length, '個詞彙');
+                    // 如果 localStorage 中有詞彙，設置 customVocabulary 為 true
+                    customVocabulary = 'true';
+                }
+            } catch (e) {
+                console.warn('⚠️ [v102.3] 解析 localStorage 中的 gameCustomVocabulary 失敗', e);
+            }
 
             console.log('🔍 [DEBUG] URL 參數:', {
                 activityId,
                 customVocabulary,
                 devLayoutTest,
-                fullURL: window.location.href
+                fullURL: window.location.href,
+                hasCustomVocabFromStorage: !!customVocabFromStorage
             });
 
             if (devLayoutTest) {
@@ -480,7 +496,8 @@ class GameScene extends Phaser.Scene {
             console.log('🔍 Match-up 遊戲 - URL 參數:', {
                 activityId,
                 customVocabulary,
-                fullURL: window.location.href
+                fullURL: window.location.href,
+                hasCustomVocabFromStorage: !!customVocabFromStorage
             });
 
             // 🔥 修復：必須提供 activityId，不使用默認數據
@@ -495,6 +512,13 @@ class GameScene extends Phaser.Scene {
                 const error = new Error('❌ customVocabulary 參數無效');
                 console.error('❌ 參數驗證失敗:', error.message);
                 throw error;
+            }
+
+            // 🔥 v102.3: 如果 localStorage 中有詞彙，直接使用
+            if (customVocabFromStorage && Array.isArray(customVocabFromStorage) && customVocabFromStorage.length > 0) {
+                console.log('✅ [v102.3] 使用 localStorage 中的自定義詞彙');
+                this.pairs = customVocabFromStorage;
+                return true;
             }
 
             console.log('✅ 參數驗證通過，允許載入詞彙數據');

@@ -373,6 +373,15 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // 🔥 v102.3: 當 customVocabulary 改變時，將其存儲到 localStorage
+  // 而不是添加到 URL 參數中，避免 iframe src 改變導致重新加載
+  useEffect(() => {
+    if (customVocabulary.length > 0) {
+      console.log('🔄 [v102.3] 將 customVocabulary 存儲到 localStorage:', customVocabulary.length, '個詞彙');
+      localStorage.setItem('gameCustomVocabulary', JSON.stringify(customVocabulary));
+    }
+  }, [customVocabulary]);
+
   // 生成包含自定義詞彙的遊戲 URL
   const getGameUrlWithVocabulary = (game: GameConfig): string => {
     let url = game.url;
@@ -381,11 +390,12 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     if (activityId) {
       const separator = url.includes('?') ? '&' : '?';
       url += `${separator}activityId=${activityId}`;
-      
-      // 只有當 customVocabulary 成功載入時才添加 customVocabulary=true 參數
-      if (customVocabulary.length > 0) {
-        url += `&customVocabulary=true`;
-      }
+
+      // 🔥 v102.3: 不再添加 customVocabulary=true 參數到 URL
+      // 改為通過 localStorage 傳遞詞彙，避免 iframe src 改變導致重新加載
+      // if (customVocabulary.length > 0) {
+      //   url += `&customVocabulary=true`;
+      // }
 
       // 優先檢查是否為學生遊戲模式（有 assignmentId）
       if (assignmentId) {
