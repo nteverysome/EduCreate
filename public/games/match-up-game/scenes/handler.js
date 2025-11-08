@@ -30,10 +30,36 @@ class Handler extends Phaser.Scene {
         this.cameras.main.setBackgroundColor('#FFFFFF')
         console.log('🎮 Handler: 背景顏色設定為白色');
 
+        // 🔥 v102.0: 監聽頁面可見性變化，防止場景重啟
+        this.setupVisibilityHandling();
+
         // 🔥 修復：使用正確的場景鍵值 'PreloadScene'
         console.log('🎮 Handler: 準備啟動 PreloadScene');
         this.launchScene('PreloadScene')
         console.log('🎮 Handler: PreloadScene 已啟動');
+    }
+
+    /**
+     * 🔥 v102.0: 設置頁面可見性處理，防止切換標籤時重啟場景
+     */
+    setupVisibilityHandling() {
+        // 監聽頁面可見性變化
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log('📴 Handler: 頁面隱藏（切換標籤/最小化）');
+                // 不做任何操作，讓場景保持運行
+            } else {
+                console.log('📱 Handler: 頁面顯示（切回標籤/恢復）');
+                // 不重啟場景，只確保場景仍在運行
+                const gameScene = this.scene.get('GameScene');
+                if (gameScene && !gameScene.scene.isActive()) {
+                    console.log('⚠️ Handler: GameScene 未運行，嘗試喚醒');
+                    this.scene.wake('GameScene');
+                }
+            }
+        });
+
+        console.log('✅ Handler: 頁面可見性處理已設置');
     }
 
     /**

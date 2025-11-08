@@ -54,6 +54,17 @@ class PreloadScene extends Phaser.Scene {
             return;
         }
 
+        // 🔥 v102.0: 檢查 GameScene 是否已經存在並運行
+        const gameScene = this.scene.get('GameScene');
+        const isGameSceneActive = gameScene && gameScene.scene.isActive();
+
+        if (isGameSceneActive) {
+            console.log('✅ PreloadScene: GameScene 已經在運行，跳過重啟');
+            // 只喚醒場景，不重啟
+            this.scene.wake('GameScene');
+            return;
+        }
+
         console.log('🎮 PreloadScene: 準備啟動 GameScene');
         this.scene.start('GameScene');
         console.log('🎮 PreloadScene: GameScene 已啟動');
