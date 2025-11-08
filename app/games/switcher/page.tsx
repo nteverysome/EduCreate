@@ -744,12 +744,16 @@ const GameSwitcherPage: React.FC = () => {
   }, [searchParams, loadActivityInfo]);
 
   // 當 session 載入完成後，重新檢查 isOwner
+  // 🔥 [v102.5] 修復：移除 loadActivityInfo 從依賴項
+  // 原因：loadActivityInfo 是一個函數，每次 render 時都會被重新創建
+  // 導致這個 useEffect 不斷被觸發，造成 customVocabulary 被重新加載
+  // 這會導致 vocabUpdateTrigger 改變，iframe 重新加載，遊戲重新初始化
   useEffect(() => {
     if (session && activityId) {
       console.log('🔄 Session 已載入，重新檢查所有者身份');
       loadActivityInfo(activityId);
     }
-  }, [session, activityId, loadActivityInfo]);
+  }, [session, activityId]);
 
   // 🔥 [v102.2] 移除在 customVocabulary 改變時改變 gameKey 的邏輯
   // 原因：改變 gameKey 會導致 GameSwitcher 組件被卸載和重新掛載
