@@ -776,6 +776,7 @@ class GameScene extends Phaser.Scene {
         // 監聽螢幕尺寸變化 - 只調整卡片位置和大小，保持詞彙數據和已配對狀態
         this.resizeTimeout = null;
         this.shuffledPairsCache = null;  // 🔥 v54.0: 緩存洗牌後的順序
+        this.rightCardsOrderCache = null;  // 🔥 v98.0: 緩存右側卡片（英文卡片）的順序
         this.scale.on('resize', (gameSize) => {
             // 🔥 v87.0: 使用防抖延遲，只調整卡片位置（不重新創建卡片）
             console.log('🔥 [v87.0] resize 事件觸發:', { width: gameSize.width, height: gameSize.height });
@@ -1691,28 +1692,40 @@ class GameScene extends Phaser.Scene {
         }
 
         // 🔥 根據隨機模式排列答案
+        // 🔥 v98.0: 檢查是否有緩存的右側卡片順序（用於 resize 時保持卡片順序）
         let shuffledAnswers;
-        console.log('🔍 [v52.0 DEBUG] 洗牌前:', {
-            randomMode: this.random,
-            originalOrder: currentPagePairs.map(p => p.id),
-            arrayLength: currentPagePairs.length
-        });
 
-        if (this.random === 'same') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const activityId = urlParams.get('activityId') || 'default-seed';
-            const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-            const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
-            shuffledAnswers = rng.shuffle([...currentPagePairs]);
-            console.log('🎲 使用固定隨機模式，種子:', seed, '洗牌後:', shuffledAnswers.map(p => p.id));
+        if (this.rightCardsOrderCache && this.rightCardsOrderCache.length === currentPagePairs.length) {
+            // 使用緩存的右側卡片順序
+            shuffledAnswers = this.rightCardsOrderCache;
+            console.log('🎲 [v98.0] 使用緩存的右側卡片順序（resize 時保持卡片順序）');
         } else {
-            // 🔥 v52.0：使用 Fisher-Yates 算法實現真正的隨機排列
-            shuffledAnswers = [...currentPagePairs];
-            for (let i = shuffledAnswers.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffledAnswers[i], shuffledAnswers[j]] = [shuffledAnswers[j], shuffledAnswers[i]];
+            console.log('🔍 [v52.0 DEBUG] 洗牌前:', {
+                randomMode: this.random,
+                originalOrder: currentPagePairs.map(p => p.id),
+                arrayLength: currentPagePairs.length
+            });
+
+            if (this.random === 'same') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const activityId = urlParams.get('activityId') || 'default-seed';
+                const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
+                shuffledAnswers = rng.shuffle([...currentPagePairs]);
+                console.log('🎲 使用固定隨機模式，種子:', seed, '洗牌後:', shuffledAnswers.map(p => p.id));
+            } else {
+                // 🔥 v52.0：使用 Fisher-Yates 算法實現真正的隨機排列
+                shuffledAnswers = [...currentPagePairs];
+                for (let i = shuffledAnswers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledAnswers[i], shuffledAnswers[j]] = [shuffledAnswers[j], shuffledAnswers[i]];
+                }
+                console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）', '洗牌後:', shuffledAnswers.map(p => p.id));
             }
-            console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）', '洗牌後:', shuffledAnswers.map(p => p.id));
+
+            // 🔥 v98.0: 保存右側卡片順序到緩存
+            this.rightCardsOrderCache = shuffledAnswers;
+            console.log('🎲 [v98.0] 已保存右側卡片順序到緩存');
         }
 
         // 創建左側外框
@@ -6041,6 +6054,10 @@ class GameScene extends Phaser.Scene {
             this.shuffledPairsCache = null;
             console.log('🔥 [v54.0] 已清除洗牌順序緩存（頁面改變）');
 
+            // 🔥 v98.0: 清除右側卡片順序緩存（因為頁面改變了）
+            this.rightCardsOrderCache = null;
+            console.log('🔥 [v98.0] 已清除右側卡片順序緩存（頁面改變）');
+
             // 重新佈局（會重新創建卡片）
             this.updateLayout();
         }
@@ -6436,6 +6453,10 @@ class GameScene extends Phaser.Scene {
         // 🔥 v54.0: 清除洗牌順序緩存（遊戲重新開始）
         this.shuffledPairsCache = null;
         console.log('🔥 [v54.0] 已清除洗牌順序緩存（遊戲重新開始）');
+
+        // 🔥 v98.0: 清除右側卡片順序緩存（遊戲重新開始）
+        this.rightCardsOrderCache = null;
+        console.log('🔥 [v98.0] 已清除右側卡片順序緩存（遊戲重新開始）');
 
         // 重新載入遊戲
         this.scene.restart();
