@@ -5853,13 +5853,21 @@ class GameScene extends Phaser.Scene {
         // Show answers 按鈕
         this.createModalButton(modal, 0, firstButtonY + buttonSpacing, 'Show answers', () => {
             console.log('🎮 點擊 Show answers 按鈕');
-            this.showMyAnswersPage();
+            // 🔥 v88.0: 隱藏模態框，回到遊戲場景並顯示所有卡片的勾勾和叉叉
+            overlay.destroy();
+            modal.destroy();
+            this.gameCompleteModal = null;
+            this.showAnswersOnCards();
         });
 
         // 🔥 [v93.0] Show all answers 按鈕
         this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 2, 'Show all answers', () => {
             console.log('🎮 點擊 Show all answers 按鈕');
-            this.showCorrectAnswersPage();
+            // 隱藏模態框，回到遊戲場景並顯示所有卡片的正確名稱
+            overlay.destroy();
+            modal.destroy();
+            this.gameCompleteModal = null;
+            this.showAllCorrectAnswers();
         });
 
         // Start again 按鈕
@@ -6011,6 +6019,75 @@ class GameScene extends Phaser.Scene {
     }
 
     // 🔥 顯示 My Answers 頁面
+    // 🔥 v88.0: 顯示所有卡片上的勾勾和叉叉，以及正確的配對物件
+    showAnswersOnCards() {
+        console.log('🎮 [v88.0] 顯示所有卡片上的勾勾和叉叉，以及正確的配對物件');
+
+        // 遍歷所有答案，在對應的卡片上顯示勾勾或叉叉，以及正確的配對物件
+        if (this.allPagesAnswers && this.allPagesAnswers.length > 0) {
+            this.allPagesAnswers.forEach((answer) => {
+                // 根據 leftPairId 找到對應的左卡片（英文卡片）
+                const leftCard = this.leftCards.find(card => card.pairId === answer.leftPairId);
+
+                if (leftCard) {
+                    // 在英文卡片上顯示勾勾或叉叉
+                    if (answer.isCorrect) {
+                        this.showCorrectAnswerOnCard(leftCard);
+                    } else {
+                        this.showIncorrectAnswerOnCard(leftCard);
+                    }
+
+                    // 🔥 v88.0: 在英文卡片下方顯示正確的配對物件（中文）
+                    this.showCorrectPairingOnCard(leftCard, answer.correctAnswer);
+                }
+            });
+        }
+    }
+
+    // 🔥 v89.0: 顯示所有卡片的正確名稱 - 英文卡片移動到匹配的中文位置
+    showAllCorrectAnswers() {
+        console.log('🎮 [v89.0] 顯示所有卡片的正確名稱 - 英文卡片移動到匹配的中文位置');
+
+        // 遍歷所有左卡片（英文卡片），將其移動到對應的中文位置
+        if (this.leftCards && this.leftCards.length > 0) {
+            this.leftCards.forEach((card) => {
+                // 根據 pairId 找到對應的配對
+                const pairId = card.getData('pairId');
+
+                // 根據佈局模式，找到對應的中文卡片位置
+                if (this.layout === 'mixed') {
+                    // 混合佈局：找到對應的中文框
+                    const rightCard = this.rightCards.find(rc => rc.getData('pairId') === pairId);
+                    if (rightCard) {
+                        // 移動英文卡片到中文框的位置
+                        this.tweens.add({
+                            targets: card,
+                            x: rightCard.x,
+                            y: rightCard.y,
+                            duration: 500,
+                            ease: 'Power2.inOut'
+                        });
+                        console.log('🎮 [v89.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+                    }
+                } else {
+                    // 分離佈局：根據 pairId 找到對應的右側卡片
+                    const rightCard = this.rightCards.find(rc => rc.getData('pairId') === pairId);
+                    if (rightCard) {
+                        // 移動英文卡片到右側卡片的位置
+                        this.tweens.add({
+                            targets: card,
+                            x: rightCard.x,
+                            y: rightCard.y,
+                            duration: 500,
+                            ease: 'Power2.inOut'
+                        });
+                        console.log('🎮 [v89.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+                    }
+                }
+            });
+        }
+    }
+
     showMyAnswersPage() {
         console.log('🎮 顯示 My Answers 頁面');
 
@@ -6201,6 +6278,92 @@ class GameScene extends Phaser.Scene {
             this.gameCompleteModal.overlay.setVisible(true);
             this.gameCompleteModal.modal.setVisible(true);
         }
+    }
+
+    // 🔥 v88.0: 在卡片上顯示勾勾
+    showCorrectAnswerOnCard(card) {
+        // 移除舊的標記（如果存在）
+        if (card.checkMark) {
+            card.checkMark.destroy();
+        }
+
+        // 創建勾勾標記
+        const checkMark = this.add.text(0, 0, '✓', {
+            fontSize: '64px',
+            color: '#4caf50',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        checkMark.setOrigin(0.5);
+        checkMark.setDepth(100);
+
+        // 定位到卡片右上角
+        const background = card.list[0]; // 卡片背景
+        if (background) {
+            const markX = card.x + background.width / 2 - 32;
+            const markY = card.y - background.height / 2 + 32;
+            checkMark.setPosition(markX, markY);
+        }
+
+        card.checkMark = checkMark;
+    }
+
+    // 🔥 v88.0: 在卡片上顯示叉叉
+    showIncorrectAnswerOnCard(card) {
+        // 移除舊的標記（如果存在）
+        if (card.xMark) {
+            card.xMark.destroy();
+        }
+
+        // 創建叉叉標記
+        const xMark = this.add.text(0, 0, '✗', {
+            fontSize: '64px',
+            color: '#f44336',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        xMark.setOrigin(0.5);
+        xMark.setDepth(100);
+
+        // 定位到卡片右上角
+        const background = card.list[0]; // 卡片背景
+        if (background) {
+            const markX = card.x + background.width / 2 - 32;
+            const markY = card.y - background.height / 2 + 32;
+            xMark.setPosition(markX, markY);
+        }
+
+        card.xMark = xMark;
+    }
+
+    // 🔥 v88.0: 在卡片下方顯示正確的配對物件（中文）
+    showCorrectPairingOnCard(card, correctAnswer) {
+        // 移除舊的配對文字（如果存在）
+        if (card.correctPairingText) {
+            card.correctPairingText.destroy();
+        }
+
+        // 創建正確配對的文字
+        const pairingText = this.add.text(0, 0, correctAnswer, {
+            fontSize: '20px',
+            color: '#000000',
+            fontFamily: 'Arial',
+            fontStyle: 'bold',
+            wordWrap: { width: 100 },
+            align: 'center'
+        });
+        pairingText.setOrigin(0.5);
+        pairingText.setDepth(99);
+
+        // 定位到卡片下方
+        const background = card.list[0]; // 卡片背景
+        if (background) {
+            const textX = card.x;
+            const textY = card.y + background.height / 2 + 30;
+            pairingText.setPosition(textX, textY);
+        }
+
+        card.correctPairingText = pairingText;
     }
 
     // 🔥 創建答案卡片
