@@ -761,16 +761,10 @@ class GameScene extends Phaser.Scene {
         this.updateLayout();
         console.log('🎮 GameScene: updateLayout 完成');
 
-        // 🔥 v1.0 新增：初始化響應式管理器
-        this.responsiveManager = new ResponsiveManager(this, {
-            debounceMs: 300,
-            throttleMs: 100,
-            enableLogging: true
-        });
-        ResponsiveLogger.log('info', 'GameScene', '響應式管理器初始化完成', {
-            debounceMs: 300,
-            throttleMs: 100
-        });
+        // 🔥 v99.0: 移除未使用的 ResponsiveManager
+        // 使用 Phaser 內置的 resize 監聽器已經足夠
+        // ResponsiveManager 會導致 resize 事件被重複處理，造成卡片重新載入
+        // 已在 game.js 第 780-798 行使用 Phaser 的 scale.on('resize') 監聽器
 
         // 🔥 v87.0: 改進的 resize 事件 - 只調整卡片位置，不重新載入詞彙
         // 監聽螢幕尺寸變化 - 只調整卡片位置和大小，保持詞彙數據和已配對狀態
@@ -7373,18 +7367,20 @@ class GameScene extends Phaser.Scene {
     }
 
     // 🔥 P1-4: 全螢幕變化事件處理
+    // 🔥 v99.0: 改為只調整位置，不重新載入
     handleFullscreenChange() {
         console.log('🎮 全螢幕狀態變化:', document.fullscreenElement ? '進入全螢幕' : '退出全螢幕');
-        // 重新計算佈局
-        this.updateLayout();
+        // 🔥 v99.0: 改為 repositionCards，只調整位置不重新載入
+        this.repositionCards();
     }
 
     // 🔥 P1-4: 設備方向變化事件處理
+    // 🔥 v99.0: 改為只調整位置，不重新載入
     handleOrientationChange() {
         const isPortrait = window.matchMedia('(orientation: portrait)').matches;
         console.log('🎮 設備方向變化:', isPortrait ? '直向' : '橫向');
-        // 重新計算佈局
-        this.updateLayout();
+        // 🔥 v99.0: 改為 repositionCards，只調整位置不重新載入
+        this.repositionCards();
     }
 }
 
