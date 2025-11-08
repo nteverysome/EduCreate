@@ -64,13 +64,20 @@ class Handler extends Phaser.Scene {
 
     /**
      * 場景啟動方法 - 啟動指定的場景並保存場景引用
+     * 🔥 v102.1: 參考 Shimozurdo 的場景啟動策略
      * @param {string} scene - 要啟動的場景鍵值
      * @param {Object} data - 傳遞給場景的初始化數據（可選）
      */
     launchScene(scene, data) {
-        // 🔥 修復：對所有場景都使用 start 確保可見和活躍
-        console.log(`🚀 Handler: 啟動場景 ${scene}`);
-        this.scene.start(scene, data);
+        // 🔥 v102.1: 對於主要遊戲場景，使用 start 確保可見和活躍
+        if (scene === 'GameScene') {
+            console.log(`🚀 Handler: 啟動主要場景 ${scene}`);
+            this.scene.start(scene, data);
+        } else {
+            // 對於背景場景（如 PreloadScene），使用 launch 並行運行
+            console.log(`🔧 Handler: 啟動背景場景 ${scene}`);
+            this.scene.launch(scene, data);
+        }
 
         // 獲取並保存場景實例的引用，方便後續操作
         this.gameScene = this.scene.get(scene)
@@ -78,8 +85,8 @@ class Handler extends Phaser.Scene {
         this.sceneRunning = scene
 
         console.log(`✅ Handler: 場景 ${scene} 已啟動`, {
-            isActive: this.gameScene.scene.isActive(),
-            isVisible: this.gameScene.scene.isVisible()
+            isActive: this.gameScene?.scene.isActive(),
+            isVisible: this.gameScene?.scene.isVisible()
         });
     }
 
