@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match-Up Game - 自動測試和修復</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.danger {
+            background: #f44336;
+        }
+        button.danger:hover {
+            background: #da190b;
+        }
+        .log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+        }
+        .log-error {
+            color: #ff6b6b;
+        }
+        .log-success {
+            color: #51cf66;
+        }
+        .log-warning {
+            color: #ffd43b;
+        }
+        .log-info {
+            color: #74c0fc;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .stat-box {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-box h3 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .stat-box .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2196F3;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Match-Up Game - 自動測試和修復系統</h1>
+        
+        <div class="section">
+            <h2>📊 實時監控統計</h2>
+            <div class="stats">
+                <div class="stat-box">
+                    <h3>updateLayout 調用</h3>
+                    <div class="value" id="updateLayoutCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <h3>repositionCards 調用</h3>
+                    <div class="value" id="repositionCardsCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <h3>resize 事件</h3>
+                    <div class="value" id="resizeCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <h3>visibilitychange 事件</h3>
+                    <div class="value" id="visibilityCount">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 控制面板</h2>
+            <button onclick="startMonitoring()">▶️ 開始監控</button>
+            <button onclick="stopMonitoring()">⏹️ 停止監控</button>
+            <button onclick="clearLogs()">🗑️ 清除日誌</button>
+            <button onclick="runTests()" class="danger">🧪 運行完整測試</button>
+            <button onclick="applyFix()" class="danger">🔨 應用修復</button>
+        </div>
+
+        <div class="section">
+            <h2>📋 診斷日誌</h2>
+            <div class="log" id="logContainer"></div>
+        </div>
+
+        <div class="section">
+            <h2>📈 測試結果</h2>
+            <div id="testResults"></div>
+        </div>
+    </div>
+
+    <script>
+        // 全局變量
+        let monitoring = false;
+        let stats = {
+            updateLayoutCount: 0,
+            repositionCardsCount: 0,
+            resizeCount: 0,
+            visibilityCount: 0,
+            fullscreenCount: 0,
+            orientationCount: 0
+        };
+        let logs = [];
+
+        // 日誌函數
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.push({ message: logEntry, type });
+            
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = logEntry;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLogs() {
+            logs = [];
+            document.getElementById('logContainer').innerHTML = '';
+            addLog('✅ 日誌已清除', 'success');
+        }
+
+        // 更新統計
+        function updateStats() {
+            document.getElementById('updateLayoutCount').textContent = stats.updateLayoutCount;
+            document.getElementById('repositionCardsCount').textContent = stats.repositionCardsCount;
+            document.getElementById('resizeCount').textContent = stats.resizeCount;
+            document.getElementById('visibilityCount').textContent = stats.visibilityCount;
+        }
+
+        // 開始監控
+        function startMonitoring() {
+            if (monitoring) {
+                addLog('⚠️ 監控已在運行', 'warning');
+                return;
+            }
+
+            monitoring = true;
+            addLog('🔍 開始監控重新載入事件...', 'info');
+
+            // 獲取遊戲場景
+            const gameScene = cc?.game?.getScene?.('GameScene');
+            if (!gameScene) {
+                addLog('❌ 無法找到 GameScene，請確保遊戲已加載', 'error');
+                monitoring = false;
+                return;
+            }
+
+            // 監控 updateLayout
+            if (gameScene.updateLayout) {
+                const originalUpdateLayout = gameScene.updateLayout;
+                gameScene.updateLayout = function() {
+                    stats.updateLayoutCount++;
+                    addLog(`❌ updateLayout 被調用 #${stats.updateLayoutCount}`, 'error');
+                    updateStats();
+                    return originalUpdateLayout.call(this);
+                };
+                addLog('✅ 已監控 updateLayout', 'success');
+            }
+
+            // 監控 repositionCards
+            if (gameScene.repositionCards) {
+                const originalRepositionCards = gameScene.repositionCards;
+                gameScene.repositionCards = function() {
+                    stats.repositionCardsCount++;
+                    addLog(`✅ repositionCards 被調用 #${stats.repositionCardsCount}`, 'success');
+                    updateStats();
+                    return originalRepositionCards.call(this);
+                };
+                addLog('✅ 已監控 repositionCards', 'success');
+            }
+
+            // 監控 resize 事件
+            window.addEventListener('resize', () => {
+                stats.resizeCount++;
+                addLog(`📏 resize 事件 #${stats.resizeCount} - 視窗大小: ${window.innerWidth}x${window.innerHeight}`, 'info');
+                updateStats();
+            });
+            addLog('✅ 已監控 resize 事件', 'success');
+
+            // 監控 visibilitychange 事件
+            document.addEventListener('visibilitychange', () => {
+                stats.visibilityCount++;
+                addLog(`👁️ visibilitychange 事件 #${stats.visibilityCount} - 頁面${document.hidden ? '隱藏' : '顯示'}`, 'info');
+                updateStats();
+            });
+            addLog('✅ 已監控 visibilitychange 事件', 'success');
+
+            addLog('🎯 監控系統已啟動！', 'success');
+        }
+
+        function stopMonitoring() {
+            monitoring = false;
+            addLog('⏹️ 監控已停止', 'warning');
+        }
+
+        // 運行測試
+        async function runTests() {
+            addLog('🧪 開始運行完整測試...', 'info');
+            
+            // 重置計數
+            stats = {
+                updateLayoutCount: 0,
+                repositionCardsCount: 0,
+                resizeCount: 0,
+                visibilityCount: 0
+            };
+            updateStats();
+
+            // 測試 1：縮小視窗
+            addLog('📝 測試 1：縮小視窗', 'info');
+            window.resizeTo(800, 600);
+            await sleep(1000);
+
+            // 測試 2：放大視窗
+            addLog('📝 測試 2：放大視窗', 'info');
+            window.resizeTo(1200, 800);
+            await sleep(1000);
+
+            // 生成報告
+            generateReport();
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // 生成報告
+        function generateReport() {
+            const resultsDiv = document.getElementById('testResults');
+            let html = '<h3>📊 測試結果報告</h3>';
+
+            const issues = [];
+            if (stats.updateLayoutCount > 0) {
+                issues.push(`❌ updateLayout 被調用 ${stats.updateLayoutCount} 次（應該是 0 次）`);
+            }
+            if (stats.repositionCardsCount === 0 && stats.resizeCount > 0) {
+                issues.push(`⚠️ repositionCards 沒有被調用（應該在 resize 時被調用）`);
+            }
+
+            if (issues.length === 0) {
+                html += '<div class="status success">✅ 所有測試通過！沒有發現重新載入問題。</div>';
+            } else {
+                html += '<div class="status error">❌ 發現以下問題：</div>';
+                issues.forEach(issue => {
+                    html += `<div style="margin: 5px 0; padding: 5px; background: #fff3cd; border-left: 3px solid #ffc107;">${issue}</div>`;
+                });
+            }
+
+            html += `
+                <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 4px;">
+                    <strong>統計數據：</strong><br>
+                    - updateLayout 調用: ${stats.updateLayoutCount} 次<br>
+                    - repositionCards 調用: ${stats.repositionCardsCount} 次<br>
+                    - resize 事件: ${stats.resizeCount} 次<br>
+                    - visibilitychange 事件: ${stats.visibilityCount} 次
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // 應用修復
+        function applyFix() {
+            addLog('🔨 開始應用修復...', 'warning');
+            
+            const gameScene = cc?.game?.getScene?.('GameScene');
+            if (!gameScene) {
+                addLog('❌ 無法找到 GameScene', 'error');
+                return;
+            }
+
+            // 修復 1：修改 handleFullscreenChange
+            if (gameScene.handleFullscreenChange) {
+                const originalHandleFullscreenChange = gameScene.handleFullscreenChange;
+                gameScene.handleFullscreenChange = function() {
+                    console.log('🎮 全螢幕狀態變化:', document.fullscreenElement ? '進入全螢幕' : '退出全螢幕');
+                    this.repositionCards();  // ✅ 改為 repositionCards
+                };
+                addLog('✅ 已修復 handleFullscreenChange', 'success');
+            }
+
+            // 修復 2：修改 handleOrientationChange
+            if (gameScene.handleOrientationChange) {
+                const originalHandleOrientationChange = gameScene.handleOrientationChange;
+                gameScene.handleOrientationChange = function() {
+                    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+                    console.log('🎮 設備方向變化:', isPortrait ? '直向' : '橫向');
+                    this.repositionCards();  // ✅ 改為 repositionCards
+                };
+                addLog('✅ 已修復 handleOrientationChange', 'success');
+            }
+
+            addLog('🎯 修復已應用！', 'success');
+            addLog('💡 提示：請重新運行測試以驗證修復效果', 'info');
+        }
+
+        // 頁面加載時的初始化
+        window.addEventListener('load', () => {
+            addLog('🎮 頁面已加載，等待遊戲初始化...', 'info');
+            
+            // 等待遊戲加載
+            setTimeout(() => {
+                const gameScene = cc?.game?.getScene?.('GameScene');
+                if (gameScene) {
+                    addLog('✅ 遊戲已加載，可以開始監控', 'success');
+                } else {
+                    addLog('⚠️ 遊戲還未加載，請稍候...', 'warning');
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
+
