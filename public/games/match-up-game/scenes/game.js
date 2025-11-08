@@ -5711,7 +5711,7 @@ class GameScene extends Phaser.Scene {
 
     // � 移除 createRestartButton() 方法：用戶要求拿掉重新開始按鈕
 
-    // 🔥 顯示遊戲結束模態框
+    // 🔥 顯示遊戲結束模態框 [v93.0] - 優化排版，合理運用空間
     showGameCompleteModal() {
         const width = this.scale.width;
         const height = this.scale.height;
@@ -5758,7 +5758,8 @@ class GameScene extends Phaser.Scene {
 
         // 創建模態框容器
         const modalWidth = Math.min(500, width * 0.8);
-        const modalHeight = Math.min(400, height * 0.7);
+        // 🔥 v91.0: 優化排版，合理運用空間 - 減少模態框高度，緊湊排列內容
+        const modalHeight = Math.min(420, height * 0.7);
         const modal = this.add.container(width / 2, height / 2);
         modal.setDepth(5001);
         modal.setScrollFactor(0);
@@ -5769,7 +5770,7 @@ class GameScene extends Phaser.Scene {
         modal.add(modalBg);
 
         // 標題：GAME COMPLETE
-        const title = this.add.text(0, -modalHeight / 2 + 40, 'GAME COMPLETE', {
+        const title = this.add.text(0, -modalHeight / 2 + 20, 'GAME COMPLETE', {
             fontSize: '36px',
             color: '#ffffff',
             fontFamily: 'Arial',
@@ -5779,8 +5780,8 @@ class GameScene extends Phaser.Scene {
         modal.add(title);
 
         // 分數標籤
-        const scoreLabel = this.add.text(-80, -modalHeight / 2 + 100, 'Score', {
-            fontSize: '20px',
+        const scoreLabel = this.add.text(-80, -modalHeight / 2 + 55, 'Score', {
+            fontSize: '18px',
             color: '#4a9eff',
             fontFamily: 'Arial'
         });
@@ -5788,8 +5789,8 @@ class GameScene extends Phaser.Scene {
         modal.add(scoreLabel);
 
         // 分數值
-        const scoreValue = this.add.text(-80, -modalHeight / 2 + 140, `${totalCorrect}/${totalQuestions}`, {
-            fontSize: '32px',
+        const scoreValue = this.add.text(-80, -modalHeight / 2 + 80, `${totalCorrect}/${totalQuestions}`, {
+            fontSize: '28px',
             color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
@@ -5799,8 +5800,8 @@ class GameScene extends Phaser.Scene {
 
         // 時間標籤（如果有計時器）
         if (this.timerType !== 'none') {
-            const timeLabel = this.add.text(80, -modalHeight / 2 + 100, 'Time', {
-                fontSize: '20px',
+            const timeLabel = this.add.text(80, -modalHeight / 2 + 55, 'Time', {
+                fontSize: '18px',
                 color: '#4a9eff',
                 fontFamily: 'Arial'
             });
@@ -5808,8 +5809,8 @@ class GameScene extends Phaser.Scene {
             modal.add(timeLabel);
 
             // 時間值
-            const timeValue = this.add.text(80, -modalHeight / 2 + 140, timeText, {
-                fontSize: '32px',
+            const timeValue = this.add.text(80, -modalHeight / 2 + 80, timeText, {
+                fontSize: '28px',
                 color: '#ffffff',
                 fontFamily: 'Arial',
                 fontStyle: 'bold'
@@ -5820,7 +5821,7 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 排名提示（動態顯示，位置調整到按鈕上方）
         const rankText = this.add.text(0, 0, 'Loading ranking...', {
-            fontSize: '16px',
+            fontSize: '14px',
             color: '#ffffff',
             fontFamily: 'Arial'
         });
@@ -5837,12 +5838,17 @@ class GameScene extends Phaser.Scene {
             }
         });
 
-        // 🔥 [v93.0] 按鈕區域（調整位置，為排名提示留出空間）
-        const buttonSpacing = 50;  // 🔥 [v93.0] 減少按鈕間距到 50px
-        const firstButtonY = modalHeight / 2 - 120;  // 🔥 [v93.0] 第一個按鈕位置
+        // 🔥 v93.0: 優化按鈕排版 - 減少上半部分和按鈕之間的空白到約 40px
+        const buttonSpacing = 42;
 
-        // 🔥 調整排名提示位置到第一個按鈕上方
-        rankText.y = firstButtonY - buttonSpacing - 40;
+        // 🔥 v93.0: 排名提示位置緊接著分數下方
+        rankText.y = -modalHeight / 2 + 115;
+
+        // 🔥 v93.0: 計算按鈕起始位置
+        // 排名提示在 -modalHeight / 2 + 115
+        // 中間空白約 40px
+        // 第一個按鈕（Leaderboard）應該在 -modalHeight / 2 + 115 + 40 = -modalHeight / 2 + 155
+        const firstButtonY = -modalHeight / 2 + 155;
 
         // Leaderboard 按鈕
         this.createModalButton(modal, 0, firstButtonY, 'Leaderboard', () => {
