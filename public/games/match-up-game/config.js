@@ -12,6 +12,11 @@ const config = {
     parent: 'game-container',
     backgroundColor: '#FFFFFF', // 白色背景（Wordwall Classic 主題）
     scene: [Handler, PreloadScene, GameScene],  // 🔥 添加 Handler 場景作為第一個場景
+
+    // 🔥 v102.0: 禁用自動暫停，防止切換標籤時重啟場景
+    disableContextMenu: true,
+    pauseOnBlur: false,  // ← 關鍵修復：禁用失焦時自動暫停
+
     scale: {
         mode: Phaser.Scale.RESIZE,  // 動態調整尺寸
         width: SIZE_WIDTH_SCREEN,

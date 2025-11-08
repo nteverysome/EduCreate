@@ -373,6 +373,21 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // 🔥 v102.4: 當 customVocabulary 改變時，添加 customVocabulary=true 參數到 URL
+  // 這樣 iframe 會重新加載，遊戲會重新初始化，卡片會動態調整為新詞彙
+  // 但 gameKey 不改變，所以 GameSwitcher 組件不會卸載/重新掛載
+  const [vocabUpdateTrigger, setVocabUpdateTrigger] = useState(0);
+
+  useEffect(() => {
+    if (customVocabulary.length > 0) {
+      console.log('🔄 [v102.4] customVocabulary 已改變，觸發 iframe 重新加載:', customVocabulary.length, '個詞彙');
+      // 改變 vocabUpdateTrigger 以觸發 iframe src 改變
+      setVocabUpdateTrigger(prev => prev + 1);
+      // 同時存儲到 localStorage 作為備份
+      localStorage.setItem('gameCustomVocabulary', JSON.stringify(customVocabulary));
+    }
+  }, [customVocabulary]);
+
   // 生成包含自定義詞彙的遊戲 URL
   const getGameUrlWithVocabulary = (game: GameConfig): string => {
     let url = game.url;
@@ -381,10 +396,11 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     if (activityId) {
       const separator = url.includes('?') ? '&' : '?';
       url += `${separator}activityId=${activityId}`;
-      
-      // 只有當 customVocabulary 成功載入時才添加 customVocabulary=true 參數
+
+      // 🔥 v102.4: 添加 customVocabulary=true 參數到 URL
+      // 這樣當 customVocabulary 改變時，iframe src 會改變，iframe 會重新加載
       if (customVocabulary.length > 0) {
-        url += `&customVocabulary=true`;
+        url += `&customVocabulary=true&vocabUpdateTrigger=${vocabUpdateTrigger}`;
       }
 
       // 優先檢查是否為學生遊戲模式（有 assignmentId）

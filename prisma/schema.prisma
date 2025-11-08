@@ -1073,6 +1073,46 @@ model WordReview {
   @@map("word_reviews")
 }
 
+// ==================== 遊戲進度保存功能模型 ====================
+
+// 🔥 v96.0: 遊戲進度表 - 用於保存遊戲進度（本地和雲端）
+model GameProgress {
+  id                  String   @id @default(cuid())
+  activityId          String   // 活動 ID
+  sessionId           String   @unique // 會話 ID（唯一）
+  currentPage         Int      // 當前頁碼
+  matchedPairs        String   // 已配對的卡片 ID（JSON 字符串）
+  allPagesAnswers     String   // 所有頁面的答案（JSON 字符串）
+  currentPageAnswers  String   // 當前頁面的答案（JSON 字符串）
+  gameStartTime       DateTime // 遊戲開始時間
+  totalGameTime       Int      // 遊戲總時間（毫秒）
+  gameState           String   // 遊戲狀態（playing, paused, completed）
+  timerType           String   // 計時器類型
+  remainingTime       Int      // 剩餘時間
+  layout              String   // 佈局類型（separated, mixed）
+  random              String   // 隨機模式
+
+  // 遊戲完成相關
+  isCompleted         Boolean  @default(false) // 是否已完成
+  score               Int?     // 分數
+  correctCount        Int?     // 答對題數
+  totalCount          Int?     // 總題數
+  accuracy            Float?   // 正確率
+  timeSpent           Int?     // 遊戲時間（秒）
+  completedAt         DateTime? // 完成時間
+
+  // 時間戳
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // 索引
+  @@index([activityId])
+  @@index([sessionId])
+  @@index([isCompleted])
+  @@index([createdAt])
+  @@map("game_progress")
+}
+
 // ==================== 遊戲排行榜功能模型 ====================
 
 // 遊戲排行榜表

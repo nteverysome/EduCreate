@@ -30,6 +30,9 @@ class Handler extends Phaser.Scene {
         this.cameras.main.setBackgroundColor('#FFFFFF')
         console.log('🎮 Handler: 背景顏色設定為白色');
 
+        // 🔥 v102.0: 監聽頁面可見性變化，防止場景重啟
+        this.setupVisibilityHandling();
+
         // 🔥 修復：使用正確的場景鍵值 'PreloadScene'
         console.log('🎮 Handler: 準備啟動 PreloadScene');
         this.launchScene('PreloadScene')
@@ -37,14 +40,44 @@ class Handler extends Phaser.Scene {
     }
 
     /**
+     * 🔥 v102.0: 設置頁面可見性處理，防止切換標籤時重啟場景
+     */
+    setupVisibilityHandling() {
+        // 監聽頁面可見性變化
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log('📴 Handler: 頁面隱藏（切換標籤/最小化）');
+                // 不做任何操作，讓場景保持運行
+            } else {
+                console.log('📱 Handler: 頁面顯示（切回標籤/恢復）');
+                // 不重啟場景，只確保場景仍在運行
+                const gameScene = this.scene.get('GameScene');
+                if (gameScene && !gameScene.scene.isActive()) {
+                    console.log('⚠️ Handler: GameScene 未運行，嘗試喚醒');
+                    this.scene.wake('GameScene');
+                }
+            }
+        });
+
+        console.log('✅ Handler: 頁面可見性處理已設置');
+    }
+
+    /**
      * 場景啟動方法 - 啟動指定的場景並保存場景引用
+     * 🔥 v102.1: 參考 Shimozurdo 的場景啟動策略
      * @param {string} scene - 要啟動的場景鍵值
      * @param {Object} data - 傳遞給場景的初始化數據（可選）
      */
     launchScene(scene, data) {
-        // 🔥 修復：對所有場景都使用 start 確保可見和活躍
-        console.log(`🚀 Handler: 啟動場景 ${scene}`);
-        this.scene.start(scene, data);
+        // 🔥 v102.1: 對於主要遊戲場景，使用 start 確保可見和活躍
+        if (scene === 'GameScene') {
+            console.log(`🚀 Handler: 啟動主要場景 ${scene}`);
+            this.scene.start(scene, data);
+        } else {
+            // 對於背景場景（如 PreloadScene），使用 launch 並行運行
+            console.log(`🔧 Handler: 啟動背景場景 ${scene}`);
+            this.scene.launch(scene, data);
+        }
 
         // 獲取並保存場景實例的引用，方便後續操作
         this.gameScene = this.scene.get(scene)
@@ -52,8 +85,8 @@ class Handler extends Phaser.Scene {
         this.sceneRunning = scene
 
         console.log(`✅ Handler: 場景 ${scene} 已啟動`, {
-            isActive: this.gameScene.scene.isActive(),
-            isVisible: this.gameScene.scene.isVisible()
+            isActive: this.gameScene?.scene.isActive(),
+            isVisible: this.gameScene?.scene.isVisible()
         });
     }
 

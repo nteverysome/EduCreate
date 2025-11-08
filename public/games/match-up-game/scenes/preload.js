@@ -34,12 +34,14 @@ class PreloadScene extends Phaser.Scene {
 
         this.handlerScene = this.scene.get('handler');
 
-        if (this.handlerScene && this.handlerScene.updateResize) {
-            console.log('🎮 PreloadScene: 調用 Handler.updateResize');
-            this.handlerScene.updateResize(this);
-        } else {
-            console.warn('⚠️ PreloadScene: handlerScene 未初始化或 updateResize 方法不存在');
-        }
+        // 🔥 v94.0: 修復 - PreloadScene 不應該監聽 resize 事件
+        // 只有 GameScene 應該監聽 resize 事件，避免場景重新載入
+        // if (this.handlerScene && this.handlerScene.updateResize) {
+        //     console.log('🎮 PreloadScene: 調用 Handler.updateResize');
+        //     this.handlerScene.updateResize(this);
+        // } else {
+        //     console.warn('⚠️ PreloadScene: handlerScene 未初始化或 updateResize 方法不存在');
+        // }
 
         try {
             await this.loadVisualStyleResources();
@@ -49,6 +51,17 @@ class PreloadScene extends Phaser.Scene {
 
         if (this.sceneStopped) {
             console.warn('⚠️ PreloadScene: 場景已停止，取消啟動 GameScene');
+            return;
+        }
+
+        // 🔥 v102.0: 檢查 GameScene 是否已經存在並運行
+        const gameScene = this.scene.get('GameScene');
+        const isGameSceneActive = gameScene && gameScene.scene.isActive();
+
+        if (isGameSceneActive) {
+            console.log('✅ PreloadScene: GameScene 已經在運行，跳過重啟');
+            // 只喚醒場景，不重啟
+            this.scene.wake('GameScene');
             return;
         }
 
