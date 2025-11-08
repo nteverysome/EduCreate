@@ -137,23 +137,59 @@ useEffect(() => {
 
 ---
 
-## 📝 實際案例：Match-Up Game v102.5
+## 📝 實際案例：Match-Up Game 的多層修復
 
-### 問題代碼
+### ⚠️ 重要提示：多個不同的問題
 
-**第 744 行**：
+Match-Up Game 遇到的「換標籤重新載入詞彙」問題實際上有 **多個不同的根本原因**，需要在不同層級進行修復：
+
+#### **v102.0-v102.2：三層修復（根本原因）**
+這是最初的問題，需要在三個不同層級修復：
+
+**第一層：Phaser 配置層級（v102.0）**
 ```javascript
-useEffect(() => {
-  if (isValidActivityId) {
-    setActivityId(activityIdParam);
-    loadActivityInfo(activityIdParam);  // 調用函數
-    // ... 其他邏輯
-  }
-}, [searchParams, loadActivityInfo]);  // ❌ 包含 loadActivityInfo
+// config.js
+export const config = {
+  // ...
+  pauseOnBlur: false,  // ✅ 禁用失焦時自動暫停
+};
 ```
 
-**第 756 行**：
+**第二層：Phaser 場景層級（v102.1）**
 ```javascript
+// scenes/handler.js
+// 使用 scene.launch() 而非 scene.start()
+this.scene.launch('PreloadScene');  // ✅ 避免場景重啟
+```
+
+**第三層：React 組件層級（v102.2）⭐ 關鍵**
+```javascript
+// app/games/switcher/page.tsx
+// 移除在 customVocabulary 改變時改變 gameKey 的邏輯
+// ❌ 不要做這個：
+// useEffect(() => {
+//   if (customVocabulary.length > 0) {
+//     setGameKey(prev => prev + 1);  // 導致組件卸載
+//   }
+// }, [customVocabulary]);
+
+// ✅ 讓 iframe src 自動更新
+<iframe src={getGameUrlWithVocabulary(currentGame)} />
+```
+
+#### **v102.5：useEffect 無限循環（新問題）**
+這是一個完全不同的問題，由 useEffect 依賴項中包含函數導致：
+
+**問題代碼**：
+```javascript
+// 第 744 行
+useEffect(() => {
+  if (isValidActivityId) {
+    loadActivityInfo(activityIdParam);  // 調用函數
+  }
+}, [searchParams, loadActivityInfo]);  // ❌ 包含 loadActivityInfo
+
+// 第 756 行
 useEffect(() => {
   if (session && activityId) {
     loadActivityInfo(activityId);  // 調用函數
@@ -161,8 +197,7 @@ useEffect(() => {
 }, [session, activityId, loadActivityInfo]);  // ❌ 包含 loadActivityInfo
 ```
 
-### 函數定義
-
+**函數定義**：
 ```javascript
 const loadActivityInfo = useCallback(async (activityId: string) => {
   const response = await fetch(`/api/activities/${activityId}`);
@@ -170,8 +205,7 @@ const loadActivityInfo = useCallback(async (activityId: string) => {
 }, [session]);  // 依賴於 session
 ```
 
-### 無限循環鏈條
-
+**無限循環鏈條**：
 ```
 1. 頁面加載
 2. session 初始化（null → 已登錄）
@@ -185,16 +219,79 @@ const loadActivityInfo = useCallback(async (activityId: string) => {
 10. 回到第 2 步
 ```
 
-### 修復代碼
-
-**第 744 行**：
+**修復代碼**：
 ```javascript
+// 第 744 行
 }, [searchParams]);  // ✅ 移除 loadActivityInfo
+
+// 第 756 行
+}, [session, activityId]);  // ✅ 移除 loadActivityInfo
 ```
 
-**第 756 行**：
+### 📊 兩個問題的對比
+
+| 方面 | v102.0-v102.2 | v102.5 |
+|------|---|---|
+| **根本原因** | React 組件卸載 | useEffect 無限循環 |
+| **症狀** | 換標籤時重新載入 | 頁面加載時重新初始化 |
+| **修復層級** | 三層（配置、場景、組件） | 一層（useEffect 依賴項） |
+| **修復方法** | 移除 gameKey 改變邏輯 | 移除函數從依賴項 |
+| **本地環境** | 可能無法重現 | 無法重現 |
+| **生產環境** | 出現問題 | 出現問題 |
+
+---
+
+## 🎯 如何區分不同的問題？
+
+### 症狀對應表
+
+| 症狀 | 可能的原因 | 修復方法 |
+|------|---------|--------|
+| 換標籤時重新載入 | React 組件卸載（gameKey 改變） | 移除 gameKey 改變邏輯 |
+| 頁面加載時重新初始化 | useEffect 無限循環 | 移除函數從依賴項 |
+| 縮小到工作列時重新載入 | Phaser pauseOnBlur 設置 | 添加 `pauseOnBlur: false` |
+| 場景被重複重啟 | scene.start() 而非 scene.launch() | 使用 `scene.launch()` |
+| 本地正常，生產有問題 | 環境差異（通常是 useEffect 問題） | 檢查 useEffect 依賴項 |
+
+### 診斷流程圖
+
+```
+問題出現
+  ↓
+本地正常嗎？
+  ├─ 是 → 可能是 useEffect 無限循環
+  │        檢查 useEffect 依賴項中是否有函數
+  │        ↓
+  │        移除函數從依賴項
+  │
+  └─ 否 → 可能是 React 組件卸載或 Phaser 配置
+           檢查是否改變了 gameKey
+           ↓
+           移除 gameKey 改變邏輯
+           或檢查 Phaser 配置
+```
+
+### 在 Console 中查看日誌
+
+**useEffect 無限循環的跡象**：
 ```javascript
-}, [session, activityId]);  // ✅ 移除 loadActivityInfo
+// 會看到重複的日誌
+🔄 [v102.4] customVocabulary 已改變，觸發 iframe 重新加載: 20 個詞彙
+🎯 正常模式 URL: ...&vocabUpdateTrigger=1
+
+🔄 [v102.4] customVocabulary 已改變，觸發 iframe 重新加載: 20 個詞彙
+🎯 正常模式 URL: ...&vocabUpdateTrigger=2
+
+🔄 [v102.4] customVocabulary 已改變，觸發 iframe 重新加載: 20 個詞彙
+🎯 正常模式 URL: ...&vocabUpdateTrigger=3
+```
+
+**React 組件卸載的跡象**：
+```javascript
+// 會看到組件卸載和重新掛載的日誌
+🎮 GameScene: 創建白色背景和載入文字
+🎮 GameScene: 載入詞彙中...
+🎮 GameScene: 創建白色背景和載入文字  // 重複出現
 ```
 
 ---
@@ -289,6 +386,34 @@ npm install --save-dev eslint-plugin-react-hooks
   }
 }
 ```
+
+---
+
+## 📚 相關修復報告
+
+### v102.0-v102.2：三層修復報告
+
+如果您遇到「換標籤重新載入詞彙」的問題，請參考：
+
+**文件位置**：`public/games/match-up-game/V102_COMPLETE_FIX_REPORT.md`
+
+**包含內容**：
+- 三層修復的詳細說明（配置層、場景層、組件層）
+- 為什麼 v102.2 是關鍵修復
+- iframe src 如何自動更新
+- 完整的驗證步驟
+
+### v102.5：useEffect 無限循環修復報告
+
+如果您遇到「頁面加載時重新初始化」的問題，請參考：
+
+**文件位置**：`public/games/match-up-game/V102_5_PRODUCTION_FIX_REPORT.md`
+
+**包含內容**：
+- useEffect 無限循環的根本原因
+- 為什麼只在生產環境出現
+- 修復前後的對比
+- 部署步驟
 
 ---
 
