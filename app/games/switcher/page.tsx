@@ -751,14 +751,17 @@ const GameSwitcherPage: React.FC = () => {
     }
   }, [session, activityId, loadActivityInfo]);
 
-  // 🔥 [v60.0] 當 customVocabulary 變化時，強制重新渲染 GameSwitcher
-  // 這確保編輯後返回時，遊戲會使用最新的詞彙數據
-  useEffect(() => {
-    if (customVocabulary.length > 0) {
-      console.log('🔄 [v60.0] 詞彙已更新，強制重新渲染遊戲:', customVocabulary.length, '個詞彙');
-      setGameKey(prev => prev + 1);
-    }
-  }, [customVocabulary]);
+  // 🔥 [v102.2] 移除在 customVocabulary 改變時改變 gameKey 的邏輯
+  // 原因：改變 gameKey 會導致 GameSwitcher 組件被卸載和重新掛載
+  // 這會導致 iframe 被銷毀和重建，遊戲被重新初始化，顯示「載入詞彙中…」
+  // 改為：讓 iframe 的 src 自動更新（通過 getGameUrlWithVocabulary 函數）
+  // 這樣 iframe 會自動重新加載，但不會銷毀 Phaser 遊戲實例
+  // useEffect(() => {
+  //   if (customVocabulary.length > 0) {
+  //     console.log('🔄 [v60.0] 詞彙已更新，強制重新渲染遊戲:', customVocabulary.length, '個詞彙');
+  //     setGameKey(prev => prev + 1);
+  //   }
+  // }, [customVocabulary]);
 
   // 載入自定義詞彙的函數（需要身份驗證）
   const loadCustomVocabulary = async (activityId: string) => {
