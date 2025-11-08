@@ -809,14 +809,17 @@ class GameScene extends Phaser.Scene {
         this.setupAutoSave();
 
         // 🔥 v96.0: 監聽頁面可見性變化（用戶最小化或切換標籤時保存）
-        document.addEventListener('visibilitychange', () => {
+        // 🔥 v97.0: 改進 - 只保存進度，不觸發任何重新洗牌的操作
+        this.visibilityChangeListener = () => {
             if (document.hidden) {
-                console.log('👁️ [v96.0] 頁面隱藏，保存進度到本地');
+                console.log('👁️ [v97.0] 頁面隱藏，保存進度到本地');
                 this.saveGameProgressLocally();
             } else {
-                console.log('👁️ [v96.0] 頁面顯示，檢查進度');
+                console.log('👁️ [v97.0] 頁面顯示，進度已保存');
+                // 🔥 v97.0: 頁面顯示時不做任何操作，避免觸發 resize 或其他事件
             }
-        });
+        };
+        document.addEventListener('visibilitychange', this.visibilityChangeListener);
 
         console.log('🎮 GameScene: create 方法完成');
     }
@@ -1297,9 +1300,10 @@ class GameScene extends Phaser.Scene {
     }
 
     // 🔥 v87.0: 只調整卡片位置，不重新載入詞彙
+    // 🔥 v97.0: 改進 - 不回退到 updateLayout()，避免重新洗牌
     repositionCards() {
         try {
-            console.log('🔄 [v87.0] repositionCards 開始 - 只調整位置，不重新載入詞彙');
+            console.log('🔄 [v97.0] repositionCards 開始 - 只調整位置，不重新載入詞彙');
 
             const width = this.scale.width;
             const height = this.scale.height;
@@ -1310,12 +1314,12 @@ class GameScene extends Phaser.Scene {
                 this.repositionSeparatedLayout(width, height);
             }
 
-            console.log('✅ [v87.0] repositionCards 完成');
+            console.log('✅ [v97.0] repositionCards 完成');
         } catch (error) {
-            console.error('❌ [v87.0] repositionCards 失敗:', error);
-            // 如果位置調整失敗，回退到完整重建
-            console.warn('⚠️ [v87.0] 位置調整失敗，回退到完整重建');
-            this.updateLayout();
+            console.error('❌ [v97.0] repositionCards 失敗:', error);
+            // 🔥 v97.0: 不回退到 updateLayout()，避免重新洗牌
+            // 只記錄錯誤，保持卡片位置不變
+            console.warn('⚠️ [v97.0] 位置調整失敗，但保持卡片位置不變（避免重新洗牌）');
         }
     }
 
@@ -7327,6 +7331,12 @@ class GameScene extends Phaser.Scene {
         if (window) {
             window.removeEventListener('orientationchange', this.handleOrientationChange);
             console.log('✅ 已移除 orientationchange 事件監聽器');
+        }
+
+        // 🔥 v97.0: 移除頁面可見性變化監聽器
+        if (this.visibilityChangeListener && document) {
+            document.removeEventListener('visibilitychange', this.visibilityChangeListener);
+            console.log('✅ [v97.0] 已移除 visibilitychange 事件監聽器');
         }
 
         // 停止計時器
