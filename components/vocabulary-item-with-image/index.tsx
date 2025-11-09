@@ -535,6 +535,7 @@ export default function VocabularyItemWithImage({
           onSelect={handleImageSelect}
           onClose={() => setShowImagePicker(false)}
           multiple={false}
+          initialSearchQuery={item.english}
         />
       )}
 
@@ -557,6 +558,7 @@ export default function VocabularyItemWithImage({
           onSelect={handleChineseImageSelect}
           onClose={() => setShowChineseImagePicker(false)}
           multiple={false}
+          initialSearchQuery={item.chinese}
         />
       )}
 

@@ -42,6 +42,7 @@ export interface ImagePickerProps {
   onClose: () => void;
   multiple?: boolean;
   maxSelection?: number;
+  initialSearchQuery?: string;
 }
 
 type TabType = 'search' | 'upload' | 'library';
@@ -51,6 +52,7 @@ export default function ImagePicker({
   onClose,
   multiple = false,
   maxSelection = 10,
+  initialSearchQuery = '',
 }: ImagePickerProps) {
   const [activeTab, setActiveTab] = useState<TabType>('search');
   const [selectedImages, setSelectedImages] = useState<UserImage[]>([]);
@@ -140,6 +142,7 @@ export default function ImagePicker({
             <SearchTab
               onSelect={handleImageSelect}
               isSelected={isImageSelected}
+              initialSearchQuery={initialSearchQuery}
             />
           )}
           {activeTab === 'upload' && (

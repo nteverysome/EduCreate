@@ -468,6 +468,7 @@ export default function ContentItemWithImage({
           onSelect={handleImageSelect}
           onClose={() => setShowImagePicker(false)}
           multiple={false}
+          initialSearchQuery={localValue.text}
         />
       )}
     </div>

@@ -13,6 +13,7 @@ import { UserImage } from './index';
 interface SearchTabProps {
   onSelect: (image: UserImage) => void;
   isSelected: (imageId: string) => boolean;
+  initialSearchQuery?: string;
 }
 
 interface UnsplashPhoto {
@@ -44,8 +45,8 @@ interface UnsplashPhoto {
   createdAt: string;
 }
 
-export default function SearchTab({ onSelect, isSelected }: SearchTabProps) {
-  const [searchQuery, setSearchQuery] = useState('education');
+export default function SearchTab({ onSelect, isSelected, initialSearchQuery = '' }: SearchTabProps) {
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery || 'education');
   const [photos, setPhotos] = useState<UnsplashPhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,11 +56,19 @@ export default function SearchTab({ onSelect, isSelected }: SearchTabProps) {
   const [color, setColor] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
 
+  // 當初始搜尋詞改變時，自動搜尋
+  useEffect(() => {
+    if (initialSearchQuery && initialSearchQuery !== searchQuery) {
+      setSearchQuery(initialSearchQuery);
+      setPage(1);
+    }
+  }, [initialSearchQuery]);
+
   useEffect(() => {
     if (searchQuery) {
       searchPhotos();
     }
-  }, [page, orientation, color]);
+  }, [page, orientation, color, searchQuery]);
 
   const searchPhotos = async () => {
     setLoading(true);
