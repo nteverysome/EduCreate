@@ -2560,10 +2560,21 @@ class GameScene extends Phaser.Scene {
 
                     // 第三步：計算實際列數
                     calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
-                    maxColsLimit = 6;
+
+                    // 🔥 v57.0：根據寬度動態調整最大列數限制
+                    // 對於大屏幕平板（1024+）：允許 7-8 列
+                    // 對於標準平板（768-1023）：允許 6 列
+                    if (width >= 1000) {
+                        maxColsLimit = 8;  // 大屏幕平板：最多 8 列
+                    } else if (width >= 900) {
+                        maxColsLimit = 7;  // 中等屏幕平板：最多 7 列
+                    } else {
+                        maxColsLimit = 6;  // 標準平板：最多 6 列
+                    }
+
                     optimalCols = Math.min(calculatedCols, maxColsLimit, itemCount);
 
-                    console.log(`🔥 [v50.0] 平板直向列數計算（簡化版）:`, {
+                    console.log(`🔥 [v57.0] 平板直向列數計算（動態最大列數）:`, {
                         width: width.toFixed(1),
                         height: height.toFixed(1),
                         availableWidth: availableWidth.toFixed(1),
@@ -2572,7 +2583,8 @@ class GameScene extends Phaser.Scene {
                         calculatedCols: calculatedCols,
                         maxColsLimit: maxColsLimit,
                         optimalCols: optimalCols,
-                        itemCount: itemCount
+                        itemCount: itemCount,
+                        screenSize: width >= 1000 ? '大屏幕' : width >= 900 ? '中等' : '標準'
                     });
                 } else {
                     // 其他設備：使用原有邏輯
