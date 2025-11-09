@@ -5708,9 +5708,9 @@ class GameScene extends Phaser.Scene {
                     this.goToNextPage();
                 });
             } else {
-                // 顯示「下一頁」按鈕
-                console.log('📄 當前頁完成，顯示下一頁按鈕');
-                this.showNextPageButton();
+                // 顯示「上一頁」和「下一頁」按鈕
+                console.log('📄 當前頁完成，顯示分頁導航按鈕');
+                this.showPaginationButtons();
             }
         } else {
             // 所有頁面都完成了，顯示最終完成訊息
@@ -5993,7 +5993,146 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // 🔥 顯示「下一頁」按鈕
+    // 🔥 [v117.0] 進入上一頁
+    goToPreviousPage() {
+        if (this.currentPage > 0) {
+            // 🔥 詳細調適訊息：追蹤頁面轉換
+            console.log('🔥 [v117.0] ========== 進入上一頁開始 ==========');
+            console.log('🔥 [v117.0] 頁面轉換前:', {
+                currentPage: this.currentPage,
+                pageDisplayName: `第 ${this.currentPage + 1} 頁`,
+                matchedPairsSize: this.matchedPairs.size,
+                matchedPairsContent: Array.from(this.matchedPairs)
+            });
+
+            this.currentPage--;
+            console.log('📄 進入上一頁:', this.currentPage + 1);
+
+            // 🔥 詳細調適訊息：頁面轉換後
+            console.log('🔥 [v117.0] 頁面轉換後:', {
+                currentPage: this.currentPage,
+                pageDisplayName: `第 ${this.currentPage + 1} 頁`,
+                totalPages: this.totalPages
+            });
+
+            // 🔥 清除洗牌順序緩存（因為頁面改變了）
+            this.shuffledPairsCache = null;
+            console.log('🔥 [v117.0] 已清除洗牌順序緩存（頁面改變）');
+
+            // 🔥 清空 matchedPairs（因為進入新頁面，舊頁面的配對信息不再適用）
+            console.log('🔥 [v117.0] 清空 matchedPairs 前:', {
+                size: this.matchedPairs.size,
+                content: Array.from(this.matchedPairs)
+            });
+            this.matchedPairs.clear();
+            console.log('🔥 [v117.0] 已清空 matchedPairs（進入新頁面）');
+            console.log('🔥 [v117.0] 清空 matchedPairs 後:', {
+                size: this.matchedPairs.size,
+                content: Array.from(this.matchedPairs)
+            });
+
+            // 重新佈局（會重新創建卡片）
+            this.updateLayout();
+        }
+    }
+
+    // 🔥 [v117.0] 顯示分頁導航按鈕（上一頁和下一頁）
+    showPaginationButtons() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 按鈕尺寸
+        const buttonWidth = 120;
+        const buttonHeight = 50;
+        const spacing = 30;  // 按鈕之間的間距
+        const centerY = height / 2;
+
+        // 上一頁按鈕位置
+        const prevButtonX = width / 2 - buttonWidth / 2 - spacing / 2;
+        // 下一頁按鈕位置
+        const nextButtonX = width / 2 + buttonWidth / 2 + spacing / 2;
+
+        // 🔥 只在不是第一頁時顯示上一頁按鈕
+        if (this.currentPage > 0) {
+            this.createPaginationButton(
+                prevButtonX,
+                centerY,
+                buttonWidth,
+                buttonHeight,
+                '⬅️ 上一頁',
+                () => this.goToPreviousPage(),
+                0x2196F3  // 藍色
+            );
+        }
+
+        // 🔥 只在不是最後一頁時顯示下一頁按鈕
+        if (this.currentPage < this.totalPages - 1) {
+            this.createPaginationButton(
+                nextButtonX,
+                centerY,
+                buttonWidth,
+                buttonHeight,
+                '下一頁 ➡️',
+                () => this.goToNextPage(),
+                0x4caf50  // 綠色
+            );
+        }
+
+        console.log('📄 [v117.0] 分頁導航按鈕已顯示', {
+            currentPage: this.currentPage + 1,
+            totalPages: this.totalPages,
+            showPrevious: this.currentPage > 0,
+            showNext: this.currentPage < this.totalPages - 1
+        });
+    }
+
+    // 🔥 [v117.0] 創建單個分頁按鈕
+    createPaginationButton(x, y, width, height, text, callback, color) {
+        // 創建按鈕背景
+        const buttonBg = this.add.rectangle(x, y, width, height, color);
+        buttonBg.setStrokeStyle(2, 0x1976D2);
+        buttonBg.setInteractive({ useHandCursor: true });
+        buttonBg.setDepth(3000);
+        buttonBg.setScrollFactor(0);
+
+        // 創建按鈕文字
+        const buttonText = this.add.text(x, y, text, {
+            fontSize: '16px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        buttonText.setOrigin(0.5);
+        buttonText.setDepth(3001);
+        buttonText.setScrollFactor(0);
+
+        // 點擊事件
+        buttonBg.on('pointerdown', () => {
+            // 移除按鈕
+            buttonBg.destroy();
+            buttonText.destroy();
+
+            // 執行回調
+            callback();
+        });
+
+        // 懸停效果
+        buttonBg.on('pointerover', () => {
+            buttonBg.setFillStyle(color);
+            buttonBg.setAlpha(0.8);
+            buttonText.setScale(1.1);
+        });
+
+        buttonBg.on('pointerout', () => {
+            buttonBg.setFillStyle(color);
+            buttonBg.setAlpha(1);
+            buttonText.setScale(1);
+        });
+
+        console.log('📄 [v117.0] 分頁按鈕已創建:', { x, y, text, color });
+    }
+
+    // 🔥 顯示「下一頁」按鈕（保留以向後兼容）
     showNextPageButton() {
         const width = this.scale.width;
         const height = this.scale.height;
