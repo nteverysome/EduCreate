@@ -428,6 +428,8 @@ class GameScene extends Phaser.Scene {
         this.isDragging = false;
         this.dragStartCard = null;
         this.submitButton = null;  // 🔥 提交答案按鈕
+        this.gameCompleteModal = null;  // 🔥 遊戲完成模態框
+        this.pageCompleteModal = null;  // 🔥 [v94.0] 頁面完成模態框
 
         // 顯示載入提示
         const width = this.scale.width;
@@ -5231,7 +5233,7 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // 🔥 顯示配對總結
+    // 🔥 顯示配對總結 [v94.0] - 使用統一的模態框樣式
     showMatchSummary(correctCount, incorrectCount, unmatchedCount = 0) {
         const width = this.scale.width;
         const height = this.scale.height;
@@ -5243,97 +5245,146 @@ class GameScene extends Phaser.Scene {
             this.submitButton = null;
         }
 
-        // 總結文字尺寸（響應式）
-        const fontSize = Math.max(24, Math.min(36, width * 0.03));
-
-        // 顯示總結
+        // 計算當前頁的統計
         const totalCount = this.leftCards.length;
-        let summaryMessage = `配對結果\n正確：${correctCount} / ${totalCount}\n錯誤：${incorrectCount} / ${totalCount}`;
+        const pageNumber = this.currentPage + 1;
+        const totalPages = this.totalPages;
 
-        if (unmatchedCount > 0) {
-            summaryMessage += `\n未配對：${unmatchedCount} / ${totalCount}`;
-        }
+        console.log('📄 [v94.0] 顯示當前頁完成模態框', {
+            pageNumber,
+            totalPages,
+            correctCount,
+            incorrectCount,
+            unmatchedCount,
+            totalCount
+        });
 
-        const summaryText = this.add.text(
+        // 創建半透明背景（遮罩）
+        const overlay = this.add.rectangle(
             width / 2,
-            height / 2 - 50,
-            summaryMessage,
-            {
-                fontSize: `${fontSize}px`,
-                color: correctCount === totalCount && unmatchedCount === 0 ? '#4caf50' : '#ff9800',
-                fontFamily: 'Arial',
-                fontStyle: 'bold',
-                align: 'center',
-                backgroundColor: correctCount === totalCount && unmatchedCount === 0 ? '#e8f5e9' : '#fff3e0',
-                padding: { x: 25, y: 15 }
-            }
+            height / 2,
+            width,
+            height,
+            0x000000,
+            0.7
         );
-        summaryText.setOrigin(0.5).setDepth(2000);
+        overlay.setDepth(5000);
+        overlay.setScrollFactor(0);
 
-        // 如果全部正確且沒有未配對，顯示完成動畫
-        if (correctCount === totalCount && unmatchedCount === 0) {
-            this.tweens.add({
-                targets: summaryText,
-                scaleX: 1.1,
-                scaleY: 1.1,
-                duration: 500,
-                yoyo: true,
-                repeat: 2,
-                ease: 'Sine.easeInOut',
-                onComplete: () => {
-                    // 檢查是否有下一頁
-                    this.time.delayedCall(1000, () => {
-                        this.onGameComplete();
-                    });
-                }
-            });
-        } else {
-            // 顯示「重試」按鈕
-            this.time.delayedCall(2000, () => {
-                this.showRetryButton();
-            });
-        }
-    }
+        // 創建模態框容器
+        const modalWidth = Math.min(500, width * 0.8);
+        const modalHeight = Math.min(420, height * 0.7);
+        const modal = this.add.container(width / 2, height / 2);
+        modal.setDepth(5001);
+        modal.setScrollFactor(0);
 
-    // 🔥 顯示「重試」按鈕
-    showRetryButton() {
-        const width = this.scale.width;
-        const height = this.scale.height;
+        // 模態框背景
+        const modalBg = this.add.rectangle(0, 0, modalWidth, modalHeight, 0x2c2c2c);
+        modalBg.setStrokeStyle(4, 0x000000);
+        modal.add(modalBg);
 
-        const buttonWidth = Math.max(120, Math.min(200, width * 0.15));
-        const buttonHeight = Math.max(40, Math.min(60, height * 0.08));
-        const fontSize = Math.max(16, Math.min(24, width * 0.02));
-
-        const buttonX = width / 2;
-        const buttonY = height / 2 + 50;
-
-        const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0xff9800);
-        buttonBg.setStrokeStyle(2, 0xf57c00);
-        buttonBg.setInteractive({ useHandCursor: true });
-        buttonBg.setDepth(2000);
-
-        const buttonText = this.add.text(buttonX, buttonY, '重試', {
-            fontSize: `${fontSize}px`,
+        // 標題：PAGE COMPLETE
+        const title = this.add.text(0, -modalHeight / 2 + 20, 'PAGE COMPLETE', {
+            fontSize: '36px',
             color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         });
-        buttonText.setOrigin(0.5);
-        buttonText.setDepth(2001);
+        title.setOrigin(0.5);
+        modal.add(title);
 
-        buttonBg.on('pointerdown', () => {
-            console.log('🔄 重試當前頁');
+        // 頁碼標籤
+        const pageLabel = this.add.text(-80, -modalHeight / 2 + 55, 'Page', {
+            fontSize: '18px',
+            color: '#4a9eff',
+            fontFamily: 'Arial'
+        });
+        pageLabel.setOrigin(0.5);
+        modal.add(pageLabel);
+
+        // 頁碼值
+        const pageValue = this.add.text(-80, -modalHeight / 2 + 80, `${pageNumber}/${totalPages}`, {
+            fontSize: '28px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        pageValue.setOrigin(0.5);
+        modal.add(pageValue);
+
+        // 分數標籤
+        const scoreLabel = this.add.text(80, -modalHeight / 2 + 55, 'Score', {
+            fontSize: '18px',
+            color: '#4a9eff',
+            fontFamily: 'Arial'
+        });
+        scoreLabel.setOrigin(0.5);
+        modal.add(scoreLabel);
+
+        // 分數值
+        const scoreValue = this.add.text(80, -modalHeight / 2 + 80, `${correctCount}/${totalCount}`, {
+            fontSize: '28px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        scoreValue.setOrigin(0.5);
+        modal.add(scoreValue);
+
+        // 頁面完成提示
+        const completeText = this.add.text(0, -modalHeight / 2 + 115, 'PAGE COMPLETE!', {
+            fontSize: '14px',
+            color: '#4caf50',
+            fontFamily: 'Arial'
+        });
+        completeText.setOrigin(0.5);
+        modal.add(completeText);
+
+        // 按鈕間距
+        const buttonSpacing = 42;
+        const firstButtonY = -modalHeight / 2 + 155;
+
+        // Show answers 按鈕
+        this.createModalButton(modal, 0, firstButtonY, 'Show answers', () => {
+            console.log('🎮 點擊 Show answers 按鈕');
+            overlay.destroy();
+            modal.destroy();
+            this.pageCompleteModal = null;
+            this.showAnswersOnCards();
+        });
+
+        // Show all answers 按鈕
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing, 'Show all answers', () => {
+            console.log('🎮 點擊 Show all answers 按鈕');
+            overlay.destroy();
+            modal.destroy();
+            this.pageCompleteModal = null;
+            this.showAllCorrectAnswers();
+        });
+
+        // Next page 按鈕
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 2, 'Next page', () => {
+            console.log('🎮 點擊 Next page 按鈕');
+            overlay.destroy();
+            modal.destroy();
+            this.pageCompleteModal = null;
+            this.goToNextPage();
+        });
+
+        // Retry 按鈕
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 3, 'Retry', () => {
+            console.log('🎮 點擊 Retry 按鈕');
+            overlay.destroy();
+            modal.destroy();
+            this.pageCompleteModal = null;
             this.resetCurrentPage();
         });
 
-        buttonBg.on('pointerover', () => {
-            buttonBg.setFillStyle(0xffb74d);
-        });
-
-        buttonBg.on('pointerout', () => {
-            buttonBg.setFillStyle(0xff9800);
-        });
+        // 保存模態框引用
+        this.pageCompleteModal = { overlay, modal };
     }
+
+    // 🔥 [v94.0] showRetryButton() 已移除 - 使用統一的模態框樣式
 
     // 🔥 重置當前頁
     resetCurrentPage() {
@@ -5990,11 +6041,18 @@ class GameScene extends Phaser.Scene {
     restartGame() {
         console.log('🎮 重新開始遊戲');
 
-        // 關閉模態框
+        // 關閉遊戲完成模態框
         if (this.gameCompleteModal) {
             this.gameCompleteModal.overlay.destroy();
             this.gameCompleteModal.modal.destroy();
             this.gameCompleteModal = null;
+        }
+
+        // 🔥 [v94.0] 關閉頁面完成模態框
+        if (this.pageCompleteModal) {
+            this.pageCompleteModal.overlay.destroy();
+            this.pageCompleteModal.modal.destroy();
+            this.pageCompleteModal = null;
         }
 
         // 重置遊戲狀態
