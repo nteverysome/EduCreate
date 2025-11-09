@@ -1077,91 +1077,99 @@ class GameScene extends Phaser.Scene {
                 console.log('ℹ️ [v53.0] 沒有已配對的卡片需要恢復');
             }
 
-            // 🔥 [v112.0] 新增：直接根據 matchedPairs 和當前卡片位置來創建標記
-            // 這樣可以確保標記始終根據當前的配對狀態正確顯示，就像第一頁提交答案時一樣
-            console.log('🔥 [v112.0] 根據 matchedPairs 重新創建標記');
+            // 🔥 [v114.0] 修復：只在有已配對卡片時才恢復標記
+            // 這樣可以確保：
+            // 1. 進入新頁面時，沒有標記（因為 matchedPairs 被清空了）
+            // 2. 窗口大小改變時，已配對的標記會被恢復
+            console.log('🔥 [v114.0] 檢查是否需要恢復標記');
 
-            // 獲取當前頁的詞彙數據
-            const startIndex = this.currentPage * this.itemsPerPage;
-            const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
-            const currentPagePairs = this.pairs.slice(startIndex, endIndex);
+            if (this.matchedPairs && this.matchedPairs.size > 0) {
+                console.log('🔥 [v114.0] 根據 matchedPairs 重新創建標記');
 
-            console.log('🔥 [v112.0] 當前頁面信息:', {
-                currentPage: this.currentPage,
-                startIndex,
-                endIndex,
-                currentPagePairsLength: currentPagePairs.length,
-                matchedPairsSize: this.matchedPairs.size
-            });
+                // 獲取當前頁的詞彙數據
+                const startIndex = this.currentPage * this.itemsPerPage;
+                const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
+                const currentPagePairs = this.pairs.slice(startIndex, endIndex);
 
-            // 在混合模式中，根據當前卡片位置來創建標記
-            if (this.layout === 'mixed') {
-                currentPagePairs.forEach((pair, pairIndex) => {
-                    // 在混合模式中，每個詞彙對應一個框位置（pairIndex）
-                    const frameIndex = pairIndex;
-
-                    // 找到當前在這個框位置的英文卡片
-                    const currentCardInFrame = this.leftCards?.find(card =>
-                        card.getData('currentFrameIndex') === frameIndex
-                    );
-
-                    if (currentCardInFrame) {
-                        const currentCardPairId = currentCardInFrame.getData('pairId');
-                        const isCorrect = pair.id === currentCardPairId;
-
-                        console.log(`🔥 [v112.0] 混合模式 - 詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
-                            pairId: pair.id,
-                            chinese: pair.chinese,
-                            expectedEnglish: pair.english,
-                            currentCardPairId: currentCardPairId,
-                            isCorrect
-                        });
-
-                        // 根據配對結果創建勾勾或叉叉
-                        if (isCorrect) {
-                            console.log(`✅ [v112.0] 卡片 ${currentCardPairId} 顯示勾勾`);
-                            this.showCorrectAnswer(currentCardInFrame, pair.english);
-                        } else {
-                            console.log(`❌ [v112.0] 卡片 ${currentCardPairId} 顯示叉叉`);
-                            this.showIncorrectAnswer(currentCardInFrame, pair.english);
-                        }
-                    } else {
-                        console.log(`⚠️ [v112.0] 框位置 ${frameIndex} 沒有卡片`);
-                    }
+                console.log('🔥 [v114.0] 當前頁面信息:', {
+                    currentPage: this.currentPage,
+                    startIndex,
+                    endIndex,
+                    currentPagePairsLength: currentPagePairs.length,
+                    matchedPairsSize: this.matchedPairs.size
                 });
-            } else {
-                // 分離模式：根據 matchedPairs 來創建標記
-                console.log('🔥 [v112.0] 分離模式：根據 matchedPairs 創建標記');
 
-                currentPagePairs.forEach((pair, pairIndex) => {
-                    // 在分離模式中，找到對應的右卡片
-                    const rightCard = this.rightCards?.find(card => card.getData('pairId') === pair.id);
+                // 在混合模式中，根據當前卡片位置來創建標記
+                if (this.layout === 'mixed') {
+                    currentPagePairs.forEach((pair, pairIndex) => {
+                        // 在混合模式中，每個詞彙對應一個框位置（pairIndex）
+                        const frameIndex = pairIndex;
 
-                    if (rightCard) {
-                        // 檢查這個詞彙是否已配對
-                        const isMatched = this.matchedPairs.has(pair.id);
+                        // 找到當前在這個框位置的英文卡片
+                        const currentCardInFrame = this.leftCards?.find(card =>
+                            card.getData('currentFrameIndex') === frameIndex
+                        );
 
-                        if (isMatched) {
-                            // 找到配對的左卡片
-                            const leftCard = this.leftCards?.find(card => card.getData('matchedWith') === rightCard);
-                            const isCorrect = leftCard && leftCard.getData('pairId') === pair.id;
+                        if (currentCardInFrame) {
+                            const currentCardPairId = currentCardInFrame.getData('pairId');
+                            const isCorrect = pair.id === currentCardPairId;
 
-                            console.log(`🔥 [v112.0] 分離模式 - 詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
+                            console.log(`🔥 [v114.0] 混合模式 - 詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
                                 pairId: pair.id,
-                                isMatched,
+                                chinese: pair.chinese,
+                                expectedEnglish: pair.english,
+                                currentCardPairId: currentCardPairId,
                                 isCorrect
                             });
 
+                            // 根據配對結果創建勾勾或叉叉
                             if (isCorrect) {
-                                console.log(`✅ [v112.0] 卡片 ${pair.id} 顯示勾勾`);
-                                this.showCorrectAnswer(rightCard, pair.english);
+                                console.log(`✅ [v114.0] 卡片 ${currentCardPairId} 顯示勾勾`);
+                                this.showCorrectAnswer(currentCardInFrame, pair.english);
                             } else {
-                                console.log(`❌ [v112.0] 卡片 ${pair.id} 顯示叉叉`);
-                                this.showIncorrectAnswer(rightCard, pair.english);
+                                console.log(`❌ [v114.0] 卡片 ${currentCardPairId} 顯示叉叉`);
+                                this.showIncorrectAnswer(currentCardInFrame, pair.english);
+                            }
+                        } else {
+                            console.log(`⚠️ [v114.0] 框位置 ${frameIndex} 沒有卡片`);
+                        }
+                    });
+                } else {
+                    // 分離模式：根據 matchedPairs 來創建標記
+                    console.log('🔥 [v114.0] 分離模式：根據 matchedPairs 創建標記');
+
+                    currentPagePairs.forEach((pair, pairIndex) => {
+                        // 在分離模式中，找到對應的右卡片
+                        const rightCard = this.rightCards?.find(card => card.getData('pairId') === pair.id);
+
+                        if (rightCard) {
+                            // 檢查這個詞彙是否已配對
+                            const isMatched = this.matchedPairs.has(pair.id);
+
+                            if (isMatched) {
+                                // 找到配對的左卡片
+                                const leftCard = this.leftCards?.find(card => card.getData('matchedWith') === rightCard);
+                                const isCorrect = leftCard && leftCard.getData('pairId') === pair.id;
+
+                                console.log(`🔥 [v114.0] 分離模式 - 詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
+                                    pairId: pair.id,
+                                    isMatched,
+                                    isCorrect
+                                });
+
+                                if (isCorrect) {
+                                    console.log(`✅ [v114.0] 卡片 ${pair.id} 顯示勾勾`);
+                                    this.showCorrectAnswer(rightCard, pair.english);
+                                } else {
+                                    console.log(`❌ [v114.0] 卡片 ${pair.id} 顯示叉叉`);
+                                    this.showIncorrectAnswer(rightCard, pair.english);
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
+            } else {
+                console.log('ℹ️ [v114.0] matchedPairs 為空，不需要恢復標記');
             }
 
             console.log('✅ [v53.0] 已配對卡片視覺效果恢復完成');
