@@ -5191,9 +5191,12 @@ class GameScene extends Phaser.Scene {
                     textY: textObject ? textObject.y : null
                 });
 
-                // 🔥 [v109.0] 如果找到文字對象，在其上方放置勾勾
+                // 🔥 [v110.0] 如果找到文字對象，在其上方放置勾勾
                 if (textObject) {
-                    // 計算文字的全局位置
+                    // 🔥 [v110.0] 修復：計算文字的全局位置
+                    // container 的位置是 (rightCard.x, rightCard.y)
+                    // textObject 的位置是相對於 container 的
+                    // 所以全局位置 = container 位置 + textObject 相對位置
                     const textGlobalX = rightCard.x + textObject.x;
                     const textGlobalY = rightCard.y + textObject.y;
 
@@ -5201,11 +5204,16 @@ class GameScene extends Phaser.Scene {
                     const markX = textGlobalX;
                     const markY = textGlobalY - 40;  // 在文字上方 40px
 
-                    console.log('🔍 [v109.0] 勾勾位置計算（基於文字）:', {
+                    console.log('🔍 [v110.0] 勾勾位置計算（基於文字）:', {
+                        rightCardX: rightCard.x,
+                        rightCardY: rightCard.y,
+                        textObjectX: textObject.x,
+                        textObjectY: textObject.y,
                         textGlobalX,
                         textGlobalY,
                         markX,
-                        markY
+                        markY,
+                        textContent: textObject.text
                     });
 
                     // 🔥 [v103.0] 移除舊的標記（如果存在）
@@ -5226,14 +5234,14 @@ class GameScene extends Phaser.Scene {
                     // 🔥 [v103.0] 保存引用以便後續清除
                     rightCard.checkMark = checkMark;
 
-                    console.log('✅ [v109.0] 混合佈局：在英文單字上方添加勾勾', {
+                    console.log('✅ [v110.0] 混合佈局：在英文單字上方添加勾勾', {
                         checkMarkX: checkMark.x,
                         checkMarkY: checkMark.y,
                         checkMarkVisible: checkMark.visible,
                         checkMarkDepth: checkMark.depth
                     });
                 } else {
-                    console.warn('⚠️ [v102.0] 混合佈局：找不到背景對象');
+                    console.warn('⚠️ [v110.0] 混合佈局：找不到英文文字對象');
                 }
             } else {
                 console.warn('⚠️ [v102.0] 混合佈局：rightCard 或 rightCard.list 不存在');
@@ -5308,7 +5316,10 @@ class GameScene extends Phaser.Scene {
                 });
 
                 if (textObject) {
-                    // 🔥 [v109.0] 計算文字的全局位置
+                    // 🔥 [v110.0] 修復：計算文字的全局位置
+                    // container 的位置是 (rightCard.x, rightCard.y)
+                    // textObject 的位置是相對於 container 的
+                    // 所以全局位置 = container 位置 + textObject 相對位置
                     const textGlobalX = rightCard.x + textObject.x;
                     const textGlobalY = rightCard.y + textObject.y;
 
@@ -5316,11 +5327,16 @@ class GameScene extends Phaser.Scene {
                     const markX = textGlobalX;
                     const markY = textGlobalY - 40;  // 在文字上方 40px
 
-                    console.log('🔍 [v109.0] 叉叉位置計算（基於文字）:', {
+                    console.log('🔍 [v110.0] 叉叉位置計算（基於文字）:', {
+                        rightCardX: rightCard.x,
+                        rightCardY: rightCard.y,
+                        textObjectX: textObject.x,
+                        textObjectY: textObject.y,
                         textGlobalX,
                         textGlobalY,
                         markX,
-                        markY
+                        markY,
+                        textContent: textObject.text
                     });
 
                     // 🔥 [v103.0] 移除舊的標記（如果存在）
@@ -5341,14 +5357,14 @@ class GameScene extends Phaser.Scene {
                     // 🔥 [v103.0] 保存引用以便後續清除
                     rightCard.xMark = xMark;
 
-                    console.log('❌ [v109.0] 混合佈局：在英文單字上方添加叉叉', {
+                    console.log('❌ [v110.0] 混合佈局：在英文單字上方添加叉叉', {
                         xMarkX: xMark.x,
                         xMarkY: xMark.y,
                         xMarkVisible: xMark.visible,
                         xMarkDepth: xMark.depth
                     });
                 } else {
-                    console.warn('⚠️ [v109.0] 混合佈局：找不到英文文字對象');
+                    console.warn('⚠️ [v110.0] 混合佈局：找不到英文文字對象');
                 }
             } else {
                 console.warn('⚠️ [v102.0] 混合佈局：rightCard 或 rightCard.list 不存在');
