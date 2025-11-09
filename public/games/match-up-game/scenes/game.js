@@ -5636,21 +5636,38 @@ class GameScene extends Phaser.Scene {
         // 🔥 [v96.0] 如果不是最後一頁，根據 autoProceed 設置決定是否自動進入下一頁
         // 這樣可以讓用戶看到勾勾和叉叉
         if (!isLastPage) {
+            // 🔥 [v119.0] 詳細的調適訊息 - 頁面轉換邏輯
+            console.log('🔥 [v119.0] ========== showMatchSummary 頁面轉換邏輯開始 ==========');
+            console.log('🔥 [v119.0] 當前狀態:', {
+                currentPage: this.currentPage,
+                totalPages: this.totalPages,
+                isLastPage: isLastPage,
+                autoProceed: this.autoProceed,
+                enablePagination: this.enablePagination
+            });
+
             if (this.autoProceed) {
                 // 自動進入下一頁
+                console.log('🔥 [v119.0] ✅ autoProceed=true：將在 2 秒後自動進入下一頁');
                 console.log('📄 [v96.0] 非最後一頁：延遲 2 秒後自動進入下一頁');
                 this.time.delayedCall(2000, () => {
+                    console.log('🔥 [v119.0] ⏰ 2 秒延遲完成，準備進入下一頁');
                     console.log('📄 [v96.0] 2 秒延遲後，進入下一頁');
+                    console.log('🔥 [v119.0] 調用 goToNextPage()，頁面轉換: ' + this.currentPage + ' → ' + (this.currentPage + 1));
                     this.goToNextPage();
                 });
             } else {
                 // 顯示分頁導航按鈕
+                console.log('🔥 [v119.0] ✅ autoProceed=false：將在 2 秒後顯示分頁導航按鈕');
                 console.log('📄 [v117.0] 非最後一頁且 autoProceed=false：顯示分頁導航按鈕');
                 this.time.delayedCall(2000, () => {
+                    console.log('🔥 [v119.0] ⏰ 2 秒延遲完成，準備顯示分頁導航按鈕');
                     console.log('📄 [v117.0] 2 秒延遲後，顯示分頁導航按鈕');
+                    console.log('🔥 [v119.0] 調用 showPaginationButtons()，當前頁面: ' + (this.currentPage + 1) + '/' + this.totalPages);
                     this.showPaginationButtons();
                 });
             }
+            console.log('🔥 [v119.0] ========== showMatchSummary 頁面轉換邏輯結束 ==========');
             return;
         }
 
@@ -6139,6 +6156,15 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 [v117.0] 顯示分頁導航按鈕（上一頁和下一頁）
     showPaginationButtons() {
+        // 🔥 [v119.0] 詳細的調適訊息 - 分頁按鈕顯示開始
+        console.log('🔥 [v119.0] ========== showPaginationButtons 開始 ==========');
+        console.log('🔥 [v119.0] 當前頁面狀態:', {
+            currentPage: this.currentPage,
+            pageDisplayName: `第 ${this.currentPage + 1} 頁`,
+            totalPages: this.totalPages,
+            enablePagination: this.enablePagination
+        });
+
         const width = this.scale.width;
         const height = this.scale.height;
 
@@ -6153,8 +6179,19 @@ class GameScene extends Phaser.Scene {
         // 下一頁按鈕位置
         const nextButtonX = width / 2 + buttonWidth / 2 + spacing / 2;
 
+        console.log('🔥 [v119.0] 按鈕位置計算:', {
+            screenWidth: width,
+            screenHeight: height,
+            prevButtonX: prevButtonX,
+            nextButtonX: nextButtonX,
+            centerY: centerY,
+            buttonWidth: buttonWidth,
+            buttonHeight: buttonHeight
+        });
+
         // 🔥 只在不是第一頁時顯示上一頁按鈕
         if (this.currentPage > 0) {
+            console.log('🔥 [v119.0] ✅ 創建上一頁按鈕（當前頁 > 0）');
             this.createPaginationButton(
                 prevButtonX,
                 centerY,
@@ -6164,10 +6201,13 @@ class GameScene extends Phaser.Scene {
                 () => this.goToPreviousPage(),
                 0x2196F3  // 藍色
             );
+        } else {
+            console.log('🔥 [v119.0] ❌ 不創建上一頁按鈕（當前頁 = 0，是第一頁）');
         }
 
         // 🔥 只在不是最後一頁時顯示下一頁按鈕
         if (this.currentPage < this.totalPages - 1) {
+            console.log('🔥 [v119.0] ✅ 創建下一頁按鈕（當前頁 < 最後一頁）');
             this.createPaginationButton(
                 nextButtonX,
                 centerY,
@@ -6177,6 +6217,8 @@ class GameScene extends Phaser.Scene {
                 () => this.goToNextPage(),
                 0x4caf50  // 綠色
             );
+        } else {
+            console.log('🔥 [v119.0] ❌ 不創建下一頁按鈕（當前頁 = 最後一頁）');
         }
 
         console.log('📄 [v117.0] 分頁導航按鈕已顯示', {
@@ -6185,16 +6227,30 @@ class GameScene extends Phaser.Scene {
             showPrevious: this.currentPage > 0,
             showNext: this.currentPage < this.totalPages - 1
         });
+        console.log('🔥 [v119.0] ========== showPaginationButtons 結束 ==========');
     }
 
     // 🔥 [v117.0] 創建單個分頁按鈕
     createPaginationButton(x, y, width, height, text, callback, color) {
+        // 🔥 [v119.0] 詳細的調適訊息 - 按鈕創建開始
+        console.log('🔥 [v119.0] ========== createPaginationButton 開始 ==========');
+        console.log('🔥 [v119.0] 按鈕參數:', {
+            x: x,
+            y: y,
+            width: width,
+            height: height,
+            text: text,
+            color: '0x' + color.toString(16).toUpperCase(),
+            callbackName: callback.name || 'anonymous'
+        });
+
         // 創建按鈕背景
         const buttonBg = this.add.rectangle(x, y, width, height, color);
         buttonBg.setStrokeStyle(2, 0x1976D2);
         buttonBg.setInteractive({ useHandCursor: true });
         buttonBg.setDepth(3000);
         buttonBg.setScrollFactor(0);
+        console.log('🔥 [v119.0] ✅ 按鈕背景已創建');
 
         // 創建按鈕文字
         const buttonText = this.add.text(x, y, text, {
@@ -6206,31 +6262,38 @@ class GameScene extends Phaser.Scene {
         buttonText.setOrigin(0.5);
         buttonText.setDepth(3001);
         buttonText.setScrollFactor(0);
+        console.log('🔥 [v119.0] ✅ 按鈕文字已創建');
 
         // 點擊事件
         buttonBg.on('pointerdown', () => {
+            console.log('🔥 [v119.0] 🖱️ 按鈕被點擊:', { text: text, currentPage: this.currentPage });
             // 移除按鈕
             buttonBg.destroy();
             buttonText.destroy();
+            console.log('🔥 [v119.0] ✅ 按鈕已銷毀');
 
             // 執行回調
+            console.log('🔥 [v119.0] 📞 執行回調函數:', callback.name || 'anonymous');
             callback();
         });
 
         // 懸停效果
         buttonBg.on('pointerover', () => {
+            console.log('🔥 [v119.0] 🎯 滑鼠進入按鈕:', { text: text });
             buttonBg.setFillStyle(color);
             buttonBg.setAlpha(0.8);
             buttonText.setScale(1.1);
         });
 
         buttonBg.on('pointerout', () => {
+            console.log('🔥 [v119.0] 🎯 滑鼠離開按鈕:', { text: text });
             buttonBg.setFillStyle(color);
             buttonBg.setAlpha(1);
             buttonText.setScale(1);
         });
 
         console.log('📄 [v117.0] 分頁按鈕已創建:', { x, y, text, color });
+        console.log('🔥 [v119.0] ========== createPaginationButton 結束 ==========');
     }
 
     // 🔥 顯示「下一頁」按鈕（保留以向後兼容）
