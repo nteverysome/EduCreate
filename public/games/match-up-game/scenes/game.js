@@ -5115,7 +5115,7 @@ class GameScene extends Phaser.Scene {
         // 🔥 [v98.0] 在混合佈局中，不需要檢查 background，直接添加勾勾
         if (this.layout === 'mixed') {
             // 混合佈局：rightCard 是英文卡片，直接在其上添加勾勾
-            console.log('🔍 [v101.0] showCorrectAnswer 混合佈局調試:', {
+            console.log('🔍 [v102.0] showCorrectAnswer 混合佈局調試:', {
                 hasRightCard: !!rightCard,
                 hasList: rightCard && !!rightCard.list,
                 listLength: rightCard && rightCard.list ? rightCard.list.length : 0,
@@ -5128,13 +5128,13 @@ class GameScene extends Phaser.Scene {
             });
 
             if (rightCard && rightCard.list) {
-                // 🔥 [v101.0] 修復：參考 showCorrectAnswerOnCard() 的方法
+                // 🔥 [v102.0] 修復：參考 showCorrectAnswerOnCard() 的方法
                 // 勾勾應該直接添加到場景中，而不是容器中
                 // 位置相對於全局坐標
 
                 const background = rightCard.list[0]; // 卡片背景
 
-                console.log('🔍 [v101.0] 背景對象詳細信息:', {
+                console.log('🔍 [v102.0] 背景對象詳細信息:', {
                     hasBackground: !!background,
                     backgroundType: background ? background.type : null,
                     backgroundWidth: background ? background.width : null,
@@ -5142,11 +5142,11 @@ class GameScene extends Phaser.Scene {
                 });
 
                 if (background) {
-                    // 🔥 [v101.0] 使用全局坐標計算勾勾位置
+                    // 🔥 [v102.0] 使用全局坐標計算勾勾位置（參考 showCorrectAnswerOnCard）
                     const markX = rightCard.x + background.width / 2 - 32;
                     const markY = rightCard.y - background.height / 2 + 32;
 
-                    console.log('🔍 [v101.0] 勾勾位置計算:', {
+                    console.log('🔍 [v102.0] 勾勾位置計算:', {
                         rightCardX: rightCard.x,
                         rightCardY: rightCard.y,
                         backgroundWidth: background.width,
@@ -5155,25 +5155,28 @@ class GameScene extends Phaser.Scene {
                         markY
                     });
 
-                    const checkMark = this.add.text(markX, markY, '✓', {
+                    // 🔥 [v102.0] 先創建在 (0, 0)，然後設置位置（與 showCorrectAnswerOnCard 一致）
+                    const checkMark = this.add.text(0, 0, '✓', {
                         fontSize: '64px',
                         color: '#4caf50',
                         fontFamily: 'Arial',
                         fontStyle: 'bold'
                     });
-                    checkMark.setOrigin(0.5, 0.5).setDepth(100);
+                    checkMark.setOrigin(0.5, 0.5);
+                    checkMark.setDepth(100);
+                    checkMark.setPosition(markX, markY);
 
-                    console.log('✅ [v101.0] 混合佈局：在英文卡片上添加勾勾', {
+                    console.log('✅ [v102.0] 混合佈局：在英文卡片上添加勾勾', {
                         checkMarkX: checkMark.x,
                         checkMarkY: checkMark.y,
                         checkMarkVisible: checkMark.visible,
                         checkMarkDepth: checkMark.depth
                     });
                 } else {
-                    console.warn('⚠️ [v101.0] 混合佈局：找不到背景對象');
+                    console.warn('⚠️ [v102.0] 混合佈局：找不到背景對象');
                 }
             } else {
-                console.warn('⚠️ [v101.0] 混合佈局：rightCard 或 rightCard.list 不存在');
+                console.warn('⚠️ [v102.0] 混合佈局：rightCard 或 rightCard.list 不存在');
             }
         } else {
             // 分離模式：使用原有的邏輯
@@ -5218,7 +5221,7 @@ class GameScene extends Phaser.Scene {
         // 🔥 [v98.0] 在混合佈局中，不需要檢查 background，直接添加叉叉
         if (this.layout === 'mixed') {
             // 混合佈局：rightCard 是英文卡片，直接在其上添加叉叉
-            console.log('🔍 [v101.0] showIncorrectAnswer 混合佈局調試:', {
+            console.log('🔍 [v102.0] showIncorrectAnswer 混合佈局調試:', {
                 hasRightCard: !!rightCard,
                 hasList: rightCard && !!rightCard.list,
                 listLength: rightCard && rightCard.list ? rightCard.list.length : 0,
@@ -5231,13 +5234,13 @@ class GameScene extends Phaser.Scene {
             });
 
             if (rightCard && rightCard.list) {
-                // 🔥 [v101.0] 修復：參考 showIncorrectAnswerOnCard() 的方法
+                // 🔥 [v102.0] 修復：參考 showIncorrectAnswerOnCard() 的方法
                 // 叉叉應該直接添加到場景中，而不是容器中
                 // 位置相對於全局坐標
 
                 const background = rightCard.list[0]; // 卡片背景
 
-                console.log('🔍 [v101.0] 背景對象詳細信息:', {
+                console.log('🔍 [v102.0] 背景對象詳細信息:', {
                     hasBackground: !!background,
                     backgroundType: background ? background.type : null,
                     backgroundWidth: background ? background.width : null,
@@ -5245,11 +5248,11 @@ class GameScene extends Phaser.Scene {
                 });
 
                 if (background) {
-                    // 🔥 [v101.0] 使用全局坐標計算叉叉位置
+                    // 🔥 [v102.0] 使用全局坐標計算叉叉位置（參考 showIncorrectAnswerOnCard）
                     const markX = rightCard.x + background.width / 2 - 32;
                     const markY = rightCard.y - background.height / 2 + 32;
 
-                    console.log('🔍 [v101.0] 叉叉位置計算:', {
+                    console.log('🔍 [v102.0] 叉叉位置計算:', {
                         rightCardX: rightCard.x,
                         rightCardY: rightCard.y,
                         backgroundWidth: background.width,
@@ -5258,25 +5261,28 @@ class GameScene extends Phaser.Scene {
                         markY
                     });
 
-                    const xMark = this.add.text(markX, markY, '✗', {
+                    // 🔥 [v102.0] 先創建在 (0, 0)，然後設置位置（與 showIncorrectAnswerOnCard 一致）
+                    const xMark = this.add.text(0, 0, '✗', {
                         fontSize: '64px',
                         color: '#f44336',
                         fontFamily: 'Arial',
                         fontStyle: 'bold'
                     });
-                    xMark.setOrigin(0.5, 0.5).setDepth(100);
+                    xMark.setOrigin(0.5, 0.5);
+                    xMark.setDepth(100);
+                    xMark.setPosition(markX, markY);
 
-                    console.log('❌ [v101.0] 混合佈局：在英文卡片上添加叉叉', {
+                    console.log('❌ [v102.0] 混合佈局：在英文卡片上添加叉叉', {
                         xMarkX: xMark.x,
                         xMarkY: xMark.y,
                         xMarkVisible: xMark.visible,
                         xMarkDepth: xMark.depth
                     });
                 } else {
-                    console.warn('⚠️ [v101.0] 混合佈局：找不到背景對象');
+                    console.warn('⚠️ [v102.0] 混合佈局：找不到背景對象');
                 }
             } else {
-                console.warn('⚠️ [v101.0] 混合佈局：rightCard 或 rightCard.list 不存在');
+                console.warn('⚠️ [v102.0] 混合佈局：rightCard 或 rightCard.list 不存在');
             }
         } else {
             // 分離模式：使用原有的邏輯
