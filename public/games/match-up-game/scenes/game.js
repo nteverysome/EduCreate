@@ -5233,7 +5233,7 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // 🔥 顯示配對總結 [v94.0] - 使用統一的模態框樣式
+    // 🔥 顯示配對總結 [v95.0] - 非最後一頁自動進入下一頁，只有最後一頁才顯示統計
     showMatchSummary(correctCount, incorrectCount, unmatchedCount = 0) {
         const width = this.scale.width;
         const height = this.scale.height;
@@ -5249,15 +5249,26 @@ class GameScene extends Phaser.Scene {
         const totalCount = this.leftCards.length;
         const pageNumber = this.currentPage + 1;
         const totalPages = this.totalPages;
+        const isLastPage = this.currentPage === this.totalPages - 1;
 
-        console.log('📄 [v94.0] 顯示當前頁完成模態框', {
+        console.log('📄 [v95.0] 顯示當前頁完成模態框', {
             pageNumber,
             totalPages,
+            isLastPage,
             correctCount,
             incorrectCount,
             unmatchedCount,
             totalCount
         });
+
+        // 🔥 [v95.0] 如果不是最後一頁，自動進入下一頁
+        if (!isLastPage) {
+            console.log('📄 [v95.0] 自動進入下一頁');
+            this.time.delayedCall(1000, () => {
+                this.goToNextPage();
+            });
+            return;
+        }
 
         // 創建半透明背景（遮罩）
         const overlay = this.add.rectangle(
@@ -5283,8 +5294,8 @@ class GameScene extends Phaser.Scene {
         modalBg.setStrokeStyle(4, 0x000000);
         modal.add(modalBg);
 
-        // 標題：PAGE COMPLETE
-        const title = this.add.text(0, -modalHeight / 2 + 20, 'PAGE COMPLETE', {
+        // 標題：GAME COMPLETE（最後一頁）
+        const title = this.add.text(0, -modalHeight / 2 + 20, 'GAME COMPLETE', {
             fontSize: '36px',
             color: '#ffffff',
             fontFamily: 'Arial',
@@ -5362,22 +5373,19 @@ class GameScene extends Phaser.Scene {
             this.showAllCorrectAnswers();
         });
 
-        // Next page 按鈕
-        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 2, 'Next page', () => {
-            console.log('🎮 點擊 Next page 按鈕');
+        // Start again 按鈕（最後一頁）
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 2, 'Start again', () => {
+            console.log('🎮 點擊 Start again 按鈕');
             overlay.destroy();
             modal.destroy();
             this.pageCompleteModal = null;
-            this.goToNextPage();
+            this.restartGame();
         });
 
-        // Retry 按鈕
-        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 3, 'Retry', () => {
-            console.log('🎮 點擊 Retry 按鈕');
-            overlay.destroy();
-            modal.destroy();
-            this.pageCompleteModal = null;
-            this.resetCurrentPage();
+        // Leaderboard 按鈕（最後一頁）
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 3, 'Leaderboard', () => {
+            console.log('🎮 點擊 Leaderboard 按鈕');
+            this.showEnterNamePage();
         });
 
         // 保存模態框引用
