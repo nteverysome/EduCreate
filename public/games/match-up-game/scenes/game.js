@@ -6172,11 +6172,13 @@ class GameScene extends Phaser.Scene {
         const buttonWidth = 120;
         const buttonHeight = 50;
         const spacing = 30;  // 按鈕之間的間距
-        const centerY = height / 2;
 
-        // 上一頁按鈕位置
+        // 🔥 [v120.0] 按鈕位置改為頂部，與分頁指示器水平對齐
+        const buttonY = 20;  // 與分頁指示器相同的 Y 位置
+
+        // 上一頁按鈕位置（左側）
         const prevButtonX = width / 2 - buttonWidth / 2 - spacing / 2;
-        // 下一頁按鈕位置
+        // 下一頁按鈕位置（右側）
         const nextButtonX = width / 2 + buttonWidth / 2 + spacing / 2;
 
         console.log('🔥 [v119.0] 按鈕位置計算:', {
@@ -6184,7 +6186,7 @@ class GameScene extends Phaser.Scene {
             screenHeight: height,
             prevButtonX: prevButtonX,
             nextButtonX: nextButtonX,
-            centerY: centerY,
+            buttonY: buttonY,
             buttonWidth: buttonWidth,
             buttonHeight: buttonHeight
         });
@@ -6194,7 +6196,7 @@ class GameScene extends Phaser.Scene {
             console.log('🔥 [v119.0] ✅ 創建上一頁按鈕（當前頁 > 0）');
             this.createPaginationButton(
                 prevButtonX,
-                centerY,
+                buttonY,
                 buttonWidth,
                 buttonHeight,
                 '⬅️ 上一頁',
@@ -6210,7 +6212,7 @@ class GameScene extends Phaser.Scene {
             console.log('🔥 [v119.0] ✅ 創建下一頁按鈕（當前頁 < 最後一頁）');
             this.createPaginationButton(
                 nextButtonX,
-                centerY,
+                buttonY,
                 buttonWidth,
                 buttonHeight,
                 '下一頁 ➡️',
