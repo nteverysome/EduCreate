@@ -971,6 +971,12 @@ class GameScene extends Phaser.Scene {
             height: this.scale.height
         });
 
+        // 🔥 [v113.0] 詳細調試：記錄 matchedPairs 的狀態
+        console.log('🔥 [v113.0] updateLayout 開始時的 matchedPairs:', {
+            size: this.matchedPairs.size,
+            pairs: Array.from(this.matchedPairs)
+        });
+
         try {
             // 清除所有現有元素
             console.log('🎮 GameScene: 清除所有現有元素');
@@ -5910,6 +5916,10 @@ class GameScene extends Phaser.Scene {
             // 🔥 v54.0: 清除洗牌順序緩存（因為頁面改變了）
             this.shuffledPairsCache = null;
             console.log('🔥 [v54.0] 已清除洗牌順序緩存（頁面改變）');
+
+            // 🔥 [v113.0] 清空 matchedPairs（因為進入新頁面，舊頁面的配對信息不再適用）
+            this.matchedPairs.clear();
+            console.log('🔥 [v113.0] 已清空 matchedPairs（進入新頁面）');
 
             // 重新佈局（會重新創建卡片）
             this.updateLayout();
