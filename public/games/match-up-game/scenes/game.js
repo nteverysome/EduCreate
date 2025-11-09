@@ -2539,7 +2539,17 @@ class GameScene extends Phaser.Scene {
                 let maxColsLimit;         // ✅ v48.0：移到外部作用域，避免作用域問題
 
                 // ✅ v50.0：改進平板直向模式列數計算 - 使用簡單的寬度比例
+                // 🔍 [DEBUG-v59.0] 添加調試日誌來追踪代碼執行路徑
+                console.log('🔍 [DEBUG-v59.0] 即將檢查 isTabletPortrait 條件');
+                console.log('🔍 [DEBUG-v59.0] isTabletPortrait:', isTabletPortrait);
+                console.log('🔍 [DEBUG-v59.0] width:', width);
+                console.log('🔍 [DEBUG-v59.0] height:', height);
+                console.log('🔍 [DEBUG-v59.0] isTablet:', isTablet);
+                console.log('🔍 [DEBUG-v59.0] isPortraitMode:', isPortraitMode);
+                console.log('🔍 [DEBUG-v59.0] isIPad:', isIPad);
+
                 if (isTabletPortrait) {
+                    console.log('🔍 [DEBUG-v59.0] ✅ 進入 isTabletPortrait 分支');
                     // 平板直向模式：根據實際寬度動態計算最佳列數
                     // 使用簡單的寬度比例方法，避免循環依賴
 
@@ -2599,6 +2609,7 @@ class GameScene extends Phaser.Scene {
                         screenSize: width >= 1000 ? '大屏幕' : width >= 900 ? '中等' : '標準'
                     });
                 } else {
+                    console.log('🔍 [DEBUG-v59.0] ❌ 進入 else 分支 (isTabletPortrait 是 false)');
                     // 其他設備：使用原有邏輯
                     // 🔥 v47.0：使用統一的列數計算，移除 iPad 特殊設置
                     // 🔥 v52.0: 修復列數計算 - 基於實際卡片尺寸而不是 minCardWidth
