@@ -1182,6 +1182,15 @@ class GameScene extends Phaser.Scene {
         console.log('🎮 GameScene: createCards 開始');
         console.log('🎮 GameScene: pairs 數據', this.pairs);
 
+        // 🔥 [v116.0] 清空 leftCards 和 rightCards 數組，防止卡片累積
+        console.log('🔥 [v116.0] 清空卡片數組前:', {
+            leftCardsCount: this.leftCards ? this.leftCards.length : 0,
+            rightCardsCount: this.rightCards ? this.rightCards.length : 0
+        });
+        this.leftCards = [];
+        this.rightCards = [];
+        console.log('🔥 [v116.0] 已清空卡片數組');
+
         // 🔥 [v115.0] 詳細調適訊息：追蹤頁面狀態
         console.log('🔥 [v115.0] ========== 創建卡片開始 ==========');
         console.log('🔥 [v115.0] 當前頁面狀態:', {
