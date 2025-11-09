@@ -48,6 +48,8 @@
     "test:responsive": "node scripts/responsive-workflow/responsive-testing-workflow.js",
     "test:responsive:integration": "node scripts/responsive-workflow/workflow-integration.js",
     "workflow:master": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js",
+    "debug:match-up:1024x1366": "node debug-match-up-1024x1366.js",
+    "debug:match-up:devtools": "node connect-responsively-devtools.js",
     "workflow:phase1": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js phase1",
     "workflow:phase2": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js phase2",
     "workflow:phase3": "node EduCreate-Test-Videos/scripts/automation/workflow-automation-master.js phase3",
