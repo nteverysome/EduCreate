@@ -2477,6 +2477,21 @@ class GameScene extends Phaser.Scene {
                 // 🔥 第六步：定義最小正方形卡片大小
                 // ✅ v49.0：改進平板直向模式的最小卡片尺寸計算
                 // 🔥 v56.0：針對大屏幕平板（1024×1366）優化列數計算
+
+                // 🔍 [DEBUG-v60.0] 詳細的設備檢測日誌
+                console.log('🔍 [DEBUG-v60.0] 詳細設備檢測 (在 minSquareSize 計算前):');
+                console.log('  width:', width);
+                console.log('  height:', height);
+                console.log('  isIPad:', isIPad);
+                console.log('  isTablet:', isTablet);
+                console.log('  isRealTablet:', isRealTablet);
+                console.log('  isPortraitMode:', isPortraitMode);
+                console.log('  isLandscapeMode:', isLandscapeMode);
+                console.log('  isTabletPortrait:', isTabletPortrait);
+                console.log('  isTabletLandscape:', isTabletLandscape);
+                console.log('  isMobileDevice:', isMobileDevice);
+                console.log('  isDesktopXGA:', isDesktopXGA);
+
                 let minSquareSize;
                 if (isIPad) {
                     if (isTabletPortrait) {
