@@ -4889,9 +4889,9 @@ class GameScene extends Phaser.Scene {
         let incorrectCount = 0;
         let unmatchedCount = 0;
 
-        // 🔥 [v99.0] 修復：獲取當前頁的詞彙數據
-        // 注意：currentPage 是 1-based（第1頁、第2頁...），所以需要減 1
-        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        // 🔥 [v100.0] 修復：獲取當前頁的詞彙數據
+        // 注意：currentPage 是 0-based（0, 1, 2...），所以直接乘以 itemsPerPage
+        const startIndex = this.currentPage * this.itemsPerPage;
         const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
         const currentPagePairs = this.pairs.slice(startIndex, endIndex);
 
