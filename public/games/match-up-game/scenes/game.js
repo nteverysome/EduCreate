@@ -5105,7 +5105,7 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // 🔥 顯示正確答案（白色內框 + 勾勾）
+    // 🔥 顯示正確答案（白色內框 + 勾勾）[v96.0]
     showCorrectAnswer(rightCard, correctAnswer) {
         const background = rightCard.getData('background');
 
@@ -5126,14 +5126,13 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v84.0] 參考 df3e620 版本 - 勾勾標記放大到 64px
-        // 在混合佈局中，根據 pairId 找到英文卡片並在其中添加勾勾
+        // 🔥 [v96.0] 在所有佈局中顯示勾勾
+        // 在混合佈局中，rightCard 就是英文卡片
+        // 在分離佈局中，rightCard 是右側的中文卡片
         if (this.layout === 'mixed') {
-            const pairId = rightCard.getData('pairId');
-            const englishCard = this.leftCards.find(card => card.getData('pairId') === pairId);
-
-            if (englishCard && englishCard.list) {
-                const englishTextObj = englishCard.list.find(child => child.type === 'Text');
+            // 混合佈局：rightCard 是英文卡片，直接在其上添加勾勾
+            if (rightCard && rightCard.list) {
+                const englishTextObj = rightCard.list.find(child => child.type === 'Text');
 
                 if (englishTextObj) {
                     const markX = 0;
@@ -5147,8 +5146,10 @@ class GameScene extends Phaser.Scene {
                     });
                     checkMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
 
-                    englishCard.add(checkMark);
+                    rightCard.add(checkMark);
                     checkMark.setPosition(markX, markY);
+
+                    console.log('✅ [v96.0] 混合佈局：在英文卡片上添加勾勾');
                 }
             }
         } else {
@@ -5169,7 +5170,7 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // 🔥 顯示錯誤答案（灰色內框 + X）
+    // 🔥 顯示錯誤答案（灰色內框 + X）[v96.0]
     showIncorrectAnswer(rightCard, correctAnswer) {
         const background = rightCard.getData('background');
 
@@ -5190,14 +5191,13 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v84.0] 參考 df3e620 版本 - 叉叉標記放大到 64px
-        // 在混合佈局中，根據 pairId 找到英文卡片並在其中添加叉叉
+        // 🔥 [v96.0] 在所有佈局中顯示叉叉
+        // 在混合佈局中，rightCard 就是英文卡片
+        // 在分離佈局中，rightCard 是右側的中文卡片
         if (this.layout === 'mixed') {
-            const pairId = rightCard.getData('pairId');
-            const englishCard = this.leftCards.find(card => card.getData('pairId') === pairId);
-
-            if (englishCard && englishCard.list) {
-                const englishTextObj = englishCard.list.find(child => child.type === 'Text');
+            // 混合佈局：rightCard 是英文卡片，直接在其上添加叉叉
+            if (rightCard && rightCard.list) {
+                const englishTextObj = rightCard.list.find(child => child.type === 'Text');
 
                 if (englishTextObj) {
                     const markX = 0;
@@ -5211,8 +5211,10 @@ class GameScene extends Phaser.Scene {
                     });
                     xMark.setOrigin(0.5, 0.5).setDepth(15).setVisible(true);
 
-                    englishCard.add(xMark);
+                    rightCard.add(xMark);
                     xMark.setPosition(markX, markY);
+
+                    console.log('❌ [v96.0] 混合佈局：在英文卡片上添加叉叉');
                 }
             }
         } else {
