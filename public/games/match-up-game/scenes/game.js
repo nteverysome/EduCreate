@@ -1084,7 +1084,15 @@ class GameScene extends Phaser.Scene {
             if (this.currentPageAnswers && this.currentPageAnswers.length > 0) {
                 console.log('🔥 [v104.0] 重新調整勾勾和叉叉的位置');
 
-                this.currentPageAnswers.forEach((answer) => {
+                this.currentPageAnswers.forEach((answer, index) => {
+                    // 🔥 [v111.0] 詳細調試日誌
+                    console.log(`🔍 [v111.0] 處理答案 ${index}:`, {
+                        rightPairId: answer.rightPairId,
+                        isCorrect: answer.isCorrect,
+                        correctAnswer: answer.correctAnswer,
+                        rightText: answer.rightText
+                    });
+
                     // 查找對應的卡片
                     let targetCard = null;
 
@@ -1099,11 +1107,15 @@ class GameScene extends Phaser.Scene {
                     if (targetCard) {
                         // 根據配對結果重新調整勾勾或叉叉
                         if (answer.isCorrect) {
+                            console.log(`✅ [v111.0] 卡片 ${answer.rightPairId} 顯示勾勾`);
                             this.showCorrectAnswer(targetCard, answer.correctAnswer);
                         } else {
+                            console.log(`❌ [v111.0] 卡片 ${answer.rightPairId} 顯示叉叉`);
                             this.showIncorrectAnswer(targetCard, answer.correctAnswer);
                         }
                         console.log(`✅ [v104.0] 已重新調整卡片 ${answer.rightPairId} 的勾勾/叉叉位置`);
+                    } else {
+                        console.warn(`⚠️ [v111.0] 找不到卡片 ${answer.rightPairId}`);
                     }
                 });
             } else {
@@ -5216,9 +5228,14 @@ class GameScene extends Phaser.Scene {
                         textContent: textObject.text
                     });
 
-                    // 🔥 [v103.0] 移除舊的標記（如果存在）
+                    // 🔥 [v111.0] 移除舊的標記（包括勾勾和叉叉）
                     if (rightCard.checkMark) {
                         rightCard.checkMark.destroy();
+                        rightCard.checkMark = null;
+                    }
+                    if (rightCard.xMark) {
+                        rightCard.xMark.destroy();
+                        rightCard.xMark = null;
                     }
 
                     const checkMark = this.add.text(0, 0, '✓', {
@@ -5339,9 +5356,14 @@ class GameScene extends Phaser.Scene {
                         textContent: textObject.text
                     });
 
-                    // 🔥 [v103.0] 移除舊的標記（如果存在）
+                    // 🔥 [v111.0] 移除舊的標記（包括勾勾和叉叉）
+                    if (rightCard.checkMark) {
+                        rightCard.checkMark.destroy();
+                        rightCard.checkMark = null;
+                    }
                     if (rightCard.xMark) {
                         rightCard.xMark.destroy();
+                        rightCard.xMark = null;
                     }
 
                     const xMark = this.add.text(0, 0, '✗', {
