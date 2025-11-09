@@ -47,15 +47,15 @@ window.matchUpGame = game;
 // 🔍 [DEBUG-v62.0] 監聽 Phaser scale 事件
 console.log('🔍 [DEBUG-v62.0] Phaser Scale 事件監聽:');
 game.scale.on('resize', (gameSize) => {
-    console.log('🔍 [DEBUG-v62.0] Scale resize 事件:', {
-        gameSize: gameSize,
-        width: gameSize.width,
-        height: gameSize.height,
-        windowInnerWidth: window.innerWidth,
-        windowInnerHeight: window.innerHeight,
-        containerWidth: document.getElementById('game-container')?.offsetWidth,
-        containerHeight: document.getElementById('game-container')?.offsetHeight
-    });
+    const containerEl = document.getElementById('game-container');
+    console.log('🔍 [DEBUG-v62.0] Scale resize 事件 - gameSize.width:', gameSize.width);
+    console.log('🔍 [DEBUG-v62.0] Scale resize 事件 - gameSize.height:', gameSize.height);
+    console.log('🔍 [DEBUG-v62.0] Scale resize 事件 - window.innerWidth:', window.innerWidth);
+    console.log('🔍 [DEBUG-v62.0] Scale resize 事件 - window.innerHeight:', window.innerHeight);
+    console.log('🔍 [DEBUG-v62.0] Scale resize 事件 - container.offsetWidth:', containerEl?.offsetWidth);
+    console.log('🔍 [DEBUG-v62.0] Scale resize 事件 - container.offsetHeight:', containerEl?.offsetHeight);
+    console.log('🔍 [DEBUG-v62.0] Scale resize 事件 - game.scale.width:', game.scale.width);
+    console.log('🔍 [DEBUG-v62.0] Scale resize 事件 - game.scale.height:', game.scale.height);
 });
 
 game.scale.on('orientationchange', (orientation) => {
