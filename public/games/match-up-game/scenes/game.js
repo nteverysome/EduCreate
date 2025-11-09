@@ -5156,6 +5156,11 @@ class GameScene extends Phaser.Scene {
                     });
 
                     // 🔥 [v102.0] 先創建在 (0, 0)，然後設置位置（與 showCorrectAnswerOnCard 一致）
+                    // 🔥 [v103.0] 移除舊的標記（如果存在）
+                    if (rightCard.checkMark) {
+                        rightCard.checkMark.destroy();
+                    }
+
                     const checkMark = this.add.text(0, 0, '✓', {
                         fontSize: '64px',
                         color: '#4caf50',
@@ -5165,6 +5170,9 @@ class GameScene extends Phaser.Scene {
                     checkMark.setOrigin(0.5, 0.5);
                     checkMark.setDepth(100);
                     checkMark.setPosition(markX, markY);
+
+                    // 🔥 [v103.0] 保存引用以便後續清除
+                    rightCard.checkMark = checkMark;
 
                     console.log('✅ [v102.0] 混合佈局：在英文卡片上添加勾勾', {
                         checkMarkX: checkMark.x,
@@ -5262,6 +5270,11 @@ class GameScene extends Phaser.Scene {
                     });
 
                     // 🔥 [v102.0] 先創建在 (0, 0)，然後設置位置（與 showIncorrectAnswerOnCard 一致）
+                    // 🔥 [v103.0] 移除舊的標記（如果存在）
+                    if (rightCard.xMark) {
+                        rightCard.xMark.destroy();
+                    }
+
                     const xMark = this.add.text(0, 0, '✗', {
                         fontSize: '64px',
                         color: '#f44336',
@@ -5271,6 +5284,9 @@ class GameScene extends Phaser.Scene {
                     xMark.setOrigin(0.5, 0.5);
                     xMark.setDepth(100);
                     xMark.setPosition(markX, markY);
+
+                    // 🔥 [v103.0] 保存引用以便後續清除
+                    rightCard.xMark = xMark;
 
                     console.log('❌ [v102.0] 混合佈局：在英文卡片上添加叉叉', {
                         xMarkX: xMark.x,
