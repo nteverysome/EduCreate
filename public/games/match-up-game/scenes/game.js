@@ -2476,19 +2476,40 @@ class GameScene extends Phaser.Scene {
 
                 // 🔥 第六步：定義最小正方形卡片大小
                 // ✅ v49.0：改進平板直向模式的最小卡片尺寸計算
+                // 🔥 v56.0：針對大屏幕平板（1024×1366）優化列數計算
                 let minSquareSize;
                 if (isIPad) {
                     if (isTabletPortrait) {
-                        // 平板直向模式：使用更寬鬆的最小尺寸，允許更多列
-                        // 對於 1024×1033，應該允許 4-5 列，所以最小尺寸應該更小
-                        minSquareSize = Math.max(120, (availableWidth - 6 * horizontalSpacing) / 6);
-                        console.log('📱 [v49.0] iPad 平板直向動態卡片尺寸:', {
-                            availableWidth: availableWidth.toFixed(1),
-                            horizontalSpacing: horizontalSpacing.toFixed(1),
-                            calculatedMinSize: minSquareSize.toFixed(1),
-                            minSizeThreshold: 120,
-                            mode: '平板直向'
-                        });
+                        // 平板直向模式：根據寬度動態調整最小卡片尺寸
+                        // 對於 1024×1366（iPad Pro 12.9"）：應該允許 6-7 列
+                        // 對於 820×1180（iPad Air）：應該允許 6-7 列
+                        // 🔥 v56.0：改進計算邏輯，根據寬度動態調整
+
+                        if (width >= 1000) {
+                            // 大屏幕平板（1024×1366）：允許更多列，最小尺寸更小
+                            minSquareSize = Math.max(100, (availableWidth - 8 * horizontalSpacing) / 7);
+                            console.log('📱 [v56.0] 大屏幕平板直向動態卡片尺寸 (1024+):', {
+                                width: width.toFixed(1),
+                                availableWidth: availableWidth.toFixed(1),
+                                horizontalSpacing: horizontalSpacing.toFixed(1),
+                                calculatedMinSize: minSquareSize.toFixed(1),
+                                minSizeThreshold: 100,
+                                targetCols: 7,
+                                mode: '大屏幕平板直向'
+                            });
+                        } else {
+                            // 標準平板直向（768-1023）：保持原有邏輯
+                            minSquareSize = Math.max(120, (availableWidth - 6 * horizontalSpacing) / 6);
+                            console.log('📱 [v49.0] 標準平板直向動態卡片尺寸 (768-1023):', {
+                                width: width.toFixed(1),
+                                availableWidth: availableWidth.toFixed(1),
+                                horizontalSpacing: horizontalSpacing.toFixed(1),
+                                calculatedMinSize: minSquareSize.toFixed(1),
+                                minSizeThreshold: 120,
+                                targetCols: 6,
+                                mode: '標準平板直向'
+                            });
+                        }
                     } else {
                         // iPad 橫向或其他模式：保持原有邏輯
                         // 5 列 + 6 個間距 = 5 * minSquareSize + 6 * horizontalSpacing = availableWidth
