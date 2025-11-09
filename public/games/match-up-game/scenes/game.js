@@ -555,6 +555,7 @@ class GameScene extends Phaser.Scene {
         // 監聽螢幕尺寸變化 - 重新創建卡片但保持已配對狀態和卡片順序
         this.resizeTimeout = null;
         this.shuffledPairsCache = null;  // 🔥 v54.0: 緩存洗牌後的順序
+        this.savedPageAnswers = null;    // 🔥 [v105.0] 新增：保存當前頁面的答案
         this.scale.on('resize', (gameSize) => {
             // 🔥 v54.0: 使用防抖延遲，保存已配對狀態和洗牌順序後重新創建卡片
             console.log('🔥 [v54.0] resize 事件觸發:', { width: gameSize.width, height: gameSize.height });
@@ -572,6 +573,10 @@ class GameScene extends Phaser.Scene {
                 const savedMatchedPairs = new Set(this.matchedPairs);
                 console.log('🔥 [v54.0] 已保存已配對卡片:', Array.from(savedMatchedPairs));
 
+                // 🔥 [v105.0] 新增：保存當前頁面的答案
+                this.savedPageAnswers = [...this.currentPageAnswers];
+                console.log('🔥 [v105.0] 已保存當前頁面答案:', this.savedPageAnswers.length, '個');
+
                 // 🔥 v54.0: 注意：不清除 shuffledPairsCache，這樣 resize 時會使用相同的洗牌順序
                 console.log('🔥 [v54.0] 使用緩存的洗牌順序（如果存在）');
 
@@ -581,6 +586,10 @@ class GameScene extends Phaser.Scene {
                 // 🔥 v54.0: 恢復已配對的卡片狀態
                 this.matchedPairs = savedMatchedPairs;
                 console.log('🔥 [v54.0] 已恢復已配對卡片狀態');
+
+                // 🔥 [v105.0] 新增：恢復當前頁面的答案
+                this.currentPageAnswers = this.savedPageAnswers;
+                console.log('🔥 [v105.0] 已恢復當前頁面答案:', this.currentPageAnswers.length, '個');
 
                 // 🔥 v54.0: 重新應用已配對卡片的視覺效果
                 this.restoreMatchedPairsVisuals();
