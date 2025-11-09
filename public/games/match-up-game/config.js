@@ -58,6 +58,12 @@ game.scale.on('resize', (gameSize) => {
     console.log('🔍 [DEBUG-v62.0] Scale resize 事件 - game.scale.height:', game.scale.height);
 });
 
+// 🔍 [DEBUG-v63.0] 實際窗口和屏幕尺寸檢查
+console.log('🔍 [DEBUG-v63.0] 實際窗口尺寸:', window.innerWidth, 'x', window.innerHeight);
+console.log('🔍 [DEBUG-v63.0] 實際屏幕尺寸:', window.screen.width, 'x', window.screen.height);
+console.log('🔍 [DEBUG-v63.0] 屏幕可用尺寸:', window.screen.availWidth, 'x', window.screen.availHeight);
+console.log('🔍 [DEBUG-v63.0] 設備像素比:', window.devicePixelRatio);
+
 game.scale.on('orientationchange', (orientation) => {
     console.log('🔍 [DEBUG-v62.0] Scale orientationchange 事件:', orientation);
 });
