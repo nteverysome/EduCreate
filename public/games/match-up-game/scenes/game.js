@@ -2544,12 +2544,24 @@ class GameScene extends Phaser.Scene {
                     // 使用簡單的寬度比例方法，避免循環依賴
 
                     // 第一步：根據寬度估算列數
-                    // 對於 1024px 寬度，應該顯示 4-5 列
-                    // 對於 768px 寬度，應該顯示 3-4 列
+                    // 🔥 v58.0：改進目標卡片寬度計算，根據屏幕寬度動態調整
+                    // 對於 1024px 寬度，應該顯示 6-7 列
+                    // 對於 768px 寬度，應該顯示 5-6 列
                     // 使用公式：cols = floor((availableWidth - spacing) / (targetCardWidth + spacing))
                     // 其中 targetCardWidth 根據寬度動態計算
 
-                    const targetCardWidth = availableWidth / 4.5;  // 目標卡片寬度（基於 4.5 列）
+                    let targetCardWidth;
+                    if (width >= 1000) {
+                        // 大屏幕平板：基於 6.5 列計算目標寬度
+                        targetCardWidth = availableWidth / 6.5;
+                    } else if (width >= 900) {
+                        // 中等屏幕平板：基於 6 列計算目標寬度
+                        targetCardWidth = availableWidth / 6;
+                    } else {
+                        // 標準平板：基於 5 列計算目標寬度
+                        targetCardWidth = availableWidth / 5;
+                    }
+
                     optimalCols = Math.max(3, Math.floor((availableWidth - horizontalSpacing) / (targetCardWidth + horizontalSpacing)));
                     optimalCols = Math.min(optimalCols, itemCount);  // 不超過項目數
 
