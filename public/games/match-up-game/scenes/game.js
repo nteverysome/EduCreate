@@ -1032,6 +1032,7 @@ class GameScene extends Phaser.Scene {
     }
 
     // 🔥 v53.0: 恢復已配對卡片的視覺效果
+    // 🔥 [v104.0] 修復：重新調整勾勾和叉叉的位置（當卡片大小改變時）
     restoreMatchedPairsVisuals() {
         try {
             console.log('🔥 [v53.0] 恢復已配對卡片視覺效果');
@@ -1044,8 +1045,8 @@ class GameScene extends Phaser.Scene {
             // 遍歷所有已配對的卡片 ID
             for (const pairId of this.matchedPairs) {
                 // 查找對應的卡片
-                const leftCard = this.leftCards?.find(card => card.pairId === pairId);
-                const rightCard = this.rightCards?.find(card => card.pairId === pairId);
+                const leftCard = this.leftCards?.find(card => card.getData('pairId') === pairId);
+                const rightCard = this.rightCards?.find(card => card.getData('pairId') === pairId);
 
                 if (leftCard && rightCard) {
                     // 應用已配對的視覺效果
@@ -1058,6 +1059,34 @@ class GameScene extends Phaser.Scene {
 
                     console.log(`✅ [v53.0] 已恢復卡片 ${pairId} 的視覺效果`);
                 }
+            }
+
+            // 🔥 [v104.0] 新增：根據 currentPageAnswers 重新調整勾勾和叉叉的位置
+            if (this.currentPageAnswers && this.currentPageAnswers.length > 0) {
+                console.log('🔥 [v104.0] 重新調整勾勾和叉叉的位置');
+
+                this.currentPageAnswers.forEach((answer) => {
+                    // 查找對應的卡片
+                    let targetCard = null;
+
+                    if (this.layout === 'mixed') {
+                        // 混合佈局：英文卡片在 leftCards 中
+                        targetCard = this.leftCards?.find(card => card.getData('pairId') === answer.rightPairId);
+                    } else {
+                        // 分離佈局：英文卡片在 rightCards 中
+                        targetCard = this.rightCards?.find(card => card.getData('pairId') === answer.rightPairId);
+                    }
+
+                    if (targetCard) {
+                        // 根據配對結果重新調整勾勾或叉叉
+                        if (answer.isCorrect) {
+                            this.showCorrectAnswer(targetCard, answer.correctAnswer);
+                        } else {
+                            this.showIncorrectAnswer(targetCard, answer.correctAnswer);
+                        }
+                        console.log(`✅ [v104.0] 已重新調整卡片 ${answer.rightPairId} 的勾勾/叉叉位置`);
+                    }
+                });
             }
 
             console.log('✅ [v53.0] 已配對卡片視覺效果恢復完成');
