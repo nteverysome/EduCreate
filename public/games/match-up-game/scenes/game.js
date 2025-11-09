@@ -1995,6 +1995,11 @@ class GameScene extends Phaser.Scene {
         const isTablet = isRealTablet;
         const isIPad = isRealTablet;  // iPad 別名
 
+        // ✅ v48.0：添加平板直向模式檢測
+        // 平板直向：寬度 768-1024px，高度 > 寬度（直向模式）
+        const isTabletPortrait = isTablet && isPortraitMode;  // 平板直向模式
+        const isTabletLandscape = isTablet && isLandscapeMode;  // 平板橫向模式
+
         // 🔥 v13.0：分離的緊湊模式檢測
         const isCompactMode = isMobileDevice || isLandscapeMobile || isTinyHeight;
         const isPortraitCompactMode = isMobileDevice && isPortraitMode;  // 手機直向緊湊模式
@@ -2366,23 +2371,42 @@ class GameScene extends Phaser.Scene {
             // ============================================================================
 
             // 🔥 第三步：定義按鈕區域和邊距
-            // ✅ v47.0：使用統一的寬度檢測，移除 iPad 特殊設置
+            // ✅ v48.0：針對平板直向模式優化邊距計算
             let topButtonAreaHeight, bottomButtonAreaHeight, sideMargin;
 
-            // 使用業界標準斷點計算邊距
-            topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
-            bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
-            sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 左右邊距（30-80px）
+            if (isTabletPortrait) {
+                // 平板直向模式：優化邊距
+                // 平板直向通常寬度 768-1024px，應該有更合理的邊距
+                topButtonAreaHeight = Math.max(60, Math.min(100, height * 0.06));     // 頂部按鈕區域（60-100px）
+                bottomButtonAreaHeight = Math.max(60, Math.min(100, height * 0.08));  // 底部按鈕區域（60-100px）
+                sideMargin = Math.max(40, Math.min(100, width * 0.05));               // 左右邊距（40-100px）
 
-            console.log('📐 [v47.0] 統一布局 - 邊距計算:', {
-                width: width,
-                height: height,
-                margins: {
-                    top: topButtonAreaHeight,
-                    bottom: bottomButtonAreaHeight,
-                    side: sideMargin
-                }
-            });
+                console.log('📐 [v48.0] 平板直向布局 - 邊距計算:', {
+                    width: width,
+                    height: height,
+                    mode: '平板直向',
+                    margins: {
+                        top: topButtonAreaHeight,
+                        bottom: bottomButtonAreaHeight,
+                        side: sideMargin
+                    }
+                });
+            } else {
+                // 其他設備：使用業界標準斷點計算邊距
+                topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
+                bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
+                sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 左右邊距（30-80px）
+
+                console.log('📐 [v47.0] 統一布局 - 邊距計算:', {
+                    width: width,
+                    height: height,
+                    margins: {
+                        top: topButtonAreaHeight,
+                        bottom: bottomButtonAreaHeight,
+                        side: sideMargin
+                    }
+                });
+            }
 
             // 🔥 第四步：計算可用空間（扣除按鈕區域）
             const availableWidth = width - sideMargin * 2;
@@ -2392,30 +2416,45 @@ class GameScene extends Phaser.Scene {
             const aspectRatio = width / height;
 
             // 🔥 第六步：計算水平和垂直間距
-            // ✅ v47.0：使用統一的寬度檢測，移除 iPad 特殊設置
+            // ✅ v48.0：針對平板直向模式優化間距計算
             let horizontalSpacing, verticalSpacing;
 
-            // 根據寬高比動態調整水平間距
-            let horizontalSpacingBase;
-            if (aspectRatio > 2.0) {
-                horizontalSpacingBase = width * 0.02;  // 超寬螢幕：2%
-            } else if (aspectRatio > 1.5) {
-                horizontalSpacingBase = width * 0.015; // 寬螢幕：1.5%
+            if (isTabletPortrait) {
+                // 平板直向模式：優化間距
+                // 平板直向通常寬度 768-1024px，應該有更合理的間距
+                horizontalSpacing = Math.max(20, Math.min(40, width * 0.025));  // 20-40px
+                verticalSpacing = Math.max(50, Math.min(100, height * 0.05));   // 50-100px
+
+                console.log('📐 [v48.0] 平板直向布局 - 間距計算:', {
+                    width,
+                    height,
+                    mode: '平板直向',
+                    horizontalSpacing: horizontalSpacing.toFixed(1),
+                    verticalSpacing: verticalSpacing.toFixed(1)
+                });
             } else {
-                horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
+                // 其他設備：根據寬高比動態調整水平間距
+                let horizontalSpacingBase;
+                if (aspectRatio > 2.0) {
+                    horizontalSpacingBase = width * 0.02;  // 超寬螢幕：2%
+                } else if (aspectRatio > 1.5) {
+                    horizontalSpacingBase = width * 0.015; // 寬螢幕：1.5%
+                } else {
+                    horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
+                }
+                horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
+
+                // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
+                verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
+
+                console.log('📐 [v47.0] 統一布局 - 間距計算:', {
+                    width,
+                    height,
+                    aspectRatio: aspectRatio.toFixed(2),
+                    horizontalSpacing: horizontalSpacing.toFixed(1),
+                    verticalSpacing: verticalSpacing.toFixed(1)
+                });
             }
-            horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
-
-            // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
-            verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
-
-            console.log('📐 [v47.0] 統一布局 - 間距計算:', {
-                width,
-                height,
-                aspectRatio: aspectRatio.toFixed(2),
-                horizontalSpacing: horizontalSpacing.toFixed(1),
-                verticalSpacing: verticalSpacing.toFixed(1)
-            });
 
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
@@ -2463,37 +2502,59 @@ class GameScene extends Phaser.Scene {
                 // 策略：盡可能多的列數，充分利用水平空間
                 let optimalCols;
 
-                // 🔥 v47.0：使用統一的列數計算，移除 iPad 特殊設置
-                // 🔥 v52.0: 修復列數計算 - 基於實際卡片尺寸而不是 minCardWidth
-                // 問題：v51.0 使用 minCardWidth（60px）計算列數，但實際卡片是正方形（263px）
-                // 導致計算出的列數過多，卡片超出容器邊界
-                //
-                // 解決方案：
-                // 1. 先估算正方形卡片的尺寸（基於高度）
-                // 2. 根據實際卡片尺寸計算列數
-                // 3. 確保所有卡片都在容器內
+                // ✅ v48.0：針對平板直向模式優化列數計算
+                if (isTabletPortrait) {
+                    // 平板直向模式：限制列數為 3-4 列
+                    // 寬度 768-1024px，應該顯示 3-4 列卡片
+                    const maxColsForTabletPortrait = 4;
 
-                // 🔥 第一步：估算正方形卡片尺寸
-                // 假設最多 10 列（保守估計）
-                const estimatedCols = Math.min(10, itemCount);
-                const estimatedRows = Math.ceil(itemCount / estimatedCols);
+                    // 估算正方形卡片尺寸
+                    const estimatedCols = Math.min(maxColsForTabletPortrait, itemCount);
+                    const estimatedRows = Math.ceil(itemCount / estimatedCols);
+                    const estimatedAvailableHeightPerRow = (availableHeight - verticalSpacing * (estimatedRows + 1)) / estimatedRows;
+                    const estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
 
-                // 估算每行的可用高度
-                const estimatedAvailableHeightPerRow = (availableHeight - verticalSpacing * (estimatedRows + 1)) / estimatedRows;
+                    // 根據寬度計算列數
+                    const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
+                    optimalCols = Math.min(calculatedCols, maxColsForTabletPortrait, itemCount);
 
-                // 估算正方形卡片尺寸（包含中文文字）
-                // totalUnitHeight = squareSize + chineseTextHeight = squareSize * 1.4
-                // squareSize = totalUnitHeight / 1.4
-                const estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
+                    console.log(`🔥 [v48.0] 平板直向列數計算:`, {
+                        width: width.toFixed(1),
+                        height: height.toFixed(1),
+                        availableWidth: availableWidth.toFixed(1),
+                        estimatedSquareSize: estimatedSquareSize.toFixed(1),
+                        calculatedCols: calculatedCols,
+                        maxColsForTabletPortrait: maxColsForTabletPortrait,
+                        optimalCols: optimalCols,
+                        itemCount: itemCount
+                    });
+                } else {
+                    // 其他設備：使用原有邏輯
+                    // 🔥 v47.0：使用統一的列數計算，移除 iPad 特殊設置
+                    // 🔥 v52.0: 修復列數計算 - 基於實際卡片尺寸而不是 minCardWidth
 
-                // 🔥 第二步：根據實際卡片尺寸計算列數
-                // 公式：cols = floor((availableWidth - spacing * (cols + 1)) / squareSize)
-                // 簡化為：cols = floor((availableWidth - spacing) / (squareSize + spacing))
-                const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
+                    // 🔥 第一步：估算正方形卡片尺寸
+                    // 假設最多 10 列（保守估計）
+                    const estimatedCols = Math.min(10, itemCount);
+                    const estimatedRows = Math.ceil(itemCount / estimatedCols);
 
-                // 限制最大列數（避免卡片過小）
-                const maxColsLimit = 10;
-                optimalCols = Math.min(calculatedCols, maxColsLimit, itemCount);
+                    // 估算每行的可用高度
+                    const estimatedAvailableHeightPerRow = (availableHeight - verticalSpacing * (estimatedRows + 1)) / estimatedRows;
+
+                    // 估算正方形卡片尺寸（包含中文文字）
+                    // totalUnitHeight = squareSize + chineseTextHeight = squareSize * 1.4
+                    // squareSize = totalUnitHeight / 1.4
+                    const estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
+
+                    // 🔥 第二步：根據實際卡片尺寸計算列數
+                    // 公式：cols = floor((availableWidth - spacing * (cols + 1)) / squareSize)
+                    // 簡化為：cols = floor((availableWidth - spacing) / (squareSize + spacing))
+                    const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
+
+                    // 限制最大列數（避免卡片過小）
+                    const maxColsLimit = 10;
+                    optimalCols = Math.min(calculatedCols, maxColsLimit, itemCount);
+                }
 
                 console.log(`🔥 [v47.0] 統一列數計算（基於實際卡片尺寸）:`, {
                     width: width.toFixed(1),
