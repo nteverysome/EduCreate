@@ -11,1772 +11,997 @@
     "devicePixelRatio": 1,
     "userAgent": "Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1",
     "title": "EduCreate - 記憶科學驅動的智能教育遊戲平台",
-    "url": "https://edu-create.vercel.app/games/switcher?game=match-up-game&activityId=cmhjff7340001jf04htar2e5k&layout=mixed&itemsPerPage=20"
+    "url": "https://edu-create.vercel.app/games/switcher?game=match-up-game&activityId=cmh93tjuh0001l404hszkdf94&layout=mixed&itemsPerPage=20"
   },
   "consoleLogs": [
     {
       "type": "log",
       "text": "🧹 執行頁面載入初始清理",
-      "timestamp": "2025-11-09T10:10:38.656Z"
+      "timestamp": "2025-11-09T10:29:27.169Z"
     },
     {
       "type": "log",
       "text": "✅ 無殘留鎖定狀態",
-      "timestamp": "2025-11-09T10:10:38.657Z"
+      "timestamp": "2025-11-09T10:29:27.170Z"
     },
     {
       "type": "log",
       "text": "🔄 載入活動詞彙: cmh93tjuh0001l404hszkdf94",
-      "timestamp": "2025-11-09T10:10:38.657Z"
+      "timestamp": "2025-11-09T10:29:27.170Z"
     },
     {
       "type": "log",
       "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94",
-      "timestamp": "2025-11-09T10:10:38.657Z"
+      "timestamp": "2025-11-09T10:29:27.170Z"
     },
     {
       "type": "log",
       "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.657Z"
+      "timestamp": "2025-11-09T10:29:27.170Z"
     },
     {
       "type": "log",
       "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.657Z"
+      "timestamp": "2025-11-09T10:29:27.170Z"
     },
     {
       "type": "log",
       "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.657Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Match-up 遊戲配置完成 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.658Z"
-    },
-    {
-      "type": "log",
-      "text": "🧹 執行全域攔截層清理",
-      "timestamp": "2025-11-09T10:10:38.658Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 全域攔截層清理完成",
-      "timestamp": "2025-11-09T10:10:38.658Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 全螢幕控制器初始化完成",
-      "timestamp": "2025-11-09T10:10:38.658Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Match-up 遊戲初始化完成",
-      "timestamp": "2025-11-09T10:10:38.658Z"
-    },
-    {
-      "type": "info",
-      "text": "🧪 matchUpDevTools 已就緒。執行 matchUpDevTools.help() 取得操作說明。",
-      "timestamp": "2025-11-09T10:10:38.658Z"
-    },
-    {
-      "type": "log",
-      "text": "%c %c %c %c %c Phaser v3.55.2 (WebGL | Web Audio) %c https://phaser.io background: #ff0000 background: #ffff00 background: #00ff00 background: #00ffff color: #ffffff; background: #000000 background: transparent",
-      "timestamp": "2025-11-09T10:10:38.658Z"
+      "timestamp": "2025-11-09T10:29:27.170Z"
     },
     {
       "type": "log",
       "text": "✅ 活動排行榜數據已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.658Z"
+      "timestamp": "2025-11-09T10:29:27.171Z"
     },
     {
       "type": "log",
       "text": "✅ 活動結果已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.658Z"
+      "timestamp": "2025-11-09T10:29:27.171Z"
+    },
+    {
+      "type": "log",
+      "text": "ℹ️ 使用默認遊戲選項",
+      "timestamp": "2025-11-09T10:29:27.171Z"
+    },
+    {
+      "type": "log",
+      "text": "✅ Match-up 選項已載入: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.171Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 檢查所有者身份: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.171Z"
+    },
+    {
+      "type": "log",
+      "text": "❌ 缺少 session 或活動所有者信息",
+      "timestamp": "2025-11-09T10:29:27.171Z"
+    },
+    {
+      "type": "log",
+      "text": "✅ 活動信息已載入: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.171Z"
     },
     {
       "type": "log",
       "text": "✅ 成功載入自定義詞彙: [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]",
-      "timestamp": "2025-11-09T10:10:38.658Z"
+      "timestamp": "2025-11-09T10:29:27.171Z"
     },
     {
       "type": "log",
-      "text": "ℹ️ 使用默認遊戲選項",
-      "timestamp": "2025-11-09T10:10:38.658Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Match-up 選項已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.659Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 檢查所有者身份: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.659Z"
-    },
-    {
-      "type": "log",
-      "text": "❌ 缺少 session 或活動所有者信息",
-      "timestamp": "2025-11-09T10:10:38.659Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 活動信息已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.659Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Handler: create 方法開始",
-      "timestamp": "2025-11-09T10:10:38.659Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Handler: 背景顏色設定為白色",
-      "timestamp": "2025-11-09T10:10:38.659Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Handler: 頁面可見性處理已設置",
-      "timestamp": "2025-11-09T10:10:38.659Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Handler: 準備啟動 PreloadScene",
-      "timestamp": "2025-11-09T10:10:38.659Z"
-    },
-    {
-      "type": "log",
-      "text": "🔧 Handler: 啟動背景場景 PreloadScene",
-      "timestamp": "2025-11-09T10:10:38.659Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Handler: 場景 PreloadScene 已啟動 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.659Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Handler: PreloadScene 已啟動",
-      "timestamp": "2025-11-09T10:10:38.660Z"
+      "text": "✅ Match-up 遊戲配置完成 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.171Z"
     },
     {
       "type": "log",
       "text": "🧹 執行全域攔截層清理",
-      "timestamp": "2025-11-09T10:10:38.660Z"
+      "timestamp": "2025-11-09T10:29:27.171Z"
     },
     {
       "type": "log",
       "text": "✅ 全域攔截層清理完成",
-      "timestamp": "2025-11-09T10:10:38.660Z"
+      "timestamp": "2025-11-09T10:29:27.171Z"
     },
     {
       "type": "log",
-      "text": "✅ 遊戲載入完成: Match up 配對遊戲",
-      "timestamp": "2025-11-09T10:10:38.660Z"
+      "text": "✅ 全螢幕控制器初始化完成",
+      "timestamp": "2025-11-09T10:29:27.171Z"
     },
     {
       "type": "log",
-      "text": "🎮 PreloadScene: create 方法開始",
-      "timestamp": "2025-11-09T10:10:38.660Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 PreloadScene: 從 URL 取得視覺風格 clouds",
-      "timestamp": "2025-11-09T10:10:38.660Z"
-    },
-    {
-      "type": "log",
-      "text": "📡 PreloadScene: 請求視覺風格資源 https://edu-create.vercel.app/api/visual-styles/resources?styleId=clouds",
-      "timestamp": "2025-11-09T10:10:38.660Z"
+      "text": "✅ Match-up 遊戲初始化完成",
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=0",
-      "timestamp": "2025-11-09T10:10:38.661Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.661Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.661Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.661Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🔍 EnhancedActivityInfoBox props: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.661Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "warning",
       "text": "處理 iframe 消息時出錯: SyntaxError: Unexpected end of JSON input",
-      "timestamp": "2025-11-09T10:10:38.661Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🔄 [v102.4] customVocabulary 已改變，觸發 iframe 重新加載: 36 個詞彙",
-      "timestamp": "2025-11-09T10:10:38.661Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🔄 Session 已載入，重新檢查所有者身份",
-      "timestamp": "2025-11-09T10:10:38.662Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:38.662Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.662Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.662Z"
+      "timestamp": "2025-11-09T10:29:27.172Z"
     },
     {
       "type": "log",
       "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.662Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:38.662Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.662Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.662Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.662Z"
-    },
-    {
-      "type": "log",
-      "text": "📴 Handler: 頁面隱藏（切換標籤/最小化）",
-      "timestamp": "2025-11-09T10:10:38.663Z"
-    },
-    {
-      "type": "error",
-      "text": "❌ PreloadScene: 載入視覺風格資源時發生錯誤 TypeError: Failed to fetch",
-      "timestamp": "2025-11-09T10:10:38.663Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 PreloadScene: 準備啟動 GameScene",
-      "timestamp": "2025-11-09T10:10:38.663Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 PreloadScene: GameScene 已啟動",
-      "timestamp": "2025-11-09T10:10:38.663Z"
+      "timestamp": "2025-11-09T10:29:27.173Z"
     },
     {
       "type": "log",
       "text": "✅ Match-up 遊戲配置完成 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.663Z"
+      "timestamp": "2025-11-09T10:29:27.173Z"
     },
     {
       "type": "log",
       "text": "🧹 執行全域攔截層清理",
-      "timestamp": "2025-11-09T10:10:38.663Z"
+      "timestamp": "2025-11-09T10:29:27.173Z"
     },
     {
       "type": "log",
       "text": "✅ 全域攔截層清理完成",
-      "timestamp": "2025-11-09T10:10:38.663Z"
+      "timestamp": "2025-11-09T10:29:27.173Z"
     },
     {
       "type": "log",
       "text": "✅ 全螢幕控制器初始化完成",
-      "timestamp": "2025-11-09T10:10:38.663Z"
+      "timestamp": "2025-11-09T10:29:27.173Z"
     },
     {
       "type": "log",
       "text": "✅ Match-up 遊戲初始化完成",
-      "timestamp": "2025-11-09T10:10:38.663Z"
+      "timestamp": "2025-11-09T10:29:27.173Z"
     },
     {
       "type": "info",
       "text": "🧪 matchUpDevTools 已就緒。執行 matchUpDevTools.help() 取得操作說明。",
-      "timestamp": "2025-11-09T10:10:38.663Z"
+      "timestamp": "2025-11-09T10:29:27.173Z"
     },
     {
       "type": "log",
       "text": "%c %c %c %c %c Phaser v3.55.2 (WebGL | Web Audio) %c https://phaser.io background: #ff0000 background: #ffff00 background: #00ff00 background: #00ffff color: #ffffff; background: #000000 background: transparent",
-      "timestamp": "2025-11-09T10:10:38.663Z"
+      "timestamp": "2025-11-09T10:29:27.173Z"
     },
     {
       "type": "log",
       "text": "🎮 Handler: create 方法開始",
-      "timestamp": "2025-11-09T10:10:38.663Z"
+      "timestamp": "2025-11-09T10:29:27.173Z"
     },
     {
       "type": "log",
       "text": "🎮 Handler: 背景顏色設定為白色",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.173Z"
     },
     {
       "type": "log",
       "text": "✅ Handler: 頁面可見性處理已設置",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.174Z"
     },
     {
       "type": "log",
       "text": "🎮 Handler: 準備啟動 PreloadScene",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.174Z"
     },
     {
       "type": "log",
       "text": "🔧 Handler: 啟動背景場景 PreloadScene",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.174Z"
     },
     {
       "type": "log",
       "text": "✅ Handler: 場景 PreloadScene 已啟動 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.174Z"
     },
     {
       "type": "log",
       "text": "🎮 Handler: PreloadScene 已啟動",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.174Z"
     },
     {
       "type": "log",
       "text": "🧹 執行全域攔截層清理",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.174Z"
     },
     {
       "type": "log",
       "text": "✅ 全域攔截層清理完成",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.174Z"
     },
     {
       "type": "log",
       "text": "✅ 遊戲載入完成: Match up 配對遊戲",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.174Z"
     },
     {
       "type": "log",
       "text": "🎮 PreloadScene: create 方法開始",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.174Z"
     },
     {
       "type": "log",
       "text": "🎨 PreloadScene: 從 URL 取得視覺風格 clouds",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.174Z"
     },
     {
       "type": "log",
       "text": "📡 PreloadScene: 請求視覺風格資源 https://edu-create.vercel.app/api/visual-styles/resources?styleId=clouds",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:38.664Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.665Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.665Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.665Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:38.665Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.665Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.665Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.665Z"
-    },
-    {
-      "type": "log",
-      "text": "ℹ️ 使用默認遊戲選項",
-      "timestamp": "2025-11-09T10:10:38.665Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Match-up 選項已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.665Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 檢查所有者身份: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.665Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:38.665Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.665Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.666Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.666Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "🔍 EnhancedActivityInfoBox props: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.666Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:38.666Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.666Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.666Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.666Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 EnhancedActivityInfoBox props: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.666Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "🔄 Session 已載入，重新檢查所有者身份",
-      "timestamp": "2025-11-09T10:10:38.666Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 用戶資料 API 響應: true",
-      "timestamp": "2025-11-09T10:10:38.666Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 所有者檢查結果: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.666Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 活動信息已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.666Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:38.667Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.667Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.667Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.667Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 EnhancedActivityInfoBox props: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.667Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:38.667Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.667Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.667Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.667Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 EnhancedActivityInfoBox props: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.667Z"
-    },
-    {
-      "type": "log",
-      "text": "🔄 Session 已載入，重新檢查所有者身份",
-      "timestamp": "2025-11-09T10:10:38.667Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "ℹ️ 使用默認遊戲選項",
-      "timestamp": "2025-11-09T10:10:38.667Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "✅ Match-up 選項已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.667Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "🔍 檢查所有者身份: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.667Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:38.668Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.668Z"
+      "timestamp": "2025-11-09T10:29:27.175Z"
     },
     {
       "type": "log",
       "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.668Z"
+      "timestamp": "2025-11-09T10:29:27.176Z"
     },
     {
       "type": "log",
       "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.668Z"
+      "timestamp": "2025-11-09T10:29:27.176Z"
     },
     {
       "type": "log",
       "text": "🔍 EnhancedActivityInfoBox props: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.668Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 用戶資料 API 響應: true",
-      "timestamp": "2025-11-09T10:10:38.668Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 所有者檢查結果: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.668Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 活動信息已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.668Z"
-    },
-    {
-      "type": "log",
-      "text": "ℹ️ 使用默認遊戲選項",
-      "timestamp": "2025-11-09T10:10:38.668Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Match-up 選項已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.668Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 檢查所有者身份: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.668Z"
+      "timestamp": "2025-11-09T10:29:27.176Z"
     },
     {
       "type": "log",
       "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:38.668Z"
+      "timestamp": "2025-11-09T10:29:27.176Z"
     },
     {
       "type": "log",
       "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:38.668Z"
+      "timestamp": "2025-11-09T10:29:27.176Z"
     },
     {
       "type": "log",
       "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:38.668Z"
+      "timestamp": "2025-11-09T10:29:27.176Z"
     },
     {
       "type": "log",
       "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.669Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 EnhancedActivityInfoBox props: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.176Z"
     },
     {
       "type": "log",
       "text": "🔍 用戶資料 API 響應: true",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.176Z"
     },
     {
       "type": "log",
       "text": "🔍 所有者檢查結果: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.176Z"
     },
     {
       "type": "log",
       "text": "✅ 活動信息已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.176Z"
+    },
+    {
+      "type": "log",
+      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
+      "timestamp": "2025-11-09T10:29:27.176Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 遊戲選項已添加到 URL",
+      "timestamp": "2025-11-09T10:29:27.177Z"
+    },
+    {
+      "type": "log",
+      "text": "🎨 視覺風格已添加到 URL: clouds",
+      "timestamp": "2025-11-09T10:29:27.177Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.177Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 EnhancedActivityInfoBox props: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.177Z"
     },
     {
       "type": "log",
       "text": "ℹ️ PreloadScene: 無需額外載入視覺風格資源",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.177Z"
     },
     {
       "type": "log",
       "text": "🎮 PreloadScene: 準備啟動 GameScene",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.177Z"
     },
     {
       "type": "log",
       "text": "🎮 PreloadScene: GameScene 已啟動",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.177Z"
     },
     {
       "type": "log",
       "text": "🎮 GameScene: create 方法開始",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.177Z"
     },
     {
       "type": "log",
       "text": "🎮 GameScene: 場景尺寸 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.177Z"
     },
     {
       "type": "log",
       "text": "🎮 GameScene: 創建白色背景和載入文字 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.177Z"
     },
     {
       "type": "log",
       "text": "🎮 GameScene: 開始載入詞彙數據",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.177Z"
     },
     {
       "type": "log",
       "text": "🔄 開始載入詞彙數據",
-      "timestamp": "2025-11-09T10:10:38.669Z"
+      "timestamp": "2025-11-09T10:29:27.177Z"
     },
     {
       "type": "log",
       "text": "🔍 [DEBUG] loadVocabularyFromAPI 函數已調用",
-      "timestamp": "2025-11-09T10:10:38.670Z"
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
       "text": "🔍 [DEBUG] URL 參數: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.670Z"
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
       "text": "🔍 Match-up 遊戲 - URL 參數: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.670Z"
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
       "text": "✅ 參數驗證通過，允許載入詞彙數據",
-      "timestamp": "2025-11-09T10:10:38.670Z"
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
       "text": "🔍 [DEBUG] 準備發送 API 請求",
-      "timestamp": "2025-11-09T10:10:38.670Z"
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
       "text": "🔄 發送 API 請求: /api/activities/cmh93tjuh0001l404hszkdf94",
-      "timestamp": "2025-11-09T10:10:38.670Z"
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
       "text": "🔍 [DEBUG] 開始 fetch 調用",
-      "timestamp": "2025-11-09T10:10:38.670Z"
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
-      "text": "🔍 [DEBUG] fetch 完成",
-      "timestamp": "2025-11-09T10:10:38.670Z"
-    },
-    {
-      "type": "log",
-      "text": "📡 API 響應狀態: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.670Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 [DEBUG] JSON 解析完成",
-      "timestamp": "2025-11-09T10:10:38.670Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 活動數據載入成功: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.670Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 檢查詞彙數據來源...",
-      "timestamp": "2025-11-09T10:10:38.670Z"
-    },
-    {
-      "type": "log",
-      "text": "📝 從 elements 載入詞彙: 2 個",
-      "timestamp": "2025-11-09T10:10:38.670Z"
-    },
-    {
-      "type": "log",
-      "text": "🔄 開始轉換詞彙數據格式...",
-      "timestamp": "2025-11-09T10:10:38.671Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 [v9.0] 原始詞彙數據結構檢查 - 總項目: 2, hasImageUrl: false, hasChineseImageUrl: false, imageUrl: null, chineseImageUrl: null",
-      "timestamp": "2025-11-09T10:10:38.671Z"
-    },
-    {
-      "type": "log",
-      "text": "🔇 [後台] 聲音已禁用，跳過音頻生成",
-      "timestamp": "2025-11-09T10:10:38.671Z"
-    },
-    {
-      "type": "log",
-      "text": "🎧 音訊診斷結果 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.671Z"
-    },
-    {
-      "type": "warning",
-      "text": "⚠️ 發現缺少或無效的 audioUrl，請檢查 CMS/後端輸出",
-      "timestamp": "2025-11-09T10:10:38.671Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 詞彙數據轉換完成: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.671Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 詳細詞彙數據檢查:",
-      "timestamp": "2025-11-09T10:10:38.671Z"
-    },
-    {
-      "type": "log",
-      "text": "詞彙 1: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.671Z"
-    },
-    {
-      "type": "log",
-      "text": "詞彙 2: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.671Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 詞彙數據載入完成 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.671Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 載入文字已移除",
-      "timestamp": "2025-11-09T10:10:38.672Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: Handler 場景引用 ✅ 存在",
-      "timestamp": "2025-11-09T10:10:38.672Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 調用 Handler.updateResize",
-      "timestamp": "2025-11-09T10:10:38.672Z"
-    },
-    {
-      "type": "log",
-      "text": "📷 Handler: updateCamera - Match-up 遊戲不使用攝影機縮放",
-      "timestamp": "2025-11-09T10:10:38.672Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Handler: updateResize 完成 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.672Z"
-    },
-    {
-      "type": "log",
-      "text": "📄 初始化分頁設置 - 總詞彙數: 2",
-      "timestamp": "2025-11-09T10:10:38.672Z"
-    },
-    {
-      "type": "log",
-      "text": "📄 從 URL 讀取 itemsPerPage: 20",
-      "timestamp": "2025-11-09T10:10:38.672Z"
-    },
-    {
-      "type": "log",
-      "text": "📄 從 URL 讀取 autoProceed: true",
-      "timestamp": "2025-11-09T10:10:38.672Z"
-    },
-    {
-      "type": "log",
-      "text": "📄 分頁設置完成: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.672Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 [v10.1] URL 參數詳細檢查: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.672Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 佈局模式: mixed [object Object]",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🎲 隨機模式: different",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "📝 顯示答案: false",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🔊 [v44.0] 聲音選項: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "⏱️ 計時器類型: none",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 調用 updateLayout",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: updateLayout 開始",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 當前場景尺寸 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 清除所有現有元素",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 添加白色背景 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 創建卡片",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: createCards 開始",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: pairs 數據 [object Object],[object Object]",
-      "timestamp": "2025-11-09T10:10:38.673Z"
-    },
-    {
-      "type": "log",
-      "text": "📄 當前頁數據: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 計算卡片尺寸和位置 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 [v46.0] 設備檢測: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "📱 [v46.0] iPad 動態卡片尺寸: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 卡片尺寸 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 卡片位置 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 卡片間距 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 創建混合佈局（英文卡片在中文框內，可交換位置）",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "📱 響應式檢測 [v38.0]: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "🖥️ 使用桌面動態響應式佈局（含按鈕空間）",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 詳細圖片檢測: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "📐 [v47.0] 統一布局 - 邊距計算: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "📐 [v47.0] 統一布局 - 間距計算: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.674Z"
-    },
-    {
-      "type": "log",
-      "text": "🟨 使用長方形卡片模式",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "📱 [v39.0] iPad 長方形卡片動態尺寸: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "🟨 長方形卡片佈局: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "📐 混合佈局參數: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "📐 [v23.0] 寬度計算詳情: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "📐 混合佈局間距: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "🔥 [v23.0] 水平間距計算: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 桌面模式：智能計算中文字體大小...",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "📊 桌面模式中文字體大小範圍: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 [v76.0] 混合佈局中文框 [0] 內容檢查: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "⚪ [v76.0] 混合佈局中文框 [0] 顯示空白",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "📦 [v76.0] 在框下方創建圖片+文字區域 [0]",
-      "timestamp": "2025-11-09T10:10:38.675Z"
-    },
-    {
-      "type": "log",
-      "text": "📝 [v76.0] 下方區域 [0] 只有文字模式",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 [v76.0] 混合佈局中文框 [1] 內容檢查: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "⚪ [v76.0] 混合佈局中文框 [1] 顯示空白",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "📦 [v76.0] 在框下方創建圖片+文字區域 [1]",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "📝 [v76.0] 下方區域 [1] 只有文字模式",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 [v54.0] 緩存檢查: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "🎲 混合佈局使用隨機排列模式（Fisher-Yates 算法）",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "🎲 [v54.0] 已保存洗牌順序到緩存",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 createLeftCard 調試信息: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "📝 createTextElement 被調用: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 文字對象已創建（智能計算）: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 createLeftCard 調試信息: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "📝 createTextElement 被調用: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 文字對象已創建（智能計算）: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.676Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 混合佈局創建完成: [object Object]",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: createCards 完成 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 卡片創建完成",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: 遊戲開始時間已記錄",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 顯示提交答案按鈕 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "🔍 按鈕位置 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 提交答案按鈕已創建",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: updateLayout 完成",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: updateLayout 完成",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "info",
-      "text": "[18:10:32] [ResponsiveManager] ℹ️ 初始化完成 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "info",
-      "text": "[18:10:32] [GameScene] ℹ️ 響應式管理器初始化完成 [object Object]",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 已綁定 resize 事件監聽器（v54.0 防抖延遲 300ms，保存已配對狀態和洗牌順序）",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 已綁定 fullscreenchange 事件監聽器",
-      "timestamp": "2025-11-09T10:10:38.677Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 已綁定 orientationchange 事件監聽器",
-      "timestamp": "2025-11-09T10:10:38.678Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 GameScene: create 方法完成",
-      "timestamp": "2025-11-09T10:10:38.678Z"
-    },
-    {
-      "type": "log",
-      "text": "🧹 頁面即將卸載，執行清理",
-      "timestamp": "2025-11-09T10:10:46.741Z"
-    },
-    {
-      "type": "log",
-      "text": "🧹 執行強制清理鎖定狀態",
-      "timestamp": "2025-11-09T10:10:46.741Z"
-    },
-    {
-      "type": "log",
-      "text": "🔓 停用全螢幕鎖定功能",
-      "timestamp": "2025-11-09T10:10:46.741Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 所有鎖定事件監聽器已移除",
-      "timestamp": "2025-11-09T10:10:46.742Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 強制清理完成",
-      "timestamp": "2025-11-09T10:10:46.742Z"
-    },
-    {
-      "type": "log",
-      "text": "📴 Handler: 頁面隱藏（切換標籤/最小化）",
-      "timestamp": "2025-11-09T10:10:46.895Z"
-    },
-    {
-      "type": "error",
-      "text": "[next-auth][error][CLIENT_FETCH_ERROR] \nhttps://next-auth.js.org/errors#client_fetch_error Failed to fetch [object Object]",
-      "timestamp": "2025-11-09T10:10:46.900Z"
-    },
-    {
-      "type": "error",
-      "text": "[next-auth][error][CLIENT_FETCH_ERROR] \nhttps://next-auth.js.org/errors#client_fetch_error Failed to fetch [object Object]",
-      "timestamp": "2025-11-09T10:10:46.901Z"
-    },
-    {
-      "type": "log",
-      "text": "🧹 執行頁面載入初始清理",
-      "timestamp": "2025-11-09T10:10:47.013Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 無殘留鎖定狀態",
-      "timestamp": "2025-11-09T10:10:47.015Z"
-    },
-    {
-      "type": "log",
-      "text": "🔄 載入活動詞彙: cmhjff7340001jf04htar2e5k",
-      "timestamp": "2025-11-09T10:10:47.016Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k",
-      "timestamp": "2025-11-09T10:10:47.022Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:47.022Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:47.022Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:47.023Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Match-up 遊戲配置完成 [object Object]",
-      "timestamp": "2025-11-09T10:10:47.262Z"
-    },
-    {
-      "type": "log",
-      "text": "🧹 執行全域攔截層清理",
-      "timestamp": "2025-11-09T10:10:47.262Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 全域攔截層清理完成",
-      "timestamp": "2025-11-09T10:10:47.263Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 全螢幕控制器初始化完成",
-      "timestamp": "2025-11-09T10:10:47.263Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Match-up 遊戲初始化完成",
-      "timestamp": "2025-11-09T10:10:47.263Z"
-    },
-    {
-      "type": "info",
-      "text": "🧪 matchUpDevTools 已就緒。執行 matchUpDevTools.help() 取得操作說明。",
-      "timestamp": "2025-11-09T10:10:47.299Z"
-    },
-    {
-      "type": "log",
-      "text": "%c %c %c %c %c Phaser v3.55.2 (WebGL | Web Audio) %c https://phaser.io background: #ff0000 background: #ffff00 background: #00ff00 background: #00ffff color: #ffffff; background: #000000 background: transparent",
-      "timestamp": "2025-11-09T10:10:47.366Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Handler: create 方法開始",
-      "timestamp": "2025-11-09T10:10:47.663Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Handler: 背景顏色設定為白色",
-      "timestamp": "2025-11-09T10:10:47.663Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Handler: 頁面可見性處理已設置",
-      "timestamp": "2025-11-09T10:10:47.663Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Handler: 準備啟動 PreloadScene",
-      "timestamp": "2025-11-09T10:10:47.664Z"
-    },
-    {
-      "type": "log",
-      "text": "🔧 Handler: 啟動背景場景 PreloadScene",
-      "timestamp": "2025-11-09T10:10:47.664Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Handler: 場景 PreloadScene 已啟動 [object Object]",
-      "timestamp": "2025-11-09T10:10:47.664Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Handler: PreloadScene 已啟動",
-      "timestamp": "2025-11-09T10:10:47.664Z"
-    },
-    {
-      "type": "log",
-      "text": "🧹 執行全域攔截層清理",
-      "timestamp": "2025-11-09T10:10:47.672Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 全域攔截層清理完成",
-      "timestamp": "2025-11-09T10:10:47.672Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 遊戲載入完成: Match up 配對遊戲",
-      "timestamp": "2025-11-09T10:10:47.673Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 PreloadScene: create 方法開始",
-      "timestamp": "2025-11-09T10:10:47.680Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 PreloadScene: 從 URL 取得視覺風格 clouds",
-      "timestamp": "2025-11-09T10:10:47.681Z"
-    },
-    {
-      "type": "log",
-      "text": "📡 PreloadScene: 請求視覺風格資源 https://edu-create.vercel.app/api/visual-styles/resources?styleId=clouds",
-      "timestamp": "2025-11-09T10:10:47.681Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k",
-      "timestamp": "2025-11-09T10:10:47.699Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:47.700Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:47.700Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:47.700Z"
-    },
-    {
-      "type": "warning",
-      "text": "處理 iframe 消息時出錯: SyntaxError: Unexpected end of JSON input",
-      "timestamp": "2025-11-09T10:10:47.740Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k",
-      "timestamp": "2025-11-09T10:10:47.774Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:47.775Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:47.775Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:47.775Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k",
-      "timestamp": "2025-11-09T10:10:47.916Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:47.916Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:47.916Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:47.917Z"
-    },
-    {
-      "type": "log",
-      "text": "🔄 Session 已載入，重新檢查所有者身份",
-      "timestamp": "2025-11-09T10:10:47.918Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 活動結果已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:47.988Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k",
-      "timestamp": "2025-11-09T10:10:47.989Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:47.989Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:47.989Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:47.989Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 活動排行榜數據已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.003Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k",
-      "timestamp": "2025-11-09T10:10:48.004Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:48.004Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:48.005Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.005Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 成功載入自定義詞彙: [object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object],[object Object]",
-      "timestamp": "2025-11-09T10:10:48.038Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k&customVocabulary=true&vocabUpdateTrigger=0",
-      "timestamp": "2025-11-09T10:10:48.038Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:48.039Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:48.039Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.039Z"
-    },
-    {
-      "type": "log",
-      "text": "🔄 [v102.4] customVocabulary 已改變，觸發 iframe 重新加載: 20 個詞彙",
-      "timestamp": "2025-11-09T10:10:48.042Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:48.043Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:48.043Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:48.043Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.043Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 遊戲選項已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.076Z"
+      "text": "ℹ️ 使用默認遊戲選項",
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
       "text": "✅ Match-up 選項已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.076Z"
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
       "text": "🔍 檢查所有者身份: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.076Z"
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
-      "text": "❌ 缺少 session 或活動所有者信息",
-      "timestamp": "2025-11-09T10:10:48.077Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 活動信息已載入: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.077Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:48.077Z"
+      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmh93tjuh0001l404hszkdf94&customVocabulary=true&vocabUpdateTrigger=1",
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
       "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:48.078Z"
+      "timestamp": "2025-11-09T10:29:27.178Z"
     },
     {
       "type": "log",
       "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:48.078Z"
+      "timestamp": "2025-11-09T10:29:27.179Z"
     },
     {
       "type": "log",
       "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.078Z"
+      "timestamp": "2025-11-09T10:29:27.179Z"
     },
     {
       "type": "log",
       "text": "🔍 EnhancedActivityInfoBox props: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.078Z"
+      "timestamp": "2025-11-09T10:29:27.179Z"
     },
     {
       "type": "log",
-      "text": "📴 Handler: 頁面隱藏（切換標籤/最小化）",
-      "timestamp": "2025-11-09T10:10:48.142Z"
-    },
-    {
-      "type": "error",
-      "text": "❌ PreloadScene: 載入視覺風格資源時發生錯誤 TypeError: Failed to fetch",
-      "timestamp": "2025-11-09T10:10:48.142Z"
+      "text": "🔍 用戶資料 API 響應: true",
+      "timestamp": "2025-11-09T10:29:27.179Z"
     },
     {
       "type": "log",
-      "text": "🎮 PreloadScene: 準備啟動 GameScene",
-      "timestamp": "2025-11-09T10:10:48.142Z"
+      "text": "🔍 所有者檢查結果: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.179Z"
     },
     {
       "type": "log",
-      "text": "🎮 PreloadScene: GameScene 已啟動",
-      "timestamp": "2025-11-09T10:10:48.143Z"
+      "text": "✅ 活動信息已載入: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.179Z"
     },
     {
       "type": "log",
-      "text": "✅ Match-up 遊戲配置完成 [object Object]",
-      "timestamp": "2025-11-09T10:10:48.275Z"
+      "text": "🔍 [DEBUG] fetch 完成",
+      "timestamp": "2025-11-09T10:29:27.179Z"
     },
     {
       "type": "log",
-      "text": "🧹 執行全域攔截層清理",
-      "timestamp": "2025-11-09T10:10:48.275Z"
+      "text": "📡 API 響應狀態: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.179Z"
     },
     {
       "type": "log",
-      "text": "✅ 全域攔截層清理完成",
-      "timestamp": "2025-11-09T10:10:48.275Z"
+      "text": "🔍 [DEBUG] JSON 解析完成",
+      "timestamp": "2025-11-09T10:29:27.179Z"
     },
     {
       "type": "log",
-      "text": "✅ 全螢幕控制器初始化完成",
-      "timestamp": "2025-11-09T10:10:48.276Z"
+      "text": "✅ 活動數據載入成功: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.179Z"
     },
     {
       "type": "log",
-      "text": "✅ Match-up 遊戲初始化完成",
-      "timestamp": "2025-11-09T10:10:48.276Z"
+      "text": "🔍 檢查詞彙數據來源...",
+      "timestamp": "2025-11-09T10:29:27.179Z"
+    },
+    {
+      "type": "log",
+      "text": "📝 從 elements 載入詞彙: 2 個",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "🔄 開始轉換詞彙數據格式...",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 [v9.0] 原始詞彙數據結構檢查 - 總項目: 2, hasImageUrl: false, hasChineseImageUrl: false, imageUrl: null, chineseImageUrl: null",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "🔇 [後台] 聲音已禁用，跳過音頻生成",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "🎧 音訊診斷結果 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "warning",
+      "text": "⚠️ 發現缺少或無效的 audioUrl，請檢查 CMS/後端輸出",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "✅ 詞彙數據轉換完成: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 詳細詞彙數據檢查:",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "詞彙 1: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "詞彙 2: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 詞彙數據載入完成 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 載入文字已移除",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: Handler 場景引用 ✅ 存在",
+      "timestamp": "2025-11-09T10:29:27.180Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 調用 Handler.updateResize",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "📷 Handler: updateCamera - Match-up 遊戲不使用攝影機縮放",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "✅ Handler: updateResize 完成 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "📄 初始化分頁設置 - 總詞彙數: 2",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "📄 從 URL 讀取 itemsPerPage: 20",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "📄 從 URL 讀取 autoProceed: true",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "📄 分頁設置完成: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 [v10.1] URL 參數詳細檢查: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 佈局模式: mixed [object Object]",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "🎲 隨機模式: different",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "📝 顯示答案: false",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "🔊 [v44.0] 聲音選項: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.181Z"
+    },
+    {
+      "type": "log",
+      "text": "⏱️ 計時器類型: none",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 調用 updateLayout",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: updateLayout 開始",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 當前場景尺寸 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 清除所有現有元素",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 添加白色背景 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 創建卡片",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: createCards 開始",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: pairs 數據 [object Object],[object Object]",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "📄 當前頁數據: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 計算卡片尺寸和位置 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 [v46.0] 設備檢測: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.182Z"
+    },
+    {
+      "type": "log",
+      "text": "📱 [v46.0] iPad 動態卡片尺寸: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 卡片尺寸 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 卡片位置 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 卡片間距 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 創建混合佈局（英文卡片在中文框內，可交換位置）",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "📱 響應式檢測 [v38.0]: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "🖥️ 使用桌面動態響應式佈局（含按鈕空間）",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 詳細圖片檢測: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "📐 [v47.0] 統一布局 - 邊距計算: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "📐 [v47.0] 統一布局 - 間距計算: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "🟨 使用長方形卡片模式",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "📱 [v39.0] iPad 長方形卡片動態尺寸: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "🟨 長方形卡片佈局: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.183Z"
+    },
+    {
+      "type": "log",
+      "text": "📐 混合佈局參數: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "📐 [v23.0] 寬度計算詳情: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "📐 混合佈局間距: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "🔥 [v23.0] 水平間距計算: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 桌面模式：智能計算中文字體大小...",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "📊 桌面模式中文字體大小範圍: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 [v76.0] 混合佈局中文框 [0] 內容檢查: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "⚪ [v76.0] 混合佈局中文框 [0] 顯示空白",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "📦 [v76.0] 在框下方創建圖片+文字區域 [0]",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "📝 [v76.0] 下方區域 [0] 只有文字模式",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 [v76.0] 混合佈局中文框 [1] 內容檢查: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.184Z"
+    },
+    {
+      "type": "log",
+      "text": "⚪ [v76.0] 混合佈局中文框 [1] 顯示空白",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "📦 [v76.0] 在框下方創建圖片+文字區域 [1]",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "📝 [v76.0] 下方區域 [1] 只有文字模式",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 [v54.0] 緩存檢查: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "🎲 混合佈局使用隨機排列模式（Fisher-Yates 算法）",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "🎲 [v54.0] 已保存洗牌順序到緩存",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 createLeftCard 調試信息: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "📝 createTextElement 被調用: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "✅ 文字對象已創建（智能計算）: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 createLeftCard 調試信息: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "📝 createTextElement 被調用: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "✅ 文字對象已創建（智能計算）: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "✅ 混合佈局創建完成: [object Object]",
+      "timestamp": "2025-11-09T10:29:27.185Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: createCards 完成 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.186Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 卡片創建完成",
+      "timestamp": "2025-11-09T10:29:27.186Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: 遊戲開始時間已記錄",
+      "timestamp": "2025-11-09T10:29:27.186Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 顯示提交答案按鈕 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.186Z"
+    },
+    {
+      "type": "log",
+      "text": "🔍 按鈕位置 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.186Z"
+    },
+    {
+      "type": "log",
+      "text": "✅ 提交答案按鈕已創建",
+      "timestamp": "2025-11-09T10:29:27.186Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: updateLayout 完成",
+      "timestamp": "2025-11-09T10:29:27.186Z"
+    },
+    {
+      "type": "log",
+      "text": "🎮 GameScene: updateLayout 完成",
+      "timestamp": "2025-11-09T10:29:27.186Z"
     },
     {
       "type": "info",
-      "text": "🧪 matchUpDevTools 已就緒。執行 matchUpDevTools.help() 取得操作說明。",
-      "timestamp": "2025-11-09T10:10:48.279Z"
+      "text": "[18:29:21] [ResponsiveManager] ℹ️ 初始化完成 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.186Z"
+    },
+    {
+      "type": "info",
+      "text": "[18:29:21] [GameScene] ℹ️ 響應式管理器初始化完成 [object Object]",
+      "timestamp": "2025-11-09T10:29:27.186Z"
     },
     {
       "type": "log",
-      "text": "%c %c %c %c %c Phaser v3.55.2 (WebGL | Web Audio) %c https://phaser.io background: #ff0000 background: #ffff00 background: #00ff00 background: #00ffff color: #ffffff; background: #000000 background: transparent",
-      "timestamp": "2025-11-09T10:10:48.296Z"
+      "text": "✅ 已綁定 resize 事件監聽器（v54.0 防抖延遲 300ms，保存已配對狀態和洗牌順序）",
+      "timestamp": "2025-11-09T10:29:27.187Z"
     },
     {
       "type": "log",
-      "text": "🎮 Handler: create 方法開始",
-      "timestamp": "2025-11-09T10:10:48.427Z"
+      "text": "✅ 已綁定 fullscreenchange 事件監聽器",
+      "timestamp": "2025-11-09T10:29:27.187Z"
     },
     {
       "type": "log",
-      "text": "🎮 Handler: 背景顏色設定為白色",
-      "timestamp": "2025-11-09T10:10:48.428Z"
+      "text": "✅ 已綁定 orientationchange 事件監聽器",
+      "timestamp": "2025-11-09T10:29:27.187Z"
     },
     {
       "type": "log",
-      "text": "✅ Handler: 頁面可見性處理已設置",
-      "timestamp": "2025-11-09T10:10:48.428Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Handler: 準備啟動 PreloadScene",
-      "timestamp": "2025-11-09T10:10:48.428Z"
-    },
-    {
-      "type": "log",
-      "text": "🔧 Handler: 啟動背景場景 PreloadScene",
-      "timestamp": "2025-11-09T10:10:48.428Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ Handler: 場景 PreloadScene 已啟動 [object Object]",
-      "timestamp": "2025-11-09T10:10:48.428Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Handler: PreloadScene 已啟動",
-      "timestamp": "2025-11-09T10:10:48.428Z"
-    },
-    {
-      "type": "log",
-      "text": "🧹 執行全域攔截層清理",
-      "timestamp": "2025-11-09T10:10:48.429Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 全域攔截層清理完成",
-      "timestamp": "2025-11-09T10:10:48.429Z"
-    },
-    {
-      "type": "log",
-      "text": "✅ 遊戲載入完成: Match up 配對遊戲",
-      "timestamp": "2025-11-09T10:10:48.429Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 PreloadScene: create 方法開始",
-      "timestamp": "2025-11-09T10:10:48.446Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 PreloadScene: 從 URL 取得視覺風格 clouds",
-      "timestamp": "2025-11-09T10:10:48.447Z"
-    },
-    {
-      "type": "log",
-      "text": "📡 PreloadScene: 請求視覺風格資源 https://edu-create.vercel.app/api/visual-styles/resources?styleId=clouds",
-      "timestamp": "2025-11-09T10:10:48.447Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:48.452Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:48.452Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:48.453Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.453Z"
-    },
-    {
-      "type": "log",
-      "text": "🎯 正常模式 URL: /games/match-up-game/?activityId=cmhjff7340001jf04htar2e5k&customVocabulary=true&vocabUpdateTrigger=1",
-      "timestamp": "2025-11-09T10:10:48.531Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 遊戲選項已添加到 URL",
-      "timestamp": "2025-11-09T10:10:48.531Z"
-    },
-    {
-      "type": "log",
-      "text": "🎨 視覺風格已添加到 URL: clouds",
-      "timestamp": "2025-11-09T10:10:48.531Z"
-    },
-    {
-      "type": "log",
-      "text": "🎮 Match-up 選項已添加到 URL: [object Object]",
-      "timestamp": "2025-11-09T10:10:48.531Z"
+      "text": "🎮 GameScene: create 方法完成",
+      "timestamp": "2025-11-09T10:29:27.187Z"
     }
   ],
   "keyLogs": [],
-  "timestamp": "2025-11-09T10:10:48.629Z",
-  "totalLogs": 352,
+  "timestamp": "2025-11-09T10:29:37.155Z",
+  "totalLogs": 197,
   "keyLogsCount": 0
 }
