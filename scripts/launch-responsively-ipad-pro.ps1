@@ -8,7 +8,7 @@
 param(
     [string]$ResponsivelyPath = "C:\Users\Administrator\AppData\Local\Programs\ResponsivelyApp\ResponsivelyApp.exe",
     [int]$WaitSeconds = 15,
-    [string]$GameUrl = "https://edu-create.vercel.app/games/switcher?game=match-up-game&activityId=cmhjff7340001jf04htar2e5k&layout=mixed&itemsPerPage=20"
+    [string]$GameUrl = "https://edu-create.vercel.app/games/switcher?game=match-up-game&activityId=cmhjff7340001jf04htar2e5k"
 )
 
 Write-Host "🚀 启动 Responsively App (iPad Pro 1024×1366)" -ForegroundColor Green
