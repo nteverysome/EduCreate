@@ -2475,20 +2475,32 @@ class GameScene extends Phaser.Scene {
                 }
 
                 // 🔥 第六步：定義最小正方形卡片大小
-                // ✅ v43.0：優化 iPad 卡片尺寸 - 增加最小尺寸至 140px (+16.7%)
+                // ✅ v49.0：改進平板直向模式的最小卡片尺寸計算
                 let minSquareSize;
                 if (isIPad) {
-                    // iPad：根據容器寬度動態計算最小卡片尺寸
-                    // 5 列 + 6 個間距 = 5 * minSquareSize + 6 * horizontalSpacing = availableWidth
-                    // minSquareSize = (availableWidth - 6 * horizontalSpacing) / 5
-                    // ✅ v43.0：最小尺寸從 120px 增加至 140px，使卡片更大更易點擊
-                    minSquareSize = Math.max(140, (availableWidth - 6 * horizontalSpacing) / 5);
-                    console.log('📱 [v43.0] iPad 動態卡片尺寸:', {
-                        availableWidth: availableWidth.toFixed(1),
-                        horizontalSpacing: horizontalSpacing.toFixed(1),
-                        calculatedMinSize: minSquareSize.toFixed(1),
-                        minSizeThreshold: 140
-                    });
+                    if (isTabletPortrait) {
+                        // 平板直向模式：使用更寬鬆的最小尺寸，允許更多列
+                        // 對於 1024×1033，應該允許 4-5 列，所以最小尺寸應該更小
+                        minSquareSize = Math.max(120, (availableWidth - 6 * horizontalSpacing) / 6);
+                        console.log('📱 [v49.0] iPad 平板直向動態卡片尺寸:', {
+                            availableWidth: availableWidth.toFixed(1),
+                            horizontalSpacing: horizontalSpacing.toFixed(1),
+                            calculatedMinSize: minSquareSize.toFixed(1),
+                            minSizeThreshold: 120,
+                            mode: '平板直向'
+                        });
+                    } else {
+                        // iPad 橫向或其他模式：保持原有邏輯
+                        // 5 列 + 6 個間距 = 5 * minSquareSize + 6 * horizontalSpacing = availableWidth
+                        // ✅ v43.0：最小尺寸從 120px 增加至 140px，使卡片更大更易點擊
+                        minSquareSize = Math.max(140, (availableWidth - 6 * horizontalSpacing) / 5);
+                        console.log('📱 [v43.0] iPad 動態卡片尺寸:', {
+                            availableWidth: availableWidth.toFixed(1),
+                            horizontalSpacing: horizontalSpacing.toFixed(1),
+                            calculatedMinSize: minSquareSize.toFixed(1),
+                            minSizeThreshold: 140
+                        });
+                    }
                 } else {
                     // 其他設備：使用固定最小尺寸
                     minSquareSize = 150;  // 最小正方形尺寸150×150
@@ -2505,30 +2517,39 @@ class GameScene extends Phaser.Scene {
                 let calculatedCols;       // ✅ v48.0：移到外部作用域，避免作用域問題
                 let maxColsLimit;         // ✅ v48.0：移到外部作用域，避免作用域問題
 
-                // ✅ v48.0：針對平板直向模式優化列數計算
+                // ✅ v50.0：改進平板直向模式列數計算 - 使用簡單的寬度比例
                 if (isTabletPortrait) {
-                    // 平板直向模式：限制列數為 3-4 列
-                    // 寬度 768-1024px，應該顯示 3-4 列卡片
-                    const maxColsForTabletPortrait = 4;
+                    // 平板直向模式：根據實際寬度動態計算最佳列數
+                    // 使用簡單的寬度比例方法，避免循環依賴
 
-                    // 估算正方形卡片尺寸
-                    const estimatedCols = Math.min(maxColsForTabletPortrait, itemCount);
-                    const estimatedRows = Math.ceil(itemCount / estimatedCols);
+                    // 第一步：根據寬度估算列數
+                    // 對於 1024px 寬度，應該顯示 4-5 列
+                    // 對於 768px 寬度，應該顯示 3-4 列
+                    // 使用公式：cols = floor((availableWidth - spacing) / (targetCardWidth + spacing))
+                    // 其中 targetCardWidth 根據寬度動態計算
+
+                    const targetCardWidth = availableWidth / 4.5;  // 目標卡片寬度（基於 4.5 列）
+                    optimalCols = Math.max(3, Math.floor((availableWidth - horizontalSpacing) / (targetCardWidth + horizontalSpacing)));
+                    optimalCols = Math.min(optimalCols, itemCount);  // 不超過項目數
+
+                    // 第二步：估算卡片尺寸
+                    const estimatedRows = Math.ceil(itemCount / optimalCols);
                     const estimatedAvailableHeightPerRow = (availableHeight - verticalSpacing * (estimatedRows + 1)) / estimatedRows;
                     estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
 
-                    // 根據寬度計算列數
+                    // 第三步：計算實際列數
                     calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
-                    maxColsLimit = maxColsForTabletPortrait;
-                    optimalCols = Math.min(calculatedCols, maxColsForTabletPortrait, itemCount);
+                    maxColsLimit = 6;
+                    optimalCols = Math.min(calculatedCols, maxColsLimit, itemCount);
 
-                    console.log(`🔥 [v48.0] 平板直向列數計算:`, {
+                    console.log(`🔥 [v50.0] 平板直向列數計算（簡化版）:`, {
                         width: width.toFixed(1),
                         height: height.toFixed(1),
                         availableWidth: availableWidth.toFixed(1),
+                        targetCardWidth: targetCardWidth.toFixed(1),
                         estimatedSquareSize: estimatedSquareSize.toFixed(1),
                         calculatedCols: calculatedCols,
-                        maxColsForTabletPortrait: maxColsForTabletPortrait,
+                        maxColsLimit: maxColsLimit,
                         optimalCols: optimalCols,
                         itemCount: itemCount
                     });
@@ -2592,6 +2613,16 @@ class GameScene extends Phaser.Scene {
 
                 // 取較小值，確保卡片不會超出邊界
                 let squareSize = Math.min(squareSizeByHeight, squareSizeByWidth);
+
+                console.log(`🔥 [v49.0] 正方形卡片尺寸檢查:`, {
+                    squareSizeByHeight: squareSizeByHeight.toFixed(1),
+                    squareSizeByWidth: squareSizeByWidth.toFixed(1),
+                    squareSize: squareSize.toFixed(1),
+                    minSquareSize: minSquareSize.toFixed(1),
+                    optimalCols: optimalCols,
+                    itemCount: itemCount,
+                    isTabletPortrait: isTabletPortrait
+                });
 
                 // 🔥 檢查是否需要增加列數（如果卡片太小）
                 if (squareSize < minSquareSize && optimalCols < itemCount) {
