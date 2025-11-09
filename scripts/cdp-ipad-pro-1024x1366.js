@@ -49,24 +49,48 @@ async function main() {
     let browser;
     let page;
     const consoleLogs = [];
-    
+
     try {
         // 连接到 Responsively App
         console.log('\n📡 连接到 Responsively App...');
+
+        // 首先获取可用的页面列表
+        console.log('📋 获取可用页面列表...');
+        const http = require('http');
+        const pages = await new Promise((resolve, reject) => {
+            http.get('http://127.0.0.1:9222/json', (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    try {
+                        resolve(JSON.parse(data));
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            }).on('error', reject);
+        });
+
+        // 找到游戏页面
+        const gamePage = pages.find(p => p.url && p.url.includes('match-up-game'));
+        if (!gamePage) {
+            throw new Error('❌ 没有找到游戏页面，请在 Responsively App 中打开游戏');
+        }
+
+        console.log(`✅ 找到游戏页面: ${gamePage.url}`);
+        console.log(`📡 WebSocket 端点: ${gamePage.webSocketDebuggerUrl}`);
+
+        // 使用正确的 WebSocket 端点连接
         browser = await puppeteer.connect({
-            browserWSEndpoint: CONFIG.CDP_ENDPOINT,
+            browserWSEndpoint: gamePage.webSocketDebuggerUrl,
             defaultViewport: null
         });
         console.log('✅ 已连接到 Responsively App');
-        
+
         // 获取页面
-        const pages = await browser.pages();
-        if (pages.length === 0) {
-            throw new Error('❌ 没有找到打开的页面，请在 Responsively App 中打开游戏');
-        }
-        
-        page = pages[0];
-        console.log(`✅ 找到页面: ${page.url()}`);
+        const allPages = await browser.pages();
+        page = allPages[0];
+        console.log(`✅ 已获取页面`);
         
         // 设置视口大小
         console.log(`\n📐 设置视口大小: ${CONFIG.DEVICE.width}×${CONFIG.DEVICE.height}`);
