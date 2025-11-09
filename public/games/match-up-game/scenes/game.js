@@ -967,6 +967,10 @@ class GameScene extends Phaser.Scene {
             console.log('🎮 GameScene: 清除所有現有元素');
             this.children.removeAll(true);
 
+            // 🔥 [v97.0] 清除提交按鈕引用，確保下一頁會重新創建按鈕
+            this.submitButton = null;
+            console.log('🎮 GameScene: 已清除提交按鈕引用');
+
             // 獲取當前螢幕尺寸
             const width = this.scale.width;
             const height = this.scale.height;
