@@ -5111,31 +5111,10 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 顯示正確答案（白色內框 + 勾勾）[v96.0]
     showCorrectAnswer(rightCard, correctAnswer) {
-        const background = rightCard.getData('background');
-
-        // 🔥 [v58.0] 修復：檢查 background 是否存在
-        if (!background) {
-            console.warn('⚠️ [v58.0] showCorrectAnswer: background 不存在，跳過視覺效果');
-            return;
-        }
-
-        const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
-
-        // 內框呈白色
-        background.setFillStyle(0xffffff);
-        background.setStrokeStyle(2, 0x000000);
-
-        // 更新文字為正確答案
-        if (textObj) {
-            textObj.setText(correctAnswer);
-        }
-
-        // 🔥 [v97.0] 在所有佈局中顯示勾勾
-        // 在混合佈局中，rightCard 就是英文卡片
-        // 在分離佈局中，rightCard 是右側的中文卡片
+        // 🔥 [v98.0] 在混合佈局中，不需要檢查 background，直接添加勾勾
         if (this.layout === 'mixed') {
             // 混合佈局：rightCard 是英文卡片，直接在其上添加勾勾
-            console.log('🔍 [v97.0] showCorrectAnswer 混合佈局調試:', {
+            console.log('🔍 [v98.0] showCorrectAnswer 混合佈局調試:', {
                 hasRightCard: !!rightCard,
                 hasList: rightCard && !!rightCard.list,
                 listLength: rightCard && rightCard.list ? rightCard.list.length : 0,
@@ -5161,14 +5140,34 @@ class GameScene extends Phaser.Scene {
                     rightCard.add(checkMark);
                     checkMark.setPosition(markX, markY);
 
-                    console.log('✅ [v97.0] 混合佈局：在英文卡片上添加勾勾');
+                    console.log('✅ [v98.0] 混合佈局：在英文卡片上添加勾勾');
                 } else {
-                    console.warn('⚠️ [v97.0] 混合佈局：找不到文字對象');
+                    console.warn('⚠️ [v98.0] 混合佈局：找不到文字對象');
                 }
             } else {
-                console.warn('⚠️ [v97.0] 混合佈局：rightCard 或 rightCard.list 不存在');
+                console.warn('⚠️ [v98.0] 混合佈局：rightCard 或 rightCard.list 不存在');
             }
         } else {
+            // 分離模式：使用原有的邏輯
+            const background = rightCard.getData('background');
+
+            // 🔥 [v58.0] 修復：檢查 background 是否存在
+            if (!background) {
+                console.warn('⚠️ [v58.0] showCorrectAnswer: background 不存在，跳過視覺效果');
+                return;
+            }
+
+            const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
+
+            // 內框呈白色
+            background.setFillStyle(0xffffff);
+            background.setStrokeStyle(2, 0x000000);
+
+            // 更新文字為正確答案
+            if (textObj) {
+                textObj.setText(correctAnswer);
+            }
+
             // 分離模式：在右卡片上顯示勾勾
             const checkMark = this.add.text(
                 rightCard.x + background.width / 2 - 32,
@@ -5188,31 +5187,10 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 顯示錯誤答案（灰色內框 + X）[v96.0]
     showIncorrectAnswer(rightCard, correctAnswer) {
-        const background = rightCard.getData('background');
-
-        // 🔥 [v58.0] 修復：檢查 background 是否存在
-        if (!background) {
-            console.warn('⚠️ [v58.0] showIncorrectAnswer: background 不存在，跳過視覺效果');
-            return;
-        }
-
-        const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
-
-        // 內框呈灰色
-        background.setFillStyle(0xcccccc);
-        background.setStrokeStyle(2, 0x000000);
-
-        // 更新文字為正確答案
-        if (textObj) {
-            textObj.setText(correctAnswer);
-        }
-
-        // 🔥 [v97.0] 在所有佈局中顯示叉叉
-        // 在混合佈局中，rightCard 就是英文卡片
-        // 在分離佈局中，rightCard 是右側的中文卡片
+        // 🔥 [v98.0] 在混合佈局中，不需要檢查 background，直接添加叉叉
         if (this.layout === 'mixed') {
             // 混合佈局：rightCard 是英文卡片，直接在其上添加叉叉
-            console.log('🔍 [v97.0] showIncorrectAnswer 混合佈局調試:', {
+            console.log('🔍 [v98.0] showIncorrectAnswer 混合佈局調試:', {
                 hasRightCard: !!rightCard,
                 hasList: rightCard && !!rightCard.list,
                 listLength: rightCard && rightCard.list ? rightCard.list.length : 0,
@@ -5238,14 +5216,34 @@ class GameScene extends Phaser.Scene {
                     rightCard.add(xMark);
                     xMark.setPosition(markX, markY);
 
-                    console.log('❌ [v97.0] 混合佈局：在英文卡片上添加叉叉');
+                    console.log('❌ [v98.0] 混合佈局：在英文卡片上添加叉叉');
                 } else {
-                    console.warn('⚠️ [v97.0] 混合佈局：找不到文字對象');
+                    console.warn('⚠️ [v98.0] 混合佈局：找不到文字對象');
                 }
             } else {
-                console.warn('⚠️ [v97.0] 混合佈局：rightCard 或 rightCard.list 不存在');
+                console.warn('⚠️ [v98.0] 混合佈局：rightCard 或 rightCard.list 不存在');
             }
         } else {
+            // 分離模式：使用原有的邏輯
+            const background = rightCard.getData('background');
+
+            // 🔥 [v58.0] 修復：檢查 background 是否存在
+            if (!background) {
+                console.warn('⚠️ [v58.0] showIncorrectAnswer: background 不存在，跳過視覺效果');
+                return;
+            }
+
+            const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
+
+            // 內框呈灰色
+            background.setFillStyle(0xcccccc);
+            background.setStrokeStyle(2, 0x000000);
+
+            // 更新文字為正確答案
+            if (textObj) {
+                textObj.setText(correctAnswer);
+            }
+
             // 分離模式：在右卡片上顯示叉叉
             const xMark = this.add.text(
                 rightCard.x + background.width / 2 - 32,
