@@ -5165,47 +5165,49 @@ class GameScene extends Phaser.Scene {
         // 🔥 [v98.0] 在混合佈局中，不需要檢查 background，直接添加勾勾
         if (this.layout === 'mixed') {
             // 混合佈局：rightCard 是英文卡片，直接在其上添加勾勾
-            console.log('🔍 [v102.0] showCorrectAnswer 混合佈局調試:', {
+            console.log('🔍 [v109.0] showCorrectAnswer 混合佈局調試:', {
                 hasRightCard: !!rightCard,
                 hasList: rightCard && !!rightCard.list,
                 listLength: rightCard && rightCard.list ? rightCard.list.length : 0,
-                listTypes: rightCard && rightCard.list ? rightCard.list.map(c => c.type) : [],
-                pairId: rightCard ? rightCard.getData('pairId') : null,
-                rightCardWidth: rightCard ? rightCard.width : null,
-                rightCardHeight: rightCard ? rightCard.height : null,
-                rightCardX: rightCard ? rightCard.x : null,
-                rightCardY: rightCard ? rightCard.y : null
+                pairId: rightCard ? rightCard.getData('pairId') : null
             });
 
             if (rightCard && rightCard.list) {
-                // 🔥 [v102.0] 修復：參考 showCorrectAnswerOnCard() 的方法
-                // 勾勾應該直接添加到場景中，而不是容器中
-                // 位置相對於全局坐標
+                // 🔥 [v109.0] 新方案：跟著英文單字作為目標
+                // 查找英文文字對象（通常是 list 中的 text 對象）
+                let textObject = null;
+                for (let i = 0; i < rightCard.list.length; i++) {
+                    const item = rightCard.list[i];
+                    if (item && item.type === 'Text') {
+                        textObject = item;
+                        break;
+                    }
+                }
 
-                const background = rightCard.list[0]; // 卡片背景
-
-                console.log('🔍 [v102.0] 背景對象詳細信息:', {
-                    hasBackground: !!background,
-                    backgroundType: background ? background.type : null,
-                    backgroundWidth: background ? background.width : null,
-                    backgroundHeight: background ? background.height : null
+                console.log('🔍 [v109.0] 英文文字對象查找:', {
+                    found: !!textObject,
+                    textContent: textObject ? textObject.text : null,
+                    textX: textObject ? textObject.x : null,
+                    textY: textObject ? textObject.y : null
                 });
 
-                if (background) {
-                    // 🔥 [v102.0] 使用全局坐標計算勾勾位置（參考 showCorrectAnswerOnCard）
-                    const markX = rightCard.x + background.width / 2 - 32;
-                    const markY = rightCard.y - background.height / 2 + 32;
+                // 🔥 [v109.0] 如果找到文字對象，在其上方放置勾勾
+                if (textObject) {
+                    // 計算文字的全局位置
+                    const textGlobalX = rightCard.x + textObject.x;
+                    const textGlobalY = rightCard.y + textObject.y;
 
-                    console.log('🔍 [v102.0] 勾勾位置計算:', {
-                        rightCardX: rightCard.x,
-                        rightCardY: rightCard.y,
-                        backgroundWidth: background.width,
-                        backgroundHeight: background.height,
+                    // 在文字上方放置勾勾（偏移量根據文字大小調整）
+                    const markX = textGlobalX;
+                    const markY = textGlobalY - 40;  // 在文字上方 40px
+
+                    console.log('🔍 [v109.0] 勾勾位置計算（基於文字）:', {
+                        textGlobalX,
+                        textGlobalY,
                         markX,
                         markY
                     });
 
-                    // 🔥 [v102.0] 先創建在 (0, 0)，然後設置位置（與 showCorrectAnswerOnCard 一致）
                     // 🔥 [v103.0] 移除舊的標記（如果存在）
                     if (rightCard.checkMark) {
                         rightCard.checkMark.destroy();
@@ -5224,7 +5226,7 @@ class GameScene extends Phaser.Scene {
                     // 🔥 [v103.0] 保存引用以便後續清除
                     rightCard.checkMark = checkMark;
 
-                    console.log('✅ [v102.0] 混合佈局：在英文卡片上添加勾勾', {
+                    console.log('✅ [v109.0] 混合佈局：在英文單字上方添加勾勾', {
                         checkMarkX: checkMark.x,
                         checkMarkY: checkMark.y,
                         checkMarkVisible: checkMark.visible,
@@ -5279,47 +5281,48 @@ class GameScene extends Phaser.Scene {
         // 🔥 [v98.0] 在混合佈局中，不需要檢查 background，直接添加叉叉
         if (this.layout === 'mixed') {
             // 混合佈局：rightCard 是英文卡片，直接在其上添加叉叉
-            console.log('🔍 [v102.0] showIncorrectAnswer 混合佈局調試:', {
+            console.log('🔍 [v109.0] showIncorrectAnswer 混合佈局調試:', {
                 hasRightCard: !!rightCard,
                 hasList: rightCard && !!rightCard.list,
                 listLength: rightCard && rightCard.list ? rightCard.list.length : 0,
-                listTypes: rightCard && rightCard.list ? rightCard.list.map(c => c.type) : [],
-                pairId: rightCard ? rightCard.getData('pairId') : null,
-                rightCardWidth: rightCard ? rightCard.width : null,
-                rightCardHeight: rightCard ? rightCard.height : null,
-                rightCardX: rightCard ? rightCard.x : null,
-                rightCardY: rightCard ? rightCard.y : null
+                pairId: rightCard ? rightCard.getData('pairId') : null
             });
 
             if (rightCard && rightCard.list) {
-                // 🔥 [v102.0] 修復：參考 showIncorrectAnswerOnCard() 的方法
-                // 叉叉應該直接添加到場景中，而不是容器中
-                // 位置相對於全局坐標
+                // 🔥 [v109.0] 新方案：跟著英文單字作為目標
+                // 查找英文文字對象（通常是 list 中的 text 對象）
+                let textObject = null;
+                for (let i = 0; i < rightCard.list.length; i++) {
+                    const item = rightCard.list[i];
+                    if (item && item.type === 'Text') {
+                        textObject = item;
+                        break;
+                    }
+                }
 
-                const background = rightCard.list[0]; // 卡片背景
-
-                console.log('🔍 [v102.0] 背景對象詳細信息:', {
-                    hasBackground: !!background,
-                    backgroundType: background ? background.type : null,
-                    backgroundWidth: background ? background.width : null,
-                    backgroundHeight: background ? background.height : null
+                console.log('🔍 [v109.0] 英文文字對象查找:', {
+                    found: !!textObject,
+                    textContent: textObject ? textObject.text : null,
+                    textX: textObject ? textObject.x : null,
+                    textY: textObject ? textObject.y : null
                 });
 
-                if (background) {
-                    // 🔥 [v102.0] 使用全局坐標計算叉叉位置（參考 showIncorrectAnswerOnCard）
-                    const markX = rightCard.x + background.width / 2 - 32;
-                    const markY = rightCard.y - background.height / 2 + 32;
+                if (textObject) {
+                    // 🔥 [v109.0] 計算文字的全局位置
+                    const textGlobalX = rightCard.x + textObject.x;
+                    const textGlobalY = rightCard.y + textObject.y;
 
-                    console.log('🔍 [v102.0] 叉叉位置計算:', {
-                        rightCardX: rightCard.x,
-                        rightCardY: rightCard.y,
-                        backgroundWidth: background.width,
-                        backgroundHeight: background.height,
+                    // 在文字上方放置叉叉（偏移量根據文字大小調整）
+                    const markX = textGlobalX;
+                    const markY = textGlobalY - 40;  // 在文字上方 40px
+
+                    console.log('🔍 [v109.0] 叉叉位置計算（基於文字）:', {
+                        textGlobalX,
+                        textGlobalY,
                         markX,
                         markY
                     });
 
-                    // 🔥 [v102.0] 先創建在 (0, 0)，然後設置位置（與 showIncorrectAnswerOnCard 一致）
                     // 🔥 [v103.0] 移除舊的標記（如果存在）
                     if (rightCard.xMark) {
                         rightCard.xMark.destroy();
@@ -5338,14 +5341,14 @@ class GameScene extends Phaser.Scene {
                     // 🔥 [v103.0] 保存引用以便後續清除
                     rightCard.xMark = xMark;
 
-                    console.log('❌ [v102.0] 混合佈局：在英文卡片上添加叉叉', {
+                    console.log('❌ [v109.0] 混合佈局：在英文單字上方添加叉叉', {
                         xMarkX: xMark.x,
                         xMarkY: xMark.y,
                         xMarkVisible: xMark.visible,
                         xMarkDepth: xMark.depth
                     });
                 } else {
-                    console.warn('⚠️ [v102.0] 混合佈局：找不到背景對象');
+                    console.warn('⚠️ [v109.0] 混合佈局：找不到英文文字對象');
                 }
             } else {
                 console.warn('⚠️ [v102.0] 混合佈局：rightCard 或 rightCard.list 不存在');
