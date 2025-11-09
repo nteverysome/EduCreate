@@ -1182,6 +1182,17 @@ class GameScene extends Phaser.Scene {
         console.log('🎮 GameScene: createCards 開始');
         console.log('🎮 GameScene: pairs 數據', this.pairs);
 
+        // 🔥 [v115.0] 詳細調適訊息：追蹤頁面狀態
+        console.log('🔥 [v115.0] ========== 創建卡片開始 ==========');
+        console.log('🔥 [v115.0] 當前頁面狀態:', {
+            currentPage: this.currentPage,
+            totalPages: this.totalPages,
+            pageDisplayName: `第 ${this.currentPage + 1} 頁 / 共 ${this.totalPages} 頁`,
+            matchedPairsSize: this.matchedPairs ? this.matchedPairs.size : 0,
+            matchedPairsContent: this.matchedPairs ? Array.from(this.matchedPairs) : [],
+            layout: this.layout
+        });
+
         // 🔥 獲取當前頁的詞彙數據
         const startIndex = this.currentPage * this.itemsPerPage;
         const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
@@ -1193,6 +1204,12 @@ class GameScene extends Phaser.Scene {
             startIndex,
             endIndex,
             currentPagePairs: currentPagePairs.length
+        });
+
+        // 🔥 [v115.0] 詳細調適訊息：列出當前頁的所有詞彙
+        console.log('🔥 [v115.0] 當前頁詞彙列表:');
+        currentPagePairs.forEach((pair, index) => {
+            console.log(`  [${index + 1}] ID: ${pair.id}, 英文: ${pair.question || pair.english}, 中文: ${pair.answer || pair.chinese}`);
         });
 
         // 獲取當前螢幕尺寸
@@ -5014,6 +5031,15 @@ class GameScene extends Phaser.Scene {
         // 而不是依賴 leftCard.getData('matchedWith')
         // 因為在混合佈局中，leftCards 可能不包含所有的詞彙對應的卡片
 
+        // 🔥 [v115.0] 詳細調適訊息：追蹤提交答案時的狀態
+        console.log('🔥 [v115.0] ========== 提交答案開始 ==========');
+        console.log('🔥 [v115.0] 提交答案時的頁面狀態:', {
+            currentPage: this.currentPage,
+            pageDisplayName: `第 ${this.currentPage + 1} 頁`,
+            totalPages: this.totalPages,
+            layout: this.layout
+        });
+
         console.log('🔍 [v60.0] 開始檢查所有配對:', {
             currentPage: this.currentPage,
             startIndex,
@@ -5918,16 +5944,40 @@ class GameScene extends Phaser.Scene {
     // 🔥 進入下一頁
     goToNextPage() {
         if (this.currentPage < this.totalPages - 1) {
+            // 🔥 [v115.0] 詳細調適訊息：追蹤頁面轉換
+            console.log('🔥 [v115.0] ========== 進入下一頁開始 ==========');
+            console.log('🔥 [v115.0] 頁面轉換前:', {
+                currentPage: this.currentPage,
+                pageDisplayName: `第 ${this.currentPage + 1} 頁`,
+                matchedPairsSize: this.matchedPairs.size,
+                matchedPairsContent: Array.from(this.matchedPairs)
+            });
+
             this.currentPage++;
             console.log('📄 進入下一頁:', this.currentPage + 1);
+
+            // 🔥 [v115.0] 詳細調適訊息：頁面轉換後
+            console.log('🔥 [v115.0] 頁面轉換後:', {
+                currentPage: this.currentPage,
+                pageDisplayName: `第 ${this.currentPage + 1} 頁`,
+                totalPages: this.totalPages
+            });
 
             // 🔥 v54.0: 清除洗牌順序緩存（因為頁面改變了）
             this.shuffledPairsCache = null;
             console.log('🔥 [v54.0] 已清除洗牌順序緩存（頁面改變）');
 
             // 🔥 [v113.0] 清空 matchedPairs（因為進入新頁面，舊頁面的配對信息不再適用）
+            console.log('🔥 [v115.0] 清空 matchedPairs 前:', {
+                size: this.matchedPairs.size,
+                content: Array.from(this.matchedPairs)
+            });
             this.matchedPairs.clear();
             console.log('🔥 [v113.0] 已清空 matchedPairs（進入新頁面）');
+            console.log('🔥 [v115.0] 清空 matchedPairs 後:', {
+                size: this.matchedPairs.size,
+                content: Array.from(this.matchedPairs)
+            });
 
             // 重新佈局（會重新創建卡片）
             this.updateLayout();
