@@ -5130,11 +5130,19 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v96.0] 在所有佈局中顯示勾勾
+        // 🔥 [v97.0] 在所有佈局中顯示勾勾
         // 在混合佈局中，rightCard 就是英文卡片
         // 在分離佈局中，rightCard 是右側的中文卡片
         if (this.layout === 'mixed') {
             // 混合佈局：rightCard 是英文卡片，直接在其上添加勾勾
+            console.log('🔍 [v97.0] showCorrectAnswer 混合佈局調試:', {
+                hasRightCard: !!rightCard,
+                hasList: rightCard && !!rightCard.list,
+                listLength: rightCard && rightCard.list ? rightCard.list.length : 0,
+                listTypes: rightCard && rightCard.list ? rightCard.list.map(c => c.type) : [],
+                pairId: rightCard ? rightCard.getData('pairId') : null
+            });
+
             if (rightCard && rightCard.list) {
                 const englishTextObj = rightCard.list.find(child => child.type === 'Text');
 
@@ -5153,8 +5161,12 @@ class GameScene extends Phaser.Scene {
                     rightCard.add(checkMark);
                     checkMark.setPosition(markX, markY);
 
-                    console.log('✅ [v96.0] 混合佈局：在英文卡片上添加勾勾');
+                    console.log('✅ [v97.0] 混合佈局：在英文卡片上添加勾勾');
+                } else {
+                    console.warn('⚠️ [v97.0] 混合佈局：找不到文字對象');
                 }
+            } else {
+                console.warn('⚠️ [v97.0] 混合佈局：rightCard 或 rightCard.list 不存在');
             }
         } else {
             // 分離模式：在右卡片上顯示勾勾
@@ -5195,11 +5207,19 @@ class GameScene extends Phaser.Scene {
             textObj.setText(correctAnswer);
         }
 
-        // 🔥 [v96.0] 在所有佈局中顯示叉叉
+        // 🔥 [v97.0] 在所有佈局中顯示叉叉
         // 在混合佈局中，rightCard 就是英文卡片
         // 在分離佈局中，rightCard 是右側的中文卡片
         if (this.layout === 'mixed') {
             // 混合佈局：rightCard 是英文卡片，直接在其上添加叉叉
+            console.log('🔍 [v97.0] showIncorrectAnswer 混合佈局調試:', {
+                hasRightCard: !!rightCard,
+                hasList: rightCard && !!rightCard.list,
+                listLength: rightCard && rightCard.list ? rightCard.list.length : 0,
+                listTypes: rightCard && rightCard.list ? rightCard.list.map(c => c.type) : [],
+                pairId: rightCard ? rightCard.getData('pairId') : null
+            });
+
             if (rightCard && rightCard.list) {
                 const englishTextObj = rightCard.list.find(child => child.type === 'Text');
 
@@ -5218,8 +5238,12 @@ class GameScene extends Phaser.Scene {
                     rightCard.add(xMark);
                     xMark.setPosition(markX, markY);
 
-                    console.log('❌ [v96.0] 混合佈局：在英文卡片上添加叉叉');
+                    console.log('❌ [v97.0] 混合佈局：在英文卡片上添加叉叉');
+                } else {
+                    console.warn('⚠️ [v97.0] 混合佈局：找不到文字對象');
                 }
+            } else {
+                console.warn('⚠️ [v97.0] 混合佈局：rightCard 或 rightCard.list 不存在');
             }
         } else {
             // 分離模式：在右卡片上顯示叉叉
