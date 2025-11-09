@@ -5633,14 +5633,24 @@ class GameScene extends Phaser.Scene {
             totalCount
         });
 
-        // 🔥 [v96.0] 如果不是最後一頁，延遲 2 秒後自動進入下一頁
+        // 🔥 [v96.0] 如果不是最後一頁，根據 autoProceed 設置決定是否自動進入下一頁
         // 這樣可以讓用戶看到勾勾和叉叉
         if (!isLastPage) {
-            console.log('📄 [v96.0] 非最後一頁：延遲 2 秒後自動進入下一頁');
-            this.time.delayedCall(2000, () => {
-                console.log('📄 [v96.0] 2 秒延遲後，進入下一頁');
-                this.goToNextPage();
-            });
+            if (this.autoProceed) {
+                // 自動進入下一頁
+                console.log('📄 [v96.0] 非最後一頁：延遲 2 秒後自動進入下一頁');
+                this.time.delayedCall(2000, () => {
+                    console.log('📄 [v96.0] 2 秒延遲後，進入下一頁');
+                    this.goToNextPage();
+                });
+            } else {
+                // 顯示分頁導航按鈕
+                console.log('📄 [v117.0] 非最後一頁且 autoProceed=false：顯示分頁導航按鈕');
+                this.time.delayedCall(2000, () => {
+                    console.log('📄 [v117.0] 2 秒延遲後，顯示分頁導航按鈕');
+                    this.showPaginationButtons();
+                });
+            }
             return;
         }
 
