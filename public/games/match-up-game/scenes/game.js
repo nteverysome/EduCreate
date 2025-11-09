@@ -812,13 +812,13 @@ class GameScene extends Phaser.Scene {
             ? this.formatTime(this.remainingTime)
             : '00:00';
 
-        // 🔥 計時器放在左上角（水平布局，避免擋住分頁指示器）
-        this.timerText = this.add.text(30, 20, initialText, {
+        // 🔥 計時器放在中間頂部（水平對齐，與分頁指示器並排）
+        this.timerText = this.add.text(width / 2 - 80, 20, initialText, {
             fontSize: '28px',
             color: timerColor,
             fontFamily: 'Arial',
             fontStyle: 'bold'
-        }).setOrigin(0, 0).setDepth(1000);
+        }).setOrigin(1, 0).setDepth(1000);
 
         // 如果是倒數計時，啟動計時器事件
         if (this.timerType === 'countDown') {
@@ -5584,8 +5584,8 @@ class GameScene extends Phaser.Scene {
         const pageText = `${this.currentPage + 1}/${this.totalPages}`;
         const fontSize = Math.max(18, Math.min(24, width * 0.02));
 
-        // 🔥 分頁指示器放在右上角（水平布局，避免擋住計時器）
-        this.pageIndicatorText = this.add.text(width - 30, 20, pageText, {
+        // 🔥 分頁指示器放在中間頂部（水平對齐，與計時器並排）
+        this.pageIndicatorText = this.add.text(width / 2 + 80, 20, pageText, {
             fontSize: `${fontSize}px`,
             color: '#666666',
             fontFamily: 'Arial',
@@ -5593,7 +5593,7 @@ class GameScene extends Phaser.Scene {
             backgroundColor: '#f5f5f5',
             padding: { x: 15, y: 8 }
         });
-        this.pageIndicatorText.setOrigin(1, 0);  // 右上角對齐
+        this.pageIndicatorText.setOrigin(0, 0);  // 左上角對齐
         this.pageIndicatorText.setDepth(100);  // 確保在最上層
 
         console.log('📄 分頁指示器已創建:', pageText);
