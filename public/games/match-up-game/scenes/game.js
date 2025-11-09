@@ -157,6 +157,97 @@ class GameScene extends Phaser.Scene {
                 imageUrl: imageA,
                 chineseImageUrl: null,
                 audioUrl: ''
+            },
+            // 🔥 [v117.0] 添加更多詞彙以測試分頁功能
+            {
+                id: 7,
+                question: 'Ocean',
+                answer: '海洋',
+                english: 'Ocean',
+                chinese: '海洋',
+                imageUrl: imageB,
+                chineseImageUrl: null,
+                audioUrl: audioA
+            },
+            {
+                id: 8,
+                question: 'Forest',
+                answer: '森林',
+                english: 'Forest',
+                chinese: '森林',
+                imageUrl: null,
+                chineseImageUrl: null,
+                audioUrl: audioB
+            },
+            {
+                id: 9,
+                question: 'Desert',
+                answer: '沙漠',
+                english: 'Desert',
+                chinese: '沙漠',
+                imageUrl: imageA,
+                chineseImageUrl: null,
+                audioUrl: null
+            },
+            {
+                id: 10,
+                question: 'River',
+                answer: '河流',
+                english: 'River',
+                chinese: '河流',
+                imageUrl: imageB,
+                chineseImageUrl: null,
+                audioUrl: audioA
+            },
+            {
+                id: 11,
+                question: 'Sky',
+                answer: '天空',
+                english: 'Sky',
+                chinese: '天空',
+                imageUrl: null,
+                chineseImageUrl: null,
+                audioUrl: null
+            },
+            {
+                id: 12,
+                question: 'Star',
+                answer: '星星',
+                english: 'Star',
+                chinese: '星星',
+                imageUrl: imageA,
+                chineseImageUrl: null,
+                audioUrl: audioB
+            },
+            {
+                id: 13,
+                question: 'Moon',
+                answer: '月亮',
+                english: 'Moon',
+                chinese: '月亮',
+                imageUrl: imageB,
+                chineseImageUrl: null,
+                audioUrl: null
+            },
+            {
+                id: 14,
+                question: 'Sun',
+                answer: '太陽',
+                english: 'Sun',
+                chinese: '太陽',
+                imageUrl: null,
+                chineseImageUrl: null,
+                audioUrl: audioA
+            },
+            {
+                id: 15,
+                question: 'Cloud',
+                answer: '雲',
+                english: 'Cloud',
+                chinese: '雲',
+                imageUrl: imageA,
+                chineseImageUrl: null,
+                audioUrl: null
             }
         ];
     }
