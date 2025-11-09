@@ -1074,6 +1074,7 @@ class GameScene extends Phaser.Scene {
             // 🔥 [v104.0] 新增：根據 currentPageAnswers 重新調整勾勾和叉叉的位置
             // 🔥 [v106.0] 修復：即使 matchedPairs 為空，也要重新創建勾勾和叉叉
             // 🔥 [v107.0] 新增：詳細調試日誌
+            console.log('🔥 [v107.0] 即將檢查 currentPageAnswers');
             console.log('🔥 [v107.0] 檢查 currentPageAnswers:', {
                 exists: !!this.currentPageAnswers,
                 length: this.currentPageAnswers?.length,
