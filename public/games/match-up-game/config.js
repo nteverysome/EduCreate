@@ -44,6 +44,28 @@ const game = new Phaser.Game(config);
 // 🔥 暴露遊戲實例到 window 對象，方便測試和調試
 window.matchUpGame = game;
 
+// 🔍 [DEBUG-v62.0] 監聽 Phaser scale 事件
+console.log('🔍 [DEBUG-v62.0] Phaser Scale 事件監聽:');
+game.scale.on('resize', (gameSize) => {
+    console.log('🔍 [DEBUG-v62.0] Scale resize 事件:', {
+        gameSize: gameSize,
+        width: gameSize.width,
+        height: gameSize.height,
+        windowInnerWidth: window.innerWidth,
+        windowInnerHeight: window.innerHeight,
+        containerWidth: document.getElementById('game-container')?.offsetWidth,
+        containerHeight: document.getElementById('game-container')?.offsetHeight
+    });
+});
+
+game.scale.on('orientationchange', (orientation) => {
+    console.log('🔍 [DEBUG-v62.0] Scale orientationchange 事件:', orientation);
+});
+
+game.scale.on('fullscreenchange', (isFullscreen) => {
+    console.log('🔍 [DEBUG-v62.0] Scale fullscreenchange 事件:', isFullscreen);
+});
+
 // 🔥 設定遊戲的基準螢幕尺寸，用於響應式縮放計算
 game.screenBaseSize = {
     maxWidth: MAX_SIZE_WIDTH_SCREEN,    // 最大寬度參考值
