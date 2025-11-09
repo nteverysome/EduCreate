@@ -1046,31 +1046,33 @@ class GameScene extends Phaser.Scene {
         try {
             console.log('🔥 [v53.0] 恢復已配對卡片視覺效果');
 
-            if (!this.matchedPairs || this.matchedPairs.size === 0) {
-                console.log('ℹ️ [v53.0] 沒有已配對的卡片需要恢復');
-                return;
-            }
+            // 🔥 [v106.0] 修復：即使 matchedPairs 為空，也要重新創建勾勾和叉叉
+            // 先恢復已配對卡片的視覺效果（如果有的話）
+            if (this.matchedPairs && this.matchedPairs.size > 0) {
+                // 遍歷所有已配對的卡片 ID
+                for (const pairId of this.matchedPairs) {
+                    // 查找對應的卡片
+                    const leftCard = this.leftCards?.find(card => card.getData('pairId') === pairId);
+                    const rightCard = this.rightCards?.find(card => card.getData('pairId') === pairId);
 
-            // 遍歷所有已配對的卡片 ID
-            for (const pairId of this.matchedPairs) {
-                // 查找對應的卡片
-                const leftCard = this.leftCards?.find(card => card.getData('pairId') === pairId);
-                const rightCard = this.rightCards?.find(card => card.getData('pairId') === pairId);
+                    if (leftCard && rightCard) {
+                        // 應用已配對的視覺效果
+                        leftCard.setAlpha(0.5);
+                        rightCard.setAlpha(0.5);
 
-                if (leftCard && rightCard) {
-                    // 應用已配對的視覺效果
-                    leftCard.setAlpha(0.5);
-                    rightCard.setAlpha(0.5);
+                        // 禁用已配對卡片的互動
+                        leftCard.setInteractive(false);
+                        rightCard.setInteractive(false);
 
-                    // 禁用已配對卡片的互動
-                    leftCard.setInteractive(false);
-                    rightCard.setInteractive(false);
-
-                    console.log(`✅ [v53.0] 已恢復卡片 ${pairId} 的視覺效果`);
+                        console.log(`✅ [v53.0] 已恢復卡片 ${pairId} 的視覺效果`);
+                    }
                 }
+            } else {
+                console.log('ℹ️ [v53.0] 沒有已配對的卡片需要恢復');
             }
 
             // 🔥 [v104.0] 新增：根據 currentPageAnswers 重新調整勾勾和叉叉的位置
+            // 🔥 [v106.0] 修復：即使 matchedPairs 為空，也要重新創建勾勾和叉叉
             if (this.currentPageAnswers && this.currentPageAnswers.length > 0) {
                 console.log('🔥 [v104.0] 重新調整勾勾和叉叉的位置');
 
@@ -1096,6 +1098,8 @@ class GameScene extends Phaser.Scene {
                         console.log(`✅ [v104.0] 已重新調整卡片 ${answer.rightPairId} 的勾勾/叉叉位置`);
                     }
                 });
+            } else {
+                console.log('ℹ️ [v106.0] 沒有當前頁面答案需要恢復');
             }
 
             console.log('✅ [v53.0] 已配對卡片視覺效果恢復完成');
