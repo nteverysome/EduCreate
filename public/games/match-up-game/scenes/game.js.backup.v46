@@ -1972,7 +1972,128 @@ class GameScene extends Phaser.Scene {
         // 🔥 第一步：iPad 容器大小分類函數
         // ✅ v42.2：根據寬度和高度的組合分類，而不是只看寬度
         // 這樣 768×1024 和 1024×768 會被分類為同一個設備
+        const classifyIPadSize = (w, h) => {
+            // 獲取寬度和高度的最小值和最大值
+            const minDim = Math.min(w, h);
+            const maxDim = Math.max(w, h);
 
+            // 根據最小尺寸分類設備
+            // iPad mini: 768×1024 或 1024×768 → minDim = 768
+            // iPad: 810×1080 或 1080×810 → minDim = 810
+            // iPad Air: 820×1180 或 1180×820 → minDim = 820
+            // iPad Pro 11": 834×1194 或 1194×834 → minDim = 834
+            // iPad Pro 12.9": 1024×1366 或 1366×1024 → minDim = 1024
+
+            let deviceSize;
+            if (minDim <= 768) {
+                deviceSize = 'small';       // iPad mini: 768
+            } else if (minDim <= 810) {
+                deviceSize = 'medium';      // iPad: 810
+            } else if (minDim <= 820) {
+                deviceSize = 'medium_large'; // iPad Air: 820
+            } else if (minDim <= 834) {
+                deviceSize = 'large';       // iPad Pro 11": 834
+            } else {
+                deviceSize = 'xlarge';      // iPad Pro 12.9": 1024
+            }
+
+            // 根據方向添加後綴
+            const aspectRatio = w / h;
+            const isPortrait = aspectRatio < 1;
+            const orientation = isPortrait ? '_portrait' : '_landscape';
+
+            return deviceSize + orientation;
+        };
+
+        // 🔥 第二步：根據 iPad 大小獲取最優參數
+        // ✅ v42.2：根據設備對角線長度和方向設置參數
+        const getIPadOptimalParams = (iPadSize) => {
+            const params = {
+                // 豎屏模式（高度 > 寬度）
+                small_portrait: {
+                    sideMargin: 15,
+                    topButtonArea: 35,
+                    bottomButtonArea: 35,
+                    horizontalSpacing: 12,
+                    verticalSpacing: 30,
+                    chineseFontSize: 22
+                },
+                medium_portrait: {
+                    sideMargin: 18,
+                    topButtonArea: 38,
+                    bottomButtonArea: 38,
+                    horizontalSpacing: 14,
+                    verticalSpacing: 32,
+                    chineseFontSize: 26
+                },
+                medium_large_portrait: {
+                    sideMargin: 20,
+                    topButtonArea: 40,
+                    bottomButtonArea: 40,
+                    horizontalSpacing: 15,
+                    verticalSpacing: 35,
+                    chineseFontSize: 28
+                },
+                large_portrait: {
+                    sideMargin: 22,
+                    topButtonArea: 42,
+                    bottomButtonArea: 42,
+                    horizontalSpacing: 16,
+                    verticalSpacing: 37,
+                    chineseFontSize: 30
+                },
+                xlarge_portrait: {
+                    sideMargin: 25,
+                    topButtonArea: 45,
+                    bottomButtonArea: 45,
+                    horizontalSpacing: 18,
+                    verticalSpacing: 40,
+                    chineseFontSize: 34
+                },
+                // 橫屏模式（寬度 > 高度）
+                small_landscape: {
+                    sideMargin: 12,
+                    topButtonArea: 30,
+                    bottomButtonArea: 30,
+                    horizontalSpacing: 10,
+                    verticalSpacing: 25,
+                    chineseFontSize: 20
+                },
+                medium_landscape: {
+                    sideMargin: 15,
+                    topButtonArea: 32,
+                    bottomButtonArea: 32,
+                    horizontalSpacing: 12,
+                    verticalSpacing: 28,
+                    chineseFontSize: 24
+                },
+                medium_large_landscape: {
+                    sideMargin: 17,
+                    topButtonArea: 34,
+                    bottomButtonArea: 34,
+                    horizontalSpacing: 13,
+                    verticalSpacing: 30,
+                    chineseFontSize: 26
+                },
+                large_landscape: {
+                    sideMargin: 19,
+                    topButtonArea: 36,
+                    bottomButtonArea: 36,
+                    horizontalSpacing: 14,
+                    verticalSpacing: 32,
+                    chineseFontSize: 28
+                },
+                xlarge_landscape: {
+                    sideMargin: 20,
+                    topButtonArea: 38,
+                    bottomButtonArea: 38,
+                    horizontalSpacing: 16,
+                    verticalSpacing: 35,
+                    chineseFontSize: 32
+                }
+            };
+            return params[iPadSize];
+        };
 
         const itemCount = currentPagePairs.length;
 
@@ -2000,7 +2121,18 @@ class GameScene extends Phaser.Scene {
         const isPortraitCompactMode = isMobileDevice && isPortraitMode;  // 手機直向緊湊模式
         const isLandscapeCompactMode = isLandscapeMobile || isTinyHeight;  // 手機橫向緊湊模式
 
-
+        // ✅ v45.0：修復 iPad 參數初始化 - 在 createMixedLayout 中定義 iPadParams
+        let iPadSize = null;
+        let iPadParams = null;
+        if (isIPad) {
+            iPadSize = classifyIPadSize(width, height);
+            iPadParams = getIPadOptimalParams(iPadSize);
+            console.log('📱 [v45.0] iPad 參數已初始化:', {
+                size: iPadSize,
+                width: width,
+                height: height
+            });
+        }
 
         console.log('📱 響應式檢測 [v38.0]:', {
             width,
@@ -2366,23 +2498,35 @@ class GameScene extends Phaser.Scene {
             // ============================================================================
 
             // 🔥 第三步：定義按鈕區域和邊距
-            // ✅ v47.0：使用統一的寬度檢測，移除 iPad 特殊設置
+            // ✅ v42.0：使用 iPad 容器分類系統
             let topButtonAreaHeight, bottomButtonAreaHeight, sideMargin;
+            let iPadSize = null;
+            let iPadParams = null;
 
-            // 使用業界標準斷點計算邊距
-            topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
-            bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
-            sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 左右邊距（30-80px）
+            if (isIPad) {
+                // iPad：使用容器分類系統
+                iPadSize = classifyIPadSize(width, height);
+                iPadParams = getIPadOptimalParams(iPadSize);
 
-            console.log('📐 [v47.0] 統一布局 - 邊距計算:', {
-                width: width,
-                height: height,
-                margins: {
-                    top: topButtonAreaHeight,
-                    bottom: bottomButtonAreaHeight,
-                    side: sideMargin
-                }
-            });
+                topButtonAreaHeight = iPadParams.topButtonArea;
+                bottomButtonAreaHeight = iPadParams.bottomButtonArea;
+                sideMargin = iPadParams.sideMargin;
+
+                console.log('📱 [v42.0] iPad 容器分類:', {
+                    size: iPadSize,
+                    width: width,
+                    height: height,
+                    margins: {
+                        top: topButtonAreaHeight,
+                        bottom: bottomButtonAreaHeight,
+                        side: sideMargin
+                    }
+                });
+            } else {
+                topButtonAreaHeight = Math.max(50, Math.min(80, height * 0.08));     // 頂部按鈕區域（50-80px）
+                bottomButtonAreaHeight = Math.max(50, Math.min(80, height * 0.10));  // 底部按鈕區域（50-80px）
+                sideMargin = Math.max(30, Math.min(80, width * 0.03));               // 左右邊距（30-80px）
+            }
 
             // 🔥 第四步：計算可用空間（扣除按鈕區域）
             const availableWidth = width - sideMargin * 2;
@@ -2392,30 +2536,43 @@ class GameScene extends Phaser.Scene {
             const aspectRatio = width / height;
 
             // 🔥 第六步：計算水平和垂直間距
-            // ✅ v47.0：使用統一的寬度檢測，移除 iPad 特殊設置
+            // ✅ v42.0：iPad 使用容器分類的固定間距，其他設備保留原有邏輯
             let horizontalSpacing, verticalSpacing;
 
-            // 根據寬高比動態調整水平間距
-            let horizontalSpacingBase;
-            if (aspectRatio > 2.0) {
-                horizontalSpacingBase = width * 0.02;  // 超寬螢幕：2%
-            } else if (aspectRatio > 1.5) {
-                horizontalSpacingBase = width * 0.015; // 寬螢幕：1.5%
+            if (isIPad && iPadParams) {
+                // iPad：使用容器分類的固定間距
+                horizontalSpacing = iPadParams.horizontalSpacing;
+                verticalSpacing = iPadParams.verticalSpacing;
+
+                console.log('📱 [v42.0] iPad 間距設定:', {
+                    size: iPadSize,
+                    horizontalSpacing: horizontalSpacing,
+                    verticalSpacing: verticalSpacing
+                });
             } else {
-                horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
+                // 非 iPad 設備或 iPad 但 iPadParams 為 null：保留原有邏輯
+                // 根據寬高比動態調整水平間距
+                let horizontalSpacingBase;
+                if (aspectRatio > 2.0) {
+                    horizontalSpacingBase = width * 0.02;  // 超寬螢幕：2%
+                } else if (aspectRatio > 1.5) {
+                    horizontalSpacingBase = width * 0.015; // 寬螢幕：1.5%
+                } else {
+                    horizontalSpacingBase = width * 0.01;  // 標準/直向：1%
+                }
+                horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
+
+                // 🔥 [v82.0] 修復：所有非 iPad 設備或 iPad 但 iPadParams 為 null 的情況都需要設置 verticalSpacing
+                // 之前只設置了 horizontalSpacing，導致 verticalSpacing 為 undefined
+                verticalSpacing = Math.max(40, Math.min(80, height * 0.04));  // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
+
+                console.log('🔥 [v82.0] 混合佈局 verticalSpacing 已設置:', {
+                    isIPad,
+                    iPadParams: iPadParams ? '有值' : 'null',
+                    verticalSpacing: verticalSpacing.toFixed(1),
+                    height
+                });
             }
-            horizontalSpacing = Math.max(15, Math.min(30, horizontalSpacingBase));  // 15-30px
-
-            // 垂直間距 = 螢幕高度的 4%，範圍：40-80px
-            verticalSpacing = Math.max(40, Math.min(80, height * 0.04));
-
-            console.log('📐 [v47.0] 統一布局 - 間距計算:', {
-                width,
-                height,
-                aspectRatio: aspectRatio.toFixed(2),
-                horizontalSpacing: horizontalSpacing.toFixed(1),
-                verticalSpacing: verticalSpacing.toFixed(1)
-            });
 
             if (hasImages) {
                 // 🟦 正方形模式（有圖片）
@@ -2463,50 +2620,71 @@ class GameScene extends Phaser.Scene {
                 // 策略：盡可能多的列數，充分利用水平空間
                 let optimalCols;
 
-                // 🔥 v47.0：使用統一的列數計算，移除 iPad 特殊設置
-                // 🔥 v52.0: 修復列數計算 - 基於實際卡片尺寸而不是 minCardWidth
-                // 問題：v51.0 使用 minCardWidth（60px）計算列數，但實際卡片是正方形（263px）
-                // 導致計算出的列數過多，卡片超出容器邊界
-                //
-                // 解決方案：
-                // 1. 先估算正方形卡片的尺寸（基於高度）
-                // 2. 根據實際卡片尺寸計算列數
-                // 3. 確保所有卡片都在容器內
+                // 🔥 v51.0：iPad 統一列數計算 - 根據容器寬度動態計算
+                // 移除硬編碼的 optimalCols，使用統一的容器寬度計算
+                if (isIPad) {
+                    // iPad：使用統一列數計算，根據容器寬度動態調整
+                    // 🔥 v51.0 修正公式：考慮邊距計算方式
+                    const minCardWidth = hasImages ? 60 : 80;
+                    const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (minCardWidth + horizontalSpacing));
+                    optimalCols = Math.min(calculatedCols, 10, itemCount);  // 最多 10 列
 
-                // 🔥 第一步：估算正方形卡片尺寸
-                // 假設最多 10 列（保守估計）
-                const estimatedCols = Math.min(10, itemCount);
-                const estimatedRows = Math.ceil(itemCount / estimatedCols);
+                    console.log(`🔥 [v51.0] iPad 統一列數計算:`, {
+                        size: iPadSize,
+                        width: width.toFixed(1),
+                        height: height.toFixed(1),
+                        availableWidth: availableWidth.toFixed(1),
+                        minCardWidth: minCardWidth,
+                        horizontalSpacing: horizontalSpacing,
+                        calculatedCols: calculatedCols,
+                        optimalCols: optimalCols,
+                        itemCount: itemCount
+                    });
+                } else {
+                    // 🔥 v52.0: 修復列數計算 - 基於實際卡片尺寸而不是 minCardWidth
+                    // 問題：v51.0 使用 minCardWidth（60px）計算列數，但實際卡片是正方形（263px）
+                    // 導致計算出的列數過多，卡片超出容器邊界
+                    //
+                    // 解決方案：
+                    // 1. 先估算正方形卡片的尺寸（基於高度）
+                    // 2. 根據實際卡片尺寸計算列數
+                    // 3. 確保所有卡片都在容器內
 
-                // 估算每行的可用高度
-                const estimatedAvailableHeightPerRow = (availableHeight - verticalSpacing * (estimatedRows + 1)) / estimatedRows;
+                    // 🔥 第一步：估算正方形卡片尺寸
+                    // 假設最多 10 列（保守估計）
+                    const estimatedCols = Math.min(10, itemCount);
+                    const estimatedRows = Math.ceil(itemCount / estimatedCols);
 
-                // 估算正方形卡片尺寸（包含中文文字）
-                // totalUnitHeight = squareSize + chineseTextHeight = squareSize * 1.4
-                // squareSize = totalUnitHeight / 1.4
-                const estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
+                    // 估算每行的可用高度
+                    const estimatedAvailableHeightPerRow = (availableHeight - verticalSpacing * (estimatedRows + 1)) / estimatedRows;
 
-                // 🔥 第二步：根據實際卡片尺寸計算列數
-                // 公式：cols = floor((availableWidth - spacing * (cols + 1)) / squareSize)
-                // 簡化為：cols = floor((availableWidth - spacing) / (squareSize + spacing))
-                const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
+                    // 估算正方形卡片尺寸（包含中文文字）
+                    // totalUnitHeight = squareSize + chineseTextHeight = squareSize * 1.4
+                    // squareSize = totalUnitHeight / 1.4
+                    const estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
 
-                // 限制最大列數（避免卡片過小）
-                const maxColsLimit = 10;
-                optimalCols = Math.min(calculatedCols, maxColsLimit, itemCount);
+                    // 🔥 第二步：根據實際卡片尺寸計算列數
+                    // 公式：cols = floor((availableWidth - spacing * (cols + 1)) / squareSize)
+                    // 簡化為：cols = floor((availableWidth - spacing) / (squareSize + spacing))
+                    const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
 
-                console.log(`🔥 [v47.0] 統一列數計算（基於實際卡片尺寸）:`, {
-                    width: width.toFixed(1),
-                    height: height.toFixed(1),
-                    aspectRatio: aspectRatio.toFixed(2),
-                    availableWidth: availableWidth.toFixed(1),
-                    estimatedSquareSize: estimatedSquareSize.toFixed(1),
-                    horizontalSpacing: horizontalSpacing,
-                    calculatedCols: calculatedCols,
-                    maxColsLimit: maxColsLimit,
-                    optimalCols: optimalCols,
-                    itemCount: itemCount
-                });
+                    // 限制最大列數（避免卡片過小）
+                    const maxColsLimit = 10;
+                    optimalCols = Math.min(calculatedCols, maxColsLimit, itemCount);
+
+                    console.log(`🔥 [v52.0] 修復列數計算（基於實際卡片尺寸）:`, {
+                        width: width.toFixed(1),
+                        height: height.toFixed(1),
+                        aspectRatio: aspectRatio.toFixed(2),
+                        availableWidth: availableWidth.toFixed(1),
+                        estimatedSquareSize: estimatedSquareSize.toFixed(1),
+                        horizontalSpacing: horizontalSpacing,
+                        calculatedCols: calculatedCols,
+                        maxColsLimit: maxColsLimit,
+                        optimalCols: optimalCols,
+                        itemCount: itemCount
+                    });
+                }
 
                 // 確保列數在合理範圍內
                 optimalCols = Math.max(1, Math.min(optimalCols, itemCount));
@@ -2824,8 +3002,17 @@ class GameScene extends Phaser.Scene {
         if (!isCompactMode) {
             console.log('🔍 桌面模式：智能計算中文字體大小...');
 
-            // ✅ v47.0：使用統一的寬度檢測，移除 iPad 特殊設置
-            let baseFontSize = Math.max(18, Math.min(72, cardHeightInFrame * 0.6));
+            // ✅ v42.0：iPad 使用容器分類的固定文字大小
+            let baseFontSize;
+            if (isIPad && iPadParams) {
+                baseFontSize = iPadParams.chineseFontSize;
+                console.log('📱 [v42.0] iPad 文字大小:', {
+                    size: iPadSize,
+                    baseFontSize: baseFontSize
+                });
+            } else {
+                baseFontSize = Math.max(18, Math.min(72, cardHeightInFrame * 0.6));
+            }
 
             chineseFontSizes = currentPagePairs.map(pair => {
                 // 🔥 計算初始字體大小
