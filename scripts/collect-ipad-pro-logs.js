@@ -117,14 +117,20 @@ async function main() {
                 windowWidth: window.innerWidth,
                 windowHeight: window.innerHeight,
                 devicePixelRatio: window.devicePixelRatio,
+                screenWidth: window.screen.width,
+                screenHeight: window.screen.height,
+                screenAvailWidth: window.screen.availWidth,
+                screenAvailHeight: window.screen.availHeight,
                 userAgent: navigator.userAgent,
                 title: document.title,
                 url: window.location.href
             };
         });
-        
+
         console.log('✅ 游戏信息:');
         console.log(`  - 窗口大小: ${gameInfo.windowWidth}×${gameInfo.windowHeight}`);
+        console.log(`  - 屏幕大小: ${gameInfo.screenWidth}×${gameInfo.screenHeight}`);
+        console.log(`  - 可用屏幕: ${gameInfo.screenAvailWidth}×${gameInfo.screenAvailHeight}`);
         console.log(`  - DPR: ${gameInfo.devicePixelRatio}`);
         console.log(`  - 标题: ${gameInfo.title}`);
         

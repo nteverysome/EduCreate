@@ -1081,6 +1081,16 @@ class GameScene extends Phaser.Scene {
         const width = this.scale.width;
         const height = this.scale.height;
 
+        // 🔍 [DEBUG-v61.0] 詳細的尺寸檢查
+        console.log('🔍 [DEBUG-v61.0] 尺寸來源檢查:');
+        console.log('  this.scale.width:', this.scale.width);
+        console.log('  this.scale.height:', this.scale.height);
+        console.log('  this.scale.gameSize.width:', this.scale.gameSize.width);
+        console.log('  this.scale.gameSize.height:', this.scale.gameSize.height);
+        console.log('  window.innerWidth:', window.innerWidth);
+        console.log('  window.innerHeight:', window.innerHeight);
+        console.log('  this.game.screenBaseSize:', this.game.screenBaseSize);
+
         console.log('🎮 GameScene: 計算卡片尺寸和位置', { width, height });
 
         // 🔥 v46.0：邊界檢查
