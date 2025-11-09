@@ -2501,6 +2501,9 @@ class GameScene extends Phaser.Scene {
                 // 🔥 第八步：智能計算最佳列數（優先使用最大可能列數）
                 // 策略：盡可能多的列數，充分利用水平空間
                 let optimalCols;
+                let estimatedSquareSize;  // ✅ v48.0：移到外部作用域，避免作用域問題
+                let calculatedCols;       // ✅ v48.0：移到外部作用域，避免作用域問題
+                let maxColsLimit;         // ✅ v48.0：移到外部作用域，避免作用域問題
 
                 // ✅ v48.0：針對平板直向模式優化列數計算
                 if (isTabletPortrait) {
@@ -2512,10 +2515,11 @@ class GameScene extends Phaser.Scene {
                     const estimatedCols = Math.min(maxColsForTabletPortrait, itemCount);
                     const estimatedRows = Math.ceil(itemCount / estimatedCols);
                     const estimatedAvailableHeightPerRow = (availableHeight - verticalSpacing * (estimatedRows + 1)) / estimatedRows;
-                    const estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
+                    estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
 
                     // 根據寬度計算列數
-                    const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
+                    calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
+                    maxColsLimit = maxColsForTabletPortrait;
                     optimalCols = Math.min(calculatedCols, maxColsForTabletPortrait, itemCount);
 
                     console.log(`🔥 [v48.0] 平板直向列數計算:`, {
@@ -2544,15 +2548,15 @@ class GameScene extends Phaser.Scene {
                     // 估算正方形卡片尺寸（包含中文文字）
                     // totalUnitHeight = squareSize + chineseTextHeight = squareSize * 1.4
                     // squareSize = totalUnitHeight / 1.4
-                    const estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
+                    estimatedSquareSize = (estimatedAvailableHeightPerRow - verticalSpacing) / 1.4;
 
                     // 🔥 第二步：根據實際卡片尺寸計算列數
                     // 公式：cols = floor((availableWidth - spacing * (cols + 1)) / squareSize)
                     // 簡化為：cols = floor((availableWidth - spacing) / (squareSize + spacing))
-                    const calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
+                    calculatedCols = Math.floor((availableWidth - horizontalSpacing) / (estimatedSquareSize + horizontalSpacing));
 
                     // 限制最大列數（避免卡片過小）
-                    const maxColsLimit = 10;
+                    maxColsLimit = 10;
                     optimalCols = Math.min(calculatedCols, maxColsLimit, itemCount);
                 }
 
