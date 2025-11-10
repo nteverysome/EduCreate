@@ -6,7 +6,7 @@
     "env": {
       "NODE_ENV": "production",
       "SKIP_ENV_VALIDATION": "true",
-      "FORCE_REBUILD": "2025-11-10-v127-pagination-selector-recreate"
+      "FORCE_REBUILD": "2025-11-10-v129-save-all-pages-matched-pairs"
     }
   },
   "functions": {
