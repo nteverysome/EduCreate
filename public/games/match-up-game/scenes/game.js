@@ -4,6 +4,14 @@
 // 注意：RESPONSIVE_BREAKPOINTS, DESIGN_TOKENS, GameResponsiveLayout 等
 // 已在 index.html 中作為全局腳本加載，無需 import
 
+// 🔥 分離模式配置系統（Phase 4 重構）
+// 注意：這些配置類已在 index.html 中作為全局腳本加載
+// - SeparatedModeConfig
+// - DeviceDetector
+// - CalculationConstants
+// - SeparatedLayoutCalculator
+// - SeparatedLayoutRenderer
+
 // 🔥 v45.1 版本標記 - 強制 Vercel 重新部署
 const GAME_VERSION = 'v45.1-ipad-fix';
 
@@ -1585,123 +1593,108 @@ class GameScene extends Phaser.Scene {
     }
 
     // 🔥 創建分離佈局（根據 Wordwall 策略）
+    // 🔥 [Phase 4] 簡化入口邏輯，統一調用方式
     createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
                           cardWidth, cardHeight, leftSpacing, rightSpacing) {
         const width = this.scale.width;
         const height = this.scale.height;
         const itemCount = currentPagePairs.length;
 
+        console.log(`🎮 [Phase 4] 創建分離佈局 - 匹配數: ${itemCount}`);
+
         // 🔥 根據 Wordwall 策略判斷佈局
         if (itemCount <= 5) {
-            // 3-5 個：左右分離，單列
-            console.log('🎮 使用左右分離佈局（3-5個匹配數，單列）');
+            console.log('📐 使用左右分離佈局（3-5個匹配數，單列）');
             this.createLeftRightSingleColumn(currentPagePairs, width, height);
-        } else {
-            // 6-20 個：左右分離，多行 2 列
-            console.log('🎮 使用左右分離佈局（6-20個匹配數，多行2列）');
+        } else if (itemCount <= 20) {
+            console.log('📐 使用左右分離佈局（6-20個匹配數，多行多列）');
             this.createLeftRightMultiRows(currentPagePairs, width, height);
+        } else {
+            console.log('📐 使用上下分離佈局（21+個匹配數，多行多列）');
+            this.createTopBottomMultiRows(currentPagePairs, width, height);
         }
     }
 
     // 🔥 創建左右分離佈局 - 單列（3-5個匹配數）
+    // 🔥 [Phase 4 重構] 使用統一的配置系統
     createLeftRightSingleColumn(currentPagePairs, width, height) {
         console.log('📐 創建左右分離佈局 - 單列（3-5個匹配數）');
 
         const itemCount = currentPagePairs.length;
 
-        // 🔥 檢測容器高度和手機橫向模式
-        const isSmallContainer = height < 600;
-        const isMediumContainer = height >= 600 && height < 800;
-        const isLandscapeMobile = width > height && height < 450;  // 🔥 手機橫向模式
+        // 🔥 [Phase 4] 使用 DeviceDetector 進行統一的設備檢測
+        // 備用方案：如果 DeviceDetector 不可用，使用內聯邏輯
+        let deviceType, deviceInfo;
 
-        console.log(`📐 容器尺寸: ${width} × ${height}`, {
-            isSmallContainer,
-            isMediumContainer,
-            isLargeContainer: height >= 800,
-            isLandscapeMobile  // 🔥 顯示是否為手機橫向模式
-        });
-
-        // 🔥 根據容器大小動態調整卡片尺寸
-        let cardWidth, cardHeight;
-
-        if (isLandscapeMobile) {
-            // 🔥 手機橫向模式：使用超緊湊佈局
-            cardWidth = Math.max(100, Math.min(150, width * 0.15));
-            cardHeight = Math.max(28, Math.min(40, height * 0.08));
-            console.log('📱 手機橫向模式：使用超緊湊佈局');
-        } else if (isSmallContainer) {
-            // 小容器：更小的卡片
-            cardWidth = Math.max(120, Math.min(200, width * 0.18));
-            cardHeight = Math.max(40, Math.min(65, height * 0.09));
-        } else if (isMediumContainer) {
-            // 中等容器：適中的卡片
-            cardWidth = Math.max(140, Math.min(220, width * 0.19));
-            cardHeight = Math.max(45, Math.min(72, height * 0.095));
+        if (typeof DeviceDetector !== 'undefined' && DeviceDetector.getDeviceType) {
+            deviceType = DeviceDetector.getDeviceType(width, height);
+            deviceInfo = DeviceDetector.getDeviceInfo(width, height);
         } else {
-            // 大容器：較大的卡片
-            cardWidth = Math.max(150, Math.min(250, width * 0.2));
-            cardHeight = Math.max(50, Math.min(80, height * 0.1));
+            // 備用設備檢測邏輯
+            const isPortrait = height >= width;
+            if (width <= 600) {
+                deviceType = isPortrait ? 'mobile-portrait' : 'mobile-landscape';
+            } else if (width <= 1024) {
+                deviceType = isPortrait ? 'tablet-portrait' : 'tablet-landscape';
+            } else {
+                deviceType = 'desktop';
+            }
+            deviceInfo = { deviceType, width, height, isPortrait };
         }
+
+        console.log(`📐 容器尺寸: ${width} × ${height}`, deviceInfo);
+
+        // 🔥 [Phase 4] 使用 SeparatedLayoutCalculator 進行統一的計算
+        // 備用方案：如果 SeparatedLayoutCalculator 不可用，使用內聯邏輯
+        let calculator;
+        if (typeof SeparatedLayoutCalculator !== 'undefined') {
+            calculator = new SeparatedLayoutCalculator(width, height, itemCount, 'left-right');
+        } else {
+            // 備用計算器邏輯
+            calculator = {
+                calculateCardSize: () => {
+                    const cardWidth = Math.min(width * 0.35, 250);
+                    const cardHeight = cardWidth * 0.3;
+                    return { width: cardWidth, height: cardHeight };
+                },
+                calculatePositions: () => {
+                    return {
+                        leftX: width * 0.25,
+                        rightX: width * 0.65,
+                        leftStartY: height * 0.15,
+                        rightStartY: height * 0.15
+                    };
+                },
+                calculateSpacing: () => {
+                    return { horizontal: 15, vertical: 10 };
+                },
+                calculateColumnCount: () => 1,
+                calculateRowCount: () => itemCount,
+                getLayoutVariant: () => 'single-column'
+            };
+        }
+
+        // 計算卡片尺寸
+        const cardSize = calculator.calculateCardSize();
+        const cardWidth = cardSize.width;
+        const cardHeight = cardSize.height;
 
         console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
 
-        // 🔥 根據容器大小動態調整位置
-        // 🔥 英文區域往右移動 20%，英文區和中文區都往下移動 10%
-        let leftX, rightX, leftStartY, rightStartY;
+        // 計算位置
+        const positions = calculator.calculatePositions();
+        const leftX = positions.leftX;
+        const rightX = positions.rightX;
+        const leftStartY = positions.leftStartY;
+        const rightStartY = positions.rightStartY;
 
-        if (isLandscapeMobile) {
-            // 🔥 手機橫向模式：更緊湊的位置
-            leftX = width * 0.38;
-            rightX = width * 0.70;
-            leftStartY = height * 0.15;
-            rightStartY = height * 0.12;
-        } else if (isSmallContainer) {
-            // 小容器：更緊湊的佈局
-            leftX = width * 0.42;  // 🔥 從 0.22 改為 0.42（+20%）
-            rightX = width * 0.68;
-            leftStartY = height * 0.25;   // 🔥 從 0.15 改為 0.25（+10%）
-            rightStartY = height * 0.22;  // 🔥 從 0.12 改為 0.22（+10%）
-        } else if (isMediumContainer) {
-            // 中等容器：平衡的佈局
-            leftX = width * 0.44;  // 🔥 從 0.24 改為 0.44（+20%）
-            rightX = width * 0.66;
-            leftStartY = height * 0.3;    // 🔥 從 0.2 改為 0.3（+10%）
-            rightStartY = height * 0.27;  // 🔥 從 0.17 改為 0.27（+10%）
-        } else {
-            // 大容器：舒適的佈局
-            leftX = width * 0.45;  // 🔥 從 0.25 改為 0.45（+20%）
-            rightX = width * 0.65;
-            leftStartY = height * 0.35;   // 🔥 從 0.25 改為 0.35（+10%）
-            rightStartY = height * 0.32;  // 🔥 從 0.22 改為 0.32（+10%）
-        }
+        console.log(`📍 位置: 左X=${leftX.toFixed(0)}, 右X=${rightX.toFixed(0)}, 左Y=${leftStartY.toFixed(0)}, 右Y=${rightStartY.toFixed(0)}`);
 
-        // 🔥 根據容器大小動態調整間距
-        // 英文卡片：加 cardHeight
-        // 中文卡片（3-5個匹配數）：只加 cardHeight（不加 textHeight + oneCharSpacing）
-        let leftSpacing, rightSpacing;
+        // 計算間距
+        const spacing = calculator.calculateSpacing();
+        const { leftSpacing, rightSpacing } = calculator.calculateSingleColumnSpacing(cardHeight);
 
-        if (isLandscapeMobile) {
-            // 🔥 手機橫向模式：計算最大可用高度，確保所有卡片都能顯示
-            const availableHeight = height * 0.75;  // 使用 75% 的高度
-            const maxSpacing = (availableHeight - cardHeight * itemCount) / (itemCount - 1);
-
-            leftSpacing = Math.max(18, Math.min(maxSpacing, cardHeight + 3));
-            rightSpacing = Math.max(18, Math.min(maxSpacing, cardHeight + 5));
-            console.log(`📱 手機橫向間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px, 可用高度=${availableHeight.toFixed(0)}px`);
-        } else if (isSmallContainer) {
-            leftSpacing = cardHeight + Math.max(3, height * 0.008);
-            rightSpacing = cardHeight + Math.max(8, height * 0.02);  // 🔥 3-5個：只加 cardHeight
-        } else if (isMediumContainer) {
-            leftSpacing = cardHeight + Math.max(4, height * 0.009);
-            rightSpacing = cardHeight + Math.max(12, height * 0.025);  // 🔥 3-5個：只加 cardHeight
-        } else {
-            leftSpacing = cardHeight + Math.max(5, height * 0.01);
-            rightSpacing = cardHeight + Math.max(15, height * 0.03);  // 🔥 3-5個：只加 cardHeight
-        }
-
-        if (!isLandscapeMobile) {
-            console.log(`📏 間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px`);
-        }
+        console.log(`📏 間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px`);
 
         // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
@@ -1875,105 +1868,50 @@ class GameScene extends Phaser.Scene {
     }
 
     // 🔥 創建左右分離佈局 - 多行 2 列（6-20個匹配數）
+    // 🔥 [Phase 4] 使用統一的配置系統
     createLeftRightMultiRows(currentPagePairs, width, height) {
         console.log('📐 創建左右分離佈局 - 多行2列（6-20個匹配數）');
 
         const itemCount = currentPagePairs.length;
 
-        // 🔥 檢測容器高度
-        const isSmallContainer = height < 600;
-        const isMediumContainer = height >= 600 && height < 800;
+        // 🔥 [Phase 4] 使用 DeviceDetector 進行統一的設備檢測
+        const deviceType = DeviceDetector.getDeviceType(width, height);
+        const deviceInfo = DeviceDetector.getDeviceInfo(width, height);
 
-        console.log(`📐 容器尺寸: ${width} × ${height}`, {
-            isSmallContainer,
-            isMediumContainer,
-            isLargeContainer: height >= 800
-        });
+        console.log(`📐 設備類型: ${deviceType}`, deviceInfo);
 
-        // 🔥 v10.0 檢測是否有圖片（只要有任何一個圖片就進入正方形模式）
+        // 🔥 檢測是否有圖片
         const hasImages = currentPagePairs.some(pair =>
             pair.imageUrl || pair.chineseImageUrl || pair.imageId || pair.chineseImageId
         );
-        console.log(`🔍 [v10.0] 分離佈局圖片檢測: hasImages=${hasImages}, mode=${hasImages ? '🟦 正方形模式' : '🟨 長方形模式'}`);
+        console.log(`🔍 圖片檢測: hasImages=${hasImages}, 模式=${hasImages ? '🟦 正方形' : '🟨 長方形'}`);
 
-        // 🔥 v48.0 使用統一列數計算系統（替代硬編碼的列數規則）
-        const minCardWidth = hasImages ? 60 : 80;  // 有圖片時卡片更小
-        const columns = UnifiedColumnCalculator.calculateOptimalColumns(
-            width,
-            itemCount,
-            minCardWidth,
-            10,  // spacing
-            30   // horizontalMargin
-        );
-        const rows = Math.ceil(itemCount / columns);
+        // 🔥 [Phase 4] 使用 SeparatedLayoutCalculator 進行統一的計算
+        const calculator = new SeparatedLayoutCalculator(width, height, itemCount, 'left-right');
 
-        console.log(`📊 [v48.0] 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局 (動態計算)`);
+        // 計算卡片尺寸
+        const cardSize = calculator.calculateCardSize();
+        const cardWidth = cardSize.width;
+        const cardHeight = cardSize.height;
 
-        // 🔥 計算間距（先計算，用於後續卡片高度計算）
-        const horizontalSpacing = Math.max(5, width * 0.01);
-        const verticalSpacing = Math.max(3, height * 0.008);
+        // 計算位置
+        const positions = calculator.calculatePositions();
+        const leftX = positions.leftX;
+        const rightX = positions.rightX;
+        const leftStartY = positions.leftStartY;
+        const rightStartY = positions.rightStartY;
 
-        // 🔥 動態計算最大卡片高度，確保所有卡片都能放入容器
-        const availableHeight = height * 0.8;  // 使用 80% 的容器高度
-        const totalVerticalSpacing = (rows - 1) * verticalSpacing;
-        const maxCardHeight = (availableHeight - totalVerticalSpacing) / rows;
+        // 計算間距
+        const spacing = calculator.calculateSpacing();
+        const { leftSpacing, rightSpacing } = calculator.calculateSingleColumnSpacing(cardHeight);
 
-        // 🔥 根據容器大小和匹配數調整卡片尺寸
-        let cardWidth, cardHeight;
+        // 計算列數和行數
+        const columns = calculator.calculateColumns(hasImages);
+        const rows = calculator.calculateRows(columns);
 
-        // 🔥 6-10 個和 16-20 個匹配數使用更小的卡片尺寸
-        const isSmallCardSize = itemCount <= 10 || itemCount >= 16;
-
-        // 🔥 v10.0 根據列數調整卡片尺寸
-        // 5 列模式（有圖片）：卡片更小
-        // 2 列模式（無圖片）：卡片更大
-        if (columns === 5) {
-            // 🔥 v10.0 正方形模式（5 列）：卡片更小
-            if (isSmallContainer) {
-                cardWidth = Math.max(50, Math.min(80, width * 0.08));
-                cardHeight = Math.max(50, Math.min(80, width * 0.08));  // 正方形
-            } else if (isMediumContainer) {
-                cardWidth = Math.max(60, Math.min(100, width * 0.10));
-                cardHeight = Math.max(60, Math.min(100, width * 0.10));  // 正方形
-            } else {
-                cardWidth = Math.max(80, Math.min(140, width * 0.12));
-                cardHeight = Math.max(80, Math.min(140, width * 0.12));  // 正方形
-            }
-        } else {
-            // 🔥 v10.0 長方形模式（2 列）：卡片更大
-            if (isSmallCardSize) {
-                cardWidth = Math.max(70, Math.min(110, width * 0.11));  // 🔥 6-10 個和 16-20 個：更小的寬度
-                cardHeight = Math.max(18, Math.min(maxCardHeight, 38));  // 🔥 6-10 個和 16-20 個：更小的高度
-            } else {
-                cardWidth = Math.max(80, Math.min(130, width * 0.13));
-                cardHeight = Math.max(20, Math.min(maxCardHeight, 45));
-            }
-        }
-
-        console.log(`📐 卡片尺寸 [v10.0]: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}, 模式: ${columns === 5 ? '🟦 正方形 (5列)' : '🟨 長方形 (2列)'}`);
-        console.log(`📏 可用高度: ${availableHeight.toFixed(0)}, 最大卡片高度: ${maxCardHeight.toFixed(0)}`);
-
-        // 🔥 英文卡片和中文卡片的垂直間距（文字在框右邊，不需要額外間距）
-        const leftVerticalSpacing = verticalSpacing;
-        const rightVerticalSpacing = verticalSpacing;  // 🔥 與左側相同
-
-        // 🔥 計算左側區域（英文）的起始位置
-        const leftAreaStartX = width * 0.08;
-        const leftAreaStartY = height * 0.1;
-
-        // 🔥 v44.2：修復右側卡片被切到邊緣的問題
-        // 計算左側區域的寬度，然後右側區域從中間開始
-        const leftAreaWidth = cardWidth * columns + horizontalSpacing * (columns - 1);
-        const rightAreaStartX = leftAreaStartX + leftAreaWidth / 2 + width * 0.02;  // 加 2% 的間距
-        const rightAreaStartY = height * 0.1;
-
-        console.log(`📍 區域位置 [v44.2]:`, {
-            leftAreaStartX: leftAreaStartX.toFixed(0),
-            leftAreaStartY: leftAreaStartY.toFixed(0),
-            leftAreaWidth: leftAreaWidth.toFixed(0),
-            rightAreaStartX: rightAreaStartX.toFixed(0),
-            rightAreaStartY: rightAreaStartY.toFixed(0)
-        });
+        console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局`);
+        console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
+        console.log(`📍 區域位置: 左=${leftX.toFixed(0)}, 右=${rightX.toFixed(0)}, 上=${leftStartY.toFixed(0)}`);
 
         // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
@@ -1996,130 +1934,82 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 創建左側外框（包圍所有英文卡片）
         this.createMultiColumnContainerBox(
-            leftAreaStartX,
-            leftAreaStartY,
+            leftX,
+            leftStartY,
             cardWidth,
             cardHeight,
-            horizontalSpacing,
-            leftVerticalSpacing,  // 🔥 英文卡片使用 leftVerticalSpacing
+            spacing.horizontal,
+            spacing.vertical,
             columns,
             rows
         );
 
-        // 🔥 不創建右側外框（中文卡片不需要外框）
-
-        // 🔥 創建左側英文卡片（多行 2 列，按照順序出現動畫）
+        // 🔥 創建左側英文卡片（多行多列，按照順序出現動畫）
         currentPagePairs.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
-            const x = leftAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = leftAreaStartY + row * (cardHeight + leftVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 leftVerticalSpacing
+            const x = leftX + col * (cardWidth + spacing.horizontal) + cardWidth / 2;
+            const y = leftStartY + row * (cardHeight + spacing.vertical) + cardHeight / 2;
 
-            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
+            const animationDelay = index * 100;
             const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
 
-        // 🔥 創建右側中文卡片（多行 2 列）
+        // 🔥 創建右側中文卡片（多行多列）
         shuffledAnswers.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
-            const x = rightAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = rightAreaStartY + row * (cardHeight + rightVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 rightVerticalSpacing
+            const x = rightX + col * (cardWidth + spacing.horizontal) + cardWidth / 2;
+            const y = rightStartY + row * (cardHeight + spacing.vertical) + cardHeight / 2;
 
-            // 🔥 根據列號決定文字位置：第一列（col=0）文字在左邊，第二列（col=1）文字在右邊
+            // 🔥 根據列號決定文字位置
             const textPosition = col === 0 ? 'left' : 'right';
-            // 🔥 [v62.0] 傳遞 imageUrl 和 audioUrl
             const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl, textPosition);
             this.rightCards.push(card);
         });
 
-        console.log('✅ 左右分離佈局（多行2列）創建完成');
+        console.log('✅ 左右分離佈局（多行多列）創建完成');
     }
 
     // 🔥 創建上下分離佈局 - 多行多列（21-30個匹配數）
+    // 🔥 [Phase 4] 使用統一的配置系統
     createTopBottomMultiRows(currentPagePairs, width, height) {
         console.log('📐 創建上下分離佈局 - 多行多列（21-30個匹配數）');
 
         const itemCount = currentPagePairs.length;
 
-        // 🔥 檢測容器高度
-        const isSmallContainer = height < 600;
-        const isMediumContainer = height >= 600 && height < 800;
+        // 🔥 [Phase 4] 使用 DeviceDetector 進行統一的設備檢測
+        const deviceType = DeviceDetector.getDeviceType(width, height);
+        const deviceInfo = DeviceDetector.getDeviceInfo(width, height);
 
-        console.log(`📐 容器尺寸: ${width} × ${height}`, {
-            isSmallContainer,
-            isMediumContainer,
-            isLargeContainer: height >= 800
-        });
+        console.log(`📐 設備類型: ${deviceType}`, deviceInfo);
 
-        // 🔥 v48.0 使用統一列數計算系統（替代硬編碼的列數規則）
-        const columns = UnifiedColumnCalculator.calculateOptimalColumns(
-            width,
-            itemCount,
-            50,   // minCardWidth
-            5,    // spacing
-            30    // horizontalMargin
-        );
-        const rows = Math.ceil(itemCount / columns);
+        // 🔥 [Phase 4] 使用 SeparatedLayoutCalculator 進行統一的計算
+        const calculator = new SeparatedLayoutCalculator(width, height, itemCount, 'top-bottom');
 
-        console.log(`📊 [v48.0] 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局 (動態計算)`);
+        // 計算卡片尺寸
+        const cardSize = calculator.calculateCardSize();
+        const cardWidth = cardSize.width;
+        const cardHeight = cardSize.height;
 
-        // 🔥 根據容器大小和列數調整卡片尺寸
-        let cardWidth, cardHeight;
-        if (isSmallContainer) {
-            cardWidth = Math.max(50, Math.min(85, width * (0.85 / columns)));
-            cardHeight = Math.max(28, Math.min(42, height * 0.11));
-        } else if (isMediumContainer) {
-            cardWidth = Math.max(60, Math.min(95, width * (0.88 / columns)));
-            cardHeight = Math.max(32, Math.min(48, height * 0.12));
-        } else {
-            cardWidth = Math.max(70, Math.min(105, width * (0.9 / columns)));
-            cardHeight = Math.max(35, Math.min(55, height * 0.13));
-        }
+        // 計算位置
+        const positions = calculator.calculatePositions();
+        const topX = positions.leftX;  // 上方區域 X
+        const topY = positions.leftStartY;  // 上方區域 Y
+        const bottomX = positions.leftX;  // 下方區域 X（與上方相同）
+        const bottomY = positions.rightStartY;  // 下方區域 Y
 
+        // 計算間距
+        const spacing = calculator.calculateSpacing();
+
+        // 計算列數和行數
+        const columns = calculator.calculateColumns(false);  // 上下分離通常不用圖片
+        const rows = calculator.calculateRows(columns);
+
+        console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局`);
         console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
-
-        // 🔥 計算間距
-        const horizontalSpacing = Math.max(3, width * 0.005);
-
-        // 🔥 計算文字高度和一個字的間距（用於下方中文卡片）
-        const textHeight = Math.max(24, Math.min(48, cardHeight * 0.6));
-        const oneCharSpacing = textHeight;
-
-        // 🔥 英文卡片的垂直間距（不加文字高度）
-        const topVerticalSpacing = Math.max(3, height * 0.01);
-
-        // 🔥 中文卡片的垂直間距（加文字高度 + 一個字的間距）
-        const bottomVerticalSpacing = textHeight + oneCharSpacing + Math.max(3, height * 0.01);
-
-        // 🔥 計算上方區域（英文）的起始位置
-        const topAreaStartX = (width - (columns * cardWidth + (columns - 1) * horizontalSpacing)) / 2;
-        const topAreaStartY = height * 0.08;
-
-        // 🔥 計算上方區域的總高度
-        const topAreaHeight = rows * cardHeight + (rows - 1) * topVerticalSpacing;
-
-        // 🔥 計算下方區域的總高度（包含文字）
-        const bottomAreaHeight = rows * cardHeight + (rows - 1) * bottomVerticalSpacing;
-
-        // 🔥 計算下方區域（中文）的起始位置，確保所有內容都能顯示
-        const bottomAreaStartX = topAreaStartX;
-        const availableBottomSpace = height - topAreaStartY - topAreaHeight - 10;  // 10px 為上下區域間距
-        const bottomAreaStartY = Math.max(
-            topAreaStartY + topAreaHeight + 10,  // 至少在上方區域下方 10px
-            height - bottomAreaHeight - 10  // 確保下方區域完全顯示
-        );
-
-        console.log(`📍 區域位置:`, {
-            topAreaStartX: topAreaStartX.toFixed(0),
-            topAreaStartY: topAreaStartY.toFixed(0),
-            topAreaHeight: topAreaHeight.toFixed(0),
-            bottomAreaStartX: bottomAreaStartX.toFixed(0),
-            bottomAreaStartY: bottomAreaStartY.toFixed(0),
-            bottomAreaHeight: bottomAreaHeight.toFixed(0),
-            availableBottomSpace: availableBottomSpace.toFixed(0)
-        });
+        console.log(`📍 區域位置: 上=${topY.toFixed(0)}, 下=${bottomY.toFixed(0)}`);
 
         // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
@@ -2142,26 +2032,24 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 創建上方外框（包圍所有英文卡片）
         this.createMultiColumnContainerBox(
-            topAreaStartX,
-            topAreaStartY,
+            topX,
+            topY,
             cardWidth,
             cardHeight,
-            horizontalSpacing,
-            topVerticalSpacing,  // 🔥 英文卡片使用 topVerticalSpacing
+            spacing.horizontal,
+            spacing.vertical,
             columns,
             rows
         );
-
-        // 🔥 不創建下方外框（中文卡片不需要外框）
 
         // 🔥 創建上方英文卡片（多行多列，按照順序出現動畫）
         currentPagePairs.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
-            const x = topAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = topAreaStartY + row * (cardHeight + topVerticalSpacing) + cardHeight / 2;  // 🔥 英文卡片使用 topVerticalSpacing
+            const x = topX + col * (cardWidth + spacing.horizontal) + cardWidth / 2;
+            const y = topY + row * (cardHeight + spacing.vertical) + cardHeight / 2;
 
-            const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
+            const animationDelay = index * 100;
             const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
@@ -2170,10 +2058,9 @@ class GameScene extends Phaser.Scene {
         shuffledAnswers.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
-            const x = bottomAreaStartX + col * (cardWidth + horizontalSpacing) + cardWidth / 2;
-            const y = bottomAreaStartY + row * (cardHeight + bottomVerticalSpacing) + cardHeight / 2;  // 🔥 中文卡片使用 bottomVerticalSpacing
+            const x = bottomX + col * (cardWidth + spacing.horizontal) + cardWidth / 2;
+            const y = bottomY + row * (cardHeight + spacing.vertical) + cardHeight / 2;
 
-            // 🔥 [v62.0] 傳遞 imageUrl 和 audioUrl
             const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl);
             this.rightCards.push(card);
         });
