@@ -1010,64 +1010,6 @@ class GameScene extends Phaser.Scene {
         this.showGameCompleteModal();
     }
 
-    // 🔥 顯示時間到訊息
-    showTimeUpMessage() {
-        const width = this.scale.width;
-        const height = this.scale.height;
-
-        // 創建半透明背景
-        const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7)
-            .setDepth(2000);
-
-        // 顯示時間到訊息
-        const messageText = this.add.text(width / 2, height / 2 - 50, '⏰ 時間到！', {
-            fontSize: '48px',
-            color: '#ffffff',
-            fontFamily: 'Arial',
-            fontStyle: 'bold'
-        }).setOrigin(0.5).setDepth(2001);
-
-        // 顯示完成進度
-        const completedCount = this.matchedPairs.size;
-        const startIndex = this.currentPage * this.itemsPerPage;
-        const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
-        const totalCount = endIndex - startIndex;
-        const progressText = this.add.text(
-            width / 2,
-            height / 2 + 20,
-            `已完成 ${completedCount} / ${totalCount} 個配對`,
-            {
-                fontSize: '24px',
-                color: '#ffffff',
-                fontFamily: 'Arial'
-            }
-        ).setOrigin(0.5).setDepth(2001);
-
-        // 如果開啟顯示答案，顯示答案按鈕
-        if (this.showAnswers) {
-            const showAnswersButton = this.add.text(
-                width / 2,
-                height / 2 + 80,
-                '📝 查看答案',
-                {
-                    fontSize: '24px',
-                    color: '#ffffff',
-                    fontFamily: 'Arial',
-                    backgroundColor: '#4CAF50',
-                    padding: { x: 20, y: 10 }
-                }
-            ).setOrigin(0.5).setDepth(2001).setInteractive({ useHandCursor: true });
-
-            showAnswersButton.on('pointerdown', () => {
-                overlay.destroy();
-                messageText.destroy();
-                progressText.destroy();
-                showAnswersButton.destroy();
-                this.showAnswersScreen();
-            });
-        }
-    }
-
     updateLayout() {
         console.log('🎮 GameScene: updateLayout 開始');
         console.log('🎮 GameScene: 當前場景尺寸', {
