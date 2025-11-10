@@ -990,6 +990,7 @@ class GameScene extends Phaser.Scene {
     }
 
     // 🔥 時間到達處理
+    // 🔥 [v138.0] 改進：時間到了時調用統一的 game complete 模態框
     onTimeUp() {
         console.log('⏱️ 時間到！');
 
@@ -998,8 +999,15 @@ class GameScene extends Phaser.Scene {
             this.timerEvent.remove();
         }
 
-        // 顯示時間到訊息
-        this.showTimeUpMessage();
+        // 🔥 [v138.0] 設置遊戲狀態為已完成
+        this.gameEndTime = Date.now();
+        this.totalGameTime = (this.gameEndTime - this.gameStartTime) / 1000; // 秒
+        this.gameState = 'completed';
+
+        console.log('🎮 [v138.0] 時間到！遊戲結束。總時間:', this.totalGameTime, '秒');
+
+        // 🔥 [v138.0] 調用統一的 game complete 模態框
+        this.showGameCompleteModal();
     }
 
     // 🔥 顯示時間到訊息
