@@ -6,7 +6,7 @@
     "env": {
       "NODE_ENV": "production",
       "SKIP_ENV_VALIDATION": "true",
-      "FORCE_REBUILD": "2025-11-10-v133-save-matched-pairs-in-checkAllMatches"
+      "FORCE_REBUILD": "2025-11-10-v134-use-currentPageAnswers-for-visual-restoration"
     }
   },
   "functions": {
