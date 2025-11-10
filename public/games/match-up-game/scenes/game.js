@@ -5633,39 +5633,42 @@ class GameScene extends Phaser.Scene {
             totalCount
         });
 
-        // 🔥 [v96.0] 如果不是最後一頁，根據 autoProceed 設置決定是否自動進入下一頁
-        // 這樣可以讓用戶看到勾勾和叉叉
+        // 🔥 [v125.0] 所有頁面都顯示分頁選擇器，讓用戶可以返回前面頁面查看答案
+        // 這樣可以讓用戶看到勾勾和叉叉，並且可以返回前面的頁面
+        console.log('🔥 [v125.0] ========== showMatchSummary 頁面轉換邏輯開始 ==========');
+        console.log('🔥 [v125.0] 當前狀態:', {
+            currentPage: this.currentPage,
+            totalPages: this.totalPages,
+            isLastPage: isLastPage,
+            autoProceed: this.autoProceed,
+            enablePagination: this.enablePagination
+        });
+
+        // 🔥 [v125.0] 無論是否為最後一頁，都顯示分頁選擇器
+        console.log('🔥 [v125.0] ✅ 顯示分頁選擇器（所有頁面都顯示，讓用戶可以返回查看答案）');
+        this.time.delayedCall(2000, () => {
+            console.log('🔥 [v125.0] ⏰ 2 秒延遲完成，準備顯示分頁選擇器');
+            console.log('🔥 [v125.0] 調用 showPaginationButtons()，當前頁面: ' + (this.currentPage + 1) + '/' + this.totalPages);
+            this.showPaginationButtons();
+
+            // 如果不是最後一頁且 autoProceed=true，在顯示分頁選擇器後自動進入下一頁
+            if (!isLastPage && this.autoProceed) {
+                console.log('🔥 [v125.0] ✅ autoProceed=true 且不是最後一頁：將在 3 秒後自動進入下一頁');
+                this.time.delayedCall(3000, () => {
+                    console.log('🔥 [v125.0] ⏰ 3 秒延遲完成，準備進入下一頁');
+                    console.log('🔥 [v125.0] 調用 goToNextPage()，頁面轉換: ' + this.currentPage + ' → ' + (this.currentPage + 1));
+                    this.goToNextPage();
+                });
+            } else if (isLastPage) {
+                console.log('🔥 [v125.0] ✅ 最後一頁：用戶可以返回前面頁面查看答案，或查看最終統計');
+            } else {
+                console.log('🔥 [v125.0] ✅ autoProceed=false：用戶可以手動控制分頁');
+            }
+        });
+        console.log('🔥 [v125.0] ========== showMatchSummary 頁面轉換邏輯結束 ==========');
+
+        // 🔥 [v125.0] 如果是最後一頁，顯示最終統計；否則直接返回
         if (!isLastPage) {
-            // 🔥 [v119.0] 詳細的調適訊息 - 頁面轉換邏輯
-            console.log('🔥 [v119.0] ========== showMatchSummary 頁面轉換邏輯開始 ==========');
-            console.log('🔥 [v119.0] 當前狀態:', {
-                currentPage: this.currentPage,
-                totalPages: this.totalPages,
-                isLastPage: isLastPage,
-                autoProceed: this.autoProceed,
-                enablePagination: this.enablePagination
-            });
-
-            // 🔥 [v122.0] 無論 autoProceed 是否為 true，都顯示分頁選擇器
-            console.log('🔥 [v122.0] ✅ 顯示分頁選擇器（無論 autoProceed 設置）');
-            this.time.delayedCall(2000, () => {
-                console.log('🔥 [v122.0] ⏰ 2 秒延遲完成，準備顯示分頁選擇器');
-                console.log('🔥 [v122.0] 調用 showPaginationButtons()，當前頁面: ' + (this.currentPage + 1) + '/' + this.totalPages);
-                this.showPaginationButtons();
-
-                // 如果 autoProceed=true，在顯示分頁選擇器後自動進入下一頁
-                if (this.autoProceed) {
-                    console.log('🔥 [v122.0] ✅ autoProceed=true：將在 3 秒後自動進入下一頁');
-                    this.time.delayedCall(3000, () => {
-                        console.log('🔥 [v122.0] ⏰ 3 秒延遲完成，準備進入下一頁');
-                        console.log('🔥 [v122.0] 調用 goToNextPage()，頁面轉換: ' + this.currentPage + ' → ' + (this.currentPage + 1));
-                        this.goToNextPage();
-                    });
-                } else {
-                    console.log('🔥 [v122.0] ✅ autoProceed=false：用戶可以手動控制分頁');
-                }
-            });
-            console.log('🔥 [v122.0] ========== showMatchSummary 頁面轉換邏輯結束 ==========');
             return;
         }
 
