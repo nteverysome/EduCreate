@@ -1072,9 +1072,21 @@ class GameScene extends Phaser.Scene {
         });
 
         try {
+            // 🔥 [v127.0] 保存分頁選擇器組件，以便在清除元素後重新創建
+            const savedPageSelectorComponents = this.pageSelectorComponents;
+            console.log('🔥 [v127.0] 已保存分頁選擇器組件:', {
+                hasSavedComponents: !!savedPageSelectorComponents,
+                currentPage: this.currentPage + 1,
+                totalPages: this.totalPages
+            });
+
             // 清除所有現有元素
             console.log('🎮 GameScene: 清除所有現有元素');
             this.children.removeAll(true);
+
+            // 🔥 [v127.0] 清除分頁選擇器組件引用（因為元素已被銷毀）
+            this.pageSelectorComponents = null;
+            console.log('🔥 [v127.0] 已清除分頁選擇器組件引用');
 
             // 🔥 [v97.0] 清除提交按鈕引用，確保下一頁會重新創建按鈕
             this.submitButton = null;
@@ -1106,6 +1118,16 @@ class GameScene extends Phaser.Scene {
 
             // 🔥 顯示「提交答案」按鈕（遊戲開始時就顯示）
             this.showSubmitButton();
+
+            // 🔥 [v127.0] 重新創建分頁選擇器（如果有多頁）
+            if (this.enablePagination && this.totalPages > 1) {
+                console.log('🔥 [v127.0] 重新創建分頁選擇器');
+                const selectorWidth = 80;
+                const selectorHeight = 50;
+                const buttonY = 20;
+                const selectorX = width / 2;
+                this.createPageSelector(selectorX, buttonY, selectorWidth, selectorHeight);
+            }
 
             // 🔥 移除重新開始按鈕：用戶要求拿掉
             console.log('🎮 GameScene: updateLayout 完成');
