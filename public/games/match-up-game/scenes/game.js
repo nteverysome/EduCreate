@@ -5578,95 +5578,11 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 顯示正確答案（白色內框 + 勾勾）[v96.0]
     showCorrectAnswer(rightCard, correctAnswer) {
-        // 🔥 [v98.0] 在混合佈局中，不需要檢查 background，直接添加勾勾
+        // 🔥 [v142.0] 修復：在混合佈局中使用 showCorrectAnswerOnCard 函數
         if (this.layout === 'mixed') {
-            // 混合佈局：rightCard 是英文卡片，直接在其上添加勾勾
-            console.log('🔍 [v109.0] showCorrectAnswer 混合佈局調試:', {
-                hasRightCard: !!rightCard,
-                hasList: rightCard && !!rightCard.list,
-                listLength: rightCard && rightCard.list ? rightCard.list.length : 0,
-                pairId: rightCard ? rightCard.getData('pairId') : null
-            });
-
-            if (rightCard && rightCard.list) {
-                // 🔥 [v109.0] 新方案：跟著英文單字作為目標
-                // 查找英文文字對象（通常是 list 中的 text 對象）
-                let textObject = null;
-                for (let i = 0; i < rightCard.list.length; i++) {
-                    const item = rightCard.list[i];
-                    if (item && item.type === 'Text') {
-                        textObject = item;
-                        break;
-                    }
-                }
-
-                console.log('🔍 [v109.0] 英文文字對象查找:', {
-                    found: !!textObject,
-                    textContent: textObject ? textObject.text : null,
-                    textX: textObject ? textObject.x : null,
-                    textY: textObject ? textObject.y : null
-                });
-
-                // 🔥 [v110.0] 如果找到文字對象，在其上方放置勾勾
-                if (textObject) {
-                    // 🔥 [v110.0] 修復：計算文字的全局位置
-                    // container 的位置是 (rightCard.x, rightCard.y)
-                    // textObject 的位置是相對於 container 的
-                    // 所以全局位置 = container 位置 + textObject 相對位置
-                    const textGlobalX = rightCard.x + textObject.x;
-                    const textGlobalY = rightCard.y + textObject.y;
-
-                    // 在文字上方放置勾勾（偏移量根據文字大小調整）
-                    const markX = textGlobalX;
-                    const markY = textGlobalY - 40;  // 在文字上方 40px
-
-                    console.log('🔍 [v110.0] 勾勾位置計算（基於文字）:', {
-                        rightCardX: rightCard.x,
-                        rightCardY: rightCard.y,
-                        textObjectX: textObject.x,
-                        textObjectY: textObject.y,
-                        textGlobalX,
-                        textGlobalY,
-                        markX,
-                        markY,
-                        textContent: textObject.text
-                    });
-
-                    // 🔥 [v111.0] 移除舊的標記（包括勾勾和叉叉）
-                    if (rightCard.checkMark) {
-                        rightCard.checkMark.destroy();
-                        rightCard.checkMark = null;
-                    }
-                    if (rightCard.xMark) {
-                        rightCard.xMark.destroy();
-                        rightCard.xMark = null;
-                    }
-
-                    const checkMark = this.add.text(0, 0, '✓', {
-                        fontSize: '64px',
-                        color: '#4caf50',
-                        fontFamily: 'Arial',
-                        fontStyle: 'bold'
-                    });
-                    checkMark.setOrigin(0.5, 0.5);
-                    checkMark.setDepth(100);
-                    checkMark.setPosition(markX, markY);
-
-                    // 🔥 [v103.0] 保存引用以便後續清除
-                    rightCard.checkMark = checkMark;
-
-                    console.log('✅ [v110.0] 混合佈局：在英文單字上方添加勾勾', {
-                        checkMarkX: checkMark.x,
-                        checkMarkY: checkMark.y,
-                        checkMarkVisible: checkMark.visible,
-                        checkMarkDepth: checkMark.depth
-                    });
-                } else {
-                    console.warn('⚠️ [v110.0] 混合佈局：找不到英文文字對象');
-                }
-            } else {
-                console.warn('⚠️ [v102.0] 混合佈局：rightCard 或 rightCard.list 不存在');
-            }
+            // 混合佈局：使用統一的 showCorrectAnswerOnCard 函數
+            console.log('🔍 [v142.0] showCorrectAnswer 混合佈局 - 調用 showCorrectAnswerOnCard');
+            this.showCorrectAnswerOnCard(rightCard);
         } else {
             // 分離模式：使用原有的邏輯
             const background = rightCard.getData('background');
@@ -5707,94 +5623,11 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 顯示錯誤答案（灰色內框 + X）[v96.0]
     showIncorrectAnswer(rightCard, correctAnswer) {
-        // 🔥 [v98.0] 在混合佈局中，不需要檢查 background，直接添加叉叉
+        // 🔥 [v142.0] 修復：在混合佈局中使用 showIncorrectAnswerOnCard 函數
         if (this.layout === 'mixed') {
-            // 混合佈局：rightCard 是英文卡片，直接在其上添加叉叉
-            console.log('🔍 [v109.0] showIncorrectAnswer 混合佈局調試:', {
-                hasRightCard: !!rightCard,
-                hasList: rightCard && !!rightCard.list,
-                listLength: rightCard && rightCard.list ? rightCard.list.length : 0,
-                pairId: rightCard ? rightCard.getData('pairId') : null
-            });
-
-            if (rightCard && rightCard.list) {
-                // 🔥 [v109.0] 新方案：跟著英文單字作為目標
-                // 查找英文文字對象（通常是 list 中的 text 對象）
-                let textObject = null;
-                for (let i = 0; i < rightCard.list.length; i++) {
-                    const item = rightCard.list[i];
-                    if (item && item.type === 'Text') {
-                        textObject = item;
-                        break;
-                    }
-                }
-
-                console.log('🔍 [v109.0] 英文文字對象查找:', {
-                    found: !!textObject,
-                    textContent: textObject ? textObject.text : null,
-                    textX: textObject ? textObject.x : null,
-                    textY: textObject ? textObject.y : null
-                });
-
-                if (textObject) {
-                    // 🔥 [v110.0] 修復：計算文字的全局位置
-                    // container 的位置是 (rightCard.x, rightCard.y)
-                    // textObject 的位置是相對於 container 的
-                    // 所以全局位置 = container 位置 + textObject 相對位置
-                    const textGlobalX = rightCard.x + textObject.x;
-                    const textGlobalY = rightCard.y + textObject.y;
-
-                    // 在文字上方放置叉叉（偏移量根據文字大小調整）
-                    const markX = textGlobalX;
-                    const markY = textGlobalY - 40;  // 在文字上方 40px
-
-                    console.log('🔍 [v110.0] 叉叉位置計算（基於文字）:', {
-                        rightCardX: rightCard.x,
-                        rightCardY: rightCard.y,
-                        textObjectX: textObject.x,
-                        textObjectY: textObject.y,
-                        textGlobalX,
-                        textGlobalY,
-                        markX,
-                        markY,
-                        textContent: textObject.text
-                    });
-
-                    // 🔥 [v111.0] 移除舊的標記（包括勾勾和叉叉）
-                    if (rightCard.checkMark) {
-                        rightCard.checkMark.destroy();
-                        rightCard.checkMark = null;
-                    }
-                    if (rightCard.xMark) {
-                        rightCard.xMark.destroy();
-                        rightCard.xMark = null;
-                    }
-
-                    const xMark = this.add.text(0, 0, '✗', {
-                        fontSize: '64px',
-                        color: '#f44336',
-                        fontFamily: 'Arial',
-                        fontStyle: 'bold'
-                    });
-                    xMark.setOrigin(0.5, 0.5);
-                    xMark.setDepth(100);
-                    xMark.setPosition(markX, markY);
-
-                    // 🔥 [v103.0] 保存引用以便後續清除
-                    rightCard.xMark = xMark;
-
-                    console.log('❌ [v110.0] 混合佈局：在英文單字上方添加叉叉', {
-                        xMarkX: xMark.x,
-                        xMarkY: xMark.y,
-                        xMarkVisible: xMark.visible,
-                        xMarkDepth: xMark.depth
-                    });
-                } else {
-                    console.warn('⚠️ [v110.0] 混合佈局：找不到英文文字對象');
-                }
-            } else {
-                console.warn('⚠️ [v102.0] 混合佈局：rightCard 或 rightCard.list 不存在');
-            }
+            // 混合佈局：使用統一的 showIncorrectAnswerOnCard 函數
+            console.log('🔍 [v142.0] showIncorrectAnswer 混合佈局 - 調用 showIncorrectAnswerOnCard');
+            this.showIncorrectAnswerOnCard(rightCard);
         } else {
             // 分離模式：使用原有的邏輯
             const background = rightCard.getData('background');
