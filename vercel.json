@@ -6,7 +6,7 @@
     "env": {
       "NODE_ENV": "production",
       "SKIP_ENV_VALIDATION": "true",
-      "FORCE_REBUILD": "2025-11-10-v137-add-pagination-to-show-all-answers"
+      "FORCE_REBUILD": "2025-11-10-v137-show-all-answers-with-card-movement"
     }
   },
   "functions": {
