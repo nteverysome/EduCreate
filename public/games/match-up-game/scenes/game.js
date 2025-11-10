@@ -5431,6 +5431,29 @@ class GameScene extends Phaser.Scene {
             });
         }
 
+        // 🔥 [v132.0] 保存當前頁的配對結果和答案（用於返回前面頁面時顯示勾勾和叉叉）
+        console.log('🔥 [v132.0] ========== checkAllMatches 保存配對結果開始 ==========');
+        console.log('🔥 [v132.0] 保存前的狀態:', {
+            currentPage: this.currentPage,
+            matchedPairsSize: this.matchedPairs.size,
+            currentPageAnswersLength: this.currentPageAnswers.length
+        });
+
+        // 保存配對結果
+        this.allPagesMatchedPairs[this.currentPage] = new Set(this.matchedPairs);
+
+        // 保存當前頁的答案
+        const pageAnswersKey = `page_${this.currentPage}_answers`;
+        this[pageAnswersKey] = [...this.currentPageAnswers];
+
+        console.log('🔥 [v132.0] 已保存配對結果:', {
+            pageIndex: this.currentPage,
+            savedPairsSize: this.allPagesMatchedPairs[this.currentPage].size,
+            savedAnswersLength: this.currentPageAnswers.length,
+            pageAnswersKey: pageAnswersKey
+        });
+        console.log('🔥 [v132.0] ========== checkAllMatches 保存配對結果結束 ==========');
+
         // 🔥 將當前頁面的答案添加到所有答案記錄中
         this.allPagesAnswers.push(...this.currentPageAnswers);
 
