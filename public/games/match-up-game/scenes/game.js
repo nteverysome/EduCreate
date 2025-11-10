@@ -30,7 +30,6 @@ class GameScene extends Phaser.Scene {
         this.currentPage = 0;   // 當前頁碼（從 0 開始）
         this.totalPages = 1;    // 總頁數
         this.enablePagination = false;  // 是否啟用分頁
-        this.pageIndicatorText = null;  // 分頁指示器文字對象
 
         // 🔥 [v126.0] 分頁選擇器組件（保持在屏幕上）
         this.pageSelectorComponents = null;  // 分頁選擇器的所有組件
@@ -1417,11 +1416,6 @@ class GameScene extends Phaser.Scene {
             // 分離佈局模式（默認）
             this.createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
                                       cardWidth, cardHeight, leftSpacing, rightSpacing);
-        }
-
-        // 🔥 創建分頁指示器
-        if (this.enablePagination) {
-            this.createPageIndicator();
         }
 
         console.log('🎮 GameScene: createCards 完成', {
@@ -6059,39 +6053,6 @@ class GameScene extends Phaser.Scene {
         closeButton.on('pointerout', () => {
             closeButton.setBackgroundColor('#f44336');
         });
-    }
-
-    // 🔥 創建分頁指示器
-    createPageIndicator() {
-        const width = this.scale.width;
-        const height = this.scale.height;
-
-        // 分頁指示器文字（例如：1/5）
-        const pageText = `${this.currentPage + 1}/${this.totalPages}`;
-        const fontSize = Math.max(18, Math.min(24, width * 0.02));
-
-        // 🔥 分頁指示器放在中間頂部（水平對齐，與計時器並排）
-        this.pageIndicatorText = this.add.text(width / 2 + 80, 20, pageText, {
-            fontSize: `${fontSize}px`,
-            color: '#666666',
-            fontFamily: 'Arial',
-            fontStyle: 'bold',
-            backgroundColor: '#f5f5f5',
-            padding: { x: 15, y: 8 }
-        });
-        this.pageIndicatorText.setOrigin(0, 0);  // 左上角對齐
-        this.pageIndicatorText.setDepth(100);  // 確保在最上層
-
-        console.log('📄 分頁指示器已創建:', pageText);
-    }
-
-    // 🔥 更新分頁指示器
-    updatePageIndicator() {
-        if (this.pageIndicatorText) {
-            const pageText = `${this.currentPage + 1}/${this.totalPages}`;
-            this.pageIndicatorText.setText(pageText);
-            console.log('📄 分頁指示器已更新:', pageText);
-        }
     }
 
     // 🔥 進入下一頁
