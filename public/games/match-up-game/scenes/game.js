@@ -25,6 +25,9 @@ class GameScene extends Phaser.Scene {
         this.dragStartCard = null;
         this.sceneStopped = false;  // 🔥 場景停止狀態標記
 
+        // 🔥 [v129.0] 保存所有頁面的配對結果（用於返回前面頁面時顯示勾勾和叉叉）
+        this.allPagesMatchedPairs = {};  // 格式：{ pageIndex: Set(pairIds) }
+
         // 🔥 分頁功能
         this.itemsPerPage = 7;  // 默認每頁 7 個詞彙（可配置）
         this.currentPage = 0;   // 當前頁碼（從 0 開始）
@@ -1117,6 +1120,22 @@ class GameScene extends Phaser.Scene {
 
             // 🔥 顯示「提交答案」按鈕（遊戲開始時就顯示）
             this.showSubmitButton();
+
+            // 🔥 [v129.0] 恢復當前頁的配對結果（如果有的話）
+            if (this.allPagesMatchedPairs[this.currentPage]) {
+                console.log('🔥 [v129.0] 恢復當前頁的配對結果:', {
+                    currentPage: this.currentPage,
+                    savedPairsSize: this.allPagesMatchedPairs[this.currentPage].size,
+                    savedPairs: Array.from(this.allPagesMatchedPairs[this.currentPage])
+                });
+                this.matchedPairs = new Set(this.allPagesMatchedPairs[this.currentPage]);
+                console.log('🔥 [v129.0] 已恢復 matchedPairs:', {
+                    matchedPairsSize: this.matchedPairs.size,
+                    matchedPairsContent: Array.from(this.matchedPairs)
+                });
+            } else {
+                console.log('🔥 [v129.0] 當前頁沒有保存的配對結果，matchedPairs 保持為空');
+            }
 
             // 🔥 [v127.0] 重新創建分頁選擇器（如果有多頁）
             if (this.enablePagination && this.totalPages > 1) {
@@ -6081,17 +6100,25 @@ class GameScene extends Phaser.Scene {
             this.shuffledPairsCache = null;
             console.log('🔥 [v54.0] 已清除洗牌順序緩存（頁面改變）');
 
-            // 🔥 [v113.0] 清空 matchedPairs（因為進入新頁面，舊頁面的配對信息不再適用）
-            console.log('🔥 [v115.0] 清空 matchedPairs 前:', {
-                size: this.matchedPairs.size,
-                content: Array.from(this.matchedPairs)
+            // 🔥 [v129.0] 保存當前頁的配對結果
+            console.log('🔥 [v129.0] 保存當前頁的配對結果前:', {
+                currentPage: this.currentPage,
+                matchedPairsSize: this.matchedPairs.size,
+                matchedPairsContent: Array.from(this.matchedPairs)
             });
+            this.allPagesMatchedPairs[this.currentPage] = new Set(this.matchedPairs);
+            console.log('🔥 [v129.0] 已保存當前頁的配對結果:', {
+                pageIndex: this.currentPage,
+                savedPairsSize: this.allPagesMatchedPairs[this.currentPage].size,
+                allPagesMatchedPairs: Object.keys(this.allPagesMatchedPairs).map(key => ({
+                    page: key,
+                    size: this.allPagesMatchedPairs[key].size
+                }))
+            });
+
+            // 清空 matchedPairs（準備進入新頁面）
             this.matchedPairs.clear();
-            console.log('🔥 [v113.0] 已清空 matchedPairs（進入新頁面）');
-            console.log('🔥 [v115.0] 清空 matchedPairs 後:', {
-                size: this.matchedPairs.size,
-                content: Array.from(this.matchedPairs)
-            });
+            console.log('🔥 [v129.0] 已清空 matchedPairs（準備進入新頁面）');
 
             // 重新佈局（會重新創建卡片）
             this.updateLayout();
@@ -6124,17 +6151,21 @@ class GameScene extends Phaser.Scene {
             this.shuffledPairsCache = null;
             console.log('🔥 [v117.0] 已清除洗牌順序緩存（頁面改變）');
 
-            // 🔥 清空 matchedPairs（因為進入新頁面，舊頁面的配對信息不再適用）
-            console.log('🔥 [v117.0] 清空 matchedPairs 前:', {
-                size: this.matchedPairs.size,
-                content: Array.from(this.matchedPairs)
+            // 🔥 [v129.0] 保存當前頁的配對結果
+            console.log('🔥 [v129.0] 保存當前頁的配對結果前:', {
+                currentPage: this.currentPage,
+                matchedPairsSize: this.matchedPairs.size,
+                matchedPairsContent: Array.from(this.matchedPairs)
             });
+            this.allPagesMatchedPairs[this.currentPage] = new Set(this.matchedPairs);
+            console.log('🔥 [v129.0] 已保存當前頁的配對結果:', {
+                pageIndex: this.currentPage,
+                savedPairsSize: this.allPagesMatchedPairs[this.currentPage].size
+            });
+
+            // 清空 matchedPairs（準備進入上一頁）
             this.matchedPairs.clear();
-            console.log('🔥 [v117.0] 已清空 matchedPairs（進入新頁面）');
-            console.log('🔥 [v117.0] 清空 matchedPairs 後:', {
-                size: this.matchedPairs.size,
-                content: Array.from(this.matchedPairs)
-            });
+            console.log('🔥 [v129.0] 已清空 matchedPairs（準備進入上一頁）');
 
             // 重新佈局（會重新創建卡片）
             this.updateLayout();
@@ -6904,6 +6935,10 @@ class GameScene extends Phaser.Scene {
         this.currentPageAnswers = [];
         this.currentPage = 0;
         this.matchedPairs.clear();
+
+        // 🔥 [v129.0] 清空所有頁面的配對結果
+        this.allPagesMatchedPairs = {};
+        console.log('🔥 [v129.0] 已清空所有頁面的配對結果');
 
         // 🔥 v54.0: 清除洗牌順序緩存（遊戲重新開始）
         this.shuffledPairsCache = null;
