@@ -7260,10 +7260,33 @@ class GameScene extends Phaser.Scene {
 
         // 獲取所有答案（包含所有頁面）
         const allAnswers = this.allPagesAnswers;
-        console.log('📝 所有答案:', allAnswers);
+        console.log('🔥 [v135.0] ========== showMyAnswersPage 開始 ==========');
+        console.log('🔥 [v135.0] 所有答案:', {
+            totalAnswers: allAnswers.length,
+            maxAnswersPerPage: maxAnswersPerPage,
+            currentAnswerPageIndex: this.currentAnswerPageIndex || 0
+        });
 
-        // 顯示答案（最多顯示 maxAnswersPerPage 個）
-        const answersToShow = allAnswers.slice(0, maxAnswersPerPage);
+        // 🔥 [v135.0] 初始化答案頁面索引
+        if (this.currentAnswerPageIndex === undefined) {
+            this.currentAnswerPageIndex = 0;
+        }
+
+        // 🔥 [v135.0] 計算分頁信息
+        const startIndex = this.currentAnswerPageIndex * maxAnswersPerPage;
+        const endIndex = Math.min(startIndex + maxAnswersPerPage, allAnswers.length);
+        const answersToShow = allAnswers.slice(startIndex, endIndex);
+        const totalAnswerPages = Math.ceil(allAnswers.length / maxAnswersPerPage);
+
+        console.log('🔥 [v135.0] 分頁信息:', {
+            currentPage: this.currentAnswerPageIndex + 1,
+            totalPages: totalAnswerPages,
+            startIndex: startIndex,
+            endIndex: endIndex,
+            answersToShowCount: answersToShow.length
+        });
+
+        // 顯示答案
         const cardWidth = 300;  // 🔥 與 createAnswerCard 中的 cardWidth 一致
         const cardX = -pageWidth / 2 + cardWidth / 2 + 30;  // 🔥 左邊距 30px
         answersToShow.forEach((answer, index) => {
@@ -7271,24 +7294,57 @@ class GameScene extends Phaser.Scene {
             this.createAnswerCard(page, cardX, y, answer, 'myAnswer');
         });
 
+        // 🔥 [v135.0] 添加分頁信息文本
+        const pageInfoText = this.add.text(0, pageHeight / 2 - 100,
+            `Page ${this.currentAnswerPageIndex + 1} / ${totalAnswerPages}`, {
+            fontSize: '16px',
+            color: '#666666',
+            fontFamily: 'Arial'
+        });
+        pageInfoText.setOrigin(0.5);
+        page.add(pageInfoText);
+
         // 底部按鈕區域
         const buttonY = pageHeight / 2 - 60;
+
+        // 🔥 [v135.0] 上一頁按鈕
+        if (this.currentAnswerPageIndex > 0) {
+            this.createAnswerPageButton(page, -250, buttonY, '← Prev', () => {
+                console.log('🎮 [v135.0] 點擊上一頁按鈕');
+                this.currentAnswerPageIndex--;
+                this.hideMyAnswersPage();
+                this.showMyAnswersPage();
+            });
+        }
 
         // Correct Answers 按鈕
         this.createAnswerPageButton(page, -150, buttonY, 'Correct Answers', () => {
             console.log('🎮 點擊 Correct Answers 按鈕');
+            this.currentAnswerPageIndex = 0;  // 🔥 [v135.0] 重置頁面索引
             this.hideMyAnswersPage();
             this.showCorrectAnswersPage();
         });
 
+        // 🔥 [v135.0] 下一頁按鈕
+        if (this.currentAnswerPageIndex < totalAnswerPages - 1) {
+            this.createAnswerPageButton(page, 50, buttonY, 'Next →', () => {
+                console.log('🎮 [v135.0] 點擊下一頁按鈕');
+                this.currentAnswerPageIndex++;
+                this.hideMyAnswersPage();
+                this.showMyAnswersPage();
+            });
+        }
+
         // Back 按鈕
         this.createAnswerPageButton(page, 150, buttonY, 'Back', () => {
             console.log('🎮 點擊 Back 按鈕');
+            this.currentAnswerPageIndex = 0;  // 🔥 [v135.0] 重置頁面索引
             this.hideMyAnswersPage();
         });
 
         // 保存頁面引用
         this.myAnswersPage = { overlay, page };
+        console.log('🔥 [v135.0] ========== showMyAnswersPage 結束 ==========');
     }
 
     // 🔥 隱藏 My Answers 頁面
@@ -7354,9 +7410,33 @@ class GameScene extends Phaser.Scene {
 
         // 獲取所有答案（包含所有頁面）
         const allAnswers = this.allPagesAnswers;
+        console.log('🔥 [v135.0] ========== showCorrectAnswersPage 開始 ==========');
+        console.log('🔥 [v135.0] 所有答案:', {
+            totalAnswers: allAnswers.length,
+            maxAnswersPerPage: maxAnswersPerPage,
+            currentAnswerPageIndex: this.currentAnswerPageIndex || 0
+        });
 
-        // 顯示答案（最多顯示 maxAnswersPerPage 個）
-        const answersToShow = allAnswers.slice(0, maxAnswersPerPage);
+        // 🔥 [v135.0] 初始化答案頁面索引
+        if (this.currentAnswerPageIndex === undefined) {
+            this.currentAnswerPageIndex = 0;
+        }
+
+        // 🔥 [v135.0] 計算分頁信息
+        const startIndex = this.currentAnswerPageIndex * maxAnswersPerPage;
+        const endIndex = Math.min(startIndex + maxAnswersPerPage, allAnswers.length);
+        const answersToShow = allAnswers.slice(startIndex, endIndex);
+        const totalAnswerPages = Math.ceil(allAnswers.length / maxAnswersPerPage);
+
+        console.log('🔥 [v135.0] 分頁信息:', {
+            currentPage: this.currentAnswerPageIndex + 1,
+            totalPages: totalAnswerPages,
+            startIndex: startIndex,
+            endIndex: endIndex,
+            answersToShowCount: answersToShow.length
+        });
+
+        // 顯示答案
         const cardWidth = 300;  // 🔥 與 createAnswerCard 中的 cardWidth 一致
         const cardX = -pageWidth / 2 + cardWidth / 2 + 30;  // 🔥 左邊距 30px
         answersToShow.forEach((answer, index) => {
@@ -7364,24 +7444,57 @@ class GameScene extends Phaser.Scene {
             this.createAnswerCard(page, cardX, y, answer, 'correctAnswer');
         });
 
+        // 🔥 [v135.0] 添加分頁信息文本
+        const pageInfoText = this.add.text(0, pageHeight / 2 - 100,
+            `Page ${this.currentAnswerPageIndex + 1} / ${totalAnswerPages}`, {
+            fontSize: '16px',
+            color: '#666666',
+            fontFamily: 'Arial'
+        });
+        pageInfoText.setOrigin(0.5);
+        page.add(pageInfoText);
+
         // 底部按鈕區域
         const buttonY = pageHeight / 2 - 60;
+
+        // 🔥 [v135.0] 上一頁按鈕
+        if (this.currentAnswerPageIndex > 0) {
+            this.createAnswerPageButton(page, -250, buttonY, '← Prev', () => {
+                console.log('🎮 [v135.0] 點擊上一頁按鈕');
+                this.currentAnswerPageIndex--;
+                this.hideCorrectAnswersPage();
+                this.showCorrectAnswersPage();
+            });
+        }
 
         // My Answers 按鈕
         this.createAnswerPageButton(page, -150, buttonY, 'My Answers', () => {
             console.log('🎮 點擊 My Answers 按鈕');
+            this.currentAnswerPageIndex = 0;  // 🔥 [v135.0] 重置頁面索引
             this.hideCorrectAnswersPage();
             this.showMyAnswersPage();
         });
 
+        // 🔥 [v135.0] 下一頁按鈕
+        if (this.currentAnswerPageIndex < totalAnswerPages - 1) {
+            this.createAnswerPageButton(page, 50, buttonY, 'Next →', () => {
+                console.log('🎮 [v135.0] 點擊下一頁按鈕');
+                this.currentAnswerPageIndex++;
+                this.hideCorrectAnswersPage();
+                this.showCorrectAnswersPage();
+            });
+        }
+
         // Back 按鈕
         this.createAnswerPageButton(page, 150, buttonY, 'Back', () => {
             console.log('🎮 點擊 Back 按鈕');
+            this.currentAnswerPageIndex = 0;  // 🔥 [v135.0] 重置頁面索引
             this.hideCorrectAnswersPage();
         });
 
         // 保存頁面引用
         this.correctAnswersPage = { overlay, page };
+        console.log('🔥 [v135.0] ========== showCorrectAnswersPage 結束 ==========');
     }
 
     // 🔥 隱藏 Correct Answers 頁面
