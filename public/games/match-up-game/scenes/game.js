@@ -6280,6 +6280,15 @@ class GameScene extends Phaser.Scene {
         const canGoPrevious = this.currentPage > 0;
         const canGoNext = this.currentPage < this.totalPages - 1;
 
+        // 🔥 [v124.0] 提示用戶可以使用分頁選擇器查看前面的答案
+        console.log('🔥 [v124.0] 💡 分頁選擇器提示:', {
+            currentPage: this.currentPage + 1,
+            totalPages: this.totalPages,
+            canGoPrevious: canGoPrevious,
+            canGoNext: canGoNext,
+            message: canGoPrevious ? '✅ 可以點擊 [−] 返回前面的頁面查看答案' : '❌ 已在第一頁，無法返回'
+        });
+
         // 🔥 [v123.0] 創建選擇器背景 - 使用漸變色
         const selectorBg = this.add.rectangle(x, y + height / 2, width, height, 0xffffff);
         selectorBg.setStrokeStyle(2, 0x2196F3);  // 藍色邊框
