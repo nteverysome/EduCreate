@@ -6,7 +6,7 @@
     "env": {
       "NODE_ENV": "production",
       "SKIP_ENV_VALIDATION": "true",
-      "FORCE_REBUILD": "2025-11-10-v131-restore-matched-pairs-visuals"
+      "FORCE_REBUILD": "2025-11-10-v132-detailed-debug-logging"
     }
   },
   "functions": {
