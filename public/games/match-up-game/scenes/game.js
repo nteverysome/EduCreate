@@ -1180,6 +1180,57 @@ class GameScene extends Phaser.Scene {
             }
             console.log('🔥 [v132.0] ========== updateLayout 恢復邏輯結束 ==========');
 
+            // 🔥 [v137.0] 如果正在顯示所有答案，則在新卡片上恢復移動效果
+            if (this.isShowingAllAnswers) {
+                console.log('🔥 [v137.0] ========== 恢復卡片移動效果開始 ==========');
+                console.log('🔥 [v137.0] 當前頁面:', {
+                    currentPage: this.currentPage,
+                    totalPages: this.totalPages,
+                    leftCardsCount: this.leftCards ? this.leftCards.length : 0,
+                    rightCardsCount: this.rightCards ? this.rightCards.length : 0
+                });
+
+                // 遍歷所有左卡片（英文卡片），將其移動到對應的中文位置
+                if (this.leftCards && this.leftCards.length > 0) {
+                    this.leftCards.forEach((card) => {
+                        // 根據 pairId 找到對應的配對
+                        const pairId = card.getData('pairId');
+
+                        // 根據佈局模式，找到對應的中文卡片位置
+                        if (this.layout === 'mixed') {
+                            // 混合佈局：找到對應的中文框
+                            const rightCard = this.rightCards.find(rc => rc.getData('pairId') === pairId);
+                            if (rightCard) {
+                                // 移動英文卡片到中文框的位置
+                                this.tweens.add({
+                                    targets: card,
+                                    x: rightCard.x,
+                                    y: rightCard.y,
+                                    duration: 500,
+                                    ease: 'Power2.inOut'
+                                });
+                                console.log('🔥 [v137.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+                            }
+                        } else {
+                            // 分離佈局：根據 pairId 找到對應的右側卡片
+                            const rightCard = this.rightCards.find(rc => rc.getData('pairId') === pairId);
+                            if (rightCard) {
+                                // 移動英文卡片到右側卡片的位置
+                                this.tweens.add({
+                                    targets: card,
+                                    x: rightCard.x,
+                                    y: rightCard.y,
+                                    duration: 500,
+                                    ease: 'Power2.inOut'
+                                });
+                                console.log('🔥 [v137.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+                            }
+                        }
+                    });
+                }
+                console.log('🔥 [v137.0] ========== 恢復卡片移動效果結束 ==========');
+            }
+
             // 🔥 [v127.0] 重新創建分頁選擇器（如果有多頁）
             if (this.enablePagination && this.totalPages > 1) {
                 console.log('🔥 [v127.0] 重新創建分頁選擇器');
@@ -7164,237 +7215,52 @@ class GameScene extends Phaser.Scene {
     }
 
     // 🔥 v89.0: 顯示所有卡片的正確名稱 - 英文卡片移動到匹配的中文位置
-    // 🔥 [v137.0] 改進：添加分頁功能，顯示所有頁面的答案
+    // 🔥 [v137.0] 改進：添加狀態標誌，在每一頁都能保存正確移動的卡片
     showAllCorrectAnswers() {
-        console.log('🎮 [v137.0] 顯示所有正確答案 - 使用答案列表視圖');
+        console.log('🎮 [v137.0] 顯示所有卡片的正確名稱 - 英文卡片移動到匹配的中文位置');
 
-        // 🔥 [v137.0] 初始化答案頁面索引
-        if (this.allAnswersPageIndex === undefined) {
-            this.allAnswersPageIndex = 0;
-        }
+        // 🔥 [v137.0] 設置標誌，表示正在顯示所有答案
+        this.isShowingAllAnswers = true;
+        console.log('🔥 [v137.0] 已設置 isShowingAllAnswers = true');
 
-        // 🔥 [v137.0] 獲取所有答案
-        const allAnswers = this.allPagesAnswers || [];
-        console.log('🔥 [v137.0] 所有答案:', {
-            totalAnswers: allAnswers.length,
-            currentPageIndex: this.allAnswersPageIndex
-        });
+        // 遍歷所有左卡片（英文卡片），將其移動到對應的中文位置
+        if (this.leftCards && this.leftCards.length > 0) {
+            this.leftCards.forEach((card) => {
+                // 根據 pairId 找到對應的配對
+                const pairId = card.getData('pairId');
 
-        // 🔥 [v137.0] 計算分頁信息
-        const maxAnswersPerPage = 5;
-        const startIndex = this.allAnswersPageIndex * maxAnswersPerPage;
-        const endIndex = Math.min(startIndex + maxAnswersPerPage, allAnswers.length);
-        const answersToShow = allAnswers.slice(startIndex, endIndex);
-        const totalAnswerPages = Math.ceil(allAnswers.length / maxAnswersPerPage);
-
-        console.log('🔥 [v137.0] 分頁信息:', {
-            currentPage: this.allAnswersPageIndex + 1,
-            totalPages: totalAnswerPages,
-            startIndex: startIndex,
-            endIndex: endIndex,
-            answersToShowCount: answersToShow.length
-        });
-
-        // 🔥 [v137.0] 創建答案列表視圖
-        const width = this.scale.width;
-        const height = this.scale.height;
-
-        // 創建半透明背景（遮罩）
-        const overlay = this.add.rectangle(
-            width / 2,
-            height / 2,
-            width,
-            height,
-            0x000000,
-            0.7
-        );
-        overlay.setDepth(6000);
-        overlay.setScrollFactor(0);
-
-        // 創建答案頁面容器
-        const pageWidth = Math.min(800, width * 0.9);
-        const pageHeight = Math.min(600, height * 0.9);
-        const page = this.add.container(width / 2, height / 2);
-        page.setDepth(6001);
-        page.setScrollFactor(0);
-
-        // 頁面背景
-        const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0xffffff);
-        pageBg.setStrokeStyle(4, 0x000000);
-        page.add(pageBg);
-
-        // 標題：Correct Answers
-        const title = this.add.text(0, -pageHeight / 2 + 40, 'Correct Answers', {
-            fontSize: '32px',
-            color: '#000000',
-            fontFamily: 'Arial',
-            fontStyle: 'bold'
-        });
-        title.setOrigin(0.5);
-        page.add(title);
-
-        // 顯示答案列表
-        const answerStartY = -pageHeight / 2 + 100;
-        const answerSpacing = 80;
-
-        // 顯示答案
-        const cardWidth = 300;
-        const cardX = -pageWidth / 2 + cardWidth / 2 + 30;
-        answersToShow.forEach((answer, index) => {
-            const y = answerStartY + index * answerSpacing;
-            this.createAnswerCardForAllAnswers(page, cardX, y, answer);
-        });
-
-        // 🔥 [v137.0] 添加分頁信息文本
-        const pageInfoText = this.add.text(0, pageHeight / 2 - 100,
-            `Page ${this.allAnswersPageIndex + 1} / ${totalAnswerPages}`, {
-            fontSize: '16px',
-            color: '#666666',
-            fontFamily: 'Arial'
-        });
-        pageInfoText.setOrigin(0.5);
-        page.add(pageInfoText);
-
-        // 底部按鈕區域
-        const buttonY = pageHeight / 2 - 60;
-
-        // 🔥 [v137.0] 上一頁按鈕
-        if (this.allAnswersPageIndex > 0) {
-            this.createAnswerPageButtonForAllAnswers(page, -250, buttonY, '← Prev', () => {
-                console.log('🎮 [v137.0] 點擊上一頁按鈕');
-                this.allAnswersPageIndex--;
-                this.hideAllAnswersPage();
-                this.showAllCorrectAnswers();
+                // 根據佈局模式，找到對應的中文卡片位置
+                if (this.layout === 'mixed') {
+                    // 混合佈局：找到對應的中文框
+                    const rightCard = this.rightCards.find(rc => rc.getData('pairId') === pairId);
+                    if (rightCard) {
+                        // 移動英文卡片到中文框的位置
+                        this.tweens.add({
+                            targets: card,
+                            x: rightCard.x,
+                            y: rightCard.y,
+                            duration: 500,
+                            ease: 'Power2.inOut'
+                        });
+                        console.log('🎮 [v137.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+                    }
+                } else {
+                    // 分離佈局：根據 pairId 找到對應的右側卡片
+                    const rightCard = this.rightCards.find(rc => rc.getData('pairId') === pairId);
+                    if (rightCard) {
+                        // 移動英文卡片到右側卡片的位置
+                        this.tweens.add({
+                            targets: card,
+                            x: rightCard.x,
+                            y: rightCard.y,
+                            duration: 500,
+                            ease: 'Power2.inOut'
+                        });
+                        console.log('🎮 [v137.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+                    }
+                }
             });
         }
-
-        // Back 按鈕
-        this.createAnswerPageButtonForAllAnswers(page, 0, buttonY, 'Back', () => {
-            console.log('🎮 [v137.0] 點擊 Back 按鈕');
-            this.allAnswersPageIndex = 0;
-            this.hideAllAnswersPage();
-            this.showGameCompleteModal();
-        });
-
-        // 🔥 [v137.0] 下一頁按鈕
-        if (this.allAnswersPageIndex < totalAnswerPages - 1) {
-            this.createAnswerPageButtonForAllAnswers(page, 250, buttonY, 'Next →', () => {
-                console.log('🎮 [v137.0] 點擊下一頁按鈕');
-                this.allAnswersPageIndex++;
-                this.hideAllAnswersPage();
-                this.showAllCorrectAnswers();
-            });
-        }
-
-        // 保存頁面引用
-        this.allAnswersPage = { overlay, page };
-        console.log('🔥 [v137.0] ========== showAllCorrectAnswers 結束 ==========');
-    }
-
-    // 🔥 [v137.0] 隱藏所有答案頁面
-    hideAllAnswersPage() {
-        if (this.allAnswersPage) {
-            this.allAnswersPage.overlay.destroy();
-            this.allAnswersPage.page.destroy();
-            this.allAnswersPage = null;
-        }
-    }
-
-    // 🔥 [v137.0] 創建答案卡片（用於所有答案視圖）
-    createAnswerCardForAllAnswers(container, x, y, answer) {
-        const cardWidth = 300;
-        const cardHeight = 60;
-        const chineseX = x + cardWidth / 2 + 20;
-
-        // 顯示正確答案
-        const displayText = answer.correctAnswer;
-        const bgColor = this.getCardColorForAllAnswers(answer.leftPairId);
-        const markColor = '#4caf50';
-        const markText = '✓';
-
-        // 創建卡片背景
-        const cardBg = this.add.rectangle(x, y, cardWidth, cardHeight, bgColor);
-        cardBg.setStrokeStyle(2, 0x000000);
-        container.add(cardBg);
-
-        // 創建卡片文字
-        const cardText = this.add.text(x, y, displayText, {
-            fontSize: '24px',
-            color: '#ffffff',
-            fontFamily: 'Arial',
-            fontStyle: 'bold'
-        });
-        cardText.setOrigin(0.5);
-        container.add(cardText);
-
-        // 創建標記（勾勾）
-        const mark = this.add.text(x + cardWidth / 2 - 20, y - cardHeight / 2 + 10, markText, {
-            fontSize: '48px',
-            color: markColor,
-            fontFamily: 'Arial',
-            fontStyle: 'bold'
-        });
-        mark.setOrigin(0.5);
-        container.add(mark);
-
-        // 創建中文文字（顯示用戶選擇的中文）
-        const chineseText = this.add.text(chineseX, y, answer.leftText, {
-            fontSize: '28px',
-            color: '#000000',
-            fontFamily: 'Arial',
-            fontStyle: 'normal'
-        });
-        chineseText.setOrigin(0, 0.5);
-        container.add(chineseText);
-    }
-
-    // 🔥 [v137.0] 獲取卡片顏色（根據 pairId）
-    getCardColorForAllAnswers(pairId) {
-        const colors = [
-            0x4a9eff, // 藍色
-            0xff4a4a, // 紅色
-            0xffa500, // 橙色
-            0x4caf50, // 綠色
-            0x9c27b0, // 紫色
-            0xffeb3b, // 黃色
-            0x00bcd4, // 青色
-            0xff9800  // 深橙色
-        ];
-        return colors[(pairId - 1) % colors.length];
-    }
-
-    // 🔥 [v137.0] 創建答案頁面按鈕（用於所有答案視圖）
-    createAnswerPageButtonForAllAnswers(container, x, y, text, callback) {
-        const buttonWidth = 250;
-        const buttonHeight = 45;
-
-        // 按鈕背景
-        const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0xffffff);
-        buttonBg.setStrokeStyle(2, 0x000000);
-        buttonBg.setInteractive({ useHandCursor: true });
-        container.add(buttonBg);
-
-        // 按鈕文字
-        const buttonText = this.add.text(x, y, text, {
-            fontSize: '20px',
-            color: '#000000',
-            fontFamily: 'Arial',
-            fontStyle: 'bold'
-        });
-        buttonText.setOrigin(0.5);
-        container.add(buttonText);
-
-        // 點擊事件
-        buttonBg.on('pointerdown', callback);
-
-        // 懸停效果
-        buttonBg.on('pointerover', () => {
-            buttonBg.setFillStyle(0xf0f0f0);
-        });
-
-        buttonBg.on('pointerout', () => {
-            buttonBg.setFillStyle(0xffffff);
-        });
     }
 
 
