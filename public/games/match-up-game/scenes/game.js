@@ -5646,28 +5646,26 @@ class GameScene extends Phaser.Scene {
                 enablePagination: this.enablePagination
             });
 
-            if (this.autoProceed) {
-                // 自動進入下一頁
-                console.log('🔥 [v119.0] ✅ autoProceed=true：將在 2 秒後自動進入下一頁');
-                console.log('📄 [v96.0] 非最後一頁：延遲 2 秒後自動進入下一頁');
-                this.time.delayedCall(2000, () => {
-                    console.log('🔥 [v119.0] ⏰ 2 秒延遲完成，準備進入下一頁');
-                    console.log('📄 [v96.0] 2 秒延遲後，進入下一頁');
-                    console.log('🔥 [v119.0] 調用 goToNextPage()，頁面轉換: ' + this.currentPage + ' → ' + (this.currentPage + 1));
-                    this.goToNextPage();
-                });
-            } else {
-                // 顯示分頁導航按鈕
-                console.log('🔥 [v119.0] ✅ autoProceed=false：將在 2 秒後顯示分頁導航按鈕');
-                console.log('📄 [v117.0] 非最後一頁且 autoProceed=false：顯示分頁導航按鈕');
-                this.time.delayedCall(2000, () => {
-                    console.log('🔥 [v119.0] ⏰ 2 秒延遲完成，準備顯示分頁導航按鈕');
-                    console.log('📄 [v117.0] 2 秒延遲後，顯示分頁導航按鈕');
-                    console.log('🔥 [v119.0] 調用 showPaginationButtons()，當前頁面: ' + (this.currentPage + 1) + '/' + this.totalPages);
-                    this.showPaginationButtons();
-                });
-            }
-            console.log('🔥 [v119.0] ========== showMatchSummary 頁面轉換邏輯結束 ==========');
+            // 🔥 [v122.0] 無論 autoProceed 是否為 true，都顯示分頁選擇器
+            console.log('🔥 [v122.0] ✅ 顯示分頁選擇器（無論 autoProceed 設置）');
+            this.time.delayedCall(2000, () => {
+                console.log('🔥 [v122.0] ⏰ 2 秒延遲完成，準備顯示分頁選擇器');
+                console.log('🔥 [v122.0] 調用 showPaginationButtons()，當前頁面: ' + (this.currentPage + 1) + '/' + this.totalPages);
+                this.showPaginationButtons();
+
+                // 如果 autoProceed=true，在顯示分頁選擇器後自動進入下一頁
+                if (this.autoProceed) {
+                    console.log('🔥 [v122.0] ✅ autoProceed=true：將在 3 秒後自動進入下一頁');
+                    this.time.delayedCall(3000, () => {
+                        console.log('🔥 [v122.0] ⏰ 3 秒延遲完成，準備進入下一頁');
+                        console.log('🔥 [v122.0] 調用 goToNextPage()，頁面轉換: ' + this.currentPage + ' → ' + (this.currentPage + 1));
+                        this.goToNextPage();
+                    });
+                } else {
+                    console.log('🔥 [v122.0] ✅ autoProceed=false：用戶可以手動控制分頁');
+                }
+            });
+            console.log('🔥 [v122.0] ========== showMatchSummary 頁面轉換邏輯結束 ==========');
             return;
         }
 
