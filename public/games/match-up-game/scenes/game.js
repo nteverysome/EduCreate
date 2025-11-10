@@ -1269,7 +1269,71 @@ class GameScene extends Phaser.Scene {
                     }
                 }
             } else {
-                console.log('🔥 [v132.0] ❌ matchedPairs 為空或不存在，跳過視覺效果恢復');
+                console.log('🔥 [v132.0] ❌ matchedPairs 為空或不存在，檢查是否可以使用 currentPageAnswers 恢復');
+
+                // 🔥 [v134.0] 新增：如果 matchedPairs 為空但 currentPageAnswers 不為空，使用 currentPageAnswers 恢復視覺效果
+                if (this.currentPageAnswers && this.currentPageAnswers.length > 0) {
+                    console.log('🔥 [v134.0] ✅ 使用 currentPageAnswers 恢復視覺效果');
+                    console.log('🔥 [v134.0] currentPageAnswers 詳情:', {
+                        length: this.currentPageAnswers.length,
+                        answers: this.currentPageAnswers.map(a => ({
+                            pairId: a.pairId || a.leftPairId,
+                            isCorrect: a.isCorrect,
+                            leftText: a.leftText,
+                            rightText: a.rightText
+                        }))
+                    });
+
+                    // 遍歷 currentPageAnswers，根據 isCorrect 屬性顯示勾勾或叉叉
+                    this.currentPageAnswers.forEach((answer, index) => {
+                        const pairId = answer.pairId || answer.leftPairId;
+                        console.log(`🔥 [v134.0] 處理答案 ${index + 1}/${this.currentPageAnswers.length}:`, {
+                            pairId,
+                            isCorrect: answer.isCorrect,
+                            leftText: answer.leftText,
+                            rightText: answer.rightText
+                        });
+
+                        if (this.layout === 'mixed') {
+                            // 混合模式：找到對應的英文卡片
+                            const leftCard = this.leftCards?.find(card => card.getData('pairId') === pairId);
+                            console.log(`🔥 [v134.0] 混合模式 - 查找卡片 pairId: ${pairId}:`, {
+                                found: !!leftCard,
+                                cardX: leftCard ? leftCard.x : null,
+                                cardY: leftCard ? leftCard.y : null
+                            });
+
+                            if (leftCard) {
+                                if (answer.isCorrect) {
+                                    console.log(`✅ [v134.0] 卡片 ${pairId} 顯示勾勾`);
+                                    this.showCorrectAnswer(leftCard, answer.rightText || answer.correctAnswer);
+                                } else {
+                                    console.log(`❌ [v134.0] 卡片 ${pairId} 顯示叉叉`);
+                                    this.showIncorrectAnswer(leftCard, answer.rightText || answer.correctAnswer);
+                                }
+                            }
+                        } else {
+                            // 分離模式：找到對應的右卡片
+                            const rightCard = this.rightCards?.find(card => card.getData('pairId') === pairId);
+                            console.log(`🔥 [v134.0] 分離模式 - 查找卡片 pairId: ${pairId}:`, {
+                                found: !!rightCard,
+                                cardX: rightCard ? rightCard.x : null,
+                                cardY: rightCard ? rightCard.y : null
+                            });
+
+                            if (rightCard) {
+                                if (answer.isCorrect) {
+                                    console.log(`✅ [v134.0] 卡片 ${pairId} 顯示勾勾`);
+                                    this.showCorrectAnswer(rightCard, answer.rightText || answer.correctAnswer);
+                                } else {
+                                    console.log(`❌ [v134.0] 卡片 ${pairId} 顯示叉叉`);
+                                    this.showIncorrectAnswer(rightCard, answer.rightText || answer.correctAnswer);
+                                }
+                            }
+                        }
+                    });
+                    console.log('🔥 [v134.0] ✅ 使用 currentPageAnswers 恢復視覺效果完成');
+                }
             }
 
             // 🔥 [v114.0] 修復：只在有已配對卡片時才恢復標記
