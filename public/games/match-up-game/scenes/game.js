@@ -1121,20 +1121,33 @@ class GameScene extends Phaser.Scene {
             // 🔥 顯示「提交答案」按鈕（遊戲開始時就顯示）
             this.showSubmitButton();
 
-            // 🔥 [v129.0] 恢復當前頁的配對結果（如果有的話）
+            // 🔥 [v130.0] 恢復當前頁的配對結果和答案（如果有的話）
             if (this.allPagesMatchedPairs[this.currentPage]) {
-                console.log('🔥 [v129.0] 恢復當前頁的配對結果:', {
+                console.log('🔥 [v130.0] 恢復當前頁的配對結果和答案:', {
                     currentPage: this.currentPage,
                     savedPairsSize: this.allPagesMatchedPairs[this.currentPage].size,
                     savedPairs: Array.from(this.allPagesMatchedPairs[this.currentPage])
                 });
                 this.matchedPairs = new Set(this.allPagesMatchedPairs[this.currentPage]);
-                console.log('🔥 [v129.0] 已恢復 matchedPairs:', {
+
+                // 🔥 [v130.0] 也恢復當前頁的答案
+                const pageAnswersKey = `page_${this.currentPage}_answers`;
+                if (this[pageAnswersKey]) {
+                    this.currentPageAnswers = [...this[pageAnswersKey]];
+                    console.log('🔥 [v130.0] 已恢復 currentPageAnswers:', {
+                        currentPageAnswersLength: this.currentPageAnswers.length,
+                        currentPageAnswers: this.currentPageAnswers
+                    });
+                } else {
+                    console.log('🔥 [v130.0] 當前頁沒有保存的答案');
+                }
+
+                console.log('🔥 [v130.0] 已恢復 matchedPairs:', {
                     matchedPairsSize: this.matchedPairs.size,
                     matchedPairsContent: Array.from(this.matchedPairs)
                 });
             } else {
-                console.log('🔥 [v129.0] 當前頁沒有保存的配對結果，matchedPairs 保持為空');
+                console.log('🔥 [v130.0] 當前頁沒有保存的配對結果，matchedPairs 保持為空');
             }
 
             // 🔥 [v127.0] 重新創建分頁選擇器（如果有多頁）
@@ -6086,6 +6099,33 @@ class GameScene extends Phaser.Scene {
                 matchedPairsContent: Array.from(this.matchedPairs)
             });
 
+            // 🔥 [v130.0] 在增加 currentPage 之前保存當前頁的配對結果和答案
+            const previousPage = this.currentPage;
+            console.log('🔥 [v130.0] 保存第 ' + (previousPage + 1) + ' 頁的配對結果和答案前:', {
+                previousPage: previousPage,
+                matchedPairsSize: this.matchedPairs.size,
+                currentPageAnswersLength: this.currentPageAnswers.length
+            });
+
+            // 保存配對結果
+            this.allPagesMatchedPairs[previousPage] = new Set(this.matchedPairs);
+
+            // 🔥 [v130.0] 也保存當前頁的答案
+            if (!this.allPagesAnswers) {
+                this.allPagesAnswers = [];
+            }
+            // 保存當前頁的答案（用於返回時恢復）
+            const pageAnswersKey = `page_${previousPage}_answers`;
+            if (!this[pageAnswersKey]) {
+                this[pageAnswersKey] = [...this.currentPageAnswers];
+            }
+
+            console.log('🔥 [v130.0] 已保存第 ' + (previousPage + 1) + ' 頁的配對結果和答案:', {
+                pageIndex: previousPage,
+                savedPairsSize: this.allPagesMatchedPairs[previousPage].size,
+                savedAnswersLength: this.currentPageAnswers.length
+            });
+
             this.currentPage++;
             console.log('📄 進入下一頁:', this.currentPage + 1);
 
@@ -6100,25 +6140,9 @@ class GameScene extends Phaser.Scene {
             this.shuffledPairsCache = null;
             console.log('🔥 [v54.0] 已清除洗牌順序緩存（頁面改變）');
 
-            // 🔥 [v129.0] 保存當前頁的配對結果
-            console.log('🔥 [v129.0] 保存當前頁的配對結果前:', {
-                currentPage: this.currentPage,
-                matchedPairsSize: this.matchedPairs.size,
-                matchedPairsContent: Array.from(this.matchedPairs)
-            });
-            this.allPagesMatchedPairs[this.currentPage] = new Set(this.matchedPairs);
-            console.log('🔥 [v129.0] 已保存當前頁的配對結果:', {
-                pageIndex: this.currentPage,
-                savedPairsSize: this.allPagesMatchedPairs[this.currentPage].size,
-                allPagesMatchedPairs: Object.keys(this.allPagesMatchedPairs).map(key => ({
-                    page: key,
-                    size: this.allPagesMatchedPairs[key].size
-                }))
-            });
-
             // 清空 matchedPairs（準備進入新頁面）
             this.matchedPairs.clear();
-            console.log('🔥 [v129.0] 已清空 matchedPairs（準備進入新頁面）');
+            console.log('🔥 [v130.0] 已清空 matchedPairs（準備進入新頁面）');
 
             // 重新佈局（會重新創建卡片）
             this.updateLayout();
@@ -6137,6 +6161,33 @@ class GameScene extends Phaser.Scene {
                 matchedPairsContent: Array.from(this.matchedPairs)
             });
 
+            // 🔥 [v130.0] 在減少 currentPage 之前保存當前頁的配對結果和答案
+            const previousPage = this.currentPage;
+            console.log('🔥 [v130.0] 保存第 ' + (previousPage + 1) + ' 頁的配對結果和答案前:', {
+                previousPage: previousPage,
+                matchedPairsSize: this.matchedPairs.size,
+                currentPageAnswersLength: this.currentPageAnswers.length
+            });
+
+            // 保存配對結果
+            this.allPagesMatchedPairs[previousPage] = new Set(this.matchedPairs);
+
+            // 🔥 [v130.0] 也保存當前頁的答案
+            if (!this.allPagesAnswers) {
+                this.allPagesAnswers = [];
+            }
+            // 保存當前頁的答案（用於返回時恢復）
+            const pageAnswersKey = `page_${previousPage}_answers`;
+            if (!this[pageAnswersKey]) {
+                this[pageAnswersKey] = [...this.currentPageAnswers];
+            }
+
+            console.log('🔥 [v130.0] 已保存第 ' + (previousPage + 1) + ' 頁的配對結果和答案:', {
+                pageIndex: previousPage,
+                savedPairsSize: this.allPagesMatchedPairs[previousPage].size,
+                savedAnswersLength: this.currentPageAnswers.length
+            });
+
             this.currentPage--;
             console.log('📄 進入上一頁:', this.currentPage + 1);
 
@@ -6151,21 +6202,9 @@ class GameScene extends Phaser.Scene {
             this.shuffledPairsCache = null;
             console.log('🔥 [v117.0] 已清除洗牌順序緩存（頁面改變）');
 
-            // 🔥 [v129.0] 保存當前頁的配對結果
-            console.log('🔥 [v129.0] 保存當前頁的配對結果前:', {
-                currentPage: this.currentPage,
-                matchedPairsSize: this.matchedPairs.size,
-                matchedPairsContent: Array.from(this.matchedPairs)
-            });
-            this.allPagesMatchedPairs[this.currentPage] = new Set(this.matchedPairs);
-            console.log('🔥 [v129.0] 已保存當前頁的配對結果:', {
-                pageIndex: this.currentPage,
-                savedPairsSize: this.allPagesMatchedPairs[this.currentPage].size
-            });
-
             // 清空 matchedPairs（準備進入上一頁）
             this.matchedPairs.clear();
-            console.log('🔥 [v129.0] 已清空 matchedPairs（準備進入上一頁）');
+            console.log('🔥 [v130.0] 已清空 matchedPairs（準備進入上一頁）');
 
             // 重新佈局（會重新創建卡片）
             this.updateLayout();
