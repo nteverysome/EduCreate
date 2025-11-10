@@ -1121,9 +1121,17 @@ class GameScene extends Phaser.Scene {
             // 🔥 顯示「提交答案」按鈕（遊戲開始時就顯示）
             this.showSubmitButton();
 
-            // 🔥 [v130.0] 恢復當前頁的配對結果和答案（如果有的話）
-            if (this.allPagesMatchedPairs[this.currentPage]) {
-                console.log('🔥 [v130.0] 恢復當前頁的配對結果和答案:', {
+            // 🔥 [v132.0] 恢復當前頁的配對結果和答案（如果有的話）
+            console.log('🔥 [v132.0] ========== updateLayout 恢復邏輯開始 ==========');
+            console.log('🔥 [v132.0] 當前頁面:', {
+                currentPage: this.currentPage,
+                totalPages: this.totalPages,
+                allPagesMatchedPairsKeys: Object.keys(this.allPagesMatchedPairs || {})
+            });
+
+            if (this.allPagesMatchedPairs && this.allPagesMatchedPairs[this.currentPage]) {
+                console.log('🔥 [v132.0] ✅ 找到保存的配對結果！');
+                console.log('🔥 [v132.0] 恢復當前頁的配對結果和答案:', {
                     currentPage: this.currentPage,
                     savedPairsSize: this.allPagesMatchedPairs[this.currentPage].size,
                     savedPairs: Array.from(this.allPagesMatchedPairs[this.currentPage])
@@ -1132,27 +1140,45 @@ class GameScene extends Phaser.Scene {
 
                 // 🔥 [v130.0] 也恢復當前頁的答案
                 const pageAnswersKey = `page_${this.currentPage}_answers`;
+                console.log('🔥 [v132.0] 查找答案鍵:', pageAnswersKey);
+                console.log('🔥 [v132.0] 所有可用的答案鍵:', Object.keys(this).filter(k => k.startsWith('page_')));
+
                 if (this[pageAnswersKey]) {
                     this.currentPageAnswers = [...this[pageAnswersKey]];
-                    console.log('🔥 [v130.0] 已恢復 currentPageAnswers:', {
+                    console.log('🔥 [v132.0] ✅ 已恢復 currentPageAnswers:', {
                         currentPageAnswersLength: this.currentPageAnswers.length,
-                        currentPageAnswers: this.currentPageAnswers
+                        firstAnswer: this.currentPageAnswers[0],
+                        allAnswers: this.currentPageAnswers
                     });
                 } else {
-                    console.log('🔥 [v130.0] 當前頁沒有保存的答案');
+                    console.log('🔥 [v132.0] ❌ 當前頁沒有保存的答案');
+                    this.currentPageAnswers = [];
                 }
 
-                console.log('🔥 [v130.0] 已恢復 matchedPairs:', {
+                console.log('🔥 [v132.0] 已恢復 matchedPairs:', {
                     matchedPairsSize: this.matchedPairs.size,
                     matchedPairsContent: Array.from(this.matchedPairs)
                 });
 
-                // 🔥 [v130.0] 恢復視覺效果（勾勾和叉叉）
-                console.log('🔥 [v130.0] 調用 restoreMatchedPairsVisuals() 恢復視覺效果');
+                // 🔥 [v131.0] 恢復視覺效果（勾勾和叉叉）
+                console.log('🔥 [v132.0] 準備調用 restoreMatchedPairsVisuals()');
+                console.log('🔥 [v132.0] 調用前的狀態:', {
+                    layout: this.layout,
+                    leftCardsCount: this.leftCards ? this.leftCards.length : 0,
+                    rightCardsCount: this.rightCards ? this.rightCards.length : 0,
+                    matchedPairsSize: this.matchedPairs.size,
+                    currentPageAnswersLength: this.currentPageAnswers.length
+                });
                 this.restoreMatchedPairsVisuals();
+                console.log('🔥 [v132.0] ✅ restoreMatchedPairsVisuals() 調用完成');
             } else {
-                console.log('🔥 [v130.0] 當前頁沒有保存的配對結果，matchedPairs 保持為空');
+                console.log('🔥 [v132.0] ❌ 當前頁沒有保存的配對結果，matchedPairs 保持為空');
+                console.log('🔥 [v132.0] allPagesMatchedPairs 狀態:', {
+                    exists: !!this.allPagesMatchedPairs,
+                    keys: this.allPagesMatchedPairs ? Object.keys(this.allPagesMatchedPairs) : []
+                });
             }
+            console.log('🔥 [v132.0] ========== updateLayout 恢復邏輯結束 ==========');
 
             // 🔥 [v127.0] 重新創建分頁選擇器（如果有多頁）
             if (this.enablePagination && this.totalPages > 1) {
@@ -1199,18 +1225,36 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 v53.0: 恢復已配對卡片的視覺效果
     // 🔥 [v104.0] 修復：重新調整勾勾和叉叉的位置（當卡片大小改變時）
+    // 🔥 [v132.0] 添加詳細調試信息
     restoreMatchedPairsVisuals() {
         try {
-            console.log('🔥 [v53.0] 恢復已配對卡片視覺效果');
+            console.log('🔥 [v132.0] ========== restoreMatchedPairsVisuals 開始 ==========');
+            console.log('🔥 [v132.0] 輸入參數檢查:', {
+                hasMatchedPairs: !!this.matchedPairs,
+                matchedPairsSize: this.matchedPairs ? this.matchedPairs.size : 0,
+                hasLeftCards: !!this.leftCards,
+                leftCardsCount: this.leftCards ? this.leftCards.length : 0,
+                hasRightCards: !!this.rightCards,
+                rightCardsCount: this.rightCards ? this.rightCards.length : 0,
+                layout: this.layout,
+                currentPageAnswersLength: this.currentPageAnswers ? this.currentPageAnswers.length : 0
+            });
 
             // 🔥 [v106.0] 修復：即使 matchedPairs 為空，也要重新創建勾勾和叉叉
             // 先恢復已配對卡片的視覺效果（如果有的話）
             if (this.matchedPairs && this.matchedPairs.size > 0) {
+                console.log('🔥 [v132.0] ✅ matchedPairs 不為空，開始恢復視覺效果');
                 // 遍歷所有已配對的卡片 ID
                 for (const pairId of this.matchedPairs) {
+                    console.log(`🔥 [v132.0] 處理 pairId: ${pairId}`);
                     // 查找對應的卡片
                     const leftCard = this.leftCards?.find(card => card.getData('pairId') === pairId);
                     const rightCard = this.rightCards?.find(card => card.getData('pairId') === pairId);
+
+                    console.log(`🔥 [v132.0] 卡片查找結果 (pairId: ${pairId}):`, {
+                        hasLeftCard: !!leftCard,
+                        hasRightCard: !!rightCard
+                    });
 
                     if (leftCard && rightCard) {
                         // 應用已配對的視覺效果
@@ -1221,51 +1265,66 @@ class GameScene extends Phaser.Scene {
                         leftCard.setInteractive(false);
                         rightCard.setInteractive(false);
 
-                        console.log(`✅ [v53.0] 已恢復卡片 ${pairId} 的視覺效果`);
+                        console.log(`✅ [v132.0] 已恢復卡片 ${pairId} 的視覺效果`);
                     }
                 }
             } else {
-                console.log('ℹ️ [v53.0] 沒有已配對的卡片需要恢復');
+                console.log('🔥 [v132.0] ❌ matchedPairs 為空或不存在，跳過視覺效果恢復');
             }
 
             // 🔥 [v114.0] 修復：只在有已配對卡片時才恢復標記
             // 這樣可以確保：
             // 1. 進入新頁面時，沒有標記（因為 matchedPairs 被清空了）
             // 2. 窗口大小改變時，已配對的標記會被恢復
-            console.log('🔥 [v114.0] 檢查是否需要恢復標記');
+            console.log('🔥 [v132.0] 檢查是否需要恢復標記');
 
             if (this.matchedPairs && this.matchedPairs.size > 0) {
-                console.log('🔥 [v114.0] 根據 matchedPairs 重新創建標記');
+                console.log('🔥 [v132.0] ✅ 根據 matchedPairs 重新創建標記');
 
                 // 獲取當前頁的詞彙數據
                 const startIndex = this.currentPage * this.itemsPerPage;
                 const endIndex = Math.min(startIndex + this.itemsPerPage, this.pairs.length);
                 const currentPagePairs = this.pairs.slice(startIndex, endIndex);
 
-                console.log('🔥 [v114.0] 當前頁面信息:', {
+                console.log('🔥 [v132.0] 當前頁面信息:', {
                     currentPage: this.currentPage,
                     startIndex,
                     endIndex,
                     currentPagePairsLength: currentPagePairs.length,
-                    matchedPairsSize: this.matchedPairs.size
+                    matchedPairsSize: this.matchedPairs.size,
+                    layout: this.layout
                 });
 
                 // 在混合模式中，根據當前卡片位置來創建標記
                 if (this.layout === 'mixed') {
+                    console.log('🔥 [v132.0] 進入混合模式標記創建邏輯');
                     currentPagePairs.forEach((pair, pairIndex) => {
                         // 在混合模式中，每個詞彙對應一個框位置（pairIndex）
                         const frameIndex = pairIndex;
 
+                        console.log(`🔥 [v132.0] 處理詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
+                            pairId: pair.id,
+                            chinese: pair.chinese,
+                            frameIndex
+                        });
+
                         // 找到當前在這個框位置的英文卡片
-                        const currentCardInFrame = this.leftCards?.find(card =>
-                            card.getData('currentFrameIndex') === frameIndex
-                        );
+                        const currentCardInFrame = this.leftCards?.find(card => {
+                            const cardFrameIndex = card.getData('currentFrameIndex');
+                            console.log(`🔥 [v132.0] 檢查卡片 - pairId: ${card.getData('pairId')}, currentFrameIndex: ${cardFrameIndex}, 目標frameIndex: ${frameIndex}`);
+                            return cardFrameIndex === frameIndex;
+                        });
+
+                        console.log(`🔥 [v132.0] 框位置 ${frameIndex} 的卡片查找結果:`, {
+                            found: !!currentCardInFrame,
+                            pairId: currentCardInFrame ? currentCardInFrame.getData('pairId') : null
+                        });
 
                         if (currentCardInFrame) {
                             const currentCardPairId = currentCardInFrame.getData('pairId');
                             const isCorrect = pair.id === currentCardPairId;
 
-                            console.log(`🔥 [v114.0] 混合模式 - 詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
+                            console.log(`🔥 [v132.0] 混合模式 - 詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
                                 pairId: pair.id,
                                 chinese: pair.chinese,
                                 expectedEnglish: pair.english,
@@ -1275,14 +1334,14 @@ class GameScene extends Phaser.Scene {
 
                             // 根據配對結果創建勾勾或叉叉
                             if (isCorrect) {
-                                console.log(`✅ [v114.0] 卡片 ${currentCardPairId} 顯示勾勾`);
+                                console.log(`✅ [v132.0] 卡片 ${currentCardPairId} 顯示勾勾`);
                                 this.showCorrectAnswer(currentCardInFrame, pair.english);
                             } else {
-                                console.log(`❌ [v114.0] 卡片 ${currentCardPairId} 顯示叉叉`);
+                                console.log(`❌ [v132.0] 卡片 ${currentCardPairId} 顯示叉叉`);
                                 this.showIncorrectAnswer(currentCardInFrame, pair.english);
                             }
                         } else {
-                            console.log(`⚠️ [v114.0] 框位置 ${frameIndex} 沒有卡片`);
+                            console.log(`⚠️ [v132.0] 框位置 ${frameIndex} 沒有卡片`);
                         }
                     });
                 } else {
