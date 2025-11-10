@@ -3777,36 +3777,62 @@ class GameScene extends Phaser.Scene {
             invalidAudioUrl: pairData ? pairData.invalidAudioUrl : null
         });
 
-        // 🔥 根據內容組合決定佈局
-        // 情況 A：圖片 + 文字 + 語音（1,1,1）
-        // 情況 B：只有語音（0,0,1）
-        // 情況 C：只有文字（0,1,0）
-        // 情況 D：圖片 + 文字（1,1,0）
-        // 情況 E：語音 + 文字（0,1,1）
+        // 🔥 [v140.0] 優先級系統 - 根據內容優先級決定佈局
+        // 優先級 1：有文字 → 一定顯示文字
+        // 優先級 2：沒有文字但有圖片 → 顯示圖片
+        // 優先級 3：沒有文字和圖片但有語音 → 顯示語音
 
-        if (hasImage && hasText && hasAudio) {
-            // 情況 A：圖片 + 文字 + 語音按鈕
-            this.createCardLayoutA(container, background, width, height, text, imageUrl, safeAudioUrl, pairId);
-        } else if (!hasImage && !hasText && hasAudio) {
-            // 情況 B：只有語音按鈕
+        console.log(`📊 [v140.0] 優先級系統 [${pairId}]:`, {
+            優先級1_有文字: hasText,
+            優先級2_有圖片: hasImage,
+            優先級3_有語音: hasAudio
+        });
+
+        // 🔥 優先級 1：有文字 → 一定顯示文字
+        if (hasText) {
+            console.log(`✅ [v140.0] 優先級 1 - 顯示文字 [${pairId}]`);
+
+            if (hasImage && hasAudio) {
+                // 文字 + 圖片 + 語音
+                console.log(`  └─ 佈局 A：文字 + 圖片 + 語音`);
+                this.createCardLayoutA(container, background, width, height, text, imageUrl, safeAudioUrl, pairId);
+            } else if (hasImage && !hasAudio) {
+                // 文字 + 圖片（無語音）
+                console.log(`  └─ 佈局 D：文字 + 圖片`);
+                this.createCardLayoutD(container, background, width, height, text, imageUrl, pairId);
+            } else if (!hasImage && hasAudio) {
+                // 文字 + 語音（無圖片）
+                console.log(`  └─ 佈局 E：文字 + 語音`);
+                this.createCardLayoutE(container, background, width, height, text, safeAudioUrl, pairId);
+            } else {
+                // 只有文字
+                console.log(`  └─ 佈局 C：只有文字`);
+                this.createCardLayoutC(container, background, width, height, text);
+            }
+        }
+        // 🔥 優先級 2：沒有文字但有圖片 → 顯示圖片
+        else if (hasImage) {
+            console.log(`✅ [v140.0] 優先級 2 - 顯示圖片 [${pairId}]`);
+
+            if (hasAudio) {
+                // 圖片 + 語音（無文字）
+                console.log(`  └─ 佈局 A：圖片 + 語音`);
+                this.createCardLayoutA(container, background, width, height, '', imageUrl, safeAudioUrl, pairId);
+            } else {
+                // 只有圖片
+                console.log(`  └─ 佈局 F：只有圖片`);
+                this.createCardLayoutF(container, background, width, height, imageUrl, pairId);
+            }
+        }
+        // 🔥 優先級 3：沒有文字和圖片但有語音 → 顯示語音
+        else if (hasAudio) {
+            console.log(`✅ [v140.0] 優先級 3 - 顯示語音 [${pairId}]`);
+            console.log(`  └─ 佈局 B：只有語音`);
             this.createCardLayoutB(container, background, width, height, safeAudioUrl, pairId);
-        } else if (!hasImage && hasText && !hasAudio) {
-            // 情況 C：只有文字（已實現）
-            this.createCardLayoutC(container, background, width, height, text);
-        } else if (hasImage && hasText && !hasAudio) {
-            // 情況 D：圖片 + 文字（已實現）
-            this.createCardLayoutD(container, background, width, height, text, imageUrl, pairId);
-        } else if (!hasImage && hasText && hasAudio) {
-            // 情況 E：語音 + 文字
-            this.createCardLayoutE(container, background, width, height, text, safeAudioUrl, pairId);
-        } else if (hasImage && !hasText && !hasAudio) {
-            // 只有圖片（無文字、無語音）- 1:1 比例顯示
-            this.createCardLayoutF(container, background, width, height, imageUrl, pairId);
-        } else if (hasImage && !hasText && hasAudio) {
-            // 圖片 + 語音（無文字）
-            this.createCardLayoutA(container, background, width, height, '', imageUrl, safeAudioUrl, pairId);
-        } else {
-            // 其他情況：只顯示背景
+        }
+        // 🔥 都沒有：只顯示背景
+        else {
+            console.log(`⚠️ [v140.0] 沒有任何內容 [${pairId}] - 只顯示背景`);
             container.add([background]);
         }
 
@@ -7234,12 +7260,15 @@ class GameScene extends Phaser.Scene {
         checkMark.setOrigin(0.5);
         checkMark.setDepth(100);
 
-        // 定位到卡片右上角
-        const background = card.list[0]; // 卡片背景
+        // 🔥 [v139.0] 改進：使用 getData 獲取背景，而非 list[0]
+        const background = card.getData('background');
         if (background) {
-            const markX = card.x + background.width / 2 - 32;
-            const markY = card.y - background.height / 2 + 32;
+            // 相對於卡片容器的位置
+            const markX = background.width / 2 - 32;
+            const markY = -background.height / 2 + 32;
             checkMark.setPosition(markX, markY);
+            // 🔥 [v139.0] 改進：將標記添加到卡片容器中
+            card.add(checkMark);
         }
 
         card.checkMark = checkMark;
@@ -7262,12 +7291,15 @@ class GameScene extends Phaser.Scene {
         xMark.setOrigin(0.5);
         xMark.setDepth(100);
 
-        // 定位到卡片右上角
-        const background = card.list[0]; // 卡片背景
+        // 🔥 [v139.0] 改進：使用 getData 獲取背景，而非 list[0]
+        const background = card.getData('background');
         if (background) {
-            const markX = card.x + background.width / 2 - 32;
-            const markY = card.y - background.height / 2 + 32;
+            // 相對於卡片容器的位置
+            const markX = background.width / 2 - 32;
+            const markY = -background.height / 2 + 32;
             xMark.setPosition(markX, markY);
+            // 🔥 [v139.0] 改進：將標記添加到卡片容器中
+            card.add(xMark);
         }
 
         card.xMark = xMark;
@@ -7292,12 +7324,15 @@ class GameScene extends Phaser.Scene {
         pairingText.setOrigin(0.5);
         pairingText.setDepth(99);
 
-        // 定位到卡片下方
-        const background = card.list[0]; // 卡片背景
+        // 🔥 [v139.0] 改進：使用 getData 獲取背景，而非 list[0]
+        const background = card.getData('background');
         if (background) {
-            const textX = card.x;
-            const textY = card.y + background.height / 2 + 30;
+            // 相對於卡片容器的位置
+            const textX = 0;
+            const textY = background.height / 2 + 30;
             pairingText.setPosition(textX, textY);
+            // 🔥 [v139.0] 改進：將文字添加到卡片容器中
+            card.add(pairingText);
         }
 
         card.correctPairingText = pairingText;
