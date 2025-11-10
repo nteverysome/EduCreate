@@ -7173,7 +7173,8 @@ class GameScene extends Phaser.Scene {
         if (this.allPagesAnswers && this.allPagesAnswers.length > 0) {
             this.allPagesAnswers.forEach((answer) => {
                 // 根據 leftPairId 找到對應的左卡片（英文卡片）
-                const leftCard = this.leftCards.find(card => card.pairId === answer.leftPairId);
+                // 🔥 [v141.0] 修復：使用 getData('pairId') 而不是 card.pairId
+                const leftCard = this.leftCards.find(card => card.getData('pairId') === answer.leftPairId);
 
                 if (leftCard) {
                     // 在英文卡片上顯示勾勾或叉叉
