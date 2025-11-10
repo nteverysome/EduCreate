@@ -32,6 +32,9 @@ class GameScene extends Phaser.Scene {
         this.enablePagination = false;  // 是否啟用分頁
         this.pageIndicatorText = null;  // 分頁指示器文字對象
 
+        // 🔥 [v126.0] 分頁選擇器組件（保持在屏幕上）
+        this.pageSelectorComponents = null;  // 分頁選擇器的所有組件
+
         // 🔥 計時器功能
         this.timerType = 'none';  // 計時器類型：none, countUp, countDown
         this.timerMinutes = 5;    // 倒數計時分鐘數
@@ -6347,9 +6350,9 @@ class GameScene extends Phaser.Scene {
         increaseText.setDepth(3001);
         increaseText.setScrollFactor(0);
 
-        // 🔥 [v123.0] 減少按鈕點擊事件
+        // 🔥 [v126.0] 減少按鈕點擊事件 - 不銷毀選擇器，只更新頁面
         decreaseBtn.on('pointerdown', () => {
-            console.log('🔥 [v123.0] 🖱️ 減少按鈕被點擊');
+            console.log('🔥 [v126.0] 🖱️ 減少按鈕被點擊');
             if (canGoPrevious) {
                 // 添加按鈕按下動畫
                 this.tweens.add({
@@ -6361,14 +6364,14 @@ class GameScene extends Phaser.Scene {
                 });
 
                 this.goToPreviousPage();
-                // 銷毀選擇器
-                this.destroyPageSelector(selectorBg, selectorText, decreaseBtn, decreaseText, increaseBtn, increaseText);
+                // 🔥 [v126.0] 不銷毀選擇器，只更新文字
+                this.updatePageSelectorText();
             }
         });
 
-        // 🔥 [v123.0] 增加按鈕點擊事件
+        // 🔥 [v126.0] 增加按鈕點擊事件 - 不銷毀選擇器，只更新頁面
         increaseBtn.on('pointerdown', () => {
-            console.log('🔥 [v123.0] 🖱️ 增加按鈕被點擊');
+            console.log('🔥 [v126.0] 🖱️ 增加按鈕被點擊');
             if (canGoNext) {
                 // 添加按鈕按下動畫
                 this.tweens.add({
@@ -6380,8 +6383,8 @@ class GameScene extends Phaser.Scene {
                 });
 
                 this.goToNextPage();
-                // 銷毀選擇器
-                this.destroyPageSelector(selectorBg, selectorText, decreaseBtn, decreaseText, increaseBtn, increaseText);
+                // 🔥 [v126.0] 不銷毀選擇器，只更新文字
+                this.updatePageSelectorText();
             }
         });
 
@@ -6439,6 +6442,17 @@ class GameScene extends Phaser.Scene {
             }
         });
 
+        // 🔥 [v126.0] 存儲分頁選擇器組件，以便後續更新
+        this.pageSelectorComponents = {
+            bg: selectorBg,
+            text: selectorText,
+            decreaseBtn: decreaseBtn,
+            decreaseText: decreaseText,
+            increaseBtn: increaseBtn,
+            increaseText: increaseText
+        };
+        console.log('🔥 [v126.0] ✅ 分頁選擇器組件已存儲');
+
         // 🔥 [v123.0] 添加淡入動畫
         selectorBg.setAlpha(0);
         selectorText.setAlpha(0);
@@ -6454,14 +6468,14 @@ class GameScene extends Phaser.Scene {
             ease: 'Quad.easeOut'
         });
 
-        console.log('📄 [v123.0] 分頁選擇器已創建:', {
+        console.log('📄 [v126.0] 分頁選擇器已創建並保持在屏幕上:', {
             x, y,
             currentPage: this.currentPage + 1,
             totalPages: this.totalPages,
             canGoPrevious,
             canGoNext
         });
-        console.log('🔥 [v123.0] ========== createPageSelector 結束 ==========');
+        console.log('🔥 [v126.0] ========== createPageSelector 結束 ==========');
     }
 
     // 🔥 [v123.0] 銷毀分頁選擇器的輔助方法
@@ -6480,6 +6494,40 @@ class GameScene extends Phaser.Scene {
                 increaseBtn.destroy();
                 increaseText.destroy();
             }
+        });
+    }
+
+    // 🔥 [v126.0] 更新分頁選擇器文字（保持選擇器在屏幕上）
+    updatePageSelectorText() {
+        if (!this.pageSelectorComponents) {
+            console.log('🔥 [v126.0] ⚠️ 分頁選擇器組件不存在，無法更新');
+            return;
+        }
+
+        const { text, decreaseBtn, increaseBtn } = this.pageSelectorComponents;
+
+        // 更新頁碼文字
+        text.setText(`${this.currentPage + 1}/${this.totalPages}`);
+        console.log('🔥 [v126.0] ✅ 分頁選擇器文字已更新:', {
+            currentPage: this.currentPage + 1,
+            totalPages: this.totalPages
+        });
+
+        // 更新按鈕的可用狀態
+        const canGoPrevious = this.currentPage > 0;
+        const canGoNext = this.currentPage < this.totalPages - 1;
+
+        // 更新減少按鈕
+        decreaseBtn.setFillStyle(canGoPrevious ? 0x2196F3 : 0xcccccc);
+        decreaseBtn.setInteractive({ useHandCursor: canGoPrevious ? true : false });
+
+        // 更新增加按鈕
+        increaseBtn.setFillStyle(canGoNext ? 0x4caf50 : 0xcccccc);
+        increaseBtn.setInteractive({ useHandCursor: canGoNext ? true : false });
+
+        console.log('🔥 [v126.0] ✅ 分頁選擇器按鈕狀態已更新:', {
+            canGoPrevious,
+            canGoNext
         });
     }
 
