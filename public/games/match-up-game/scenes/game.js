@@ -6154,91 +6154,48 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 [v117.0] 顯示分頁導航按鈕（上一頁和下一頁）
     showPaginationButtons() {
-        // 🔥 [v119.0] 詳細的調適訊息 - 分頁按鈕顯示開始
-        console.log('🔥 [v119.0] ========== showPaginationButtons 開始 ==========');
-        console.log('🔥 [v119.0] 當前頁面狀態:', {
+        // 🔥 [v124.0] 簡化分頁設計 - 只保留分頁選擇器，移除左右按鈕
+        console.log('🔥 [v124.0] ========== showPaginationButtons 開始 ==========');
+        console.log('🔥 [v124.0] 當前頁面狀態:', {
             currentPage: this.currentPage,
             pageDisplayName: `第 ${this.currentPage + 1} 頁`,
             totalPages: this.totalPages,
             enablePagination: this.enablePagination
         });
 
+        // 🔥 [v124.0] 如果只有 1 頁，完全隱藏分頁 UI
+        if (this.totalPages <= 1) {
+            console.log('🔥 [v124.0] ℹ️ 只有 1 頁，隱藏分頁 UI');
+            return;
+        }
+
         const width = this.scale.width;
         const height = this.scale.height;
 
-        // 按鈕尺寸
-        const buttonWidth = 120;
-        const buttonHeight = 50;
-        const spacing = 30;  // 按鈕之間的間距
+        // 🔥 [v124.0] 分頁選擇器位置（頂部中央）
+        const buttonY = 20;
+        const selectorWidth = 80;
+        const selectorHeight = 50;
+        const selectorX = width / 2;
 
-        // 🔥 [v120.0] 按鈕位置改為頂部，與分頁指示器水平對齐
-        const buttonY = 20;  // 與分頁指示器相同的 Y 位置
-
-        // 🔥 [v121.0] 計算分頁選擇器的寬度
-        const selectorWidth = 80;  // 分頁選擇器寬度
-        const selectorHeight = 50;  // 分頁選擇器高度
-        const selectorX = width / 2;  // 分頁選擇器在中間
-
-        // 上一頁按鈕位置（左側）
-        const prevButtonX = selectorX - selectorWidth / 2 - buttonWidth / 2 - spacing / 2;
-        // 下一頁按鈕位置（右側）
-        const nextButtonX = selectorX + selectorWidth / 2 + buttonWidth / 2 + spacing / 2;
-
-        console.log('🔥 [v119.0] 按鈕位置計算:', {
+        console.log('🔥 [v124.0] 分頁選擇器位置:', {
             screenWidth: width,
             screenHeight: height,
-            prevButtonX: prevButtonX,
-            nextButtonX: nextButtonX,
             selectorX: selectorX,
             buttonY: buttonY,
-            buttonWidth: buttonWidth,
-            buttonHeight: buttonHeight,
-            selectorWidth: selectorWidth
+            selectorWidth: selectorWidth,
+            selectorHeight: selectorHeight
         });
 
-        // 🔥 只在不是第一頁時顯示上一頁按鈕
-        if (this.currentPage > 0) {
-            console.log('🔥 [v119.0] ✅ 創建上一頁按鈕（當前頁 > 0）');
-            this.createPaginationButton(
-                prevButtonX,
-                buttonY,
-                buttonWidth,
-                buttonHeight,
-                '⬅️ 上一頁',
-                () => this.goToPreviousPage(),
-                0x2196F3  // 藍色
-            );
-        } else {
-            console.log('🔥 [v119.0] ❌ 不創建上一頁按鈕（當前頁 = 0，是第一頁）');
-        }
-
-        // 🔥 [v121.0] 在中間創建分頁選擇器
-        console.log('🔥 [v121.0] ✅ 創建分頁選擇器');
+        // 🔥 [v124.0] 只創建分頁選擇器，移除左右按鈕
+        console.log('🔥 [v124.0] ✅ 創建分頁選擇器（簡化設計）');
         this.createPageSelector(selectorX, buttonY, selectorWidth, selectorHeight);
 
-        // 🔥 只在不是最後一頁時顯示下一頁按鈕
-        if (this.currentPage < this.totalPages - 1) {
-            console.log('🔥 [v119.0] ✅ 創建下一頁按鈕（當前頁 < 最後一頁）');
-            this.createPaginationButton(
-                nextButtonX,
-                buttonY,
-                buttonWidth,
-                buttonHeight,
-                '下一頁 ➡️',
-                () => this.goToNextPage(),
-                0x4caf50  // 綠色
-            );
-        } else {
-            console.log('🔥 [v119.0] ❌ 不創建下一頁按鈕（當前頁 = 最後一頁）');
-        }
-
-        console.log('📄 [v117.0] 分頁導航按鈕已顯示', {
+        console.log('📄 [v124.0] 分頁選擇器已顯示', {
             currentPage: this.currentPage + 1,
-            totalPages: this.totalPages,
-            showPrevious: this.currentPage > 0,
-            showNext: this.currentPage < this.totalPages - 1
+            totalPages: this.totalPages
         });
-        console.log('🔥 [v119.0] ========== showPaginationButtons 結束 ==========');
+        console.log('🔥 [v124.0] ========== showPaginationButtons 結束 ==========');
     }
 
     // 🔥 [v117.0] 創建單個分頁按鈕
