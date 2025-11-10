@@ -6323,15 +6323,12 @@ class GameScene extends Phaser.Scene {
         const canGoPrevious = this.currentPage > 0;
         const canGoNext = this.currentPage < this.totalPages - 1;
 
-        // 🔥 [v123.0] 創建選擇器背景 - 使用漸變色和陰影
+        // 🔥 [v123.0] 創建選擇器背景 - 使用漸變色
         const selectorBg = this.add.rectangle(x, y + height / 2, width, height, 0xffffff);
         selectorBg.setStrokeStyle(2, 0x2196F3);  // 藍色邊框
         selectorBg.setDepth(3000);
         selectorBg.setScrollFactor(0);
-
-        // 添加陰影效果
-        selectorBg.setShadow(0, 2, 0x000000, 0.3, 0, 0, true);
-        console.log('🔥 [v123.0] ✅ 選擇器背景已創建（帶陰影）');
+        console.log('🔥 [v123.0] ✅ 選擇器背景已創建');
 
         // 🔥 [v123.0] 創建選擇器文字（顯示當前頁碼）- 更大更清晰
         const selectorText = this.add.text(x, y + height / 2, `${this.currentPage + 1}/${this.totalPages}`, {
@@ -6351,7 +6348,6 @@ class GameScene extends Phaser.Scene {
         decreaseBtn.setInteractive({ useHandCursor: canGoPrevious ? true : false });
         decreaseBtn.setDepth(3000);
         decreaseBtn.setScrollFactor(0);
-        decreaseBtn.setShadow(0, 1, 0x000000, 0.2, 0, 0, true);
         console.log('🔥 [v123.0] ✅ 減少按鈕已創建');
 
         const decreaseText = this.add.text(x - width / 2 + 15, y + height / 2, '−', {
@@ -6370,7 +6366,6 @@ class GameScene extends Phaser.Scene {
         increaseBtn.setInteractive({ useHandCursor: canGoNext ? true : false });
         increaseBtn.setDepth(3000);
         increaseBtn.setScrollFactor(0);
-        increaseBtn.setShadow(0, 1, 0x000000, 0.2, 0, 0, true);
         console.log('🔥 [v123.0] ✅ 增加按鈕已創建');
 
         const increaseText = this.add.text(x + width / 2 - 15, y + height / 2, '+', {
