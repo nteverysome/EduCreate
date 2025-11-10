@@ -1146,6 +1146,10 @@ class GameScene extends Phaser.Scene {
                     matchedPairsSize: this.matchedPairs.size,
                     matchedPairsContent: Array.from(this.matchedPairs)
                 });
+
+                // 🔥 [v130.0] 恢復視覺效果（勾勾和叉叉）
+                console.log('🔥 [v130.0] 調用 restoreMatchedPairsVisuals() 恢復視覺效果');
+                this.restoreMatchedPairsVisuals();
             } else {
                 console.log('🔥 [v130.0] 當前頁沒有保存的配對結果，matchedPairs 保持為空');
             }
