@@ -6,7 +6,7 @@
     "env": {
       "NODE_ENV": "production",
       "SKIP_ENV_VALIDATION": "true",
-      "FORCE_REBUILD": "2025-11-10-v134-use-currentPageAnswers-for-visual-restoration"
+      "FORCE_REBUILD": "2025-11-10-v135-add-pagination-to-answer-pages"
     }
   },
   "functions": {
