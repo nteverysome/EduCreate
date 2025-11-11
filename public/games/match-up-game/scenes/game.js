@@ -1657,10 +1657,36 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 創建左右分離佈局 - 單列（3-5個匹配數）
     // 🔥 [Phase 4 重構] 使用統一的配置系統
+    // 🔥 [v25.0] 集成 SeparatedResponsiveConfig 進行完整的響應式計算
     createLeftRightSingleColumn(currentPagePairs, width, height) {
         console.log('📐 創建左右分離佈局 - 自適應佈局（3-20個匹配數）');
 
         const itemCount = currentPagePairs.length;
+
+        // 🔥 [v25.0] 使用 SeparatedResponsiveConfig 進行響應式計算
+        let responsiveConfig = null;
+        let responsiveLayout = null;
+        let responsivePositions = null;
+
+        if (typeof SeparatedResponsiveConfig !== 'undefined') {
+            try {
+                responsiveConfig = new SeparatedResponsiveConfig(width, height, itemCount);
+                responsiveLayout = responsiveConfig.calculateLayout();
+                responsivePositions = responsiveConfig.calculateContainerPositions();
+
+                console.log('✅ [v25.0] SeparatedResponsiveConfig 已加載', {
+                    breakpoint: responsiveLayout.breakpoint,
+                    cols: responsiveLayout.cols,
+                    cardSize: responsiveLayout.cardSize,
+                    fontSize: responsiveLayout.fontSize
+                });
+            } catch (error) {
+                console.warn('⚠️ [v25.0] SeparatedResponsiveConfig 計算失敗:', error);
+                responsiveConfig = null;
+            }
+        } else {
+            console.warn('⚠️ [v25.0] SeparatedResponsiveConfig 未加載，使用備用方案');
+        }
 
         // 🔥 [Phase 4] 使用 DeviceDetector 進行統一的設備檢測
         // 備用方案：如果 DeviceDetector 不可用，使用內聯邏輯
@@ -1716,49 +1742,61 @@ class GameScene extends Phaser.Scene {
             };
         }
 
-        // 🔥 [Dynamic Sizing] 使用新的動態卡片大小計算方法
-        // 根據容器大小和卡片數量自動計算最優卡片大小
-        const optimalSize = calculator.calculateOptimalCardSize(itemCount);
-        const cardWidth = optimalSize.width;
-        const cardHeight = optimalSize.height;
+        // 🔥 [v25.0] 使用 SeparatedResponsiveConfig 計算卡片大小
+        let cardWidth, cardHeight, fontSize;
 
-        // 🎨 [v1.0] 備用方案：如果 optimalSize 沒有 contentSizes，使用內聯計算
-        let contentSizes = optimalSize.contentSizes;
-        if (!contentSizes) {
-            // 備用計算 contentSizes
-            contentSizes = {
-                audioButton: {
-                    size: Math.max(Math.floor(cardHeight * 0.25), 16),
-                    minSize: 16,
-                    maxSize: 40
-                },
-                image: {
-                    width: Math.max(Math.floor(cardWidth * 0.35), 30),
-                    height: Math.max(Math.floor(cardHeight * 0.5), 25),
-                    minWidth: 30,
-                    maxWidth: 100,
-                    minHeight: 25,
-                    maxHeight: 80
-                },
-                text: {
-                    fontSize: Math.max(Math.floor(cardHeight * 0.22), 12),
-                    minFontSize: 12,
-                    maxFontSize: 28,
-                    lineHeight: Math.max(Math.floor(cardHeight * 0.28), 14)
-                },
-                spacing: {
-                    padding: Math.max(Math.floor(cardHeight * 0.1), 5),
-                    gap: Math.max(Math.floor(cardHeight * 0.08), 4)
-                }
-            };
-            console.log('⚠️ 使用備用 contentSizes 計算（SeparatedLayoutCalculator 版本過舊）');
+        if (responsiveLayout) {
+            // 使用響應式配置計算的卡片大小
+            cardWidth = responsiveLayout.cardSize.width;
+            cardHeight = responsiveLayout.cardSize.height;
+            fontSize = responsiveLayout.fontSize;
+
+            console.log('✅ [v25.0] 使用響應式卡片大小:', {
+                cardWidth: cardWidth.toFixed(0),
+                cardHeight: cardHeight.toFixed(0),
+                fontSize: fontSize
+            });
+        } else {
+            // 備用方案：使用 SeparatedLayoutCalculator
+            const optimalSize = calculator.calculateOptimalCardSize(itemCount);
+            cardWidth = optimalSize.width;
+            cardHeight = optimalSize.height;
+            fontSize = Math.max(Math.floor(cardHeight * 0.22), 12);
+
+            console.log('⚠️ 使用備用卡片大小計算（SeparatedResponsiveConfig 不可用）');
         }
+
+        // 🎨 [v25.0] 計算內容大小
+        let contentSizes = {
+            audioButton: {
+                size: Math.max(Math.floor(cardHeight * 0.25), 16),
+                minSize: 16,
+                maxSize: 40
+            },
+            image: {
+                width: Math.max(Math.floor(cardWidth * 0.35), 30),
+                height: Math.max(Math.floor(cardHeight * 0.5), 25),
+                minWidth: 30,
+                maxWidth: 100,
+                minHeight: 25,
+                maxHeight: 80
+            },
+            text: {
+                fontSize: fontSize,
+                minFontSize: 12,
+                maxFontSize: 28,
+                lineHeight: Math.max(Math.floor(cardHeight * 0.28), 14)
+            },
+            spacing: {
+                padding: Math.max(Math.floor(cardHeight * 0.1), 5),
+                gap: Math.max(Math.floor(cardHeight * 0.08), 4)
+            }
+        };
 
         console.log(`📊 動態卡片大小計算:`, {
             itemCount,
-            cardSize: { width: cardWidth, height: cardHeight },
-            layout: optimalSize.layout,
-            utilization: optimalSize.debug ? optimalSize.debug.utilization : 'N/A'
+            cardSize: { width: cardWidth.toFixed(0), height: cardHeight.toFixed(0) },
+            fontSize: fontSize
         });
 
         console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)} (itemCount=${itemCount})`);
@@ -1776,11 +1814,31 @@ class GameScene extends Phaser.Scene {
         // 🎨 [v1.0] 保存 contentSizes 到實例變量，供其他方法使用
         this.currentContentSizes = contentSizes;
 
-        // 🔥 [v14.0] 使用實例變量中保存的位置信息（包含計時器間距）
-        const leftX = this.currentLeftX;
-        const rightX = this.currentRightX;
-        const leftStartY = this.currentLeftStartY;
-        const rightStartY = this.currentRightStartY;
+        // 🔥 [v25.0] 使用 SeparatedResponsiveConfig 計算的容器位置
+        let leftX, rightX, leftStartY, rightStartY;
+
+        if (responsivePositions) {
+            // 使用響應式配置計算的位置
+            leftX = responsivePositions.left.x;
+            rightX = responsivePositions.right.x;
+            leftStartY = responsiveLayout.margins.top;
+            rightStartY = responsiveLayout.margins.top;
+
+            console.log('✅ [v25.0] 使用響應式容器位置:', {
+                leftX: leftX.toFixed(0),
+                rightX: rightX.toFixed(0),
+                leftStartY: leftStartY.toFixed(0),
+                rightStartY: rightStartY.toFixed(0)
+            });
+        } else {
+            // 備用方案：使用實例變量中保存的位置信息（包含計時器間距）
+            leftX = this.currentLeftX;
+            rightX = this.currentRightX;
+            leftStartY = this.currentLeftStartY;
+            rightStartY = this.currentRightStartY;
+
+            console.log('⚠️ 使用備用容器位置（SeparatedResponsiveConfig 不可用）');
+        }
 
         console.log(`📍 位置: 左X=${leftX.toFixed(0)}, 右X=${rightX.toFixed(0)}, 左Y=${leftStartY.toFixed(0)}, 右Y=${rightStartY.toFixed(0)}`);
 
@@ -1837,6 +1895,19 @@ class GameScene extends Phaser.Scene {
             const card = this.createRightCard(pos.x, pos.y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl, 'right');  // 🔥 文字在框右邊
             this.rightCards.push(card);
         });
+
+        // 🔥 [v25.0] 集成總結
+        if (responsiveConfig) {
+            console.log('✅ [v25.0] SeparatedResponsiveConfig 集成完成', {
+                breakpoint: responsiveLayout.breakpoint,
+                cardSize: `${cardWidth.toFixed(0)}×${cardHeight.toFixed(0)}px`,
+                fontSize: `${fontSize}px`,
+                containerPositions: {
+                    leftX: leftX.toFixed(0),
+                    rightX: rightX.toFixed(0)
+                }
+            });
+        }
 
         console.log('✅ 左右分離佈局創建完成 (自適應佈局)');
     }
