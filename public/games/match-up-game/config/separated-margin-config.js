@@ -14,7 +14,7 @@ if (typeof SeparatedMarginConfig === 'undefined') {
         CONTAINER: {
             TOP_RATIO: 0.083,       // 8.3% 頂部邊距（約 80px，計時器 50px + 30px 間距）
             BOTTOM_RATIO: 0.10,     // 10% 底部邊距
-            SIDE_PIXEL: 150         // 🔥 [v9.0] 150px 左右邊距（三等分佈局）
+            SIDE_PIXEL: 80          // 🔥 [v28.0] 80px 左右邊距（調整為更小的邊距，讓卡片有更多空間）
         },
 
         // 外框級別邊距（像素值）
