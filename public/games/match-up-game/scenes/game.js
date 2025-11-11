@@ -1819,8 +1819,7 @@ class GameScene extends Phaser.Scene {
         let leftX, rightX, leftStartY, rightStartY;
 
         // 🔥 [v29.0] 從 SeparatedMarginConfig 讀取邊距配置
-        const SeparatedMarginConfig = require('../config/separated-margin-config.js');
-        const sideMargin = SeparatedMarginConfig.CONTAINER.SIDE_PIXEL;  // 從配置文件讀取邊距
+        const sideMargin = window.SeparatedMarginConfig?.CONFIG?.CONTAINER?.SIDE_PIXEL || 80;  // 從配置文件讀取邊距，默認 80px
 
         // 🔥 [v29.0] 計算三等分佈局的容器距離
         const containerWidth = width * 0.3333;  // 每個容器的寬度（33%）
