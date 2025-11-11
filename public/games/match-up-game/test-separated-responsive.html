@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分離模式響應式配置測試</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .test-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .test-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .test-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .test-card .info {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .test-card .info strong {
+            color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .output {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        .output-line {
+            margin: 2px 0;
+        }
+
+        .success {
+            color: #00ff00;
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        .warning {
+            color: #ffd93d;
+        }
+
+        .info {
+            color: #6bcfff;
+        }
+
+        .breakpoint-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .breakpoint-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .breakpoint-box .name {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .breakpoint-box .range {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .breakpoint-box .cols {
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .breakpoint-box .margin {
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .footer {
+            background: #f0f0f0;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            button {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 分離模式響應式配置測試</h1>
+            <p>完整的本地測試套件 - 驗證所有響應式功能</p>
+        </div>
+
+        <div class="content">
+            <!-- 斷點系統測試 -->
+            <div class="section">
+                <h2>📱 斷點系統測試</h2>
+                <p style="margin-bottom: 15px; color: #666;">當前屏幕: <strong id="current-screen">加載中...</strong></p>
+                
+                <div class="breakpoint-demo" id="breakpoint-demo"></div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="testBreakpoints()">🧪 測試斷點檢測</button>
+                    <button class="btn-secondary" onclick="simulateDevice('mobile')">📱 模擬手機</button>
+                    <button class="btn-secondary" onclick="simulateDevice('tablet')">📱 模擬平板</button>
+                    <button class="btn-secondary" onclick="simulateDevice('desktop')">🖥️ 模擬桌面</button>
+                </div>
+
+                <div class="output" id="breakpoint-output"></div>
+            </div>
+
+            <!-- 卡片大小計算測試 -->
+            <div class="section">
+                <h2>📐 卡片大小計算測試</h2>
+                <p style="margin-bottom: 15px; color: #666;">測試不同解析度下的卡片大小計算</p>
+                
+                <div class="test-grid" id="card-size-grid"></div>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="testCardSizes()">🧪 測試卡片大小</button>
+                    <button class="btn-secondary" onclick="clearOutput('card-output')">清空輸出</button>
+                </div>
+
+                <div class="output" id="card-output"></div>
+            </div>
+
+            <!-- 字體大小計算測試 -->
+            <div class="section">
+                <h2>🔤 字體大小計算測試</h2>
+                <p style="margin-bottom: 15px; color: #666;">測試響應式字體大小計算</p>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="testFontSizes()">🧪 測試字體大小</button>
+                    <button class="btn-secondary" onclick="testChineseFontSizes()">🧪 測試中文字體</button>
+                    <button class="btn-secondary" onclick="clearOutput('font-output')">清空輸出</button>
+                </div>
+
+                <div class="output" id="font-output"></div>
+            </div>
+
+            <!-- 完整布局測試 -->
+            <div class="section">
+                <h2>🎨 完整布局計算測試</h2>
+                <p style="margin-bottom: 15px; color: #666;">測試完整的響應式布局計算</p>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="testCompleteLayout()">🧪 測試完整布局</button>
+                    <button class="btn-secondary" onclick="testRealWorldScenarios()">🌍 測試真實場景</button>
+                    <button class="btn-secondary" onclick="clearOutput('layout-output')">清空輸出</button>
+                </div>
+
+                <div class="output" id="layout-output"></div>
+            </div>
+
+            <!-- 統計信息 -->
+            <div class="section">
+                <h2>📊 統計信息</h2>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="label">核心類</div>
+                        <div class="value">6</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">斷點</div>
+                        <div class="value">4</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">測試套件</div>
+                        <div class="value">6</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">集成示例</div>
+                        <div class="value">7</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 快速操作 -->
+            <div class="section">
+                <h2>⚡ 快速操作</h2>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="runAllTests()">▶️ 運行所有測試</button>
+                    <button class="btn-primary" onclick="runIntegrationExamples()">▶️ 運行集成示例</button>
+                    <button class="btn-secondary" onclick="clearAllOutputs()">🗑️ 清空所有輸出</button>
+                    <button class="btn-secondary" onclick="openConsole()">🔧 打開控制台</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>✅ 分離模式響應式配置系統 v1.0 | 提交: c79a76e | 2024-11-11</p>
+        </div>
+    </div>
+
+    <!-- 加載配置文件 -->
+    <script src="/games/match-up-game/config/separated-responsive-config.js"></script>
+    <script src="/games/match-up-game/config/separated-responsive-config.test.js"></script>
+    <script src="/games/match-up-game/config/separated-responsive-integration-example.js"></script>
+
+    <script>
+        // 輸出函數
+        function log(outputId, message, type = 'info') {
+            const output = document.getElementById(outputId);
+            const line = document.createElement('div');
+            line.className = `output-line ${type}`;
+            line.textContent = message;
+            output.appendChild(line);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput(outputId) {
+            document.getElementById(outputId).innerHTML = '';
+        }
+
+        function clearAllOutputs() {
+            clearOutput('breakpoint-output');
+            clearOutput('card-output');
+            clearOutput('font-output');
+            clearOutput('layout-output');
+        }
+
+        // 更新當前屏幕信息
+        function updateCurrentScreen() {
+            const config = new SeparatedResponsiveConfig(window.innerWidth, window.innerHeight);
+            document.getElementById('current-screen').textContent = 
+                `${window.innerWidth}×${window.innerHeight}px (${config.breakpoint})`;
+        }
+
+        // 生成斷點演示
+        function generateBreakpointDemo() {
+            const bpSystem = new BreakpointSystem();
+            const demo = document.getElementById('breakpoint-demo');
+            demo.innerHTML = '';
+
+            Object.entries(bpSystem.breakpoints).forEach(([key, bp]) => {
+                const box = document.createElement('div');
+                box.className = 'breakpoint-box';
+                box.innerHTML = `
+                    <div class="name">${bp.name.toUpperCase()}</div>
+                    <div class="range">${bp.min}-${bp.max === Infinity ? '∞' : bp.max}px</div>
+                    <div class="cols">列數: ${bp.cols}</div>
+                    <div class="margin">邊距: ${bp.sideMargin}px</div>
+                `;
+                demo.appendChild(box);
+            });
+        }
+
+        // 測試函數
+        function testBreakpoints() {
+            clearOutput('breakpoint-output');
+            log('breakpoint-output', '🧪 開始測試斷點檢測...', 'info');
+            
+            const testCases = [
+                { width: 375, height: 667, name: '手機直向' },
+                { width: 812, height: 375, name: '手機橫向' },
+                { width: 1024, height: 768, name: '平板' },
+                { width: 1440, height: 900, name: '桌面' }
+            ];
+
+            testCases.forEach(tc => {
+                const config = new SeparatedResponsiveConfig(tc.width, tc.height);
+                const result = `✅ ${tc.name} (${tc.width}×${tc.height}) → ${config.breakpoint}`;
+                log('breakpoint-output', result, 'success');
+            });
+
+            log('breakpoint-output', '\n✅ 斷點檢測測試完成！', 'success');
+        }
+
+        function testCardSizes() {
+            clearOutput('card-output');
+            log('card-output', '🧪 開始測試卡片大小計算...', 'info');
+            
+            const testCases = [
+                { width: 375, height: 667, itemCount: 5 },
+                { width: 768, height: 1024, itemCount: 10 },
+                { width: 1024, height: 768, itemCount: 8 },
+                { width: 1440, height: 900, itemCount: 12 }
+            ];
+
+            testCases.forEach(tc => {
+                const config = new SeparatedResponsiveConfig(tc.width, tc.height, tc.itemCount);
+                const layout = config.calculateLayout();
+                log('card-output', `📦 ${tc.width}×${tc.height} (${tc.itemCount}項):`, 'info');
+                log('card-output', `   卡片: ${layout.cardSize.width.toFixed(0)}×${layout.cardSize.height.toFixed(0)}px`, 'success');
+                log('card-output', `   列數: ${layout.cols}, 字體: ${layout.fontSize}px\n`, 'success');
+            });
+
+            log('card-output', '✅ 卡片大小計算測試完成！', 'success');
+        }
+
+        function testFontSizes() {
+            clearOutput('font-output');
+            log('font-output', '🧪 開始測試字體大小計算...', 'info');
+            
+            const widths = [375, 480, 768, 1024, 1440];
+            log('font-output', '基於寬度的字體大小:', 'info');
+            
+            widths.forEach(w => {
+                const fontSize = FontSizeCalculator.calculateByWidth(w);
+                log('font-output', `  寬度 ${w}px → 字體 ${fontSize}px`, 'success');
+            });
+
+            log('font-output', '\n✅ 字體大小計算測試完成！', 'success');
+        }
+
+        function testChineseFontSizes() {
+            clearOutput('font-output');
+            log('font-output', '🧪 開始測試中文字體大小計算...', 'info');
+            
+            const cardHeights = [100, 150, 200, 250];
+            const textLengths = [1, 2, 3, 4, 5, 6];
+
+            cardHeights.forEach(h => {
+                log('font-output', `卡片高度 ${h}px:`, 'info');
+                const sizes = textLengths.map(len => 
+                    FontSizeCalculator.calculateChineseFontSize(h, len)
+                ).join(', ');
+                log('font-output', `  ${sizes}px\n`, 'success');
+            });
+
+            log('font-output', '✅ 中文字體大小計算測試完成！', 'success');
+        }
+
+        function testCompleteLayout() {
+            clearOutput('layout-output');
+            log('layout-output', '🧪 開始測試完整布局計算...', 'info');
+            
+            const scenarios = [
+                { width: 375, height: 667, itemCount: 5, name: '手機直向' },
+                { width: 812, height: 375, itemCount: 8, name: '手機橫向' },
+                { width: 1024, height: 768, itemCount: 10, name: '平板' },
+                { width: 1440, height: 900, itemCount: 12, name: '桌面' }
+            ];
+
+            scenarios.forEach(s => {
+                const config = new SeparatedResponsiveConfig(s.width, s.height, s.itemCount);
+                const layout = config.calculateLayout();
+                const positions = config.calculateContainerPositions();
+
+                log('layout-output', `\n${s.name} (${s.width}×${s.height}):`, 'info');
+                log('layout-output', `  斷點: ${layout.breakpoint}`, 'success');
+                log('layout-output', `  卡片: ${layout.cardSize.width.toFixed(0)}×${layout.cardSize.height.toFixed(0)}px`, 'success');
+                log('layout-output', `  列數: ${layout.cols}`, 'success');
+                log('layout-output', `  字體: ${layout.fontSize}px`, 'success');
+                log('layout-output', `  左容器 X: ${positions.left.x.toFixed(0)}px`, 'success');
+                log('layout-output', `  右容器 X: ${positions.right.x.toFixed(0)}px`, 'success');
+            });
+
+            log('layout-output', '\n✅ 完整布局計算測試完成！', 'success');
+        }
+
+        function testRealWorldScenarios() {
+            clearOutput('layout-output');
+            log('layout-output', '🌍 開始測試真實場景...', 'info');
+            
+            // 場景 1: iPhone 12
+            log('layout-output', '\n📱 場景 1: iPhone 12 (390×844)', 'info');
+            const mobile = new SeparatedResponsiveConfig(390, 844, 8);
+            const mobileLayout = mobile.calculateLayout();
+            log('layout-output', `  斷點: ${mobile.breakpoint}`, 'success');
+            log('layout-output', `  卡片: ${mobileLayout.cardSize.width.toFixed(0)}×${mobileLayout.cardSize.height.toFixed(0)}px`, 'success');
+
+            // 場景 2: iPad
+            log('layout-output', '\n📱 場景 2: iPad (1024×1366)', 'info');
+            const tablet = new SeparatedResponsiveConfig(1024, 1366, 12);
+            const tabletLayout = tablet.calculateLayout();
+            log('layout-output', `  斷點: ${tablet.breakpoint}`, 'success');
+            log('layout-output', `  卡片: ${tabletLayout.cardSize.width.toFixed(0)}×${tabletLayout.cardSize.height.toFixed(0)}px`, 'success');
+
+            // 場景 3: 桌面
+            log('layout-output', '\n🖥️ 場景 3: 桌面 (1440×900)', 'info');
+            const desktop = new SeparatedResponsiveConfig(1440, 900, 15);
+            const desktopLayout = desktop.calculateLayout();
+            log('layout-output', `  斷點: ${desktop.breakpoint}`, 'success');
+            log('layout-output', `  卡片: ${desktopLayout.cardSize.width.toFixed(0)}×${desktopLayout.cardSize.height.toFixed(0)}px`, 'success');
+
+            log('layout-output', '\n✅ 真實場景測試完成！', 'success');
+        }
+
+        function simulateDevice(device) {
+            const sizes = {
+                mobile: { width: 375, height: 667 },
+                tablet: { width: 1024, height: 768 },
+                desktop: { width: 1440, height: 900 }
+            };
+
+            const size = sizes[device];
+            const config = new SeparatedResponsiveConfig(size.width, size.height);
+            const layout = config.calculateLayout();
+
+            clearOutput('breakpoint-output');
+            log('breakpoint-output', `📱 模擬設備: ${device.toUpperCase()}`, 'info');
+            log('breakpoint-output', `屏幕大小: ${size.width}×${size.height}px`, 'info');
+            log('breakpoint-output', `斷點: ${config.breakpoint}`, 'success');
+            log('breakpoint-output', `卡片大小: ${layout.cardSize.width.toFixed(0)}×${layout.cardSize.height.toFixed(0)}px`, 'success');
+            log('breakpoint-output', `列數: ${layout.cols}`, 'success');
+            log('breakpoint-output', `字體大小: ${layout.fontSize}px`, 'success');
+            log('breakpoint-output', `邊距: ${JSON.stringify(layout.margins)}`, 'success');
+        }
+
+        function runAllTests() {
+            log('breakpoint-output', '▶️ 運行所有測試...', 'info');
+            testBreakpoints();
+            setTimeout(() => testCardSizes(), 500);
+            setTimeout(() => testFontSizes(), 1000);
+            setTimeout(() => testCompleteLayout(), 1500);
+        }
+
+        function runIntegrationExamples() {
+            clearAllOutputs();
+            log('layout-output', '▶️ 運行集成示例...', 'info');
+            
+            if (typeof SeparatedResponsiveIntegrationExample !== 'undefined') {
+                // 重定向 console.log 到輸出框
+                const originalLog = console.log;
+                console.log = function(...args) {
+                    log('layout-output', args.join(' '), 'info');
+                    originalLog.apply(console, args);
+                };
+
+                SeparatedResponsiveIntegrationExample.runAllExamples();
+
+                console.log = originalLog;
+            } else {
+                log('layout-output', '❌ 集成示例未加載', 'error');
+            }
+        }
+
+        function openConsole() {
+            alert('按 F12 打開開發者工具控制台查看詳細輸出');
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            updateCurrentScreen();
+            generateBreakpointDemo();
+            log('breakpoint-output', '✅ 測試環境已準備就緒！', 'success');
+        });
+
+        // 監聽窗口大小變化
+        window.addEventListener('resize', () => {
+            updateCurrentScreen();
+        });
+    </script>
+</body>
+</html>
+
