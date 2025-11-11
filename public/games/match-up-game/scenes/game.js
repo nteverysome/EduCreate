@@ -1818,9 +1818,12 @@ class GameScene extends Phaser.Scene {
         // 分離模式佈局：左33% | 中33% | 右33%
         let leftX, rightX, leftStartY, rightStartY;
 
-        // 🔥 [v28.0] 計算三等分佈局的容器距離
+        // 🔥 [v29.0] 從 SeparatedMarginConfig 讀取邊距配置
+        const SeparatedMarginConfig = require('../config/separated-margin-config.js');
+        const sideMargin = SeparatedMarginConfig.CONTAINER.SIDE_PIXEL;  // 從配置文件讀取邊距
+
+        // 🔥 [v29.0] 計算三等分佈局的容器距離
         const containerWidth = width * 0.3333;  // 每個容器的寬度（33%）
-        const sideMargin = 150;  // 左右邊距（來自 SeparatedMarginConfig）
         const usableContainerWidth = containerWidth - sideMargin * 2;  // 可用容器寬度
         const middleGap = width * 0.3334;  // 中間空白區寬度（33%）
 
@@ -1830,8 +1833,13 @@ class GameScene extends Phaser.Scene {
         leftStartY = this.currentLeftStartY || (height * 0.15);   // 使用保存的位置或默認值
         rightStartY = this.currentRightStartY || (height * 0.15); // 使用保存的位置或默認值
 
-        console.log('🔥🔥🔥 [v28.0] 分離模式三等分佈局已啟用 🔥🔥🔥');
-        console.log('✅ [v28.0] 容器距離計算:', {
+        // 🔥 [v29.0] 調適訊息：分析卡片是否超出容器
+        const cardExceedsContainer = cardWidth > usableContainerWidth;
+        const excessPixels = cardWidth - usableContainerWidth;
+        const containerUtilization = (cardWidth / usableContainerWidth * 100).toFixed(1);
+
+        console.log('🔥🔥🔥 [v29.0] 分離模式三等分佈局已啟用 🔥🔥🔥');
+        console.log('✅ [v29.0] 容器距離計算:', {
             screenWidth: width.toFixed(0),
             containerWidth: containerWidth.toFixed(0),
             sideMargin: sideMargin,
@@ -1840,6 +1848,16 @@ class GameScene extends Phaser.Scene {
             leftX: leftX.toFixed(0),
             rightX: rightX.toFixed(0),
             layoutType: '三等分佈局（左33% | 中33% | 右33%）'
+        });
+
+        // 🔥 [v29.0] 調適訊息：卡片大小分析
+        console.log('🔍 [v29.0] 卡片大小分析:', {
+            cardWidth: cardWidth.toFixed(0),
+            usableContainerWidth: usableContainerWidth.toFixed(0),
+            cardExceedsContainer: cardExceedsContainer ? '❌ 超出容器' : '✅ 在容器內',
+            excessPixels: cardExceedsContainer ? excessPixels.toFixed(0) : '0',
+            containerUtilization: containerUtilization + '%',
+            recommendation: cardExceedsContainer ? '⚠️ 卡片太大，需要調整' : '✅ 卡片大小合適'
         });
 
         console.log(`📍 位置: 左X=${leftX.toFixed(0)}, 右X=${rightX.toFixed(0)}, 左Y=${leftStartY.toFixed(0)}, 右Y=${rightStartY.toFixed(0)}`);
