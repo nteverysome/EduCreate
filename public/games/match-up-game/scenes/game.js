@@ -1742,7 +1742,7 @@ class GameScene extends Phaser.Scene {
             };
         }
 
-        // 🔥 [v25.0] 使用 SeparatedResponsiveConfig 計算卡片大小
+        // 🔥 [v28.0] 使用 SeparatedResponsiveConfig 計算卡片大小
         let cardWidth, cardHeight, fontSize;
 
         if (responsiveLayout) {
@@ -1751,7 +1751,7 @@ class GameScene extends Phaser.Scene {
             cardHeight = responsiveLayout.cardSize.height;
             fontSize = responsiveLayout.fontSize;
 
-            console.log('✅ [v25.0] 使用響應式卡片大小:', {
+            console.log('✅ [v28.0] 使用響應式卡片大小:', {
                 cardWidth: cardWidth.toFixed(0),
                 cardHeight: cardHeight.toFixed(0),
                 fontSize: fontSize
@@ -1814,24 +1814,31 @@ class GameScene extends Phaser.Scene {
         // 🎨 [v1.0] 保存 contentSizes 到實例變量，供其他方法使用
         this.currentContentSizes = contentSizes;
 
-        // 🔥 [v27.0] 分離模式使用特殊的三等分佈局，不使用 SeparatedResponsiveConfig
+        // 🔥 [v28.0] 分離模式使用特殊的三等分佈局，計算容器距離
         // 分離模式佈局：左33% | 中33% | 右33%
-        // 🔥 [v27.0] 改進：禁用 SeparatedResponsiveConfig，使用舊的計算方式
         let leftX, rightX, leftStartY, rightStartY;
 
-        // 🔥 [v27.0] 分離模式使用固定的三等分佈局比例
-        // 不使用 responsivePositions，因為分離模式有特殊的佈局要求
+        // 🔥 [v28.0] 計算三等分佈局的容器距離
+        const containerWidth = width * 0.3333;  // 每個容器的寬度（33%）
+        const sideMargin = 150;  // 左右邊距（來自 SeparatedMarginConfig）
+        const usableContainerWidth = containerWidth - sideMargin * 2;  // 可用容器寬度
+        const middleGap = width * 0.3334;  // 中間空白區寬度（33%）
+
+        // 🔥 [v28.0] 分離模式使用固定的三等分佈局比例
         leftX = width * 0.4;         // 左容器中心（33% 位置）
         rightX = width * 0.75;       // 右容器中心（66% 位置）
         leftStartY = this.currentLeftStartY || (height * 0.15);   // 使用保存的位置或默認值
         rightStartY = this.currentRightStartY || (height * 0.15); // 使用保存的位置或默認值
 
-        console.log('🔥🔥🔥 [v27.0] 分離模式三等分佈局已啟用 🔥🔥🔥');
-        console.log('✅ [v27.0] 使用分離模式三等分佈局:', {
+        console.log('🔥🔥🔥 [v28.0] 分離模式三等分佈局已啟用 🔥🔥🔥');
+        console.log('✅ [v28.0] 容器距離計算:', {
+            screenWidth: width.toFixed(0),
+            containerWidth: containerWidth.toFixed(0),
+            sideMargin: sideMargin,
+            usableContainerWidth: usableContainerWidth.toFixed(0),
+            middleGap: middleGap.toFixed(0),
             leftX: leftX.toFixed(0),
             rightX: rightX.toFixed(0),
-            leftStartY: leftStartY.toFixed(0),
-            rightStartY: rightStartY.toFixed(0),
             layoutType: '三等分佈局（左33% | 中33% | 右33%）'
         });
 
