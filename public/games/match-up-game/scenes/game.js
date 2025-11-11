@@ -1818,10 +1818,10 @@ class GameScene extends Phaser.Scene {
         // 分離模式佈局：左33% | 中33% | 右33%
         let leftX, rightX, leftStartY, rightStartY;
 
-        // 🔥 [v29.0] 從 SeparatedMarginConfig 讀取邊距配置
-        const sideMargin = window.SeparatedMarginConfig?.CONFIG?.CONTAINER?.SIDE_PIXEL || 80;  // 從配置文件讀取邊距，默認 80px
+        // 🔥 [v30.0] 計算三等分佈局的容器距離
+        // 🔥 [v30.0] 邊距配置：80px（從 SeparatedMarginConfig 讀取，或使用默認值）
+        const sideMargin = 80;  // 左右邊距（80px）
 
-        // 🔥 [v29.0] 計算三等分佈局的容器距離
         const containerWidth = width * 0.3333;  // 每個容器的寬度（33%）
         const usableContainerWidth = containerWidth - sideMargin * 2;  // 可用容器寬度
         const middleGap = width * 0.3334;  // 中間空白區寬度（33%）
@@ -1832,13 +1832,13 @@ class GameScene extends Phaser.Scene {
         leftStartY = this.currentLeftStartY || (height * 0.15);   // 使用保存的位置或默認值
         rightStartY = this.currentRightStartY || (height * 0.15); // 使用保存的位置或默認值
 
-        // 🔥 [v29.0] 調適訊息：分析卡片是否超出容器
+        // 🔥 [v30.0] 調適訊息：分析卡片是否超出容器
         const cardExceedsContainer = cardWidth > usableContainerWidth;
         const excessPixels = cardWidth - usableContainerWidth;
         const containerUtilization = (cardWidth / usableContainerWidth * 100).toFixed(1);
 
-        console.log('🔥🔥🔥 [v29.0] 分離模式三等分佈局已啟用 🔥🔥🔥');
-        console.log('✅ [v29.0] 容器距離計算:', {
+        console.log('🔥🔥🔥 [v30.0] 分離模式三等分佈局已啟用 🔥🔥🔥');
+        console.log('✅ [v30.0] 容器距離計算:', {
             screenWidth: width.toFixed(0),
             containerWidth: containerWidth.toFixed(0),
             sideMargin: sideMargin,
@@ -1849,8 +1849,8 @@ class GameScene extends Phaser.Scene {
             layoutType: '三等分佈局（左33% | 中33% | 右33%）'
         });
 
-        // 🔥 [v29.0] 調適訊息：卡片大小分析
-        console.log('🔍 [v29.0] 卡片大小分析:', {
+        // 🔥 [v30.0] 調適訊息：卡片大小分析
+        console.log('🔍 [v30.0] 卡片大小分析:', {
             cardWidth: cardWidth.toFixed(0),
             usableContainerWidth: usableContainerWidth.toFixed(0),
             cardExceedsContainer: cardExceedsContainer ? '❌ 超出容器' : '✅ 在容器內',
