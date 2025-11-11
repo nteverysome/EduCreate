@@ -1562,19 +1562,53 @@ class GameScene extends Phaser.Scene {
 
         console.log('🎮 GameScene: 卡片尺寸', { cardWidth, cardHeight });
 
-        // 響應式位置（使用百分比）
-        const leftX = width * 0.25;        // 左側卡片在 25% 位置
-        const rightX = width * 0.65;       // 右側卡片在 65% 位置
-        const leftStartY = height * 0.25;  // 左側起始位置在 25% 高度
-        const rightStartY = height * 0.22; // 右側起始位置在 22% 高度
+        // 🔥 [v10.0] 改進的響應式位置計算 - 三等分佈局 + 計時器間距
+        // 容器佈局：左33% | 中33% | 右33%
+        // 🔥 [v11.0] 改進：自動計算頂部和底部邊距（與混合模式一致）
 
-        console.log('🎮 GameScene: 卡片位置', { leftX, rightX, leftStartY, rightStartY });
-
-        // 響應式間距
+        // 先計算響應式間距（需要在計算卡片總高度之前）
         const leftSpacing = cardHeight + Math.max(5, height * 0.01);   // 卡片高度 + 5px 或 1% 高度
         const rightSpacing = cardHeight + Math.max(15, height * 0.03); // 卡片高度 + 15px 或 3% 高度
 
         console.log('🎮 GameScene: 卡片間距', { leftSpacing, rightSpacing });
+
+        // 🔥 [v19.0] 計算可用高度和邊距 - 考慮計時器實際高度 - 左右單元往下移動 50px
+        const timerHeight = 50;            // 計時器實際高度（文字 28px + 邊距）
+        const timerGap = 20;               // 計時器下方間距（20px）
+        const additionalTopMargin = 90;    // 額外上方邊距（左右單元往下移動 50px，共 90px）
+        const topButtonArea = timerHeight + timerGap + additionalTopMargin;  // 頂部區域 = 計時器 + 間距 + 額外邊距 = 160px
+        const bottomButtonArea = 60;       // 底部按鈕區域
+        const availableHeight = height - topButtonArea - bottomButtonArea;
+
+        // 計算卡片總高度（用於邊距計算）
+        const totalCardHeight = SeparatedMarginConfig.calculateTotalCardHeight(currentPagePairs.length, cardHeight, leftSpacing);
+
+        // 🔥 [v12.0] 計算頂部偏移（自動居中，考慮計時器高度）
+        const topOffset = SeparatedMarginConfig.calculateTopOffsetForSeparated(availableHeight, totalCardHeight, timerHeight);
+
+        // 🔥 [v23.0] 計算實際起始位置 - leftX 改為 width * 0.4
+        const leftX = width * 0.4;         // 左容器中心（調整為 0.4）
+        const rightX = width * 0.75;       // 右容器中心（保持 0.75）
+        const leftStartY = topButtonArea + topOffset;   // 計時器 + 間距 + 頂部偏移
+        const rightStartY = topButtonArea + topOffset;  // 右側也是相同位置（對齐！）
+        const bottomOffset = topOffset;    // 底部邊距對稱
+
+        // 🔥 [v23.0] 詳細日誌 - leftX 改為 width * 0.4
+        console.log('🎮 GameScene: 卡片位置（v23.0 leftX: 0.4, rightX: 0.75）', {
+            timerHeight: timerHeight.toFixed(0),
+            timerGap: timerGap.toFixed(0),
+            topButtonArea: topButtonArea.toFixed(0),
+            bottomButtonArea: bottomButtonArea.toFixed(0),
+            availableHeight: availableHeight.toFixed(0),
+            totalCardHeight: totalCardHeight.toFixed(0),
+            topOffset: topOffset.toFixed(0),
+            leftStartY: leftStartY.toFixed(0),
+            rightStartY: rightStartY.toFixed(0),
+            bottomOffset: bottomOffset.toFixed(0),
+            containerLayout: 'leftX: 0.4, rightX: 0.75',   // 🔥 [v23.0] leftX 改為 width * 0.4
+            timerGapVerification: `計時器 (0-${timerHeight}) + 間距 (${timerHeight}-${topButtonArea}) = 卡片開始 (${topButtonArea}+${topOffset.toFixed(0)}=${leftStartY.toFixed(0)})`,
+            symmetry: topOffset === bottomOffset ? '✅ 頂部和底部邊距對稱' : '❌ 邊距不對稱'
+        });
 
         // 🔥 根據佈局模式創建卡片
         if (this.layout === 'mixed') {
@@ -1582,6 +1616,12 @@ class GameScene extends Phaser.Scene {
             this.createMixedLayout(currentPagePairs, width, height, cardWidth, cardHeight);
         } else {
             // 分離佈局模式（默認）
+            // 🔥 [v14.0] 保存位置信息到實例變量，供 createLeftRightSingleColumn 使用
+            this.currentLeftX = leftX;
+            this.currentRightX = rightX;
+            this.currentLeftStartY = leftStartY;
+            this.currentRightStartY = rightStartY;
+
             this.createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
                                       cardWidth, cardHeight, leftSpacing, rightSpacing);
         }
@@ -1618,7 +1658,7 @@ class GameScene extends Phaser.Scene {
     // 🔥 創建左右分離佈局 - 單列（3-5個匹配數）
     // 🔥 [Phase 4 重構] 使用統一的配置系統
     createLeftRightSingleColumn(currentPagePairs, width, height) {
-        console.log('📐 創建左右分離佈局 - 單列（3-5個匹配數）');
+        console.log('📐 創建左右分離佈局 - 自適應佈局（3-20個匹配數）');
 
         const itemCount = currentPagePairs.length;
 
@@ -1658,11 +1698,13 @@ class GameScene extends Phaser.Scene {
                     return { width: cardWidth, height: cardHeight };
                 },
                 calculatePositions: () => {
+                    // 🔥 [v7.0] 改進的位置計算 - 充分利用水平空間
+                    // 容器佈局：左25% | 中50% | 右25%
                     return {
-                        leftX: width * 0.25,
-                        rightX: width * 0.65,
+                        leftX: width * 0.125,      // 左容器中心
+                        rightX: width * 0.875,     // 右容器中心
                         leftStartY: height * 0.15,
-                        rightStartY: height * 0.15
+                        rightStartY: height * 0.15 // 對齐！
                     };
                 },
                 calculateSpacing: () => {
@@ -1674,27 +1716,80 @@ class GameScene extends Phaser.Scene {
             };
         }
 
-        // 計算卡片尺寸
-        const cardSize = calculator.calculateCardSize();
-        const cardWidth = cardSize.width;
-        const cardHeight = cardSize.height;
+        // 🔥 [Dynamic Sizing] 使用新的動態卡片大小計算方法
+        // 根據容器大小和卡片數量自動計算最優卡片大小
+        const optimalSize = calculator.calculateOptimalCardSize(itemCount);
+        const cardWidth = optimalSize.width;
+        const cardHeight = optimalSize.height;
 
-        console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)}`);
+        // 🎨 [v1.0] 備用方案：如果 optimalSize 沒有 contentSizes，使用內聯計算
+        let contentSizes = optimalSize.contentSizes;
+        if (!contentSizes) {
+            // 備用計算 contentSizes
+            contentSizes = {
+                audioButton: {
+                    size: Math.max(Math.floor(cardHeight * 0.25), 16),
+                    minSize: 16,
+                    maxSize: 40
+                },
+                image: {
+                    width: Math.max(Math.floor(cardWidth * 0.35), 30),
+                    height: Math.max(Math.floor(cardHeight * 0.5), 25),
+                    minWidth: 30,
+                    maxWidth: 100,
+                    minHeight: 25,
+                    maxHeight: 80
+                },
+                text: {
+                    fontSize: Math.max(Math.floor(cardHeight * 0.22), 12),
+                    minFontSize: 12,
+                    maxFontSize: 28,
+                    lineHeight: Math.max(Math.floor(cardHeight * 0.28), 14)
+                },
+                spacing: {
+                    padding: Math.max(Math.floor(cardHeight * 0.1), 5),
+                    gap: Math.max(Math.floor(cardHeight * 0.08), 4)
+                }
+            };
+            console.log('⚠️ 使用備用 contentSizes 計算（SeparatedLayoutCalculator 版本過舊）');
+        }
 
-        // 計算位置
-        const positions = calculator.calculatePositions();
-        const leftX = positions.leftX;
-        const rightX = positions.rightX;
-        const leftStartY = positions.leftStartY;
-        const rightStartY = positions.rightStartY;
+        console.log(`📊 動態卡片大小計算:`, {
+            itemCount,
+            cardSize: { width: cardWidth, height: cardHeight },
+            layout: optimalSize.layout,
+            utilization: optimalSize.debug ? optimalSize.debug.utilization : 'N/A'
+        });
+
+        console.log(`📐 卡片尺寸: ${cardWidth.toFixed(0)} × ${cardHeight.toFixed(0)} (itemCount=${itemCount})`);
+
+        // 🎨 [v1.0] 內容大小詳細日誌
+        console.log(`🎨 內容大小配置:`, {
+            audioButtonSize: contentSizes.audioButton.size,
+            imageSize: { width: contentSizes.image.width, height: contentSizes.image.height },
+            fontSize: contentSizes.text.fontSize,
+            lineHeight: contentSizes.text.lineHeight,
+            padding: contentSizes.spacing.padding,
+            gap: contentSizes.spacing.gap
+        });
+
+        // 🎨 [v1.0] 保存 contentSizes 到實例變量，供其他方法使用
+        this.currentContentSizes = contentSizes;
+
+        // 🔥 [v14.0] 使用實例變量中保存的位置信息（包含計時器間距）
+        const leftX = this.currentLeftX;
+        const rightX = this.currentRightX;
+        const leftStartY = this.currentLeftStartY;
+        const rightStartY = this.currentRightStartY;
 
         console.log(`📍 位置: 左X=${leftX.toFixed(0)}, 右X=${rightX.toFixed(0)}, 左Y=${leftStartY.toFixed(0)}, 右Y=${rightStartY.toFixed(0)}`);
 
-        // 計算間距
-        const spacing = calculator.calculateSpacing();
-        const { leftSpacing, rightSpacing } = calculator.calculateSingleColumnSpacing(cardHeight);
+        // 🔥 [Screenshot_279] 使用新的佈局計算方法
+        const leftLayout = calculator.calculateLeftLayout(itemCount);
+        const rightLayout = calculator.calculateRightLayout(itemCount);
 
-        console.log(`📏 間距: 左側=${leftSpacing.toFixed(1)}px, 右側=${rightSpacing.toFixed(1)}px`);
+        console.log(`📐 左側佈局: ${leftLayout.columns} 列 × ${leftLayout.rows} 行 (${leftLayout.layout})`);
+        console.log(`📐 右側佈局: ${rightLayout.columns} 列 × ${rightLayout.rows} 行 (${rightLayout.layout})`);
 
         // 🔥 根據隨機模式排列答案
         let shuffledAnswers;
@@ -1721,26 +1816,29 @@ class GameScene extends Phaser.Scene {
             console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）', '洗牌後:', shuffledAnswers.map(p => p.id));
         }
 
-        // 創建左側外框
-        this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftSpacing, itemCount);
+        // 🔥 [Screenshot_279] 創建左側外框（使用新的佈局信息）
+        // 🔥 [v3.0] 使用動態間距計算外框高度
+        const dynamicSpacing = calculator.dynamicSpacing || 10;
+        const leftContainerHeight = leftLayout.rows * cardHeight + (leftLayout.rows - 1) * dynamicSpacing;
+        this.createLeftContainerBox(leftX, leftStartY, cardWidth, cardHeight, leftContainerHeight);
 
-        // 🔥 創建左側題目卡片（按照順序出現動畫）
+        // 🔥 [Screenshot_279] 創建左側題目卡片（使用新的位置計算）
         currentPagePairs.forEach((pair, index) => {
-            const y = leftStartY + index * leftSpacing;
+            const pos = calculator.calculateLeftCardPosition(index, leftLayout.columns, cardWidth, cardHeight, leftX, leftStartY);
             const animationDelay = index * 100;  // 🔥 每個卡片延遲 100ms
-            const card = this.createLeftCard(leftX, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
+            const card = this.createLeftCard(pos.x, pos.y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
         });
 
-        // 創建右側答案卡片（文字在框右邊）
+        // 🔥 [Screenshot_279] 創建右側答案卡片（使用新的位置計算）
         shuffledAnswers.forEach((pair, index) => {
-            const y = rightStartY + index * rightSpacing;
+            const pos = calculator.calculateRightCardPosition(index, cardHeight, rightX, rightStartY);
             // 🔥 [v62.0] 傳遞 imageUrl 和 audioUrl
-            const card = this.createRightCard(rightX, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl, 'right');  // 🔥 文字在框右邊
+            const card = this.createRightCard(pos.x, pos.y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl, 'right');  // 🔥 文字在框右邊
             this.rightCards.push(card);
         });
 
-        console.log('✅ 左右分離佈局創建完成');
+        console.log('✅ 左右分離佈局創建完成 (自適應佈局)');
     }
 
     // 🔥 創建上下分離佈局 - 2 行（6-10個匹配數）
@@ -1875,8 +1973,24 @@ class GameScene extends Phaser.Scene {
         const itemCount = currentPagePairs.length;
 
         // 🔥 [Phase 4] 使用 DeviceDetector 進行統一的設備檢測
-        const deviceType = DeviceDetector.getDeviceType(width, height);
-        const deviceInfo = DeviceDetector.getDeviceInfo(width, height);
+        // 備用方案：如果 DeviceDetector 不可用，使用內聯邏輯
+        let deviceType, deviceInfo;
+
+        if (typeof DeviceDetector !== 'undefined' && DeviceDetector.getDeviceType) {
+            deviceType = DeviceDetector.getDeviceType(width, height);
+            deviceInfo = DeviceDetector.getDeviceInfo(width, height);
+        } else {
+            // 備用設備檢測邏輯
+            const isPortrait = height >= width;
+            if (width <= 600) {
+                deviceType = isPortrait ? 'mobile-portrait' : 'mobile-landscape';
+            } else if (width <= 1024) {
+                deviceType = isPortrait ? 'tablet-portrait' : 'tablet-landscape';
+            } else {
+                deviceType = 'desktop';
+            }
+            deviceInfo = { deviceType, width, height, isPortrait };
+        }
 
         console.log(`📐 設備類型: ${deviceType}`, deviceInfo);
 
@@ -3578,20 +3692,81 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    createLeftContainerBox(x, y, cardWidth, cardHeight, spacing, count) {
-        // 計算外框的尺寸
-        const padding = 10;  // 外框與卡片之間的間距
-        const boxWidth = cardWidth + padding * 2;
-        const boxHeight = (cardHeight * count) + (spacing - cardHeight) * (count - 1) + padding * 2;
+    createLeftContainerBox(x, y, cardWidth, cardHeight, containerHeight) {
+        // 🔥 [v8.0] 使用統一邊距配置系統 - 修正外框位置計算
+        const margins = typeof SeparatedMarginConfig !== 'undefined'
+            ? SeparatedMarginConfig.CONFIG.FRAME
+            : { PADDING: 10, TOP_PADDING: 15 };
 
-        // 計算外框的中心位置
-        const boxCenterY = y + (spacing * (count - 1)) / 2;
+        const padding = margins.PADDING;
+        const topPadding = margins.TOP_PADDING;
+
+        const boxWidth = cardWidth + padding * 2;
+        const boxHeight = containerHeight + padding * 2 + topPadding;
+
+        // 🔥 [v8.0] 修正外框中心位置計算
+        // x 已經是卡片的中心位置，外框中心應該就是 x，不需要額外偏移
+        const boxCenterX = x;  // ✅ 修正：移除 + padding 偏移
+
+        // 🔥 [v8.0] 修正 Y 軸位置計算
+        // y = 第一張卡片的中心Y
+        // containerHeight = 所有卡片的總高度（包括間距）
+        // 正確公式：boxCenterY = y + (containerHeight - cardHeight) / 2 - topPadding / 2
+        // 這樣外框會正確地包含所有卡片，並在頂部留出 topPadding 空間
+        const boxCenterY = y + (containerHeight - cardHeight) / 2 - topPadding / 2;
 
         // 創建外框
-        const containerBox = this.add.rectangle(x, boxCenterY, boxWidth, boxHeight);
+        const containerBox = this.add.rectangle(boxCenterX, boxCenterY, boxWidth, boxHeight);
         containerBox.setStrokeStyle(2, 0x333333);  // 黑色邊框
         containerBox.setFillStyle(0xffffff, 0);    // 透明填充
         containerBox.setDepth(0);  // 在卡片下層
+
+        // 🔥 [v8.0] 驗證卡片是否在框內
+        this.verifyCardInFrame(x, y, cardWidth, cardHeight, containerHeight, boxCenterX, boxCenterY, boxWidth, boxHeight);
+    }
+
+    // 🔥 [v8.0] 驗證卡片是否在外框內
+    verifyCardInFrame(cardCenterX, cardCenterY, cardWidth, cardHeight, containerHeight, boxCenterX, boxCenterY, boxWidth, boxHeight) {
+        // 計算第一張卡片的邊界
+        const firstCardTop = cardCenterY - cardHeight / 2;
+        const firstCardBottom = cardCenterY + cardHeight / 2;
+
+        // 計算最後一張卡片的邊界
+        const lastCardCenterY = cardCenterY + containerHeight - cardHeight;
+        const lastCardTop = lastCardCenterY - cardHeight / 2;
+        const lastCardBottom = lastCardCenterY + cardHeight / 2;
+
+        // 計算卡片區域的邊界
+        const cardLeft = cardCenterX - cardWidth / 2;
+        const cardRight = cardCenterX + cardWidth / 2;
+        const cardTop = firstCardTop;
+        const cardBottom = lastCardBottom;
+
+        // 計算外框邊界
+        const boxLeft = boxCenterX - boxWidth / 2;
+        const boxRight = boxCenterX + boxWidth / 2;
+        const boxTop = boxCenterY - boxHeight / 2;
+        const boxBottom = boxCenterY + boxHeight / 2;
+
+        // 驗證卡片是否在框內
+        const isInside = cardLeft >= boxLeft && cardRight <= boxRight &&
+                        cardTop >= boxTop && cardBottom <= boxBottom;
+
+        // 計算邊距
+        const topMargin = cardTop - boxTop;
+        const bottomMargin = boxBottom - cardBottom;
+        const leftMargin = cardLeft - boxLeft;
+        const rightMargin = boxRight - cardRight;
+
+        // 輸出驗證結果
+        console.log('🔍 [v8.0] 卡片與外框驗證:', {
+            isInside: isInside ? '✅ 在框內' : '❌ 超出框外',
+            cardBoundary: { left: cardLeft.toFixed(1), right: cardRight.toFixed(1), top: cardTop.toFixed(1), bottom: cardBottom.toFixed(1) },
+            boxBoundary: { left: boxLeft.toFixed(1), right: boxRight.toFixed(1), top: boxTop.toFixed(1), bottom: boxBottom.toFixed(1) },
+            margins: { top: topMargin.toFixed(1), bottom: bottomMargin.toFixed(1), left: leftMargin.toFixed(1), right: rightMargin.toFixed(1) }
+        });
+
+        return isInside;
     }
 
     // 🔥 創建多列外框（智能多列佈局）
@@ -3979,13 +4154,17 @@ class GameScene extends Phaser.Scene {
         // 🔥 首先添加背景（最底層）
         container.add([background]);
 
+        // 🎨 [v1.0] 使用 contentSizes 計算圖片大小
+        // 從 this.currentContentSizes 獲取預計算的內容大小
+        const contentSizes = this.currentContentSizes;
+
         // 圖片區域：佔據卡片上方 50%
         const imageHeight = height * 0.5;
         const imageY = -height / 2 + imageHeight / 2;
 
         // 🔥 文字區域：佔據卡片下方 50%，但需要留出底部間距
         const textAreaHeight = height * 0.5;
-        const bottomPadding = Math.max(8, height * 0.08);  // 底部間距：8px 或高度的 8%
+        const bottomPadding = contentSizes ? contentSizes.spacing.padding : Math.max(8, height * 0.08);
         const textHeight = textAreaHeight - bottomPadding;
         // 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
         const textY = height / 2 - bottomPadding - textHeight / 2;
@@ -3997,17 +4176,21 @@ class GameScene extends Phaser.Scene {
             textHeight,
             textY,
             cardHeight: height,
-            formula: `textY = ${height / 2} - ${bottomPadding} - ${textHeight / 2} = ${textY}`
+            formula: `textY = ${height / 2} - ${bottomPadding} - ${textHeight / 2} = ${textY}`,
+            contentSizesUsed: !!contentSizes
         });
 
         // 計算正方形圖片的尺寸（1:1 比例）
-        const squareSize = Math.min(width - 4, imageHeight - 4);
+        // 🎨 [v1.0] 使用 contentSizes 中的圖片大小
+        const squareSize = contentSizes
+            ? Math.min(contentSizes.image.width, contentSizes.image.height, imageHeight - 4)
+            : Math.min(width - 4, imageHeight - 4);
 
         // 創建圖片
         // ✅ v44.0：添加錯誤處理
         // 🔥 [v68.0] 修復：使用 english-${pairId} 作為 imageKey，避免與中文圖片衝突
         this.loadAndDisplayImage(container, imageUrl, 0, imageY, squareSize, `english-${pairId}`).catch(error => {
-            console.error('❌ 圖片載入失敗 (佈局 B):', error);
+            console.error('❌ 圖片載入失敗 (佈局 D):', error);
         });
 
         // 創建文字（如果有）
@@ -4167,8 +4350,11 @@ class GameScene extends Phaser.Scene {
             containerExists: !!container
         });
 
-        // 🔥 初始字體大小（基於高度的 60%）
-        let fontSize = Math.max(14, Math.min(48, height * 0.6));
+        // 🎨 [v1.0] 使用 contentSizes 中的字體大小
+        const contentSizes = this.currentContentSizes;
+        let fontSize = contentSizes
+            ? contentSizes.text.fontSize
+            : Math.max(14, Math.min(48, height * 0.6));
 
         // 創建臨時文字測量寬度和高度
         const tempText = this.add.text(0, 0, text, {
@@ -4212,6 +4398,7 @@ class GameScene extends Phaser.Scene {
             textHeight: cardText.height,
             maxTextWidth: maxTextWidth,
             maxTextHeight: maxTextHeight,
+            contentSizesUsed: !!contentSizes,
             widthRatio: (finalTextWidth / width * 100).toFixed(1) + '%',
             heightRatio: (finalTextHeight / height * 100).toFixed(1) + '%',
             visible: cardText.visible,
@@ -4287,16 +4474,29 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 輔助函數 - 創建語音按鈕
     createAudioButton(container, audioUrl, x, y, size, pairId) {
-        console.log('🔊 創建語音按鈕:', { x, y, size, audioUrl: audioUrl ? '有' : '無', pairId });
+        // 🎨 [v1.0] 使用 contentSizes 中的按鈕大小
+        const contentSizes = this.currentContentSizes;
+        const buttonSize = contentSizes
+            ? contentSizes.audioButton.size
+            : Math.max(50, Math.min(80, size * 0.6));
+
+        console.log('🔊 創建語音按鈕:', {
+            x, y,
+            size,
+            buttonSize,
+            audioUrl: audioUrl ? '有' : '無',
+            pairId,
+            contentSizesUsed: !!contentSizes
+        });
 
         // 🔥 創建按鈕背景（相對於 buttonContainer 的座標為 0, 0）
-        const buttonBg = this.add.rectangle(0, 0, size, size, 0x4CAF50);
+        const buttonBg = this.add.rectangle(0, 0, buttonSize, buttonSize, 0x4CAF50);
         buttonBg.setStrokeStyle(2, 0x2E7D32);
         buttonBg.setOrigin(0.5);
 
         // 🔥 創建喇叭圖標（相對於 buttonContainer 的座標為 0, 0）
         const speakerIcon = this.add.text(0, 0, '🔊', {
-            fontSize: `${size * 0.6}px`,
+            fontSize: `${buttonSize * 0.6}px`,
             fontFamily: 'Arial'
         });
         speakerIcon.setOrigin(0.5);
@@ -4411,13 +4611,13 @@ class GameScene extends Phaser.Scene {
     }
 
     createRightCard(x, y, width, height, text, pairId, imageUrl = null, audioUrl = null, textPosition = 'bottom') {
-        // 🔥 [v65.0] 改進右側卡片 - 參考英文卡片實現
-        console.log('🎨 [v65.0] createRightCard 被調用:', {
+        // 🔥 [v24.0] 改進右側卡片 - 中文卡片不顯示語音按鈕
+        console.log('🎨 [v24.0] createRightCard 被調用:', {
             pairId,
             hasText: !!text && text.trim() !== '',
             hasImage: !!imageUrl && imageUrl.trim() !== '',
-            hasAudio: !!audioUrl && audioUrl.trim() !== '',
-            textPosition
+            textPosition,
+            note: '右側卡片（中文）不顯示語音按鈕'
         });
 
         // 創建卡片容器
@@ -4432,44 +4632,25 @@ class GameScene extends Phaser.Scene {
         background.setStrokeStyle(2, 0x333333);
         background.setDepth(1);
 
-        // 🔥 [v65.0] 查找 pairData 以獲取音頻狀態（參考英文卡片）
-        const pairData = this.pairs.find(pair => pair.id === pairId);
-        const audioStatus = pairData ? pairData.audioStatus : (audioUrl ? 'available' : 'missing');
-        const hasAudio = audioStatus === 'available';
-        const safeAudioUrl = hasAudio ? audioUrl : null;
-
         // 🔥 [v62.0] 檢查內容組合
         const hasImage = imageUrl && imageUrl.trim() !== '';
         const hasText = text && text.trim() !== '' && text.trim() !== '<br>';
 
-        console.log('🔍 [v65.0] 右側卡片內容檢查:', {
+        console.log('🔍 [v24.0] 右側卡片內容檢查:', {
             pairId,
             hasImage,
             hasText,
-            hasAudio,
-            audioStatus,
-            combination: `${hasImage ? 'I' : '-'}${hasText ? 'T' : '-'}${hasAudio ? 'A' : '-'}`
+            hasAudio: false,
+            combination: `${hasImage ? 'I' : '-'}${hasText ? 'T' : '-'}-`
         });
 
-        // 🔥 [v62.0] 根據內容組合決定佈局
-        if (hasImage && hasText && hasAudio) {
-            // 情況 A：圖片 + 文字 + 語音
-            this.createRightCardLayoutA(container, background, width, height, text, imageUrl, safeAudioUrl, pairId);
-        } else if (hasImage && hasText && !hasAudio) {
+        // 🔥 [v24.0] 根據內容組合決定佈局 - 不包含語音選項
+        if (hasImage && hasText) {
             // 情況 D：圖片 + 文字
             this.createRightCardLayoutD(container, background, width, height, text, imageUrl, pairId);
-        } else if (hasImage && !hasText && hasAudio) {
-            // 圖片 + 語音（無文字）
-            this.createRightCardLayoutImageAudio(container, background, width, height, imageUrl, safeAudioUrl, pairId);
-        } else if (hasImage && !hasText && !hasAudio) {
+        } else if (hasImage && !hasText) {
             // 情況 F：只有圖片
             this.createRightCardLayoutF(container, background, width, height, imageUrl, pairId);
-        } else if (!hasImage && hasText && hasAudio) {
-            // 情況 E：文字 + 語音
-            this.createRightCardLayoutE(container, background, width, height, text, safeAudioUrl, pairId);
-        } else if (!hasImage && !hasText && hasAudio) {
-            // 情況 B：只有語音
-            this.createRightCardLayoutB(container, background, width, height, safeAudioUrl, pairId);
         } else {
             // 情況 C：只有文字（現有邏輯）
             this.createRightCardLayoutC(container, background, width, height, text, textPosition);

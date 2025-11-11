@@ -215,20 +215,25 @@ const MatchUpOptionsPanel: React.FC<MatchUpOptionsPanelProps> = ({
             </td>
           </tr>
 
-          {/* 每頁匹配數選項 */}
+          {/* 每頁匹配數選項 - 預設值：3, 4, 5, 7, 10, 20 */}
           <tr className="border-b border-gray-200">
-            <td className="py-3 pr-4 font-medium">每頁匹配數</td>
+            <td className="py-3 pr-4 font-medium align-top">每頁匹配數</td>
             <td className="py-3">
-              <div className="flex items-center gap-3">
-                <input
-                  type="range"
-                  min="3"
-                  max={Math.min(20, totalVocabulary)}
-                  value={options.itemsPerPage}
-                  onChange={(e) => updateOptions({ itemsPerPage: Number(e.target.value) })}
-                  className="flex-1 cursor-pointer"
-                />
-                <span className="w-8 text-center font-semibold text-lg">{options.itemsPerPage}</span>
+              <div className="flex flex-wrap gap-2">
+                {[3, 4, 5, 7, 10, 20].map((value) => (
+                  <button
+                    key={value}
+                    onClick={() => updateOptions({ itemsPerPage: value })}
+                    className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                      options.itemsPerPage === value
+                        ? 'bg-blue-500 text-white shadow-md'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                    title={`選擇每頁 ${value} 對卡片`}
+                  >
+                    {value}
+                  </button>
+                ))}
               </div>
             </td>
           </tr>
