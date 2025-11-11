@@ -1814,31 +1814,26 @@ class GameScene extends Phaser.Scene {
         // 🎨 [v1.0] 保存 contentSizes 到實例變量，供其他方法使用
         this.currentContentSizes = contentSizes;
 
-        // 🔥 [v25.0] 使用 SeparatedResponsiveConfig 計算的容器位置
+        // 🔥 [v27.0] 分離模式使用特殊的三等分佈局，不使用 SeparatedResponsiveConfig
+        // 分離模式佈局：左33% | 中33% | 右33%
+        // 🔥 [v27.0] 改進：禁用 SeparatedResponsiveConfig，使用舊的計算方式
         let leftX, rightX, leftStartY, rightStartY;
 
-        if (responsivePositions) {
-            // 使用響應式配置計算的位置
-            leftX = responsivePositions.left.x;
-            rightX = responsivePositions.right.x;
-            leftStartY = responsiveLayout.margins.top;
-            rightStartY = responsiveLayout.margins.top;
+        // 🔥 [v27.0] 分離模式使用固定的三等分佈局比例
+        // 不使用 responsivePositions，因為分離模式有特殊的佈局要求
+        leftX = width * 0.4;         // 左容器中心（33% 位置）
+        rightX = width * 0.75;       // 右容器中心（66% 位置）
+        leftStartY = this.currentLeftStartY || (height * 0.15);   // 使用保存的位置或默認值
+        rightStartY = this.currentRightStartY || (height * 0.15); // 使用保存的位置或默認值
 
-            console.log('✅ [v25.0] 使用響應式容器位置:', {
-                leftX: leftX.toFixed(0),
-                rightX: rightX.toFixed(0),
-                leftStartY: leftStartY.toFixed(0),
-                rightStartY: rightStartY.toFixed(0)
-            });
-        } else {
-            // 備用方案：使用實例變量中保存的位置信息（包含計時器間距）
-            leftX = this.currentLeftX;
-            rightX = this.currentRightX;
-            leftStartY = this.currentLeftStartY;
-            rightStartY = this.currentRightStartY;
-
-            console.log('⚠️ 使用備用容器位置（SeparatedResponsiveConfig 不可用）');
-        }
+        console.log('🔥🔥🔥 [v27.0] 分離模式三等分佈局已啟用 🔥🔥🔥');
+        console.log('✅ [v27.0] 使用分離模式三等分佈局:', {
+            leftX: leftX.toFixed(0),
+            rightX: rightX.toFixed(0),
+            leftStartY: leftStartY.toFixed(0),
+            rightStartY: rightStartY.toFixed(0),
+            layoutType: '三等分佈局（左33% | 中33% | 右33%）'
+        });
 
         console.log(`📍 位置: 左X=${leftX.toFixed(0)}, 右X=${rightX.toFixed(0)}, 左Y=${leftStartY.toFixed(0)}, 右Y=${rightStartY.toFixed(0)}`);
 
