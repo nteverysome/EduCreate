@@ -28,6 +28,7 @@ class GameScene extends Phaser.Scene {
         // 遊戲狀態
         this.leftCards = [];
         this.rightCards = [];
+        this.rightEmptyBoxes = [];  // 🔥 [v35.0] 單獨存儲右側空白框
         this.matchedPairs = new Set();
         this.isDragging = false;
         this.dragStartCard = null;
@@ -35,6 +36,9 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 [v129.0] 保存所有頁面的配對結果（用於返回前面頁面時顯示勾勾和叉叉）
         this.allPagesMatchedPairs = {};  // 格式：{ pageIndex: Set(pairIds) }
+
+        // 🔥 [v156.0] 保存所有頁面的卡片位置（用於返回前面頁面時恢復卡片位置）
+        this.allPagesCardPositions = {};  // 格式：{ pageIndex: { pairId: { x, y } } }
 
         // 🔥 分頁功能
         this.itemsPerPage = 7;  // 默認每頁 7 個詞彙（可配置）
@@ -528,6 +532,7 @@ class GameScene extends Phaser.Scene {
         // 清空數組（防止重新開始時重複）
         this.leftCards = [];
         this.rightCards = [];
+        this.rightEmptyBoxes = [];  // 🔥 [v35.0] 清空右側空白框
         this.matchedPairs = new Set();
         this.isDragging = false;
         this.dragStartCard = null;
@@ -538,9 +543,27 @@ class GameScene extends Phaser.Scene {
         // 顯示載入提示
         const width = this.scale.width;
         const height = this.scale.height;
-        console.log('🎮 GameScene: 創建白色背景和載入文字', { width, height });
+        console.log('🎮 GameScene: 創建背景和載入文字', { width, height });
 
-        this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
+        // 🎨 [v1.0] 使用中世紀背景圖片或白色背景作為備用
+        if (this.textures.exists('game-background')) {
+            const background = this.add.image(width / 2, height / 2, 'game-background');
+            background.setDepth(-1);
+            background.setName('background-image');  // 🎨 [v1.0] 設置名稱以便後續查找
+            // 調整背景圖片大小以覆蓋整個遊戲區域
+            const scaleX = width / background.width;
+            const scaleY = height / background.height;
+            const scale = Math.max(scaleX, scaleY);
+            background.setScale(scale);
+            console.log('🎨 GameScene: 中世紀背景圖片已加載');
+        } else {
+            // 備用：使用白色背景
+            const whiteBg = this.add.rectangle(width / 2, height / 2, width, height, 0xffffff);
+            whiteBg.setDepth(-1);
+            whiteBg.setName('background-image');  // 🎨 [v1.0] 設置名稱以便後續查找
+            console.log('⚠️ GameScene: 背景圖片未找到，使用白色背景');
+        }
+
         const loadingText = this.add.text(width / 2, height / 2, '載入詞彙中...', {
             fontSize: '24px',
             color: '#333333',
@@ -660,6 +683,7 @@ class GameScene extends Phaser.Scene {
         this.resizeTimeout = null;
         this.shuffledPairsCache = null;  // 🔥 v54.0: 緩存洗牌後的順序
         this.savedPageAnswers = null;    // 🔥 [v105.0] 新增：保存當前頁面的答案
+        this.allPagesShuffledCache = {};  // 🔥 [v169.0] 新增：保存每一頁的洗牌順序，用於返回上一頁時保持空白框順序一致
         this.scale.on('resize', (gameSize) => {
             // 🔥 v54.0: 使用防抖延遲，保存已配對狀態和洗牌順序後重新創建卡片
             console.log('🔥 [v54.0] resize 事件觸發:', { width: gameSize.width, height: gameSize.height });
@@ -1032,6 +1056,19 @@ class GameScene extends Phaser.Scene {
         });
 
         try {
+            // 🔥 [v202.0] 移除特定的延遲調用，而不是所有事件
+            // 這樣可以避免影響計時器和其他時間相關功能
+            if (this.summaryDelayedCall) {
+                this.summaryDelayedCall.remove();
+                this.summaryDelayedCall = null;
+                console.log('🔥 [v202.0] 已移除 summaryDelayedCall');
+            }
+            if (this.autoProceedDelayedCall) {
+                this.autoProceedDelayedCall.remove();
+                this.autoProceedDelayedCall = null;
+                console.log('🔥 [v202.0] 已移除 autoProceedDelayedCall');
+            }
+
             // 🔥 [v127.0] 保存分頁選擇器組件，以便在清除元素後重新創建
             const savedPageSelectorComponents = this.pageSelectorComponents;
             console.log('🔥 [v127.0] 已保存分頁選擇器組件:', {
@@ -1042,7 +1079,97 @@ class GameScene extends Phaser.Scene {
 
             // 清除所有現有元素
             console.log('🎮 GameScene: 清除所有現有元素');
+            console.log('🔥 [v230.1] updateLayout 清除前 - 子元素數:', this.children.list.length);
+
+            // 🎨 [v1.0] 保存背景圖片引用，避免被銷毀
+            const backgroundImage = this.children.getByName('background-image');
+            console.log('🎨 [v1.0] 背景圖片引用:', !!backgroundImage);
+
+            // 🔥 [v217.2] 在銷毀前明確清除卡片數組（防止引用殘留）
+            console.log('🔥 [v217.2] 銷毀前的卡片狀態:', {
+                leftCardsCount: this.leftCards.length,
+                rightCardsCount: this.rightCards.length,
+                rightEmptyBoxesCount: this.rightEmptyBoxes.length
+            });
+
+            // 🔥 [v230.4] 檢查卡片數組中是否有被銷毀的卡片
+            console.log('🔥 [v230.4] 檢查卡片數組中的卡片狀態:');
+            let destroyedLeftCards = 0, destroyedRightCards = 0, destroyedEmptyBoxes = 0;
+            this.leftCards.forEach(card => {
+                if (card && card.isDestroyed) destroyedLeftCards++;
+            });
+            this.rightCards.forEach(card => {
+                if (card && card.isDestroyed) destroyedRightCards++;
+            });
+            this.rightEmptyBoxes.forEach(box => {
+                if (box && box.isDestroyed) destroyedEmptyBoxes++;
+            });
+            console.log('🔥 [v230.4] 已銷毀的卡片 - 左:', destroyedLeftCards, '右:', destroyedRightCards, '空白框:', destroyedEmptyBoxes);
+
+            // 🔥 [v1.5] 先清除空白框中的所有子元素（嵌套的卡片）
+            if (this.rightEmptyBoxes && this.rightEmptyBoxes.length > 0) {
+                this.rightEmptyBoxes.forEach(box => {
+                    if (box && !box.isDestroyed && box.list && box.list.length > 0) {
+                        console.log('🔥 [v1.5] 清除空白框中的子元素:', {
+                            boxPairId: box.getData('pairId'),
+                            childrenCount: box.list.length
+                        });
+                        // 清除容器中的所有子元素
+                        box.removeAll(true);
+                    }
+                });
+            }
+
+            // 明確銷毀每個卡片
+            if (this.leftCards && this.leftCards.length > 0) {
+                this.leftCards.forEach(card => {
+                    if (card && !card.isDestroyed) {
+                        card.destroy();
+                    }
+                });
+            }
+
+            if (this.rightCards && this.rightCards.length > 0) {
+                this.rightCards.forEach(card => {
+                    if (card && !card.isDestroyed) {
+                        card.destroy();
+                    }
+                });
+            }
+
+            if (this.rightEmptyBoxes && this.rightEmptyBoxes.length > 0) {
+                this.rightEmptyBoxes.forEach(box => {
+                    if (box && !box.isDestroyed) {
+                        box.destroy();
+                    }
+                });
+            }
+
+            // 然後銷毀所有其他元素（除了背景圖片）
+            console.log('🔥 [v230.3] removeAll 前 - this.children.list.length:', this.children.list.length);
+
             this.children.removeAll(true);
+
+            console.log('🔥 [v230.3] removeAll 後 - 子元素數:', this.children.list.length);
+
+            // 🎨 [v1.0] 重新添加背景圖片（如果存在）
+            if (backgroundImage && !backgroundImage.isDestroyed) {
+                this.add.existing(backgroundImage);
+                backgroundImage.setDepth(-1);
+                console.log('🎨 [v1.0] 背景圖片已重新添加');
+            }
+
+            // 🔥 [v162.0] 清除卡片數組和空白框引用（因為元素已被銷毀）
+            this.leftCards = [];
+            this.rightCards = [];
+            this.rightEmptyBoxes = [];  // 🔥 [v162.0] 清空空白框引用
+            console.log('🔥 [v162.0] 已清除卡片數組和空白框引用');
+            console.log('🔥 [v230.1] updateLayout 清除後 - 子元素數:', this.children.list.length);
+            console.log('🔥 [v217.2] 銷毀後的卡片狀態:', {
+                leftCardsCount: this.leftCards.length,
+                rightCardsCount: this.rightCards.length,
+                rightEmptyBoxesCount: this.rightEmptyBoxes.length
+            });
 
             // 🔥 [v127.0] 清除分頁選擇器組件引用（因為元素已被銷毀）
             this.pageSelectorComponents = null;
@@ -1052,13 +1179,13 @@ class GameScene extends Phaser.Scene {
             this.submitButton = null;
             console.log('🎮 GameScene: 已清除提交按鈕引用');
 
-            // 獲取當前螢幕尺寸
+            // 🎨 [v1.0] 獲取當前螢幕尺寸（用於後續計算）
             const width = this.scale.width;
             const height = this.scale.height;
 
-            console.log('🎮 GameScene: 添加白色背景', { width, height });
-            // 添加白色背景
-            this.add.rectangle(width / 2, height / 2, width, height, 0xffffff).setDepth(-1);
+            console.log('🎮 GameScene: 背景已在 create 方法中添加，跳過重複添加');
+            // 🎨 [v1.0] 背景圖片已在 create 方法中添加，不需要在這裡重複添加
+            // 移除白色背景以避免覆蓋背景圖片
 
             // 🔥 移除標題：用戶要求拿掉遊戲內的 "Match up" 標題
 
@@ -1078,6 +1205,15 @@ class GameScene extends Phaser.Scene {
 
             // 🔥 顯示「提交答案」按鈕（遊戲開始時就顯示）
             this.showSubmitButton();
+
+            // 🔥 [v180.0] 恢復當前頁的 frameIndexToPairIdMap
+            if (this.allPagesFrameIndexToPairIdMap && this.allPagesFrameIndexToPairIdMap[this.currentPage]) {
+                this.frameIndexToPairIdMap = { ...this.allPagesFrameIndexToPairIdMap[this.currentPage] };
+                console.log('🔥 [v180.0] 已恢復當前頁的 frameIndexToPairIdMap:', {
+                    currentPage: this.currentPage,
+                    mapping: this.frameIndexToPairIdMap
+                });
+            }
 
             // 🔥 [v132.0] 恢復當前頁的配對結果和答案（如果有的話）
             console.log('🔥 [v132.0] ========== updateLayout 恢復邏輯開始 ==========');
@@ -1145,7 +1281,9 @@ class GameScene extends Phaser.Scene {
                     currentPage: this.currentPage,
                     totalPages: this.totalPages,
                     leftCardsCount: this.leftCards ? this.leftCards.length : 0,
-                    rightCardsCount: this.rightCards ? this.rightCards.length : 0
+                    rightCardsCount: this.rightCards ? this.rightCards.length : 0,
+                    rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+                    layout: this.layout
                 });
 
                 // 遍歷所有左卡片（英文卡片），將其移動到對應的中文位置
@@ -1167,21 +1305,45 @@ class GameScene extends Phaser.Scene {
                                     duration: 500,
                                     ease: 'Power2.inOut'
                                 });
-                                console.log('🔥 [v137.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+                                console.log('🔥 [v137.0] 混合模式 - 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
                             }
                         } else {
-                            // 分離佈局：根據 pairId 找到對應的右側卡片
-                            const rightCard = this.rightCards.find(rc => rc.getData('pairId') === pairId);
-                            if (rightCard) {
-                                // 移動英文卡片到右側卡片的位置
-                                this.tweens.add({
-                                    targets: card,
-                                    x: rightCard.x,
-                                    y: rightCard.y,
-                                    duration: 500,
-                                    ease: 'Power2.inOut'
+                            // 🔥 [v223.0] 分離佈局：根據 pairId 找到對應的空白框（不是框外答案卡片）
+                            const emptyBox = this.rightEmptyBoxes ? this.rightEmptyBoxes.find(box => box.getData('pairId') === pairId) : null;
+                            if (emptyBox) {
+                                // 🔥 [v223.0] 修復：添加卡片到空白框容器中（像 v222.0 一樣）
+                                console.log('🔥 [v223.0] 準備將卡片添加到空白框容器:', {
+                                    pairId: pairId,
+                                    cardHasParentContainer: !!card.parentContainer,
+                                    cardParentContainerType: card.parentContainer ? card.parentContainer.constructor.name : 'none'
                                 });
-                                console.log('🔥 [v137.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+
+                                // 🔥 [v223.0] 如果卡片已經有父容器，先移除
+                                if (card.parentContainer) {
+                                    console.log('🔥 [v223.0] 卡片已有父容器，準備移除:', {
+                                        pairId: pairId,
+                                        parentContainerType: card.parentContainer.constructor.name
+                                    });
+                                    card.parentContainer.remove(card);
+                                }
+
+                                // 🔥 [v223.0] 將卡片添加到空白框容器中
+                                emptyBox.add(card);
+
+                                // 🔥 [v223.0] 設置卡片的本地座標為 (0, 0)，使其顯示在容器中心
+                                card.setPosition(0, 0);
+
+                                console.log('🔥 [v223.0] 卡片已添加到空白框容器:', {
+                                    pairId: pairId,
+                                    cardLocalX: card.x,
+                                    cardLocalY: card.y,
+                                    cardWorldX: card.getWorldTransformMatrix().tx,
+                                    cardWorldY: card.getWorldTransformMatrix().ty,
+                                    emptyBoxWorldX: emptyBox.getWorldTransformMatrix().tx,
+                                    emptyBoxWorldY: emptyBox.getWorldTransformMatrix().ty
+                                });
+                            } else {
+                                console.warn('⚠️ [v223.0] 分離模式 - 未找到空白框:', { pairId });
                             }
                         }
                     });
@@ -1197,6 +1359,34 @@ class GameScene extends Phaser.Scene {
                 const buttonY = 20;
                 const selectorX = width / 2;
                 this.createPageSelector(selectorX, buttonY, selectorWidth, selectorHeight);
+            }
+
+            // 🔥 [v156.0] 恢復卡片位置（如果有保存的位置）
+            this.restoreCardPositions(this.currentPage);
+
+            // 🔥 [v217.2] 恢復 "Show all answers" 狀態（增強版本）
+            if (this.allPagesShowAllAnswersState && this.allPagesShowAllAnswersState[this.currentPage]) {
+                console.log('🔥 [v217.2] 檢測到第 ' + (this.currentPage + 1) + ' 頁有保存的 showAllAnswers 狀態，準備恢復');
+                console.log('🔥 [v217.2] 恢復前的卡片信息:', {
+                    currentPage: this.currentPage,
+                    leftCardsCount: this.leftCards.length,
+                    leftCardsPairIds: this.leftCards.map(c => c.getData('pairId')),
+                    rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+                    rightEmptyBoxesPairIds: this.rightEmptyBoxes ? this.rightEmptyBoxes.map(b => b.getData('pairId')) : []
+                });
+
+                // 🔥 [v217.2] 增加延遲時間到 300ms，確保卡片完全創建和渲染
+                this.time.delayedCall(300, () => {
+                    console.log('🔥 [v217.2] 延遲 300ms 後，準備恢復 showAllAnswers 狀態');
+                    console.log('🔥 [v217.2] 恢復時的卡片信息:', {
+                        currentPage: this.currentPage,
+                        leftCardsCount: this.leftCards.length,
+                        leftCardsPairIds: this.leftCards.map(c => c.getData('pairId')),
+                        rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+                        rightEmptyBoxesPairIds: this.rightEmptyBoxes ? this.rightEmptyBoxes.map(b => b.getData('pairId')) : []
+                    });
+                    this.showAllCorrectAnswers();
+                });
             }
 
             // 🔥 移除重新開始按鈕：用戶要求拿掉
@@ -1235,8 +1425,60 @@ class GameScene extends Phaser.Scene {
     // 🔥 v53.0: 恢復已配對卡片的視覺效果
     // 🔥 [v104.0] 修復：重新調整勾勾和叉叉的位置（當卡片大小改變時）
     // 🔥 [v132.0] 添加詳細調試信息
+    // 🔥 [v175.0] 修復：清除舊的標記，確保頁面返回時正確顯示答案
     restoreMatchedPairsVisuals() {
         try {
+            console.log('🔥 [v175.0] ========== restoreMatchedPairsVisuals 開始 ==========');
+
+            // 🔥 [v175.0] 新增：清除所有舊的標記（checkMark 和 xMark）
+            console.log('🔥 [v175.0] 清除舊的標記開始');
+            if (this.leftCards && this.leftCards.length > 0) {
+                this.leftCards.forEach(card => {
+                    if (card.checkMark) {
+                        console.log(`🔥 [v175.0] 清除左卡片 ${card.getData('pairId')} 的勾勾`);
+                        card.checkMark.destroy();
+                        card.checkMark = null;
+                    }
+                    if (card.xMark) {
+                        console.log(`🔥 [v175.0] 清除左卡片 ${card.getData('pairId')} 的叉叉`);
+                        card.xMark.destroy();
+                        card.xMark = null;
+                    }
+                });
+            }
+
+            if (this.rightCards && this.rightCards.length > 0) {
+                this.rightCards.forEach(card => {
+                    if (card.checkMark) {
+                        console.log(`🔥 [v175.0] 清除右卡片 ${card.getData('pairId')} 的勾勾`);
+                        card.checkMark.destroy();
+                        card.checkMark = null;
+                    }
+                    if (card.xMark) {
+                        console.log(`🔥 [v175.0] 清除右卡片 ${card.getData('pairId')} 的叉叉`);
+                        card.xMark.destroy();
+                        card.xMark = null;
+                    }
+                });
+            }
+
+            // 🔥 [v177.0] 新增：清除空白框上的標記
+            if (this.rightEmptyBoxes && this.rightEmptyBoxes.length > 0) {
+                this.rightEmptyBoxes.forEach(emptyBox => {
+                    if (emptyBox.checkMark) {
+                        console.log(`🔥 [v177.0] 清除空白框 ${emptyBox.getData('pairId')} 的勾勾`);
+                        emptyBox.checkMark.destroy();
+                        emptyBox.checkMark = null;
+                    }
+                    if (emptyBox.xMark) {
+                        console.log(`🔥 [v177.0] 清除空白框 ${emptyBox.getData('pairId')} 的叉叉`);
+                        emptyBox.xMark.destroy();
+                        emptyBox.xMark = null;
+                    }
+                });
+            }
+            console.log('🔥 [v177.0] 清除舊的標記完成（包括空白框）');
+
             console.log('🔥 [v132.0] ========== restoreMatchedPairsVisuals 開始 ==========');
             console.log('🔥 [v132.0] 輸入參數檢查:', {
                 hasMatchedPairs: !!this.matchedPairs,
@@ -1322,21 +1564,22 @@ class GameScene extends Phaser.Scene {
                                 }
                             }
                         } else {
-                            // 分離模式：找到對應的右卡片
-                            const rightCard = this.rightCards?.find(card => card.getData('pairId') === pairId);
-                            console.log(`🔥 [v134.0] 分離模式 - 查找卡片 pairId: ${pairId}:`, {
-                                found: !!rightCard,
-                                cardX: rightCard ? rightCard.x : null,
-                                cardY: rightCard ? rightCard.y : null
+                            // 🔥 [v181.0] 修復：分離模式應該在左卡片上顯示視覺指示器
+                            // 找到對應的左卡片（根據 currentFrameIndex）
+                            const leftCard = this.leftCards?.find(card => card.getData('pairId') === pairId);
+                            console.log(`🔥 [v181.0] 分離模式 - 查找左卡片 pairId: ${pairId}:`, {
+                                found: !!leftCard,
+                                cardX: leftCard ? leftCard.x : null,
+                                cardY: leftCard ? leftCard.y : null
                             });
 
-                            if (rightCard) {
+                            if (leftCard) {
                                 if (answer.isCorrect) {
-                                    console.log(`✅ [v134.0] 卡片 ${pairId} 顯示勾勾`);
-                                    this.showCorrectAnswer(rightCard, answer.rightText || answer.correctAnswer);
+                                    console.log(`✅ [v181.0] 左卡片 ${pairId} 顯示勾勾`);
+                                    this.showCorrectAnswer(leftCard, answer.rightText || answer.correctAnswer);
                                 } else {
-                                    console.log(`❌ [v134.0] 卡片 ${pairId} 顯示叉叉`);
-                                    this.showIncorrectAnswer(rightCard, answer.rightText || answer.correctAnswer);
+                                    console.log(`❌ [v181.0] 左卡片 ${pairId} 顯示叉叉`);
+                                    this.showIncorrectAnswer(leftCard, answer.rightText || answer.correctAnswer);
                                 }
                             }
                         }
@@ -1472,6 +1715,7 @@ class GameScene extends Phaser.Scene {
         });
         this.leftCards = [];
         this.rightCards = [];
+        this.rightEmptyBoxes = [];  // 🔥 [v35.0] 清空右側空白框
         console.log('🔥 [v116.0] 已清空卡片數組');
 
         // 🔥 [v115.0] 詳細調適訊息：追蹤頁面狀態
@@ -1742,28 +1986,57 @@ class GameScene extends Phaser.Scene {
             };
         }
 
+        // 🔥 [v31.0] 計算可用高度（用於卡片高度計算）
+        const timerHeight = 50;            // 計時器實際高度
+        const timerGap = 20;               // 計時器下方間距
+        const additionalTopMargin = 90;    // 額外上方邊距
+        const topButtonArea = timerHeight + timerGap + additionalTopMargin;  // 160px
+        const bottomButtonArea = 60;       // 底部按鈕區域
+        const availableHeightForCards = height - topButtonArea - bottomButtonArea;  // 454px
+
+        // 🔥 [v31.0] 計算卡片間距（基於項目數量）
+        const cardSpacingBetweenCards = Math.max(10, availableHeightForCards * 0.05);  // 最少 10px
+
+        // 🔥 [v31.0] 計算最大卡片高度（確保所有卡片都能顯示）
+        const maxCardHeightForAllItems = (availableHeightForCards - cardSpacingBetweenCards * (itemCount - 1)) / itemCount;
+
         // 🔥 [v28.0] 使用 SeparatedResponsiveConfig 計算卡片大小
         let cardWidth, cardHeight, fontSize;
 
         if (responsiveLayout) {
             // 使用響應式配置計算的卡片大小
             cardWidth = responsiveLayout.cardSize.width;
-            cardHeight = responsiveLayout.cardSize.height;
+            // 🔥 [v31.0] 限制卡片高度，確保所有卡片都能顯示
+            cardHeight = Math.min(responsiveLayout.cardSize.height, maxCardHeightForAllItems);
             fontSize = responsiveLayout.fontSize;
 
-            console.log('✅ [v28.0] 使用響應式卡片大小:', {
+            // 🔥 [v32.0] 放大卡片 10%
+            cardWidth = cardWidth * 1.1;
+            cardHeight = cardHeight * 1.1;
+            fontSize = Math.round(fontSize * 1.1);
+
+            console.log('✅ [v32.0] 使用響應式卡片大小（放大 10%）:', {
                 cardWidth: cardWidth.toFixed(0),
                 cardHeight: cardHeight.toFixed(0),
-                fontSize: fontSize
+                fontSize: fontSize,
+                maxCardHeightForAllItems: maxCardHeightForAllItems.toFixed(0),
+                itemCount: itemCount,
+                scaleFactor: '1.1x (10% 放大)'
             });
         } else {
             // 備用方案：使用 SeparatedLayoutCalculator
             const optimalSize = calculator.calculateOptimalCardSize(itemCount);
             cardWidth = optimalSize.width;
-            cardHeight = optimalSize.height;
+            // 🔥 [v31.0] 限制卡片高度
+            cardHeight = Math.min(optimalSize.height, maxCardHeightForAllItems);
             fontSize = Math.max(Math.floor(cardHeight * 0.22), 12);
 
-            console.log('⚠️ 使用備用卡片大小計算（SeparatedResponsiveConfig 不可用）');
+            // 🔥 [v32.0] 放大卡片 10%
+            cardWidth = cardWidth * 1.1;
+            cardHeight = cardHeight * 1.1;
+            fontSize = Math.round(fontSize * 1.1);
+
+            console.log('⚠️ 使用備用卡片大小計算（SeparatedResponsiveConfig 不可用）- 放大 10%');
         }
 
         // 🎨 [v25.0] 計算內容大小
@@ -1819,26 +2092,40 @@ class GameScene extends Phaser.Scene {
         let leftX, rightX, leftStartY, rightStartY;
 
         // 🔥 [v30.0] 計算三等分佈局的容器距離
-        // 🔥 [v30.0] 邊距配置：80px（從 SeparatedMarginConfig 讀取，或使用默認值）
-        const sideMargin = 80;  // 左右邊距（80px）
+        // 🔥 [v32.0] 邊距配置：根據卡片大小動態調整
+        let sideMargin = 80;  // 初始左右邊距（80px）
 
         const containerWidth = width * 0.3333;  // 每個容器的寬度（33%）
-        const usableContainerWidth = containerWidth - sideMargin * 2;  // 可用容器寬度
+        let usableContainerWidth = containerWidth - sideMargin * 2;  // 可用容器寬度
+
+        // 🔥 [v32.0] 如果卡片超出容器，動態減少邊距
+        if (cardWidth > usableContainerWidth) {
+            const excessWidth = cardWidth - usableContainerWidth;
+            sideMargin = Math.max(20, sideMargin - Math.ceil(excessWidth / 2));  // 最少保留 20px 邊距
+            usableContainerWidth = containerWidth - sideMargin * 2;
+            console.log('🔥 [v32.0] 卡片超出容器，動態減少邊距:', {
+                originalMargin: 80,
+                newMargin: sideMargin,
+                excessWidth: excessWidth.toFixed(0)
+            });
+        }
+
         const middleGap = width * 0.3334;  // 中間空白區寬度（33%）
 
         // 🔥 [v28.0] 分離模式使用固定的三等分佈局比例
         leftX = width * 0.4;         // 左容器中心（33% 位置）
-        rightX = width * 0.75;       // 右容器中心（66% 位置）
+        // 🔥 [v33.0] 右容器向左移動，給圖片完整顯示空間
+        rightX = width * 0.65;       // 右容器中心向左移動（從 75% 改為 65%）
         leftStartY = this.currentLeftStartY || (height * 0.15);   // 使用保存的位置或默認值
         rightStartY = this.currentRightStartY || (height * 0.15); // 使用保存的位置或默認值
 
-        // 🔥 [v30.0] 調適訊息：分析卡片是否超出容器
+        // 🔥 [v32.0] 調適訊息：分析卡片是否超出容器
         const cardExceedsContainer = cardWidth > usableContainerWidth;
         const excessPixels = cardWidth - usableContainerWidth;
         const containerUtilization = (cardWidth / usableContainerWidth * 100).toFixed(1);
 
-        console.log('🔥🔥🔥 [v30.0] 分離模式三等分佈局已啟用 🔥🔥🔥');
-        console.log('✅ [v30.0] 容器距離計算:', {
+        console.log('🔥🔥🔥 [v32.0] 分離模式三等分佈局已啟用（卡片放大 10%）🔥🔥🔥');
+        console.log('✅ [v32.0] 容器距離計算:', {
             screenWidth: width.toFixed(0),
             containerWidth: containerWidth.toFixed(0),
             sideMargin: sideMargin,
@@ -1846,11 +2133,12 @@ class GameScene extends Phaser.Scene {
             middleGap: middleGap.toFixed(0),
             leftX: leftX.toFixed(0),
             rightX: rightX.toFixed(0),
-            layoutType: '三等分佈局（左33% | 中33% | 右33%）'
+            layoutType: '三等分佈局（左33% | 中33% | 右33%）',
+            scaleFactor: '1.1x (10% 放大)'
         });
 
-        // 🔥 [v30.0] 調適訊息：卡片大小分析
-        console.log('🔍 [v30.0] 卡片大小分析:', {
+        // 🔥 [v32.0] 調適訊息：卡片大小分析
+        console.log('🔍 [v32.0] 卡片大小分析（放大 10%）:', {
             cardWidth: cardWidth.toFixed(0),
             usableContainerWidth: usableContainerWidth.toFixed(0),
             cardExceedsContainer: cardExceedsContainer ? '❌ 超出容器' : '✅ 在容器內',
@@ -1876,7 +2164,11 @@ class GameScene extends Phaser.Scene {
             arrayLength: currentPagePairs.length
         });
 
-        if (this.random === 'same') {
+        // 🔥 [v169.0] 檢查是否有保存的洗牌順序（用於返回上一頁時保持空白框順序一致）
+        if (this.allPagesShuffledCache && this.allPagesShuffledCache[this.currentPage]) {
+            shuffledAnswers = this.allPagesShuffledCache[this.currentPage];
+            console.log('🎲 [v169.0] 使用保存的洗牌順序（返回上一頁）:', shuffledAnswers.map(p => p.id));
+        } else if (this.random === 'same') {
             const urlParams = new URLSearchParams(window.location.search);
             const activityId = urlParams.get('activityId') || 'default-seed';
             const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
@@ -1907,12 +2199,44 @@ class GameScene extends Phaser.Scene {
             this.leftCards.push(card);
         });
 
-        // 🔥 [Screenshot_279] 創建右側答案卡片（使用新的位置計算）
+        // 🔥 [v180.0] 新增：創建 frameIndex 到 pairId 的映射
+        if (!this.frameIndexToPairIdMap) this.frameIndexToPairIdMap = {};
+        if (!this.allPagesFrameIndexToPairIdMap) this.allPagesFrameIndexToPairIdMap = {};
+
+        // 🔥 [v33.0] 創建右側空白框 + 框外答案卡片（Wordwall 風格）
         shuffledAnswers.forEach((pair, index) => {
             const pos = calculator.calculateRightCardPosition(index, cardHeight, rightX, rightStartY);
-            // 🔥 [v62.0] 傳遞 imageUrl 和 audioUrl
-            const card = this.createRightCard(pos.x, pos.y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl, 'right');  // 🔥 文字在框右邊
-            this.rightCards.push(card);
+
+            // 🔥 [v33.0] 創建右側空白框（用於拖放）
+            const emptyBox = this.createEmptyRightBox(pos.x, pos.y, cardWidth, cardHeight, pair.id);
+            this.rightCards.push(emptyBox);
+
+            // 🔥 [v35.0] 單獨存儲空白框用於拖放檢查
+            if (!this.rightEmptyBoxes) this.rightEmptyBoxes = [];
+            this.rightEmptyBoxes.push(emptyBox);
+
+            // 🔥 [v176.0] 新增：設置 frameIndex（應用混合模式的簡潔設計）
+            emptyBox.setData('frameIndex', index);
+
+            // 🔥 [v180.0] 新增：建立 frameIndex 到 pairId 的映射
+            this.frameIndexToPairIdMap[index] = pair.id;
+
+            console.log('🔥 [v176.0] 已設置空白框的 frameIndex:', {
+                pairId: pair.id,
+                frameIndex: index,
+                boxesCount: this.rightEmptyBoxes.length
+            });
+
+            // 🔥 [v33.0] 創建框外答案卡片（圖片 + 水平文字）
+            const answerCard = this.createOutsideAnswerCard(pos.x, pos.y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl);
+            this.rightCards.push(answerCard);
+        });
+
+        // 🔥 [v180.0] 新增：保存當前頁的 frameIndex 到 pairId 映射
+        this.allPagesFrameIndexToPairIdMap[this.currentPage] = { ...this.frameIndexToPairIdMap };
+        console.log('🔥 [v180.0] 已保存當前頁的 frameIndex 到 pairId 映射:', {
+            currentPage: this.currentPage,
+            mapping: this.frameIndexToPairIdMap
         });
 
         // 🔥 [v25.0] 集成總結
@@ -2160,17 +2484,28 @@ class GameScene extends Phaser.Scene {
             this.leftCards.push(card);
         });
 
-        // 🔥 創建右側中文卡片（多行多列）
+        // 🔥 創建右側空白框 + 框外答案卡片（Wordwall 風格）
         shuffledAnswers.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = rightX + col * (cardWidth + spacing.horizontal) + cardWidth / 2;
             const y = rightStartY + row * (cardHeight + spacing.vertical) + cardHeight / 2;
 
-            // 🔥 根據列號決定文字位置
-            const textPosition = col === 0 ? 'left' : 'right';
-            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl, textPosition);
-            this.rightCards.push(card);
+            // 🔥 [v33.0] 創建右側空白框（用於拖放）
+            const emptyBox = this.createEmptyRightBox(x, y, cardWidth, cardHeight, pair.id);
+            this.rightCards.push(emptyBox);
+
+            // 🔥 [v35.0] 單獨存儲空白框用於拖放檢查
+            if (!this.rightEmptyBoxes) this.rightEmptyBoxes = [];
+            this.rightEmptyBoxes.push(emptyBox);
+            console.log('🔥 [v35.0] 已添加空白框到 rightEmptyBoxes:', {
+                pairId: pair.id,
+                boxesCount: this.rightEmptyBoxes.length
+            });
+
+            // 🔥 [v33.0] 創建框外答案卡片（圖片 + 水平文字）
+            const answerCard = this.createOutsideAnswerCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl);
+            this.rightCards.push(answerCard);
         });
 
         console.log('✅ 左右分離佈局（多行多列）創建完成');
@@ -2258,15 +2593,28 @@ class GameScene extends Phaser.Scene {
             this.leftCards.push(card);
         });
 
-        // 🔥 創建下方中文卡片（多行多列）
+        // 🔥 創建下方空白框 + 框外答案卡片（Wordwall 風格）
         shuffledAnswers.forEach((pair, index) => {
             const col = index % columns;
             const row = Math.floor(index / columns);
             const x = bottomX + col * (cardWidth + spacing.horizontal) + cardWidth / 2;
             const y = bottomY + row * (cardHeight + spacing.vertical) + cardHeight / 2;
 
-            const card = this.createRightCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, pair.audioUrl);
-            this.rightCards.push(card);
+            // 🔥 [v33.0] 創建下方空白框（用於拖放）
+            const emptyBox = this.createEmptyRightBox(x, y, cardWidth, cardHeight, pair.id);
+            this.rightCards.push(emptyBox);
+
+            // 🔥 [v35.0] 單獨存儲空白框用於拖放檢查
+            if (!this.rightEmptyBoxes) this.rightEmptyBoxes = [];
+            this.rightEmptyBoxes.push(emptyBox);
+            console.log('🔥 [v35.0] 已添加空白框到 rightEmptyBoxes:', {
+                pairId: pair.id,
+                boxesCount: this.rightEmptyBoxes.length
+            });
+
+            // 🔥 [v33.0] 創建框外答案卡片（圖片 + 水平文字）
+            const answerCard = this.createOutsideAnswerCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl);
+            this.rightCards.push(answerCard);
         });
 
         console.log('✅ 上下分離佈局（多行多列）創建完成');
@@ -4002,8 +4350,10 @@ class GameScene extends Phaser.Scene {
             ease: 'Power2'      // 緩動函數（平滑加速）
         });
 
-        // 設置互動（整個容器可拖曳）
-        container.setInteractive({ useHandCursor: true, draggable: true });
+        // 🔥 [v34.0] 設置互動（整個容器可拖曳）
+        // 正確的方式：先 setInteractive，再 setDraggable
+        container.setInteractive({ useHandCursor: true });
+        this.input.setDraggable(container);
 
         // 儲存原始位置
         container.setData({
@@ -4054,9 +4404,9 @@ class GameScene extends Phaser.Scene {
             this.isDragging = true;
             this.dragStartCard = container;
 
-            // 📝 卡片"飄浮"起來的視覺效果
+            // 🔥 [v34.0] 卡片"飄浮"起來的視覺效果
+            // 移除 scale 放大以避免座標偏差
             container.setDepth(100);   // 提升到最上層（深度值100）
-            container.setScale(1.1);   // 稍微放大（110%）
             background.setAlpha(0.9);  // 半透明（90%不透明度）
         });
 
@@ -4068,9 +4418,18 @@ class GameScene extends Phaser.Scene {
                 return;
             }
 
-            // 移動整個卡片
+            // 🔥 [v35.0] 使用 pointer 座標直接設置卡片位置
+            // 這是 Phaser 的標準做法，pointer.x 和 pointer.y 已經是正確的全局座標
             container.x = pointer.x;
             container.y = pointer.y;
+
+            console.log('🖱️ 拖拉中:', {
+                pairId: container.getData('pairId'),
+                pointerX: pointer.x.toFixed(0),
+                pointerY: pointer.y.toFixed(0),
+                currentX: container.x.toFixed(0),
+                currentY: container.y.toFixed(0)
+            });
         });
 
         // 拖曳結束
@@ -4114,15 +4473,15 @@ class GameScene extends Phaser.Scene {
                         }
                     });
                 } else {
-                    // 先檢查是否拖曳到其他左側卡片（交換位置）
-                    const swapped = this.checkSwap(pointer, container);
+                    // 🔥 [v35.0] 分離模式：先檢查是否拖到右容器的空白框
+                    const droppedInBox = this.checkDropInRightBox(pointer, container);
 
-                    if (!swapped) {
-                        // 如果沒有交換，檢查是否拖曳到右側卡片
-                        const dropped = this.checkDrop(pointer, container);
+                    if (!droppedInBox) {
+                        // 沒有放到右容器，檢查是否拖曳到其他左側卡片（交換位置）
+                        const swapped = this.checkSwap(pointer, container);
 
-                        if (!dropped) {
-                            // 沒有放到正確位置，返回原位
+                        if (!swapped) {
+                            // 沒有交換，返回原位
                             this.tweens.add({
                                 targets: container,
                                 x: container.getData('originalX'),
@@ -4143,9 +4502,6 @@ class GameScene extends Phaser.Scene {
 
             this.dragStartCard = null;
         });
-
-        // 啟用拖曳
-        this.input.setDraggable(container);
 
         return container;
     }
@@ -4755,7 +5111,7 @@ class GameScene extends Phaser.Scene {
         });
 
         // 設置互動（接收拖曳）
-        background.setInteractive({ useHandCursor: true });
+        background.setInteractive({ useHandCursor: true }, Phaser.Geom.Rectangle.Contains);
 
         // 懸停效果
         background.on('pointerover', () => {
@@ -5108,6 +5464,92 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    // 🔥 [v35.0] 檢查是否拖到右容器的空白框（分離模式）
+    checkDropInRightBox(pointer, draggedCard) {
+        console.log('🔍 [v35.0] 檢查是否拖到右容器空白框:', {
+            draggedCardId: draggedCard.getData('pairId'),
+            draggedCardPosition: { x: draggedCard.x, y: draggedCard.y },
+            pointerPosition: { x: pointer.x, y: pointer.y },
+            emptyBoxesCount: (this.rightEmptyBoxes || []).length
+        });
+
+        // 遍歷所有右側空白框
+        for (let i = 0; i < (this.rightEmptyBoxes || []).length; i++) {
+            const emptyBox = this.rightEmptyBoxes[i];
+            const bounds = emptyBox.getBounds();
+
+            console.log(`🔍 [v174.0] 檢查空白框 ${i}:`, {
+                boxPairId: emptyBox.getData('pairId'),
+                boxPosition: { x: emptyBox.x, y: emptyBox.y },
+                boxBounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height },
+                pointerInBounds: bounds.contains(pointer.x, pointer.y),
+                cardInBounds: bounds.contains(draggedCard.x, draggedCard.y)
+            });
+
+            // 🔥 [v174.0] 修復：同時檢查指針位置和卡片位置
+            // 如果指針在框內，或者卡片中心在框內，都認為是拖到了框
+            const pointerInBox = bounds.contains(pointer.x, pointer.y);
+            const cardInBox = bounds.contains(draggedCard.x, draggedCard.y);
+
+            if (pointerInBox || cardInBox) {
+                console.log('✅ [v35.0] 卡片拖到空白框:', {
+                    pairId: draggedCard.getData('pairId'),
+                    boxPairId: emptyBox.getData('pairId'),
+                    boxBounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height },
+                    matchReason: pointerInBox ? '指針在框內' : '卡片在框內'
+                });
+
+                // 檢查是否匹配
+                if (draggedCard.getData('pairId') === emptyBox.getData('pairId')) {
+                    // ✅ 匹配成功
+                    console.log('🎉 [v35.0] 配對成功！');
+                    this.checkMatch(draggedCard, emptyBox);
+                } else {
+                    // ⚠️ 不匹配，但卡片仍然停留在框裡
+                    console.log('⚠️ [v35.0] 不匹配，但卡片停留在框裡');
+
+                    // 🔥 [v187.0] 新增：設置 currentFrameIndex（關鍵修復！）
+                    draggedCard.setData('currentFrameIndex', i);
+                    console.log('🔥 [v187.0] 已設置 currentFrameIndex:', {
+                        pairId: draggedCard.getData('pairId'),
+                        currentFrameIndex: i,
+                        emptyBoxPairId: emptyBox.getData('pairId')
+                    });
+
+                    // 將卡片移動到框的中心位置
+                    const boxCenterX = bounds.x + bounds.width / 2;
+                    const boxCenterY = bounds.y + bounds.height / 2;
+
+                    this.tweens.add({
+                        targets: draggedCard,
+                        x: boxCenterX,
+                        y: boxCenterY,
+                        duration: 200,
+                        ease: 'Back.easeOut',
+                        onComplete: () => {
+                            draggedCard.setDepth(5);
+                            const background = draggedCard.list[0];
+                            if (background) background.setAlpha(1);
+
+                            // 🔥 [v157.0] 保存卡片位置（即使不匹配也要保存）
+                            console.log('🔥 [v157.0] 保存卡片位置（不匹配但停留在框內）:', {
+                                pairId: draggedCard.getData('pairId'),
+                                x: draggedCard.x.toFixed(0),
+                                y: draggedCard.y.toFixed(0)
+                            });
+                            this.saveCardPositionForCurrentPage(draggedCard);
+                        }
+                    });
+                }
+
+                return true;  // 卡片已停留在框裡
+            }
+        }
+
+        console.log('❌ [v35.0] 卡片沒有拖到任何空白框');
+        return false;
+    }
+
     checkDrop(pointer, draggedCard) {
         // 📝 調試訊息：記錄拖放檢查開始
         console.log('🎯 檢查拖放:', {
@@ -5127,30 +5569,37 @@ class GameScene extends Phaser.Scene {
             return this.checkMixedModeDrop(pointer, draggedCard);
         }
 
-        // 分離模式：檢查指針是否在任何右側卡片上
-        let targetCard = null;
+        // 🔥 [v35.0] 分離模式：檢查指針是否在任何右側空白框上
+        let targetBox = null;
 
-        for (const card of this.rightCards) {
-            if (card.getData('isMatched')) continue;  // 跳過已配對的卡片
+        // 使用 rightEmptyBoxes 而不是 rightCards
+        for (const box of this.rightEmptyBoxes || []) {
+            const bounds = box.getBounds();
+            console.log('🔍 [v35.0] 檢查空白框:', {
+                boxPairId: box.getData('pairId'),
+                bounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height },
+                pointerX: pointer.x,
+                pointerY: pointer.y,
+                contains: bounds.contains(pointer.x, pointer.y)
+            });
 
-            const bounds = card.getBounds();
             if (bounds.contains(pointer.x, pointer.y)) {
-                targetCard = card;
-                console.log('✅ 找到目標卡片:', card.getData('pairId'));
+                targetBox = box;
+                console.log('✅ [v35.0] 找到目標空白框:', box.getData('pairId'));
                 break;
             }
         }
 
-        if (targetCard) {
-            console.log('🎯 執行配對檢查:', {
+        if (targetBox) {
+            console.log('🎯 [v35.0] 執行配對檢查:', {
                 leftCard: draggedCard.getData('pairId'),
-                rightCard: targetCard.getData('pairId')
+                rightBox: targetBox.getData('pairId')
             });
-            this.checkMatch(draggedCard, targetCard);
+            this.checkMatch(draggedCard, targetBox);
             return true;
         }
 
-        console.log('❌ 沒有找到目標卡片');
+        console.log('❌ [v35.0] 沒有找到目標空白框');
         return false;
     }
 
@@ -5294,6 +5743,15 @@ class GameScene extends Phaser.Scene {
     checkMatch(leftCard, rightCard) {
         // 🔥 新機制：無論對錯，都讓英文卡片進入中文內框
         // 不立即檢查對錯，等待用戶點擊「提交答案」按鈕
+
+        // 🔥 [v164.0] 深度調試：記錄所有進入 checkMatch 的卡片
+        console.log('🔥 [v164.0] checkMatch 被調用:', {
+            leftCardPairId: leftCard.getData('pairId'),
+            rightCardPairId: rightCard.getData('pairId'),
+            rightCardIsEmptyBox: rightCard.getData('isEmptyBox'),
+            layout: this.layout
+        });
+
         this.onMatchSuccess(leftCard, rightCard);
     }
 
@@ -5312,6 +5770,17 @@ class GameScene extends Phaser.Scene {
             matchedPairsSize: this.matchedPairs.size
         });
 
+        // 🔥 [v164.0] 深度調試：檢查 rightCard 的狀態
+        console.log('🔥 [v164.0] onMatchSuccess 開始 - 檢查 rightCard 狀態:', {
+            pairId: pairId,
+            layout: this.layout,
+            rightCardPairId: rightCard.getData('pairId'),
+            rightCardIsEmptyBox: rightCard.getData('isEmptyBox'),
+            rightCardType: rightCard.constructor.name,
+            rightCardX: rightCard.x,
+            rightCardY: rightCard.y
+        });
+
         // 分離模式：左側卡片移動到右側空白框的位置（完全覆蓋）
         const targetX = rightCard.x;
         const targetY = rightCard.y;
@@ -5327,6 +5796,116 @@ class GameScene extends Phaser.Scene {
             onComplete: () => {
                 leftCard.setDepth(10);  // 提升到空白框上方
                 leftCard.getData('background').setAlpha(1);
+
+                // 🔥 [v144.0] 修復：將卡片添加到空白框容器中，以便提交答案時能找到
+                // 這樣 checkAllMatches 函數才能通過 emptyBox.list 找到卡片
+                if (this.layout === 'separated' && rightCard.getData('isEmptyBox')) {
+                    console.log('🔥 [v144.0] 將卡片添加到空白框容器前:', {
+                        cardPairId: leftCard.getData('pairId'),
+                        boxPairId: rightCard.getData('pairId'),
+                        cardWorldPos: { x: leftCard.x, y: leftCard.y },
+                        boxWorldPos: { x: rightCard.x, y: rightCard.y },
+                        boxChildrenBefore: rightCard.list.length
+                    });
+
+                    // 🔥 [v145.0] 修復：在添加到容器前，計算卡片相對於容器的座標
+                    // 因為添加到容器後，卡片的座標會變成相對於容器的座標
+                    const cardRelativeX = leftCard.x - rightCard.x;
+                    const cardRelativeY = leftCard.y - rightCard.y;
+
+                    // 將卡片添加到空白框容器中
+                    rightCard.add(leftCard);
+
+                    // 設置卡片相對於容器的座標
+                    leftCard.setPosition(cardRelativeX, cardRelativeY);
+
+                    // 🔥 [v160.0] 添加到容器後，卡片的座標已經變成相對座標
+                    // 獲取卡片在容器內的實際相對座標
+                    const actualRelativeX = leftCard.x;
+                    const actualRelativeY = leftCard.y;
+
+                    console.log('🔥 [v145.0] 卡片已添加到空白框容器:', {
+                        cardPairId: leftCard.getData('pairId'),
+                        boxPairId: rightCard.getData('pairId'),
+                        cardRelativePos: { x: cardRelativeX, y: cardRelativeY },
+                        boxChildrenAfter: rightCard.list.length
+                    });
+
+                    // 🔥 [v171.0] 修復：保存空白框的索引位置而不是 pairId
+                    // 原因：pairId 在頁面返回時可能對應不同的位置，但索引位置始終一致
+                    const pairIdForSave = leftCard.getData('pairId');
+
+                    // 🔥 [v171.0] 找到空白框在 rightEmptyBoxes 中的索引
+                    const emptyBoxIndex = this.rightEmptyBoxes.findIndex(box => box === rightCard);
+
+                    // 🔥 [v176.0] 新增：設置 currentFrameIndex（應用混合模式的簡潔設計）
+                    leftCard.setData('currentFrameIndex', emptyBoxIndex);
+                    console.log('🔥 [v176.0] 已設置卡片的 currentFrameIndex:', {
+                        pairId: pairIdForSave,
+                        currentFrameIndex: emptyBoxIndex
+                    });
+
+                    // 🔥 [v186.0] 調適訊息：驗證 currentFrameIndex 是否正確設置
+                    console.log('🔥 [v186.0] onMatchSuccess 完成 - 卡片狀態驗證:', {
+                        pairId: pairIdForSave,
+                        currentFrameIndex: leftCard.getData('currentFrameIndex'),
+                        isMatched: leftCard.getData('isMatched'),
+                        matchedWith: leftCard.getData('matchedWith') ? '已設置' : '未設置',
+                        cardX: leftCard.x.toFixed(0),
+                        cardY: leftCard.y.toFixed(0)
+                    });
+
+                    console.log('🔥 [v171.0] 保存卡片位置前的檢查:', {
+                        pairId: pairIdForSave,
+                        emptyBoxIndex: emptyBoxIndex,
+                        emptyBoxPairId: rightCard.getData('pairId'),
+                        pairIdType: typeof pairIdForSave,
+                        pairIdIsUndefined: pairIdForSave === undefined,
+                        pairIdIsNull: pairIdForSave === null,
+                        actualRelativeX: actualRelativeX,
+                        actualRelativeY: actualRelativeY
+                    });
+
+                    console.log('🔥 [v171.0] 保存卡片位置（配對成功）:', {
+                        pairId: pairIdForSave,
+                        emptyBoxIndex: emptyBoxIndex,
+                        emptyBoxPairId: rightCard.getData('pairId'),
+                        actualRelativeX: actualRelativeX,
+                        actualRelativeY: actualRelativeY
+                    });
+
+                    // 保存卡片位置信息
+                    if (!this.allPagesCardPositions[this.currentPage]) {
+                        this.allPagesCardPositions[this.currentPage] = {};
+                    }
+
+                    // 🔥 [v171.0] 檢查 pairId 和 emptyBoxIndex 是否有效
+                    if (pairIdForSave === undefined || pairIdForSave === null) {
+                        console.error('❌ [v171.0] 錯誤：pairId 為 undefined 或 null！', {
+                            leftCard: leftCard,
+                            leftCardData: leftCard.getData('pairId'),
+                            rightCard: rightCard,
+                            rightCardData: rightCard.getData('pairId')
+                        });
+                    } else if (emptyBoxIndex === -1) {
+                        console.error('❌ [v171.0] 錯誤：未找到空白框在 rightEmptyBoxes 中的索引！', {
+                            pairId: pairIdForSave,
+                            rightCard: rightCard,
+                            rightEmptyBoxesCount: this.rightEmptyBoxes.length
+                        });
+                    } else {
+                        // 🔥 [v176.0] 改進：只保存 currentFrameIndex（應用混合模式的簡潔設計）
+                        this.allPagesCardPositions[this.currentPage][pairIdForSave] = {
+                            isMatched: true,
+                            currentFrameIndex: emptyBoxIndex  // ✅ [v176.0] 簡化：只保存框的索引
+                        };
+                        console.log('✅ [v176.0] 卡片位置已保存（簡化版）:', {
+                            pairId: pairIdForSave,
+                            currentFrameIndex: emptyBoxIndex,
+                            currentPage: this.currentPage
+                        });
+                    }
+                }
 
                 // 🔥 檢查是否所有卡片都已配對，如果是則顯示「提交答案」按鈕
                 this.checkAllCardsMatched();
@@ -5597,88 +6176,146 @@ class GameScene extends Phaser.Scene {
                 }
             });
         } else {
-            // 分離模式：使用原有的邏輯
-            console.log('🔍 [v64.0] 分離模式：使用 matchedPairs 集合檢查');
+            // 分離模式：使用改進的邏輯（v176.0）
+            console.log('🔍 [v176.0] 分離模式：使用 currentFrameIndex 檢查答案', {
+                rightEmptyBoxesLength: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+                leftCardsLength: this.leftCards ? this.leftCards.length : 0,
+                currentPagePairsLength: currentPagePairs.length
+            });
 
-            currentPagePairs.forEach((pair, pairIndex) => {
-                const isMatched = this.matchedPairs.has(pair.id);
+            // 🔥 [v180.0] 改進：使用 frameIndexToPairIdMap 驗證答案
+            // 遍歷所有 frameIndex（空白框位置）
+            for (let frameIndex = 0; frameIndex < this.rightEmptyBoxes.length; frameIndex++) {
+                // 🔥 [v180.0] 從映射中獲取期望的 pairId
+                const expectedPairId = this.frameIndexToPairIdMap[frameIndex];
 
-                console.log(`🔍 [v64.0] 詞彙對 ${pairIndex + 1}/${currentPagePairs.length}:`, {
-                    pairId: pair.id,
-                    chinese: pair.chinese,
-                    english: pair.english,
-                    isMatched: isMatched
+                // 找到當前在這個框位置的卡片
+                const currentCardInFrame = this.leftCards.find(card =>
+                    card.getData('currentFrameIndex') === frameIndex
+                );
+
+                console.log(`🔍 [v180.0] 框位置 ${frameIndex + 1}/${this.rightEmptyBoxes.length}:`, {
+                    expectedPairId: expectedPairId,
+                    frameIndex: frameIndex,
+                    hasCardInFrame: !!currentCardInFrame,
+                    cardPairId: currentCardInFrame ? currentCardInFrame.getData('pairId') : null
                 });
 
-                if (isMatched) {
-                    const leftCard = this.leftCards.find(card => card.getData('pairId') === pair.id);
-                    const rightCard = leftCard ? leftCard.getData('matchedWith') : null;
+                if (currentCardInFrame) {
+                    const currentCardPairId = currentCardInFrame.getData('pairId');
+                    const isCorrect = expectedPairId === currentCardPairId;
+                    const userAnswerPair = this.pairs.find(p => p.id === currentCardPairId);
+                    const expectedPair = this.pairs.find(p => p.id === expectedPairId);
 
-                    if (rightCard) {
-                        const rightPairId = rightCard.getData('pairId');
-                        const isCorrect = pair.id === rightPairId;
-                        const userAnswerPair = this.pairs.find(p => p.id === rightPairId);
-
-                        console.log(`🔍 [v64.0] 答案驗證 - 詞彙對 ${pairIndex + 1}:`, {
-                            expectedPairId: pair.id,
-                            selectedPairId: rightPairId,
-                            isCorrect,
-                            expectedChinese: pair.chinese,
-                            expectedEnglish: pair.english,
-                            userAnswerEnglish: userAnswerPair ? userAnswerPair.english : null
-                        });
-
-                        this.currentPageAnswers.push({
-                            page: this.currentPage,
-                            leftText: pair.chinese,
-                            rightText: userAnswerPair ? userAnswerPair.english : '(未知)',
-                            correctAnswer: pair.english,
-                            correctChinese: pair.chinese,
-                            isCorrect: isCorrect,
-                            leftPairId: pair.id,
-                            rightPairId: rightPairId
-                        });
-
-                        if (isCorrect) {
-                            correctCount++;
-                            console.log('✅ 配對正確:', pair.chinese, '-', userAnswerPair.english);
-                            this.showCorrectAnswer(rightCard, pair.english);
-                        } else {
-                            incorrectCount++;
-                            console.log('❌ 配對錯誤:', pair.chinese, '-', userAnswerPair.english);
-                            this.showIncorrectAnswer(rightCard, pair.english);
-                        }
-                    } else {
-                        console.warn('⚠️ [v64.0] 配對已記錄但找不到右卡片:', pair.id);
-                        unmatchedCount++;
-                        this.currentPageAnswers.push({
-                            page: this.currentPage,
-                            leftText: pair.chinese,
-                            rightText: null,
-                            correctAnswer: pair.english,
-                            correctChinese: pair.chinese,
-                            isCorrect: false,
-                            leftPairId: pair.id,
-                            rightPairId: null
-                        });
-                    }
-                } else {
-                    unmatchedCount++;
-                    console.log('⚠️ 未配對:', pair.chinese);
+                    console.log(`🔍 [v180.0] 答案驗證 - 框位置 ${frameIndex + 1}:`, {
+                        expectedPairId: expectedPairId,
+                        selectedPairId: currentCardPairId,
+                        isCorrect,
+                        expectedChinese: expectedPair ? expectedPair.chinese : 'N/A',
+                        expectedEnglish: expectedPair ? expectedPair.english : 'N/A',
+                        userAnswerEnglish: userAnswerPair ? userAnswerPair.english : null
+                    });
 
                     this.currentPageAnswers.push({
                         page: this.currentPage,
-                        leftText: pair.chinese,
+                        leftText: expectedPair ? expectedPair.chinese : 'N/A',
+                        rightText: userAnswerPair ? userAnswerPair.english : '(未知)',
+                        correctAnswer: expectedPair ? expectedPair.english : 'N/A',
+                        correctChinese: expectedPair ? expectedPair.chinese : 'N/A',
+                        isCorrect: isCorrect,
+                        leftPairId: expectedPairId,
+                        rightPairId: currentCardPairId
+                    });
+
+                    if (isCorrect) {
+                        correctCount++;
+                        console.log('✅ [v180.0] 配對正確:', expectedPair ? expectedPair.chinese : 'N/A', '-', userAnswerPair ? userAnswerPair.english : 'N/A');
+
+                        // 🔥 [v190.0] 修復：在分離模式中，視覺指示器應該顯示在空白框上，而不是左卡片上
+                        if (this.layout === 'separated') {
+                            // 在空白框上顯示勾勾
+                            const emptyBox = this.rightEmptyBoxes[frameIndex];
+                            if (emptyBox) {
+                                this.showCorrectAnswer(emptyBox, expectedPair ? expectedPair.english : 'N/A');
+                            }
+                        } else {
+                            // 混合模式：在左卡片上顯示勾勾
+                            this.showCorrectAnswer(currentCardInFrame, expectedPair ? expectedPair.english : 'N/A');
+                        }
+                    } else {
+                        incorrectCount++;
+                        console.log('❌ [v180.0] 配對錯誤:', expectedPair ? expectedPair.chinese : 'N/A', '-', userAnswerPair ? userAnswerPair.english : 'N/A');
+
+                        // 🔥 [v190.0] 修復：在分離模式中，視覺指示器應該顯示在空白框上，而不是左卡片上
+                        if (this.layout === 'separated') {
+                            // 在空白框上顯示叉叉
+                            const emptyBox = this.rightEmptyBoxes[frameIndex];
+                            if (emptyBox) {
+                                this.showIncorrectAnswer(emptyBox, expectedPair ? expectedPair.english : 'N/A');
+                            }
+                        } else {
+                            // 混合模式：在左卡片上顯示叉叉
+                            this.showIncorrectAnswer(currentCardInFrame, expectedPair ? expectedPair.english : 'N/A');
+                        }
+                    }
+                } else {
+                    // 沒有卡片在這個框位置
+                    unmatchedCount++;
+                    const expectedPair = this.pairs.find(p => p.id === expectedPairId);
+                    console.log('⚠️ [v180.0] 未配對:', expectedPair ? expectedPair.chinese : 'N/A');
+
+                    // 在空白框上顯示叉叉
+                    const emptyBox = this.rightEmptyBoxes[frameIndex];
+                    if (emptyBox) {
+                        this.showIncorrectAnswer(emptyBox, expectedPair ? expectedPair.english : 'N/A');
+                    }
+
+                    this.currentPageAnswers.push({
+                        page: this.currentPage,
+                        leftText: expectedPair ? expectedPair.chinese : 'N/A',
                         rightText: null,
-                        correctAnswer: pair.english,
-                        correctChinese: pair.chinese,
+                        correctAnswer: expectedPair ? expectedPair.english : 'N/A',
+                        correctChinese: expectedPair ? expectedPair.chinese : 'N/A',
                         isCorrect: false,
-                        leftPairId: pair.id,
+                        leftPairId: expectedPairId,
                         rightPairId: null
                     });
                 }
-            });
+            }
+
+            console.log('✅ [v176.0] 分離模式答案驗證完成');
+
+            // 🔥 [v178.0] 修復：移除重複的舊邏輯循環
+            // 原有的第二個循環（v35.0 和 v147.0）已被新的 v176.0 邏輯取代
+            // 該舊邏輯會導致勾勾和叉叉被顯示兩次
+            console.log('🔥 [v178.0] 分離模式答案驗證已完成，跳過舊邏輯循環');
         }
+
+        // 🔥 [v182.0] 保存當前頁的卡片位置（包括未拖動的卡片）
+        console.log('🔥 [v182.0] ========== 保存卡片位置開始 ==========');
+        if (!this.allPagesCardPositions[this.currentPage]) {
+            this.allPagesCardPositions[this.currentPage] = {};
+        }
+
+        // 保存所有左側卡片的位置
+        this.leftCards.forEach(card => {
+            const pairId = card.getData('pairId');
+            const currentFrameIndex = card.getData('currentFrameIndex');
+
+            // 只保存有 currentFrameIndex 的卡片（已拖動到空白框的卡片）
+            if (currentFrameIndex !== undefined && currentFrameIndex !== null) {
+                this.allPagesCardPositions[this.currentPage][pairId] = {
+                    isMatched: card.getData('isMatched'),
+                    currentFrameIndex: currentFrameIndex
+                };
+                console.log('✅ [v182.0] 已保存卡片位置:', {
+                    pairId: pairId,
+                    currentFrameIndex: currentFrameIndex,
+                    isMatched: card.getData('isMatched')
+                });
+            }
+        });
+        console.log('🔥 [v182.0] ========== 保存卡片位置結束 ==========');
 
         // 🔥 [v132.0] 保存當前頁的配對結果和答案（用於返回前面頁面時顯示勾勾和叉叉）
         console.log('🔥 [v132.0] ========== checkAllMatches 保存配對結果開始 ==========');
@@ -5702,6 +6339,56 @@ class GameScene extends Phaser.Scene {
             pageAnswersKey: pageAnswersKey
         });
         console.log('🔥 [v132.0] ========== checkAllMatches 保存配對結果結束 ==========');
+
+        // 🔥 [v185.0] 新增：在提交答案時保存卡片位置（關鍵修復！）
+        console.log('🔥 [v185.0] ========== checkAllMatches 保存卡片位置開始 ==========');
+        console.log('🔥 [v186.0] 調適訊息 - 保存前的狀態:', {
+            currentPage: this.currentPage,
+            leftCardsCount: this.leftCards.length,
+            allPagesCardPositionsKeys: Object.keys(this.allPagesCardPositions)
+        });
+
+        if (!this.allPagesCardPositions[this.currentPage]) {
+            this.allPagesCardPositions[this.currentPage] = {};
+            console.log('🔥 [v186.0] 已初始化 allPagesCardPositions[' + this.currentPage + ']');
+        }
+
+        // 保存所有左側卡片的位置
+        let savedCardsCount = 0;
+        this.leftCards.forEach(card => {
+            const pairId = card.getData('pairId');
+            const currentFrameIndex = card.getData('currentFrameIndex');
+            const isMatched = card.getData('isMatched');
+
+            console.log('🔥 [v186.0] 檢查卡片:', {
+                pairId: pairId,
+                currentFrameIndex: currentFrameIndex,
+                isMatched: isMatched,
+                shouldSave: currentFrameIndex !== undefined && currentFrameIndex !== null
+            });
+
+            // 只保存有 currentFrameIndex 的卡片（已拖動到空白框的卡片）
+            if (currentFrameIndex !== undefined && currentFrameIndex !== null) {
+                this.allPagesCardPositions[this.currentPage][pairId] = {
+                    isMatched: isMatched,
+                    currentFrameIndex: currentFrameIndex
+                };
+                savedCardsCount++;
+                console.log('✅ [v185.0] 已保存卡片位置:', {
+                    pairId: pairId,
+                    currentFrameIndex: currentFrameIndex,
+                    isMatched: isMatched
+                });
+            }
+        });
+
+        console.log('🔥 [v186.0] 調適訊息 - 保存完成:', {
+            currentPage: this.currentPage,
+            savedCardsCount: savedCardsCount,
+            totalLeftCards: this.leftCards.length,
+            allPagesCardPositions: this.allPagesCardPositions[this.currentPage]
+        });
+        console.log('🔥 [v185.0] ========== checkAllMatches 保存卡片位置結束 ==========');
 
         // 🔥 將當前頁面的答案添加到所有答案記錄中
         this.allPagesAnswers.push(...this.currentPageAnswers);
@@ -5745,6 +6432,24 @@ class GameScene extends Phaser.Scene {
             // 分離模式：使用原有的邏輯
             const background = rightCard.getData('background');
 
+            // 🔥 [v35.0] 修復：檢查是否為空白框（isEmptyBox）
+            const isEmptyBox = rightCard.getData('isEmptyBox');
+
+            // 🔥 [v174.0] 調試：記錄卡片類型
+            console.log('🔥 [v174.0] showCorrectAnswer 分離模式:', {
+                pairId: rightCard.getData('pairId'),
+                isEmptyBox: isEmptyBox,
+                hasBackground: !!background,
+                cardType: rightCard.constructor.name
+            });
+
+            if (isEmptyBox) {
+                // 空白框模式：直接在框上顯示勾勾
+                console.log('🔍 [v35.0] showCorrectAnswer 空白框模式 - 顯示勾勾');
+                this.showCorrectAnswerOnCard(rightCard);
+                return;
+            }
+
             // 🔥 [v58.0] 修復：檢查 background 是否存在
             if (!background) {
                 console.warn('⚠️ [v58.0] showCorrectAnswer: background 不存在，跳過視覺效果');
@@ -5763,6 +6468,18 @@ class GameScene extends Phaser.Scene {
             }
 
             // 分離模式：在右卡片上顯示勾勾
+            // 🔥 [v177.0] 修復：清除舊的標記，然後添加新的標記
+            if (rightCard.checkMark) {
+                console.log('🔄 [v177.0] 清除舊的勾勾標記:', rightCard.getData('pairId'));
+                rightCard.checkMark.destroy();
+                rightCard.checkMark = null;
+            }
+            if (rightCard.xMark) {
+                console.log('🔄 [v177.0] 清除舊的叉叉標記:', rightCard.getData('pairId'));
+                rightCard.xMark.destroy();
+                rightCard.xMark = null;
+            }
+
             const checkMark = this.add.text(
                 rightCard.x + background.width / 2 - 32,
                 rightCard.y - background.height / 2 + 32,
@@ -5776,38 +6493,73 @@ class GameScene extends Phaser.Scene {
             );
             checkMark.setOrigin(0.5).setDepth(15);
             rightCard.add(checkMark);
+
+            // 🔥 [v177.0] 新增：保存標記引用，以便後續清除
+            rightCard.checkMark = checkMark;
+            console.log('✅ [v177.0] 勾勾已添加到卡片（分離模式非空白框）:', {
+                pairId: rightCard.getData('pairId'),
+                markX: rightCard.x + background.width / 2 - 32,
+                markY: rightCard.y - background.height / 2 + 32
+            });
         }
     }
 
     // 🔥 顯示錯誤答案（灰色內框 + X）[v96.0]
     showIncorrectAnswer(rightCard, correctAnswer) {
-        // 🔥 [v142.0] 修復：在混合佈局中使用 showIncorrectAnswerOnCard 函數
+        // 🔥 [v152.0] 修復：完全鏡像 showCorrectAnswer 的邏輯
+        console.log('🔍 [v152.0] showIncorrectAnswer 開始:', {
+            layout: this.layout,
+            isEmptyBox: rightCard.getData('isEmptyBox'),
+            pairId: rightCard.getData('pairId'),
+            correctAnswer: correctAnswer
+        });
+
+        // 🔥 [v152.0] 統一邏輯：完全鏡像 showCorrectAnswer
         if (this.layout === 'mixed') {
-            // 混合佈局：使用統一的 showIncorrectAnswerOnCard 函數
-            console.log('🔍 [v142.0] showIncorrectAnswer 混合佈局 - 調用 showIncorrectAnswerOnCard');
+            // 混合佈局：使用 showIncorrectAnswerOnCard 函數
+            console.log('🔍 [v152.0] showIncorrectAnswer 混合佈局 - 調用 showIncorrectAnswerOnCard');
             this.showIncorrectAnswerOnCard(rightCard);
         } else {
-            // 分離模式：使用原有的邏輯
+            // 分離模式：使用與勾勾相同的邏輯
             const background = rightCard.getData('background');
 
-            // 🔥 [v58.0] 修復：檢查 background 是否存在
-            if (!background) {
-                console.warn('⚠️ [v58.0] showIncorrectAnswer: background 不存在，跳過視覺效果');
+            // 🔥 [v152.0] 檢查是否為空白框（isEmptyBox）
+            const isEmptyBox = rightCard.getData('isEmptyBox');
+
+            // 🔥 [v174.0] 調試：記錄卡片類型
+            console.log('🔥 [v174.0] showIncorrectAnswer 分離模式:', {
+                pairId: rightCard.getData('pairId'),
+                isEmptyBox: isEmptyBox,
+                hasBackground: !!background,
+                cardType: rightCard.constructor.name
+            });
+
+            if (isEmptyBox) {
+                // 空白框模式：直接在框上顯示叉叉（使用 showIncorrectAnswerOnCard）
+                console.log('🔍 [v152.0] showIncorrectAnswer 空白框模式 - 調用 showIncorrectAnswerOnCard');
+                this.showIncorrectAnswerOnCard(rightCard);
                 return;
             }
 
-            const textObj = rightCard.getData('text');  // 🔥 修正：使用 'text' 而非 'textObj'
-
-            // 內框呈灰色
-            background.setFillStyle(0xcccccc);
-            background.setStrokeStyle(2, 0x000000);
-
-            // 更新文字為正確答案
-            if (textObj) {
-                textObj.setText(correctAnswer);
+            // 🔥 [v152.0] 檢查 background 是否存在
+            if (!background) {
+                console.warn('⚠️ [v152.0] showIncorrectAnswer: background 不存在，跳過視覺效果');
+                return;
             }
 
-            // 分離模式：在右卡片上顯示叉叉
+            // 分離模式（非空白框）：在右卡片上顯示叉叉（使用與勾勾相同的邏輯）
+            // 🔥 [v177.0] 修復：清除舊的標記，然後添加新的標記
+            if (rightCard.checkMark) {
+                console.log('🔄 [v177.0] 清除舊的勾勾標記:', rightCard.getData('pairId'));
+                rightCard.checkMark.destroy();
+                rightCard.checkMark = null;
+            }
+            if (rightCard.xMark) {
+                console.log('🔄 [v177.0] 清除舊的叉叉標記:', rightCard.getData('pairId'));
+                rightCard.xMark.destroy();
+                rightCard.xMark = null;
+            }
+
             const xMark = this.add.text(
                 rightCard.x + background.width / 2 - 32,
                 rightCard.y - background.height / 2 + 32,
@@ -5821,7 +6573,18 @@ class GameScene extends Phaser.Scene {
             );
             xMark.setOrigin(0.5).setDepth(15);
             rightCard.add(xMark);
+
+            // 🔥 [v177.0] 新增：保存標記引用，以便後續清除
+            rightCard.xMark = xMark;
+            console.log('✅ [v177.0] 叉叉已添加到卡片（分離模式非空白框）:', {
+                pairId: rightCard.getData('pairId'),
+                markX: rightCard.x + background.width / 2 - 32,
+                markY: rightCard.y - background.height / 2 + 32,
+                markDepth: 15
+            });
         }
+
+        console.log('🔍 [v152.0] showIncorrectAnswer 完成');
     }
 
     // 🔥 顯示配對總結 [v95.0] - 非最後一頁自動進入下一頁，只有最後一頁才顯示統計
@@ -5865,18 +6628,37 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 [v125.0] 無論是否為最後一頁，都顯示分頁選擇器
         console.log('🔥 [v125.0] ✅ 顯示分頁選擇器（所有頁面都顯示，讓用戶可以返回查看答案）');
-        this.time.delayedCall(2000, () => {
+
+        // 🔥 [v202.0] 清除舊的延遲調用（如果存在）
+        if (this.summaryDelayedCall) {
+            this.summaryDelayedCall.remove();
+            this.summaryDelayedCall = null;
+            console.log('🔥 [v202.0] 已清除舊的 summaryDelayedCall');
+        }
+
+        // 🔥 [v202.0] 創建新的延遲調用並保存引用
+        this.summaryDelayedCall = this.time.delayedCall(2000, () => {
             console.log('🔥 [v125.0] ⏰ 2 秒延遲完成，準備顯示分頁選擇器');
             console.log('🔥 [v125.0] 調用 showPaginationButtons()，當前頁面: ' + (this.currentPage + 1) + '/' + this.totalPages);
             this.showPaginationButtons();
+            this.summaryDelayedCall = null;  // 🔥 [v202.0] 清除引用
 
             // 如果不是最後一頁且 autoProceed=true，在顯示分頁選擇器後自動進入下一頁
             if (!isLastPage && this.autoProceed) {
                 console.log('🔥 [v125.0] ✅ autoProceed=true 且不是最後一頁：將在 3 秒後自動進入下一頁');
-                this.time.delayedCall(3000, () => {
+
+                // 🔥 [v202.0] 清除舊的自動進入延遲調用（如果存在）
+                if (this.autoProceedDelayedCall) {
+                    this.autoProceedDelayedCall.remove();
+                    this.autoProceedDelayedCall = null;
+                }
+
+                // 🔥 [v202.0] 創建新的延遲調用並保存引用
+                this.autoProceedDelayedCall = this.time.delayedCall(3000, () => {
                     console.log('🔥 [v125.0] ⏰ 3 秒延遲完成，準備進入下一頁');
                     console.log('🔥 [v125.0] 調用 goToNextPage()，頁面轉換: ' + this.currentPage + ' → ' + (this.currentPage + 1));
                     this.goToNextPage();
+                    this.autoProceedDelayedCall = null;  // 🔥 [v202.0] 清除引用
                 });
             } else if (isLastPage) {
                 console.log('🔥 [v125.0] ✅ 最後一頁：用戶可以返回前面頁面查看答案，或查看最終統計');
@@ -6022,6 +6804,7 @@ class GameScene extends Phaser.Scene {
         this.rightCards.forEach(card => card.destroy());
         this.leftCards = [];
         this.rightCards = [];
+        this.rightEmptyBoxes = [];  // 🔥 [v35.0] 清空右側空白框
         this.matchedPairs.clear();
 
         // 清除所有文字和按鈕
@@ -6104,7 +6887,9 @@ class GameScene extends Phaser.Scene {
                     backgroundColor: '#2196F3',
                     padding: { x: 20, y: 10 }
                 }
-            ).setOrigin(0.5).setDepth(2001).setInteractive({ useHandCursor: true });
+            ).setOrigin(0.5).setDepth(2001);
+
+            showAnswersButton.setInteractive({ useHandCursor: true });
 
             showAnswersButton.on('pointerdown', () => {
                 completeText.destroy();
@@ -6238,7 +7023,9 @@ class GameScene extends Phaser.Scene {
                 backgroundColor: '#f44336',
                 padding: { x: 20, y: 10 }
             }
-        ).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        ).setOrigin(0.5);
+
+        closeButton.setInteractive({ useHandCursor: true });
 
         closeButton.on('pointerdown', () => {
             // 重新載入遊戲
@@ -6294,6 +7081,50 @@ class GameScene extends Phaser.Scene {
                 savedAnswersLength: this.currentPageAnswers.length
             });
 
+            // 🔥 [v183.0] 在進入下一頁前保存卡片位置（包括未拖動的卡片）
+            console.log('🔥 [v183.0] ========== 進入下一頁前保存卡片位置開始 ==========');
+            console.log('🔥 [v186.0] 調適訊息 - goToNextPage 保存前:', {
+                previousPage: previousPage,
+                currentPage: this.currentPage,
+                leftCardsCount: this.leftCards.length,
+                allPagesCardPositionsKeys: Object.keys(this.allPagesCardPositions)
+            });
+
+            if (!this.allPagesCardPositions[previousPage]) {
+                this.allPagesCardPositions[previousPage] = {};
+                console.log('🔥 [v186.0] 已初始化 allPagesCardPositions[' + previousPage + ']');
+            }
+
+            // 保存所有左側卡片的位置
+            let savedCardsCount = 0;
+            this.leftCards.forEach(card => {
+                const pairId = card.getData('pairId');
+                const currentFrameIndex = card.getData('currentFrameIndex');
+                const isMatched = card.getData('isMatched');
+
+                // 只保存有 currentFrameIndex 的卡片（已拖動到空白框的卡片）
+                if (currentFrameIndex !== undefined && currentFrameIndex !== null) {
+                    this.allPagesCardPositions[previousPage][pairId] = {
+                        isMatched: isMatched,
+                        currentFrameIndex: currentFrameIndex
+                    };
+                    savedCardsCount++;
+                    console.log('✅ [v183.0] 已保存卡片位置:', {
+                        pairId: pairId,
+                        currentFrameIndex: currentFrameIndex,
+                        isMatched: isMatched
+                    });
+                }
+            });
+
+            console.log('🔥 [v186.0] 調適訊息 - goToNextPage 保存完成:', {
+                previousPage: previousPage,
+                savedCardsCount: savedCardsCount,
+                totalLeftCards: this.leftCards.length,
+                allPagesCardPositions: this.allPagesCardPositions[previousPage]
+            });
+            console.log('🔥 [v183.0] ========== 進入下一頁前保存卡片位置結束 ==========');
+
             this.currentPage++;
             console.log('📄 進入下一頁:', this.currentPage + 1);
 
@@ -6304,9 +7135,13 @@ class GameScene extends Phaser.Scene {
                 totalPages: this.totalPages
             });
 
-            // 🔥 v54.0: 清除洗牌順序緩存（因為頁面改變了）
-            this.shuffledPairsCache = null;
-            console.log('🔥 [v54.0] 已清除洗牌順序緩存（頁面改變）');
+            // 🔥 [v169.0] 不清除洗牌順序緩存，而是保存每一頁的洗牌順序
+            // 這樣返回上一頁時，空白框的順序會保持一致
+            if (!this.allPagesShuffledCache) {
+                this.allPagesShuffledCache = {};
+            }
+            this.allPagesShuffledCache[this.currentPage] = this.shuffledPairsCache;
+            console.log('🔥 [v169.0] 已保存第 ' + (this.currentPage + 1) + ' 頁的洗牌順序到緩存');
 
             // 清空 matchedPairs（準備進入新頁面）
             this.matchedPairs.clear();
@@ -6356,6 +7191,50 @@ class GameScene extends Phaser.Scene {
                 savedAnswersLength: this.currentPageAnswers.length
             });
 
+            // 🔥 [v183.0] 在進入上一頁前保存卡片位置（包括未拖動的卡片）
+            console.log('🔥 [v183.0] ========== 進入上一頁前保存卡片位置開始 ==========');
+            console.log('🔥 [v186.0] 調適訊息 - goToPreviousPage 保存前:', {
+                previousPage: previousPage,
+                currentPage: this.currentPage,
+                leftCardsCount: this.leftCards.length,
+                allPagesCardPositionsKeys: Object.keys(this.allPagesCardPositions)
+            });
+
+            if (!this.allPagesCardPositions[previousPage]) {
+                this.allPagesCardPositions[previousPage] = {};
+                console.log('🔥 [v186.0] 已初始化 allPagesCardPositions[' + previousPage + ']');
+            }
+
+            // 保存所有左側卡片的位置
+            let savedCardsCount = 0;
+            this.leftCards.forEach(card => {
+                const pairId = card.getData('pairId');
+                const currentFrameIndex = card.getData('currentFrameIndex');
+                const isMatched = card.getData('isMatched');
+
+                // 只保存有 currentFrameIndex 的卡片（已拖動到空白框的卡片）
+                if (currentFrameIndex !== undefined && currentFrameIndex !== null) {
+                    this.allPagesCardPositions[previousPage][pairId] = {
+                        isMatched: isMatched,
+                        currentFrameIndex: currentFrameIndex
+                    };
+                    savedCardsCount++;
+                    console.log('✅ [v183.0] 已保存卡片位置:', {
+                        pairId: pairId,
+                        currentFrameIndex: currentFrameIndex,
+                        isMatched: isMatched
+                    });
+                }
+            });
+
+            console.log('🔥 [v186.0] 調適訊息 - goToPreviousPage 保存完成:', {
+                previousPage: previousPage,
+                savedCardsCount: savedCardsCount,
+                totalLeftCards: this.leftCards.length,
+                allPagesCardPositions: this.allPagesCardPositions[previousPage]
+            });
+            console.log('🔥 [v183.0] ========== 進入上一頁前保存卡片位置結束 ==========');
+
             this.currentPage--;
             console.log('📄 進入上一頁:', this.currentPage + 1);
 
@@ -6366,9 +7245,13 @@ class GameScene extends Phaser.Scene {
                 totalPages: this.totalPages
             });
 
-            // 🔥 清除洗牌順序緩存（因為頁面改變了）
-            this.shuffledPairsCache = null;
-            console.log('🔥 [v117.0] 已清除洗牌順序緩存（頁面改變）');
+            // 🔥 [v169.0] 不清除洗牌順序緩存，而是保存每一頁的洗牌順序
+            // 這樣返回上一頁時，空白框的順序會保持一致
+            if (!this.allPagesShuffledCache) {
+                this.allPagesShuffledCache = {};
+            }
+            this.allPagesShuffledCache[this.currentPage] = this.shuffledPairsCache;
+            console.log('🔥 [v169.0] 已保存第 ' + (this.currentPage + 1) + ' 頁的洗牌順序到緩存');
 
             // 清空 matchedPairs（準備進入上一頁）
             this.matchedPairs.clear();
@@ -6493,8 +7376,22 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 [v123.0] 創建分頁選擇器（頁碼選擇）- 優化視覺設計
     createPageSelector(x, y, width, height) {
-        console.log('🔥 [v123.0] ========== createPageSelector 開始 ==========');
-        console.log('🔥 [v123.0] 分頁選擇器參數:', {
+        console.log('🔥 [v198.0] ========== createPageSelector 開始 ==========');
+
+        // 🔥 [v198.0] 修復：先銷毀舊的分頁選擇器（如果存在）
+        if (this.pageSelectorComponents) {
+            console.log('🔥 [v198.0] 銷毀舊的分頁選擇器');
+            const { bg, text, decreaseBtn, decreaseText, increaseBtn, increaseText } = this.pageSelectorComponents;
+            if (bg) bg.destroy();
+            if (text) text.destroy();
+            if (decreaseBtn) decreaseBtn.destroy();
+            if (decreaseText) decreaseText.destroy();
+            if (increaseBtn) increaseBtn.destroy();
+            if (increaseText) increaseText.destroy();
+            this.pageSelectorComponents = null;
+        }
+
+        console.log('🔥 [v198.0] 分頁選擇器參數:', {
             x: x,
             y: y,
             width: width,
@@ -6535,13 +7432,18 @@ class GameScene extends Phaser.Scene {
         selectorText.setScrollFactor(0);
         console.log('🔥 [v123.0] ✅ 選擇器文字已創建');
 
-        // 🔥 [v123.0] 創建左側減少按鈕 - 改進設計
+        // 🔥 [v197.0] 創建左側減少按鈕 - 始終保持啟用
         const decreaseBtn = this.add.rectangle(x - width / 2 + 15, y + height / 2, 24, 24,
             canGoPrevious ? 0x2196F3 : 0xcccccc);
-        decreaseBtn.setInteractive({ useHandCursor: canGoPrevious ? true : false });
+        // 🔥 [v197.0] 修復：始終啟用按鈕，不調用 disableInteractive()
+        decreaseBtn.setInteractive(
+            new Phaser.Geom.Rectangle(0, 0, 24, 24),
+            Phaser.Geom.Rectangle.Contains,
+            { useHandCursor: true }
+        );
         decreaseBtn.setDepth(3000);
         decreaseBtn.setScrollFactor(0);
-        console.log('🔥 [v123.0] ✅ 減少按鈕已創建');
+        console.log('🔥 [v197.0] ✅ 減少按鈕已創建（始終啟用）');
 
         const decreaseText = this.add.text(x - width / 2 + 15, y + height / 2, '−', {
             fontSize: '16px',
@@ -6553,13 +7455,18 @@ class GameScene extends Phaser.Scene {
         decreaseText.setDepth(3001);
         decreaseText.setScrollFactor(0);
 
-        // 🔥 [v123.0] 創建右側增加按鈕 - 改進設計
+        // 🔥 [v197.0] 創建右側增加按鈕 - 始終保持啟用
         const increaseBtn = this.add.rectangle(x + width / 2 - 15, y + height / 2, 24, 24,
             canGoNext ? 0x4caf50 : 0xcccccc);
-        increaseBtn.setInteractive({ useHandCursor: canGoNext ? true : false });
+        // 🔥 [v197.0] 修復：始終啟用按鈕，不調用 disableInteractive()
+        increaseBtn.setInteractive(
+            new Phaser.Geom.Rectangle(0, 0, 24, 24),
+            Phaser.Geom.Rectangle.Contains,
+            { useHandCursor: true }
+        );
         increaseBtn.setDepth(3000);
         increaseBtn.setScrollFactor(0);
-        console.log('🔥 [v123.0] ✅ 增加按鈕已創建');
+        console.log('🔥 [v197.0] ✅ 增加按鈕已創建（始終啟用）');
 
         const increaseText = this.add.text(x + width / 2 - 15, y + height / 2, '+', {
             fontSize: '16px',
@@ -6571,10 +7478,11 @@ class GameScene extends Phaser.Scene {
         increaseText.setDepth(3001);
         increaseText.setScrollFactor(0);
 
-        // 🔥 [v126.0] 減少按鈕點擊事件 - 不銷毀選擇器，只更新頁面
+        // 🔥 [v199.0] 減少按鈕點擊事件 - 移除 updatePageSelectorText() 調用
         decreaseBtn.on('pointerdown', () => {
-            console.log('🔥 [v126.0] 🖱️ 減少按鈕被點擊');
-            if (canGoPrevious) {
+            console.log('🔥 [v199.0] 🖱️ 減少按鈕被點擊');
+            // 🔥 [v196.0] 動態檢查當前頁面狀態，而不是使用閉包變數
+            if (this.currentPage > 0) {
                 // 添加按鈕按下動畫
                 this.tweens.add({
                     targets: decreaseBtn,
@@ -6585,15 +7493,16 @@ class GameScene extends Phaser.Scene {
                 });
 
                 this.goToPreviousPage();
-                // 🔥 [v126.0] 不銷毀選擇器，只更新文字
-                this.updatePageSelectorText();
+                // 🔥 [v199.0] 移除 updatePageSelectorText() 調用
+                // 因為 updateLayout() 已經重新創建了分頁選擇器，不需要再更新
             }
         });
 
-        // 🔥 [v126.0] 增加按鈕點擊事件 - 不銷毀選擇器，只更新頁面
+        // 🔥 [v199.0] 增加按鈕點擊事件 - 移除 updatePageSelectorText() 調用
         increaseBtn.on('pointerdown', () => {
-            console.log('🔥 [v126.0] 🖱️ 增加按鈕被點擊');
-            if (canGoNext) {
+            console.log('🔥 [v199.0] 🖱️ 增加按鈕被點擊');
+            // 🔥 [v196.0] 動態檢查當前頁面狀態，而不是使用閉包變數
+            if (this.currentPage < this.totalPages - 1) {
                 // 添加按鈕按下動畫
                 this.tweens.add({
                     targets: increaseBtn,
@@ -6604,8 +7513,8 @@ class GameScene extends Phaser.Scene {
                 });
 
                 this.goToNextPage();
-                // 🔥 [v126.0] 不銷毀選擇器，只更新文字
-                this.updatePageSelectorText();
+                // 🔥 [v199.0] 移除 updatePageSelectorText() 調用
+                // 因為 updateLayout() 已經重新創建了分頁選擇器，不需要再更新
             }
         });
 
@@ -6718,7 +7627,8 @@ class GameScene extends Phaser.Scene {
         });
     }
 
-    // 🔥 [v126.0] 更新分頁選擇器文字（保持選擇器在屏幕上）
+    // 🔥 [v197.0] 更新分頁選擇器文字（保持選擇器在屏幕上）
+    // 🔥 [v197.0] 修復：只更新顏色，不調用 disableInteractive() 或 setInteractive()
     updatePageSelectorText() {
         if (!this.pageSelectorComponents) {
             console.log('🔥 [v126.0] ⚠️ 分頁選擇器組件不存在，無法更新');
@@ -6729,7 +7639,7 @@ class GameScene extends Phaser.Scene {
 
         // 更新頁碼文字
         text.setText(`${this.currentPage + 1}/${this.totalPages}`);
-        console.log('🔥 [v126.0] ✅ 分頁選擇器文字已更新:', {
+        console.log('🔥 [v197.0] ✅ 分頁選擇器文字已更新:', {
             currentPage: this.currentPage + 1,
             totalPages: this.totalPages
         });
@@ -6738,15 +7648,12 @@ class GameScene extends Phaser.Scene {
         const canGoPrevious = this.currentPage > 0;
         const canGoNext = this.currentPage < this.totalPages - 1;
 
-        // 更新減少按鈕
+        // 🔥 [v197.0] 修復：只更新顏色，不調用 disableInteractive()
+        // 按鈕始終保持啟用，在事件監聽器中動態檢查是否可以導航
         decreaseBtn.setFillStyle(canGoPrevious ? 0x2196F3 : 0xcccccc);
-        decreaseBtn.setInteractive({ useHandCursor: canGoPrevious ? true : false });
-
-        // 更新增加按鈕
         increaseBtn.setFillStyle(canGoNext ? 0x4caf50 : 0xcccccc);
-        increaseBtn.setInteractive({ useHandCursor: canGoNext ? true : false });
 
-        console.log('🔥 [v126.0] ✅ 分頁選擇器按鈕狀態已更新:', {
+        console.log('🔥 [v197.0] ✅ 分頁選擇器按鈕顏色已更新:', {
             canGoPrevious,
             canGoNext
         });
@@ -6999,6 +7906,10 @@ class GameScene extends Phaser.Scene {
         // Start again 按鈕
         this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 3, 'Start again', () => {
             console.log('🎮 點擊 Start again 按鈕');
+            // 🔥 [v1.2] 先銷毀模態框，再重新開始遊戲
+            overlay.destroy();
+            modal.destroy();
+            this.gameCompleteModal = null;
             this.restartGame();
         });
 
@@ -7118,6 +8029,7 @@ class GameScene extends Phaser.Scene {
     // 🔥 重新開始遊戲
     restartGame() {
         console.log('🎮 重新開始遊戲');
+        console.log('🔥 [v230.6] restartGame 被調用了');
 
         // 關閉遊戲完成模態框
         if (this.gameCompleteModal) {
@@ -7131,6 +8043,25 @@ class GameScene extends Phaser.Scene {
             this.pageCompleteModal.overlay.destroy();
             this.pageCompleteModal.modal.destroy();
             this.pageCompleteModal = null;
+        }
+
+        // 🔥 [v1.1] 清理所有延遲調用
+        if (this.summaryDelayedCall) {
+            this.summaryDelayedCall.remove();
+            this.summaryDelayedCall = null;
+            console.log('🔥 [v1.1] 已移除 summaryDelayedCall');
+        }
+        if (this.autoProceedDelayedCall) {
+            this.autoProceedDelayedCall.remove();
+            this.autoProceedDelayedCall = null;
+            console.log('🔥 [v1.1] 已移除 autoProceedDelayedCall');
+        }
+
+        // 🔥 [v1.1] 停止計時器
+        if (this.timerEvent) {
+            this.timerEvent.remove();
+            this.timerEvent = null;
+            console.log('🔥 [v1.1] 已停止計時器');
         }
 
         // 重置遊戲狀態
@@ -7151,14 +8082,105 @@ class GameScene extends Phaser.Scene {
         this.shuffledPairsCache = null;
         console.log('🔥 [v54.0] 已清除洗牌順序緩存（遊戲重新開始）');
 
-        // 重新載入遊戲
-        this.scene.restart();
+        // 🔥 [v1.3] 重置 "Show all answers" 狀態
+        this.isShowingAllAnswers = false;
+        this.allPagesShowAllAnswersState = {};
+        console.log('🔥 [v1.3] 已重置 Show all answers 狀態');
+
+        // 🔥 [v230.2] 改變策略：只重置遊戲狀態，讓 updateLayout() 自己清除卡片
+        // 原因：updateLayout() 中的清除邏輯依賴於 this.leftCards 等數組
+        console.log('🔥 [v230.2] ========== 開始重新初始化遊戲 ==========');
+
+        // 調適訊息：記錄重新開始前的狀態
+        const beforeState = {
+            leftCardsCount: this.leftCards ? this.leftCards.length : 0,
+            rightCardsCount: this.rightCards ? this.rightCards.length : 0,
+            rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+            matchedPairsSize: this.matchedPairs ? this.matchedPairs.size : 0,
+            childrenCount: this.children.list.length
+        };
+        console.log('🔥 [v230.2] 重新開始前的狀態 - 左卡片:', beforeState.leftCardsCount, '右卡片:', beforeState.rightCardsCount, '空白框:', beforeState.rightEmptyBoxesCount, '配對:', beforeState.matchedPairsSize, '子元素:', beforeState.childrenCount);
+
+        // 重新初始化遊戲狀態（不清除卡片數組，讓 updateLayout 自己清除）
+        console.log('🔥 [v230.2] 重新初始化遊戲狀態');
+        this.gameState = 'playing';
+        this.gameStartTime = null;
+        this.gameEndTime = null;
+        this.totalGameTime = 0;
+        this.allPagesAnswers = [];
+        this.currentPageAnswers = [];
+        this.currentPage = 0;
+        this.matchedPairs.clear();
+        this.allPagesMatchedPairs = {};
+        this.shuffledPairsCache = null;
+        this.isShowingAllAnswers = false;
+        this.allPagesShowAllAnswersState = {};
+        this.isDragging = false;
+        this.dragStartCard = null;
+        this.submitButton = null;
+        this.gameCompleteModal = null;
+        this.pageCompleteModal = null;
+
+        // 🔥 [v230.14] 關鍵修復：清除所有頁面的答案緩存
+        // 這樣 updateLayout() 就不會恢復舊的 X 標記
+        for (let i = 0; i < this.totalPages; i++) {
+            const pageAnswersKey = `page_${i}_answers`;
+            this[pageAnswersKey] = [];
+        }
+        console.log('🔥 [v230.14] 已清除所有頁面的答案緩存');
+
+        // 🔥 [v230.15] 關鍵修復：清除所有頁面的卡片位置緩存
+        // 這樣 restoreCardPositions() 就不會恢復卡片位置並重新填充 matchedPairs
+        this.allPagesCardPositions = {};
+        console.log('🔥 [v230.15] 已清除所有頁面的卡片位置緩存');
+
+        console.log('🔥 [v230.2] 已重新初始化遊戲狀態');
+
+        // 🔥 [v230.13] 最終解決方案：不依賴卡片數組，直接清除所有標記
+        // 原因：showAnswersOnCards() 後，卡片可能已經被 updateLayout() 清除
+        console.log('🔥 [v230.13] 開始清除所有標記（最終解決方案）');
+
+        // 策略：直接調用 updateLayout() 來清除所有元素並重新創建
+        // updateLayout() 會清除所有卡片、標記和其他元素
+        // 這樣可以確保所有殘留的 X 標記都被清除
+        console.log('🔥 [v230.13] 不需要手動清除標記，updateLayout() 會清除所有元素');
+
+        // 🔥 [v230.5] 在調用 updateLayout 之前檢查卡片數組
+        console.log('🔥 [v230.5] 調用 updateLayout 前的卡片數組狀態 - 左:', this.leftCards.length, '右:', this.rightCards.length, '空白框:', this.rightEmptyBoxes.length);
+
+        // 重新調用 updateLayout 來清除舊卡片並創建新卡片
+        console.log('🔥 [v230.2] 調用 updateLayout 清除舊卡片並創建新卡片');
+        this.updateLayout();
+
+        // 調適訊息：updateLayout 完成後的狀態
+        const finalState = {
+            leftCardsCount: this.leftCards ? this.leftCards.length : 0,
+            rightCardsCount: this.rightCards ? this.rightCards.length : 0,
+            rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+            matchedPairsSize: this.matchedPairs ? this.matchedPairs.size : 0,
+            childrenCount: this.children.list.length
+        };
+        console.log('🔥 [v230.2] updateLayout 完成後的狀態 - 左卡片:', finalState.leftCardsCount, '右卡片:', finalState.rightCardsCount, '空白框:', finalState.rightEmptyBoxesCount, '配對:', finalState.matchedPairsSize, '子元素:', finalState.childrenCount);
+
+        console.log('🔥 [v230.2] ========== 重新初始化遊戲完成 ==========');
     }
 
     // 🔥 顯示 My Answers 頁面
     // 🔥 v88.0: 顯示所有卡片上的勾勾和叉叉，以及正確的配對物件
     showAnswersOnCards() {
         console.log('🎮 [v88.0] 顯示所有卡片上的勾勾和叉叉，以及正確的配對物件');
+
+        // 🔥 [v202.0] 移除特定的延遲調用，而不是所有事件
+        if (this.summaryDelayedCall) {
+            this.summaryDelayedCall.remove();
+            this.summaryDelayedCall = null;
+            console.log('🔥 [v202.0] 已移除 summaryDelayedCall');
+        }
+        if (this.autoProceedDelayedCall) {
+            this.autoProceedDelayedCall.remove();
+            this.autoProceedDelayedCall = null;
+            console.log('🔥 [v202.0] 已移除 autoProceedDelayedCall');
+        }
 
         // 遍歷所有答案，在對應的卡片上顯示勾勾或叉叉，以及正確的配對物件
         if (this.allPagesAnswers && this.allPagesAnswers.length > 0) {
@@ -7187,15 +8209,126 @@ class GameScene extends Phaser.Scene {
     showAllCorrectAnswers() {
         console.log('🎮 [v137.0] 顯示所有卡片的正確名稱 - 英文卡片移動到匹配的中文位置');
 
-        // 🔥 [v137.0] 設置標誌，表示正在顯示所有答案
+        // 🔥 [v203.1] 調適訊息：記錄初始狀態
+        console.log('🔥 [v203.1] ========== showAllCorrectAnswers 開始 ==========');
+        console.log('🔥 [v203.1] 初始狀態:', {
+            layout: this.layout,
+            leftCardsCount: this.leftCards ? this.leftCards.length : 0,
+            rightCardsCount: this.rightCards ? this.rightCards.length : 0,
+            rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+            currentPage: this.currentPage,
+            totalPages: this.totalPages
+        });
+
+        // 🔥 [v202.0] 移除特定的延遲調用，而不是所有事件
+        if (this.summaryDelayedCall) {
+            this.summaryDelayedCall.remove();
+            this.summaryDelayedCall = null;
+            console.log('🔥 [v202.0] 已移除 summaryDelayedCall');
+        }
+        if (this.autoProceedDelayedCall) {
+            this.autoProceedDelayedCall.remove();
+            this.autoProceedDelayedCall = null;
+            console.log('🔥 [v202.0] 已移除 autoProceedDelayedCall');
+        }
+
+        // 🔥 [v214.1] 設置標誌，表示正在顯示所有答案
         this.isShowingAllAnswers = true;
-        console.log('🔥 [v137.0] 已設置 isShowingAllAnswers = true');
+
+        // 🔥 [v217.0] 保存當前頁的 "Show all answers" 狀態
+        // 🔥 [v221.0] 改進：為所有頁面設置 Show All Answers 狀態，而不是只設置當前頁面
+        if (!this.allPagesShowAllAnswersState) {
+            this.allPagesShowAllAnswersState = {};
+        }
+
+        // 為所有頁面設置 Show All Answers 狀態
+        for (let i = 0; i < this.totalPages; i++) {
+            this.allPagesShowAllAnswersState[i] = true;
+        }
+
+        console.log('🔥 [v221.0] 已為所有 ' + this.totalPages + ' 頁設置 showAllAnswers 狀態:', this.allPagesShowAllAnswersState);
+
+        console.log('🔥 [v214.1] ========== showAllCorrectAnswers 開始 ==========');
+        console.log('🔥 [v214.1] 已設置 isShowingAllAnswers = true', {
+            layout: this.layout,
+            currentPage: this.currentPage,
+            totalPages: this.totalPages
+        });
+
+        // 🔥 [v219.0] 確保所有卡片都可見
+        console.log('🔥 [v219.0] 確保所有卡片可見 - 開始');
+
+        // 確保左卡片可見
+        if (this.leftCards && this.leftCards.length > 0) {
+            this.leftCards.forEach(card => {
+                card.setVisible(true);
+                card.setAlpha(1);
+            });
+            console.log('🔥 [v219.0] 已確保所有左卡片可見:', {
+                leftCardsCount: this.leftCards.length
+            });
+        }
+
+        // 確保右側空白框可見
+        if (this.rightEmptyBoxes && this.rightEmptyBoxes.length > 0) {
+            this.rightEmptyBoxes.forEach(box => {
+                box.setVisible(true);
+                box.setAlpha(1);
+            });
+            console.log('🔥 [v219.0] 已確保所有空白框可見:', {
+                rightEmptyBoxesCount: this.rightEmptyBoxes.length
+            });
+        }
+
+        // 確保框外答案卡片可見
+        if (this.rightCards && this.rightCards.length > 0) {
+            this.rightCards.forEach(card => {
+                card.setVisible(true);
+                card.setAlpha(1);
+            });
+            console.log('🔥 [v219.0] 已確保所有框外答案卡片可見:', {
+                rightCardsCount: this.rightCards.length
+            });
+        }
+
+        console.log('🔥 [v219.0] 確保所有卡片可見 - 完成');
 
         // 遍歷所有左卡片（英文卡片），將其移動到對應的中文位置
         if (this.leftCards && this.leftCards.length > 0) {
-            this.leftCards.forEach((card) => {
+            console.log('🔥 [v214.1] 開始遍歷左卡片:', {
+                leftCardsCount: this.leftCards.length,
+                layout: this.layout,
+                rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+                rightCardsCount: this.rightCards ? this.rightCards.length : 0
+            });
+
+            let movedCount = 0;
+            let notFoundCount = 0;
+
+            this.leftCards.forEach((card, cardIndex) => {
                 // 根據 pairId 找到對應的配對
                 const pairId = card.getData('pairId');
+                const cardText = card.getData('text') || 'unknown';
+
+                // 🔥 [v215.0] 獲取卡片的世界坐標和容器信息
+                const cardWorldX = card.getWorldTransformMatrix().tx;
+                const cardWorldY = card.getWorldTransformMatrix().ty;
+                const cardParentContainer = card.parentContainer;
+                const cardDepth = card.depth;
+
+                console.log(`🔥 [v214.1] 處理卡片 ${cardIndex + 1}/${this.leftCards.length}:`, {
+                    pairId: pairId,
+                    text: cardText,
+                    currentX: card.x,
+                    currentY: card.y,
+                    worldX: cardWorldX,
+                    worldY: cardWorldY,
+                    hasParentContainer: !!cardParentContainer,
+                    parentContainerType: cardParentContainer ? cardParentContainer.constructor.name : 'none',
+                    depth: cardDepth,
+                    cardExists: !!card,
+                    cardHasData: !!card.getData
+                });
 
                 // 根據佈局模式，找到對應的中文卡片位置
                 if (this.layout === 'mixed') {
@@ -7210,25 +8343,131 @@ class GameScene extends Phaser.Scene {
                             duration: 500,
                             ease: 'Power2.inOut'
                         });
+                        movedCount++;
                         console.log('🎮 [v137.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
                     }
                 } else {
-                    // 分離佈局：根據 pairId 找到對應的右側卡片
-                    const rightCard = this.rightCards.find(rc => rc.getData('pairId') === pairId);
-                    if (rightCard) {
-                        // 移動英文卡片到右側卡片的位置
-                        this.tweens.add({
-                            targets: card,
-                            x: rightCard.x,
-                            y: rightCard.y,
-                            duration: 500,
-                            ease: 'Power2.inOut'
+                    // 🔥 [v214.1] 分離佈局：採用混合模式的方法 - 只移動位置，不涉及容器操作
+                    console.log(`🔍 [v214.1] 分離模式 - 搜尋空白框:`, {
+                        pairId: pairId,
+                        rightEmptyBoxesExists: !!this.rightEmptyBoxes,
+                        rightEmptyBoxesLength: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0
+                    });
+
+                    const emptyBox = this.rightEmptyBoxes ? this.rightEmptyBoxes.find(box => {
+                        const boxPairId = box.getData('pairId');
+                        console.log(`  └─ 檢查空白框: boxPairId=${boxPairId}, targetPairId=${pairId}, match=${boxPairId === pairId}`);
+                        return boxPairId === pairId;
+                    }) : null;
+
+                    if (emptyBox) {
+                        // 🔥 [v215.0] 獲取空白框的詳細信息
+                        const emptyBoxWorldX = emptyBox.getWorldTransformMatrix().tx;
+                        const emptyBoxWorldY = emptyBox.getWorldTransformMatrix().ty;
+                        const emptyBoxParentContainer = emptyBox.parentContainer;
+                        const emptyBoxDepth = emptyBox.depth;
+
+                        console.log('✅ [v214.1] 找到空白框:', {
+                            pairId: pairId,
+                            emptyBoxX: emptyBox.x,
+                            emptyBoxY: emptyBox.y,
+                            emptyBoxWorldX: emptyBoxWorldX,
+                            emptyBoxWorldY: emptyBoxWorldY,
+                            cardCurrentX: card.x,
+                            cardCurrentY: card.y,
+                            cardWorldX: cardWorldX,
+                            cardWorldY: cardWorldY,
+                            emptyBoxHasParentContainer: !!emptyBoxParentContainer,
+                            emptyBoxParentContainerType: emptyBoxParentContainer ? emptyBoxParentContainer.constructor.name : 'none',
+                            emptyBoxDepth: emptyBoxDepth,
+                            cardDepth: cardDepth,
+                            emptyBoxExists: !!emptyBox,
+                            emptyBoxHasPosition: emptyBox.x !== undefined && emptyBox.y !== undefined
                         });
-                        console.log('🎮 [v137.0] 移動卡片:', { pairId, fromX: card.x, toX: rightCard.x });
+
+                        // 🔥 [v222.0] 修復：將卡片添加到空白框容器中，而不是只移動位置
+                        // 這樣可以確保座標系統一致
+                        console.log('🎮 [v222.0] 準備將卡片添加到空白框容器:', {
+                            pairId: pairId,
+                            cardHasParentContainer: !!card.parentContainer,
+                            cardParentContainerType: card.parentContainer ? card.parentContainer.constructor.name : 'none',
+                            emptyBoxHasParentContainer: !!emptyBox.parentContainer
+                        });
+
+                        // 🔥 [v219.0] 確保卡片可見
+                        card.setVisible(true);
+                        card.setAlpha(1);
+                        console.log('🔥 [v219.0] 確保卡片可見:', {
+                            pairId: pairId,
+                            visible: card.visible,
+                            alpha: card.alpha
+                        });
+
+                        // 🔥 [v222.0] 如果卡片已經有父容器，先移除
+                        if (card.parentContainer) {
+                            console.log('🔥 [v222.0] 卡片已有父容器，準備移除:', {
+                                pairId: pairId,
+                                parentContainerType: card.parentContainer.constructor.name
+                            });
+                            card.parentContainer.remove(card);
+                        }
+
+                        // 🔥 [v222.0] 計算卡片相對於空白框的座標
+                        const cardRelativeX = card.x - emptyBox.x;
+                        const cardRelativeY = card.y - emptyBox.y;
+
+                        // 🔥 [v222.0] 將卡片添加到空白框容器中
+                        emptyBox.add(card);
+
+                        // 🔥 [v222.0] 設置卡片的本地座標為 (0, 0)，使其顯示在容器中心
+                        card.setPosition(0, 0);
+
+                        console.log('🔥 [v222.0] 卡片已添加到空白框容器:', {
+                            pairId: pairId,
+                            cardLocalX: card.x,
+                            cardLocalY: card.y,
+                            cardWorldX: card.getWorldTransformMatrix().tx,
+                            cardWorldY: card.getWorldTransformMatrix().ty,
+                            emptyBoxWorldX: emptyBoxWorldX,
+                            emptyBoxWorldY: emptyBoxWorldY,
+                            relativeX: cardRelativeX,
+                            relativeY: cardRelativeY
+                        });
+
+                        movedCount++;
+                        console.log('🎮 [v222.0] 卡片已成功添加到空白框容器:', {
+                            pairId,
+                            fromX: cardWorldX,
+                            toX: emptyBoxWorldX,
+                            cardNowInContainer: !!card.parentContainer
+                        });
+                    } else {
+                        notFoundCount++;
+                        console.error('❌ [v214.1] 未找到對應的空白框:', {
+                            pairId,
+                            cardText,
+                            rightEmptyBoxesExists: !!this.rightEmptyBoxes,
+                            rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+                            allEmptyBoxPairIds: this.rightEmptyBoxes ? this.rightEmptyBoxes.map(box => box.getData('pairId')) : []
+                        });
                     }
                 }
             });
+
+            console.log('✅ [v214.1] 卡片移動完成:', {
+                totalCards: this.leftCards.length,
+                movedCount: movedCount,
+                notFoundCount: notFoundCount,
+                successRate: `${((movedCount / this.leftCards.length) * 100).toFixed(2)}%`
+            });
+        } else {
+            console.warn('⚠️ [v214.1] 沒有左卡片或左卡片數組為空:', {
+                leftCards: this.leftCards,
+                leftCardsLength: this.leftCards ? this.leftCards.length : 0
+            });
         }
+
+        console.log('🔥 [v214.1] ========== showAllCorrectAnswers 結束 ==========');
     }
 
 
@@ -7237,63 +8476,169 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 v88.0: 在卡片上顯示勾勾
     showCorrectAnswerOnCard(card) {
-        // 移除舊的標記（如果存在）
+        console.log('🔍 [v153.0] showCorrectAnswerOnCard 開始:', {
+            pairId: card.getData('pairId'),
+            isEmptyBox: card.getData('isEmptyBox'),
+            hasBackground: !!card.getData('background'),
+            cardX: card.x,
+            cardY: card.y,
+            cardType: card.constructor.name,
+            cardParent: card.parentContainer ? card.parentContainer.constructor.name : 'none'
+        });
+
+        // 🔥 [v139.0] 改進：使用 getData 獲取背景，而非 list[0]
+        const background = card.getData('background');
+        console.log('🔍 [v153.0] 背景檢查:', {
+            background: !!background,
+            backgroundWidth: background ? background.width : 'N/A',
+            backgroundHeight: background ? background.height : 'N/A',
+            backgroundDepth: background ? background.depth : 'N/A'
+        });
+
+        // 🔥 [v177.0] 修復：清除舊的標記（包括勾勾和叉叉）
         if (card.checkMark) {
+            console.log('🔄 [v177.0] 移除舊的勾勾標記');
             card.checkMark.destroy();
+            card.checkMark = null;
+        }
+        if (card.xMark) {
+            console.log('🔄 [v177.0] 移除舊的叉叉標記');
+            card.xMark.destroy();
+            card.xMark = null;
         }
 
         // 創建勾勾標記
         const checkMark = this.add.text(0, 0, '✓', {
-            fontSize: '64px',
+            fontSize: '80px',
             color: '#4caf50',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         });
         checkMark.setOrigin(0.5);
-        checkMark.setDepth(100);
+        checkMark.setDepth(2000);  // 🔥 [v154.0] 提升深度到 2000，確保勾勾顯示在最上方
 
-        // 🔥 [v139.0] 改進：使用 getData 獲取背景，而非 list[0]
-        const background = card.getData('background');
+        // 🔥 [v179.0] 修復：計算正確的世界座標（考慮卡片是否在容器中）
         if (background) {
-            // 相對於卡片容器的位置
-            const markX = background.width / 2 - 32;
-            const markY = -background.height / 2 + 32;
-            checkMark.setPosition(markX, markY);
-            // 🔥 [v139.0] 改進：將標記添加到卡片容器中
-            card.add(checkMark);
+            // 🔥 [v179.0] 改進：使用 getWorldTransformMatrix 獲取世界座標
+            // 這樣即使卡片在容器中，也能正確計算世界座標
+            const worldTransform = card.getWorldTransformMatrix();
+            const worldX = worldTransform.tx + background.width / 2 - 32;
+            const worldY = worldTransform.ty - background.height / 2 + 32;
+            checkMark.setPosition(worldX, worldY);
+
+            console.log('✅ [v179.0] 勾勾已添加到場景（使用世界座標）:', {
+                pairId: card.getData('pairId'),
+                worldX: worldX.toFixed(0),
+                worldY: worldY.toFixed(0),
+                markDepth: checkMark.depth,
+                cardLocalPos: { x: card.x, y: card.y },
+                cardWorldPos: { x: worldTransform.tx.toFixed(0), y: worldTransform.ty.toFixed(0) },
+                backgroundSize: { width: background.width, height: background.height },
+                isInContainer: !!card.parentContainer
+            });
+        } else {
+            // 🔥 [v179.0] 後備邏輯：背景不存在時，使用世界座標
+            const worldTransform = card.getWorldTransformMatrix();
+            console.warn('⚠️ [v179.0] 背景不存在，使用世界座標顯示勾勾');
+            checkMark.setPosition(worldTransform.tx, worldTransform.ty);
+
+            console.log('✅ [v179.0] 勾勾已添加到場景（使用世界座標）:', {
+                pairId: card.getData('pairId'),
+                worldX: worldTransform.tx.toFixed(0),
+                worldY: worldTransform.ty.toFixed(0),
+                markDepth: checkMark.depth,
+                isInContainer: !!card.parentContainer
+            });
         }
 
+        // 🔥 [v155.0] 改進：直接添加到場景中，而不是容器中
+        // 這樣勾勾就不會受到容器座標系統的影響
+        // 🔥 [v174.0] 修復：確保勾勾被添加到場景中
+        this.add.existing(checkMark);  // 添加到場景中
         card.checkMark = checkMark;
     }
 
     // 🔥 v88.0: 在卡片上顯示叉叉
     showIncorrectAnswerOnCard(card) {
-        // 移除舊的標記（如果存在）
+        console.log('🔍 [v153.0] showIncorrectAnswerOnCard 開始:', {
+            pairId: card.getData('pairId'),
+            isEmptyBox: card.getData('isEmptyBox'),
+            hasBackground: !!card.getData('background'),
+            cardX: card.x,
+            cardY: card.y,
+            cardType: card.constructor.name,
+            cardParent: card.parentContainer ? card.parentContainer.constructor.name : 'none'
+        });
+
+        // 🔥 [v139.0] 改進：使用 getData 獲取背景，而非 list[0]
+        const background = card.getData('background');
+        console.log('🔍 [v153.0] 背景檢查:', {
+            background: !!background,
+            backgroundWidth: background ? background.width : 'N/A',
+            backgroundHeight: background ? background.height : 'N/A',
+            backgroundDepth: background ? background.depth : 'N/A'
+        });
+
+        // 🔥 [v177.0] 修復：清除舊的標記（包括勾勾和叉叉）
+        if (card.checkMark) {
+            console.log('🔄 [v177.0] 移除舊的勾勾標記');
+            card.checkMark.destroy();
+            card.checkMark = null;
+        }
         if (card.xMark) {
+            console.log('🔄 [v177.0] 移除舊的叉叉標記');
             card.xMark.destroy();
+            card.xMark = null;
         }
 
         // 創建叉叉標記
         const xMark = this.add.text(0, 0, '✗', {
-            fontSize: '64px',
+            fontSize: '80px',
             color: '#f44336',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         });
         xMark.setOrigin(0.5);
-        xMark.setDepth(100);
+        xMark.setDepth(2000);  // 🔥 [v154.0] 提升深度到 2000，確保叉叉顯示在最上方
 
-        // 🔥 [v139.0] 改進：使用 getData 獲取背景，而非 list[0]
-        const background = card.getData('background');
+        // 🔥 [v179.0] 修復：計算正確的世界座標（考慮卡片是否在容器中）
         if (background) {
-            // 相對於卡片容器的位置
-            const markX = background.width / 2 - 32;
-            const markY = -background.height / 2 + 32;
-            xMark.setPosition(markX, markY);
-            // 🔥 [v139.0] 改進：將標記添加到卡片容器中
-            card.add(xMark);
+            // 🔥 [v179.0] 改進：使用 getWorldTransformMatrix 獲取世界座標
+            // 這樣即使卡片在容器中，也能正確計算世界座標
+            const worldTransform = card.getWorldTransformMatrix();
+            const worldX = worldTransform.tx + background.width / 2 - 32;
+            const worldY = worldTransform.ty - background.height / 2 + 32;
+            xMark.setPosition(worldX, worldY);
+
+            console.log('✅ [v179.0] 叉叉已添加到場景（使用世界座標）:', {
+                pairId: card.getData('pairId'),
+                worldX: worldX.toFixed(0),
+                worldY: worldY.toFixed(0),
+                markDepth: xMark.depth,
+                cardLocalPos: { x: card.x, y: card.y },
+                cardWorldPos: { x: worldTransform.tx.toFixed(0), y: worldTransform.ty.toFixed(0) },
+                backgroundSize: { width: background.width, height: background.height },
+                isInContainer: !!card.parentContainer
+            });
+        } else {
+            // 🔥 [v179.0] 後備邏輯：背景不存在時，使用世界座標
+            const worldTransform = card.getWorldTransformMatrix();
+            console.warn('⚠️ [v179.0] 背景不存在，使用世界座標顯示叉叉');
+            xMark.setPosition(worldTransform.tx, worldTransform.ty);
+
+            console.log('✅ [v179.0] 叉叉已添加到場景（使用世界座標）:', {
+                pairId: card.getData('pairId'),
+                worldX: worldTransform.tx.toFixed(0),
+                worldY: worldTransform.ty.toFixed(0),
+                markDepth: xMark.depth,
+                isInContainer: !!card.parentContainer
+            });
         }
 
+        // 🔥 [v155.0] 改進：直接添加到場景中，而不是容器中
+        // 這樣叉叉就不會受到容器座標系統的影響
+        // 🔥 [v174.0] 修復：確保叉叉被添加到場景中
+        this.add.existing(xMark);  // 添加到場景中
         card.xMark = xMark;
     }
 
@@ -7765,6 +9110,99 @@ class GameScene extends Phaser.Scene {
         console.log('🎮 GameScene: shutdown 方法完成 - 所有事件監聽器已清理');
     }
 
+    // 🔥 [v33.0] 創建右側空白框（用於拖放）
+    createEmptyRightBox(x, y, width, height, pairId) {
+        const container = this.add.container(x, y);
+        container.setDepth(5);
+        container.setData('pairId', pairId);
+        container.setData('isEmptyBox', true);
+
+        // 🔥 [v35.0] 移除藍色背景，只保留邊框，這樣勾勾和叉叉才能顯示
+        // 創建空白框背景（透明，只有邊框）
+        const background = this.add.rectangle(0, 0, width, height, 0x000000, 0);
+        background.setStrokeStyle(3, 0x4d94ff);
+        background.setDepth(1);
+
+        container.add([background]);
+
+        // 🔥 [v35.0] 存儲 background 數據，以便提交答案時使用
+        container.setData('background', background);
+
+        console.log('✅ [v33.0] 空白框已創建:', {
+            pairId,
+            x: x.toFixed(0),
+            y: y.toFixed(0),
+            width: width.toFixed(0),
+            height: height.toFixed(0),
+            hasBackground: !!background,
+            backgroundTransparent: true
+        });
+
+        return container;
+    }
+
+    // 🔥 [v33.0] 創建框外答案卡片（圖片 + 水平文字）
+    createOutsideAnswerCard(boxX, boxY, boxWidth, boxHeight, text, pairId, imageUrl) {
+        // 🔥 [v33.0] 計算框外卡片的位置（在框的右側）
+        const imageSize = boxHeight * 0.9;
+        const imagePadding = 20;  // 圖片與框的間距（增加到 20px）
+        const textPadding = 15;   // 文字與圖片的間距
+
+        // 🔥 [v33.0] 計算容器的邊界
+        // boxX 是容器中心，所以容器右邊界 = boxX + boxWidth/2
+        const boxRightEdge = boxX + boxWidth / 2;
+
+        // 圖片位置：容器右邊界 + 間距（圖片中心）
+        const imageX = boxRightEdge + imagePadding + imageSize / 2;
+        const imageY = boxY;
+
+        // 文字位置：圖片右邊 + 間距
+        const textX = imageX + imageSize / 2 + textPadding;
+        const textY = boxY;
+
+        // 🔥 [v33.0] 創建容器（位置在圖片中心）
+        const container = this.add.container(imageX, imageY);
+        container.setDepth(4);
+        container.setData('pairId', pairId);
+        container.setData('isAnswerCard', true);
+
+        // 🔥 [v33.0] 加載並顯示圖片（相對於容器，位置為 0,0）
+        if (imageUrl && imageUrl.trim() !== '') {
+            this.loadAndDisplayImage(container, imageUrl, 0, 0, imageSize, `answer-${pairId}`).catch(error => {
+                console.error('❌ 答案圖片載入失敗:', error);
+            });
+        }
+
+        // 🔥 [v33.0] 創建文字（水平排列，相對於全局坐標）
+        if (text && text.trim() !== '' && text.trim() !== '<br>') {
+            const fontSize = Math.max(20, Math.min(32, boxHeight * 0.5));
+            const textObj = this.add.text(textX, textY, text, {
+                font: `bold ${fontSize}px Arial`,
+                fill: '#000000',
+                align: 'left',
+                wordWrap: { width: 150 }
+            });
+            textObj.setOrigin(0, 0.5);
+            textObj.setDepth(5);
+        }
+
+        console.log('✅ [v33.0] 框外答案卡片已創建:', {
+            pairId,
+            text,
+            boxX: boxX.toFixed(0),
+            boxY: boxY.toFixed(0),
+            boxRightEdge: boxRightEdge.toFixed(0),
+            imageX: imageX.toFixed(0),
+            imageY: imageY.toFixed(0),
+            imageSize: imageSize.toFixed(0),
+            textX: textX.toFixed(0),
+            textY: textY.toFixed(0),
+            imagePadding: imagePadding
+        });
+
+        return container;
+    }
+
     // 🔥 P1-4: 全螢幕變化事件處理
     handleFullscreenChange() {
         console.log('🎮 全螢幕狀態變化:', document.fullscreenElement ? '進入全螢幕' : '退出全螢幕');
@@ -7778,6 +9216,334 @@ class GameScene extends Phaser.Scene {
         console.log('🎮 設備方向變化:', isPortrait ? '直向' : '橫向');
         // 重新計算佈局
         this.updateLayout();
+    }
+
+    // 🔥 [v156.0] 保存當前頁的卡片位置
+    saveCardPositions(pageIndex) {
+        console.log('🔥 [v156.0] ========== 保存卡片位置開始 ==========');
+        console.log('🔥 [v156.0] 頁面索引:', pageIndex);
+
+        // 初始化該頁的位置存儲
+        if (!this.allPagesCardPositions[pageIndex]) {
+            this.allPagesCardPositions[pageIndex] = {};
+        }
+
+        // 保存所有左側卡片的位置
+        this.leftCards.forEach(card => {
+            const pairId = card.getData('pairId');
+            this.allPagesCardPositions[pageIndex][pairId] = {
+                x: card.x,
+                y: card.y,
+                isMatched: card.getData('isMatched')
+            };
+        });
+
+        console.log('🔥 [v156.0] 已保存第 ' + (pageIndex + 1) + ' 頁的卡片位置:', {
+            pageIndex: pageIndex,
+            savedCardsCount: Object.keys(this.allPagesCardPositions[pageIndex]).length,
+            positions: this.allPagesCardPositions[pageIndex]
+        });
+        console.log('🔥 [v156.0] ========== 保存卡片位置完成 ==========');
+    }
+
+    // 🔥 [v157.0] 保存當前頁面的單個卡片位置（在拖放時調用）
+    // 🔥 [v189.0] 修復：統一使用 currentFrameIndex 而不是 x, y 座標
+    saveCardPositionForCurrentPage(card) {
+        const pageIndex = this.currentPage;
+        const pairId = card.getData('pairId');
+        const currentFrameIndex = card.getData('currentFrameIndex');
+        const isMatched = card.getData('isMatched');
+
+        // 初始化該頁的位置存儲
+        if (!this.allPagesCardPositions[pageIndex]) {
+            this.allPagesCardPositions[pageIndex] = {};
+        }
+
+        // 🔥 [v189.0] 修復：保存 currentFrameIndex 而不是 x, y 座標
+        // 這樣可以與 checkAllMatches() 和 goToNextPage() 的保存格式一致
+        if (currentFrameIndex !== undefined && currentFrameIndex !== null) {
+            this.allPagesCardPositions[pageIndex][pairId] = {
+                isMatched: isMatched,
+                currentFrameIndex: currentFrameIndex
+            };
+
+            console.log('🔥 [v189.0] 已保存卡片位置（當前頁，使用 currentFrameIndex）:', {
+                pageIndex: pageIndex,
+                pairId: pairId,
+                currentFrameIndex: currentFrameIndex,
+                isMatched: isMatched
+            });
+        } else {
+            console.log('⚠️ [v189.0] 卡片沒有 currentFrameIndex，跳過保存:', {
+                pageIndex: pageIndex,
+                pairId: pairId,
+                currentFrameIndex: currentFrameIndex
+            });
+        }
+    }
+
+    // 🔥 [v156.0] 恢復指定頁的卡片位置
+    restoreCardPositions(pageIndex) {
+        console.log('🔥 [v156.0] ========== 恢復卡片位置開始 ==========');
+        console.log('🔥 [v156.0] 頁面索引:', pageIndex);
+
+        // 🔥 [v186.0] 調適訊息：檢查所有保存的卡片位置
+        console.log('🔥 [v186.0] 調適訊息 - 恢復前的全局狀態:', {
+            currentPage: this.currentPage,
+            pageIndex: pageIndex,
+            allPagesCardPositionsKeys: Object.keys(this.allPagesCardPositions),
+            allPagesCardPositionsContent: this.allPagesCardPositions
+        });
+
+        // 🔥 [v188.0] 新增：詳細檢查 allPagesCardPositions 的結構
+        console.log('🔥 [v188.0] 詳細檢查 allPagesCardPositions 結構:', {
+            pageIndex: pageIndex,
+            pageIndexType: typeof pageIndex,
+            allPagesCardPositionsType: typeof this.allPagesCardPositions,
+            allPagesCardPositionsIsArray: Array.isArray(this.allPagesCardPositions),
+            allPagesCardPositionsKeys: Object.keys(this.allPagesCardPositions),
+            allPagesCardPositionsEntries: Object.entries(this.allPagesCardPositions).map(([key, value]) => ({
+                key: key,
+                keyType: typeof key,
+                valueKeys: Object.keys(value || {})
+            })),
+            directAccess: {
+                'allPagesCardPositions[0]': this.allPagesCardPositions[0],
+                'allPagesCardPositions[1]': this.allPagesCardPositions[1],
+                'allPagesCardPositions["0"]': this.allPagesCardPositions['0'],
+                'allPagesCardPositions["1"]': this.allPagesCardPositions['1']
+            }
+        });
+
+        // 檢查是否有保存的位置
+        if (!this.allPagesCardPositions[pageIndex]) {
+            console.log('🔥 [v156.0] ❌ 沒有保存的卡片位置');
+            console.log('🔥 [v186.0] 調適訊息 - 沒有保存的位置詳情:', {
+                pageIndex: pageIndex,
+                allPagesCardPositionsKeys: Object.keys(this.allPagesCardPositions),
+                hasPageData: this.allPagesCardPositions.hasOwnProperty(pageIndex)
+            });
+            return;
+        }
+
+        const savedPositions = this.allPagesCardPositions[pageIndex];
+        let restoredCount = 0;
+
+        console.log('🔥 [v186.0] 調適訊息 - 恢復前的狀態:', {
+            pageIndex: pageIndex,
+            savedPositionsCount: Object.keys(savedPositions).length,
+            savedPositions: savedPositions,
+            leftCardsCount: this.leftCards.length
+        });
+
+        // 🔥 [v165.0] 深度調試：記錄所有可用的空白框
+        console.log('🔥 [v165.0] 恢復前的空白框狀態:', {
+            rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+            rightEmptyBoxesList: this.rightEmptyBoxes ? this.rightEmptyBoxes.map((box, idx) => ({
+                index: idx,
+                pairId: box.getData('pairId'),
+                x: box.x,
+                y: box.y,
+                isDestroyed: box.isDestroyed ? true : false
+            })) : [],
+            savedPositionsKeys: Object.keys(savedPositions)
+        });
+
+        // 恢復所有卡片的位置
+        this.leftCards.forEach(card => {
+            const pairId = card.getData('pairId');
+            if (savedPositions[pairId]) {
+                const savedPos = savedPositions[pairId];
+
+                // 🔥 [v192.0] 修復：移除 isMatched 限制，只要有 currentFrameIndex 就恢復
+                // 這樣無論卡片是否正確配對，都會被恢復到對應的空白框中
+                if (savedPos.currentFrameIndex !== undefined) {
+                    // 卡片被拖到空白框中，需要添加到容器中
+                    console.log('🔥 [v192.0] 恢復卡片到空白框（無論是否正確配對）:', {
+                        pairId: pairId,
+                        currentFrameIndex: savedPos.currentFrameIndex,
+                        isMatched: savedPos.isMatched
+                    });
+
+                    // 🔥 [v192.0] 直接使用 currentFrameIndex 作為空白框的索引
+                    const frameIndex = savedPos.currentFrameIndex;
+                    const emptyBox = this.rightEmptyBoxes && frameIndex < this.rightEmptyBoxes.length
+                        ? this.rightEmptyBoxes[frameIndex]
+                        : null;
+
+                    console.log('🔥 [v192.0] 查找空白框:', {
+                        frameIndex: frameIndex,
+                        rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+                        emptyBoxFound: !!emptyBox,
+                        emptyBoxPairId: emptyBox ? emptyBox.getData('pairId') : null
+                    });
+
+                    if (emptyBox) {
+                        // 🔥 [v193.0] 修復：在添加到容器前，記錄卡片的世界座標
+                        const cardWorldX = card.x;
+                        const cardWorldY = card.y;
+
+                        // 🔥 [v192.0] 添加到容器
+                        emptyBox.add(card);
+
+                        // 🔥 [v193.0] 修復：設置卡片的本地座標為 (0, 0)
+                        // 這樣卡片就會顯示在容器的中心，而不是右下角
+                        card.setPosition(0, 0);
+
+                        card.setData('currentFrameIndex', frameIndex);
+                        card.setData('isMatched', savedPos.isMatched || false);
+                        card.setData('matchedWith', emptyBox);
+
+                        // 只有正確配對的卡片才添加到 matchedPairs
+                        if (savedPos.isMatched) {
+                            this.matchedPairs.add(pairId);
+                        }
+
+                        console.log('✅ [v193.0] 卡片已恢復到容器:', {
+                            pairId: pairId,
+                            frameIndex: frameIndex,
+                            isMatched: savedPos.isMatched,
+                            emptyBoxPairId: emptyBox.getData('pairId'),
+                            cardWorldPos: { x: cardWorldX, y: cardWorldY },
+                            cardLocalPos: { x: card.x, y: card.y }
+                        });
+
+                        // 🔥 [v192.0] 新增：恢復視覺指示器
+                        if (savedPos.isMatched) {
+                            // 正確配對：顯示勾勾
+                            console.log('✅ [v193.0] 恢復勾勾視覺指示器');
+                            this.showCorrectAnswerOnCard(emptyBox);
+                        } else {
+                            // 錯誤配對：顯示叉叉
+                            console.log('❌ [v193.0] 恢復叉叉視覺指示器');
+                            this.showIncorrectAnswerOnCard(emptyBox);
+                        }
+                    } else {
+                        console.error('❌ [v193.0] 未找到空白框:', {
+                            pairId: pairId,
+                            frameIndex: frameIndex,
+                            rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0
+                        });
+                    }
+                } else if (savedPos.isMatched && savedPos.emptyBoxIndex !== undefined) {
+                    // 🔥 [v171.0] 舊的邏輯（保留以備後用）
+                    // 卡片被配對，需要添加到容器中
+                    console.log('🔥 [v171.0] 恢復配對卡片（在容器內）:', {
+                        pairId: pairId,
+                        emptyBoxIndex: savedPos.emptyBoxIndex,
+                        relativeX: savedPos.relativeX,
+                        relativeY: savedPos.relativeY
+                    });
+
+                    // 🔥 [v171.0] 通過索引位置找到對應的空白框
+                    const emptyBox = this.rightEmptyBoxes && savedPos.emptyBoxIndex < this.rightEmptyBoxes.length
+                        ? this.rightEmptyBoxes[savedPos.emptyBoxIndex]
+                        : null;
+
+                    // 🔥 [v171.0] 深度調試：記錄查找過程
+                    console.log('🔥 [v171.0] 查找空白框詳細信息:', {
+                        lookingForEmptyBoxIndex: savedPos.emptyBoxIndex,
+                        rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+                        emptyBoxFound: !!emptyBox,
+                        searchDetails: this.rightEmptyBoxes ? this.rightEmptyBoxes.map((box, idx) => ({
+                            index: idx,
+                            boxPairId: box.getData('pairId'),
+                            isTarget: idx === savedPos.emptyBoxIndex,
+                            isDestroyed: box.isDestroyed ? true : false,
+                            x: box.x,
+                            y: box.y
+                        })) : []
+                    });
+
+                    if (emptyBox) {
+                        // 🔥 [v171.0] 修復：使用正確索引位置的空白框座標
+                        // 這樣即使空白框的順序改變了，卡片也會被放入正確的空白框
+
+                        // 1️⃣ 先將卡片設置到空白框的世界座標 + 相對座標
+                        const worldX = emptyBox.x + savedPos.relativeX;
+                        const worldY = emptyBox.y + savedPos.relativeY;
+                        card.setPosition(worldX, worldY);
+
+                        console.log('🔥 [v171.0] 卡片重置到空白框的世界座標:', {
+                            pairId: pairId,
+                            emptyBoxIndex: savedPos.emptyBoxIndex,
+                            emptyBoxPairId: emptyBox.getData('pairId'),
+                            worldX: worldX,
+                            worldY: worldY,
+                            emptyBoxX: emptyBox.x,
+                            emptyBoxY: emptyBox.y
+                        });
+
+                        // 2️⃣ 然後將卡片添加到容器
+                        emptyBox.add(card);
+
+                        // 3️⃣ 最後設置相對座標（確保卡片在容器內的正確位置）
+                        card.setPosition(savedPos.relativeX, savedPos.relativeY);
+                        card.setData('isMatched', true);
+                        card.setData('matchedWith', emptyBox);
+                        this.matchedPairs.add(pairId);
+
+                        console.log('🔥 [v171.0] 卡片已恢復到容器:', {
+                            pairId: pairId,
+                            emptyBoxIndex: savedPos.emptyBoxIndex,
+                            emptyBoxPairId: emptyBox.getData('pairId'),
+                            emptyBoxX: emptyBox.x,
+                            emptyBoxY: emptyBox.y,
+                            relativeX: card.x,
+                            relativeY: card.y,
+                            worldX: emptyBox.x + card.x,
+                            worldY: emptyBox.y + card.y
+                        });
+                    } else {
+                        // 🔥 [v171.0] 未找到空白框 - 索引超出範圍或空白框不存在
+                        console.error('❌ [v171.0] 未找到空白框！卡片將保留在場景中（可能在左上角）:', {
+                            pairId: pairId,
+                            lookingForEmptyBoxIndex: savedPos.emptyBoxIndex,
+                            savedPos: savedPos,
+                            cardCurrentPosition: {
+                                x: card.x,
+                                y: card.y
+                            },
+                            rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0,
+                            rightEmptyBoxesPairIds: this.rightEmptyBoxes ? this.rightEmptyBoxes.map((box, idx) => `[${idx}]=${box.getData('pairId')}`) : []
+                        });
+                    }
+                } else {
+                    // 卡片未被配對，恢復到世界座標
+                    // 🔥 [v159.0] 確保座標是數字而不是字符串
+                    card.x = typeof savedPos.x === 'string' ? parseFloat(savedPos.x) : savedPos.x;
+                    card.y = typeof savedPos.y === 'string' ? parseFloat(savedPos.y) : savedPos.y;
+                }
+
+                restoredCount++;
+
+                // 🔥 [v167.0] 安全的座標轉換 - 處理已配對卡片沒有 x/y 的情況
+                let displayX, displayY;
+                if (savedPos.isMatched) {
+                    // 已配對卡片使用容器座標
+                    displayX = typeof savedPos.containerX === 'string' ? savedPos.containerX : (savedPos.containerX ? savedPos.containerX.toFixed(0) : 'N/A');
+                    displayY = typeof savedPos.containerY === 'string' ? savedPos.containerY : (savedPos.containerY ? savedPos.containerY.toFixed(0) : 'N/A');
+                } else {
+                    // 未配對卡片使用世界座標
+                    displayX = typeof savedPos.x === 'string' ? savedPos.x : (savedPos.x ? savedPos.x.toFixed(0) : 'N/A');
+                    displayY = typeof savedPos.y === 'string' ? savedPos.y : (savedPos.y ? savedPos.y.toFixed(0) : 'N/A');
+                }
+
+                console.log('🔥 [v156.0] 已恢復卡片位置:', {
+                    pairId: pairId,
+                    x: displayX,
+                    y: displayY,
+                    isMatched: savedPos.isMatched
+                });
+            }
+        });
+
+        console.log('🔥 [v156.0] 已恢復第 ' + (pageIndex + 1) + ' 頁的卡片位置:', {
+            pageIndex: pageIndex,
+            restoredCardsCount: restoredCount,
+            totalSavedPositions: Object.keys(savedPositions).length
+        });
+        console.log('🔥 [v156.0] ========== 恢復卡片位置完成 ==========');
     }
 }
 
