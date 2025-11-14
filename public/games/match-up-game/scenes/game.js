@@ -12,8 +12,8 @@
 // - SeparatedLayoutCalculator
 // - SeparatedLayoutRenderer
 
-// 🔥 v45.1 版本標記 - 強制 Vercel 重新部署
-const GAME_VERSION = 'v45.1-ipad-fix';
+// 🔥 v75.0 版本標記 - 強制 Vercel 重新部署（修復 calculateLeftLayout 和 calculateRightLayout 方法缺失）
+const GAME_VERSION = 'v75.0-layout-calculator-fix';
 
 // Game 場景 - 主遊戲邏輯（卡片拖動配對）
 class GameScene extends Phaser.Scene {
