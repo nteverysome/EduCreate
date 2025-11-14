@@ -1881,9 +1881,13 @@ class GameScene extends Phaser.Scene {
             // 🔥 [v76.0] 10 個匹配數使用上下分離單行布局（10列 × 1行，參考批數 7）
             console.log('📐 使用上下分離佈局（10個匹配數，單行）');
             this.createTopBottomSingleRowTen(currentPagePairs, width, height);
+        } else if (itemCount === 20) {
+            // 🔥 [v77.0] 20 個匹配數使用垂直堆疊單元佈局（每個單元包含：英文圖片 + 文字 + 答案圖片 + 文字）
+            console.log('📐 使用垂直堆疊單元佈局（20個匹配數，垂直單元）');
+            this.createVerticalUnitLayout(currentPagePairs, width, height);
         } else {
-            // 🔥 [v77.0] 6,8-9,11-20 個匹配數以及 21+ 個匹配數都使用上下分離多行布局
-            console.log('📐 使用上下分離佈局（6,8-9,11+個匹配數，多行多列）');
+            // 🔥 [v77.0] 6,8-9,11-19,21+ 個匹配數都使用上下分離多行布局
+            console.log('📐 使用上下分離佈局（6,8-9,11-19,21+個匹配數，多行多列）');
             this.createTopBottomMultiRows(currentPagePairs, width, height);
         }
     }
@@ -2945,6 +2949,103 @@ class GameScene extends Phaser.Scene {
 
         console.log(`✅ 下方答案卡片已創建: ${shuffledAnswers.length} 對`);
         console.log('✅ 上下分離佈局（單行）創建完成');
+    }
+
+    // 🔥 [v77.0] 創建垂直堆疊單元佈局 - 20個匹配數
+    // 每個單元包含：英文圖片 + 文字 + 空白框 + 答案圖片 + 文字
+    createVerticalUnitLayout(currentPagePairs, width, height) {
+        console.log('📐 創建垂直堆疊單元佈局 - 20個匹配數（垂直單元）');
+
+        const itemCount = currentPagePairs.length;
+
+        // 🔥 計算可用空間
+        const timerHeight = 50;
+        const timerGap = 20;
+        const additionalTopMargin = 50;
+        const topButtonArea = timerHeight + timerGap + additionalTopMargin;  // 120px
+        const bottomButtonArea = 80;  // 提交按鈕區域
+        const availableHeight = height - topButtonArea - bottomButtonArea;
+        const availableWidth = width;
+
+        // 🔥 計算網格佈局（2列 × 10行 或 4列 × 5行）
+        // 對於 20 個項目，使用 4 列 × 5 行
+        const columns = 4;
+        const rows = Math.ceil(itemCount / columns);
+
+        // 🔥 計算單元尺寸
+        const horizontalMargin = 20;
+        const verticalMargin = 20;
+        const horizontalSpacing = 20;
+        const verticalSpacing = 20;
+
+        const usableWidth = availableWidth - horizontalMargin * 2;
+        const usableHeight = availableHeight - verticalMargin * 2;
+
+        const unitWidth = (usableWidth - (columns - 1) * horizontalSpacing) / columns;
+        const unitHeight = (usableHeight - (rows - 1) * verticalSpacing) / rows;
+
+        console.log(`📊 匹配數: ${itemCount}, 使用 ${rows} 行 × ${columns} 列佈局`);
+        console.log(`📐 單元尺寸: ${unitWidth.toFixed(0)} × ${unitHeight.toFixed(0)}`);
+
+        // 🔥 計算單元內部的各部分高度
+        const imageHeight = unitHeight * 0.35;  // 圖片佔 35%
+        const textHeight = unitHeight * 0.15;   // 文字佔 15%
+        const emptyBoxHeight = unitHeight * 0.25;  // 空白框佔 25%
+        const answerHeight = unitHeight * 0.25;  // 答案佔 25%
+
+        console.log(`📐 單元內部尺寸: 圖片=${imageHeight.toFixed(0)}, 文字=${textHeight.toFixed(0)}, 空白框=${emptyBoxHeight.toFixed(0)}, 答案=${answerHeight.toFixed(0)}`);
+
+        // 🔥 根據隨機模式排列答案
+        let shuffledAnswers;
+        if (this.random === 'same') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId') || 'default-seed';
+            const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
+            shuffledAnswers = rng.shuffle([...currentPagePairs]);
+            console.log('🎲 使用固定隨機模式，種子:', seed);
+        } else {
+            shuffledAnswers = [...currentPagePairs];
+            for (let i = shuffledAnswers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledAnswers[i], shuffledAnswers[j]] = [shuffledAnswers[j], shuffledAnswers[i]];
+            }
+            console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）');
+        }
+
+        // 🔥 創建所有單元
+        currentPagePairs.forEach((pair, index) => {
+            const col = index % columns;
+            const row = Math.floor(index / columns);
+
+            // 計算單元的起始位置
+            const unitX = horizontalMargin + col * (unitWidth + horizontalSpacing) + unitWidth / 2;
+            const unitY = topButtonArea + verticalMargin + row * (unitHeight + verticalSpacing) + unitHeight / 2;
+
+            // 計算各部分的 Y 位置（相對於單元中心）
+            const imageY = unitY - unitHeight / 2 + imageHeight / 2;
+            const textY = imageY + imageHeight / 2 + textHeight / 2;
+            const emptyBoxY = textY + textHeight / 2 + emptyBoxHeight / 2;
+            const answerY = emptyBoxY + emptyBoxHeight / 2 + answerHeight / 2;
+
+            // 🔥 創建英文卡片（圖片 + 文字）
+            const animationDelay = index * 100;
+            const card = this.createLeftCard(unitX, textY, unitWidth, textHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
+            this.leftCards.push(card);
+
+            // 🔥 創建空白框
+            const emptyBox = this.createEmptyRightBox(unitX, emptyBoxY, unitWidth, emptyBoxHeight, pair.id);
+            this.rightCards.push(emptyBox);
+
+            if (!this.rightEmptyBoxes) this.rightEmptyBoxes = [];
+            this.rightEmptyBoxes.push(emptyBox);
+
+            // 🔥 創建答案卡片（圖片 + 文字）
+            const answerCard = this.createOutsideAnswerCard(unitX, answerY, unitWidth, answerHeight, pair.answer, pair.id, pair.chineseImageUrl, 'vertical');
+            this.rightCards.push(answerCard);
+        });
+
+        console.log(`✅ 垂直堆疊單元佈局創建完成: ${itemCount} 個單元`);
     }
 
     // 🔥 創建上下分離佈局 - 多行多列（6,8-9,11+個匹配數）
