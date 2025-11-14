@@ -3076,14 +3076,23 @@ class GameScene extends Phaser.Scene {
             scaled: requiredHeight > availableHeight ? '⚠️ 已縮放' : '✅ 理想尺寸'
         });
 
-        // 🔥 [v81.4] 計算上方和下方區域的起始位置 - 空白框往上移動，縮短與英文卡片第二行的距離
-        const topY = topButtonArea + cardHeight / 2;
-        const separationSpacing = cardHeight * 0.3;  // 🔥 [v81.4] 英文卡片和空白框之間的距離 = 卡片高度的 30%（從 150% 減少到 30%）
-        const bottomY = topY + cardHeight + verticalSpacing + separationSpacing;
+        // 🔥 [v85.0] 計算上方和下方區域的起始位置 - 確保容器不重疊
+        const topY = topButtonArea + cardHeight / 2;  // 英文卡片第一行的中心 Y
+
+        // 🔥 [v85.0] 計算英文卡片容器的總高度和底部邊界
+        const englishCardsHeight = cardHeight * totalRows;  // 英文卡片的總高度（沒有行間距）
+        const englishCardsBottom = topY + englishCardsHeight / 2;  // 英文卡片容器的底部邊界
+
+        // 🔥 [v85.0] 計算空白框容器的起始位置 - 確保不與英文卡片重疊
+        const separationSpacing = cardHeight * 0.3;  // 英文卡片和空白框之間的距離
+        const bottomY = englishCardsBottom + separationSpacing + cardHeight / 2;  // 空白框第一行的中心 Y
         const startX = horizontalMargin + cardWidth / 2;
 
-        console.log(`📍 [v77.0] 區域位置:`, {
+        console.log(`📍 [v85.0] 容器邊界計算:`, {
             topY: topY.toFixed(0),
+            englishCardsHeight: englishCardsHeight.toFixed(0),
+            englishCardsBottom: englishCardsBottom.toFixed(0),
+            separationSpacing: separationSpacing.toFixed(0),
             bottomY: bottomY.toFixed(0),
             startX: startX.toFixed(0),
             spacing: verticalSpacing.toFixed(2)
