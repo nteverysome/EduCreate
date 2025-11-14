@@ -5373,19 +5373,28 @@ class GameScene extends Phaser.Scene {
         // 1️⃣ 語音按鈕區域（上方 20% - 改進響應式設計）
         // 🔥 [v215.0] 改進：減少按鈕區域高度，給圖片和文字更多空間
         const buttonAreaHeight = height * 0.2;
+        // 🔥 [v220.0] 改進：按鈕放在卡片內部，不要超出邊界
+        // 按鈕位置 = 卡片頂部 + 按鈕區域高度的一半
         const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
+
         // 🔥 [v219.0] 改進：再減小按鈕大小到原來的四分之一
         const buttonSize = this.currentPageItemCount === 20
             ? Math.min(6, buttonAreaHeight * 0.0875)  // 20 個卡片：8.75%（原 35% 的四分之一），最大 6px
             : Math.min(7, buttonAreaHeight * 0.1125);  // 其他情況：11.25%（原 45% 的四分之一），最大 7px
 
+        // 🔥 [v220.0] 確保按鈕不超出卡片邊界
+        // 按鈕最大半徑 = 按鈕區域高度的一半
+        const maxButtonRadius = buttonAreaHeight / 2;
+        const constrainedButtonSize = Math.min(buttonSize, maxButtonRadius * 2 * 0.9);  // 留 10% 邊距
+
         console.log('🔊 準備調用 createAudioButton:', {
             audioUrl: audioUrl ? '有' : '無',
             buttonAreaY,
-            buttonSize
+            buttonSize: constrainedButtonSize,
+            maxButtonRadius
         });
 
-        this.createAudioButton(container, audioUrl, 0, buttonAreaY, buttonSize, pairId);
+        this.createAudioButton(container, audioUrl, 0, buttonAreaY, constrainedButtonSize, pairId);
 
         console.log('✅ createAudioButton 調用完成');
 
