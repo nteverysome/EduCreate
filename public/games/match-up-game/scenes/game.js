@@ -12,8 +12,8 @@
 // - SeparatedLayoutCalculator
 // - SeparatedLayoutRenderer
 
-// 🔥 v75.0 版本標記 - 強制 Vercel 重新部署（修復 calculateLeftLayout 和 calculateRightLayout 方法缺失）
-const GAME_VERSION = 'v75.0-layout-calculator-fix';
+// 🔥 v76.0 版本標記 - 動態修復缺失的 calculateLeftLayout 和 calculateRightLayout 方法
+const GAME_VERSION = 'v76.0-dynamic-method-patch';
 
 // Game 場景 - 主遊戲邏輯（卡片拖動配對）
 class GameScene extends Phaser.Scene {
@@ -2004,6 +2004,39 @@ class GameScene extends Phaser.Scene {
         if (typeof SeparatedLayoutCalculator !== 'undefined') {
             console.log('✅ [v74.0] 使用 SeparatedLayoutCalculator 類');
             calculator = new SeparatedLayoutCalculator(width, height, itemCount, 'left-right');
+
+            // 🔥 [v76.0] 檢查並修復缺失的方法
+            console.log('🔍 [v76.0] 檢查 SeparatedLayoutCalculator 方法:', {
+                hasCalculateLeftLayout: typeof calculator.calculateLeftLayout === 'function',
+                hasCalculateRightLayout: typeof calculator.calculateRightLayout === 'function'
+            });
+
+            // 如果缺少方法，動態添加它們
+            if (typeof calculator.calculateLeftLayout !== 'function') {
+                console.warn('⚠️ [v76.0] calculateLeftLayout 方法缺失，動態添加');
+                calculator.calculateLeftLayout = function(itemCount) {
+                    if (itemCount <= 5) {
+                        return { columns: 1, rows: itemCount, layout: 'single-column' };
+                    } else if (itemCount === 7) {
+                        return { columns: 2, rows: Math.ceil(itemCount / 2), layout: 'multi-rows' };
+                    } else if (itemCount === 10) {
+                        return { columns: 10, rows: 1, layout: 'single-row' };
+                    } else if (itemCount === 20) {
+                        return { columns: 10, rows: 2, layout: 'multi-rows' };
+                    } else {
+                        return { columns: 1, rows: itemCount, layout: 'single-column' };
+                    }
+                };
+            }
+
+            if (typeof calculator.calculateRightLayout !== 'function') {
+                console.warn('⚠️ [v76.0] calculateRightLayout 方法缺失，動態添加');
+                calculator.calculateRightLayout = function(itemCount) {
+                    return { columns: 1, rows: itemCount, layout: 'single-column' };
+                };
+            }
+
+            console.log('✅ [v76.0] SeparatedLayoutCalculator 方法檢查完成');
         } else {
             // 備用計算器邏輯
             console.log('⚠️ [v74.0] SeparatedLayoutCalculator 不可用，使用備用計算器');
