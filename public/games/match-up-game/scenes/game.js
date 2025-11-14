@@ -5402,33 +5402,7 @@ class GameScene extends Phaser.Scene {
 
         // 3️⃣ 文字區域（下方 30%，需要留出底部間距）
         const textAreaHeight = height * 0.3;
-
-        // 🔥 [v216.0] 改進 3：根據卡片高度動態調整邊距
-        // 參考混合模式的動態邊距調整（第 3825-3847 行）
-        let bottomPadding;
-        let verticalSpacing;
-
-        if (height < 50) {
-            // 小卡片：最小邊距
-            bottomPadding = 3;
-            verticalSpacing = 2;
-        } else if (height < 80) {
-            // 中卡片：標準邊距
-            bottomPadding = 6;
-            verticalSpacing = 3;
-        } else {
-            // 大卡片：較大邊距
-            bottomPadding = 8;
-            verticalSpacing = 4;
-        }
-
-        console.log('📏 [v216.0] 動態邊距調整:', {
-            cardHeight: height,
-            bottomPadding,
-            verticalSpacing,
-            sizeCategory: height < 50 ? '小' : height < 80 ? '中' : '大'
-        });
-
+        const bottomPadding = Math.max(6, height * 0.06);  // 底部間距：6px 或高度的 6%
         const textHeight = textAreaHeight - bottomPadding;
         // 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
         const textAreaY = height / 2 - bottomPadding - textHeight / 2;
@@ -5492,19 +5466,7 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 文字區域：佔據卡片下方 50%，但需要留出底部間距
         const textAreaHeight = height * 0.5;
-
-        // 🔥 [v216.0] 改進 3：根據卡片高度動態調整邊距
-        let bottomPadding;
-        if (contentSizes) {
-            bottomPadding = contentSizes.spacing.padding;
-        } else if (height < 50) {
-            bottomPadding = 3;
-        } else if (height < 80) {
-            bottomPadding = 6;
-        } else {
-            bottomPadding = 8;
-        }
-
+        const bottomPadding = contentSizes ? contentSizes.spacing.padding : Math.max(8, height * 0.08);
         const textHeight = textAreaHeight - bottomPadding;
         // 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
         const textY = height / 2 - bottomPadding - textHeight / 2;
@@ -5551,17 +5513,7 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 文字在下方，需要留出底部間距
         const textAreaHeight = height * 0.4;
-
-        // 🔥 [v216.0] 改進 3：根據卡片高度動態調整邊距
-        let bottomPadding;
-        if (height < 50) {
-            bottomPadding = 3;
-        } else if (height < 80) {
-            bottomPadding = 6;
-        } else {
-            bottomPadding = 8;
-        }
-
+        const bottomPadding = Math.max(6, height * 0.06);  // 底部間距：6px 或高度的 6%
         const textHeight = textAreaHeight - bottomPadding;
         // 🔥 文字位置：卡片下邊界 - 底部間距 - 文字高度/2
         const textY = height / 2 - bottomPadding - textHeight / 2;
@@ -5706,29 +5658,6 @@ class GameScene extends Phaser.Scene {
             ? contentSizes.text.fontSize
             : Math.max(14, Math.min(48, height * 0.6));
 
-        // 🔥 [v216.0] 改進 1：根據文字長度調整字體大小
-        // 參考混合模式的智能文字縮放（第 3922-3932 行）
-        const textLength = text ? text.length : 0;
-        let fontSizeMultiplier = 1.0;
-
-        if (textLength <= 2) {
-            fontSizeMultiplier = 1.0;   // 1-2 字：100%
-        } else if (textLength <= 4) {
-            fontSizeMultiplier = 0.85;  // 3-4 字：85%
-        } else if (textLength <= 6) {
-            fontSizeMultiplier = 0.75;  // 5-6 字：75%
-        } else {
-            fontSizeMultiplier = 0.65;  // 7+ 字：65%
-        }
-
-        fontSize = Math.max(12, fontSize * fontSizeMultiplier);
-
-        console.log('🔤 [v216.0] 文字長度調整:', {
-            textLength,
-            multiplier: fontSizeMultiplier,
-            adjustedFontSize: fontSize
-        });
-
         // 創建臨時文字測量寬度和高度
         const tempText = this.add.text(0, 0, text, {
             fontSize: `${fontSize}px`,
@@ -5741,10 +5670,9 @@ class GameScene extends Phaser.Scene {
         // 🔥 計算最大高度（留 10% 邊距）
         const maxTextHeight = height * 0.9;
 
-        // 🔥 [v216.0] 改進 2：改為逐像素調整而不是逐 2px
-        // 參考混合模式的精細調整（第 3944-3947 行）
+        // 🔥 同時檢查寬度和高度，如果超過則縮小字體
         while ((tempText.width > maxTextWidth || tempText.height > maxTextHeight) && fontSize > 12) {
-            fontSize -= 1;  // 改為 -1 而不是 -2，更精細的調整
+            fontSize -= 2;
             tempText.setFontSize(fontSize);
         }
 
