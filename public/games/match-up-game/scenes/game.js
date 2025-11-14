@@ -2985,7 +2985,7 @@ class GameScene extends Phaser.Scene {
                 topButtonArea: 0.11,      // 11% 視窗高度
                 bottomButtonArea: 0.075,  // 7.5% 視窗高度
                 answerCardsHeight: 0.38,  // 38% 視窗高度
-                horizontalMargin: 0.10,   // 10% 視窗寬度
+                horizontalMargin: 0.15,   // 🔥 [v84.1] 15% 視窗寬度（從 10% 增加，讓卡片更小）
                 itemsPerRow: 8            // 🔥 [v84.0] 平板：8 列
             },
             desktop: {
