@@ -5374,10 +5374,10 @@ class GameScene extends Phaser.Scene {
         // 🔥 [v215.0] 改進：減少按鈕區域高度，給圖片和文字更多空間
         const buttonAreaHeight = height * 0.2;
         const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
-        // 🔥 [v215.0] 改進：按鈕大小計算更合理
+        // 🔥 [v217.0] 改進：移除最小值限制，確保按鈕不超過區域
         const buttonSize = this.currentPageItemCount === 20
-            ? Math.max(12, Math.min(24, buttonAreaHeight * 0.35))  // 🔥 [v215.0] 匹配數 20 時：縮小到 35%
-            : Math.max(14, Math.min(28, buttonAreaHeight * 0.45));  // 🔥 [v215.0] 其他情況：改為 45%（從 60% 減少）
+            ? Math.min(24, buttonAreaHeight * 0.35)  // 20 個卡片：35%，最大 24px
+            : Math.min(28, buttonAreaHeight * 0.45);  // 其他情況：45%，最大 28px
 
         console.log('🔊 準備調用 createAudioButton:', {
             audioUrl: audioUrl ? '有' : '無',
