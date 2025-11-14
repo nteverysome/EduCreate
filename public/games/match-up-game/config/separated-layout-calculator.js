@@ -157,16 +157,22 @@ if (typeof SeparatedLayoutCalculator === 'undefined') {
 
         /**
          * 計算列數
+         * 🔥 [v53.1] 修復 7 個匹配數:使用 1 列布局(1列 × 7行)
          *
          * @param {boolean} hasImages - 是否有圖片
          * @returns {number} 列數
          */
         calculateColumns(hasImages = false) {
+            // 🔥 [v53.1] 特殊處理:7 個匹配數使用單列布局
+            if (this.itemCount === 7 && this.layoutType === 'left-right') {
+                return 1;  // 1 列 × 7 行
+            }
+
             if (hasImages) {
-                // 正方形模式（有圖片）
+                // 正方形模式(有圖片)
                 return this.constants.COLUMNS.SQUARE_MODE_COLS;
             } else {
-                // 長方形模式（無圖片）
+                // 長方形模式(無圖片)
                 return this.constants.COLUMNS.RECTANGLE_MODE_COLS;
             }
         }
@@ -299,6 +305,295 @@ if (typeof SeparatedLayoutCalculator === 'undefined') {
                 contentMode,
                 availableHeight: this.calculateAvailableHeight(),
                 availableWidth: this.calculateAvailableWidth()
+            };
+        }
+
+        /**
+         * 計算左側佈局（根據卡片數量自動選擇）
+         *
+         * @param {number} itemCount - 卡片數量
+         * @returns {object} { columns, rows, layout }
+         */
+        calculateLeftLayout(itemCount) {
+            if (itemCount <= 5) {
+                return {
+                    columns: 1,
+                    rows: itemCount,
+                    layout: 'single-column'
+                };
+            } else if (itemCount === 7) {
+                return {
+                    columns: 2,
+                    rows: Math.ceil(itemCount / 2),
+                    layout: 'multi-rows'
+                };
+            } else if (itemCount === 10) {
+                return {
+                    columns: 10,
+                    rows: 1,
+                    layout: 'single-row'
+                };
+            } else if (itemCount === 20) {
+                return {
+                    columns: 10,
+                    rows: 2,
+                    layout: 'multi-rows'
+                };
+            } else {
+                // 默認佈局
+                return {
+                    columns: 1,
+                    rows: itemCount,
+                    layout: 'single-column'
+                };
+            }
+        }
+
+        /**
+         * 計算右側佈局（始終是單列）
+         *
+         * @param {number} itemCount - 卡片數量
+         * @returns {object} { columns, rows, layout }
+         */
+        calculateRightLayout(itemCount) {
+            return {
+                columns: 1,
+                rows: itemCount,
+                layout: 'single-column'
+            };
+        }
+
+        /**
+         * 根據卡片數量計算預設卡片大小（舊方法，保留向後兼容）
+         *
+         * @param {number} itemCount - 卡片數量
+         * @returns {object} { width, height }
+         */
+        calculateCardSizeByItemCount(itemCount) {
+            const sizeMap = {
+                3: { width: 160, height: 85 },   // 🔥 [Screenshot_280] 增加卡片大小以匹配 Screenshot_275 風格
+                4: { width: 150, height: 75 },   // 🔥 [Screenshot_280] 增加卡片大小以匹配 Screenshot_275
+                5: { width: 130, height: 65 },   // 🔥 [Screenshot_280] 增加卡片大小以匹配 Screenshot_275 風格
+                7: { width: 90, height: 45 },    // 🔥 [Screenshot_280] 增加卡片大小以匹配 Screenshot_275 風格
+                10: { width: 70, height: 35 },   // 🔥 [Screenshot_280] 增加卡片大小以匹配 Screenshot_275 風格
+                20: { width: 80, height: 45 }    // 🔥 [Screenshot_280] 增加卡片大小以匹配 Screenshot_275 風格
+            };
+
+            return sizeMap[itemCount] || { width: 80, height: 35 };
+        }
+
+        /**
+         * 🔥 [Dynamic Sizing] 根據容器大小和卡片數量計算最優卡片大小
+         * 這個方法會根據實際容器尺寸動態計算卡片大小，以最大化空間利用率
+         *
+         * 佈局結構：
+         * ┌─────────────────────────────────────────────────────────┐
+         * │ 邊距 │ 左側卡片 │ 中間空白 │ 右側卡片 │ 邊距 │
+         * │ 15px │  25%    │  50%    │  25%    │ 15px │
+         * └─────────────────────────────────────────────────────────┘
+         *
+         * @param {number} itemCount - 卡片數量
+         * @returns {object} { width, height, layout: { columns, rows }, contentSizes: {...} }
+         */
+        calculateOptimalCardSize(itemCount) {
+            // 🔥 [v6.0] 使用統一邊距配置系統
+            // 從 SeparatedMarginConfig 獲取邊距配置
+            const margins = typeof SeparatedMarginConfig !== 'undefined'
+                ? SeparatedMarginConfig.calculateMargins(this.height)
+                : {
+                    containerTop: this.height * 0.15,
+                    containerBottom: this.height * 0.10,
+                    containerSide: 15,
+                    cardMinSpacing: 8,
+                    cardMaxSpacing: 20
+                };
+
+            // 容器配置 - 基於視覺分析優化
+            // 🔥 [v9.0] 三等分佈局：左33% | 中33% | 右33%
+            const containerConfig = {
+                leftRatio: 0.3333,    // 左側容器佔總寬度的 33%
+                rightRatio: 0.3333,   // 右側容器佔總寬度的 33%
+                middleRatio: 0.3334,  // 中間空白區佔總寬度的 33%
+                topMargin: margins.containerTop,      // 使用統一配置
+                bottomMargin: margins.containerBottom, // 使用統一配置
+                sideMargin: margins.containerSide,    // 使用統一配置
+                minSpacing: margins.cardMinSpacing,   // 使用統一配置
+                maxSpacing: margins.cardMaxSpacing    // 使用統一配置
+            };
+
+            // 計算可用空間
+            const availableWidth = this.width * containerConfig.leftRatio - containerConfig.sideMargin * 2;
+            const availableHeight = this.height * (1 - containerConfig.topMargin / this.height - containerConfig.bottomMargin / this.height);
+
+            // 根據卡片數量確定佈局
+            let layout, cardWidth, cardHeight, dynamicSpacing;
+
+            if (itemCount <= 5) {
+                // 單列佈局：1 列 × itemCount 行
+                layout = { columns: 1, rows: itemCount };
+                // 🔥 [v9.0] 三等分佈局 - 卡片寬度調整到 320px
+                cardWidth = Math.min(availableWidth, 320); // 最大寬度調整到 320px
+
+                // 🔥 [v3.0] 動態計算卡片間距，確保均勻分布
+                const totalCardHeight = availableHeight;
+                const totalSpacingHeight = totalCardHeight - (itemCount * 60); // 假設最小卡片高度 60px
+                dynamicSpacing = Math.max(
+                    containerConfig.minSpacing,
+                    Math.min(
+                        containerConfig.maxSpacing,
+                        totalSpacingHeight / Math.max(itemCount - 1, 1)
+                    )
+                );
+
+                cardHeight = (availableHeight - dynamicSpacing * (itemCount - 1)) / itemCount;
+                cardHeight = Math.max(cardHeight, 40); // 最小高度 40px
+            } else if (itemCount === 7) {
+                // 多列佈局：2 列 × 4 行
+                layout = { columns: 2, rows: 4 };
+                dynamicSpacing = 10;
+                cardWidth = (availableWidth - dynamicSpacing) / 2;
+                cardHeight = (availableHeight - dynamicSpacing * 3) / 4;
+                cardWidth = Math.max(cardWidth, 50); // 最小寬度 50px
+                cardHeight = Math.max(cardHeight, 35); // 最小高度 35px
+            } else if (itemCount === 10) {
+                // 單行佈局：10 列 × 1 行
+                layout = { columns: 10, rows: 1 };
+                dynamicSpacing = 8;
+                cardWidth = (availableWidth - dynamicSpacing * 9) / 10;
+                cardHeight = availableHeight - dynamicSpacing;
+                cardWidth = Math.max(cardWidth, 40); // 最小寬度 40px
+                cardHeight = Math.max(cardHeight, 30); // 最小高度 30px
+            } else if (itemCount === 20) {
+                // 多行佈局：10 列 × 2 行
+                layout = { columns: 10, rows: 2 };
+                dynamicSpacing = 8;
+                cardWidth = (availableWidth - dynamicSpacing * 9) / 10;
+                cardHeight = (availableHeight - dynamicSpacing) / 2;
+                cardWidth = Math.max(cardWidth, 40); // 最小寬度 40px
+                cardHeight = Math.max(cardHeight, 30); // 最小高度 30px
+            } else {
+                // 默認：單列佈局
+                layout = { columns: 1, rows: itemCount };
+                cardWidth = Math.min(availableWidth, 200);
+
+                // 動態計算卡片間距
+                const totalCardHeight = availableHeight;
+                const totalSpacingHeight = totalCardHeight - (itemCount * 60);
+                dynamicSpacing = Math.max(
+                    containerConfig.minSpacing,
+                    Math.min(
+                        containerConfig.maxSpacing,
+                        totalSpacingHeight / Math.max(itemCount - 1, 1)
+                    )
+                );
+
+                cardHeight = (availableHeight - dynamicSpacing * (itemCount - 1)) / itemCount;
+                cardHeight = Math.max(cardHeight, 40);
+            }
+
+            // 確保卡片大小在合理範圍內
+            cardWidth = Math.min(cardWidth, 320); // 🔥 [v9.0] 最大寬度調整到 320px
+            cardHeight = Math.min(cardHeight, 150); // 最大高度 150px
+
+            // 保存動態間距供後續使用
+            this.dynamicSpacing = dynamicSpacing || 10;
+
+            // 🎨 計算卡片內容大小（圖片、文字、按鈕）
+            const contentSizes = this.calculateContentSizes(cardWidth, cardHeight);
+
+            return {
+                width: Math.floor(cardWidth),
+                height: Math.floor(cardHeight),
+                layout: layout,
+                contentSizes: contentSizes,
+                containerConfig: containerConfig,
+                debug: {
+                    availableWidth: Math.floor(availableWidth),
+                    availableHeight: Math.floor(availableHeight),
+                    utilization: {
+                        width: Math.floor((layout.columns * cardWidth + containerConfig.spacing * (layout.columns - 1)) / availableWidth * 100),
+                        height: Math.floor((layout.rows * cardHeight + containerConfig.spacing * (layout.rows - 1)) / availableHeight * 100)
+                    }
+                }
+            };
+        }
+
+        /**
+         * 🎨 根據卡片大小計算內容大小（圖片、文字、按鈕）
+         * @param {number} cardWidth - 卡片寬度
+         * @param {number} cardHeight - 卡片高度
+         * @returns {object} 內容大小配置
+         */
+        calculateContentSizes(cardWidth, cardHeight) {
+            return {
+                // 語音按鈕大小
+                audioButton: {
+                    size: Math.max(Math.floor(cardHeight * 0.25), 16),
+                    minSize: 16,
+                    maxSize: 40
+                },
+                // 圖片大小
+                image: {
+                    width: Math.max(Math.floor(cardWidth * 0.35), 30),
+                    height: Math.max(Math.floor(cardHeight * 0.5), 25),
+                    minWidth: 30,
+                    maxWidth: 100,
+                    minHeight: 25,
+                    maxHeight: 80
+                },
+                // 文字大小
+                text: {
+                    fontSize: Math.max(Math.floor(cardHeight * 0.22), 12),
+                    minFontSize: 12,
+                    maxFontSize: 28,
+                    lineHeight: Math.max(Math.floor(cardHeight * 0.28), 14)
+                },
+                // 邊距和間距
+                spacing: {
+                    padding: Math.max(Math.floor(cardHeight * 0.1), 5),
+                    gap: Math.max(Math.floor(cardHeight * 0.08), 4)
+                }
+            };
+        }
+
+        /**
+         * 計算左側卡片位置
+         *
+         * @param {number} index - 卡片索引
+         * @param {number} columns - 列數
+         * @param {number} cardWidth - 卡片寬度
+         * @param {number} cardHeight - 卡片高度
+         * @param {number} startX - 起始 X 座標
+         * @param {number} startY - 起始 Y 座標
+         * @returns {object} { x, y }
+         */
+        calculateLeftCardPosition(index, columns, cardWidth, cardHeight, startX, startY) {
+            // 🔥 [v3.0] 使用動態間距確保卡片均勻分布
+            const dynamicSpacing = this.dynamicSpacing || 10;
+            const row = Math.floor(index / columns);
+            const col = index % columns;
+
+            return {
+                x: startX + col * (cardWidth + dynamicSpacing),
+                y: startY + row * (cardHeight + dynamicSpacing)
+            };
+        }
+
+        /**
+         * 計算右側卡片位置
+         *
+         * @param {number} index - 卡片索引
+         * @param {number} cardHeight - 卡片高度
+         * @param {number} startX - 起始 X 座標
+         * @param {number} startY - 起始 Y 座標
+         * @returns {object} { x, y }
+         */
+        calculateRightCardPosition(index, cardHeight, startX, startY) {
+            const spacing = this.calculateSpacing();
+
+            return {
+                x: startX,
+                y: startY + index * (cardHeight + spacing.vertical)
             };
         }
 

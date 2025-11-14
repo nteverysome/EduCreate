@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
     const styleId = formData.get('styleId') as string;
     const resourceType = formData.get('resourceType') as string;
+    const game = (formData.get('game') as string) || 'shimozurdo-game'; // 默認為 shimozurdo-game
 
     if (!file || !styleId || !resourceType) {
       return NextResponse.json(
@@ -28,8 +29,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 驗證資源類型
-    const validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
+    // 根據遊戲類型驗證資源類型
+    let validResourceTypes: string[];
+    if (game === 'match-up-game') {
+      validResourceTypes = ['background', 'card_background', 'card_border', 'colors', 'fonts', 'config'];
+    } else {
+      // shimozurdo-game
+      validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
+    }
+
     if (!validResourceTypes.includes(resourceType)) {
       return NextResponse.json(
         { error: '無效的資源類型' },
@@ -43,9 +51,20 @@ export async function POST(request: NextRequest) {
     // 驗證文件類型
     const imageExtensions = ['png', 'jpg', 'jpeg', 'webp'];
     const audioExtensions = ['mp3', 'wav', 'ogg'];
+    const jsonExtensions = ['json'];
 
-    const isImage = ['spaceship', 'cloud1', 'cloud2', 'bg_layer'].includes(resourceType);
-    const isAudio = ['background', 'hit', 'success'].includes(resourceType);
+    // 根據遊戲類型判斷資源類型
+    let isImage = false;
+    let isAudio = false;
+    let isJson = false;
+
+    if (game === 'match-up-game') {
+      isImage = ['background', 'card_background', 'card_border'].includes(resourceType);
+      isJson = ['colors', 'fonts', 'config'].includes(resourceType);
+    } else {
+      isImage = ['spaceship', 'cloud1', 'cloud2', 'bg_layer'].includes(resourceType);
+      isAudio = ['background', 'hit', 'success'].includes(resourceType);
+    }
 
     if (isImage && !imageExtensions.includes(fileExtension || '')) {
       return NextResponse.json(
@@ -61,10 +80,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (isJson && !jsonExtensions.includes(fileExtension || '')) {
+      return NextResponse.json(
+        { error: '配置文件必須是 JSON 格式' },
+        { status: 400 }
+      );
+    }
+
     // 構建 Blob 存儲路徑
-    const blobPath = isAudio
-      ? `visual-styles/${styleId}/sounds/${resourceType}.${fileExtension}`
-      : `visual-styles/${styleId}/${resourceType}.${fileExtension}`;
+    let blobPath: string;
+    if (game === 'match-up-game') {
+      blobPath = `visual-styles/${styleId}/${resourceType}.${fileExtension}`;
+    } else {
+      blobPath = isAudio
+        ? `visual-styles/${styleId}/sounds/${resourceType}.${fileExtension}`
+        : `visual-styles/${styleId}/${resourceType}.${fileExtension}`;
+    }
 
     // 上傳到 Vercel Blob Storage
     const blob = await put(blobPath, file, {
@@ -102,6 +133,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const styleId = searchParams.get('styleId');
+    const game = searchParams.get('game') || 'shimozurdo-game';
 
     if (!styleId) {
       return NextResponse.json(
@@ -124,9 +156,21 @@ export async function GET(request: NextRequest) {
       prefix: `visual-styles/${styleId}/`,
     });
 
-    // 檢查每種資源類型是否存在
-    const resources: Record<string, { exists: boolean; url?: string }> = {
-      spaceship: { exists: false },
+    // 根據遊戲類型初始化資源對象
+    let resources: Record<string, { exists: boolean; url?: string }> = {};
+
+    if (game === 'match-up-game') {
+      resources = {
+        background: { exists: false },
+        card_background: { exists: false },
+        card_border: { exists: false },
+        colors: { exists: false },
+        fonts: { exists: false },
+        config: { exists: false }
+      };
+    } else {
+      resources = {
+        spaceship: { exists: false },
       cloud1: { exists: false },
       cloud2: { exists: false },
       bg_layer: { exists: false },
@@ -172,6 +216,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const styleId = searchParams.get('styleId');
     const resourceType = searchParams.get('resourceType');
+    const game = searchParams.get('game') || 'shimozurdo-game';
 
     if (!styleId || !resourceType) {
       return NextResponse.json(
@@ -189,8 +234,14 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // 驗證資源類型
-    const validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
+    // 根據遊戲類型驗證資源類型
+    let validResourceTypes: string[];
+    if (game === 'match-up-game') {
+      validResourceTypes = ['background', 'card_background', 'card_border', 'colors', 'fonts', 'config'];
+    } else {
+      validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
+    }
+
     if (!validResourceTypes.includes(resourceType)) {
       return NextResponse.json(
         { error: '無效的資源類型' },

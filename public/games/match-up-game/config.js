@@ -86,3 +86,4 @@ console.log('✅ Match-up 遊戲配置完成', {
     screenBaseSize: game.screenBaseSize
 });
 
+// 🔥 [v55.0] 強制重新編譯 - 垂直間距優化完成

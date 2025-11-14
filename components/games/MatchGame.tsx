@@ -990,49 +990,179 @@ export default function MatchGame({
       {/* 遊戲區域 */}
       <div className="game-area p-6">
         {gameState ? (
-          <div className="grid grid-cols-2 gap-6">
-            {/* 左側項目 */}
-            <div className="left-items space-y-3" data-testid="left-items" role="group" aria-labelledby="left-items-heading">
-              <h3 id="left-items-heading" className="text-lg font-semibold text-gray-900 mb-4">選擇項目</h3>
-              {gameState.pairs.map((pair, index) => {
-                const isMatched = gameState.matchedPairs.some(mp => mp.leftItem.id === pair.leftItem.id);
-                const isSelected = gameState.selectedItems.includes(pair.leftItem.id);
-                const isFocused = accessibilityEnabled && keyboardMode && focusRegion === 'left' && currentFocusIndex === index;
+          // 根據配對數量選擇布局模式
+          gameState.pairs.length === 7 ? (
+            // Wordwall 風格單行水平布局 (7 個匹配數專用)
+            <div className="wordwall-layout">
+              {/* 題目卡片行 */}
+              <div className="question-cards-row mb-8">
+                <div className="flex justify-center items-start gap-3 flex-wrap">
+                  {gameState.pairs.map((pair, index) => {
+                    const isMatched = gameState.matchedPairs.some(mp => mp.leftItem.id === pair.leftItem.id);
+                    const isSelected = gameState.selectedItems.includes(pair.leftItem.id);
+                    const isFocused = accessibilityEnabled && keyboardMode && focusRegion === 'left' && currentFocusIndex === index;
 
-                return (
-                  <div
-                    key={pair.leftItem.id}
-                    className={`${getItemStyle(pair.leftItem)} ${isFocused ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}
-                    onClick={() => handleItemClick(pair.leftItem.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleItemClick(pair.leftItem.id);
-                      }
-                    }}
-                    role="button"
-                    tabIndex={accessibilityEnabled ? (isFocused ? 0 : -1) : 0}
-                    aria-label={`選擇項目：${pair.leftItem.content}${isMatched ? '，已配對' : ''}${isSelected ? '，已選擇' : ''}`}
-                    aria-pressed={isSelected}
-                    aria-disabled={isMatched}
-                    aria-describedby={`item-${pair.leftItem.id}-description`}
-                    data-testid={`item-${pair.leftItem.id}`}
-                  >
-                    {renderItemContent(pair.leftItem)}
-                    <div id={`item-${pair.leftItem.id}-description`} className="sr-only">
-                      {isMatched ? '此項目已成功配對' : isSelected ? '此項目已選擇，請選擇配對項目' : '點擊選擇此項目'}
-                    </div>
+                    return (
+                      <div
+                        key={pair.leftItem.id}
+                        className={`question-card ${getItemStyle(pair.leftItem)} ${isFocused ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}
+                        style={{
+                          width: '120px',
+                          minHeight: '160px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '12px',
+                          fontSize: '14px'
+                        }}
+                        onClick={() => handleItemClick(pair.leftItem.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleItemClick(pair.leftItem.id);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={accessibilityEnabled ? (isFocused ? 0 : -1) : 0}
+                        aria-label={`題目卡片：${pair.leftItem.content}${isMatched ? '，已配對' : ''}${isSelected ? '，已選擇' : ''}`}
+                        aria-pressed={isSelected}
+                        aria-disabled={isMatched}
+                        data-testid={`question-card-${pair.leftItem.id}`}
+                      >
+                        {renderItemContent(pair.leftItem)}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 答案區域 */}
+              <div className="answer-area">
+                {/* 空白框行 */}
+                <div className="drop-zones-row mb-4">
+                  <div className="flex justify-center items-center gap-3 flex-wrap">
+                    {gameState.pairs.map((pair, index) => {
+                      const matchedPair = gameState.matchedPairs.find(mp => mp.leftItem.id === pair.leftItem.id);
+
+                      return (
+                        <div
+                          key={`drop-zone-${pair.leftItem.id}`}
+                          className="drop-zone"
+                          style={{
+                            width: '120px',
+                            height: '80px',
+                            border: '2px dashed #d1d5db',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: matchedPair ? '#d1fae5' : '#f9fafb',
+                            fontSize: '12px',
+                            color: '#6b7280'
+                          }}
+                          data-testid={`drop-zone-${index}`}
+                        >
+                          {matchedPair ? (
+                            <span className="text-green-600 font-semibold">✓</span>
+                          ) : (
+                            <span>拖放答案</span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-          </div>
-          {/* 右側項目 */}
-          <div className="right-items space-y-3" data-testid="right-items" role="group" aria-labelledby="right-items-heading">
-            <h3 id="right-items-heading" className="text-lg font-semibold text-gray-900 mb-4">配對項目</h3>
-            {gameState.pairs.map((pair, index) => {
-              const isMatched = gameState.matchedPairs.some(mp => mp.rightItem.id === pair.rightItem.id);
-              const isSelected = gameState.selectedItems.includes(pair.rightItem.id);
-              const isFocused = accessibilityEnabled && keyboardMode && focusRegion === 'right' && currentFocusIndex === index;
+                </div>
+
+                {/* 答案卡片行 */}
+                <div className="answer-cards-row">
+                  <div className="flex justify-center items-center gap-3 flex-wrap">
+                    {gameState.pairs.map((pair, index) => {
+                      const isMatched = gameState.matchedPairs.some(mp => mp.rightItem.id === pair.rightItem.id);
+                      const isSelected = gameState.selectedItems.includes(pair.rightItem.id);
+                      const isFocused = accessibilityEnabled && keyboardMode && focusRegion === 'right' && currentFocusIndex === index;
+
+                      return (
+                        <div
+                          key={pair.rightItem.id}
+                          className={`answer-card ${getItemStyle(pair.rightItem)} ${isFocused ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}
+                          style={{
+                            width: '120px',
+                            minHeight: '100px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '12px',
+                            fontSize: '14px'
+                          }}
+                          onClick={() => handleItemClick(pair.rightItem.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleItemClick(pair.rightItem.id);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={accessibilityEnabled ? (isFocused ? 0 : -1) : 0}
+                          aria-label={`答案卡片：${pair.rightItem.content}${isMatched ? '，已配對' : ''}${isSelected ? '，已選擇' : ''}`}
+                          aria-pressed={isSelected}
+                          aria-disabled={isMatched}
+                          data-testid={`answer-card-${pair.rightItem.id}`}
+                        >
+                          {renderItemContent(pair.rightItem)}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // 原有的左右分離布局 (其他匹配數使用)
+            <div className="grid grid-cols-2 gap-6">
+              {/* 左側項目 */}
+              <div className="left-items space-y-3" data-testid="left-items" role="group" aria-labelledby="left-items-heading">
+                <h3 id="left-items-heading" className="text-lg font-semibold text-gray-900 mb-4">選擇項目</h3>
+                {gameState.pairs.map((pair, index) => {
+                  const isMatched = gameState.matchedPairs.some(mp => mp.leftItem.id === pair.leftItem.id);
+                  const isSelected = gameState.selectedItems.includes(pair.leftItem.id);
+                  const isFocused = accessibilityEnabled && keyboardMode && focusRegion === 'left' && currentFocusIndex === index;
+
+                  return (
+                    <div
+                      key={pair.leftItem.id}
+                      className={`${getItemStyle(pair.leftItem)} ${isFocused ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`}
+                      onClick={() => handleItemClick(pair.leftItem.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleItemClick(pair.leftItem.id);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={accessibilityEnabled ? (isFocused ? 0 : -1) : 0}
+                      aria-label={`選擇項目：${pair.leftItem.content}${isMatched ? '，已配對' : ''}${isSelected ? '，已選擇' : ''}`}
+                      aria-pressed={isSelected}
+                      aria-disabled={isMatched}
+                      aria-describedby={`item-${pair.leftItem.id}-description`}
+                      data-testid={`item-${pair.leftItem.id}`}
+                    >
+                      {renderItemContent(pair.leftItem)}
+                      <div id={`item-${pair.leftItem.id}-description`} className="sr-only">
+                        {isMatched ? '此項目已成功配對' : isSelected ? '此項目已選擇，請選擇配對項目' : '點擊選擇此項目'}
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+            {/* 右側項目 */}
+            <div className="right-items space-y-3" data-testid="right-items" role="group" aria-labelledby="right-items-heading">
+              <h3 id="right-items-heading" className="text-lg font-semibold text-gray-900 mb-4">配對項目</h3>
+              {gameState.pairs.map((pair, index) => {
+                const isMatched = gameState.matchedPairs.some(mp => mp.rightItem.id === pair.rightItem.id);
+                const isSelected = gameState.selectedItems.includes(pair.rightItem.id);
+                const isFocused = accessibilityEnabled && keyboardMode && focusRegion === 'right' && currentFocusIndex === index;
 
               return (
                 <div
@@ -1061,7 +1191,8 @@ export default function MatchGame({
               );
             })}
           </div>
-        </div>
+            </div>
+          )
         ) : (
           <div className="text-center py-8">
             <div className="text-4xl mb-4">⏳</div>

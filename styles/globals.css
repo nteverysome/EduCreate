@@ -180,3 +180,65 @@
 .flip-card-back {
   transform: rotateY(180deg);
 }
+
+/* Wordwall 風格單行水平布局 */
+.wordwall-layout {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.wordwall-layout .question-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.wordwall-layout .question-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.wordwall-layout .answer-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: grab;
+}
+
+.wordwall-layout .answer-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.wordwall-layout .answer-card:active {
+  cursor: grabbing;
+}
+
+.wordwall-layout .drop-zone {
+  transition: all 0.3s ease;
+}
+
+.wordwall-layout .drop-zone:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+/* 響應式設計 */
+@media (max-width: 1024px) {
+  .wordwall-layout .question-card,
+  .wordwall-layout .answer-card,
+  .wordwall-layout .drop-zone {
+    width: 100px !important;
+    min-height: 120px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .wordwall-layout .question-card,
+  .wordwall-layout .answer-card,
+  .wordwall-layout .drop-zone {
+    width: 80px !important;
+    min-height: 100px !important;
+    font-size: 11px !important;
+  }
+}

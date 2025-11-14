@@ -20,30 +20,30 @@ if (typeof SeparatedModeConfig === 'undefined') {
          */
         static CONFIG = {
             'mobile-portrait': {
-                // 卡片尺寸配置
-                cardWidth: { min: 120, max: 200, ratio: 0.18 },
-                cardHeight: { min: 40, max: 65, ratio: 0.09 },
+                // 卡片尺寸配置 - 優化：增加卡片尺寸以更好利用空間
+                cardWidth: { min: 120, max: 200, ratio: 0.20 },
+                cardHeight: { min: 40, max: 65, ratio: 0.10 },
 
                 // 位置配置（左右分離 - 單列）
                 positions: {
                     leftX: 0.42,
                     rightX: 0.68,
-                    leftStartY: 0.25,
-                    rightStartY: 0.22
+                    leftStartY: 0.18,  // 優化：減少頂部邊距
+                    rightStartY: 0.15
                 },
 
-                // 間距配置
+                // 間距配置 - 優化：減少間距以容納更多卡片
                 spacing: {
-                    horizontal: 10,
-                    vertical: 5
+                    horizontal: 8,
+                    vertical: 3
                 },
 
-                // 邊距配置
+                // 邊距配置 - 優化：減少邊距以增加可用空間
                 margins: {
-                    top: 30,
-                    bottom: 30,
-                    left: 15,
-                    right: 15
+                    top: 20,
+                    bottom: 20,
+                    left: 12,
+                    right: 12
                 },
 
                 // 容器檢測
@@ -87,30 +87,30 @@ if (typeof SeparatedModeConfig === 'undefined') {
             },
 
             'tablet-portrait': {
-                // 卡片尺寸配置
-                cardWidth: { min: 140, max: 220, ratio: 0.19 },
-                cardHeight: { min: 45, max: 72, ratio: 0.095 },
+                // 卡片尺寸配置 - 優化：增加卡片尺寸
+                cardWidth: { min: 140, max: 240, ratio: 0.21 },
+                cardHeight: { min: 45, max: 75, ratio: 0.11 },
 
                 // 位置配置（左右分離 - 單列）
                 positions: {
                     leftX: 0.44,
                     rightX: 0.66,
-                    leftStartY: 0.30,
-                    rightStartY: 0.27
+                    leftStartY: 0.22,  // 優化：減少頂部邊距
+                    rightStartY: 0.19
                 },
 
-                // 間距配置
+                // 間距配置 - 優化：減少間距
                 spacing: {
-                    horizontal: 12,
-                    vertical: 8
+                    horizontal: 10,
+                    vertical: 5
                 },
 
-                // 邊距配置
+                // 邊距配置 - 優化：減少邊距
                 margins: {
-                    top: 40,
-                    bottom: 40,
-                    left: 20,
-                    right: 20
+                    top: 30,
+                    bottom: 30,
+                    left: 15,
+                    right: 15
                 },
 
                 // 容器檢測
@@ -120,30 +120,30 @@ if (typeof SeparatedModeConfig === 'undefined') {
             },
 
             'tablet-landscape': {
-                // 卡片尺寸配置
-                cardWidth: { min: 150, max: 250, ratio: 0.2 },
-                cardHeight: { min: 50, max: 80, ratio: 0.1 },
+                // 卡片尺寸配置 - 優化：增加卡片尺寸
+                cardWidth: { min: 150, max: 260, ratio: 0.22 },
+                cardHeight: { min: 50, max: 85, ratio: 0.11 },
 
                 // 位置配置（左右分離 - 單列）
                 positions: {
                     leftX: 0.40,
                     rightX: 0.65,
-                    leftStartY: 0.25,
-                    rightStartY: 0.22
+                    leftStartY: 0.18,  // 優化：減少頂部邊距
+                    rightStartY: 0.15
                 },
 
-                // 間距配置
+                // 間距配置 - 優化：減少間距
                 spacing: {
-                    horizontal: 15,
-                    vertical: 10
+                    horizontal: 12,
+                    vertical: 6
                 },
 
-                // 邊距配置
+                // 邊距配置 - 優化：減少邊距
                 margins: {
-                    top: 50,
-                    bottom: 50,
-                    left: 25,
-                    right: 25
+                    top: 35,
+                    bottom: 35,
+                    left: 20,
+                    right: 20
                 },
 
                 // 容器檢測
@@ -153,30 +153,30 @@ if (typeof SeparatedModeConfig === 'undefined') {
             },
 
             'desktop': {
-                // 卡片尺寸配置
-                cardWidth: { min: 160, max: 280, ratio: 0.22 },
-                cardHeight: { min: 55, max: 90, ratio: 0.12 },
+                // 卡片尺寸配置 - 優化：增加卡片尺寸
+                cardWidth: { min: 160, max: 300, ratio: 0.24 },
+                cardHeight: { min: 55, max: 95, ratio: 0.13 },
 
                 // 位置配置（左右分離 - 單列）
                 positions: {
                     leftX: 0.35,
                     rightX: 0.70,
-                    leftStartY: 0.20,
-                    rightStartY: 0.18
+                    leftStartY: 0.15,  // 優化：減少頂部邊距
+                    rightStartY: 0.12
                 },
 
-                // 間距配置
+                // 間距配置 - 優化：減少間距
                 spacing: {
-                    horizontal: 20,
-                    vertical: 15
+                    horizontal: 16,
+                    vertical: 10
                 },
 
-                // 邊距配置
+                // 邊距配置 - 優化：減少邊距
                 margins: {
-                    top: 60,
-                    bottom: 60,
-                    left: 30,
-                    right: 30
+                    top: 45,
+                    bottom: 45,
+                    left: 25,
+                    right: 25
                 },
 
                 // 容器檢測

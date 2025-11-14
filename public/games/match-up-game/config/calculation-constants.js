@@ -37,43 +37,43 @@ if (typeof CalculationConstants === 'undefined') {
         };
 
         /**
-         * 間距常量
+         * 間距常量 - 優化：減少間距以容納更多卡片
          */
         static SPACING = {
-            // 水平間距
-            HORIZONTAL_MIN: 3,
-            HORIZONTAL_MAX: 20,
-            HORIZONTAL_RATIO: 0.01,
+            // 水平間距 - 優化：減少水平間距
+            HORIZONTAL_MIN: 2,
+            HORIZONTAL_MAX: 16,
+            HORIZONTAL_RATIO: 0.008,
 
-            // 垂直間距
-            VERTICAL_MIN: 3,
-            VERTICAL_MAX: 15,
-            VERTICAL_RATIO: 0.008,
+            // 垂直間距 - 優化：減少垂直間距
+            VERTICAL_MIN: 2,
+            VERTICAL_MAX: 10,
+            VERTICAL_RATIO: 0.005,
 
-            // 特殊間距
-            LANDSCAPE_MOBILE_HORIZONTAL: 8,
-            LANDSCAPE_MOBILE_VERTICAL: 3
+            // 特殊間距 - 優化：減少橫向模式間距
+            LANDSCAPE_MOBILE_HORIZONTAL: 6,
+            LANDSCAPE_MOBILE_VERTICAL: 2
         };
 
         /**
-         * 邊距常量
+         * 邊距常量 - 優化：減少邊距以更好利用空間
          */
         static MARGINS = {
-            // 頂部邊距
-            TOP_MIN: 20,
-            TOP_MAX: 60,
+            // 頂部邊距 - 優化：減少頂部邊距
+            TOP_MIN: 15,
+            TOP_MAX: 45,
 
-            // 底部邊距
-            BOTTOM_MIN: 20,
-            BOTTOM_MAX: 60,
+            // 底部邊距 - 優化：減少底部邊距
+            BOTTOM_MIN: 15,
+            BOTTOM_MAX: 45,
 
-            // 左邊距
-            LEFT_MIN: 10,
-            LEFT_MAX: 30,
+            // 左邊距 - 優化：減少左邊距
+            LEFT_MIN: 8,
+            LEFT_MAX: 25,
 
-            // 右邊距
-            RIGHT_MIN: 10,
-            RIGHT_MAX: 30
+            // 右邊距 - 優化：減少右邊距
+            RIGHT_MIN: 8,
+            RIGHT_MAX: 25
         };
 
         /**

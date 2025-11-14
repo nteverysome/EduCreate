@@ -277,22 +277,36 @@ if (typeof SeparatedResponsiveConfig === 'undefined') {
 
         /**
          * 計算左右容器的位置和大小
+         * 🔥 [v26.0] 改進：考慮外框寬度，確保卡片不被切割
          */
         calculateContainerPositions() {
             const layout = this.calculateLayout();
             const containerWidth = this.width / 2;
             const usableWidth = containerWidth - layout.margins.side;
 
+            // 🔥 [v26.0] 外框邊距（來自 SeparatedMarginConfig）
+            const framePadding = 10;  // 外框與卡片間距
+            const cardWidth = layout.cardSize.width;
+            const boxWidth = cardWidth + framePadding * 2;  // 外框寬度
+
             return {
                 left: {
                     x: layout.margins.side + usableWidth / 2,
                     width: usableWidth,
-                    containerWidth: containerWidth
+                    containerWidth: containerWidth,
+                    // 🔥 [v26.0] 新增：外框信息
+                    boxWidth: boxWidth,
+                    framePadding: framePadding,
+                    cardWidth: cardWidth
                 },
                 right: {
                     x: this.width / 2 + layout.margins.side + usableWidth / 2,
                     width: usableWidth,
-                    containerWidth: containerWidth
+                    containerWidth: containerWidth,
+                    // 🔥 [v26.0] 新增：外框信息
+                    boxWidth: boxWidth,
+                    framePadding: framePadding,
+                    cardWidth: cardWidth
                 }
             };
         }
