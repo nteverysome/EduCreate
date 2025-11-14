@@ -171,6 +171,26 @@ class PreloadScene extends Phaser.Scene {
                 });
             }
 
+            // 🔥 [v82.0] 詳細的資源加載驗證
+            console.log('🔍 [v82.0] 視覺風格資源加載驗證', {
+                visualStyle,
+                resourceCount,
+                resources: data?.resources,
+                hasColorConfig: data?.resources?.colors ? true : false,
+                hasFontConfig: data?.resources?.fonts ? true : false,
+                hasFullConfig: data?.resources?.config ? true : false
+            });
+
+            if (resourceCount > 0) {
+                console.log('✅ [v82.0] 視覺風格資源已成功加載！', {
+                    visualStyle,
+                    resourceCount,
+                    colorUrl: data?.resources?.colors,
+                    fontUrl: data?.resources?.fonts,
+                    configUrl: data?.resources?.config
+                });
+            }
+
             if (!data?.success || !data?.resources) {
                 console.warn('⚠️ [v80.0] PreloadScene: 視覺風格資源回應無效，使用默認樣式', data);
                 return;
