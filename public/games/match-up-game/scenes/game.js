@@ -2972,31 +2972,35 @@ class GameScene extends Phaser.Scene {
             ? getBreakpoint(width)
             : (width < 768 ? 'mobile' : width < 1024 ? 'tablet' : width < 1280 ? 'desktop' : 'wide');
 
-        // 🔥 [v82.0] 根據斷點定義響應式比例
+        // 🔥 [v84.0] 根據斷點定義響應式比例和動態列數
         const responsiveRatios = {
             mobile: {
                 topButtonArea: 0.10,      // 10% 視窗高度
                 bottomButtonArea: 0.08,   // 8% 視窗高度
                 answerCardsHeight: 0.40,  // 40% 視窗高度
-                horizontalMargin: 0.05    // 5% 視窗寬度
+                horizontalMargin: 0.05,   // 5% 視窗寬度
+                itemsPerRow: 5            // 🔥 [v84.0] 手機：5 列
             },
             tablet: {
                 topButtonArea: 0.11,      // 11% 視窗高度
                 bottomButtonArea: 0.075,  // 7.5% 視窗高度
                 answerCardsHeight: 0.38,  // 38% 視窗高度
-                horizontalMargin: 0.10    // 10% 視窗寬度
+                horizontalMargin: 0.10,   // 10% 視窗寬度
+                itemsPerRow: 8            // 🔥 [v84.0] 平板：8 列
             },
             desktop: {
                 topButtonArea: 0.111,     // 11.1% 視窗高度
                 bottomButtonArea: 0.074,  // 7.4% 視窗高度
                 answerCardsHeight: 0.38,  // 38% 視窗高度
-                horizontalMargin: 0.138   // 13.8% 視窗寬度
+                horizontalMargin: 0.138,  // 13.8% 視窗寬度
+                itemsPerRow: 10           // 🔥 [v84.0] 桌面：10 列
             },
             wide: {
                 topButtonArea: 0.111,     // 11.1% 視窗高度
                 bottomButtonArea: 0.074,  // 7.4% 視窗高度
                 answerCardsHeight: 0.38,  // 38% 視窗高度
-                horizontalMargin: 0.15    // 15% 視窗寬度
+                horizontalMargin: 0.15,   // 15% 視窗寬度
+                itemsPerRow: 10           // 🔥 [v84.0] 寬屏：10 列
             }
         };
 
@@ -3010,8 +3014,9 @@ class GameScene extends Phaser.Scene {
         const horizontalMargin = width * ratios.horizontalMargin;
         const availableWidth = width - horizontalMargin * 2;
 
+        // 🔥 [v84.0] 動態列數系統 - 根據斷點自動調整
+        const itemsPerRow = ratios.itemsPerRow;
         const fixedHorizontalSpacing = 18;
-        const itemsPerRow = 10;
         const totalSpacingWidth = (itemsPerRow - 1) * fixedHorizontalSpacing;
         const baseCardWidth = (availableWidth - totalSpacingWidth) / itemsPerRow;
         const idealHorizontalSpacing = fixedHorizontalSpacing;
@@ -3046,9 +3051,15 @@ class GameScene extends Phaser.Scene {
         const totalCardWidth = itemsPerRow * cardWidth + (itemsPerRow - 1) * horizontalSpacing;
         const widthUtilization = (totalCardWidth / availableWidth * 100).toFixed(1);
 
-        console.log(`📊 [v83.0] 業界標準響應式佈局 - 20個匹配數:`, {
+        // 🔥 [v84.0] 計算行數
+        const totalRows = Math.ceil(itemCount / itemsPerRow);
+
+        console.log(`📊 [v84.0] 動態列數響應式佈局 - 20個匹配數:`, {
             screenSize: `${width}×${height}`,
             breakpoint: `${breakpoint} 📱`,
+            itemsPerRow: `${itemsPerRow} 列 🔥`,
+            totalRows: `${totalRows} 行 🔥`,
+            layout: `${itemsPerRow}×${totalRows} 🔥`,
             itemCount,
             cardWidth: cardWidth.toFixed(0),
             cardHeight: cardHeight.toFixed(0),
@@ -3096,7 +3107,7 @@ class GameScene extends Phaser.Scene {
             console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）');
         }
 
-        // 🔥 [v81.4] 創建上方英文卡片（2行，每行 10 列）- 第一行和第二行之間沒有間距
+        // 🔥 [v84.0] 創建上方英文卡片（動態行列數）- 第一行和第二行之間沒有間距
         currentPagePairs.forEach((pair, index) => {
             const col = index % itemsPerRow;
             const row = Math.floor(index / itemsPerRow);
@@ -3109,7 +3120,7 @@ class GameScene extends Phaser.Scene {
 
         console.log(`✅ 上方英文卡片已創建: ${this.leftCards.length} 張`);
 
-        // 創建下方空白框 + 框外答案卡片（2行，每行 10 列）
+        // 🔥 [v84.0] 創建下方空白框 + 框外答案卡片（動態行列數）
         shuffledAnswers.forEach((pair, index) => {
             const col = index % itemsPerRow;
             const row = Math.floor(index / itemsPerRow);
@@ -3131,7 +3142,7 @@ class GameScene extends Phaser.Scene {
         });
 
         console.log(`✅ 下方答案卡片已創建: ${shuffledAnswers.length} 對`);
-        console.log('✅ 上下分離佈局（2行 × 10列）創建完成');
+        console.log(`✅ [v84.0] 上下分離佈局（${totalRows}行 × ${itemsPerRow}列）創建完成 🔥`);
     }
 
     // 🔥 [v77.0] 創建垂直堆疊單元佈局 - 20個匹配數
