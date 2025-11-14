@@ -2105,14 +2105,16 @@ class GameScene extends Phaser.Scene {
             console.log('⚠️ 使用備用卡片大小計算（SeparatedResponsiveConfig 不可用）- 放大 10%');
         }
 
-        // 🎨 [v81.5] 計算內容大小 - 當匹配數是 20 時縮小聲音按鈕
+        // 🎨 [v215.0] 計算內容大小 - 改進分離模式下的聲音按鈕響應式設計
         let contentSizes = {
             audioButton: {
+                // 🔥 [v215.0] 改進：根據卡片高度計算更合理的按鈕大小
+                // 分離模式中按鈕應該更小，給圖片和文字更多空間
                 size: itemCount === 20
-                    ? Math.max(Math.floor(cardHeight * 0.15), 12)  // 🔥 [v81.5] 匹配數 20 時：縮小到 15%（從 25% 減少）
-                    : Math.max(Math.floor(cardHeight * 0.25), 16),  // 其他情況：保持 25%
-                minSize: itemCount === 20 ? 12 : 16,  // 🔥 [v81.5] 最小尺寸也相應調整
-                maxSize: itemCount === 20 ? 28 : 40   // 🔥 [v81.5] 最大尺寸也相應調整
+                    ? Math.max(Math.floor(cardHeight * 0.12), 10)  // 🔥 [v215.0] 匹配數 20 時：縮小到 12%
+                    : Math.max(Math.floor(cardHeight * 0.18), 14),  // 🔥 [v215.0] 其他情況：改為 18%（從 25% 減少）
+                minSize: itemCount === 20 ? 10 : 14,  // 🔥 [v215.0] 最小尺寸調整
+                maxSize: itemCount === 20 ? 24 : 32   // 🔥 [v215.0] 最大尺寸調整
             },
             image: {
                 width: Math.max(Math.floor(cardWidth * 0.35), 30),
@@ -5368,13 +5370,14 @@ class GameScene extends Phaser.Scene {
         // 🔥 首先添加背景（最底層）
         container.add([background]);
 
-        // 1️⃣ 語音按鈕區域（上方 30%）
-        const buttonAreaHeight = height * 0.3;
+        // 1️⃣ 語音按鈕區域（上方 20% - 改進響應式設計）
+        // 🔥 [v215.0] 改進：減少按鈕區域高度，給圖片和文字更多空間
+        const buttonAreaHeight = height * 0.2;
         const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
-        // 🔥 [v81.5] 當匹配數是 20 時縮小聲音按鈕
+        // 🔥 [v215.0] 改進：按鈕大小計算更合理
         const buttonSize = this.currentPageItemCount === 20
-            ? Math.max(15, Math.min(28, buttonAreaHeight * 0.4))  // 🔥 [v81.5] 匹配數 20 時：縮小到 40%
-            : Math.max(20, Math.min(40, buttonAreaHeight * 0.6));  // 其他情況：保持 60%
+            ? Math.max(12, Math.min(24, buttonAreaHeight * 0.35))  // 🔥 [v215.0] 匹配數 20 時：縮小到 35%
+            : Math.max(14, Math.min(28, buttonAreaHeight * 0.45));  // 🔥 [v215.0] 其他情況：改為 45%（從 60% 減少）
 
         console.log('🔊 準備調用 createAudioButton:', {
             audioUrl: audioUrl ? '有' : '無',
@@ -5386,8 +5389,9 @@ class GameScene extends Phaser.Scene {
 
         console.log('✅ createAudioButton 調用完成');
 
-        // 2️⃣ 圖片區域（中間 40%）
-        const imageAreaHeight = height * 0.4;
+        // 2️⃣ 圖片區域（中間 50% - 改進響應式設計）
+        // 🔥 [v215.0] 改進：增加圖片區域高度，因為按鈕區域從 30% 改為 20%
+        const imageAreaHeight = height * 0.5;
         const imageAreaY = -height / 2 + buttonAreaHeight + imageAreaHeight / 2;
         const squareSize = Math.min(width - 4, imageAreaHeight - 4);
         // ✅ v44.0：添加錯誤處理
@@ -5424,8 +5428,9 @@ class GameScene extends Phaser.Scene {
         // 🔥 首先添加背景（最底層）
         container.add([background]);
 
-        // 語音按鈕置中並放大
-        const buttonSize = Math.max(50, Math.min(80, width * 0.6));
+        // 🔥 [v215.0] 改進：語音按鈕置中，但大小更合理
+        // 使用卡片寬度和高度中的較小值來計算按鈕大小
+        const buttonSize = Math.max(40, Math.min(60, Math.min(width, height) * 0.5));
         this.createAudioButton(container, audioUrl, 0, 0, buttonSize, pairId);
     }
 
@@ -5501,9 +5506,9 @@ class GameScene extends Phaser.Scene {
         // 🔥 首先添加背景（最底層）
         container.add([background]);
 
-        // 語音按鈕在上方
-        const buttonSize = Math.max(30, Math.min(50, width * 0.25));
-        const buttonY = -height / 2 + buttonSize / 2 + 10;
+        // 🔥 [v215.0] 改進：語音按鈕在上方，大小更合理
+        const buttonSize = Math.max(24, Math.min(40, width * 0.2));
+        const buttonY = -height / 2 + buttonSize / 2 + 8;
         this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
 
         // 🔥 文字在下方，需要留出底部間距
@@ -5567,8 +5572,8 @@ class GameScene extends Phaser.Scene {
             console.error('❌ 圖片載入失敗 (佈局 ImageAudio):', error);
         });
 
-        // 創建語音按鈕（下方）
-        const buttonSize = Math.max(30, Math.min(50, width * 0.2));
+        // 🔥 [v215.0] 改進：創建語音按鈕（下方），大小更合理
+        const buttonSize = Math.max(24, Math.min(40, width * 0.18));
         const buttonY = height / 2 - buttonSize / 2 - 5;
         this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
     }
@@ -6079,15 +6084,18 @@ class GameScene extends Phaser.Scene {
         // 🔥 首先添加背景（最底層）
         container.add([background]);
 
-        // 1️⃣ 語音按鈕區域（上方 30%）
-        const buttonAreaHeight = height * 0.3;
+        // 1️⃣ 語音按鈕區域（上方 20% - 改進響應式設計）
+        // 🔥 [v215.0] 改進：減少按鈕區域高度，給圖片和文字更多空間
+        const buttonAreaHeight = height * 0.2;
         const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
-        const buttonSize = Math.max(20, Math.min(40, buttonAreaHeight * 0.6));
+        // 🔥 [v215.0] 改進：按鈕大小計算更合理
+        const buttonSize = Math.max(14, Math.min(28, buttonAreaHeight * 0.45));
 
         this.createAudioButton(container, audioUrl, 0, buttonAreaY, buttonSize, pairId);
 
-        // 2️⃣ 圖片區域（中間 40%）
-        const imageAreaHeight = height * 0.4;
+        // 2️⃣ 圖片區域（中間 50% - 改進響應式設計）
+        // 🔥 [v215.0] 改進：增加圖片區域高度，因為按鈕區域從 30% 改為 20%
+        const imageAreaHeight = height * 0.5;
         const imageAreaY = -height / 2 + buttonAreaHeight + imageAreaHeight / 2;
         const squareSize = Math.min(width - 4, imageAreaHeight - 4);
 
@@ -6178,8 +6186,8 @@ class GameScene extends Phaser.Scene {
             this.createTextElement(container, text, 0, textAreaY, width, textHeight);
         }
 
-        // 語音按鈕在下方 30%
-        const buttonSize = Math.max(30, Math.min(50, width * 0.25));
+        // 🔥 [v215.0] 改進：語音按鈕在下方，大小更合理
+        const buttonSize = Math.max(24, Math.min(40, width * 0.2));
         const buttonY = height / 2 - buttonSize / 2 - 5;
         this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
     }
@@ -6230,8 +6238,8 @@ class GameScene extends Phaser.Scene {
             console.error('❌ 圖片載入失敗 (右側佈局 ImageAudio):', error);
         });
 
-        // 創建語音按鈕（下方）
-        const buttonSize = Math.max(30, Math.min(50, width * 0.2));
+        // 🔥 [v215.0] 改進：創建語音按鈕（下方），大小更合理
+        const buttonSize = Math.max(24, Math.min(40, width * 0.18));
         const buttonY = height / 2 - buttonSize / 2 - 5;
         this.createAudioButton(container, audioUrl, 0, buttonY, buttonSize, pairId);
     }

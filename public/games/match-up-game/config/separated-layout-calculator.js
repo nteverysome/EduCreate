@@ -526,11 +526,11 @@ if (typeof SeparatedLayoutCalculator === 'undefined') {
          */
         calculateContentSizes(cardWidth, cardHeight) {
             return {
-                // 語音按鈕大小
+                // 🔥 [v215.0] 改進：語音按鈕大小計算更合理
                 audioButton: {
-                    size: Math.max(Math.floor(cardHeight * 0.25), 16),
-                    minSize: 16,
-                    maxSize: 40
+                    size: Math.max(Math.floor(cardHeight * 0.18), 14),  // 🔥 [v215.0] 改為 18%（從 25% 減少）
+                    minSize: 14,
+                    maxSize: 32
                 },
                 // 圖片大小
                 image: {
