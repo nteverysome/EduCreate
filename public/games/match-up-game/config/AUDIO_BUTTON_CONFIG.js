@@ -10,20 +10,22 @@
 const AUDIO_BUTTON_CONFIG = {
     // ========== 📏 大小配置 ==========
     size: {
-        // 按鈕大小計算方式
+        // 按鈕大小計算方式 - 支持 7、10、20 三種卡片數量
+
+        // 7 個卡片時的大小百分比
+        percentageFor7Items: 0.01,       // 1%
+        minSizeFor7Items: 2,             // 最小 2px
+        maxSizeFor7Items: 4,             // 最大 4px
+
+        // 10 個卡片時的大小百分比
+        percentageFor10Items: 0.045,     // 4.5%
+        minSizeFor10Items: 3,            // 最小 3px
+        maxSizeFor10Items: 6,            // 最大 6px
+
         // 20 個卡片時的大小百分比
-        percentageFor20Items: 0.01,      // 1%（超小 - 當前預設）
-
-        // 其他情況的大小百分比
-        percentageForOthers: 0.045,      // 4.5%（超小 - 當前預設）
-
-        // 最小尺寸（像素）
-        minSizeFor20Items: 2,            // 20 個卡片最小 2px
-        minSizeForOthers: 3,             // 其他情況最小 3px
-
-        // 最大尺寸（像素）
-        maxSizeFor20Items: 4,            // 20 個卡片最大 4px
-        maxSizeForOthers: 6,             // 其他情況最大 6px
+        percentageFor20Items: 0.01,      // 1%
+        minSizeFor20Items: 2,            // 最小 2px
+        maxSizeFor20Items: 4,            // 最大 4px
 
         // 邊界檢查：按鈕最多佔按鈕區域的百分比
         maxPercentageOfButtonArea: 0.9,  // 90%（留 10% 邊距）
@@ -108,60 +110,75 @@ const AUDIO_BUTTON_PRESETS = {
     // 超小按鈕
     tiny: {
         size: {
+            percentageFor7Items: 0.01,    // 1%
+            percentageFor10Items: 0.045,  // 4.5%
             percentageFor20Items: 0.01,   // 1%
-            percentageForOthers: 0.045,   // 4.5%
+            minSizeFor7Items: 2,
+            minSizeFor10Items: 3,
             minSizeFor20Items: 2,
-            minSizeForOthers: 3,
+            maxSizeFor7Items: 4,
+            maxSizeFor10Items: 6,
             maxSizeFor20Items: 4,
-            maxSizeForOthers: 6,
         }
     },
 
     // 小按鈕
     small: {
         size: {
+            percentageFor7Items: 0.03,    // 3%
+            percentageFor10Items: 0.09,   // 9%
             percentageFor20Items: 0.03,   // 3%
-            percentageForOthers: 0.09,    // 9%
+            minSizeFor7Items: 4,
+            minSizeFor10Items: 6,
             minSizeFor20Items: 4,
-            minSizeForOthers: 6,
+            maxSizeFor7Items: 8,
+            maxSizeFor10Items: 12,
             maxSizeFor20Items: 8,
-            maxSizeForOthers: 12,
         }
     },
 
     // 中等按鈕
     medium: {
         size: {
+            percentageFor7Items: 0.06,    // 6%
+            percentageFor10Items: 0.18,   // 18%
             percentageFor20Items: 0.06,   // 6%
-            percentageForOthers: 0.18,    // 18%
+            minSizeFor7Items: 6,
+            minSizeFor10Items: 10,
             minSizeFor20Items: 6,
-            minSizeForOthers: 10,
+            maxSizeFor7Items: 16,
+            maxSizeFor10Items: 24,
             maxSizeFor20Items: 16,
-            maxSizeForOthers: 24,
         }
     },
 
     // 大按鈕
     large: {
         size: {
+            percentageFor7Items: 0.10,    // 10%
+            percentageFor10Items: 0.27,   // 27%
             percentageFor20Items: 0.10,   // 10%
-            percentageForOthers: 0.27,    // 27%
+            minSizeFor7Items: 10,
+            minSizeFor10Items: 14,
             minSizeFor20Items: 10,
-            minSizeForOthers: 14,
+            maxSizeFor7Items: 24,
+            maxSizeFor10Items: 36,
             maxSizeFor20Items: 24,
-            maxSizeForOthers: 36,
         }
     },
 
     // 超大按鈕
     xlarge: {
         size: {
+            percentageFor7Items: 0.25,    // 25%
+            percentageFor10Items: 0.35,   // 35%
             percentageFor20Items: 0.25,   // 25%
-            percentageForOthers: 0.35,    // 35%
+            minSizeFor7Items: 20,
+            minSizeFor10Items: 24,
             minSizeFor20Items: 20,
-            minSizeForOthers: 24,
+            maxSizeFor7Items: 40,
+            maxSizeFor10Items: 56,
             maxSizeFor20Items: 40,
-            maxSizeForOthers: 56,
         }
     },
 };

@@ -53,21 +53,22 @@ const AUDIO_BUTTON_CONFIG = {
 
 ### 按鈕大小百分比
 
-| 預設 | 20 個卡片 | 其他情況 | 說明 |
-|------|---------|--------|------|
-| tiny | 1% | 4.5% | 超小 |
-| small | 3% | 9% | 小 |
-| medium | 6% | 18% | 中等 |
-| large | 10% | 27% | 大 |
-| xlarge | 25% | 35% | 超大 |
+| 預設 | 7 個卡片 | 10 個卡片 | 20 個卡片 | 說明 |
+|------|---------|---------|---------|------|
+| tiny | 1% | 4.5% | 1% | 超小 |
+| small | 3% | 9% | 3% | 小 |
+| medium | 6% | 18% | 6% | 中等 |
+| large | 10% | 27% | 10% | 大 |
+| xlarge | 25% | 35% | 25% | 超大 |
 
 ### 調整方法
 
 ```javascript
 // 在 AUDIO_BUTTON_CONFIG 中修改
 size: {
-    percentageFor20Items: 0.06,  // ← 改這個數字
-    percentageForOthers: 0.09,   // ← 改這個數字
+    percentageFor7Items: 0.03,   // ← 改 7 個卡片的大小
+    percentageFor10Items: 0.09,  // ← 改 10 個卡片的大小
+    percentageFor20Items: 0.06,  // ← 改 20 個卡片的大小
 }
 ```
 

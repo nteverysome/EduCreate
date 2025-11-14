@@ -2105,16 +2105,18 @@ class GameScene extends Phaser.Scene {
             console.log('⚠️ 使用備用卡片大小計算（SeparatedResponsiveConfig 不可用）- 放大 10%');
         }
 
-        // 🎨 [v219.0] 計算內容大小 - 再減小聲音按鈕到原來的四分之一
+        // 🎨 [v222.0] 計算內容大小 - 支持 7、10、20 三種卡片數量
         let contentSizes = {
             audioButton: {
-                // 🔥 [v219.0] 改進：按鈕大小減到四分之一
+                // 🔥 [v222.0] 改進：針對不同卡片數量設置不同的按鈕大小
                 // 分離模式中按鈕應該非常小，給圖片和文字最大空間
-                size: itemCount === 20
-                    ? Math.max(Math.floor(cardHeight * 0.03), 5)  // 🔥 [v219.0] 匹配數 20 時：3%（原 12% 的四分之一）
-                    : Math.max(Math.floor(cardHeight * 0.045), 6),  // 🔥 [v219.0] 其他情況：4.5%（原 18% 的四分之一）
-                minSize: itemCount === 20 ? 5 : 6,  // 🔥 [v219.0] 最小尺寸調整
-                maxSize: itemCount === 20 ? 8 : 10   // 🔥 [v219.0] 最大尺寸調整
+                size: itemCount === 7
+                    ? Math.max(Math.floor(cardHeight * 0.01), 2)   // 7 個卡片：1%
+                    : itemCount === 10
+                    ? Math.max(Math.floor(cardHeight * 0.045), 3)  // 10 個卡片：4.5%
+                    : Math.max(Math.floor(cardHeight * 0.01), 2),  // 20 個卡片：1%
+                minSize: itemCount === 7 ? 2 : itemCount === 10 ? 3 : 2,
+                maxSize: itemCount === 7 ? 4 : itemCount === 10 ? 6 : 4
             },
             image: {
                 width: Math.max(Math.floor(cardWidth * 0.35), 30),
