@@ -3014,24 +3014,9 @@ class GameScene extends Phaser.Scene {
         const horizontalMargin = width * ratios.horizontalMargin;
         const availableWidth = width - horizontalMargin * 2;
 
-        // 🔥 [v89.0] 根據寬度動態計算最佳列數
+        // 🔥 [v84.0] 動態列數系統 - 根據斷點自動調整
+        const itemsPerRow = ratios.itemsPerRow;
         const fixedHorizontalSpacing = 18;
-        const minCardWidth = 50;  // 卡片最小寬度
-
-        // 計算基於寬度的最大列數
-        const maxColsBasedOnWidth = Math.floor((availableWidth + fixedHorizontalSpacing) / (minCardWidth + fixedHorizontalSpacing));
-
-        // 使用預設列數作為基礎，但根據寬度調整
-        let itemsPerRow = ratios.itemsPerRow;
-
-        // 🔥 [v89.0] 如果計算出的列數小於預設列數，使用計算值
-        if (maxColsBasedOnWidth < itemsPerRow) {
-            itemsPerRow = maxColsBasedOnWidth;
-        }
-
-        // 確保至少有 4 列
-        itemsPerRow = Math.max(itemsPerRow, 4);
-
         const totalSpacingWidth = (itemsPerRow - 1) * fixedHorizontalSpacing;
         const baseCardWidth = (availableWidth - totalSpacingWidth) / itemsPerRow;
         const idealHorizontalSpacing = fixedHorizontalSpacing;
@@ -3069,11 +3054,9 @@ class GameScene extends Phaser.Scene {
         // 🔥 [v84.0] 計算行數
         const totalRows = Math.ceil(itemCount / itemsPerRow);
 
-        console.log(`📊 [v89.0] 動態列數響應式佈局 - 20個匹配數:`, {
+        console.log(`📊 [v84.0] 動態列數響應式佈局 - 20個匹配數:`, {
             screenSize: `${width}×${height}`,
             breakpoint: `${breakpoint} 📱`,
-            presetItemsPerRow: `${ratios.itemsPerRow} 列`,
-            maxColsBasedOnWidth: `${maxColsBasedOnWidth} 列`,
             itemsPerRow: `${itemsPerRow} 列 🔥`,
             totalRows: `${totalRows} 行 🔥`,
             layout: `${itemsPerRow}×${totalRows} 🔥`,
