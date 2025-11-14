@@ -3009,15 +3009,13 @@ class GameScene extends Phaser.Scene {
         const topButtonArea = height * ratios.topButtonArea;
         const bottomButtonArea = height * ratios.bottomButtonArea;
         const answerCardsHeight = height * ratios.answerCardsHeight;
-
-        // 🔥 [v87.0] 先計算行數，然後根據行數計算 availableHeight
-        const itemsPerRow = ratios.itemsPerRow;
-        const totalRows = Math.ceil(itemCount / itemsPerRow);
+        const availableHeight = height - topButtonArea - bottomButtonArea - answerCardsHeight;
 
         const horizontalMargin = width * ratios.horizontalMargin;
         const availableWidth = width - horizontalMargin * 2;
 
-        // 🔥 [v87.0] 動態列數系統 - 根據斷點自動調整
+        // 🔥 [v84.0] 動態列數系統 - 根據斷點自動調整
+        const itemsPerRow = ratios.itemsPerRow;
         const fixedHorizontalSpacing = 18;
         const totalSpacingWidth = (itemsPerRow - 1) * fixedHorizontalSpacing;
         const baseCardWidth = (availableWidth - totalSpacingWidth) / itemsPerRow;
@@ -3030,21 +3028,12 @@ class GameScene extends Phaser.Scene {
         const verticalSpacingRatio = 1.0;  // 🔥 [v81.3] 從 0.5 (50%) 增加到 1.0 (100%)
         const idealVerticalSpacing = idealCardHeight * verticalSpacingRatio;
 
-        // 🔥 [v87.0] 根據實際行數計算所需高度
-        // 英文卡片高度 + 分離間距 + 空白框高度
-        // = totalRows × cardHeight + separationSpacing + (totalRows × cardHeight + (totalRows - 1) × verticalSpacing)
-        // = 2 × totalRows × cardHeight + separationSpacing + (totalRows - 1) × verticalSpacing
-        const separationSpacingRatio = 0.3;  // 分離間距 = cardHeight × 0.3
-        const requiredHeightForAllCards = 2 * totalRows * idealCardHeight +
-                                          idealCardHeight * separationSpacingRatio +
-                                          (totalRows - 1) * idealVerticalSpacing;
-
-        // 🔥 [v87.0] 計算實際可用高度（考慮所有容器）
-        const availableHeight = height - topButtonArea - bottomButtonArea - answerCardsHeight;
+        // 檢查理想尺寸是否適應可用高度（2 行卡片）
+        const requiredHeight = idealCardHeight * 2 + idealVerticalSpacing;
 
         let cardWidth, cardHeight, verticalSpacing, horizontalSpacing;
 
-        if (requiredHeightForAllCards <= availableHeight) {
+        if (requiredHeight <= availableHeight) {
             // ✅ 理想尺寸適應，使用理想比例
             cardWidth = baseCardWidth;
             cardHeight = idealCardHeight;
@@ -3052,11 +3041,7 @@ class GameScene extends Phaser.Scene {
             horizontalSpacing = idealHorizontalSpacing;
         } else {
             // ⚠️ 理想尺寸太大，需要縮小以適應高度
-            // 計算最大可用的卡片高度
-            // availableHeight = 2 × totalRows × cardHeight + cardHeight × 0.3 + (totalRows - 1) × cardHeight × verticalSpacingRatio
-            // availableHeight = cardHeight × (2 × totalRows + 0.3 + (totalRows - 1) × verticalSpacingRatio)
-            const heightCoefficient = 2 * totalRows + separationSpacingRatio + (totalRows - 1) * verticalSpacingRatio;
-            cardHeight = availableHeight / heightCoefficient;
+            cardHeight = availableHeight / 2;
             cardWidth = cardHeight / 1.2;
             verticalSpacing = cardHeight * verticalSpacingRatio;
             horizontalSpacing = fixedHorizontalSpacing;
@@ -3066,7 +3051,10 @@ class GameScene extends Phaser.Scene {
         const totalCardWidth = itemsPerRow * cardWidth + (itemsPerRow - 1) * horizontalSpacing;
         const widthUtilization = (totalCardWidth / availableWidth * 100).toFixed(1);
 
-        console.log(`📊 [v87.0] 動態列數響應式佈局 - 20個匹配數:`, {
+        // 🔥 [v84.0] 計算行數
+        const totalRows = Math.ceil(itemCount / itemsPerRow);
+
+        console.log(`📊 [v84.0] 動態列數響應式佈局 - 20個匹配數:`, {
             screenSize: `${width}×${height}`,
             breakpoint: `${breakpoint} 📱`,
             itemsPerRow: `${itemsPerRow} 列 🔥`,
@@ -3084,9 +3072,8 @@ class GameScene extends Phaser.Scene {
             totalCardWidth: totalCardWidth.toFixed(0),
             widthUtilization: `${widthUtilization}%`,
             availableHeight: availableHeight.toFixed(0),
-            requiredHeightForAllCards: requiredHeightForAllCards.toFixed(0),
-            scaled: requiredHeightForAllCards > availableHeight ? '⚠️ 已縮放' : '✅ 理想尺寸',
-            heightCoefficient: (2 * totalRows + separationSpacingRatio + (totalRows - 1) * verticalSpacingRatio).toFixed(2)
+            requiredHeight: requiredHeight.toFixed(0),
+            scaled: requiredHeight > availableHeight ? '⚠️ 已縮放' : '✅ 理想尺寸'
         });
 
         // 🔥 [v86.0] 計算上方和下方區域的起始位置 - 確保容器不重疊
