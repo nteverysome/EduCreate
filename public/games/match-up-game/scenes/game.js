@@ -2973,10 +2973,11 @@ class GameScene extends Phaser.Scene {
         const rows = Math.ceil(itemCount / columns);
 
         // 🔥 計算單元尺寸
-        const horizontalMargin = 20;
-        const verticalMargin = 20;
-        const horizontalSpacing = 20;
-        const verticalSpacing = 20;
+        // 🔥 [v79.0] 減少間距以放大單元
+        const horizontalMargin = 5;
+        const verticalMargin = 5;
+        const horizontalSpacing = 8;
+        const verticalSpacing = 8;
 
         const usableWidth = availableWidth - horizontalMargin * 2;
         const usableHeight = availableHeight - verticalMargin * 2;
