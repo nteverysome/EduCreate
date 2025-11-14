@@ -2966,17 +2966,48 @@ class GameScene extends Phaser.Scene {
 
         const itemCount = currentPagePairs.length;
 
-        // 🔥 [v78.0] 計算可用空間 - 增加答案卡片區域高度
-        const timerHeight = 50;
-        const timerGap = 20;
-        const additionalTopMargin = 50;
-        const topButtonArea = timerHeight + timerGap + additionalTopMargin;  // 120px
-        const bottomButtonArea = 80;
-        const answerCardsHeight = 410;  // 🔥 [v80.3] 從 280px 增加到 410px，給答案卡片區域更多空間
+        // 🔥 [v83.0] 使用業界標準響應式斷點系統（來自 responsive-config.js）
+        // 使用預定義的斷點函數
+        const breakpoint = typeof getBreakpoint === 'function'
+            ? getBreakpoint(width)
+            : (width < 768 ? 'mobile' : width < 1024 ? 'tablet' : width < 1280 ? 'desktop' : 'wide');
+
+        // 🔥 [v82.0] 根據斷點定義響應式比例
+        const responsiveRatios = {
+            mobile: {
+                topButtonArea: 0.10,      // 10% 視窗高度
+                bottomButtonArea: 0.08,   // 8% 視窗高度
+                answerCardsHeight: 0.40,  // 40% 視窗高度
+                horizontalMargin: 0.05    // 5% 視窗寬度
+            },
+            tablet: {
+                topButtonArea: 0.11,      // 11% 視窗高度
+                bottomButtonArea: 0.075,  // 7.5% 視窗高度
+                answerCardsHeight: 0.38,  // 38% 視窗高度
+                horizontalMargin: 0.10    // 10% 視窗寬度
+            },
+            desktop: {
+                topButtonArea: 0.111,     // 11.1% 視窗高度
+                bottomButtonArea: 0.074,  // 7.4% 視窗高度
+                answerCardsHeight: 0.38,  // 38% 視窗高度
+                horizontalMargin: 0.138   // 13.8% 視窗寬度
+            },
+            wide: {
+                topButtonArea: 0.111,     // 11.1% 視窗高度
+                bottomButtonArea: 0.074,  // 7.4% 視窗高度
+                answerCardsHeight: 0.38,  // 38% 視窗高度
+                horizontalMargin: 0.15    // 15% 視窗寬度
+            }
+        };
+
+        const ratios = responsiveRatios[breakpoint];
+
+        const topButtonArea = height * ratios.topButtonArea;
+        const bottomButtonArea = height * ratios.bottomButtonArea;
+        const answerCardsHeight = height * ratios.answerCardsHeight;
         const availableHeight = height - topButtonArea - bottomButtonArea - answerCardsHeight;
 
-        // 🔥 [v81.0] 計算卡片寬度（方案 C：110px × 110px，1:1 比例，完全解決重疊）
-        const horizontalMargin = 265;  // 🔥 [v81.0] 從 100px 增加到 265px，縮小卡片尺寸
+        const horizontalMargin = width * ratios.horizontalMargin;
         const availableWidth = width - horizontalMargin * 2;
 
         const fixedHorizontalSpacing = 18;
@@ -3015,7 +3046,9 @@ class GameScene extends Phaser.Scene {
         const totalCardWidth = itemsPerRow * cardWidth + (itemsPerRow - 1) * horizontalSpacing;
         const widthUtilization = (totalCardWidth / availableWidth * 100).toFixed(1);
 
-        console.log(`📊 [v77.0] Wordwall 風格單行布局計算 - 20個匹配數:`, {
+        console.log(`📊 [v83.0] 業界標準響應式佈局 - 20個匹配數:`, {
+            screenSize: `${width}×${height}`,
+            breakpoint: `${breakpoint} 📱`,
             itemCount,
             cardWidth: cardWidth.toFixed(0),
             cardHeight: cardHeight.toFixed(0),
@@ -3023,6 +3056,7 @@ class GameScene extends Phaser.Scene {
             horizontalSpacing: horizontalSpacing.toFixed(1),
             verticalSpacing: verticalSpacing.toFixed(1),
             horizontalMargin: horizontalMargin.toFixed(0),
+            horizontalMarginRatio: `${(ratios.horizontalMargin * 100).toFixed(1)}%`,
             availableWidth: availableWidth.toFixed(0),
             totalCardWidth: totalCardWidth.toFixed(0),
             widthUtilization: `${widthUtilization}%`,
