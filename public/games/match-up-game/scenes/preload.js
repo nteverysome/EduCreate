@@ -22,6 +22,10 @@ class PreloadScene extends Phaser.Scene {
         loadingText.setOrigin(0.5);
 
         this.initialLoadingText = loadingText;
+
+        // 🎨 [v1.0] 加載中世紀背景圖片
+        this.load.image('game-background', '/games/match-up-game/assets/game_background_4.png');
+        console.log('🖼️ PreloadScene: 排程載入中世紀背景圖片');
     }
 
     async create() {
@@ -30,6 +34,29 @@ class PreloadScene extends Phaser.Scene {
         if (this.initialLoadingText) {
             this.initialLoadingText.destroy();
             this.initialLoadingText = null;
+        }
+
+        // 🎨 [v1.0] 在 create 方法中加載中世紀背景圖片
+        if (!this.textures.exists('game-background')) {
+            this.load.image('game-background', '/games/match-up-game/assets/game_background_4.png');
+            console.log('🖼️ PreloadScene: 排程載入中世紀背景圖片');
+
+            // 等待圖片加載完成
+            await new Promise((resolve) => {
+                this.load.once('complete', () => {
+                    console.log('✅ PreloadScene: 中世紀背景圖片加載完成');
+                    resolve();
+                });
+
+                this.load.once('loaderror', (file) => {
+                    console.warn('⚠️ PreloadScene: 背景圖片加載失敗', file.key, file.src);
+                    resolve();
+                });
+
+                if (!this.load.isLoading()) {
+                    this.load.start();
+                }
+            });
         }
 
         this.handlerScene = this.scene.get('handler');
@@ -89,14 +116,25 @@ class PreloadScene extends Phaser.Scene {
             this.visualStyleId = visualStyle;
 
             const apiUrl = `${window.location.origin}/api/visual-styles/resources?styleId=${visualStyle}`;
-            console.log('📡 PreloadScene: 請求視覺風格資源', apiUrl);
+            console.log('📡 [v80.0] PreloadScene: 請求視覺風格資源', {
+                apiUrl,
+                origin: window.location.origin,
+                visualStyle
+            });
 
             const response = await fetch(apiUrl, {
                 headers: { Accept: 'application/json' }
             });
 
+            console.log('📡 [v80.0] PreloadScene: API 回應狀態', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok,
+                contentType: response.headers.get('content-type')
+            });
+
             if (!response.ok) {
-                console.warn('⚠️ PreloadScene: 無法取得視覺風格資源，使用默認樣式', {
+                console.warn('⚠️ [v80.0] PreloadScene: 無法取得視覺風格資源，使用默認樣式', {
                     status: response.status,
                     statusText: response.statusText
                 });
@@ -105,8 +143,14 @@ class PreloadScene extends Phaser.Scene {
 
             const data = await response.json();
 
+            console.log('📡 [v80.0] PreloadScene: API 回應數據', {
+                success: data?.success,
+                resourceCount: Object.keys(data?.resources || {}).length,
+                resources: data?.resources
+            });
+
             if (!data?.success || !data?.resources) {
-                console.warn('⚠️ PreloadScene: 視覺風格資源回應無效，使用默認樣式', data);
+                console.warn('⚠️ [v80.0] PreloadScene: 視覺風格資源回應無效，使用默認樣式', data);
                 return;
             }
 
@@ -115,21 +159,30 @@ class PreloadScene extends Phaser.Scene {
                 this.game.visualStyleResources = data.resources;
             }
 
+            console.log('✅ [v80.0] PreloadScene: 視覺風格資源已設置', {
+                resourceCount: Object.keys(data.resources).length
+            });
+
             const queued = this.queueVisualStyleAssets(visualStyle, data.resources);
 
+            console.log('📋 [v80.0] PreloadScene: queueVisualStyleAssets 結果', {
+                queued,
+                resourceCount: Object.keys(data.resources).length
+            });
+
             if (!queued) {
-                console.log('ℹ️ PreloadScene: 無需額外載入視覺風格資源');
+                console.log('ℹ️ [v80.0] PreloadScene: 無需額外載入視覺風格資源');
                 return;
             }
 
             await new Promise((resolve) => {
                 this.load.once('complete', () => {
-                    console.log('✅ PreloadScene: 視覺風格資源載入完成');
+                    console.log('✅ [v80.0] PreloadScene: 視覺風格資源載入完成');
                     resolve();
                 });
 
                 this.load.once('loaderror', (file) => {
-                    console.warn('⚠️ PreloadScene: 視覺風格資源載入失敗', file.key, file.src);
+                    console.warn('⚠️ [v80.0] PreloadScene: 視覺風格資源載入失敗', file.key, file.src);
                 });
 
                 if (!this.load.isLoading()) {
@@ -137,7 +190,11 @@ class PreloadScene extends Phaser.Scene {
                 }
             });
         } catch (error) {
-            console.error('❌ PreloadScene: 載入視覺風格資源時發生錯誤', error);
+            console.error('❌ [v80.0] PreloadScene: 載入視覺風格資源時發生錯誤', error);
+            console.error('❌ [v80.0] PreloadScene: 錯誤詳情', {
+                message: error?.message,
+                stack: error?.stack
+            });
         }
     }
 
