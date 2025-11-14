@@ -3052,9 +3052,22 @@ class GameScene extends Phaser.Scene {
             }
         };
 
+        // 🔥 [v91.0] 檢測特定解析度（768×1024）並做特別計算
+        const isSpecialTablet = (width === 768 || (width > 760 && width < 780)) &&
+                                (height === 1024 || (height > 1020 && height < 1030));
+
         // 🔥 [v90.0] 根據屏幕方向選擇配置
-        const orientationKey = isLandscape ? 'landscape' : 'portrait';
-        const ratios = responsiveRatios[breakpoint][orientationKey];
+        let orientationKey = isLandscape ? 'landscape' : 'portrait';
+        let ratios = responsiveRatios[breakpoint][orientationKey];
+
+        // 🔥 [v91.0] 為特定解析度（768×1024）做特別調整
+        if (isSpecialTablet && isPortrait) {
+            // 對於 768×1024 直屏，減少列數以避免超出容器
+            ratios = {
+                ...ratios,
+                itemsPerRow: 6  // 從 8 列改為 6 列
+            };
+        }
 
         const topButtonArea = height * ratios.topButtonArea;
         const bottomButtonArea = height * ratios.bottomButtonArea;
@@ -3104,10 +3117,11 @@ class GameScene extends Phaser.Scene {
         // 🔥 [v84.0] 計算行數
         const totalRows = Math.ceil(itemCount / itemsPerRow);
 
-        console.log(`📊 [v90.0] 動態列數響應式佈局 - 20個匹配數:`, {
+        console.log(`📊 [v91.0] 動態列數響應式佈局 - 20個匹配數:`, {
             screenSize: `${width}×${height}`,
             orientation: `${isLandscape ? '📱 橫屏' : '📱 直屏'}`,
             breakpoint: `${breakpoint} 📱`,
+            specialTablet: isSpecialTablet ? '✅ 768×1024 特別計算' : '❌ 標準計算',
             itemsPerRow: `${itemsPerRow} 列 🔥`,
             totalRows: `${totalRows} 行 🔥`,
             layout: `${itemsPerRow}×${totalRows} 🔥`,
