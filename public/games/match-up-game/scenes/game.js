@@ -1055,6 +1055,16 @@ class GameScene extends Phaser.Scene {
             pairs: Array.from(this.matchedPairs)
         });
 
+        // 🔥 [v74.0] 添加詳細的調適訊息
+        console.log('🔍 [v74.0] ========== updateLayout 開始 ==========', {
+            timestamp: new Date().toISOString(),
+            width: this.scale.width,
+            height: this.scale.height,
+            itemCount: this.currentPagePairs ? this.currentPagePairs.length : 'unknown',
+            currentPage: this.currentPage + 1,
+            totalPages: this.totalPages
+        });
+
         try {
             // 🔥 [v202.0] 移除特定的延遲調用，而不是所有事件
             // 這樣可以避免影響計時器和其他時間相關功能
@@ -1391,9 +1401,29 @@ class GameScene extends Phaser.Scene {
 
             // 🔥 移除重新開始按鈕：用戶要求拿掉
             console.log('🎮 GameScene: updateLayout 完成');
+            console.log('🔍 [v74.0] ========== updateLayout 結束（成功）==========', {
+                timestamp: new Date().toISOString(),
+                leftCardsCount: this.leftCards ? this.leftCards.length : 0,
+                rightCardsCount: this.rightCards ? this.rightCards.length : 0,
+                rightEmptyBoxesCount: this.rightEmptyBoxes ? this.rightEmptyBoxes.length : 0
+            });
         } catch (error) {
             console.error('❌ GameScene: updateLayout 失敗', error);
             console.error('❌ 錯誤堆棧:', error.stack);
+
+            // 🔥 [v74.0] 詳細的錯誤診斷訊息
+            console.error('🔍 [v74.0] ========== 詳細錯誤診斷 ==========', {
+                errorMessage: error.message,
+                errorName: error.name,
+                errorType: typeof error,
+                timestamp: new Date().toISOString(),
+                currentPage: this.currentPage + 1,
+                totalPages: this.totalPages,
+                itemCount: this.currentPagePairs ? this.currentPagePairs.length : 'unknown',
+                layout: this.layout,
+                width: this.scale.width,
+                height: this.scale.height
+            });
 
             // 顯示錯誤信息
             const width = this.scale.width;
@@ -1413,6 +1443,8 @@ class GameScene extends Phaser.Scene {
                 align: 'center',
                 wordWrap: { width: width - 100 }
             }).setOrigin(0.5);
+
+            console.log('🔍 [v74.0] ========== updateLayout 結束（失敗）==========');
         }
     }
 
@@ -1963,10 +1995,18 @@ class GameScene extends Phaser.Scene {
         // 🔥 [Phase 4] 使用 SeparatedLayoutCalculator 進行統一的計算
         // 備用方案：如果 SeparatedLayoutCalculator 不可用，使用內聯邏輯
         let calculator;
+        console.log('🔍 [v74.0] 檢查 SeparatedLayoutCalculator 可用性:', {
+            isDefined: typeof SeparatedLayoutCalculator !== 'undefined',
+            type: typeof SeparatedLayoutCalculator,
+            value: SeparatedLayoutCalculator
+        });
+
         if (typeof SeparatedLayoutCalculator !== 'undefined') {
+            console.log('✅ [v74.0] 使用 SeparatedLayoutCalculator 類');
             calculator = new SeparatedLayoutCalculator(width, height, itemCount, 'left-right');
         } else {
             // 備用計算器邏輯
+            console.log('⚠️ [v74.0] SeparatedLayoutCalculator 不可用，使用備用計算器');
             calculator = {
                 calculateCardSize: () => {
                     const cardWidth = Math.min(width * 0.35, 250);
@@ -1991,6 +2031,7 @@ class GameScene extends Phaser.Scene {
                 getLayoutVariant: () => 'single-column',
                 // 🔥 [v73.0] 添加缺失的佈局計算方法
                 calculateLeftLayout: (count) => {
+                    console.log('🔍 [v74.0] calculateLeftLayout 被調用:', { count });
                     return {
                         columns: 1,
                         rows: count,
@@ -1998,6 +2039,7 @@ class GameScene extends Phaser.Scene {
                     };
                 },
                 calculateRightLayout: (count) => {
+                    console.log('🔍 [v74.0] calculateRightLayout 被調用:', { count });
                     return {
                         columns: 1,
                         rows: count,
@@ -2005,6 +2047,18 @@ class GameScene extends Phaser.Scene {
                     };
                 }
             };
+            console.log('✅ [v74.0] 備用計算器已創建，包含所有必要方法:', {
+                hasMethods: {
+                    calculateCardSize: typeof calculator.calculateCardSize === 'function',
+                    calculatePositions: typeof calculator.calculatePositions === 'function',
+                    calculateSpacing: typeof calculator.calculateSpacing === 'function',
+                    calculateColumnCount: typeof calculator.calculateColumnCount === 'function',
+                    calculateRowCount: typeof calculator.calculateRowCount === 'function',
+                    getLayoutVariant: typeof calculator.getLayoutVariant === 'function',
+                    calculateLeftLayout: typeof calculator.calculateLeftLayout === 'function',
+                    calculateRightLayout: typeof calculator.calculateRightLayout === 'function'
+                }
+            });
         }
 
         // 🔥 [v31.0] 計算可用高度（用於卡片高度計算）
@@ -2176,8 +2230,29 @@ class GameScene extends Phaser.Scene {
         console.log(`📍 位置: 左X=${leftX.toFixed(0)}, 右X=${rightX.toFixed(0)}, 左Y=${leftStartY.toFixed(0)}, 右Y=${rightStartY.toFixed(0)}`);
 
         // 🔥 [Screenshot_279] 使用新的佈局計算方法
-        const leftLayout = calculator.calculateLeftLayout(itemCount);
-        const rightLayout = calculator.calculateRightLayout(itemCount);
+        console.log('🔍 [v74.0] 準備調用 calculateLeftLayout 和 calculateRightLayout:', {
+            calculatorType: calculator.constructor.name,
+            hasCalculateLeftLayout: typeof calculator.calculateLeftLayout === 'function',
+            hasCalculateRightLayout: typeof calculator.calculateRightLayout === 'function',
+            itemCount: itemCount
+        });
+
+        let leftLayout, rightLayout;
+        try {
+            leftLayout = calculator.calculateLeftLayout(itemCount);
+            console.log('✅ [v74.0] calculateLeftLayout 成功:', leftLayout);
+        } catch (error) {
+            console.error('❌ [v74.0] calculateLeftLayout 失敗:', error);
+            throw error;
+        }
+
+        try {
+            rightLayout = calculator.calculateRightLayout(itemCount);
+            console.log('✅ [v74.0] calculateRightLayout 成功:', rightLayout);
+        } catch (error) {
+            console.error('❌ [v74.0] calculateRightLayout 失敗:', error);
+            throw error;
+        }
 
         console.log(`📐 左側佈局: ${leftLayout.columns} 列 × ${leftLayout.rows} 行 (${leftLayout.layout})`);
         console.log(`📐 右側佈局: ${rightLayout.columns} 列 × ${rightLayout.rows} 行 (${rightLayout.layout})`);
