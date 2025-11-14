@@ -1988,7 +1988,22 @@ class GameScene extends Phaser.Scene {
                 },
                 calculateColumnCount: () => 1,
                 calculateRowCount: () => itemCount,
-                getLayoutVariant: () => 'single-column'
+                getLayoutVariant: () => 'single-column',
+                // 🔥 [v73.0] 添加缺失的佈局計算方法
+                calculateLeftLayout: (count) => {
+                    return {
+                        columns: 1,
+                        rows: count,
+                        layout: 'single-column'
+                    };
+                },
+                calculateRightLayout: (count) => {
+                    return {
+                        columns: 1,
+                        rows: count,
+                        layout: 'single-column'
+                    };
+                }
             };
         }
 
