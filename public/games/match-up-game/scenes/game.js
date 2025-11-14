@@ -2966,45 +2966,95 @@ class GameScene extends Phaser.Scene {
 
         const itemCount = currentPagePairs.length;
 
+        // 🔥 [v90.0] 檢測屏幕方向
+        const isLandscape = width > height;  // 橫屏：寬度 > 高度
+        const isPortrait = width <= height;  // 直屏：寬度 <= 高度
+
         // 🔥 [v83.0] 使用業界標準響應式斷點系統（來自 responsive-config.js）
         // 使用預定義的斷點函數
         const breakpoint = typeof getBreakpoint === 'function'
             ? getBreakpoint(width)
             : (width < 768 ? 'mobile' : width < 1024 ? 'tablet' : width < 1280 ? 'desktop' : 'wide');
 
-        // 🔥 [v84.0] 根據斷點定義響應式比例和動態列數
+        // 🔥 [v90.0] 根據斷點和屏幕方向定義響應式比例和動態列數
         const responsiveRatios = {
             mobile: {
-                topButtonArea: 0.10,      // 10% 視窗高度
-                bottomButtonArea: 0.08,   // 8% 視窗高度
-                answerCardsHeight: 0.40,  // 40% 視窗高度
-                horizontalMargin: 0.05,   // 5% 視窗寬度
-                itemsPerRow: 5            // 🔥 [v84.0] 手機：5 列
+                // 直屏配置
+                portrait: {
+                    topButtonArea: 0.10,      // 10% 視窗高度
+                    bottomButtonArea: 0.08,   // 8% 視窗高度
+                    answerCardsHeight: 0.40,  // 40% 視窗高度
+                    horizontalMargin: 0.05,   // 5% 視窗寬度
+                    itemsPerRow: 5            // 直屏：5 列
+                },
+                // 橫屏配置
+                landscape: {
+                    topButtonArea: 0.10,      // 10% 視窗高度
+                    bottomButtonArea: 0.08,   // 8% 視窗高度
+                    answerCardsHeight: 0.40,  // 40% 視窗高度
+                    horizontalMargin: 0.05,   // 5% 視窗寬度
+                    itemsPerRow: 8            // 橫屏：8 列
+                }
             },
             tablet: {
-                topButtonArea: 0.11,      // 11% 視窗高度
-                bottomButtonArea: 0.075,  // 7.5% 視窗高度
-                answerCardsHeight: 0.38,  // 38% 視窗高度
-                horizontalMargin: 0.15,   // 🔥 [v84.1] 15% 視窗寬度（從 10% 增加，讓卡片更小）
-                itemsPerRow: 10           // 🔥 [v88.0] 平板：10 列（從 8 列增加）
+                // 直屏配置
+                portrait: {
+                    topButtonArea: 0.11,      // 11% 視窗高度
+                    bottomButtonArea: 0.075,  // 7.5% 視窗高度
+                    answerCardsHeight: 0.38,  // 38% 視窗高度
+                    horizontalMargin: 0.15,   // 15% 視窗寬度
+                    itemsPerRow: 8            // 直屏：8 列
+                },
+                // 橫屏配置
+                landscape: {
+                    topButtonArea: 0.11,      // 11% 視窗高度
+                    bottomButtonArea: 0.075,  // 7.5% 視窗高度
+                    answerCardsHeight: 0.38,  // 38% 視窗高度
+                    horizontalMargin: 0.15,   // 15% 視窗寬度
+                    itemsPerRow: 10           // 橫屏：10 列
+                }
             },
             desktop: {
-                topButtonArea: 0.111,     // 11.1% 視窗高度
-                bottomButtonArea: 0.074,  // 7.4% 視窗高度
-                answerCardsHeight: 0.38,  // 38% 視窗高度
-                horizontalMargin: 0.138,  // 13.8% 視窗寬度
-                itemsPerRow: 10           // 🔥 [v84.0] 桌面：10 列
+                // 直屏配置
+                portrait: {
+                    topButtonArea: 0.111,     // 11.1% 視窗高度
+                    bottomButtonArea: 0.074,  // 7.4% 視窗高度
+                    answerCardsHeight: 0.38,  // 38% 視窗高度
+                    horizontalMargin: 0.138,  // 13.8% 視窗寬度
+                    itemsPerRow: 10           // 直屏：10 列
+                },
+                // 橫屏配置
+                landscape: {
+                    topButtonArea: 0.111,     // 11.1% 視窗高度
+                    bottomButtonArea: 0.074,  // 7.4% 視窗高度
+                    answerCardsHeight: 0.38,  // 38% 視窗高度
+                    horizontalMargin: 0.138,  // 13.8% 視窗寬度
+                    itemsPerRow: 10           // 橫屏：10 列
+                }
             },
             wide: {
-                topButtonArea: 0.111,     // 11.1% 視窗高度
-                bottomButtonArea: 0.074,  // 7.4% 視窗高度
-                answerCardsHeight: 0.38,  // 38% 視窗高度
-                horizontalMargin: 0.15,   // 15% 視窗寬度
-                itemsPerRow: 10           // 🔥 [v84.0] 寬屏：10 列
+                // 直屏配置
+                portrait: {
+                    topButtonArea: 0.111,     // 11.1% 視窗高度
+                    bottomButtonArea: 0.074,  // 7.4% 視窗高度
+                    answerCardsHeight: 0.38,  // 38% 視窗高度
+                    horizontalMargin: 0.15,   // 15% 視窗寬度
+                    itemsPerRow: 10           // 直屏：10 列
+                },
+                // 橫屏配置
+                landscape: {
+                    topButtonArea: 0.111,     // 11.1% 視窗高度
+                    bottomButtonArea: 0.074,  // 7.4% 視窗高度
+                    answerCardsHeight: 0.38,  // 38% 視窗高度
+                    horizontalMargin: 0.15,   // 15% 視窗寬度
+                    itemsPerRow: 10           // 橫屏：10 列
+                }
             }
         };
 
-        const ratios = responsiveRatios[breakpoint];
+        // 🔥 [v90.0] 根據屏幕方向選擇配置
+        const orientationKey = isLandscape ? 'landscape' : 'portrait';
+        const ratios = responsiveRatios[breakpoint][orientationKey];
 
         const topButtonArea = height * ratios.topButtonArea;
         const bottomButtonArea = height * ratios.bottomButtonArea;
@@ -3054,8 +3104,9 @@ class GameScene extends Phaser.Scene {
         // 🔥 [v84.0] 計算行數
         const totalRows = Math.ceil(itemCount / itemsPerRow);
 
-        console.log(`📊 [v84.0] 動態列數響應式佈局 - 20個匹配數:`, {
+        console.log(`📊 [v90.0] 動態列數響應式佈局 - 20個匹配數:`, {
             screenSize: `${width}×${height}`,
+            orientation: `${isLandscape ? '📱 橫屏' : '📱 直屏'}`,
             breakpoint: `${breakpoint} 📱`,
             itemsPerRow: `${itemsPerRow} 列 🔥`,
             totalRows: `${totalRows} 行 🔥`,
