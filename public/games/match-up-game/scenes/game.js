@@ -2967,9 +2967,9 @@ class GameScene extends Phaser.Scene {
         const availableHeight = height - topButtonArea - bottomButtonArea;
         const availableWidth = width;
 
-        // 🔥 計算網格佈局（2列 × 10行 或 4列 × 5行）
-        // 對於 20 個項目，使用 4 列 × 5 行
-        const columns = 4;
+        // 🔥 計算網格佈局（2行 × 10列）
+        // 對於 20 個項目，使用 10 列 × 2 行
+        const columns = 10;
         const rows = Math.ceil(itemCount / columns);
 
         // 🔥 計算單元尺寸
