@@ -171,13 +171,14 @@ export async function GET(request: NextRequest) {
     } else {
       resources = {
         spaceship: { exists: false },
-      cloud1: { exists: false },
-      cloud2: { exists: false },
-      bg_layer: { exists: false },
-      background: { exists: false },
-      hit: { exists: false },
-      success: { exists: false },
-    };
+        cloud1: { exists: false },
+        cloud2: { exists: false },
+        bg_layer: { exists: false },
+        background: { exists: false },
+        hit: { exists: false },
+        success: { exists: false }
+      };
+    }
 
     // 遍歷 Blob 列表，匹配資源類型
     blobs.forEach((blob) => {
