@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>上下容器間距控制函數可視化</title>
+    <title>批數 20 垂直堆疊單元佈局 - 間距調整工具</title>
     <style>
         * {
             margin: 0;
@@ -21,325 +21,53 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-        }
-
-        h1 {
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .main-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
         }
 
-        .visualization-box {
+        .control-panel {
             background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
-        .visualization-title {
-            font-size: 1.3em;
-            font-weight: bold;
+        .control-panel h2 {
             color: #333;
             margin-bottom: 20px;
-            border-bottom: 3px solid #667eea;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
             padding-bottom: 10px;
         }
 
-        .bug-fix-banner {
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E72 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: bold;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .formula-comparison {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .formula-box {
-            padding: 15px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-        }
-
-        .formula-wrong {
-            background: #FFE5E5;
-            border: 2px solid #FF6B6B;
-        }
-
-        .formula-correct {
-            background: #E5F5E5;
-            border: 2px solid #4CAF50;
-        }
-
-        .formula-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-
-        .formula-wrong .formula-title {
-            color: #FF6B6B;
-        }
-
-        .formula-correct .formula-title {
-            color: #4CAF50;
-        }
-
-        .screen {
-            width: 100%;
-            height: 600px;
-            background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
-            border: 3px solid #333;
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .timer-area {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 50px;
-            background: #FFD700;
-            border-bottom: 2px solid #FFA500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #333;
-            z-index: 10;
-        }
-
-        .timer-gap {
-            position: absolute;
-            top: 50px;
-            left: 0;
-            right: 0;
-            height: 20px;
-            background: #f5f5f5;
-            border-bottom: 1px dashed #999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-            color: #666;
-        }
-
-        .top-margin {
-            position: absolute;
-            top: 70px;
-            left: 0;
-            right: 0;
-            height: 90px;
-            background: #E8F4F8;
-            border-bottom: 1px dashed #999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-            color: #666;
-        }
-
-        .top-container {
-            position: absolute;
-            top: 160px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            height: 100px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 3px solid #333;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1.1em;
-            z-index: 5;
-        }
-
-        .vertical-spacing {
-            position: absolute;
-            top: 260px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            height: 2px;
-            background: #FF4444;
-            border: 1px solid #FF0000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 3;
-        }
-
-        .spacing-label {
-            position: absolute;
-            top: 265px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #FF4444;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 1em;
-            font-weight: bold;
-            white-space: nowrap;
-            z-index: 4;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.05); }
-        }
-
-        .bottom-container {
-            position: absolute;
-            top: 270px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            height: 100px;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border: 3px solid #333;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1.1em;
-            z-index: 5;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .bottom-button-area {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 80px;
-            background: #FFF9E6;
-            border-top: 2px solid #FFD700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-            color: #666;
-            z-index: 1;
-        }
-
-        .answer-cards-wrapper {
-            position: absolute;
-            top: 370px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 15px;
-            z-index: 4;
-            flex-wrap: wrap;
-        }
-
-        .answer-card-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .answer-empty-box {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #333;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.5em;
-            color: #999;
-            border-radius: 4px;
-        }
-
-        .answer-image-box {
-            width: 35px;
-            height: 35px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.7em;
-            font-weight: bold;
-        }
-
-        .answer-text-box {
-            font-size: 0.55em;
-            font-weight: bold;
-            color: #333;
-            text-align: center;
-            max-width: 50px;
-            word-break: break-word;
-        }
-
-        .controls {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
-        }
-
         .control-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .control-label {
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
+        .control-group label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .slider-container {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-        }
-
-        .control-value {
-            color: #667eea;
-            font-size: 1.1em;
-            font-weight: bold;
+            gap: 10px;
         }
 
         input[type="range"] {
-            width: 100%;
-            height: 8px;
-            border-radius: 5px;
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
             background: #ddd;
             outline: none;
             -webkit-appearance: none;
@@ -348,682 +76,472 @@
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: #667eea;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
         }
 
         input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             background: #667eea;
             cursor: pointer;
             border: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
         }
 
-        .function-list {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-
-        .function-item {
-            background: #f9f9f9;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-        }
-
-        .function-name {
-            font-weight: bold;
+        .value-display {
+            min-width: 50px;
+            text-align: right;
             color: #667eea;
-            font-size: 1.1em;
-            margin-bottom: 5px;
+            font-weight: 700;
+            font-size: 14px;
         }
 
-        .function-desc {
-            color: #666;
-            font-size: 0.95em;
+        .stats-box {
+            background: #f5f7fa;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .stats-box .stat-row {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 8px;
+            color: #555;
         }
 
-        .function-code {
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
+        .stat-label {
+            font-weight: 600;
             color: #333;
-            overflow-x: auto;
         }
 
-        .highlight {
-            background: #FFFF00;
-            padding: 2px 4px;
-            border-radius: 3px;
+        .stat-value {
+            color: #667eea;
+            font-weight: 700;
         }
 
-        .answer-card-visualization {
-            background: #f9f9f9;
-            border: 2px solid #667eea;
-            border-radius: 10px;
+        .preview-area {
+            background: white;
+            border-radius: 12px;
             padding: 20px;
-            margin-top: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: auto;
         }
 
-        .answer-card-title {
-            font-size: 1.2em;
-            font-weight: bold;
+        .preview-title {
             color: #333;
             margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: 600;
             border-bottom: 2px solid #667eea;
             padding-bottom: 10px;
         }
 
-        .answer-card-demo {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 40px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+        .preview-container {
+            background: #f9fafb;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            width: 100%;
+            height: 600px;
+            overflow: auto;
         }
 
-        .answer-card-container {
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 0;
+            width: 100%;
+            height: 100%;
+            padding: 5px;
+        }
+
+        .unit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 1px solid #555;
+            border-radius: 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-        }
-
-        .answer-card-label {
-            font-weight: bold;
-            color: #333;
-            font-size: 0.95em;
-        }
-
-        .empty-box {
-            width: 120px;
-            height: 120px;
-            border: 3px solid #333;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-            color: #999;
-        }
-
-        .answer-image {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
-            font-size: 0.8em;
-        }
-
-        .answer-text {
-            font-size: 0.9em;
-            font-weight: bold;
-            color: #333;
+            font-size: 11px;
+            font-weight: 600;
             text-align: center;
-            max-width: 120px;
+            padding: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .answer-card-controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        .unit-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            width: 100%;
+        }
+
+        .unit-part {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            padding: 2px;
+            font-size: 9px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
             margin-top: 20px;
         }
 
-        .answer-control-group {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
+        button {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
         }
 
-        .answer-control-label {
-            font-weight: bold;
+        .btn-reset {
+            background: #f0f0f0;
             color: #333;
-            margin-bottom: 10px;
-            font-size: 0.95em;
         }
 
-        .answer-control-value {
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-apply {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-apply:hover {
+            background: #5568d3;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #1565c0;
+            line-height: 1.5;
+        }
+
+        .code-box {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #333;
+            line-height: 1.4;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .code-label {
+            font-weight: 600;
             color: #667eea;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .answer-control-slider {
-            width: 100%;
-            margin-top: 8px;
-        }
-
-        .answer-control-info {
-            font-size: 0.8em;
-            color: #666;
-            margin-top: 8px;
-        }
-
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .answer-card-demo {
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .answer-card-controls {
-                grid-template-columns: 1fr;
-            }
+            margin-bottom: 8px;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 上下容器間距控制函數可視化</h1>
+        <!-- 控制面板 -->
+        <div class="control-panel">
+            <h2>⚙️ 間距調整</h2>
 
-        <div class="bug-fix-banner">
-            🐛 v58.0 Bug 修復：移除多餘的 cardHeight / 2，使得 verticalSpacing = 0 時容器完全貼在一起！
-        </div>
-
-        <div class="formula-comparison">
-            <div class="formula-box formula-wrong">
-                <div class="formula-title">❌ 修改前（錯誤）</div>
-                <div>bottomY = topY + cardHeight + verticalSpacing + <span style="background: #FF6B6B; color: white; padding: 2px 4px; border-radius: 3px;">cardHeight / 2</span></div>
-                <div style="margin-top: 10px; font-size: 0.85em; color: #666;">
-                  當 verticalSpacing = 0 時：<br>
-                  間距 = 113px ❌
-                </div>
-            </div>
-            <div class="formula-box formula-correct">
-                <div class="formula-title">✅ 修改後（正確）</div>
-                <div>bottomY = topY + cardHeight + verticalSpacing</div>
-                <div style="margin-top: 10px; font-size: 0.85em; color: #666;">
-                  當 verticalSpacing = 0 時：<br>
-                  間距 = 0px ✅
-                </div>
-            </div>
-        </div>
-
-        <div class="main-grid">
-            <!-- 左側：可視化 -->
-            <div class="visualization-box">
-                <div class="visualization-title">📊 實時可視化（已修復）</div>
-                <div class="screen">
-                    <div class="timer-area">⏱️ 計時器 (50px)</div>
-                    <div class="timer-gap">計時器間距 (20px)</div>
-                    <div class="top-margin">額外上方邊距 (90px)</div>
-                    <div class="top-container">🔵 上方容器 (英文卡片)</div>
-                    <div class="vertical-spacing"></div>
-                    <div class="spacing-label" id="spacingLabel">2.2px (1%)</div>
-                    <div class="bottom-container">🔴 下方容器 (空白框)</div>
-                    <div class="answer-cards-wrapper" id="answerCardsContainer"></div>
-                    <div class="bottom-button-area">提交按鈕區域 (80px)</div>
+            <div class="control-group">
+                <label>水平邊距 (Horizontal Margin)</label>
+                <div class="slider-container">
+                    <input type="range" id="horizontalMargin" min="0" max="50" value="5">
+                    <span class="value-display" id="horizontalMarginValue">5</span>
+                    <span>px</span>
                 </div>
             </div>
 
-            <!-- 右側：控制面板 -->
-            <div class="visualization-box">
-                <div class="visualization-title">🎛️ 控制面板</div>
-                
+            <div class="control-group">
+                <label>垂直邊距 (Vertical Margin)</label>
+                <div class="slider-container">
+                    <input type="range" id="verticalMargin" min="0" max="50" value="5">
+                    <span class="value-display" id="verticalMarginValue">5</span>
+                    <span>px</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>水平間距 (Horizontal Spacing)</label>
+                <div class="slider-container">
+                    <input type="range" id="horizontalSpacing" min="0" max="50" value="8">
+                    <span class="value-display" id="horizontalSpacingValue">8</span>
+                    <span>px</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>垂直間距 (Vertical Spacing)</label>
+                <div class="slider-container">
+                    <input type="range" id="verticalSpacing" min="0" max="50" value="8">
+                    <span class="value-display" id="verticalSpacingValue">8</span>
+                    <span>px</span>
+                </div>
+            </div>
+
+            <!-- 單元內部比例調整 -->
+            <div style="border-top: 2px solid #ddd; margin-top: 20px; padding-top: 20px;">
+                <h3 style="color: #667eea; font-size: 14px; margin-bottom: 15px;">📦 單元內部比例</h3>
+
                 <div class="control-group">
-                    <div class="control-label">
-                        <span>垂直間距比例 (verticalSpacingRatio)</span>
-                        <span class="control-value" id="ratioValue">0.01 (1%)</span>
-                    </div>
-                    <input type="range" id="ratioSlider" min="0" max="0.05" step="0.001" value="0.01">
-                    <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
-                        📍 位置: L2551 | 當前值: 0.01 | 範圍: 0 - 0.05
+                    <label>圖片高度比例 (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="imageRatio" min="10" max="50" value="35">
+                        <span class="value-display" id="imageRatioValue">35</span>
+                        <span>%</span>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <div class="control-label">
-                        <span>底部按鈕區域 (bottomButtonArea)</span>
-                        <span class="control-value" id="bottomValue">80px</span>
-                    </div>
-                    <input type="range" id="bottomSlider" min="40" max="120" step="5" value="80">
-                    <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
-                        📍 位置: L2533 | 當前值: 80px | 範圍: 40 - 120px
+                    <label>文字高度比例 (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="textRatio" min="5" max="30" value="15">
+                        <span class="value-display" id="textRatioValue">15</span>
+                        <span>%</span>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <div class="control-label">
-                        <span>額外上方邊距 (additionalTopMargin)</span>
-                        <span class="control-value" id="topMarginValue">90px</span>
-                    </div>
-                    <input type="range" id="topMarginSlider" min="50" max="150" step="5" value="90">
-                    <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
-                        📍 位置: L2531 | 當前值: 90px | 範圍: 50 - 150px
+                    <label>空白框高度比例 (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="emptyBoxRatio" min="10" max="40" value="25">
+                        <span class="value-display" id="emptyBoxRatioValue">25</span>
+                        <span>%</span>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <div class="control-label">
-                        <span>卡片高度 (cardHeight) - 動態計算</span>
-                        <span class="control-value" id="cardHeightValue">226px</span>
-                    </div>
-                    <div style="font-size: 0.85em; color: #666; margin-top: 5px; background: #E8F5E9; padding: 10px; border-radius: 5px; border-left: 4px solid #4CAF50;">
-                        🔥 [v61.0] 動態識別容器大小<br>
-                        📍 位置: L2570 | 自動計算 | 根據其他參數動態調整<br>
-                        <span style="color: #2E7D32; font-weight: bold;">公式: cardHeight = (600 - 50 - 20 - topMargin - bottomButtonArea - answerCardsHeight) / 2</span>
+                    <label>答案高度比例 (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="answerRatio" min="10" max="40" value="25">
+                        <span class="value-display" id="answerRatioValue">25</span>
+                        <span>%</span>
                     </div>
                 </div>
+
+                <div style="background: #fff3cd; border-left: 3px solid #ffc107; padding: 10px; border-radius: 4px; font-size: 12px; color: #856404; margin-top: 10px;">
+                    ⚠️ 比例總和應為 100%
+                    <div id="ratioSum" style="font-weight: 600; margin-top: 5px;">總計: 100%</div>
+                </div>
+            </div>
+
+            <!-- 統計信息 -->
+            <div class="stats-box">
+                <div class="stat-row">
+                    <span class="stat-label">單元寬度:</span>
+                    <span class="stat-value" id="unitWidth">176</span>
+                    <span>px</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">單元高度:</span>
+                    <span class="stat-value" id="unitHeight">56</span>
+                    <span>px</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">佈局:</span>
+                    <span class="stat-value">2 行 × 10 列</span>
+                </div>
+            </div>
+
+            <!-- 代碼顯示 -->
+            <div class="code-box">
+                <div class="code-label">📝 遊戲代碼參數:</div>
+                <div id="codeDisplay">
+const horizontalMargin = 5;<br>
+const verticalMargin = 5;<br>
+const horizontalSpacing = 8;<br>
+const verticalSpacing = 8;
+                </div>
+            </div>
+
+            <div class="info-box">
+                💡 <strong>提示:</strong> 調整滑塊即時預覽佈局效果。
+            </div>
+
+            <div class="button-group">
+                <button class="btn-reset" onclick="resetValues()">🔄 重置</button>
+                <button class="btn-apply" onclick="applyToGame()">✅ 應用到遊戲</button>
             </div>
         </div>
 
-        <!-- 答案卡片位置可視化 -->
-        <div class="answer-card-visualization">
-            <div class="answer-card-title">🎨 v60.0 答案卡片位置可視化（文字在空白框下方）</div>
-
-            <div class="answer-card-demo">
-                <div class="answer-card-container">
-                    <div class="answer-card-label">修改前 (v33.0) - 水平排列</div>
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                        <div class="empty-box">空白框</div>
-                        <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
-                            <div class="answer-image">圖片</div>
-                            <div class="answer-text">文字</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="answer-card-container">
-                    <div class="answer-card-label">修改後 (v60.0) - 垂直排列 ✅</div>
-                    <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
-                        <div class="empty-box">空白框</div>
-                        <div class="answer-image">圖片</div>
-                        <div class="answer-text">文字</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="answer-card-controls">
-                <div class="answer-control-group">
-                    <div class="answer-control-label">
-                        圖片與框的間距 (imagePadding)
-                        <span class="answer-control-value" id="imagePaddingValue">10px</span>
-                    </div>
-                    <input type="range" class="answer-control-slider" id="imagePaddingSlider" min="5" max="30" step="1" value="10">
-                    <div class="answer-control-info">
-                        📍 位置: L9295 | 當前值: 10px | 範圍: 5 - 30px
-                    </div>
-                </div>
-
-                <div class="answer-control-group">
-                    <div class="answer-control-label">
-                        文字與圖片的間距 (textPadding)
-                        <span class="answer-control-value" id="textPaddingValue">8px</span>
-                    </div>
-                    <input type="range" class="answer-control-slider" id="textPaddingSlider" min="3" max="20" step="1" value="8">
-                    <div class="answer-control-info">
-                        📍 位置: L9296 | 當前值: 8px | 範圍: 3 - 20px
-                    </div>
-                </div>
-
-                <div class="answer-control-group">
-                    <div class="answer-control-label">
-                        圖片大小 (imageSize)
-                        <span class="answer-control-value" id="imageSizeValue">90%</span>
-                    </div>
-                    <input type="range" class="answer-control-slider" id="imageSizeSlider" min="60" max="120" step="5" value="90">
-                    <div class="answer-control-info">
-                        📍 位置: L9294 | 當前值: 90% | 範圍: 60% - 120%
-                    </div>
-                </div>
-
-                <div class="answer-control-group">
-                    <div class="answer-control-label">
-                        字體大小 (fontSize)
-                        <span class="answer-control-value" id="fontSizeValue">16-28px</span>
-                    </div>
-                    <input type="range" class="answer-control-slider" id="fontSizeSlider" min="12" max="36" step="2" value="20">
-                    <div class="answer-control-info">
-                        📍 位置: L9325 | 當前值: 16-28px | 範圍: 12-36px
-                    </div>
-                </div>
-            </div>
-
-            <div style="background: #E5F5E5; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #4CAF50;">
-                <div style="font-weight: bold; color: #2E7D32; margin-bottom: 8px;">✅ v60.0 修改說明</div>
-                <div style="font-size: 0.9em; color: #333; line-height: 1.6;">
-                    <strong>修改函數</strong>: createOutsideAnswerCard() (L9291-9342)<br>
-                    <strong>修改內容</strong>: 將答案卡片的文字位置從圖片右邊改為圖片下方<br>
-                    <strong>佈局方向</strong>: 從水平排列改為垂直排列<br>
-                    <strong>文字對齐</strong>: 從左對齐改為水平居中<br>
-                    <strong>效果</strong>: 上下分離時，文字在空白框下方，更符合視覺習慣
-                </div>
-            </div>
-        </div>
-
-        <!-- 函數說明 -->
-        <div class="function-list">
-            <div class="visualization-title">📚 控制上下容器間距的函數</div>
-
-            <div class="function-item">
-                <div class="function-name">1️⃣ createTopBottomSingleRow() - 上下單行佈局</div>
-                <div class="function-desc">位置: L2523 | 用途: 7 個匹配數的上下單行佈局 | 版本: v58.0（已修復）</div>
-                <div class="function-code">
-const <span class="highlight">verticalSpacingRatio</span> = 0.01;  // 🔥 控制間距的關鍵參數<br>
-const <span class="highlight">verticalSpacing</span> = cardHeight * verticalSpacingRatio;<br>
-const topY = topButtonArea + cardHeight / 2;<br>
-<span style="background: #FFE5E5; padding: 2px 4px; border-radius: 3px;">❌ 修改前: const bottomY = topY + cardHeight + verticalSpacing + cardHeight / 2;</span><br>
-<span style="background: #E5F5E5; padding: 2px 4px; border-radius: 3px;">✅ 修改後: const bottomY = topY + cardHeight + <span class="highlight">verticalSpacing</span>;</span>
-                </div>
-            </div>
-
-            <div class="function-item">
-                <div class="function-name">2️⃣ createTopBottomTwoRows() - 上下雙行佈局</div>
-                <div class="function-desc">位置: L2265 | 用途: 8-14 個匹配數的上下雙行佈局</div>
-                <div class="function-code">
-const topAreaStartY = height * 0.12;  // 上方區域<br>
-const <span class="highlight">bottomAreaStartY</span> = height * 0.55;  // 🔥 控制上下容器距離<br>
-// 間距 = bottomAreaStartY - topAreaStartY - topAreaHeight
-                </div>
-            </div>
-
-            <div class="function-item">
-                <div class="function-name">3️⃣ calculateAvailableHeight() - 計算可用高度</div>
-                <div class="function-desc">位置: L759-761, L2534 | 用途: 計算扣除按鈕區域後的可用高度</div>
-                <div class="function-code">
-const <span class="highlight">topButtonArea</span> = 160;  // 計時器 + 間距 + 邊距<br>
-const <span class="highlight">bottomButtonArea</span> = 80;  // 提交按鈕區域<br>
-const availableHeight = height - topButtonArea - bottomButtonArea;
-                </div>
-            </div>
-
-            <div class="function-item">
-                <div class="function-name">4️⃣ 間距計算公式（v58.0 已修復）</div>
-                <div class="function-desc">上下容器之間的實際間距計算</div>
-                <div class="function-code">
-<span style="color: #FF6B6B; font-weight: bold;">❌ 修改前（錯誤）:</span><br>
-bottomY = topY + cardHeight + verticalSpacing + <span style="background: #FF6B6B; color: white; padding: 2px 4px;">cardHeight / 2</span><br>
-間距 = 113px (當 verticalSpacing = 0)<br>
-<br>
-<span style="color: #4CAF50; font-weight: bold;">✅ 修改後（正確）:</span><br>
-bottomY = topY + cardHeight + <span class="highlight">verticalSpacing</span><br>
-間距 = 0px (當 verticalSpacing = 0) ✅
-                </div>
-            </div>
-
-            <div class="function-item">
-                <div class="function-name">📊 修復前後對比表</div>
-                <div class="function-desc">v58.0 Bug 修復的具體改進</div>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
-                        <tr style="background: #f0f0f0;">
-                            <th style="border: 1px solid #ddd; padding: 8px;">verticalSpacingRatio</th>
-                            <th style="border: 1px solid #ddd; padding: 8px; background: #FFE5E5;">修改前</th>
-                            <th style="border: 1px solid #ddd; padding: 8px; background: #E5F5E5;">修改後</th>
-                            <th style="border: 1px solid #ddd; padding: 8px;">改進</th>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 8px;">0</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; background: #FFE5E5;">113px ❌</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; background: #E5F5E5;">0px ✅</td>
-                            <td style="border: 1px solid #ddd; padding: 8px;">-113px</td>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 8px;">0.01</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; background: #FFE5E5;">115.26px</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; background: #E5F5E5;">2.26px ✅</td>
-                            <td style="border: 1px solid #ddd; padding: 8px;">-113px</td>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 8px;">0.02</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; background: #FFE5E5;">117.52px</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; background: #E5F5E5;">4.52px ✅</td>
-                            <td style="border: 1px solid #ddd; padding: 8px;">-113px</td>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #ddd; padding: 8px;">0.05</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; background: #FFE5E5;">125.3px</td>
-                            <td style="border: 1px solid #ddd; padding: 8px; background: #E5F5E5;">11.3px ✅</td>
-                            <td style="border: 1px solid #ddd; padding: 8px;">-113px</td>
-                        </tr>
-                    </table>
-                </div>
+        <!-- 預覽區域 -->
+        <div class="preview-area">
+            <div class="preview-title">📐 佈局預覽 (2 行 × 10 列)</div>
+            <div class="preview-container">
+                <div class="grid-layout" id="gridLayout"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // 上下容器間距控制
-        const ratioSlider = document.getElementById('ratioSlider');
-        const bottomSlider = document.getElementById('bottomSlider');
-        const topMarginSlider = document.getElementById('topMarginSlider');
-        const cardHeightSlider = document.getElementById('cardHeightSlider');
+        const CONTAINER_WIDTH = 1841;
+        const AVAILABLE_HEIGHT = 763;
+        const COLUMNS = 10;
+        const ROWS = 2;
+        const TOTAL_UNITS = 20;
 
-        const ratioValue = document.getElementById('ratioValue');
-        const bottomValue = document.getElementById('bottomValue');
-        const topMarginValue = document.getElementById('topMarginValue');
-        const cardHeightValue = document.getElementById('cardHeightValue');
-        const spacingLabel = document.getElementById('spacingLabel');
+        const sliders = {
+            horizontalMargin: document.getElementById('horizontalMargin'),
+            verticalMargin: document.getElementById('verticalMargin'),
+            horizontalSpacing: document.getElementById('horizontalSpacing'),
+            verticalSpacing: document.getElementById('verticalSpacing'),
+            imageRatio: document.getElementById('imageRatio'),
+            textRatio: document.getElementById('textRatio'),
+            emptyBoxRatio: document.getElementById('emptyBoxRatio'),
+            answerRatio: document.getElementById('answerRatio')
+        };
 
-        // 答案卡片位置控制
-        const imagePaddingSlider = document.getElementById('imagePaddingSlider');
-        const textPaddingSlider = document.getElementById('textPaddingSlider');
-        const imageSizeSlider = document.getElementById('imageSizeSlider');
-        const fontSizeSlider = document.getElementById('fontSizeSlider');
+        const displays = {
+            horizontalMargin: document.getElementById('horizontalMarginValue'),
+            verticalMargin: document.getElementById('verticalMarginValue'),
+            horizontalSpacing: document.getElementById('horizontalSpacingValue'),
+            verticalSpacing: document.getElementById('verticalSpacingValue'),
+            imageRatio: document.getElementById('imageRatioValue'),
+            textRatio: document.getElementById('textRatioValue'),
+            emptyBoxRatio: document.getElementById('emptyBoxRatioValue'),
+            answerRatio: document.getElementById('answerRatioValue')
+        };
 
-        const imagePaddingValue = document.getElementById('imagePaddingValue');
-        const textPaddingValue = document.getElementById('textPaddingValue');
-        const imageSizeValue = document.getElementById('imageSizeValue');
-        const fontSizeValue = document.getElementById('fontSizeValue');
+        function calculateLayout() {
+            const hMargin = parseInt(sliders.horizontalMargin.value);
+            const vMargin = parseInt(sliders.verticalMargin.value);
+            const hSpacing = parseInt(sliders.horizontalSpacing.value);
+            const vSpacing = parseInt(sliders.verticalSpacing.value);
+            const imageRatio = parseInt(sliders.imageRatio.value);
+            const textRatio = parseInt(sliders.textRatio.value);
+            const emptyBoxRatio = parseInt(sliders.emptyBoxRatio.value);
+            const answerRatio = parseInt(sliders.answerRatio.value);
 
-        const topContainer = document.querySelector('.top-container');
-        const bottomContainer = document.querySelector('.bottom-container');
-        const verticalSpacing = document.querySelector('.vertical-spacing');
-        const topMargin = document.querySelector('.top-margin');
-        const bottomButtonArea = document.querySelector('.bottom-button-area');
-        const answerCardsContainer = document.getElementById('answerCardsContainer');
+            const usableWidth = CONTAINER_WIDTH - hMargin * 2;
+            const usableHeight = AVAILABLE_HEIGHT - vMargin * 2;
 
-        function calculateDynamicCardHeight(topMargin, bottomButtonArea, imagePadding, textPadding, imageSize) {
-            // 屏幕總高度
-            const screenHeight = 600;
+            const unitWidth = (usableWidth - (COLUMNS - 1) * hSpacing) / COLUMNS;
+            const unitHeight = (usableHeight - (ROWS - 1) * vSpacing) / ROWS;
 
-            // 固定區域高度
-            const timerHeight = 50;
-            const timerGap = 20;
-
-            // 答案卡片區域高度（估計值）
-            // 圖片高度 + imagePadding + textPadding + 文字高度
-            const estimatedImageHeight = 50 * (imageSize / 100);  // 假設基礎高度 50px
-            const estimatedTextHeight = 20;
-            const answerCardsHeight = estimatedImageHeight + imagePadding + textPadding + estimatedTextHeight + 10;  // +10 為間距
-
-            // 可用高度 = 屏幕高度 - 固定區域 - 邊距 - 按鈕區域 - 答案卡片區域
-            const availableHeight = screenHeight - timerHeight - timerGap - topMargin - bottomButtonArea - answerCardsHeight;
-
-            // 卡片高度 = 可用高度 / 2（上下各一個容器）
-            const dynamicCardHeight = Math.max(80, Math.floor(availableHeight / 2));
-
-            return dynamicCardHeight;
+            return {
+                hMargin, vMargin, hSpacing, vSpacing, unitWidth, unitHeight,
+                imageRatio, textRatio, emptyBoxRatio, answerRatio
+            };
         }
 
-        function updateVisualization() {
-            const ratio = parseFloat(ratioSlider.value);
-            const bottom = parseInt(bottomSlider.value);
-            const topMargin = parseInt(topMarginSlider.value);
-            const imagePadding = parseInt(imagePaddingSlider.value);
-            const textPadding = parseInt(textPaddingSlider.value);
-            const imageSize = parseInt(imageSizeSlider.value);
+        function updatePreview() {
+            const layout = calculateLayout();
+            const { unitWidth, unitHeight, hMargin, vMargin, hSpacing, vSpacing, imageRatio, textRatio, emptyBoxRatio, answerRatio } = layout;
 
-            // 🔥 動態計算卡片高度
-            const cardHeight = calculateDynamicCardHeight(topMargin, bottom, imagePadding, textPadding, imageSize);
+            document.getElementById('unitWidth').textContent = Math.round(unitWidth);
+            document.getElementById('unitHeight').textContent = Math.round(unitHeight);
 
-            // 更新標籤
-            ratioValue.textContent = `${ratio.toFixed(3)} (${(ratio * 100).toFixed(1)}%)`;
-            bottomValue.textContent = `${bottom}px`;
-            topMarginValue.textContent = `${topMargin}px`;
-            cardHeightValue.textContent = `${cardHeight}px`;
+            Object.keys(sliders).forEach(key => {
+                displays[key].textContent = sliders[key].value;
+            });
 
-            // 計算間距 - 這是上下容器中間的空間
-            const spacing = cardHeight * ratio;
+            // 更新比例總和
+            const ratioSum = imageRatio + textRatio + emptyBoxRatio + answerRatio;
+            const ratioSumColor = ratioSum === 100 ? '#28a745' : '#dc3545';
+            document.getElementById('ratioSum').innerHTML = `<span style="color: ${ratioSumColor};">總計: ${ratioSum}%</span>`;
 
-            // 更新標籤 - 顯示計算公式
-            if (spacing === 0) {
-                spacingLabel.textContent = `0px (無間距)`;
-            } else {
-                spacingLabel.textContent = `${spacing.toFixed(1)}px = ${cardHeight}px × ${ratio.toFixed(3)}`;
+            document.getElementById('codeDisplay').innerHTML = `
+const horizontalMargin = ${hMargin};<br>
+const verticalMargin = ${vMargin};<br>
+const horizontalSpacing = ${hSpacing};<br>
+const verticalSpacing = ${vSpacing};<br>
+<br>
+const imageRatio = ${imageRatio};<br>
+const textRatio = ${textRatio};<br>
+const emptyBoxRatio = ${emptyBoxRatio};<br>
+const answerRatio = ${answerRatio};<br>
+<br>
+// 計算結果:<br>
+// 單元寬度: ${Math.round(unitWidth)}px<br>
+// 單元高度: ${Math.round(unitHeight)}px
+            `;
+
+            const gridLayout = document.getElementById('gridLayout');
+            gridLayout.innerHTML = '';
+            gridLayout.style.gridTemplateColumns = `repeat(${COLUMNS}, 1fr)`;
+            gridLayout.style.gap = `${vSpacing}px ${hSpacing}px`;
+            gridLayout.style.padding = `${vMargin}px ${hMargin}px`;
+
+            for (let i = 0; i < TOTAL_UNITS; i++) {
+                const unit = document.createElement('div');
+                unit.className = 'unit';
+                unit.style.width = `${unitWidth}px`;
+                unit.style.height = `${unitHeight}px`;
+                unit.innerHTML = `
+                    <div class="unit-content">
+                        <div class="unit-part" style="height: ${unitHeight * imageRatio / 100}px;">📷</div>
+                        <div class="unit-part" style="height: ${unitHeight * textRatio / 100}px;">📝</div>
+                        <div class="unit-part" style="height: ${unitHeight * emptyBoxRatio / 100}px;">⬜</div>
+                        <div class="unit-part" style="height: ${unitHeight * answerRatio / 100}px;">✅</div>
+                    </div>
+                `;
+                gridLayout.appendChild(unit);
             }
-
-            // 更新視覺位置 - 使用修復後的正確公式
-            const topButtonArea = 50 + 20 + topMargin;  // timer + gap + margin
-            const topY = topButtonArea + cardHeight / 2;
-
-            // 🔥 [v58.0] 修復後的正確公式（移除 + cardHeight / 2）
-            const bottomY = topY + cardHeight + spacing;
-
-            // 計算修改前的錯誤公式（用於對比）
-            const bottomY_wrong = topY + cardHeight + spacing + cardHeight / 2;
-            const spacing_wrong = bottomY_wrong - topY - cardHeight;
-
-            topContainer.style.top = (topButtonArea) + 'px';
-            topContainer.style.height = cardHeight + 'px';
-
-            verticalSpacing.style.top = (topY + cardHeight / 2) + 'px';
-            verticalSpacing.style.height = Math.max(1, spacing) + 'px';  // 最少 1px 以便看見
-
-            spacingLabel.style.top = (topY + cardHeight / 2 + Math.max(1, spacing) / 2 - 15) + 'px';
-
-            bottomContainer.style.top = (topY + cardHeight + spacing) + 'px';
-            bottomContainer.style.height = cardHeight + 'px';
-
-            bottomButtonArea.style.height = bottom + 'px';
-
-            topMargin.style.height = topMargin + 'px';
-
-            // 控制台輸出 - 顯示修復前後的對比
-            console.log('📊 [v61.0] 上下容器間距計算（動態卡片高度）:', {
-                verticalSpacingRatio: ratio,
-                cardHeight_dynamic: cardHeight,
-                verticalSpacing: spacing.toFixed(2),
-                topY: topY.toFixed(0),
-                bottomY_correct: bottomY.toFixed(0),
-                spacing_correct: spacing.toFixed(2),
-                formula_dynamic: `cardHeight = (600 - 50 - 20 - ${topMargin} - ${bottom} - answerCardsHeight) / 2 = ${cardHeight}px`,
-                formula_correct: `bottomY = topY + cardHeight + verticalSpacing = ${topY.toFixed(0)} + ${cardHeight.toFixed(0)} + ${spacing.toFixed(2)}`,
-                note: '卡片高度現在根據容器大小動態計算，為圖片和文字留出空間'
-            });
         }
 
-        function generateAnswerCards() {
-            // 清空容器
-            answerCardsContainer.innerHTML = '';
-
-            // 生成 3 個示例答案卡片
-            const sampleAnswers = [
-                { text: 'Answer 1', emoji: '📝' },
-                { text: 'Answer 2', emoji: '📚' },
-                { text: 'Answer 3', emoji: '✏️' }
-            ];
-
-            sampleAnswers.forEach((answer, index) => {
-                const cardItem = document.createElement('div');
-                cardItem.className = 'answer-card-item';
-
-                const emptyBox = document.createElement('div');
-                emptyBox.className = 'answer-empty-box';
-                emptyBox.textContent = '空白框';
-
-                const imageBox = document.createElement('div');
-                imageBox.className = 'answer-image-box';
-                imageBox.textContent = answer.emoji;
-
-                const textBox = document.createElement('div');
-                textBox.className = 'answer-text-box';
-                textBox.textContent = answer.text;
-
-                cardItem.appendChild(emptyBox);
-                cardItem.appendChild(imageBox);
-                cardItem.appendChild(textBox);
-
-                answerCardsContainer.appendChild(cardItem);
-            });
+        function resetValues() {
+            sliders.horizontalMargin.value = 5;
+            sliders.verticalMargin.value = 5;
+            sliders.horizontalSpacing.value = 8;
+            sliders.verticalSpacing.value = 8;
+            sliders.imageRatio.value = 35;
+            sliders.textRatio.value = 15;
+            sliders.emptyBoxRatio.value = 25;
+            sliders.answerRatio.value = 25;
+            updatePreview();
         }
 
-        function updateAnswerCardVisualization() {
-            const imagePadding = parseInt(imagePaddingSlider.value);
-            const textPadding = parseInt(textPaddingSlider.value);
-            const imageSize = parseInt(imageSizeSlider.value);
-            const fontSize = parseInt(fontSizeSlider.value);
-
-            // 更新標籤
-            imagePaddingValue.textContent = `${imagePadding}px`;
-            textPaddingValue.textContent = `${textPadding}px`;
-            imageSizeValue.textContent = `${imageSize}%`;
-            fontSizeValue.textContent = `${Math.max(12, Math.min(36, fontSize))}px`;
-
-            // 更新答案卡片的樣式
-            const answerImageBoxes = document.querySelectorAll('.answer-image-box');
-            const answerTextBoxes = document.querySelectorAll('.answer-text-box');
-
-            answerImageBoxes.forEach(box => {
-                box.style.width = `${imageSize * 0.5}px`;
-                box.style.height = `${imageSize * 0.5}px`;
-                box.style.marginTop = `${imagePadding}px`;
+        function applyToGame() {
+            const layout = calculateLayout();
+            const params = new URLSearchParams({
+                hMargin: layout.hMargin,
+                vMargin: layout.vMargin,
+                hSpacing: layout.hSpacing,
+                vSpacing: layout.vSpacing,
+                imageRatio: layout.imageRatio,
+                textRatio: layout.textRatio,
+                emptyBoxRatio: layout.emptyBoxRatio,
+                answerRatio: layout.answerRatio
             });
 
-            answerTextBoxes.forEach(box => {
-                box.style.marginTop = `${textPadding}px`;
-                box.style.fontSize = `${Math.max(0.5, fontSize / 20)}em`;
-            });
-
-            // 控制台輸出
-            console.log('🎨 [v60.0] 答案卡片位置調整:', {
-                imagePadding: `${imagePadding}px`,
-                textPadding: `${textPadding}px`,
-                imageSize: `${imageSize}%`,
-                fontSize: `${fontSize}px`,
-                formula: `imageY = boxBottomEdge + ${imagePadding}px + imageSize/2`,
-                textFormula: `textY = imageY + imageSize/2 + ${textPadding}px`,
-                description: '文字在空白框下方，圖片在文字上方'
-            });
+            const gameUrl = `http://localhost:3000/games/switcher?game=match-up-game&activityId=cmhjff7340001jf04htar2e5k&${params.toString()}`;
+            window.open(gameUrl, '_blank');
         }
 
-        ratioSlider.addEventListener('input', updateVisualization);
-        bottomSlider.addEventListener('input', updateVisualization);
-        topMarginSlider.addEventListener('input', updateVisualization);
+        Object.values(sliders).forEach(slider => {
+            slider.addEventListener('input', updatePreview);
+        });
 
-        // 🔥 [v61.0] 答案卡片參數也會影響卡片高度，所以也需要更新可視化
-        imagePaddingSlider.addEventListener('input', () => {
-            updateVisualization();
-            updateAnswerCardVisualization();
-        });
-        textPaddingSlider.addEventListener('input', () => {
-            updateVisualization();
-            updateAnswerCardVisualization();
-        });
-        imageSizeSlider.addEventListener('input', () => {
-            updateVisualization();
-            updateAnswerCardVisualization();
-        });
-        fontSizeSlider.addEventListener('input', updateAnswerCardVisualization);
-
-        // 初始化
-        generateAnswerCards();
-        updateVisualization();
-        updateAnswerCardVisualization();
+        updatePreview();
     </script>
 </body>
 </html>

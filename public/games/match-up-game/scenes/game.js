@@ -2973,9 +2973,9 @@ class GameScene extends Phaser.Scene {
         const rows = Math.ceil(itemCount / columns);
 
         // 🔥 計算單元尺寸
-        // 🔥 [v79.0] 減少間距以放大單元
+        // 🔥 [v80.0] 取消上下邊界，讓卡片高度變大
         const horizontalMargin = 5;
-        const verticalMargin = 5;
+        const verticalMargin = 0;  // 🔥 [v80.0] 取消上下邊界
         const horizontalSpacing = 8;
         const verticalSpacing = 8;
 
