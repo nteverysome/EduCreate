@@ -1137,6 +1137,75 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
     }, 100);
 
     console.log(`✅ 遊戲載入完成: ${currentGame?.displayName}`);
+
+    // 🔥 [v218.0] 暴露遊戲對象到全局作用域，方便直接訪問
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      const iframeWindow = iframeRef.current.contentWindow;
+
+      // 創建全局遊戲訪問對象
+      window.EduCreateGameAccess = {
+        // 獲取 iframe 中的遊戲對象
+        getGame: () => iframeWindow.matchUpGame,
+
+        // 獲取 GameScene
+        getGameScene: () => {
+          const game = iframeWindow.matchUpGame;
+          if (!game) return null;
+          return game.scene.scenes.find((s: any) => s.constructor.name === 'GameScene');
+        },
+
+        // 直接調用 Show All Answers
+        showAllAnswers: () => {
+          const gameScene = window.EduCreateGameAccess.getGameScene();
+          if (gameScene) {
+            gameScene.showAllCorrectAnswers();
+            console.log('✅ [v218.0] Show All Answers 已調用');
+            return true;
+          } else {
+            console.error('❌ [v218.0] GameScene 不存在');
+            return false;
+          }
+        },
+
+        // 獲取當前頁面信息
+        getCurrentPageInfo: () => {
+          const gameScene = window.EduCreateGameAccess.getGameScene();
+          if (!gameScene) return null;
+          return {
+            currentPage: gameScene.currentPage + 1,
+            totalPages: gameScene.totalPages,
+            leftCardsPairIds: gameScene.leftCards.map((c: any) => c.getData('pairId')),
+            rightEmptyBoxesPairIds: gameScene.rightEmptyBoxes.map((b: any) => b.getData('pairId')),
+            isShowingAllAnswers: gameScene.isShowingAllAnswers
+          };
+        },
+
+        // 導航到下一頁
+        goToNextPage: () => {
+          const gameScene = window.EduCreateGameAccess.getGameScene();
+          if (gameScene) {
+            gameScene.goToNextPage();
+            console.log('✅ [v218.0] 已導航到下一頁');
+            return true;
+          }
+          return false;
+        },
+
+        // 導航到上一頁
+        goToPreviousPage: () => {
+          const gameScene = window.EduCreateGameAccess.getGameScene();
+          if (gameScene) {
+            gameScene.goToPreviousPage();
+            console.log('✅ [v218.0] 已導航到上一頁');
+            return true;
+          }
+          return false;
+        }
+      };
+
+      console.log('🔥 [v218.0] 遊戲訪問對象已暴露到 window.EduCreateGameAccess');
+      console.log('🔥 [v218.0] 可用方法: getGame(), getGameScene(), showAllAnswers(), getCurrentPageInfo(), goToNextPage(), goToPreviousPage()');
+    }
   }, [currentGame]);
 
   // iframe 消息處理
@@ -1487,9 +1556,10 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         style={{
           // 移除 aspectRatio，避免與 height: 100vh 衝突
           width: '100%',
-          // 全螢幕模式：100vh，非全螢幕模式：90vh
-          height: isMobile ? (isGameFullscreen ? '100vh' : '90vh') : '70vh',
-          maxHeight: isMobile ? (isGameFullscreen ? '100vh' : '90vh') : '800px',
+          // 🔥 [v69.0] 桌面端改為 100vh 以充分利用容器寬度
+          // 全螢幕模式：100vh，非全螢幕模式：100vh（改為全高度）
+          height: isMobile ? (isGameFullscreen ? '100vh' : '90vh') : '100vh',
+          maxHeight: isMobile ? (isGameFullscreen ? '100vh' : '90vh') : 'none',
           // 強制覆蓋CSS限制
           maxWidth: 'none !important' as any,
         }}

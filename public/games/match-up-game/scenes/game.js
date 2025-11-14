@@ -1878,6 +1878,7 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 創建分離佈局（根據 Wordwall 策略）
     // 🔥 [Phase 4] 簡化入口邏輯，統一調用方式
+    // 🔥 [v53.0] 修復 7 個匹配數布局：改為上下分離單行布局
     createSeparatedLayout(currentPagePairs, leftX, rightX, leftStartY, rightStartY,
                           cardWidth, cardHeight, leftSpacing, rightSpacing) {
         const width = this.scale.width;
@@ -1890,8 +1891,13 @@ class GameScene extends Phaser.Scene {
         if (itemCount <= 5) {
             console.log('📐 使用左右分離佈局（3-5個匹配數，單列）');
             this.createLeftRightSingleColumn(currentPagePairs, width, height);
+        } else if (itemCount === 7) {
+            // 🔥 [v53.2] 7 個匹配數使用上下分離單行布局（7列 × 1行）
+            console.log('📐 使用上下分離佈局（7個匹配數，單行）');
+            this.createTopBottomSingleRow(currentPagePairs, width, height);
         } else if (itemCount <= 20) {
-            console.log('📐 使用左右分離佈局（6-20個匹配數，多行多列）');
+            // 🔥 [v53.1] 6,8-20 個匹配數使用左右分離多行布局
+            console.log('📐 使用左右分離佈局（6,8-20個匹配數，多行多列）');
             this.createLeftRightMultiRows(currentPagePairs, width, height);
         } else {
             console.log('📐 使用上下分離佈局（21+個匹配數，多行多列）');
@@ -2116,7 +2122,12 @@ class GameScene extends Phaser.Scene {
         leftX = width * 0.4;         // 左容器中心（33% 位置）
         // 🔥 [v33.0] 右容器向左移動，給圖片完整顯示空間
         rightX = width * 0.65;       // 右容器中心向左移動（從 75% 改為 65%）
-        leftStartY = this.currentLeftStartY || (height * 0.15);   // 使用保存的位置或默認值
+
+        // 🔥 [v72.0] 回到原本的位置（0.15）
+        let leftStartYRatio = 0.15;  // 🔥 [v72.0] 回到原本的 0.15
+
+        // 使用保存的位置或默認值
+        leftStartY = this.currentLeftStartY || (height * leftStartYRatio);
         rightStartY = this.currentRightStartY || (height * 0.15); // 使用保存的位置或默認值
 
         // 🔥 [v32.0] 調適訊息：分析卡片是否超出容器
@@ -2228,7 +2239,8 @@ class GameScene extends Phaser.Scene {
             });
 
             // 🔥 [v33.0] 創建框外答案卡片（圖片 + 水平文字）
-            const answerCard = this.createOutsideAnswerCard(pos.x, pos.y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl);
+            // 🔥 [v65.0] 批數 3-5 使用水平排列（圖片在左，文字在右）
+            const answerCard = this.createOutsideAnswerCard(pos.x, pos.y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, 'horizontal');
             this.rightCards.push(answerCard);
         });
 
@@ -2504,11 +2516,171 @@ class GameScene extends Phaser.Scene {
             });
 
             // 🔥 [v33.0] 創建框外答案卡片（圖片 + 水平文字）
-            const answerCard = this.createOutsideAnswerCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl);
+            // 🔥 [v65.0] 批數 6, 8-20 使用水平排列（圖片在左，文字在右）
+            const answerCard = this.createOutsideAnswerCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, 'horizontal');
             this.rightCards.push(answerCard);
         });
 
         console.log('✅ 左右分離佈局（多行多列）創建完成');
+    }
+
+    // 🔥 [v53.2] 創建上下分離佈局 - 單行（7個匹配數）
+    // 專門處理 7 個匹配數的單行布局：上方 7 列 × 1 行，下方 7 列 × 1 行
+    // 🎨 [v53.3] 參考 Wordwall Screenshot_36 的精緻比例
+    createTopBottomSingleRow(currentPagePairs, width, height) {
+        console.log('📐 創建上下分離佈局 - 單行（7個匹配數，7列 × 1行）');
+
+        const itemCount = currentPagePairs.length;
+
+        // 🔥 計算可用空間
+        const timerHeight = 50;
+        const timerGap = 20;
+        const additionalTopMargin = 50;  // 🔥 [v59.0] 減少上方邊距（從 90px 改為 50px）
+        const topButtonArea = timerHeight + timerGap + additionalTopMargin;  // 120px
+        const bottomButtonArea = 80;  // 🔥 [v62.0] 恢復為 80px（保留提交按鈕區域）
+        const answerCardsHeight = 140;  // 🔥 [v64.0] 減少為 140px（給卡片更多空間，文字更大）
+        const availableHeight = height - topButtonArea - bottomButtonArea - answerCardsHeight;
+
+        // 🎨 [v53.3] 參考 Wordwall 的精緻比例
+        // 🔥 [v68.0] 7 組上下容器完全填滿整個容器寬度（考慮中心錨點）
+        // 左右邊距：0px（完全填滿容器）
+        const horizontalMargin = 0;  // 🔥 [v68.0] 保持 0px，完全填滿容器
+        const availableWidth = width - horizontalMargin * 2;
+
+        // 🔥 [v68.0] 優化卡片寬度計算 - 考慮 Phaser 中心錨點
+        // 公式（考慮中心錨點）：cardWidth/2 + 6*(cardWidth + spacing) + cardWidth/2 = availableWidth
+        // 簡化：7*cardWidth + 6*spacing = availableWidth
+        // 使用合理的間距（18px），讓卡片寬度自動計算
+        const fixedHorizontalSpacing = 18;  // 🔥 [v68.0] 調整間距到 18px（精確填滿）
+        const totalSpacingWidth = (itemCount - 1) * fixedHorizontalSpacing;
+        const baseCardWidth = (availableWidth - totalSpacingWidth) / itemCount;
+        const idealHorizontalSpacing = fixedHorizontalSpacing;
+
+        // 理想卡片高度：寬度的 1.2 倍（略高於正方形）
+        const idealCardHeight = baseCardWidth * 1.2;
+
+        // 🔥 [v59.0] 完全移除垂直間距：卡片高度的 0%（完全貼在一起）
+        const verticalSpacingRatio = 0;  // 從 0.01 改為 0 - 完全移除間距
+        const idealVerticalSpacing = idealCardHeight * verticalSpacingRatio;
+
+        // 🔥 檢查理想尺寸是否適應可用高度
+        const requiredHeight = idealCardHeight * 2 + idealVerticalSpacing;
+
+        let cardWidth, cardHeight, verticalSpacing, horizontalSpacing;
+
+        if (requiredHeight <= availableHeight) {
+            // ✅ 理想尺寸適應,使用理想比例
+            cardWidth = baseCardWidth;
+            cardHeight = idealCardHeight;
+            verticalSpacing = idealVerticalSpacing;
+            horizontalSpacing = idealHorizontalSpacing;
+        } else {
+            // ⚠️ 理想尺寸太大,需要縮小以適應高度
+            // 🔥 [v59.0] 保持 1.2 的寬高比和 0% 的垂直間距比例（完全貼在一起）
+            // 方程: 2 * cardHeight + 0 * cardHeight = availableHeight
+            // 解: cardHeight = availableHeight / 2
+            cardHeight = availableHeight / 2;  // 🔥 [v59.0] 改為 / 2（移除垂直間距）
+            cardWidth = cardHeight / 1.2;
+            verticalSpacing = cardHeight * verticalSpacingRatio;
+
+            // 🔥 [v65.0] 縮放時也使用固定間距，確保卡片平均分佈
+            horizontalSpacing = fixedHorizontalSpacing;
+        }
+
+        // 🔥 [v65.0] 驗證卡片是否完全填滿容器寬度
+        const totalCardWidth = itemCount * cardWidth + (itemCount - 1) * horizontalSpacing;
+        const widthUtilization = (totalCardWidth / availableWidth * 100).toFixed(1);
+
+        console.log(`📊 [v65.0] Wordwall 風格單行布局計算 - 卡片平均分佈到容器內:`, {
+            itemCount,
+            cardWidth: cardWidth.toFixed(0),
+            cardHeight: cardHeight.toFixed(0),
+            cardAspectRatio: (cardHeight / cardWidth).toFixed(2),
+            horizontalSpacing: horizontalSpacing.toFixed(1),
+            verticalSpacing: verticalSpacing.toFixed(1),
+            horizontalMargin: horizontalMargin.toFixed(0),
+            availableWidth: availableWidth.toFixed(0),
+            totalCardWidth: totalCardWidth.toFixed(0),
+            widthUtilization: `${widthUtilization}%`,
+            availableHeight: availableHeight.toFixed(0),
+            requiredHeight: requiredHeight.toFixed(0),
+            scaled: requiredHeight > availableHeight ? '⚠️ 已縮放' : '✅ 理想尺寸',
+            '🔥 [v65.0] 優化參數': {
+                fixedHorizontalSpacing: `${fixedHorizontalSpacing}px (固定間距)`,
+                totalSpacingWidth: `${totalSpacingWidth.toFixed(0)}px (總間距寬度)`,
+                formula: `cardWidth = (${availableWidth.toFixed(0)} - ${totalSpacingWidth.toFixed(0)}) / ${itemCount} = ${cardWidth.toFixed(0)}px`,
+                bottomButtonArea: `${bottomButtonArea}px (保留提交按鈕區域)`,
+                answerCardsHeight: `${answerCardsHeight}px (圖片+文字)`,
+                imageSizeRatio: '0.5 (保持)',
+                fontSizeRatio: '0.35 (文字更大)',
+                fontSizeRange: '14-26px'
+            }
+        });
+
+        // 🔥 [v58.0] 計算上方和下方區域的起始位置
+        // 🔴 修復 bug：移除多餘的 cardHeight / 2，使得 verticalSpacing = 0 時容器完全貼在一起
+        const topY = topButtonArea + cardHeight / 2;
+        const bottomY = topY + cardHeight + verticalSpacing;  // 🔥 [v58.0] 移除 + cardHeight / 2
+        const startX = horizontalMargin + cardWidth / 2;
+
+        console.log(`📍 [v58.0] 區域位置（已修復）:`, {
+            topY: topY.toFixed(0),
+            bottomY: bottomY.toFixed(0),
+            startX: startX.toFixed(0),
+            spacing: verticalSpacing.toFixed(2),
+            formula: `bottomY = topY + cardHeight + verticalSpacing = ${topY.toFixed(0)} + ${cardHeight.toFixed(0)} + ${verticalSpacing.toFixed(2)}`
+        });
+
+        // 🔥 根據隨機模式排列答案
+        let shuffledAnswers;
+        if (this.random === 'same') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId') || 'default-seed';
+            const seed = activityId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const rng = new Phaser.Math.RandomDataGenerator([seed.toString()]);
+            shuffledAnswers = rng.shuffle([...currentPagePairs]);
+            console.log('🎲 使用固定隨機模式，種子:', seed);
+        } else {
+            shuffledAnswers = [...currentPagePairs];
+            for (let i = shuffledAnswers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledAnswers[i], shuffledAnswers[j]] = [shuffledAnswers[j], shuffledAnswers[i]];
+            }
+            console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）');
+        }
+
+        // 🔥 創建上方英文卡片（單行，7 列）
+        currentPagePairs.forEach((pair, index) => {
+            const x = startX + index * (cardWidth + horizontalSpacing);
+            const y = topY;
+            const animationDelay = index * 100;
+            const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
+            this.leftCards.push(card);
+        });
+
+        console.log(`✅ 上方英文卡片已創建: ${this.leftCards.length} 張`);
+
+        // 🔥 創建下方空白框 + 框外答案卡片（單行，7 列）
+        shuffledAnswers.forEach((pair, index) => {
+            const x = startX + index * (cardWidth + horizontalSpacing);
+            const y = bottomY;
+
+            // 創建空白框
+            const emptyBox = this.createEmptyRightBox(x, y, cardWidth, cardHeight, pair.id);
+            this.rightCards.push(emptyBox);
+
+            // 單獨存儲空白框用於拖放檢查
+            if (!this.rightEmptyBoxes) this.rightEmptyBoxes = [];
+            this.rightEmptyBoxes.push(emptyBox);
+
+            // 創建框外答案卡片
+            // 🔥 [v65.0] 批數 7 使用垂直排列（圖片在上，文字在下）
+            const answerCard = this.createOutsideAnswerCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, 'vertical');
+            this.rightCards.push(answerCard);
+        });
+
+        console.log(`✅ 下方答案卡片已創建: ${shuffledAnswers.length} 對`);
+        console.log('✅ 上下分離佈局（單行）創建完成');
     }
 
     // 🔥 創建上下分離佈局 - 多行多列（21-30個匹配數）
@@ -2613,7 +2785,8 @@ class GameScene extends Phaser.Scene {
             });
 
             // 🔥 [v33.0] 創建框外答案卡片（圖片 + 水平文字）
-            const answerCard = this.createOutsideAnswerCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl);
+            // 🔥 [v65.0] 批數 21+ 使用垂直排列（圖片在上，文字在下）
+            const answerCard = this.createOutsideAnswerCard(x, y, cardWidth, cardHeight, pair.answer, pair.id, pair.chineseImageUrl, 'vertical');
             this.rightCards.push(answerCard);
         });
 
@@ -9141,52 +9314,69 @@ class GameScene extends Phaser.Scene {
         return container;
     }
 
-    // 🔥 [v33.0] 創建框外答案卡片（圖片 + 水平文字）
-    createOutsideAnswerCard(boxX, boxY, boxWidth, boxHeight, text, pairId, imageUrl) {
-        // 🔥 [v33.0] 計算框外卡片的位置（在框的右側）
-        const imageSize = boxHeight * 0.9;
-        const imagePadding = 20;  // 圖片與框的間距（增加到 20px）
-        const textPadding = 15;   // 文字與圖片的間距
+    // 🔥 [v65.0] 創建框外答案卡片（支持水平和垂直排列）
+    // layoutType: 'horizontal' (批數3-5) 或 'vertical' (批數7, 21+)
+    createOutsideAnswerCard(boxX, boxY, boxWidth, boxHeight, text, pairId, imageUrl, layoutType = 'vertical') {
+        // 🔥 [v65.0] 根據布局類型選擇排列方式
+        if (layoutType === 'horizontal') {
+            return this.createHorizontalAnswerCard(boxX, boxY, boxWidth, boxHeight, text, pairId, imageUrl);
+        } else {
+            return this.createVerticalAnswerCard(boxX, boxY, boxWidth, boxHeight, text, pairId, imageUrl);
+        }
+    }
 
-        // 🔥 [v33.0] 計算容器的邊界
-        // boxX 是容器中心，所以容器右邊界 = boxX + boxWidth/2
-        const boxRightEdge = boxX + boxWidth / 2;
+    // 🔥 [v65.0] 創建水平排列的答案卡片（圖片在左，文字在右）- 用於批數 3-5
+    // 🔥 [v66.0] 優化文字大小和位置
+    createHorizontalAnswerCard(boxX, boxY, boxWidth, boxHeight, text, pairId, imageUrl) {
+        // 🔥 [v65.0] 計算框外卡片的位置（在框的右側）
+        const boxRightEdge = boxX + boxWidth / 2;  // 框的右邊界
+        const horizontalPadding = 8;  // 框與卡片之間的水平間距
 
-        // 圖片位置：容器右邊界 + 間距（圖片中心）
+        // 圖片大小：卡片高度的 60%
+        const imageSize = boxHeight * 0.6;
+        const imagePadding = horizontalPadding;  // 圖片與框的間距
+
+        // 圖片位置：框右邊界 + 間距（圖片中心）
         const imageX = boxRightEdge + imagePadding + imageSize / 2;
-        const imageY = boxY;
+        const imageY = boxY;  // 垂直居中於框
 
-        // 文字位置：圖片右邊 + 間距
+        // 文字寬度：卡片寬度的 50%
+        const textWidth = boxWidth * 0.5;
+        const textPadding = 4;  // 文字與圖片的間距
+
+        // 文字位置：圖片右側 + 間距
         const textX = imageX + imageSize / 2 + textPadding;
-        const textY = boxY;
+        const textY = boxY;  // 垂直居中於框
 
-        // 🔥 [v33.0] 創建容器（位置在圖片中心）
+        // 🔥 [v65.0] 創建容器（位置在圖片中心）
+        // 🔥 [v67.0] 降低深度到 2，確保不會蓋住左側卡片（深度 5）
         const container = this.add.container(imageX, imageY);
-        container.setDepth(4);
+        container.setDepth(2);  // 🔥 [v67.0] 從 4 改為 2，在左側卡片下方
         container.setData('pairId', pairId);
         container.setData('isAnswerCard', true);
 
-        // 🔥 [v33.0] 加載並顯示圖片（相對於容器，位置為 0,0）
+        // 🔥 [v65.0] 加載並顯示圖片（相對於容器，位置為 0,0）
         if (imageUrl && imageUrl.trim() !== '') {
             this.loadAndDisplayImage(container, imageUrl, 0, 0, imageSize, `answer-${pairId}`).catch(error => {
                 console.error('❌ 答案圖片載入失敗:', error);
             });
         }
 
-        // 🔥 [v33.0] 創建文字（水平排列，相對於全局坐標）
+        // 🔥 [v66.0] 創建文字（水平排列，在圖片右側）- 增大文字大小
         if (text && text.trim() !== '' && text.trim() !== '<br>') {
-            const fontSize = Math.max(20, Math.min(32, boxHeight * 0.5));
+            // 🔥 [v66.0] 文字大小從 boxHeight * 0.3 改為 boxHeight * 0.5（更大的文字）
+            const fontSize = Math.max(16, Math.min(28, boxHeight * 0.5));
             const textObj = this.add.text(textX, textY, text, {
                 font: `bold ${fontSize}px Arial`,
                 fill: '#000000',
                 align: 'left',
-                wordWrap: { width: 150 }
+                wordWrap: { width: textWidth }
             });
-            textObj.setOrigin(0, 0.5);
-            textObj.setDepth(5);
+            textObj.setOrigin(0, 0.5);  // 左對齐，垂直居中
+            textObj.setDepth(3);  // 🔥 [v67.0] 從 5 改為 3，在左側卡片下方
         }
 
-        console.log('✅ [v33.0] 框外答案卡片已創建:', {
+        console.log('✅ [v65.0] 水平排列答案卡片已創建（圖片在左，文字在右）:', {
             pairId,
             text,
             boxX: boxX.toFixed(0),
@@ -9197,7 +9387,72 @@ class GameScene extends Phaser.Scene {
             imageSize: imageSize.toFixed(0),
             textX: textX.toFixed(0),
             textY: textY.toFixed(0),
-            imagePadding: imagePadding
+            layoutType: 'horizontal'
+        });
+
+        return container;
+    }
+
+    // 🔥 [v65.0] 創建垂直排列的答案卡片（圖片在上，文字在下）- 用於批數 7, 21+
+    createVerticalAnswerCard(boxX, boxY, boxWidth, boxHeight, text, pairId, imageUrl) {
+        // 🔥 [v63.0] 計算框外卡片的位置（在框的下方）
+        // 圖片大小從 0.9 改為 0.5（減小圖片比例）
+        const imageSize = boxHeight * 0.5;
+        const imagePadding = 5;   // 🔥 [v63.0] 減少圖片與框的間距（從 10 改為 5）
+        const textPadding = 4;    // 🔥 [v63.0] 減少文字與圖片的間距（從 8 改為 4）
+
+        // 🔥 [v60.0] 計算容器的邊界
+        // boxY 是容器中心，所以容器下邊界 = boxY + boxHeight/2
+        const boxBottomEdge = boxY + boxHeight / 2;
+
+        // 圖片位置：容器下邊界 + 間距（圖片中心）
+        const imageX = boxX;  // 水平居中於框
+        const imageY = boxBottomEdge + imagePadding + imageSize / 2;
+
+        // 文字位置：圖片下方 + 間距
+        const textX = boxX;  // 水平居中於框
+        const textY = imageY + imageSize / 2 + textPadding;
+
+        // 🔥 [v60.0] 創建容器（位置在圖片中心）
+        const container = this.add.container(imageX, imageY);
+        container.setDepth(4);
+        container.setData('pairId', pairId);
+        container.setData('isAnswerCard', true);
+
+        // 🔥 [v60.0] 加載並顯示圖片（相對於容器，位置為 0,0）
+        if (imageUrl && imageUrl.trim() !== '') {
+            this.loadAndDisplayImage(container, imageUrl, 0, 0, imageSize, `answer-${pairId}`).catch(error => {
+                console.error('❌ 答案圖片載入失敗:', error);
+            });
+        }
+
+        // 🔥 [v64.0] 創建文字（垂直排列，在圖片下方）- 增大文字大小
+        if (text && text.trim() !== '' && text.trim() !== '<br>') {
+            // 🔥 [v64.0] 文字大小從 boxHeight * 0.25 改為 boxHeight * 0.35（更大的文字）
+            const fontSize = Math.max(14, Math.min(26, boxHeight * 0.35));
+            const textObj = this.add.text(textX, textY, text, {
+                font: `bold ${fontSize}px Arial`,
+                fill: '#000000',
+                align: 'center',
+                wordWrap: { width: boxWidth * 1.0 }  // 🔥 [v64.0] 增加 wordWrap 寬度（從 0.9 改為 1.0）
+            });
+            textObj.setOrigin(0.5, 0);  // 水平居中，頂部對齐
+            textObj.setDepth(5);
+        }
+
+        console.log('✅ [v65.0] 垂直排列答案卡片已創建（圖片在上，文字在下）:', {
+            pairId,
+            text,
+            boxX: boxX.toFixed(0),
+            boxY: boxY.toFixed(0),
+            boxBottomEdge: boxBottomEdge.toFixed(0),
+            imageX: imageX.toFixed(0),
+            imageY: imageY.toFixed(0),
+            imageSize: imageSize.toFixed(0),
+            textX: textX.toFixed(0),
+            textY: textY.toFixed(0),
+            imagePadding: imagePadding,
+            layoutType: 'vertical'
         });
 
         return container;
