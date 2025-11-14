@@ -12,8 +12,8 @@
 // - SeparatedLayoutCalculator
 // - SeparatedLayoutRenderer
 
-// 🔥 v77.0 版本標記 - 在 createLeftRightSingleColumn 中直接修復缺失的方法
-const GAME_VERSION = 'v77.0-direct-method-patch';
+// 🔥 v78.0 版本標記 - 添加所有缺失的方法（包括 calculateLeftCardPosition 和 calculateRightCardPosition）
+const GAME_VERSION = 'v78.0-complete-method-patch';
 
 // Game 場景 - 主遊戲邏輯（卡片拖動配對）
 class GameScene extends Phaser.Scene {
@@ -2262,17 +2262,19 @@ class GameScene extends Phaser.Scene {
 
         console.log(`📍 位置: 左X=${leftX.toFixed(0)}, 右X=${rightX.toFixed(0)}, 左Y=${leftStartY.toFixed(0)}, 右Y=${rightStartY.toFixed(0)}`);
 
-        // 🔥 [v77.0] 在調用前檢查並修復缺失的方法
-        console.log('🔍 [v77.0] 調用前檢查 calculator 方法:', {
+        // 🔥 [v78.0] 在調用前檢查並修復所有缺失的方法
+        console.log('🔍 [v78.0] 調用前檢查 calculator 所有方法:', {
             calculatorType: calculator.constructor.name,
             hasCalculateLeftLayout: typeof calculator.calculateLeftLayout === 'function',
             hasCalculateRightLayout: typeof calculator.calculateRightLayout === 'function',
+            hasCalculateLeftCardPosition: typeof calculator.calculateLeftCardPosition === 'function',
+            hasCalculateRightCardPosition: typeof calculator.calculateRightCardPosition === 'function',
             itemCount: itemCount
         });
 
-        // 🔥 [v77.0] 如果方法缺失，動態添加它們
+        // 🔥 [v78.0] 如果方法缺失，動態添加它們
         if (typeof calculator.calculateLeftLayout !== 'function') {
-            console.warn('⚠️ [v77.0] calculateLeftLayout 方法缺失，動態添加');
+            console.warn('⚠️ [v78.0] calculateLeftLayout 方法缺失，動態添加');
             calculator.calculateLeftLayout = function(itemCount) {
                 if (itemCount <= 5) {
                     return { columns: 1, rows: itemCount, layout: 'single-column' };
@@ -2289,13 +2291,37 @@ class GameScene extends Phaser.Scene {
         }
 
         if (typeof calculator.calculateRightLayout !== 'function') {
-            console.warn('⚠️ [v77.0] calculateRightLayout 方法缺失，動態添加');
+            console.warn('⚠️ [v78.0] calculateRightLayout 方法缺失，動態添加');
             calculator.calculateRightLayout = function(itemCount) {
                 return { columns: 1, rows: itemCount, layout: 'single-column' };
             };
         }
 
-        console.log('✅ [v77.0] 方法檢查完成，準備調用');
+        if (typeof calculator.calculateLeftCardPosition !== 'function') {
+            console.warn('⚠️ [v78.0] calculateLeftCardPosition 方法缺失，動態添加');
+            calculator.calculateLeftCardPosition = function(index, columns, cardWidth, cardHeight, startX, startY) {
+                const dynamicSpacing = this.dynamicSpacing || 10;
+                const row = Math.floor(index / columns);
+                const col = index % columns;
+                return {
+                    x: startX + col * (cardWidth + dynamicSpacing),
+                    y: startY + row * (cardHeight + dynamicSpacing)
+                };
+            };
+        }
+
+        if (typeof calculator.calculateRightCardPosition !== 'function') {
+            console.warn('⚠️ [v78.0] calculateRightCardPosition 方法缺失，動態添加');
+            calculator.calculateRightCardPosition = function(index, cardHeight, startX, startY) {
+                const spacing = this.calculateSpacing ? this.calculateSpacing() : { vertical: 10 };
+                return {
+                    x: startX,
+                    y: startY + index * (cardHeight + spacing.vertical)
+                };
+            };
+        }
+
+        console.log('✅ [v78.0] 所有方法檢查完成，準備調用');
 
         // 🔥 [Screenshot_279] 使用新的佈局計算方法
         console.log('🔍 [v74.0] 準備調用 calculateLeftLayout 和 calculateRightLayout:', {
