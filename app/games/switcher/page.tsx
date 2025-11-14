@@ -777,6 +777,15 @@ const GameSwitcherPage: React.FC = () => {
         const data = await response.json() as { vocabularyItems?: any[] };
         console.log('✅ 成功載入自定義詞彙:', data.vocabularyItems);
         setCustomVocabulary(data.vocabularyItems || []);
+
+        // 🔥 [v77.0] 根據詞彙數量自動調整 itemsPerPage
+        if (data.vocabularyItems && data.vocabularyItems.length === 20) {
+          console.log('🎯 [v77.0] 檢測到 20 個詞彙，自動設置 itemsPerPage=20');
+          setMatchUpOptions(prev => ({
+            ...prev,
+            itemsPerPage: 20
+          }));
+        }
       } else {
         console.error('❌ 載入詞彙失敗:', response.status);
         setCustomVocabulary([]);
@@ -797,6 +806,15 @@ const GameSwitcherPage: React.FC = () => {
         const data = await response.json() as { activity?: { vocabularyItems?: any[] } };
         console.log('✅ 成功載入分享遊戲詞彙:', data.activity?.vocabularyItems);
         setCustomVocabulary(data.activity?.vocabularyItems || []);
+
+        // 🔥 [v77.0] 根據詞彙數量自動調整 itemsPerPage
+        if (data.activity?.vocabularyItems && data.activity.vocabularyItems.length === 20) {
+          console.log('🎯 [v77.0] 檢測到 20 個詞彙，自動設置 itemsPerPage=20');
+          setMatchUpOptions(prev => ({
+            ...prev,
+            itemsPerPage: 20
+          }));
+        }
       } else {
         console.error('❌ 載入分享遊戲詞彙失敗:', response.status);
         setCustomVocabulary([]);
@@ -817,6 +835,15 @@ const GameSwitcherPage: React.FC = () => {
         const data = await response.json() as { activity?: { vocabularyItems?: any[] } };
         console.log('✅ 成功載入學生遊戲詞彙:', data.activity?.vocabularyItems);
         setCustomVocabulary(data.activity?.vocabularyItems || []);
+
+        // 🔥 [v77.0] 根據詞彙數量自動調整 itemsPerPage
+        if (data.activity?.vocabularyItems && data.activity.vocabularyItems.length === 20) {
+          console.log('🎯 [v77.0] 檢測到 20 個詞彙，自動設置 itemsPerPage=20');
+          setMatchUpOptions(prev => ({
+            ...prev,
+            itemsPerPage: 20
+          }));
+        }
       } else {
         console.error('❌ 載入學生遊戲詞彙失敗:', response.status);
         setCustomVocabulary([]);
