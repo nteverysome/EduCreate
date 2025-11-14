@@ -1900,6 +1900,9 @@ class GameScene extends Phaser.Scene {
 
         const itemCount = currentPagePairs.length;
 
+        // 🔥 [v81.5] 存儲當前頁面的 itemCount，用於調整聲音按鈕大小
+        this.currentPageItemCount = itemCount;
+
         // 🔥 [v25.0] 使用 SeparatedResponsiveConfig 進行響應式計算
         let responsiveConfig = null;
         let responsiveLayout = null;
@@ -2102,12 +2105,14 @@ class GameScene extends Phaser.Scene {
             console.log('⚠️ 使用備用卡片大小計算（SeparatedResponsiveConfig 不可用）- 放大 10%');
         }
 
-        // 🎨 [v25.0] 計算內容大小
+        // 🎨 [v81.5] 計算內容大小 - 當匹配數是 20 時縮小聲音按鈕
         let contentSizes = {
             audioButton: {
-                size: Math.max(Math.floor(cardHeight * 0.25), 16),
-                minSize: 16,
-                maxSize: 40
+                size: itemCount === 20
+                    ? Math.max(Math.floor(cardHeight * 0.15), 12)  // 🔥 [v81.5] 匹配數 20 時：縮小到 15%（從 25% 減少）
+                    : Math.max(Math.floor(cardHeight * 0.25), 16),  // 其他情況：保持 25%
+                minSize: itemCount === 20 ? 12 : 16,  // 🔥 [v81.5] 最小尺寸也相應調整
+                maxSize: itemCount === 20 ? 28 : 40   // 🔥 [v81.5] 最大尺寸也相應調整
             },
             image: {
                 width: Math.max(Math.floor(cardWidth * 0.35), 30),
@@ -2832,8 +2837,8 @@ class GameScene extends Phaser.Scene {
         const answerCardsHeight = 140;
         const availableHeight = height - topButtonArea - bottomButtonArea - answerCardsHeight;
 
-        // 🔥 計算卡片寬度（與批數 7 相同邏輯）
-        const horizontalMargin = 0;
+        // 🔥 [v80.1] 計算卡片寬度（方案 B：118px × 118px，1:1 比例）
+        const horizontalMargin = 100;  // 水平邊距 100px
         const availableWidth = width - horizontalMargin * 2;
 
         const fixedHorizontalSpacing = 18;
@@ -2841,8 +2846,8 @@ class GameScene extends Phaser.Scene {
         const baseCardWidth = (availableWidth - totalSpacingWidth) / itemCount;
         const idealHorizontalSpacing = fixedHorizontalSpacing;
 
-        // 理想卡片高度：寬度的 1.2 倍（略高於正方形）
-        const idealCardHeight = baseCardWidth * 1.2;
+        // 🔥 [v80.1] 理想卡片高度：寬度的 1.0 倍（1:1 比例，方案 B）
+        const idealCardHeight = baseCardWidth * 1.0;
 
         // 垂直間距：0（完全貼在一起）
         const verticalSpacingRatio = 0;
@@ -2887,16 +2892,18 @@ class GameScene extends Phaser.Scene {
             scaled: requiredHeight > availableHeight ? '⚠️ 已縮放' : '✅ 理想尺寸'
         });
 
-        // 計算上方和下方區域的起始位置
+        // 🔥 [v81.0] 計算上方和下方區域的起始位置 - 增加英文卡片和空白框之間的距離
         const topY = topButtonArea + cardHeight / 2;
-        const bottomY = topY + cardHeight + verticalSpacing;
+        const separationSpacing = cardHeight * 0.8;  // 🔥 [v81.0] 英文卡片和空白框之間的距離 = 卡片高度的 80%
+        const bottomY = topY + cardHeight + verticalSpacing + separationSpacing;
         const startX = horizontalMargin + cardWidth / 2;
 
-        console.log(`📍 [v76.0] 區域位置:`, {
+        console.log(`📍 [v81.0] 區域位置:`, {
             topY: topY.toFixed(0),
             bottomY: bottomY.toFixed(0),
             startX: startX.toFixed(0),
-            spacing: verticalSpacing.toFixed(2)
+            spacing: verticalSpacing.toFixed(2),
+            separationSpacing: separationSpacing.toFixed(2)
         });
 
         // 根據隨機模式排列答案
@@ -2959,17 +2966,17 @@ class GameScene extends Phaser.Scene {
 
         const itemCount = currentPagePairs.length;
 
-        // 🔥 計算可用空間（與批數 10 相同）
+        // 🔥 [v78.0] 計算可用空間 - 增加答案卡片區域高度
         const timerHeight = 50;
         const timerGap = 20;
         const additionalTopMargin = 50;
         const topButtonArea = timerHeight + timerGap + additionalTopMargin;  // 120px
         const bottomButtonArea = 80;
-        const answerCardsHeight = 140;
+        const answerCardsHeight = 410;  // 🔥 [v80.3] 從 280px 增加到 410px，給答案卡片區域更多空間
         const availableHeight = height - topButtonArea - bottomButtonArea - answerCardsHeight;
 
-        // 🔥 計算卡片寬度（與批數 10 相同邏輯）
-        const horizontalMargin = 0;
+        // 🔥 [v81.0] 計算卡片寬度（方案 C：110px × 110px，1:1 比例，完全解決重疊）
+        const horizontalMargin = 265;  // 🔥 [v81.0] 從 100px 增加到 265px，縮小卡片尺寸
         const availableWidth = width - horizontalMargin * 2;
 
         const fixedHorizontalSpacing = 18;
@@ -2978,11 +2985,11 @@ class GameScene extends Phaser.Scene {
         const baseCardWidth = (availableWidth - totalSpacingWidth) / itemsPerRow;
         const idealHorizontalSpacing = fixedHorizontalSpacing;
 
-        // 理想卡片高度：寬度的 1.2 倍（略高於正方形）
-        const idealCardHeight = baseCardWidth * 1.2;
+        // 🔥 [v81.0] 理想卡片高度：寬度的 1.0 倍（1:1 比例，方案 C：110px × 110px）
+        const idealCardHeight = baseCardWidth * 1.0;
 
-        // 垂直間距：0（完全貼在一起）
-        const verticalSpacingRatio = 0;
+        // 🔥 [v81.3] 垂直間距：100% 卡片高度（空白框之間有更大間距）
+        const verticalSpacingRatio = 1.0;  // 🔥 [v81.3] 從 0.5 (50%) 增加到 1.0 (100%)
         const idealVerticalSpacing = idealCardHeight * verticalSpacingRatio;
 
         // 檢查理想尺寸是否適應可用高度（2 行卡片）
@@ -3024,9 +3031,10 @@ class GameScene extends Phaser.Scene {
             scaled: requiredHeight > availableHeight ? '⚠️ 已縮放' : '✅ 理想尺寸'
         });
 
-        // 計算上方和下方區域的起始位置
+        // 🔥 [v81.4] 計算上方和下方區域的起始位置 - 空白框往上移動，縮短與英文卡片第二行的距離
         const topY = topButtonArea + cardHeight / 2;
-        const bottomY = topY + cardHeight + verticalSpacing;
+        const separationSpacing = cardHeight * 0.3;  // 🔥 [v81.4] 英文卡片和空白框之間的距離 = 卡片高度的 30%（從 150% 減少到 30%）
+        const bottomY = topY + cardHeight + verticalSpacing + separationSpacing;
         const startX = horizontalMargin + cardWidth / 2;
 
         console.log(`📍 [v77.0] 區域位置:`, {
@@ -3054,12 +3062,12 @@ class GameScene extends Phaser.Scene {
             console.log('🎲 使用隨機排列模式（Fisher-Yates 算法）');
         }
 
-        // 創建上方英文卡片（2行，每行 10 列）
+        // 🔥 [v81.4] 創建上方英文卡片（2行，每行 10 列）- 第一行和第二行之間沒有間距
         currentPagePairs.forEach((pair, index) => {
             const col = index % itemsPerRow;
             const row = Math.floor(index / itemsPerRow);
             const x = startX + col * (cardWidth + horizontalSpacing);
-            const y = topY + row * (cardHeight + verticalSpacing);
+            const y = topY + row * cardHeight;  // 🔥 [v81.4] 英文卡片之間沒有間距（只有 cardHeight，沒有 verticalSpacing）
             const animationDelay = index * 100;
             const card = this.createLeftCard(x, y, cardWidth, cardHeight, pair.question, pair.id, animationDelay, pair.imageUrl, pair.audioUrl);
             this.leftCards.push(card);
@@ -5240,7 +5248,10 @@ class GameScene extends Phaser.Scene {
         // 1️⃣ 語音按鈕區域（上方 30%）
         const buttonAreaHeight = height * 0.3;
         const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
-        const buttonSize = Math.max(20, Math.min(40, buttonAreaHeight * 0.6));  // 🔥 減小按鈕大小，確保在框內
+        // 🔥 [v81.5] 當匹配數是 20 時縮小聲音按鈕
+        const buttonSize = this.currentPageItemCount === 20
+            ? Math.max(15, Math.min(28, buttonAreaHeight * 0.4))  // 🔥 [v81.5] 匹配數 20 時：縮小到 40%
+            : Math.max(20, Math.min(40, buttonAreaHeight * 0.6));  // 其他情況：保持 60%
 
         console.log('🔊 準備調用 createAudioButton:', {
             audioUrl: audioUrl ? '有' : '無',
