@@ -149,6 +149,28 @@ class PreloadScene extends Phaser.Scene {
                 resources: data?.resources
             });
 
+            // 🔥 [v81.0] 詳細的資源診斷訊息
+            const resourceCount = Object.keys(data?.resources || {}).length;
+            console.log('🔍 [v81.0] 視覺風格資源診斷', {
+                visualStyle,
+                resourceCount,
+                hasResources: resourceCount > 0,
+                resourceKeys: Object.keys(data?.resources || {}),
+                apiResponse: {
+                    success: data?.success,
+                    styleId: data?.styleId,
+                    timestamp: data?.timestamp
+                }
+            });
+
+            if (resourceCount === 0) {
+                console.warn('⚠️ [v81.0] 視覺風格資源為空 - Vercel Blob Storage 中沒有上傳資源', {
+                    visualStyle,
+                    message: '請上傳視覺風格資源到 Vercel Blob Storage 的 visual-styles/{styleId}/ 目錄',
+                    blobStoragePath: `visual-styles/${visualStyle}/`
+                });
+            }
+
             if (!data?.success || !data?.resources) {
                 console.warn('⚠️ [v80.0] PreloadScene: 視覺風格資源回應無效，使用默認樣式', data);
                 return;
