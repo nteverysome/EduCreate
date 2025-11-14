@@ -354,6 +354,38 @@
                 </div>
             </div>
 
+            <!-- 空白框與答案間距 -->
+            <div style="border-top: 2px solid #ddd; margin-top: 20px; padding-top: 20px;">
+                <h3 style="color: #667eea; font-size: 14px; margin-bottom: 15px;">🔗 空白框與答案關係</h3>
+
+                <div class="control-group">
+                    <label>空白框與答案間距 (px)</label>
+                    <div class="slider-container">
+                        <input type="range" id="emptyBoxAnswerGap" min="0" max="20" value="0">
+                        <span class="value-display" id="emptyBoxAnswerGapValue">0</span>
+                        <span>px</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>答案圖片大小比例 (%)</label>
+                    <div class="slider-container">
+                        <input type="range" id="answerImageRatio" min="30" max="80" value="50">
+                        <span class="value-display" id="answerImageRatioValue">50</span>
+                        <span>%</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>答案圖片與框間距 (px)</label>
+                    <div class="slider-container">
+                        <input type="range" id="answerImagePadding" min="0" max="15" value="5">
+                        <span class="value-display" id="answerImagePaddingValue">5</span>
+                        <span>px</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- 統計信息 -->
             <div class="stats-box">
                 <div class="stat-row">
@@ -417,7 +449,10 @@ const verticalSpacing = 8;
             imageRatio: document.getElementById('imageRatio'),
             textRatio: document.getElementById('textRatio'),
             emptyBoxRatio: document.getElementById('emptyBoxRatio'),
-            answerRatio: document.getElementById('answerRatio')
+            answerRatio: document.getElementById('answerRatio'),
+            emptyBoxAnswerGap: document.getElementById('emptyBoxAnswerGap'),
+            answerImageRatio: document.getElementById('answerImageRatio'),
+            answerImagePadding: document.getElementById('answerImagePadding')
         };
 
         const displays = {
@@ -428,7 +463,10 @@ const verticalSpacing = 8;
             imageRatio: document.getElementById('imageRatioValue'),
             textRatio: document.getElementById('textRatioValue'),
             emptyBoxRatio: document.getElementById('emptyBoxRatioValue'),
-            answerRatio: document.getElementById('answerRatioValue')
+            answerRatio: document.getElementById('answerRatioValue'),
+            emptyBoxAnswerGap: document.getElementById('emptyBoxAnswerGapValue'),
+            answerImageRatio: document.getElementById('answerImageRatioValue'),
+            answerImagePadding: document.getElementById('answerImagePaddingValue')
         };
 
         function calculateLayout() {
@@ -440,6 +478,9 @@ const verticalSpacing = 8;
             const textRatio = parseInt(sliders.textRatio.value);
             const emptyBoxRatio = parseInt(sliders.emptyBoxRatio.value);
             const answerRatio = parseInt(sliders.answerRatio.value);
+            const emptyBoxAnswerGap = parseInt(sliders.emptyBoxAnswerGap.value);
+            const answerImageRatio = parseInt(sliders.answerImageRatio.value);
+            const answerImagePadding = parseInt(sliders.answerImagePadding.value);
 
             const usableWidth = CONTAINER_WIDTH - hMargin * 2;
             const usableHeight = AVAILABLE_HEIGHT - vMargin * 2;
@@ -449,7 +490,8 @@ const verticalSpacing = 8;
 
             return {
                 hMargin, vMargin, hSpacing, vSpacing, unitWidth, unitHeight,
-                imageRatio, textRatio, emptyBoxRatio, answerRatio
+                imageRatio, textRatio, emptyBoxRatio, answerRatio,
+                emptyBoxAnswerGap, answerImageRatio, answerImagePadding
             };
         }
 
@@ -469,6 +511,8 @@ const verticalSpacing = 8;
             const ratioSumColor = ratioSum === 100 ? '#28a745' : '#dc3545';
             document.getElementById('ratioSum').innerHTML = `<span style="color: ${ratioSumColor};">總計: ${ratioSum}%</span>`;
 
+            const { emptyBoxAnswerGap, answerImageRatio, answerImagePadding } = layout;
+
             document.getElementById('codeDisplay').innerHTML = `
 const horizontalMargin = ${hMargin};<br>
 const verticalMargin = ${vMargin};<br>
@@ -479,6 +523,10 @@ const imageRatio = ${imageRatio};<br>
 const textRatio = ${textRatio};<br>
 const emptyBoxRatio = ${emptyBoxRatio};<br>
 const answerRatio = ${answerRatio};<br>
+<br>
+const emptyBoxAnswerGap = ${emptyBoxAnswerGap};<br>
+const answerImageRatio = ${answerImageRatio};<br>
+const answerImagePadding = ${answerImagePadding};<br>
 <br>
 // 計算結果:<br>
 // 單元寬度: ${Math.round(unitWidth)}px<br>
@@ -510,13 +558,16 @@ const answerRatio = ${answerRatio};<br>
 
         function resetValues() {
             sliders.horizontalMargin.value = 5;
-            sliders.verticalMargin.value = 5;
+            sliders.verticalMargin.value = 0;
             sliders.horizontalSpacing.value = 8;
             sliders.verticalSpacing.value = 8;
             sliders.imageRatio.value = 35;
             sliders.textRatio.value = 15;
             sliders.emptyBoxRatio.value = 25;
             sliders.answerRatio.value = 25;
+            sliders.emptyBoxAnswerGap.value = 0;
+            sliders.answerImageRatio.value = 50;
+            sliders.answerImagePadding.value = 5;
             updatePreview();
         }
 
@@ -530,7 +581,10 @@ const answerRatio = ${answerRatio};<br>
                 imageRatio: layout.imageRatio,
                 textRatio: layout.textRatio,
                 emptyBoxRatio: layout.emptyBoxRatio,
-                answerRatio: layout.answerRatio
+                answerRatio: layout.answerRatio,
+                emptyBoxAnswerGap: layout.emptyBoxAnswerGap,
+                answerImageRatio: layout.answerImageRatio,
+                answerImagePadding: layout.answerImagePadding
             });
 
             const gameUrl = `http://localhost:3000/games/switcher?game=match-up-game&activityId=cmhjff7340001jf04htar2e5k&${params.toString()}`;
