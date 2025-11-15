@@ -132,8 +132,10 @@ export class SpeakingCardsResponsiveLayout {
   getFontSizes(): { title: number; subtitle: number; body: number } {
     const titleConfig = getLayoutConfig('title', this.breakpoint);
     const subtitleConfig = getLayoutConfig('subtitle', this.breakpoint);
-    const fontSizeToken = getToken('fontSize', this.breakpoint);
-    const bodySize = fontSizeToken?.md || 16;
+
+    // fontSize 是全局的，不按斷點分類
+    const fontSizeTokens = DESIGN_TOKENS.fontSize as any;
+    const bodySize = fontSizeTokens?.md || 16;
 
     return {
       title: titleConfig?.fontSize || 32,
