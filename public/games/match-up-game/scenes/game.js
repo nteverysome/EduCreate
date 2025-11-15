@@ -2105,23 +2105,38 @@ class GameScene extends Phaser.Scene {
             console.log('⚠️ 使用備用卡片大小計算（SeparatedResponsiveConfig 不可用）- 放大 10%');
         }
 
-        // 🎨 [v224.0] 計算內容大小 - 合理調整按鈕大小，確保不超出卡片邊界
+        // 🎨 [v226.0] 計算內容大小 - 真正的響應式設計，按鈕根據設備類型動態調整
+        // 🔥 [v226.0] 改進：根據設備類型和 cardHeight 動態計算按鈕大小
+
+        // 1️⃣ 根據設備類型和卡片數量獲取動態百分比
+        const buttonPercentages = {
+            'mobile-portrait': { 3: 0.08, 5: 0.08, 7: 0.10, 10: 0.12, 20: 0.14 },
+            'mobile-landscape': { 3: 0.10, 5: 0.10, 7: 0.12, 10: 0.14, 20: 0.16 },
+            'tablet-portrait': { 3: 0.10, 5: 0.10, 7: 0.12, 10: 0.14, 20: 0.16 },
+            'tablet-landscape': { 3: 0.12, 5: 0.12, 7: 0.14, 10: 0.16, 20: 0.18 },
+            'desktop': { 3: 0.14, 5: 0.14, 7: 0.16, 10: 0.18, 20: 0.18 }
+        };
+
+        const buttonPercentage = buttonPercentages[deviceType]?.[itemCount] || 0.10;
+
+        // 2️⃣ 計算動態最大值（按鈕區域的 90%）
+        const buttonAreaHeight = cardHeight * 0.2;
+        const dynamicMaxSize = buttonAreaHeight * 0.9;
+
+        // 3️⃣ 計算最小值
+        const buttonMinSize = itemCount === 3 ? 5 : itemCount === 5 ? 5 :
+                              itemCount === 7 ? 4 : itemCount === 10 ? 4 : 3;
+
+        // 4️⃣ 計算按鈕大小
+        const calculatedButtonSize = Math.floor(cardHeight * buttonPercentage);
+        const finalButtonSize = Math.min(Math.max(calculatedButtonSize, buttonMinSize), dynamicMaxSize);
+
         let contentSizes = {
             audioButton: {
-                // 🔥 [v224.0] 改進：根據 cardHeight 合理調整按鈕大小
-                // 按鈕區域 = cardHeight × 20%，按鈕最多佔 90% = cardHeight × 0.18
-                // 根據實際 cardHeight 值調整百分比，確保按鈕大小合理且不超出邊界
-                size: itemCount === 3
-                    ? Math.min(Math.max(Math.floor(cardHeight * 0.10), 5), Math.floor(cardHeight * 0.18))   // 3 個卡片：10%，最小 5px，最大 18%
-                    : itemCount === 5
-                    ? Math.min(Math.max(Math.floor(cardHeight * 0.10), 5), Math.floor(cardHeight * 0.18))   // 5 個卡片：10%，最小 5px，最大 18%
-                    : itemCount === 7
-                    ? Math.min(Math.max(Math.floor(cardHeight * 0.12), 4), Math.floor(cardHeight * 0.18))   // 7 個卡片：12%，最小 4px，最大 18%
-                    : itemCount === 10
-                    ? Math.min(Math.max(Math.floor(cardHeight * 0.14), 4), Math.floor(cardHeight * 0.18))   // 10 個卡片：14%，最小 4px，最大 18%
-                    : Math.min(Math.max(Math.floor(cardHeight * 0.16), 3), Math.floor(cardHeight * 0.18)),  // 20 個卡片：16%，最小 3px，最大 18%
-                minSize: itemCount === 3 ? 5 : itemCount === 5 ? 5 : itemCount === 7 ? 4 : itemCount === 10 ? 4 : 3,
-                maxSize: itemCount === 3 ? 12 : itemCount === 5 ? 9 : itemCount === 7 ? 6 : itemCount === 10 ? 5 : 3
+                // 🔥 [v226.0] 真正的響應式設計：根據設備類型動態調整
+                size: finalButtonSize,
+                minSize: buttonMinSize,
+                maxSize: Math.floor(dynamicMaxSize)
             },
             image: {
                 width: Math.max(Math.floor(cardWidth * 0.35), 30),
