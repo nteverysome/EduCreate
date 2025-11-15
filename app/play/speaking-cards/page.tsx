@@ -132,9 +132,13 @@ function SpeakingCardsGame() {
     }
   };
 
-  // 點擊右邊卡片時直接進行到下一張
+  // 點擊右邊卡片時直接進行到下一張（不顯示背景）
   const handleFlippedCardClick = () => {
-    handleAdvanceToNext();
+    if (currentCardIndex < shuffledCards.length - 1) {
+      // 同時更新 currentCardIndex 和 isFlipped，避免中間狀態
+      setCurrentCardIndex(currentCardIndex + 1);
+      setIsFlipped(false);
+    }
   };
 
   if (isLoading) {
@@ -168,12 +172,12 @@ function SpeakingCardsGame() {
 
         {/* 遊戲區域 */}
         <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
-          {/* 左側：卡牌堆 - 可點擊翻卡 */}
+          {/* 左側：卡牌堆 - 可點擊回到上一張 */}
           <div
             className="relative cursor-pointer group"
-            onClick={handleCardFlip}
-            onTouchEnd={handleCardFlip}
-            title="點擊翻卡"
+            onClick={handlePrevious}
+            onTouchEnd={handlePrevious}
+            title="點擊回到上一張"
           >
             <div className="w-64 h-96 rounded-xl shadow-2xl border-4 border-white relative overflow-hidden group-hover:shadow-3xl transition-all active:scale-95 transform">
               {/* 卡牌背面圖片 */}
@@ -246,12 +250,12 @@ function SpeakingCardsGame() {
               </div>
             ) : (
               <div
-                onClick={handleCardFlip}
-                onTouchEnd={handleCardFlip}
+                onClick={handleFlippedCardClick}
+                onTouchEnd={handleFlippedCardClick}
                 className="w-64 h-96 rounded-xl shadow-2xl border-4 border-blue-200 cursor-pointer hover:shadow-xl transition-all active:scale-95 transform bg-transparent flex items-center justify-center"
-                title="點擊翻卡"
+                title="點擊進行下一張"
               >
-                <p className="text-gray-300 text-lg font-semibold drop-shadow-lg pointer-events-none">點擊翻卡</p>
+                <p className="text-gray-300 text-lg font-semibold drop-shadow-lg pointer-events-none">點擊進行下一張</p>
               </div>
             )}
           </div>
