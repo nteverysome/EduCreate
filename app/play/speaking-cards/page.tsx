@@ -132,12 +132,14 @@ function SpeakingCardsGame() {
     }
   };
 
-  // 點擊右邊卡片時直接進行到下一張（不顯示背景）
+  // 點擊右邊卡片時的邏輯
   const handleFlippedCardClick = () => {
-    if (currentCardIndex < shuffledCards.length - 1) {
-      // 同時更新 currentCardIndex 和 isFlipped，避免中間狀態
-      setCurrentCardIndex(currentCardIndex + 1);
-      setIsFlipped(false);
+    if (isFlipped) {
+      // 如果已翻開，進行到下一張
+      handleNext();
+    } else {
+      // 如果未翻開，翻開卡片
+      handleFlip();
     }
   };
 
