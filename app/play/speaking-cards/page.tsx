@@ -101,11 +101,16 @@ function SpeakingCardsGame() {
     }
   };
 
-  // 上一張卡片
+  // 上一張卡片 - 直接顯示內容
   const handlePrevious = () => {
     if (currentCardIndex > 0) {
-      setCurrentCardIndex(currentCardIndex - 1);
-      setIsFlipped(false);
+      const prevIndex = currentCardIndex - 1;
+      setCurrentCardIndex(prevIndex);
+      // 保持 isFlipped 為 true，直接顯示上一張卡片內容
+      // 如果有語音，播放語音
+      if (shuffledCards[prevIndex]?.audioUrl) {
+        playAudio(shuffledCards[prevIndex].audioUrl!);
+      }
     }
   };
 
