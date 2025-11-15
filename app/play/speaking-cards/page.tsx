@@ -192,10 +192,12 @@ function SpeakingCardsGame() {
         <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
           {/* 左側：卡牌堆 - 可點擊回到上一張 */}
           <div
-            className="relative cursor-pointer group"
+            className={`relative cursor-pointer group transition-opacity ${
+              currentCardIndex === shuffledCards.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
+            }`}
             onClick={handlePrevious}
             onTouchEnd={handlePrevious}
-            title="點擊回到上一張"
+            title={currentCardIndex === shuffledCards.length - 1 ? '沒有上一張卡片' : '點擊回到上一張'}
           >
             <div className="w-64 h-96 rounded-xl shadow-2xl border-4 border-white relative overflow-hidden group-hover:shadow-3xl transition-all active:scale-95 transform">
               {/* 卡牌背面圖片 */}
