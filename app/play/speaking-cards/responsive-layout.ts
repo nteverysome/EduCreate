@@ -80,13 +80,16 @@ export class SpeakingCardsResponsiveLayout {
   getCardSize(): { width: number; height: number } {
     if (this.isIPad && this.iPadModel) {
       const iPadConfig = getIPadConfig(this.width, this.height);
-      return {
-        width: iPadConfig.cardWidth,
-        height: iPadConfig.cardHeight
-      };
+      if (iPadConfig) {
+        return {
+          width: iPadConfig.cardWidth,
+          height: iPadConfig.cardHeight
+        };
+      }
     }
 
-    return getToken('cardSize', this.breakpoint);
+    const cardSize = getToken('cardSize', this.breakpoint);
+    return cardSize || { width: 256, height: 384 };
   }
 
   /**
@@ -95,27 +98,32 @@ export class SpeakingCardsResponsiveLayout {
   getButtonSize(): { padding: string; fontSize: number } {
     if (this.isIPad && this.iPadModel) {
       const iPadConfig = getIPadConfig(this.width, this.height);
-      return {
-        padding: iPadConfig.buttonPadding,
-        fontSize: iPadConfig.fontSize
-      };
+      if (iPadConfig) {
+        return {
+          padding: iPadConfig.buttonPadding,
+          fontSize: iPadConfig.fontSize
+        };
+      }
     }
 
-    return getToken('buttonSize', this.breakpoint);
+    const buttonSize = getToken('buttonSize', this.breakpoint);
+    return buttonSize || { padding: '12px 24px', fontSize: 16 };
   }
 
   /**
    * 獲取邊距
    */
   getMargins(): { side: number; top: number; bottom: number } {
-    return getToken('margins', this.breakpoint);
+    const margins = getToken('margins', this.breakpoint);
+    return margins || { side: 16, top: 20, bottom: 20 };
   }
 
   /**
    * 獲取間距
    */
   getGaps(): { horizontal: number; vertical: number } {
-    return getToken('gaps', this.breakpoint);
+    const gaps = getToken('gaps', this.breakpoint);
+    return gaps || { horizontal: 12, vertical: 16 };
   }
 
   /**
@@ -124,11 +132,12 @@ export class SpeakingCardsResponsiveLayout {
   getFontSizes(): { title: number; subtitle: number; body: number } {
     const titleConfig = getLayoutConfig('title', this.breakpoint);
     const subtitleConfig = getLayoutConfig('subtitle', this.breakpoint);
-    const bodySize = getToken('fontSize', this.breakpoint).md;
+    const fontSizeToken = getToken('fontSize', this.breakpoint);
+    const bodySize = fontSizeToken?.md || 16;
 
     return {
-      title: titleConfig.fontSize,
-      subtitle: subtitleConfig.fontSize,
+      title: titleConfig?.fontSize || 32,
+      subtitle: subtitleConfig?.fontSize || 16,
       body: bodySize
     };
   }
@@ -137,14 +146,22 @@ export class SpeakingCardsResponsiveLayout {
    * 獲取卡片區域配置
    */
   getCardAreaConfig(): any {
-    return getLayoutConfig('cardArea', this.breakpoint);
+    return getLayoutConfig('cardArea', this.breakpoint) || {
+      maxWidth: '100%',
+      padding: '16px',
+      gap: '8px'
+    };
   }
 
   /**
    * 獲取按鈕區域配置
    */
   getButtonAreaConfig(): any {
-    return getLayoutConfig('buttonArea', this.breakpoint);
+    return getLayoutConfig('buttonArea', this.breakpoint) || {
+      flexDirection: 'row',
+      gap: '12px',
+      padding: '16px'
+    };
   }
 
   /**
