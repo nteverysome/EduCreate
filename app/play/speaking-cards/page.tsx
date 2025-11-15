@@ -93,6 +93,14 @@ function SpeakingCardsGame() {
     }
   };
 
+  // 進行到下一張卡片（不翻回，直接顯示下一張背面）
+  const handleAdvanceToNext = () => {
+    if (currentCardIndex < shuffledCards.length - 1) {
+      setCurrentCardIndex(currentCardIndex + 1);
+      setIsFlipped(false);
+    }
+  };
+
   // 上一張卡片
   const handlePrevious = () => {
     if (currentCardIndex > 0) {
@@ -126,7 +134,7 @@ function SpeakingCardsGame() {
 
   // 點擊右邊卡片時直接進行到下一張
   const handleFlippedCardClick = () => {
-    handleNext();
+    handleAdvanceToNext();
   };
 
   if (isLoading) {
