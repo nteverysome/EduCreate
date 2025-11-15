@@ -5418,7 +5418,7 @@ class GameScene extends Phaser.Scene {
             audioUrl: audioUrl ? '有' : '無',
             buttonAreaY,
             buttonSize: constrainedButtonSize,
-            maxButtonRadius
+            maxButtonSize
         });
 
         this.createAudioButton(container, audioUrl, 0, buttonAreaY, constrainedButtonSize, pairId);
