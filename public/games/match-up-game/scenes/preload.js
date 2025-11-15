@@ -23,9 +23,8 @@ class PreloadScene extends Phaser.Scene {
 
         this.initialLoadingText = loadingText;
 
-        // 🎨 [v1.0] 加載中世紀背景圖片
-        this.load.image('game-background', '/games/match-up-game/assets/game_background_4.png');
-        console.log('🖼️ PreloadScene: 排程載入中世紀背景圖片');
+        // 🎨 [v2.0] 背景圖片將在 create 方法中從視覺風格資源動態加載
+        console.log('🖼️ PreloadScene: 背景圖片將在 create 方法中動態加載');
     }
 
     async create() {
@@ -36,27 +35,12 @@ class PreloadScene extends Phaser.Scene {
             this.initialLoadingText = null;
         }
 
-        // 🎨 [v1.0] 在 create 方法中加載中世紀背景圖片
+        // 🎨 [v2.0] 先加載視覺風格資源，然後動態加載背景圖片
+        await this.loadVisualStyleResources();
+
+        // 🎨 [v2.0] 從視覺風格資源中加載背景圖片
         if (!this.textures.exists('game-background')) {
-            this.load.image('game-background', '/games/match-up-game/assets/game_background_4.png');
-            console.log('🖼️ PreloadScene: 排程載入中世紀背景圖片');
-
-            // 等待圖片加載完成
-            await new Promise((resolve) => {
-                this.load.once('complete', () => {
-                    console.log('✅ PreloadScene: 中世紀背景圖片加載完成');
-                    resolve();
-                });
-
-                this.load.once('loaderror', (file) => {
-                    console.warn('⚠️ PreloadScene: 背景圖片加載失敗', file.key, file.src);
-                    resolve();
-                });
-
-                if (!this.load.isLoading()) {
-                    this.load.start();
-                }
-            });
+            await this.loadBackgroundFromVisualStyle();
         }
 
         this.handlerScene = this.scene.get('handler');
@@ -237,6 +221,81 @@ class PreloadScene extends Phaser.Scene {
                 message: error?.message,
                 stack: error?.stack
             });
+        }
+    }
+
+    /**
+     * 🎨 [v2.0] 從視覺風格資源中動態加載背景圖片
+     */
+    async loadBackgroundFromVisualStyle() {
+        try {
+            // 檢查是否有視覺風格資源
+            if (!this.visualStyleResources) {
+                console.warn('⚠️ PreloadScene: 沒有視覺風格資源，使用備用背景');
+                await this.loadFallbackBackground();
+                return;
+            }
+
+            // 查找背景圖片資源（資源類型為 bg_layer）
+            const bgUrl = this.visualStyleResources['bg_layer'];
+
+            if (bgUrl && typeof bgUrl === 'string') {
+                console.log('🎨 PreloadScene: 從視覺風格資源加載背景圖片', bgUrl);
+                this.load.image('game-background', bgUrl);
+
+                // 等待背景圖片加載完成
+                await new Promise((resolve) => {
+                    this.load.once('complete', () => {
+                        console.log('✅ PreloadScene: 視覺風格背景圖片加載完成');
+                        resolve();
+                    });
+
+                    this.load.once('loaderror', (file) => {
+                        console.warn('⚠️ PreloadScene: 視覺風格背景圖片加載失敗，使用備用背景', file.key);
+                        resolve();
+                    });
+
+                    if (!this.load.isLoading()) {
+                        this.load.start();
+                    }
+                });
+            } else {
+                console.warn('⚠️ PreloadScene: 視覺風格中沒有背景圖片資源，使用備用背景');
+                await this.loadFallbackBackground();
+            }
+        } catch (error) {
+            console.error('❌ PreloadScene: 加載視覺風格背景時發生錯誤', error);
+            await this.loadFallbackBackground();
+        }
+    }
+
+    /**
+     * 🎨 [v2.0] 加載備用背景圖片（硬編碼路徑）
+     */
+    async loadFallbackBackground() {
+        try {
+            if (!this.textures.exists('game-background')) {
+                console.log('🖼️ PreloadScene: 加載備用背景圖片');
+                this.load.image('game-background', '/games/match-up-game/assets/game_background_4.png');
+
+                await new Promise((resolve) => {
+                    this.load.once('complete', () => {
+                        console.log('✅ PreloadScene: 備用背景圖片加載完成');
+                        resolve();
+                    });
+
+                    this.load.once('loaderror', (file) => {
+                        console.warn('⚠️ PreloadScene: 備用背景圖片加載失敗', file.key);
+                        resolve();
+                    });
+
+                    if (!this.load.isLoading()) {
+                        this.load.start();
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('❌ PreloadScene: 加載備用背景時發生錯誤', error);
         }
     }
 
