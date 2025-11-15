@@ -5807,11 +5807,9 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 輔助函數 - 創建語音按鈕
     createAudioButton(container, audioUrl, x, y, size, pairId) {
-        // 🎨 [v1.0] 使用 contentSizes 中的按鈕大小
-        const contentSizes = this.currentContentSizes;
-        const buttonSize = contentSizes
-            ? contentSizes.audioButton.size
-            : Math.max(50, Math.min(80, size * 0.6));
+        // 🔥 [v227.0] 修正：直接使用傳入的 size 參數，確保按鈕響應卡片尺寸
+        // ✅ 這樣按鈕會像圖片和文字一樣響應卡片尺寸的變化
+        const buttonSize = size;
 
         console.log('🔊 創建語音按鈕:', {
             x, y,
@@ -5819,7 +5817,7 @@ class GameScene extends Phaser.Scene {
             buttonSize,
             audioUrl: audioUrl ? '有' : '無',
             pairId,
-            contentSizesUsed: !!contentSizes
+            responsive: '✅ 使用傳入的 size 參數，完全響應式'
         });
 
         // 🔥 創建按鈕背景（相對於 buttonContainer 的座標為 0, 0）
