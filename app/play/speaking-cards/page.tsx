@@ -132,11 +132,19 @@ function SpeakingCardsGame() {
     }
   };
 
-  // 點擊右邊卡片時的邏輯
+  // 點擊右邊卡片時的邏輯 - 直接顯示內容，再點進行到下一張
   const handleFlippedCardClick = () => {
     if (isFlipped) {
-      // 如果已翻開，進行到下一張
-      handleNext();
+      // 如果已翻開，進行到下一張並翻開新卡片
+      if (currentCardIndex < shuffledCards.length - 1) {
+        const nextIndex = currentCardIndex + 1;
+        setCurrentCardIndex(nextIndex);
+        // 保持 isFlipped 為 true，直接顯示下一張卡片內容
+        // 如果有語音，播放語音
+        if (shuffledCards[nextIndex]?.audioUrl) {
+          playAudio(shuffledCards[nextIndex].audioUrl!);
+        }
+      }
     } else {
       // 如果未翻開，翻開卡片
       handleFlip();
