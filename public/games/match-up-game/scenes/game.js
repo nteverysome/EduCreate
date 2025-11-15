@@ -5399,15 +5399,20 @@ class GameScene extends Phaser.Scene {
         // 按鈕位置 = 卡片頂部 + 按鈕區域高度的一半
         const buttonAreaY = -height / 2 + buttonAreaHeight / 2;
 
-        // 🔥 [v219.0] 改進：再減小按鈕大小到原來的四分之一
+        // 🔥 [v228.0] 改進：調整按鈕大小百分比，使按鈕更清晰可見
+        // 根據卡片數量調整百分比，確保按鈕大小合理
         const buttonSize = this.currentPageItemCount === 20
-            ? Math.min(6, buttonAreaHeight * 0.0875)  // 20 個卡片：8.75%（原 35% 的四分之一），最大 6px
-            : Math.min(7, buttonAreaHeight * 0.1125);  // 其他情況：11.25%（原 45% 的四分之一），最大 7px
+            ? buttonAreaHeight * 0.35  // 20 個卡片：35%（增大）
+            : this.currentPageItemCount === 10
+            ? buttonAreaHeight * 0.40  // 10 個卡片：40%（增大）
+            : this.currentPageItemCount === 7
+            ? buttonAreaHeight * 0.45  // 7 個卡片：45%（增大）
+            : buttonAreaHeight * 0.50;  // 3-5 個卡片：50%（增大）
 
-        // 🔥 [v220.0] 確保按鈕不超出卡片邊界
-        // 按鈕最大半徑 = 按鈕區域高度的一半
-        const maxButtonRadius = buttonAreaHeight / 2;
-        const constrainedButtonSize = Math.min(buttonSize, maxButtonRadius * 2 * 0.9);  // 留 10% 邊距
+        // 🔥 [v228.0] 確保按鈕不超出卡片邊界
+        // 按鈕最大值 = 按鈕區域高度的 90%（留 10% 邊距）
+        const maxButtonSize = buttonAreaHeight * 0.9;
+        const constrainedButtonSize = Math.min(buttonSize, maxButtonSize);
 
         console.log('🔊 準備調用 createAudioButton:', {
             audioUrl: audioUrl ? '有' : '無',
