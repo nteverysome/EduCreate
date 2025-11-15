@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import { useResponsiveLayout } from './useResponsiveLayout';
+import { useContainerResponsiveLayout } from './useContainerResponsiveLayout';
 
 interface CardData {
   id: string;
@@ -20,6 +21,9 @@ function SpeakingCardsGame() {
 
   // 使用響應式佈局 Hook
   const responsive = useResponsiveLayout();
+
+  // 使用容器感知的響應式佈局 Hook
+  const containerLayout = useContainerResponsiveLayout();
 
   const [cards, setCards] = useState<CardData[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -207,13 +211,15 @@ function SpeakingCardsGame() {
         </div>
 
         {/* 遊戲區域 */}
-        <div style={{
-          display: 'flex',
-          flexDirection: responsive.isMobile ? 'column' : 'row',
-          gap: responsive.gaps?.horizontal ? `${responsive.gaps.horizontal}px` : '32px',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
+        <div
+          ref={containerLayout.containerRef}
+          style={{
+            display: 'flex',
+            flexDirection: responsive.isMobile ? 'column' : 'row',
+            gap: responsive.gaps?.horizontal ? `${responsive.gaps.horizontal}px` : '32px',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
           {/* 左側：卡牌堆 - 可點擊回到上一張 */}
           <div
             className={`relative cursor-pointer group transition-opacity ${
@@ -226,8 +232,8 @@ function SpeakingCardsGame() {
             <div
               className="rounded-xl shadow-2xl border-4 border-white relative overflow-hidden group-hover:shadow-3xl transition-all active:scale-95 transform"
               style={{
-                width: responsive.cardSize?.width ? `${responsive.cardSize.width}px` : '256px',
-                height: responsive.cardSize?.height ? `${responsive.cardSize.height}px` : '384px'
+                width: `${containerLayout.cardWidth}px`,
+                height: `${containerLayout.cardHeight}px`
               }}
             >
               {/* 卡牌背面圖片 */}
@@ -243,8 +249,8 @@ function SpeakingCardsGame() {
               style={{
                 top: '8px',
                 left: '8px',
-                width: responsive.cardSize?.width ? `${responsive.cardSize.width}px` : '256px',
-                height: responsive.cardSize?.height ? `${responsive.cardSize.height}px` : '384px'
+                width: `${containerLayout.cardWidth}px`,
+                height: `${containerLayout.cardHeight}px`
               }}
             >
               <img
@@ -258,8 +264,8 @@ function SpeakingCardsGame() {
               style={{
                 top: '16px',
                 left: '16px',
-                width: responsive.cardSize?.width ? `${responsive.cardSize.width}px` : '256px',
-                height: responsive.cardSize?.height ? `${responsive.cardSize.height}px` : '384px'
+                width: `${containerLayout.cardWidth}px`,
+                height: `${containerLayout.cardHeight}px`
               }}
             >
               <img
@@ -278,8 +284,8 @@ function SpeakingCardsGame() {
                 onTouchEnd={handleFlippedCardClick}
                 className="rounded-xl shadow-2xl border-4 border-blue-200 flex flex-col items-center justify-center bg-cover bg-center cursor-pointer hover:shadow-xl transition-all active:scale-95 transform"
                 style={{
-                  width: responsive.cardSize?.width ? `${responsive.cardSize.width}px` : '256px',
-                  height: responsive.cardSize?.height ? `${responsive.cardSize.height}px` : '384px',
+                  width: `${containerLayout.cardWidth}px`,
+                  height: `${containerLayout.cardHeight}px`,
                   padding: responsive.gaps?.horizontal ? `${responsive.gaps.horizontal}px` : '24px',
                   backgroundImage: 'url(/images/card-front-bg.png)'
                 }}
@@ -293,7 +299,7 @@ function SpeakingCardsGame() {
                     className="object-cover rounded-lg pointer-events-none"
                     style={{
                       width: '100%',
-                      height: responsive.cardSize ? `${responsive.cardSize.height * 0.4}px` : '150px',
+                      height: `${containerLayout.cardHeight * 0.4}px`,
                       marginBottom: responsive.gaps?.vertical ? `${responsive.gaps.vertical}px` : '16px'
                     }}
                   />
@@ -340,8 +346,8 @@ function SpeakingCardsGame() {
                 onTouchEnd={handleFlippedCardClick}
                 className="rounded-xl shadow-2xl border-4 border-blue-200 cursor-pointer hover:shadow-xl transition-all active:scale-95 transform bg-transparent flex items-center justify-center"
                 style={{
-                  width: responsive.cardSize?.width ? `${responsive.cardSize.width}px` : '256px',
-                  height: responsive.cardSize?.height ? `${responsive.cardSize.height}px` : '384px'
+                  width: `${containerLayout.cardWidth}px`,
+                  height: `${containerLayout.cardHeight}px`
                 }}
                 title="點擊進行下一張"
               >
