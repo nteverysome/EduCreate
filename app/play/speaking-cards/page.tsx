@@ -180,6 +180,23 @@ function SpeakingCardsGame() {
 
   const currentCard = shuffledCards[currentCardIndex];
 
+  // 動態縮放系統：所有元素根據卡片實際尺寸等比例縮放
+  // 基準：標準卡片 300×420px
+  const scaledStyles = {
+    // 卡片內邊距：卡片寬度的 6%（標準 300px 時為 18px）
+    cardPadding: Math.round(containerLayout.cardWidth * 0.06),
+    // 圖片高度：卡片高度的 45%（標準 420px 時為 189px）
+    imageHeight: Math.round(containerLayout.cardHeight * 0.45),
+    // 文字大小：卡片寬度的 6%（標準 300px 時為 18px）
+    fontSize: Math.round(containerLayout.cardWidth * 0.06),
+    // 元素間距：卡片寬度的 4%（標準 300px 時為 12px）
+    gap: Math.round(containerLayout.cardWidth * 0.04),
+    // 按鈕內邊距：卡片寬度的 4%（標準 300px 時為 12px）
+    buttonPadding: Math.round(containerLayout.cardWidth * 0.04),
+    // 圖標大小：卡片寬度的 6%（標準 300px 時為 18px）
+    iconSize: Math.round(containerLayout.cardWidth * 0.06)
+  };
+
   return (
     <div
       className="min-h-screen bg-cover bg-center bg-fixed flex flex-col"
@@ -295,12 +312,12 @@ function SpeakingCardsGame() {
                 style={{
                   width: `${containerLayout.cardWidth}px`,
                   height: `${containerLayout.cardHeight}px`,
-                  padding: responsive.gaps?.horizontal ? `${responsive.gaps.horizontal}px` : '24px',
+                  padding: `${scaledStyles.cardPadding}px`,
                   backgroundImage: 'url(/images/card-front-bg.png)'
                 }}
                 title="點擊進行下一張"
               >
-                {/* 圖片 */}
+                {/* 圖片 - 動態高度 */}
                 {currentCard.imageUrl && (
                   <img
                     src={currentCard.imageUrl}
@@ -308,25 +325,26 @@ function SpeakingCardsGame() {
                     className="object-cover rounded-lg pointer-events-none"
                     style={{
                       width: '100%',
-                      height: `${containerLayout.cardHeight * 0.4}px`,
-                      marginBottom: responsive.gaps?.vertical ? `${responsive.gaps.vertical}px` : '16px'
+                      height: `${scaledStyles.imageHeight}px`,
+                      marginBottom: `${scaledStyles.gap}px`
                     }}
                   />
                 )}
 
-                {/* 文字 */}
+                {/* 文字 - 動態字體大小 */}
                 {currentCard.text && (
                   <p
                     className="font-bold text-gray-900 text-center pointer-events-none"
                     style={{
-                      fontSize: responsive.fontSize?.body ? `${responsive.fontSize.body}px` : '18px'
+                      fontSize: `${scaledStyles.fontSize}px`,
+                      lineHeight: '1.3'
                     }}
                   >
                     {currentCard.text}
                   </p>
                 )}
 
-                {/* 語音圖標 */}
+                {/* 語音圖標 - 動態尺寸 */}
                 {currentCard.audioUrl && (
                   <button
                     onClick={(e) => {
@@ -335,13 +353,13 @@ function SpeakingCardsGame() {
                     }}
                     className="bg-blue-100 hover:bg-blue-200 rounded-full transition-colors"
                     style={{
-                      marginTop: responsive.gaps?.vertical ? `${responsive.gaps.vertical}px` : '16px',
-                      padding: responsive.buttonSize?.padding || '12px'
+                      marginTop: `${scaledStyles.gap}px`,
+                      padding: `${scaledStyles.buttonPadding}px`
                     }}
                   >
                     <svg className="text-blue-600" fill="currentColor" viewBox="0 0 20 20" style={{
-                      width: responsive.fontSize?.body ? `${responsive.fontSize.body}px` : '18px',
-                      height: responsive.fontSize?.body ? `${responsive.fontSize.body}px` : '18px'
+                      width: `${scaledStyles.iconSize}px`,
+                      height: `${scaledStyles.iconSize}px`
                     }}>
                       <path d="M10 3.5a.5.5 0 00-.5-.5h-3a.5.5 0 00-.5.5v13a.5.5 0 00.5.5h3a.5.5 0 00.5-.5v-13zM8 5a1 1 0 011-1h2a1 1 0 011 1v10a1 1 0 01-1 1H9a1 1 0 01-1-1V5z"/>
                       <path d="M14.5 8a.5.5 0 01.5.5v3a.5.5 0 01-1 0v-3a.5.5 0 01.5-.5zm2-2a.5.5 0 01.5.5v7a.5.5 0 01-1 0v-7a.5.5 0 01.5-.5z"/>
@@ -363,7 +381,7 @@ function SpeakingCardsGame() {
                 <p
                   className="text-gray-300 font-semibold drop-shadow-lg pointer-events-none"
                   style={{
-                    fontSize: responsive.fontSize?.body ? `${responsive.fontSize.body}px` : '16px'
+                    fontSize: `${scaledStyles.fontSize}px`
                   }}
                 >
                   點擊進行下一張
