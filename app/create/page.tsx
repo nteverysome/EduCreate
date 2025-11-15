@@ -140,6 +140,16 @@ const gameTemplates = [
     status: 'completed',
     estimatedLoadTime: 500
   },
+  {
+    id: 'speaking-cards',
+    name: 'Speaking Cards 語音卡牌',
+    description: '通過翻卡學習，支援圖片、文字和語音的多感官記憶訓練',
+    icon: '🎴',
+    category: '語音聽覺記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 400
+  },
   // 開發中的遊戲
   {
     id: 'matching-pairs',

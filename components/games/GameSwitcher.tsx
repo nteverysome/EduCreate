@@ -221,6 +221,19 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     estimatedLoadTime: 1200,
     hidden: false  // 顯示在切換遊戲選單中
   },
+  {
+    id: 'speaking-cards',
+    name: 'speaking-cards',
+    displayName: 'Speaking Cards 語音卡牌',
+    description: '通過翻卡學習，支援圖片、文字和語音的多感官記憶訓練',
+    type: 'component',
+    memoryType: '語音聽覺記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🎴',
+    estimatedLoadTime: 400,
+    hidden: false  // 顯示在切換遊戲選單中
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -320,6 +333,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/math-attack-game/';
     case 'match-up-game':
       return '/games/match-up-game/';
+    case 'speaking-cards':
+      return '/play/speaking-cards';
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':
