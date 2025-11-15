@@ -1,54 +1,54 @@
 # 🔊 英文卡片音量按鈕大小參考表
 
-## 📊 每頁批數的音量按鈕大小
+## 📊 每頁批數的音量按鈕大小（v224.0 合理調整版本）
 
-根據 `game.js` 第 2113-2121 行的計算邏輯：
+根據 `game.js` 第 2113-2125 行的計算邏輯（已合理調整）：
 
 ```javascript
 size: itemCount === 3
-    ? Math.max(Math.floor(cardHeight * 0.01), 2)   // 3 個卡片：1%
+    ? Math.min(Math.max(Math.floor(cardHeight * 0.10), 5), 14)   // 3 個卡片：10%，最小 5px，最大 14px
     : itemCount === 5
-    ? Math.max(Math.floor(cardHeight * 0.02), 2)   // 5 個卡片：2%
+    ? Math.min(Math.max(Math.floor(cardHeight * 0.10), 5), 12)   // 5 個卡片：10%，最小 5px，最大 12px
     : itemCount === 7
-    ? Math.max(Math.floor(cardHeight * 0.01), 2)   // 7 個卡片：1%
+    ? Math.min(Math.max(Math.floor(cardHeight * 0.12), 4), 10)   // 7 個卡片：12%，最小 4px，最大 10px
     : itemCount === 10
-    ? Math.max(Math.floor(cardHeight * 0.045), 3)  // 10 個卡片：4.5%
-    : Math.max(Math.floor(cardHeight * 0.01), 2),  // 20 個卡片：1%
+    ? Math.min(Math.max(Math.floor(cardHeight * 0.14), 4), 8)    // 10 個卡片：14%，最小 4px，最大 8px
+    : Math.min(Math.max(Math.floor(cardHeight * 0.16), 3), 6),   // 20 個卡片：16%，最小 3px，最大 6px
 ```
 
 ---
 
 ## 🎯 按鈕大小計算公式
 
-### 按鈕大小 = Math.max(Math.floor(cardHeight × 百分比), 最小值)
+### 按鈕大小 = Math.min(Math.max(Math.floor(cardHeight × 百分比), 最小值), 最大值)
 
-| 卡片數量 | 百分比 | 最小值 | 計算公式 |
-|---------|--------|--------|---------|
-| **3** | 1% | 2px | Math.max(Math.floor(cardHeight × 0.01), 2) |
-| **5** | 2% | 2px | Math.max(Math.floor(cardHeight × 0.02), 2) |
-| **7** | 1% | 2px | Math.max(Math.floor(cardHeight × 0.01), 2) |
-| **10** | 4.5% | 3px | Math.max(Math.floor(cardHeight × 0.045), 3) |
-| **20** | 1% | 2px | Math.max(Math.floor(cardHeight × 0.01), 2) |
+| 卡片數量 | 百分比 | 最小值 | 最大值 | 計算公式 |
+|---------|--------|--------|--------|---------|
+| **3** | 10% | 5px | 14px | Math.min(Math.max(Math.floor(cardHeight × 0.10), 5), 14) |
+| **5** | 10% | 5px | 12px | Math.min(Math.max(Math.floor(cardHeight × 0.10), 5), 12) |
+| **7** | 12% | 4px | 10px | Math.min(Math.max(Math.floor(cardHeight × 0.12), 4), 10) |
+| **10** | 14% | 4px | 8px | Math.min(Math.max(Math.floor(cardHeight × 0.14), 4), 8) |
+| **20** | 16% | 3px | 6px | Math.min(Math.max(Math.floor(cardHeight × 0.16), 3), 6) |
 
 ---
 
 ## 📐 實際按鈕大小（根據 cardHeight）
 
-### 假設不同的 cardHeight 值
+### 假設不同的 cardHeight 值（合理調整版本）
 
 | cardHeight | 3 個卡片 | 5 個卡片 | 7 個卡片 | 10 個卡片 | 20 個卡片 |
 |-----------|---------|---------|---------|----------|----------|
-| 30px | 2px | 2px | 2px | 3px | 2px |
-| 40px | 2px | 2px | 2px | 3px | 2px |
-| 50px | 2px | 2px | 2px | 3px | 2px |
-| 60px | 2px | 2px | 2px | 3px | 2px |
-| 70px | 2px | 2px | 2px | 3px | 2px |
-| 80px | 2px | 2px | 2px | 4px | 2px |
-| 90px | 2px | 2px | 2px | 4px | 2px |
-| 100px | 2px | 2px | 2px | 5px | 2px |
-| 110px | 2px | 2px | 2px | 5px | 2px |
-| 120px | 2px | 2px | 2px | 5px | 2px |
-| 150px | 2px | 3px | 2px | 7px | 2px |
+| 30px | 5px | 5px | 4px | 4px | 3px |
+| 40px | 5px | 5px | 5px | 6px | 4px |
+| 50px | 5px | 5px | 6px | 7px | 5px |
+| 60px | 6px | 6px | 7px | 8px | 6px |
+| 70px | 7px | 7px | 8px | 8px | 6px |
+| 80px | 8px | 8px | 10px | 8px | 6px |
+| 90px | 9px | 9px | 10px | 8px | 6px |
+| 100px | 10px | 10px | 10px | 8px | 6px |
+| 110px | 11px | 11px | 10px | 8px | 6px |
+| 120px | 12px | 12px | 10px | 8px | 6px |
+| 150px | 14px | 12px | 10px | 8px | 6px |
 
 ---
 

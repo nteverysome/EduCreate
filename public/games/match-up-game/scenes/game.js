@@ -2105,22 +2105,23 @@ class GameScene extends Phaser.Scene {
             console.log('⚠️ 使用備用卡片大小計算（SeparatedResponsiveConfig 不可用）- 放大 10%');
         }
 
-        // 🎨 [v223.0] 計算內容大小 - 支持 3、5、7、10、20 五種卡片數量
+        // 🎨 [v224.0] 計算內容大小 - 合理調整按鈕大小，確保不超出卡片邊界
         let contentSizes = {
             audioButton: {
-                // 🔥 [v223.0] 改進：針對不同卡片數量設置不同的按鈕大小
-                // 分離模式中按鈕應該非常小，給圖片和文字最大空間
+                // 🔥 [v224.0] 改進：根據 cardHeight 合理調整按鈕大小
+                // 按鈕區域 = cardHeight × 20%，按鈕最多佔 90% = cardHeight × 0.18
+                // 根據實際 cardHeight 值調整百分比，確保按鈕大小合理且不超出邊界
                 size: itemCount === 3
-                    ? Math.max(Math.floor(cardHeight * 0.01), 2)   // 3 個卡片：1%
+                    ? Math.min(Math.max(Math.floor(cardHeight * 0.10), 5), Math.floor(cardHeight * 0.18))   // 3 個卡片：10%，最小 5px，最大 18%
                     : itemCount === 5
-                    ? Math.max(Math.floor(cardHeight * 0.02), 2)   // 5 個卡片：2%
+                    ? Math.min(Math.max(Math.floor(cardHeight * 0.10), 5), Math.floor(cardHeight * 0.18))   // 5 個卡片：10%，最小 5px，最大 18%
                     : itemCount === 7
-                    ? Math.max(Math.floor(cardHeight * 0.01), 2)   // 7 個卡片：1%
+                    ? Math.min(Math.max(Math.floor(cardHeight * 0.12), 4), Math.floor(cardHeight * 0.18))   // 7 個卡片：12%，最小 4px，最大 18%
                     : itemCount === 10
-                    ? Math.max(Math.floor(cardHeight * 0.045), 3)  // 10 個卡片：4.5%
-                    : Math.max(Math.floor(cardHeight * 0.01), 2),  // 20 個卡片：1%
-                minSize: itemCount === 3 ? 2 : itemCount === 5 ? 2 : itemCount === 7 ? 2 : itemCount === 10 ? 3 : 2,
-                maxSize: itemCount === 3 ? 4 : itemCount === 5 ? 4 : itemCount === 7 ? 4 : itemCount === 10 ? 6 : 4
+                    ? Math.min(Math.max(Math.floor(cardHeight * 0.14), 4), Math.floor(cardHeight * 0.18))   // 10 個卡片：14%，最小 4px，最大 18%
+                    : Math.min(Math.max(Math.floor(cardHeight * 0.16), 3), Math.floor(cardHeight * 0.18)),  // 20 個卡片：16%，最小 3px，最大 18%
+                minSize: itemCount === 3 ? 5 : itemCount === 5 ? 5 : itemCount === 7 ? 4 : itemCount === 10 ? 4 : 3,
+                maxSize: itemCount === 3 ? 14 : itemCount === 5 ? 12 : itemCount === 7 ? 10 : itemCount === 10 ? 8 : 6
             },
             image: {
                 width: Math.max(Math.floor(cardWidth * 0.35), 30),
