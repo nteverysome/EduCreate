@@ -213,9 +213,12 @@ export default function MatchUpVisualStylesAdminPage() {
                         <div className="mb-2">
                           <img
                             key={`${resource.id}-${refreshKey}`}
-                            src={`${uploaded.url}?t=${refreshKey}`}
+                            src={uploaded.url}
                             alt={resource.name}
                             className="w-24 h-24 object-contain mx-auto rounded-lg border border-gray-200"
+                            onError={(e) => {
+                              console.error('圖片加載失敗:', uploaded.url);
+                            }}
                           />
                           <div className="text-xs text-green-600 mt-1">✅ 已上傳</div>
                         </div>
