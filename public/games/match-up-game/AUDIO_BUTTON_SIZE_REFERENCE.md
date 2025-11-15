@@ -24,11 +24,11 @@ size: itemCount === 3
 
 | 卡片數量 | 百分比 | 最小值 | 最大值 | 計算公式 |
 |---------|--------|--------|--------|---------|
-| **3** | 10% | 5px | 14px | Math.min(Math.max(Math.floor(cardHeight × 0.10), 5), 14) |
-| **5** | 10% | 5px | 12px | Math.min(Math.max(Math.floor(cardHeight × 0.10), 5), 12) |
-| **7** | 12% | 4px | 10px | Math.min(Math.max(Math.floor(cardHeight × 0.12), 4), 10) |
-| **10** | 14% | 4px | 8px | Math.min(Math.max(Math.floor(cardHeight × 0.14), 4), 8) |
-| **20** | 16% | 3px | 6px | Math.min(Math.max(Math.floor(cardHeight × 0.16), 3), 6) |
+| **3** | 10% | 5px | 12px | Math.min(Math.max(Math.floor(cardHeight × 0.10), 5), 12) |
+| **5** | 10% | 5px | 9px | Math.min(Math.max(Math.floor(cardHeight × 0.10), 5), 9) |
+| **7** | 12% | 4px | 6px | Math.min(Math.max(Math.floor(cardHeight × 0.12), 4), 6) |
+| **10** | 14% | 4px | 5px | Math.min(Math.max(Math.floor(cardHeight × 0.14), 4), 5) |
+| **20** | 16% | 3px | 3px | Math.min(Math.max(Math.floor(cardHeight × 0.16), 3), 3) |
 
 ---
 
@@ -39,16 +39,16 @@ size: itemCount === 3
 | cardHeight | 3 個卡片 | 5 個卡片 | 7 個卡片 | 10 個卡片 | 20 個卡片 |
 |-----------|---------|---------|---------|----------|----------|
 | 30px | 5px | 5px | 4px | 4px | 3px |
-| 40px | 5px | 5px | 5px | 6px | 4px |
-| 50px | 5px | 5px | 6px | 7px | 5px |
-| 60px | 6px | 6px | 7px | 8px | 6px |
-| 70px | 7px | 7px | 8px | 8px | 6px |
-| 80px | 8px | 8px | 10px | 8px | 6px |
-| 90px | 9px | 9px | 10px | 8px | 6px |
-| 100px | 10px | 10px | 10px | 8px | 6px |
-| 110px | 11px | 11px | 10px | 8px | 6px |
-| 120px | 12px | 12px | 10px | 8px | 6px |
-| 150px | 14px | 12px | 10px | 8px | 6px |
+| 40px | 5px | 5px | 5px | 5px | 3px |
+| 50px | 5px | 5px | 6px | 5px | 3px |
+| 60px | 6px | 6px | 6px | 5px | 3px |
+| 70px | 7px | 7px | 6px | 5px | 3px |
+| 80px | 8px | 8px | 6px | 5px | 3px |
+| 90px | 9px | 9px | 6px | 5px | 3px |
+| 100px | 10px | 9px | 6px | 5px | 3px |
+| 110px | 11px | 9px | 6px | 5px | 3px |
+| 120px | 12px | 9px | 6px | 5px | 3px |
+| 150px | 12px | 9px | 6px | 5px | 3px |
 
 ---
 

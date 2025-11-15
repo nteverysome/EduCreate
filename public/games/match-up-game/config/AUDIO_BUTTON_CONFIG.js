@@ -16,27 +16,27 @@ const AUDIO_BUTTON_CONFIG = {
         // 3 個卡片時的大小百分比（cardHeight ≈ 65-80px）
         percentageFor3Items: 0.10,       // 10%
         minSizeFor3Items: 5,             // 最小 5px
-        maxSizeFor3Items: 14,            // 最大 14px
+        maxSizeFor3Items: 12,            // 最大 12px（cardHeight × 0.18）
 
         // 5 個卡片時的大小百分比（cardHeight ≈ 50-65px）
         percentageFor5Items: 0.10,       // 10%
         minSizeFor5Items: 5,             // 最小 5px
-        maxSizeFor5Items: 12,            // 最大 12px
+        maxSizeFor5Items: 9,             // 最大 9px（cardHeight × 0.18）
 
         // 7 個卡片時的大小百分比（cardHeight ≈ 35-45px）
         percentageFor7Items: 0.12,       // 12%
         minSizeFor7Items: 4,             // 最小 4px
-        maxSizeFor7Items: 10,            // 最大 10px
+        maxSizeFor7Items: 6,             // 最大 6px（cardHeight × 0.18）
 
         // 10 個卡片時的大小百分比（cardHeight ≈ 28-35px）
         percentageFor10Items: 0.14,      // 14%
         minSizeFor10Items: 4,            // 最小 4px
-        maxSizeFor10Items: 8,            // 最大 8px
+        maxSizeFor10Items: 5,            // 最大 5px（cardHeight × 0.18）
 
         // 20 個卡片時的大小百分比（cardHeight ≈ 14-20px）
         percentageFor20Items: 0.16,      // 16%
         minSizeFor20Items: 3,            // 最小 3px
-        maxSizeFor20Items: 6,            // 最大 6px
+        maxSizeFor20Items: 3,            // 最大 3px（cardHeight × 0.18）
 
         // 邊界檢查：按鈕最多佔按鈕區域的百分比
         maxPercentageOfButtonArea: 0.9,  // 90%（cardHeight × 0.18）
@@ -131,11 +131,11 @@ const AUDIO_BUTTON_PRESETS = {
             minSizeFor7Items: 4,
             minSizeFor10Items: 4,
             minSizeFor20Items: 3,
-            maxSizeFor3Items: 14,
-            maxSizeFor5Items: 12,
-            maxSizeFor7Items: 10,
-            maxSizeFor10Items: 8,
-            maxSizeFor20Items: 6,
+            maxSizeFor3Items: 12,
+            maxSizeFor5Items: 9,
+            maxSizeFor7Items: 6,
+            maxSizeFor10Items: 5,
+            maxSizeFor20Items: 3,
         }
     },
 
@@ -152,11 +152,11 @@ const AUDIO_BUTTON_PRESETS = {
             minSizeFor7Items: 5,
             minSizeFor10Items: 5,
             minSizeFor20Items: 4,
-            maxSizeFor3Items: 16,
-            maxSizeFor5Items: 14,
-            maxSizeFor7Items: 12,
-            maxSizeFor10Items: 10,
-            maxSizeFor20Items: 8,
+            maxSizeFor3Items: 12,
+            maxSizeFor5Items: 9,
+            maxSizeFor7Items: 6,
+            maxSizeFor10Items: 5,
+            maxSizeFor20Items: 3,
         }
     },
 
@@ -173,11 +173,11 @@ const AUDIO_BUTTON_PRESETS = {
             minSizeFor7Items: 6,
             minSizeFor10Items: 6,
             minSizeFor20Items: 5,
-            maxSizeFor3Items: 18,
-            maxSizeFor5Items: 16,
-            maxSizeFor7Items: 14,
-            maxSizeFor10Items: 12,
-            maxSizeFor20Items: 10,
+            maxSizeFor3Items: 12,
+            maxSizeFor5Items: 9,
+            maxSizeFor7Items: 6,
+            maxSizeFor10Items: 5,
+            maxSizeFor20Items: 3,
         }
     },
 
@@ -194,11 +194,11 @@ const AUDIO_BUTTON_PRESETS = {
             minSizeFor7Items: 7,
             minSizeFor10Items: 7,
             minSizeFor20Items: 6,
-            maxSizeFor3Items: 20,
-            maxSizeFor5Items: 18,
-            maxSizeFor7Items: 16,
-            maxSizeFor10Items: 14,
-            maxSizeFor20Items: 12,
+            maxSizeFor3Items: 12,
+            maxSizeFor5Items: 9,
+            maxSizeFor7Items: 6,
+            maxSizeFor10Items: 5,
+            maxSizeFor20Items: 3,
         }
     },
 
@@ -215,11 +215,11 @@ const AUDIO_BUTTON_PRESETS = {
             minSizeFor7Items: 8,
             minSizeFor10Items: 8,
             minSizeFor20Items: 7,
-            maxSizeFor3Items: 22,
-            maxSizeFor5Items: 20,
-            maxSizeFor7Items: 18,
-            maxSizeFor10Items: 16,
-            maxSizeFor20Items: 14,
+            maxSizeFor3Items: 12,
+            maxSizeFor5Items: 9,
+            maxSizeFor7Items: 6,
+            maxSizeFor10Items: 5,
+            maxSizeFor20Items: 3,
         }
     },
 };

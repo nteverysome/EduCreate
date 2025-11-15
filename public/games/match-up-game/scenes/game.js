@@ -2121,7 +2121,7 @@ class GameScene extends Phaser.Scene {
                     ? Math.min(Math.max(Math.floor(cardHeight * 0.14), 4), Math.floor(cardHeight * 0.18))   // 10 個卡片：14%，最小 4px，最大 18%
                     : Math.min(Math.max(Math.floor(cardHeight * 0.16), 3), Math.floor(cardHeight * 0.18)),  // 20 個卡片：16%，最小 3px，最大 18%
                 minSize: itemCount === 3 ? 5 : itemCount === 5 ? 5 : itemCount === 7 ? 4 : itemCount === 10 ? 4 : 3,
-                maxSize: itemCount === 3 ? 14 : itemCount === 5 ? 12 : itemCount === 7 ? 10 : itemCount === 10 ? 8 : 6
+                maxSize: itemCount === 3 ? 12 : itemCount === 5 ? 9 : itemCount === 7 ? 6 : itemCount === 10 ? 5 : 3
             },
             image: {
                 width: Math.max(Math.floor(cardWidth * 0.35), 30),
