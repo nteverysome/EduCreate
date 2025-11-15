@@ -113,13 +113,13 @@ function SpeakingCardsGame() {
     handlePrevious();
   };
 
-  // 發牌（翻開當前卡片或移動到下一張）
-  const handleDeal = () => {
+  // 翻卡並自動進行到下一張
+  const handleCardFlip = () => {
     if (isFlipped) {
-      // 如果當前卡片已翻開，移動到下一張
+      // 如果已翻開，點擊右邊卡片翻回，然後進行到下一張
       handleNext();
     } else {
-      // 如果當前卡片未翻開，翻開它
+      // 如果未翻開，翻開卡片
       handleFlip();
     }
   };
@@ -155,29 +155,34 @@ function SpeakingCardsGame() {
 
         {/* 遊戲區域 */}
         <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
-          {/* 左側：卡牌堆 */}
-          <div className="relative">
-            <div className="w-64 h-96 rounded-xl shadow-2xl border-4 border-white relative overflow-hidden">
+          {/* 左側：卡牌堆 - 可點擊翻卡 */}
+          <div
+            className="relative cursor-pointer group"
+            onClick={handleCardFlip}
+            onTouchEnd={handleCardFlip}
+            title="點擊翻卡"
+          >
+            <div className="w-64 h-96 rounded-xl shadow-2xl border-4 border-white relative overflow-hidden group-hover:shadow-3xl transition-all active:scale-95 transform">
               {/* 卡牌背面圖片 */}
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover pointer-events-none"
               />
             </div>
             {/* 堆疊效果 */}
-            <div className="absolute top-2 left-2 w-64 h-96 rounded-xl shadow-xl border-4 border-white -z-10 overflow-hidden">
+            <div className="absolute top-2 left-2 w-64 h-96 rounded-xl shadow-xl border-4 border-white -z-10 overflow-hidden group-hover:shadow-lg transition-all">
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover pointer-events-none"
               />
             </div>
-            <div className="absolute top-4 left-4 w-64 h-96 rounded-xl shadow-lg border-4 border-white -z-20 overflow-hidden">
+            <div className="absolute top-4 left-4 w-64 h-96 rounded-xl shadow-lg border-4 border-white -z-20 overflow-hidden group-hover:shadow-md transition-all">
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover pointer-events-none"
               />
             </div>
           </div>
@@ -186,23 +191,26 @@ function SpeakingCardsGame() {
           <div className="relative">
             {currentCard && isFlipped ? (
               <div
-                className="w-64 h-96 rounded-xl shadow-2xl border-4 border-blue-200 p-6 flex flex-col items-center justify-center bg-cover bg-center"
+                onClick={handleCardFlip}
+                onTouchEnd={handleCardFlip}
+                className="w-64 h-96 rounded-xl shadow-2xl border-4 border-blue-200 p-6 flex flex-col items-center justify-center bg-cover bg-center cursor-pointer hover:shadow-xl transition-all active:scale-95 transform"
                 style={{
                   backgroundImage: 'url(/images/card-front-bg.png)'
                 }}
+                title="點擊翻回或進行下一張"
               >
                 {/* 圖片 */}
                 {currentCard.imageUrl && (
                   <img
                     src={currentCard.imageUrl}
                     alt={currentCard.text}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
+                    className="w-full h-48 object-cover rounded-lg mb-4 pointer-events-none"
                   />
                 )}
 
                 {/* 文字 */}
                 {currentCard.text && (
-                  <p className="text-2xl font-bold text-gray-900 text-center">
+                  <p className="text-2xl font-bold text-gray-900 text-center pointer-events-none">
                     {currentCard.text}
                   </p>
                 )}
@@ -210,7 +218,10 @@ function SpeakingCardsGame() {
                 {/* 語音圖標 */}
                 {currentCard.audioUrl && (
                   <button
-                    onClick={() => playAudio(currentCard.audioUrl!)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      playAudio(currentCard.audioUrl!);
+                    }}
                     className="mt-4 p-3 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors"
                   >
                     <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -221,8 +232,13 @@ function SpeakingCardsGame() {
                 )}
               </div>
             ) : (
-              <div className="w-64 h-96 border-4 border-dashed border-blue-300 rounded-xl flex items-center justify-center">
-                <p className="text-gray-400 text-lg">點擊 Deal 發牌</p>
+              <div
+                onClick={handleCardFlip}
+                onTouchEnd={handleCardFlip}
+                className="w-64 h-96 border-4 border-dashed border-blue-300 rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all active:scale-95 transform"
+                title="點擊翻卡"
+              >
+                <p className="text-gray-400 text-lg pointer-events-none">點擊翻卡</p>
               </div>
             )}
           </div>
@@ -234,20 +250,14 @@ function SpeakingCardsGame() {
             onClick={handleShuffle}
             className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
           >
-            Shuffle
+            🔀 Shuffle
           </button>
           <button
             onClick={handleUndo}
             disabled={currentCardIndex === 0}
             className="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Undo
-          </button>
-          <button
-            onClick={handleDeal}
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-lg transition-colors"
-          >
-            Deal
+            ↶ Undo
           </button>
         </div>
 
