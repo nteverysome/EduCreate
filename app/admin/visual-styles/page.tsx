@@ -4,17 +4,17 @@ import { useState, useEffect } from 'react';
 import { VISUAL_STYLES } from '@/types/visual-style';
 
 /**
- * 視覺風格資源管理頁面
- * 允許管理員上傳和替換視覺風格的資源（圖片和音效）
+ * Shimozurdo Game 視覺風格資源管理頁面
+ * 允許管理員上傳和替換 Shimozurdo Game 視覺風格的資源（圖片和音效）
  */
-export default function VisualStylesAdminPage() {
+export default function ShimozurdoVisualStylesAdminPage() {
   const [selectedStyle, setSelectedStyle] = useState('clouds');
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
   const [uploadedResources, setUploadedResources] = useState<Record<string, { exists: boolean; url?: string }>>({});
   const [refreshKey, setRefreshKey] = useState(0); // 用於強制刷新圖片預覽
 
-  // 資源類型定義
+  // Shimozurdo Game 的資源類型定義
   const resourceTypes = [
     { id: 'spaceship', name: '太空船圖片', accept: 'image/png,image/jpeg,image/webp' },
     { id: 'cloud1', name: '雲朵圖片 1', accept: 'image/png,image/jpeg,image/webp' },
@@ -30,7 +30,7 @@ export default function VisualStylesAdminPage() {
    */
   const fetchUploadedResources = async () => {
     try {
-      const response = await fetch(`/api/visual-styles/upload?styleId=${selectedStyle}`);
+      const response = await fetch(`/api/visual-styles/upload?styleId=${selectedStyle}&game=shimozurdo-game`);
       if (response.ok) {
         const data = await response.json();
         setUploadedResources(data.resources || {});
@@ -57,6 +57,7 @@ export default function VisualStylesAdminPage() {
       formData.append('file', file);
       formData.append('styleId', selectedStyle);
       formData.append('resourceType', resourceType);
+      formData.append('game', 'shimozurdo-game');
 
       const response = await fetch('/api/visual-styles/upload', {
         method: 'POST',
@@ -99,7 +100,7 @@ export default function VisualStylesAdminPage() {
     setMessage('');
 
     try {
-      const response = await fetch(`/api/visual-styles/upload?styleId=${selectedStyle}&resourceType=${resourceType}`, {
+      const response = await fetch(`/api/visual-styles/upload?styleId=${selectedStyle}&resourceType=${resourceType}&game=shimozurdo-game`, {
         method: 'DELETE',
       });
 
@@ -161,10 +162,10 @@ export default function VisualStylesAdminPage() {
         {/* 頁面標題 */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            🎨 視覺風格資源管理
+            🎨 Shimozurdo Game 視覺風格資源管理
           </h1>
           <p className="text-gray-600">
-            上傳和替換視覺風格的圖片和音效資源
+            上傳和替換 Shimozurdo Game 視覺風格的圖片和音效資源
           </p>
         </div>
 
