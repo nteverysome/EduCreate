@@ -235,10 +235,10 @@ function SpeakingCardsGame() {
               <div
                 onClick={handleCardFlip}
                 onTouchEnd={handleCardFlip}
-                className="w-64 h-96 border-4 border-dashed border-blue-300 rounded-xl flex items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all active:scale-95 transform"
+                className="w-64 h-96 rounded-xl shadow-2xl border-4 border-blue-200 cursor-pointer hover:shadow-xl transition-all active:scale-95 transform bg-transparent flex items-center justify-center"
                 title="點擊翻卡"
               >
-                <p className="text-gray-400 text-lg pointer-events-none">點擊翻卡</p>
+                <p className="text-gray-300 text-lg font-semibold drop-shadow-lg pointer-events-none">點擊翻卡</p>
               </div>
             )}
           </div>
