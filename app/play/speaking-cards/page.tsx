@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
+import { useResponsiveLayout } from './useResponsiveLayout';
 
 interface CardData {
   id: string;
@@ -16,6 +17,9 @@ function SpeakingCardsGame() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
+
+  // 使用響應式佈局 Hook
+  const responsive = useResponsiveLayout();
 
   const [cards, setCards] = useState<CardData[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -179,17 +183,37 @@ function SpeakingCardsGame() {
         backgroundImage: 'url(/images/speaking-cards-bg.png)'
       }}
     >
-      <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full px-4 py-8">
+      <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full" style={{
+        padding: responsive.margins ? `${responsive.margins.top}px ${responsive.margins.side}px` : '32px 16px'
+      }}>
         {/* 標題 */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{activityTitle}</h1>
-          <p className="text-gray-600">
+        <div className="text-center" style={{
+          marginBottom: responsive.fontSize?.title ? `${responsive.fontSize.title / 2}px` : '16px'
+        }}>
+          <h1 style={{
+            fontSize: responsive.fontSize?.title ? `${responsive.fontSize.title}px` : '32px',
+            fontWeight: 'bold',
+            color: '#111827',
+            marginBottom: '8px'
+          }}>
+            {activityTitle}
+          </h1>
+          <p style={{
+            fontSize: responsive.fontSize?.subtitle ? `${responsive.fontSize.subtitle}px` : '16px',
+            color: '#4b5563'
+          }}>
             卡片 {currentCardIndex + 1} / {shuffledCards.length}
           </p>
         </div>
 
         {/* 遊戲區域 */}
-        <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
+        <div style={{
+          display: 'flex',
+          flexDirection: responsive.isMobile ? 'column' : 'row',
+          gap: responsive.gaps?.horizontal ? `${responsive.gaps.horizontal}px` : '32px',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
           {/* 左側：卡牌堆 - 可點擊回到上一張 */}
           <div
             className={`relative cursor-pointer group transition-opacity ${
@@ -199,7 +223,13 @@ function SpeakingCardsGame() {
             onTouchEnd={handlePrevious}
             title={currentCardIndex === shuffledCards.length - 1 ? '沒有上一張卡片' : '點擊回到上一張'}
           >
-            <div className="w-64 h-96 rounded-xl shadow-2xl border-4 border-white relative overflow-hidden group-hover:shadow-3xl transition-all active:scale-95 transform">
+            <div
+              className="rounded-xl shadow-2xl border-4 border-white relative overflow-hidden group-hover:shadow-3xl transition-all active:scale-95 transform"
+              style={{
+                width: responsive.cardSize?.width ? `${responsive.cardSize.width}px` : '256px',
+                height: responsive.cardSize?.height ? `${responsive.cardSize.height}px` : '384px'
+              }}
+            >
               {/* 卡牌背面圖片 */}
               <img
                 src="/images/card-back.png"
@@ -208,14 +238,30 @@ function SpeakingCardsGame() {
               />
             </div>
             {/* 堆疊效果 */}
-            <div className="absolute top-2 left-2 w-64 h-96 rounded-xl shadow-xl border-4 border-white -z-10 overflow-hidden group-hover:shadow-lg transition-all">
+            <div
+              className="absolute rounded-xl shadow-xl border-4 border-white -z-10 overflow-hidden group-hover:shadow-lg transition-all"
+              style={{
+                top: '8px',
+                left: '8px',
+                width: responsive.cardSize?.width ? `${responsive.cardSize.width}px` : '256px',
+                height: responsive.cardSize?.height ? `${responsive.cardSize.height}px` : '384px'
+              }}
+            >
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
                 className="w-full h-full object-cover pointer-events-none"
               />
             </div>
-            <div className="absolute top-4 left-4 w-64 h-96 rounded-xl shadow-lg border-4 border-white -z-20 overflow-hidden group-hover:shadow-md transition-all">
+            <div
+              className="absolute rounded-xl shadow-lg border-4 border-white -z-20 overflow-hidden group-hover:shadow-md transition-all"
+              style={{
+                top: '16px',
+                left: '16px',
+                width: responsive.cardSize?.width ? `${responsive.cardSize.width}px` : '256px',
+                height: responsive.cardSize?.height ? `${responsive.cardSize.height}px` : '384px'
+              }}
+            >
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
@@ -230,8 +276,11 @@ function SpeakingCardsGame() {
               <div
                 onClick={handleFlippedCardClick}
                 onTouchEnd={handleFlippedCardClick}
-                className="w-64 h-96 rounded-xl shadow-2xl border-4 border-blue-200 p-6 flex flex-col items-center justify-center bg-cover bg-center cursor-pointer hover:shadow-xl transition-all active:scale-95 transform"
+                className="rounded-xl shadow-2xl border-4 border-blue-200 flex flex-col items-center justify-center bg-cover bg-center cursor-pointer hover:shadow-xl transition-all active:scale-95 transform"
                 style={{
+                  width: responsive.cardSize?.width ? `${responsive.cardSize.width}px` : '256px',
+                  height: responsive.cardSize?.height ? `${responsive.cardSize.height}px` : '384px',
+                  padding: responsive.gaps?.horizontal ? `${responsive.gaps.horizontal}px` : '24px',
                   backgroundImage: 'url(/images/card-front-bg.png)'
                 }}
                 title="點擊進行下一張"
@@ -241,13 +290,23 @@ function SpeakingCardsGame() {
                   <img
                     src={currentCard.imageUrl}
                     alt={currentCard.text}
-                    className="w-full h-48 object-cover rounded-lg mb-4 pointer-events-none"
+                    className="object-cover rounded-lg pointer-events-none"
+                    style={{
+                      width: '100%',
+                      height: responsive.cardSize ? `${responsive.cardSize.height * 0.4}px` : '150px',
+                      marginBottom: responsive.gaps?.vertical ? `${responsive.gaps.vertical}px` : '16px'
+                    }}
                   />
                 )}
 
                 {/* 文字 */}
                 {currentCard.text && (
-                  <p className="text-2xl font-bold text-gray-900 text-center pointer-events-none">
+                  <p
+                    className="font-bold text-gray-900 text-center pointer-events-none"
+                    style={{
+                      fontSize: responsive.fontSize?.body ? `${responsive.fontSize.body}px` : '18px'
+                    }}
+                  >
                     {currentCard.text}
                   </p>
                 )}
@@ -259,9 +318,16 @@ function SpeakingCardsGame() {
                       e.stopPropagation();
                       playAudio(currentCard.audioUrl!);
                     }}
-                    className="mt-4 p-3 bg-blue-100 hover:bg-blue-200 rounded-full transition-colors"
+                    className="bg-blue-100 hover:bg-blue-200 rounded-full transition-colors"
+                    style={{
+                      marginTop: responsive.gaps?.vertical ? `${responsive.gaps.vertical}px` : '16px',
+                      padding: responsive.buttonSize?.padding || '12px'
+                    }}
                   >
-                    <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="text-blue-600" fill="currentColor" viewBox="0 0 20 20" style={{
+                      width: responsive.fontSize?.body ? `${responsive.fontSize.body}px` : '18px',
+                      height: responsive.fontSize?.body ? `${responsive.fontSize.body}px` : '18px'
+                    }}>
                       <path d="M10 3.5a.5.5 0 00-.5-.5h-3a.5.5 0 00-.5.5v13a.5.5 0 00.5.5h3a.5.5 0 00.5-.5v-13zM8 5a1 1 0 011-1h2a1 1 0 011 1v10a1 1 0 01-1 1H9a1 1 0 01-1-1V5z"/>
                       <path d="M14.5 8a.5.5 0 01.5.5v3a.5.5 0 01-1 0v-3a.5.5 0 01.5-.5zm2-2a.5.5 0 01.5.5v7a.5.5 0 01-1 0v-7a.5.5 0 01.5-.5z"/>
                     </svg>
@@ -272,27 +338,54 @@ function SpeakingCardsGame() {
               <div
                 onClick={handleFlippedCardClick}
                 onTouchEnd={handleFlippedCardClick}
-                className="w-64 h-96 rounded-xl shadow-2xl border-4 border-blue-200 cursor-pointer hover:shadow-xl transition-all active:scale-95 transform bg-transparent flex items-center justify-center"
+                className="rounded-xl shadow-2xl border-4 border-blue-200 cursor-pointer hover:shadow-xl transition-all active:scale-95 transform bg-transparent flex items-center justify-center"
+                style={{
+                  width: responsive.cardSize?.width ? `${responsive.cardSize.width}px` : '256px',
+                  height: responsive.cardSize?.height ? `${responsive.cardSize.height}px` : '384px'
+                }}
                 title="點擊進行下一張"
               >
-                <p className="text-gray-300 text-lg font-semibold drop-shadow-lg pointer-events-none">點擊進行下一張</p>
+                <p
+                  className="text-gray-300 font-semibold drop-shadow-lg pointer-events-none"
+                  style={{
+                    fontSize: responsive.fontSize?.body ? `${responsive.fontSize.body}px` : '16px'
+                  }}
+                >
+                  點擊進行下一張
+                </p>
               </div>
             )}
           </div>
         </div>
 
         {/* 控制按鈕 */}
-        <div className="flex justify-center gap-4 mt-8">
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: responsive.gaps?.horizontal ? `${responsive.gaps.horizontal}px` : '16px',
+          marginTop: responsive.margins?.top ? `${responsive.margins.top}px` : '32px',
+          flexDirection: responsive.isMobile ? 'column' : 'row'
+        }}>
           <button
             onClick={handleShuffle}
-            className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+            className="bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+            style={{
+              padding: responsive.buttonSize?.padding || '12px 24px',
+              fontSize: responsive.buttonSize?.fontSize ? `${responsive.buttonSize.fontSize}px` : '16px',
+              width: responsive.isMobile ? '100%' : 'auto'
+            }}
           >
             🔀 Shuffle
           </button>
           <button
             onClick={handleUndo}
             disabled={currentCardIndex === 0}
-            className="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              padding: responsive.buttonSize?.padding || '12px 24px',
+              fontSize: responsive.buttonSize?.fontSize ? `${responsive.buttonSize.fontSize}px` : '16px',
+              width: responsive.isMobile ? '100%' : 'auto'
+            }}
           >
             ↶ Undo
           </button>
