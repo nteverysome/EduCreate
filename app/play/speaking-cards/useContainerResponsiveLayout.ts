@@ -182,13 +182,23 @@ export function useContainerResponsiveLayout() {
     cardWidth = Math.min(DESIGN_TOKENS.cardSize.maxWidth, cardWidth);
 
     // 7. 計算卡片高度（保持寬高比）
-    const cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
+    let cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
 
-    // 8. 確保卡片不超過可用高度
+    // 8. 確保卡片不超過可用高度（關鍵修復：同時調整寬度和高度）
     if (cardHeight > availableHeight) {
-      const adjustedCardHeight = availableHeight;
-      cardWidth = adjustedCardHeight / DESIGN_TOKENS.cardSize.aspectRatio;
+      cardHeight = availableHeight;
+      cardWidth = cardHeight / DESIGN_TOKENS.cardSize.aspectRatio;
+
+      // 再次檢查寬度是否超過可用寬度
+      if (cardWidth > availableWidth) {
+        cardWidth = availableWidth;
+        cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
+      }
     }
+
+    // 9. 最終確保卡片尺寸在容器內（雙重保險）
+    const finalCardWidth = Math.min(cardWidth, availableWidth);
+    const finalCardHeight = Math.min(cardHeight, availableHeight);
 
     return {
       containerWidth,
@@ -200,8 +210,8 @@ export function useContainerResponsiveLayout() {
       availableHeight,
       padding,
       gap,
-      cardWidth: Math.round(cardWidth),
-      cardHeight: Math.round(cardWidth * DESIGN_TOKENS.cardSize.aspectRatio),
+      cardWidth: Math.round(finalCardWidth),
+      cardHeight: Math.round(finalCardHeight),
       fontSize
     };
   }, [getContainerBreakpoint]);
@@ -227,7 +237,11 @@ export function useContainerResponsiveLayout() {
         const metrics = calculateLayoutMetrics(width, height);
         setLayoutMetrics(metrics);
 
-        // 詳細日誌
+        // 詳細日誌（包含容器適配檢查）
+        const cardFitsWidth = metrics.cardWidth <= metrics.availableWidth;
+        const cardFitsHeight = metrics.cardHeight <= metrics.availableHeight;
+        const cardFitsContainer = cardFitsWidth && cardFitsHeight;
+
         console.log('📐 [容器響應式系統] 佈局更新', {
           容器尺寸: `${width.toFixed(0)}×${height.toFixed(0)}px`,
           斷點: `${metrics.breakpoint.name} (${metrics.breakpoint.description})`,
@@ -237,7 +251,8 @@ export function useContainerResponsiveLayout() {
           Padding: `${metrics.padding}px`,
           Gap: `${metrics.gap}px`,
           卡片尺寸: `${metrics.cardWidth}×${metrics.cardHeight}px`,
-          字體大小: `標題:${metrics.fontSize.title}px, 正文:${metrics.fontSize.body}px, 小字:${metrics.fontSize.small}px`
+          字體大小: `標題:${metrics.fontSize.title}px, 正文:${metrics.fontSize.body}px, 小字:${metrics.fontSize.small}px`,
+          容器適配: cardFitsContainer ? '✅ 完全適配' : `⚠️ 超出容器 (寬度:${cardFitsWidth ? '✅' : '❌'}, 高度:${cardFitsHeight ? '✅' : '❌'})`
         });
       }
     }, 100); // 100ms 防抖

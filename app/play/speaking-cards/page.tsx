@@ -210,7 +210,7 @@ function SpeakingCardsGame() {
           </p>
         </div>
 
-        {/* 遊戲區域 */}
+        {/* 遊戲區域 - 添加尺寸限制和 overflow 控制 */}
         <div
           ref={containerLayout.containerRef}
           style={{
@@ -218,7 +218,11 @@ function SpeakingCardsGame() {
             flexDirection: responsive.isMobile ? 'column' : 'row',
             gap: responsive.gaps?.horizontal ? `${responsive.gaps.horizontal}px` : '32px',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            maxWidth: '100%',
+            maxHeight: '100vh',
+            overflow: 'hidden',
+            position: 'relative'
           }}>
           {/* 左側：卡牌堆 - 可點擊回到上一張 */}
           <div
@@ -228,6 +232,11 @@ function SpeakingCardsGame() {
             onClick={handlePrevious}
             onTouchEnd={handlePrevious}
             title={currentCardIndex === shuffledCards.length - 1 ? '沒有上一張卡片' : '點擊回到上一張'}
+            style={{
+              // 確保卡片堆疊不超出容器
+              maxWidth: `${containerLayout.cardWidth + 16}px`,
+              maxHeight: `${containerLayout.cardHeight + 16}px`
+            }}
           >
             <div
               className="rounded-xl shadow-2xl border-4 border-white relative overflow-hidden group-hover:shadow-3xl transition-all active:scale-95 transform"
