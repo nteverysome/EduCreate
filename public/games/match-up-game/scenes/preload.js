@@ -99,11 +99,12 @@ class PreloadScene extends Phaser.Scene {
 
             this.visualStyleId = visualStyle;
 
-            const apiUrl = `${window.location.origin}/api/visual-styles/resources?styleId=${visualStyle}`;
+            const apiUrl = `${window.location.origin}/api/visual-styles/resources?styleId=${visualStyle}&game=match-up-game`;
             console.log('📡 [v80.0] PreloadScene: 請求視覺風格資源', {
                 apiUrl,
                 origin: window.location.origin,
-                visualStyle
+                visualStyle,
+                game: 'match-up-game'
             });
 
             const response = await fetch(apiUrl, {
@@ -236,8 +237,8 @@ class PreloadScene extends Phaser.Scene {
                 return;
             }
 
-            // 查找背景圖片資源（資源類型為 bg_layer）
-            const bgUrl = this.visualStyleResources['bg_layer'];
+            // 查找背景圖片資源（資源類型為 background，用於 match-up-game）
+            const bgUrl = this.visualStyleResources['background'];
 
             if (bgUrl && typeof bgUrl === 'string') {
                 console.log('🎨 PreloadScene: 從視覺風格資源加載背景圖片', bgUrl);

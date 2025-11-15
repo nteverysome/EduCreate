@@ -17,8 +17,9 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const styleId = searchParams.get('styleId');
+    const game = searchParams.get('game') || 'shimozurdo-game';
 
-    console.log('📡 [visual-styles/resources] GET 請求:', { styleId, url: request.url });
+    console.log('📡 [visual-styles/resources] GET 請求:', { styleId, game, url: request.url });
 
     if (!styleId) {
       console.error('❌ [visual-styles/resources] 缺少 styleId 參數');
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 從 Blob Storage 列出所有文件
-    console.log('📂 [visual-styles/resources] 從 Blob Storage 列出文件:', { styleId });
+    console.log('📂 [visual-styles/resources] 從 Blob Storage 列出文件:', { styleId, game });
 
     const { blobs } = await list({
       prefix: `visual-styles/${styleId}/`,
@@ -66,11 +67,12 @@ export async function GET(request: NextRequest) {
       resources[resourceType] = `${blob.url}?v=${timestamp}`;
     });
 
-    console.log('✅ [visual-styles/resources] 返回資源:', { styleId, resourceCount: Object.keys(resources).length });
+    console.log('✅ [visual-styles/resources] 返回資源:', { styleId, game, resourceCount: Object.keys(resources).length, resourceKeys: Object.keys(resources) });
 
     return NextResponse.json({
       success: true,
       styleId,
+      game,
       resources,
       timestamp // 返回時間戳供前端參考
     }, {
