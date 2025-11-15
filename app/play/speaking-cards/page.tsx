@@ -116,12 +116,17 @@ function SpeakingCardsGame() {
   // 翻卡並自動進行到下一張
   const handleCardFlip = () => {
     if (isFlipped) {
-      // 如果已翻開，點擊右邊卡片翻回，然後進行到下一張
+      // 如果已翻開，直接進行到下一張
       handleNext();
     } else {
       // 如果未翻開，翻開卡片
       handleFlip();
     }
+  };
+
+  // 點擊右邊卡片時直接進行到下一張
+  const handleFlippedCardClick = () => {
+    handleNext();
   };
 
   if (isLoading) {
@@ -191,13 +196,13 @@ function SpeakingCardsGame() {
           <div className="relative">
             {currentCard && isFlipped ? (
               <div
-                onClick={handleCardFlip}
-                onTouchEnd={handleCardFlip}
+                onClick={handleFlippedCardClick}
+                onTouchEnd={handleFlippedCardClick}
                 className="w-64 h-96 rounded-xl shadow-2xl border-4 border-blue-200 p-6 flex flex-col items-center justify-center bg-cover bg-center cursor-pointer hover:shadow-xl transition-all active:scale-95 transform"
                 style={{
                   backgroundImage: 'url(/images/card-front-bg.png)'
                 }}
-                title="點擊翻回或進行下一張"
+                title="點擊進行下一張"
               >
                 {/* 圖片 */}
                 {currentCard.imageUrl && (
