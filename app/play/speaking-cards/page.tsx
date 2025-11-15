@@ -101,7 +101,7 @@ function SpeakingCardsGame() {
     }
   };
 
-  // 上一張卡片 - 直接顯示內容，或返回我的活動
+  // 上一張卡片 - 直接顯示內容，或翻回背景
   const handlePrevious = () => {
     if (currentCardIndex > 0) {
       const prevIndex = currentCardIndex - 1;
@@ -112,8 +112,8 @@ function SpeakingCardsGame() {
         playAudio(shuffledCards[prevIndex].audioUrl!);
       }
     } else {
-      // 如果已經是第一張，返回我的活動
-      router.push('/my-activities');
+      // 如果已經是第一張，翻回背景（未翻開狀態）
+      setIsFlipped(false);
     }
   };
 
