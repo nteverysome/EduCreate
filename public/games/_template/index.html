@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='chrome=1'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1'>
+    <meta name='apple-mobile-web-app-capable' content='yes'>
+    <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
+    
+    <title>EduCreate Game</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;  /* 動態視窗高度 */
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #000;
+            pointer-events: none;  /* 不攔截觸控事件 */
+        }
+
+        #game-container {
+            width: 100vw !important;
+            height: 100dvh !important;
+            pointer-events: auto !important;
+            touch-action: manipulation !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        /* Mobile 優化 */
+        @media screen and (max-width: 768px) {
+            html, body {
+                height: 100vh !important;
+                height: 100dvh !important;
+                overflow: hidden !important;
+                position: fixed !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id='game-container'></div>
+
+    <!-- ===== 依賴載入 ===== -->
+    
+    <!-- Phaser 引擎 -->
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.53.1/dist/phaser.min.js"></script>
+
+    <!-- EduCreate 結果收集器 -->
+    <script src="/games/shared/result-collector.js"></script>
+
+    <!-- ===== 管理器系統 ===== -->
+    
+    <!-- SRS 系統 -->
+    <script src="/games/shared/utils/sm2.js"></script>
+    
+    <!-- GEPT 管理器 -->
+    <script src="/games/shared/managers/GEPTManager.js"></script>
+    
+    <!-- Bilingual 管理器 -->
+    <script src="/games/shared/managers/BilingualManager.js"></script>
+    
+    <!-- SRS 管理器 -->
+    <script src="/games/shared/managers/SRSManager.js"></script>
+
+    <!-- ===== 遊戲配置 ===== -->
+    
+    <!-- 遊戲主入口 -->
+    <script type="module" src="./config.js"></script>
+
+    <!-- ===== 初始化腳本 ===== -->
+    
+    <script>
+        // 遊戲準備就緒事件
+        window.addEventListener('gameReady', function(event) {
+            console.log('🎉 遊戲準備就緒');
+        });
+
+        // 錯誤處理
+        window.addEventListener('error', function(event) {
+            console.error('❌ 頁面錯誤:', event.error);
+        });
+
+        // 超時處理
+        setTimeout(function() {
+            if (!window.game) {
+                console.warn('⚠️ 遊戲載入超時');
+            }
+        }, 15000);
+
+        console.log('✅ EduCreate 遊戲模板已載入');
+    </script>
+</body>
+</html>
+

@@ -471,6 +471,22 @@ class GameScene extends Phaser.Scene {
 
     async create() {
         console.log('🎮 GameScene: create 方法開始');
+
+        // 🔍 [v70.0] 記錄 create 開始時的尺寸信息
+        const createStartWidth = this.scale.width;
+        const createStartHeight = this.scale.height;
+        console.log('🔍 [v70.0] ========== create 開始時的尺寸 ==========', {
+            scaleWidth: createStartWidth,
+            scaleHeight: createStartHeight,
+            gameConfigWidth: this.game.config.width,
+            gameConfigHeight: this.game.config.height,
+            containerWidth: this.scale.gameSize.width,
+            containerHeight: this.scale.gameSize.height,
+            baseWidth: this.game.screenBaseSize.width,
+            baseHeight: this.game.screenBaseSize.height,
+            timestamp: new Date().toISOString()
+        });
+
         console.log('🎮 GameScene: 場景尺寸', {
             width: this.scale.width,
             height: this.scale.height,
@@ -488,6 +504,7 @@ class GameScene extends Phaser.Scene {
         this.submitButton = null;  // 🔥 提交答案按鈕
         this.gameCompleteModal = null;  // 🔥 遊戲完成模態框
         this.pageCompleteModal = null;  // 🔥 [v94.0] 頁面完成模態框
+        this.gameCompleteModalShown = false;  // 🔥 [v65.0] 防止重複顯示遊戲完成模態框
 
         // 顯示載入提示
         const width = this.scale.width;
@@ -539,6 +556,33 @@ class GameScene extends Phaser.Scene {
         // 移除載入提示
         loadingText.destroy();
         console.log('🎮 GameScene: 載入文字已移除');
+
+        // 🔍 [v70.0] 詞彙載入完成後的調適訊息 - 比較尺寸變化
+        const afterLoadWidth = this.scale.width;
+        const afterLoadHeight = this.scale.height;
+        console.log('🔍 [v70.0] ========== 詞彙載入完成後的尺寸 ==========', {
+            success: success,
+            pairsCount: this.pairs ? this.pairs.length : 0,
+            scaleWidth: afterLoadWidth,
+            scaleHeight: afterLoadHeight,
+            containerWidth: this.scale.gameSize.width,
+            containerHeight: this.scale.gameSize.height,
+            baseWidth: this.game.screenBaseSize.width,
+            baseHeight: this.game.screenBaseSize.height,
+            widthChanged: afterLoadWidth !== createStartWidth,
+            heightChanged: afterLoadHeight !== createStartHeight,
+            widthDifference: afterLoadWidth - createStartWidth,
+            heightDifference: afterLoadHeight - createStartHeight,
+            timestamp: new Date().toISOString()
+        });
+
+        // 🔍 [v67.0] 詞彙載入完成後的調適訊息
+        console.log('🔍 [v67.0] 詞彙載入完成 - 調適訊息', {
+            success: success,
+            pairsCount: this.pairs ? this.pairs.length : 0,
+            timestamp: new Date().toISOString(),
+            containerSize: { width: width, height: height }
+        });
 
         // 🔥 修復：如果載入失敗，顯示錯誤信息並停止遊戲
         if (!success || this.vocabularyLoadError) {
@@ -931,6 +975,11 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 更新倒數計時器
     updateCountDownTimer() {
+        // 🔥 [v65.0] 防止時間到後繼續減少
+        if (this.remainingTime <= 0) {
+            return; // 時間已到，不再更新
+        }
+
         this.remainingTime--;
 
         if (this.remainingTime <= 0) {
@@ -3140,6 +3189,24 @@ class GameScene extends Phaser.Scene {
 
         // 🔥 [v84.0] 計算行數
         const totalRows = Math.ceil(itemCount / itemsPerRow);
+
+        // 🔥 [v72.0] 記錄卡片寬度計算信息
+        console.log('📐 [v72.0] createTopBottomSeparated 卡片寬度計算:', {
+            sceneWidth: width,
+            sceneHeight: height,
+            availableWidth: availableWidth.toFixed(2),
+            availableHeight: availableHeight.toFixed(2),
+            itemsPerRow: itemsPerRow,
+            baseCardWidth: baseCardWidth.toFixed(2),
+            cardWidth: cardWidth.toFixed(2),
+            cardHeight: cardHeight.toFixed(2),
+            horizontalSpacing: horizontalSpacing.toFixed(2),
+            verticalSpacing: verticalSpacing.toFixed(2),
+            requiredHeight: requiredHeight.toFixed(2),
+            totalCardWidth: totalCardWidth.toFixed(2),
+            widthUtilization: widthUtilization + '%',
+            timestamp: new Date().toISOString()
+        });
 
         console.log(`📊 [v91.0] 動態列數響應式佈局 - 20個匹配數:`, {
             screenSize: `${width}×${height}`,
@@ -5616,8 +5683,23 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 輔助函數 - 載入並顯示圖片
     // ✅ v44.0：修復圖片載入失敗 - 使用 Fetch API 直接載入圖片
+    // 🔥 [v72.0] 添加詳細調適訊息追蹤圖片寬度變化
     loadAndDisplayImage(container, imageUrl, x, y, size, pairId) {
         const imageKey = `card-image-${pairId}`;
+
+        // 🔥 [v72.0] 記錄圖片寬度信息
+        console.log('🖼️ [v72.0] loadAndDisplayImage 被調用:', {
+            pairId,
+            imageKey,
+            size: size.toFixed(2),
+            x: x.toFixed(2),
+            y: y.toFixed(2),
+            containerWidth: container.width,
+            containerHeight: container.height,
+            sceneWidth: this.scale.width,
+            sceneHeight: this.scale.height,
+            timestamp: new Date().toISOString()
+        });
 
         if (!this.textures.exists(imageKey)) {
             // ✅ v44.0：使用 Fetch API 直接載入圖片，避免 Phaser 加載器問題
@@ -5651,7 +5733,15 @@ class GameScene extends Phaser.Scene {
                             // 🔥 [v67.0] 添加到容器
                             container.add(cardImage);
 
-                            console.log(`✅ 圖片載入完成: ${imageKey}`);
+                            // 🔥 [v72.0] 記錄圖片創建完成
+                            console.log(`✅ [v72.0] 圖片載入完成: ${imageKey}`, {
+                                displaySize: size.toFixed(2),
+                                actualWidth: cardImage.width.toFixed(2),
+                                actualHeight: cardImage.height.toFixed(2),
+                                displayWidth: cardImage.displayWidth.toFixed(2),
+                                displayHeight: cardImage.displayHeight.toFixed(2),
+                                position: { x: cardImage.x.toFixed(2), y: cardImage.y.toFixed(2) }
+                            });
                             resolve();
                         };
 
@@ -5673,6 +5763,16 @@ class GameScene extends Phaser.Scene {
             cardImage.setDisplaySize(size, size);
             cardImage.setOrigin(0.5);
             container.add(cardImage);
+
+            // 🔥 [v72.0] 記錄圖片創建完成（已緩存）
+            console.log(`✅ [v72.0] 圖片載入完成（已緩存）: ${imageKey}`, {
+                displaySize: size.toFixed(2),
+                actualWidth: cardImage.width.toFixed(2),
+                actualHeight: cardImage.height.toFixed(2),
+                displayWidth: cardImage.displayWidth.toFixed(2),
+                displayHeight: cardImage.displayHeight.toFixed(2),
+                position: { x: cardImage.x.toFixed(2), y: cardImage.y.toFixed(2) }
+            });
             return Promise.resolve();
         }
     }
@@ -8633,6 +8733,21 @@ class GameScene extends Phaser.Scene {
 
     // 🔥 顯示遊戲結束模態框 [v93.0] - 優化排版，合理運用空間
     showGameCompleteModal() {
+        // 🔥 [v65.0] 防止重複調用
+        if (this.gameCompleteModalShown) {
+            console.log('⚠️ [v65.0] 模態框已經顯示，跳過重複調用');
+            return;
+        }
+        this.gameCompleteModalShown = true;
+        console.log('🎮 [v65.0] 首次顯示遊戲結束模態框');
+
+        // 🔥 [v65.0] 停止計時器（額外保護）
+        if (this.timerEvent) {
+            this.timerEvent.remove();
+            this.timerEvent = null;
+            console.log('⏱️ [v65.0] 計時器已停止');
+        }
+
         const width = this.scale.width;
         const height = this.scale.height;
 

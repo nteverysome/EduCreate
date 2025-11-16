@@ -103,6 +103,17 @@ class Handler extends Phaser.Scene {
         // 獲取當前遊戲的實際顯示高度
         const scaleHeight = scene.scale.gameSize.height
 
+        // 🔍 [v70.0] 記錄 updateResize 開始時的尺寸信息
+        console.log('🔍 [v70.0] ========== updateResize 開始 ==========', {
+            scaleWidth: scaleWidth,
+            scaleHeight: scaleHeight,
+            baseWidth: scene.game.screenBaseSize.width,
+            baseHeight: scene.game.screenBaseSize.height,
+            sceneScaleWidth: scene.scale.width,
+            sceneScaleHeight: scene.scale.height,
+            timestamp: new Date().toISOString()
+        });
+
         // 創建父容器尺寸結構，用於響應式計算的基準
         scene.parent = new Phaser.Structs.Size(scaleWidth, scaleHeight)
         // 創建調整器尺寸結構，使用 FIT 模式確保內容適應容器
@@ -118,14 +129,33 @@ class Handler extends Phaser.Scene {
         // 設定調整器的實際尺寸
         scene.sizer.setSize(scaleWidth, scaleHeight)
 
+        // 🔍 [v70.0] 記錄 FIT 模式計算後的尺寸
+        console.log('🔍 [v70.0] ========== FIT 模式計算結果 ==========', {
+            sizerWidth: scene.sizer.width,
+            sizerHeight: scene.sizer.height,
+            parentWidth: scene.parent.width,
+            parentHeight: scene.parent.height,
+            baseWidth: scene.game.screenBaseSize.width,
+            baseHeight: scene.game.screenBaseSize.height,
+            scaleWidth: scaleWidth,
+            scaleHeight: scaleHeight,
+            widthRatio: (scaleWidth / scene.game.screenBaseSize.width).toFixed(2),
+            heightRatio: (scaleHeight / scene.game.screenBaseSize.height).toFixed(2),
+            fitMode: 'FIT (保持比例)',
+            timestamp: new Date().toISOString()
+        });
+
         // 立即更新攝影機設定以適應新的尺寸
         this.updateCamera(scene)
 
-        console.log('✅ Handler: updateResize 完成', {
+        // 🔍 [v67.0] 詳細調適訊息 - 追蹤 updateResize 調用
+        console.log('✅ [v67.0] Handler: updateResize 完成', {
             scaleWidth,
             scaleHeight,
             baseWidth: scene.game.screenBaseSize.width,
-            baseHeight: scene.game.screenBaseSize.height
+            baseHeight: scene.game.screenBaseSize.height,
+            timestamp: new Date().toISOString(),
+            caller: 'updateResize'
         });
     }
 
@@ -147,9 +177,8 @@ class Handler extends Phaser.Scene {
             // 更新調整器的尺寸以匹配新的視窗大小
             this.sizer.setSize(width, height)
 
-            // 🔥 Match-up 遊戲不需要攝影機縮放
-            // 因為遊戲使用 Phaser.Scale.RESIZE 模式，會自動調整遊戲尺寸
-            console.log('🔄 Handler: resize - Match-up 遊戲不使用攝影機縮放', {
+            // 🔥 [v73.0] Match-up 遊戲不需要攝影機縮放
+            console.log('🔥 [v73.0] resize - Match-up 遊戲不使用攝影機縮放', {
                 width,
                 height
             });
@@ -165,6 +194,7 @@ class Handler extends Phaser.Scene {
     /**
      * 攝影機更新方法 - 根據場景尺寸調整攝影機的縮放和位置
      * @param {Phaser.Scene} scene - 需要更新攝影機的場景實例
+     * 🔥 使用 shimozurdo-game 的 Camera Zoom 方法
      */
     updateCamera(scene) {
         // 獲取指定場景的主攝影機實例
@@ -176,10 +206,9 @@ class Handler extends Phaser.Scene {
             return;
         }
 
-        // 🔥 Match-up 遊戲不需要攝影機縮放
+        // 🔥 [v73.0] Match-up 遊戲不需要攝影機縮放
         // 因為遊戲使用 Phaser.Scale.RESIZE 模式，會自動調整遊戲尺寸
-        // 攝影機縮放會導致遊戲內容看起來是白色的
-        console.log('📷 Handler: updateCamera - Match-up 遊戲不使用攝影機縮放');
+        console.log('🔥 [v73.0] updateCamera - Match-up 遊戲不使用攝影機縮放');
 
         // 重置攝影機縮放為 1
         camera.setZoom(1);
