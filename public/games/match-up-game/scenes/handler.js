@@ -163,7 +163,7 @@ class Handler extends Phaser.Scene {
      * 視窗大小調整處理方法 - 當視窗大小改變時自動調用
      * @param {Object} gameSize - 包含新的遊戲尺寸信息的物件
      * 注意：這個方法中的 'this' 指向當前正在運行的場景實例
-     * 🔥 [v78.0] 統一 zoom = 1，設備自適應 centerOn 位置
+     * 🔥 [v79.0] 設備自適應策略 - 結合 v77 桌面端 + v74 手機端
      */
     resize(gameSize) {
         // 檢查場景是否已停止，避免在場景停止後繼續處理調整
@@ -178,30 +178,32 @@ class Handler extends Phaser.Scene {
             // 更新調整器的尺寸以匹配新的視窗大小
             this.sizer.setSize(width, height)
 
-            // 🔥 [v78.0] 統一使用 zoom = 1，但 centerOn 位置不同
+            // 🔥 [v79.0] 設備自適應策略 - 結合最佳方案
             // 攝影機更新邏輯
             const camera = this.cameras.main
 
             if (camera) {
-                // 計算水平和垂直方向的縮放比例（用於調試）
+                // 計算水平和垂直方向的縮放比例
                 const scaleX = this.sizer.width / this.game.screenBaseSize.width
                 const scaleY = this.sizer.height / this.game.screenBaseSize.height
 
                 // 判斷是否為手機設備（寬度 < 768）
                 const isMobile = this.sizer.width < 768
 
-                let zoom = 1  // 🔥 [v78.0] 統一使用 zoom = 1
+                let zoom
                 let strategy
                 let centerX, centerY
 
                 if (isMobile) {
-                    // 🔥 [v78.0] 手機端：zoom = 1 + centerOn(baseSize/2) - v73 方法
-                    strategy = 'Mobile - zoom=1, centerOn(baseSize/2)'
+                    // 🔥 [v79.0] 手機端：Math.max + centerOn(baseSize/2) - v74 方法
+                    zoom = Math.max(scaleX, scaleY)
+                    strategy = 'Mobile - Math.max (v74 method)'
                     centerX = this.game.screenBaseSize.width / 2
                     centerY = this.game.screenBaseSize.height / 2
                 } else {
-                    // 🔥 [v78.0] 桌面端：zoom = 1 + centerOn(sizer/2) - v77 方法
-                    strategy = 'Desktop - zoom=1, centerOn(sizer/2)'
+                    // 🔥 [v79.0] 桌面端：zoom = 1 + centerOn(sizer/2) - v77 方法
+                    zoom = 1
+                    strategy = 'Desktop - zoom=1, centerOn(sizer/2) (v77 method)'
                     centerX = this.sizer.width / 2
                     centerY = this.sizer.height / 2
                 }
@@ -209,7 +211,7 @@ class Handler extends Phaser.Scene {
                 camera.setZoom(zoom)
                 camera.centerOn(centerX, centerY)
 
-                console.log('🔥 [v78.0] resize - Camera zoom 設置:', {
+                console.log('🔥 [v79.0] resize - Camera zoom 設置:', {
                     width,
                     height,
                     scaleX: scaleX.toFixed(3),
@@ -227,9 +229,9 @@ class Handler extends Phaser.Scene {
     /**
      * 攝影機更新方法 - 根據場景尺寸調整攝影機的縮放和位置
      * @param {Phaser.Scene} scene - 需要更新攝影機的場景實例
-     * 🔥 [v78.0] 統一 zoom = 1，設備自適應 centerOn 位置
-     * - 桌面端（寬度 >= 768）：zoom = 1, centerOn(sizer/2) - 置中顯示
-     * - 手機端（寬度 < 768）：zoom = 1, centerOn(baseSize/2) - v73 方法
+     * 🔥 [v79.0] 設備自適應策略 - 結合 v77 桌面端 + v74 手機端
+     * - 桌面端（寬度 >= 768）：zoom = 1, centerOn(sizer/2) - v77 方法（置中顯示）
+     * - 手機端（寬度 < 768）：zoom = Math.max, centerOn(baseSize/2) - v74 方法（正常顯示）
      */
     updateCamera(scene) {
         // 獲取指定場景的主攝影機實例
@@ -241,26 +243,28 @@ class Handler extends Phaser.Scene {
             return;
         }
 
-        // 🔥 [v78.0] 統一使用 zoom = 1，但 centerOn 位置不同
-        // 計算水平和垂直方向的縮放比例（用於調試）
+        // 🔥 [v79.0] 設備自適應策略 - 結合最佳方案
+        // 計算水平和垂直方向的縮放比例
         const scaleX = scene.sizer.width / this.game.screenBaseSize.width
         const scaleY = scene.sizer.height / this.game.screenBaseSize.height
 
         // 判斷是否為手機設備（寬度 < 768）
         const isMobile = scene.sizer.width < 768
 
-        let zoom = 1  // 🔥 [v78.0] 統一使用 zoom = 1
+        let zoom
         let strategy
         let centerX, centerY
 
         if (isMobile) {
-            // 🔥 [v78.0] 手機端：zoom = 1 + centerOn(baseSize/2) - v73 方法
-            strategy = 'Mobile - zoom=1, centerOn(baseSize/2)'
+            // 🔥 [v79.0] 手機端：Math.max + centerOn(baseSize/2) - v74 方法
+            zoom = Math.max(scaleX, scaleY)
+            strategy = 'Mobile - Math.max (v74 method)'
             centerX = this.game.screenBaseSize.width / 2
             centerY = this.game.screenBaseSize.height / 2
         } else {
-            // 🔥 [v78.0] 桌面端：zoom = 1 + centerOn(sizer/2) - v77 方法
-            strategy = 'Desktop - zoom=1, centerOn(sizer/2)'
+            // 🔥 [v79.0] 桌面端：zoom = 1 + centerOn(sizer/2) - v77 方法
+            zoom = 1
+            strategy = 'Desktop - zoom=1, centerOn(sizer/2) (v77 method)'
             centerX = scene.sizer.width / 2
             centerY = scene.sizer.height / 2
         }
@@ -268,7 +272,7 @@ class Handler extends Phaser.Scene {
         camera.setZoom(zoom)
         camera.centerOn(centerX, centerY)
 
-        console.log('🔥 [v78.0] updateCamera - Camera zoom 設置:', {
+        console.log('🔥 [v79.0] updateCamera - Camera zoom 設置:', {
             scaleX: scaleX.toFixed(3),
             scaleY: scaleY.toFixed(3),
             zoom: zoom.toFixed(3),
