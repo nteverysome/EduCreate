@@ -64,7 +64,8 @@ const DESIGN_TOKENS = {
   cardSize: {
     minWidth: 140,
     maxWidth: 400,
-    aspectRatio: 1.4, // 高度 = 寬度 × 1.4
+    portraitAspectRatio: 1.4, // 直向：高度 = 寬度 × 1.4（例如 300×420）
+    landscapeAspectRatio: 1 / 1.4, // 橫向：高度 = 寬度 × 0.714（例如 420×300）
   },
 
   // 容器 padding（根據斷點）
@@ -181,51 +182,58 @@ export function useContainerResponsiveLayout() {
     let cardWidth: number;
     let cardHeight: number;
 
-    // 5. 業界標準：橫向模式優先考慮高度限制
+    // 5. 業界標準：根據方向使用不同的寬高比和計算策略
     if (orientation === 'landscape') {
-      // 橫向模式：高度是瓶頸，從高度開始計算
+      // 橫向模式：卡片橫向擺放（寬度 > 高度）
+      // 使用橫向寬高比：高度 = 寬度 × 0.714
+      const aspectRatio = DESIGN_TOKENS.cardSize.landscapeAspectRatio;
+
+      // 從高度開始計算（高度是瓶頸）
       // 使用 65% 的可用高度（留 35% 空間給標題、按鈕等）
       const maxCardHeight = availableHeight * 0.65;
       cardHeight = maxCardHeight;
-      cardWidth = cardHeight / DESIGN_TOKENS.cardSize.aspectRatio;
+      cardWidth = cardHeight / aspectRatio; // 寬度 = 高度 / 0.714 = 高度 × 1.4
 
       // 確保寬度不超過可用寬度
       if (cardWidth > availableWidth) {
         cardWidth = availableWidth;
-        cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
+        cardHeight = cardWidth * aspectRatio;
       }
 
-      // 應用最小/最大限制
+      // 應用最小/最大限制（基於寬度）
       cardWidth = Math.max(DESIGN_TOKENS.cardSize.minWidth, cardWidth);
       cardWidth = Math.min(DESIGN_TOKENS.cardSize.maxWidth, cardWidth);
-      cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
+      cardHeight = cardWidth * aspectRatio;
 
       // 最終檢查：確保不超過可用高度
       if (cardHeight > availableHeight) {
         cardHeight = availableHeight;
-        cardWidth = cardHeight / DESIGN_TOKENS.cardSize.aspectRatio;
+        cardWidth = cardHeight / aspectRatio;
       }
     } else {
-      // 直向模式：寬度是主要考量
-      // 6. 計算卡片寬度
+      // 直向模式：卡片直向擺放（高度 > 寬度）
+      // 使用直向寬高比：高度 = 寬度 × 1.4
+      const aspectRatio = DESIGN_TOKENS.cardSize.portraitAspectRatio;
+
+      // 從寬度開始計算（寬度是主要考量）
       cardWidth = availableWidth * widthRatio;
 
-      // 7. 應用最小/最大限制
+      // 應用最小/最大限制
       cardWidth = Math.max(DESIGN_TOKENS.cardSize.minWidth, cardWidth);
       cardWidth = Math.min(DESIGN_TOKENS.cardSize.maxWidth, cardWidth);
 
-      // 8. 計算卡片高度（保持寬高比）
-      cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
+      // 計算卡片高度（保持寬高比）
+      cardHeight = cardWidth * aspectRatio;
 
-      // 9. 確保卡片不超過可用高度
+      // 確保卡片不超過可用高度
       if (cardHeight > availableHeight) {
         cardHeight = availableHeight;
-        cardWidth = cardHeight / DESIGN_TOKENS.cardSize.aspectRatio;
+        cardWidth = cardHeight / aspectRatio;
 
         // 再次檢查寬度是否超過可用寬度
         if (cardWidth > availableWidth) {
           cardWidth = availableWidth;
-          cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
+          cardHeight = cardWidth * aspectRatio;
         }
       }
     }
