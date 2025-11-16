@@ -267,7 +267,10 @@ function SpeakingCardsGame() {
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
-                className="w-full h-full object-contain pointer-events-none"
+                className="w-full h-full object-contain pointer-events-none transition-transform"
+                style={{
+                  transform: containerLayout.orientation === 'landscape' ? 'rotate(90deg)' : 'none'
+                }}
               />
             </div>
             {/* 堆疊效果 */}
@@ -283,7 +286,10 @@ function SpeakingCardsGame() {
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
-                className="w-full h-full object-contain pointer-events-none"
+                className="w-full h-full object-contain pointer-events-none transition-transform"
+                style={{
+                  transform: containerLayout.orientation === 'landscape' ? 'rotate(90deg)' : 'none'
+                }}
               />
             </div>
             <div
@@ -298,7 +304,10 @@ function SpeakingCardsGame() {
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
-                className="w-full h-full object-contain pointer-events-none"
+                className="w-full h-full object-contain pointer-events-none transition-transform"
+                style={{
+                  transform: containerLayout.orientation === 'landscape' ? 'rotate(90deg)' : 'none'
+                }}
               />
             </div>
           </div>
