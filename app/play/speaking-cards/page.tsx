@@ -263,11 +263,11 @@ function SpeakingCardsGame() {
                 height: `${containerLayout.cardHeight}px`
               }}
             >
-              {/* 卡牌背面圖片 */}
+              {/* 卡牌背面圖片 - 使用 object-contain 確保完整顯示（類似 Phaser FIT 模式） */}
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
-                className="w-full h-full object-cover pointer-events-none"
+                className="w-full h-full object-contain pointer-events-none"
               />
             </div>
             {/* 堆疊效果 */}
@@ -283,7 +283,7 @@ function SpeakingCardsGame() {
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
-                className="w-full h-full object-cover pointer-events-none"
+                className="w-full h-full object-contain pointer-events-none"
               />
             </div>
             <div
@@ -298,7 +298,7 @@ function SpeakingCardsGame() {
               <img
                 src="/images/card-back.png"
                 alt="Card Back"
-                className="w-full h-full object-cover pointer-events-none"
+                className="w-full h-full object-contain pointer-events-none"
               />
             </div>
           </div>
@@ -318,12 +318,12 @@ function SpeakingCardsGame() {
                 }}
                 title="點擊進行下一張"
               >
-                {/* 圖片 - 動態高度 */}
+                {/* 圖片 - 動態高度，使用 object-contain 確保完整顯示（類似 Phaser FIT 模式） */}
                 {currentCard.imageUrl && (
                   <img
                     src={currentCard.imageUrl}
                     alt={currentCard.text}
-                    className="object-cover rounded-lg pointer-events-none"
+                    className="object-contain rounded-lg pointer-events-none"
                     style={{
                       width: '100%',
                       height: `${scaledStyles.imageHeight}px`,
