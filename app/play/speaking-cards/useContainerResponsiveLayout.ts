@@ -140,6 +140,10 @@ export function useContainerResponsiveLayout() {
   const [containerSize, setContainerSize] = useState<ContainerSize>({ width: 0, height: 0 });
   const [layoutMetrics, setLayoutMetrics] = useState<LayoutMetrics | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
+  // 追蹤 ref 元素狀態
+  const [refElement, setRefElement] = useState<HTMLDivElement | null>(null);
 
   /**
    * 獲取容器斷點
@@ -154,7 +158,7 @@ export function useContainerResponsiveLayout() {
   }, []);
 
   /**
-   * 計算佈局指標（業界標準算法）
+   * 計算佈局指標（業界標準算法 - 優化橫向模式）
    */
   const calculateLayoutMetrics = useCallback((containerWidth: number, containerHeight: number): LayoutMetrics => {
     // 1. 確定斷點
@@ -174,29 +178,59 @@ export function useContainerResponsiveLayout() {
     const availableWidth = containerWidth - (padding * 2);
     const availableHeight = containerHeight - (padding * 2);
 
-    // 5. 計算卡片寬度
-    let cardWidth = availableWidth * widthRatio;
+    let cardWidth: number;
+    let cardHeight: number;
 
-    // 6. 應用最小/最大限制
-    cardWidth = Math.max(DESIGN_TOKENS.cardSize.minWidth, cardWidth);
-    cardWidth = Math.min(DESIGN_TOKENS.cardSize.maxWidth, cardWidth);
-
-    // 7. 計算卡片高度（保持寬高比）
-    let cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
-
-    // 8. 確保卡片不超過可用高度（關鍵修復：同時調整寬度和高度）
-    if (cardHeight > availableHeight) {
-      cardHeight = availableHeight;
+    // 5. 業界標準：橫向模式優先考慮高度限制
+    if (orientation === 'landscape') {
+      // 橫向模式：高度是瓶頸，從高度開始計算
+      // 使用 65% 的可用高度（留 35% 空間給標題、按鈕等）
+      const maxCardHeight = availableHeight * 0.65;
+      cardHeight = maxCardHeight;
       cardWidth = cardHeight / DESIGN_TOKENS.cardSize.aspectRatio;
 
-      // 再次檢查寬度是否超過可用寬度
+      // 確保寬度不超過可用寬度
       if (cardWidth > availableWidth) {
         cardWidth = availableWidth;
         cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
       }
+
+      // 應用最小/最大限制
+      cardWidth = Math.max(DESIGN_TOKENS.cardSize.minWidth, cardWidth);
+      cardWidth = Math.min(DESIGN_TOKENS.cardSize.maxWidth, cardWidth);
+      cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
+
+      // 最終檢查：確保不超過可用高度
+      if (cardHeight > availableHeight) {
+        cardHeight = availableHeight;
+        cardWidth = cardHeight / DESIGN_TOKENS.cardSize.aspectRatio;
+      }
+    } else {
+      // 直向模式：寬度是主要考量
+      // 6. 計算卡片寬度
+      cardWidth = availableWidth * widthRatio;
+
+      // 7. 應用最小/最大限制
+      cardWidth = Math.max(DESIGN_TOKENS.cardSize.minWidth, cardWidth);
+      cardWidth = Math.min(DESIGN_TOKENS.cardSize.maxWidth, cardWidth);
+
+      // 8. 計算卡片高度（保持寬高比）
+      cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
+
+      // 9. 確保卡片不超過可用高度
+      if (cardHeight > availableHeight) {
+        cardHeight = availableHeight;
+        cardWidth = cardHeight / DESIGN_TOKENS.cardSize.aspectRatio;
+
+        // 再次檢查寬度是否超過可用寬度
+        if (cardWidth > availableWidth) {
+          cardWidth = availableWidth;
+          cardHeight = cardWidth * DESIGN_TOKENS.cardSize.aspectRatio;
+        }
+      }
     }
 
-    // 9. 最終確保卡片尺寸在容器內（雙重保險）
+    // 10. 最終確保卡片尺寸在容器內（雙重保險）
     const finalCardWidth = Math.min(cardWidth, availableWidth);
     const finalCardHeight = Math.min(cardHeight, availableHeight);
 
@@ -258,36 +292,78 @@ export function useContainerResponsiveLayout() {
     }, 100); // 100ms 防抖
   }, [calculateLayoutMetrics]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  // 初始化函數：當容器 ref 設置時調用
+  const initializeObserver = useCallback((container: HTMLDivElement) => {
+    console.log('🎯 [容器響應式系統] 初始化 Observer');
 
-    // 創建 ResizeObserver
-    const resizeObserver = new ResizeObserver(handleResize);
+    // 清理舊的 observer
+    if (resizeObserverRef.current) {
+      resizeObserverRef.current.disconnect();
+    }
+
+    // 業界標準：使用視口尺寸而不是容器尺寸
+    // 這樣可以避免容器高度依賴內容的循環依賴問題
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // 創建新的 ResizeObserver（監聽視口變化）
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize([{
+        target: container,
+        contentRect: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      } as any]);
+    });
+    resizeObserverRef.current = resizeObserver;
 
     // 開始監聽
     resizeObserver.observe(container);
 
-    // 初始計算
-    const rect = container.getBoundingClientRect();
-    const metrics = calculateLayoutMetrics(rect.width, rect.height);
-    setContainerSize({ width: rect.width, height: rect.height });
+    // 初始計算（使用視口尺寸）
+    const metrics = calculateLayoutMetrics(viewportWidth, viewportHeight);
+    setContainerSize({ width: viewportWidth, height: viewportHeight });
     setLayoutMetrics(metrics);
 
     console.log('🚀 [容器響應式系統] 初始化完成', {
-      容器尺寸: `${rect.width.toFixed(0)}×${rect.height.toFixed(0)}px`,
-      斷點: `${metrics.breakpoint.name} (${metrics.breakpoint.description})`
+      視口尺寸: `${viewportWidth.toFixed(0)}×${viewportHeight.toFixed(0)}px`,
+      斷點: `${metrics.breakpoint.name} (${metrics.breakpoint.description})`,
+      方向: metrics.orientation === 'portrait' ? '直向' : '橫向',
+      卡片尺寸: `${metrics.cardWidth}×${metrics.cardHeight}px`
     });
+  }, [handleResize, calculateLayoutMetrics]);
+
+  // 監聽 ref 元素的變化（修復 ref 時機問題）
+  useEffect(() => {
+    if (containerRef.current && containerRef.current !== refElement) {
+      console.log('✅ [容器響應式系統] containerRef 已設置');
+      setRefElement(containerRef.current);
+    }
+  });
+
+  // 當 refElement 設置後，初始化 observer
+  useEffect(() => {
+    if (!refElement) {
+      return;
+    }
+
+    console.log('✅ [容器響應式系統] refElement 存在，初始化 observer');
+
+    // 初始化 observer
+    initializeObserver(refElement);
 
     // 清理
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
-      resizeObserver.disconnect();
-      console.log('🧹 [容器響應式系統] 已清理');
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+        console.log('🧹 [容器響應式系統] 已清理');
+      }
     };
-  }, [handleResize, calculateLayoutMetrics]);
+  }, [refElement, initializeObserver]);
 
   // 返回值
   return {

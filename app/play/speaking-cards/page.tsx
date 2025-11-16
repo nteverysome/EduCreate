@@ -236,8 +236,9 @@ function SpeakingCardsGame() {
             gap: responsive.gaps?.horizontal ? `${responsive.gaps.horizontal}px` : '32px',
             alignItems: 'center',
             justifyContent: 'center',
+            flex: 1,
+            minHeight: 0,
             maxWidth: '100%',
-            maxHeight: '100vh',
             overflow: 'hidden',
             position: 'relative'
           }}>
