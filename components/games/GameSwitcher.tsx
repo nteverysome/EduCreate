@@ -234,6 +234,32 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     estimatedLoadTime: 400,
     hidden: false  // 顯示在切換遊戲選單中
   },
+  {
+    id: 'dino-chrome-clone',
+    name: 'dino',
+    displayName: '🦖 恐龍遊戲 (Dino Chrome Clone)',
+    description: 'Google Chrome 恐龍遊戲克隆，經典的跳躍躲避遊戲，訓練反應速度和手眼協調',
+    type: 'iframe',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🦖',
+    estimatedLoadTime: 800,
+    hidden: false  // 顯示在切換遊戲選單中
+  },
+  {
+    id: 'platformer-game',
+    name: 'platformer',
+    displayName: '🎮 Platformer 平台遊戲',
+    description: '經典平台遊戲，通過跳躍、躲避障礙和收集物品來完成關卡。訓練空間記憶和反應速度',
+    type: 'iframe',
+    memoryType: '空間視覺記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🎮',
+    estimatedLoadTime: 1000,
+    hidden: false  // 顯示在切換遊戲選單中
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -333,6 +359,10 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/math-attack-game/';
     case 'match-up-game':
       return '/games/match-up-game/';
+    case 'dino-chrome-clone':
+      return '/games/dino-chrome-clone/dist/';
+    case 'platformer-game':
+      return '/games/platformer-game/dist/';
     case 'speaking-cards':
       return '/play/speaking-cards';
     case 'matching-pairs':
