@@ -472,6 +472,21 @@ class GameScene extends Phaser.Scene {
     async create() {
         console.log('🎮 GameScene: create 方法開始');
 
+        // 🔥 [v1.0] 修復移動設備黑屏：檢測設備類型並調整初始尺寸
+        const isMobile = window.innerWidth < 768;
+        const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+        const isLandscape = window.innerWidth > window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+
+        console.log('📱 [v1.0] 設備檢測:', {
+            isMobile,
+            isTablet,
+            isLandscape,
+            dpr,
+            windowWidth: window.innerWidth,
+            windowHeight: window.innerHeight
+        });
+
         // 🔍 [v70.0] 記錄 create 開始時的尺寸信息
         const createStartWidth = this.scale.width;
         const createStartHeight = this.scale.height;
@@ -521,12 +536,22 @@ class GameScene extends Phaser.Scene {
             const scaleY = height / background.height;
             const scale = Math.max(scaleX, scaleY);
             background.setScale(scale);
+
+            // 🔥 [v119.0] FIT 模式下無需註冊到 ResizeManager
+            // Phaser 會自動處理背景的縮放和位置
+            console.log('✅ GameScene: 背景已創建（FIT 模式自動處理）');
+
             console.log('🎨 GameScene: 中世紀背景圖片已加載');
         } else {
             // 備用：使用白色背景
             const whiteBg = this.add.rectangle(width / 2, height / 2, width, height, 0xffffff);
             whiteBg.setDepth(-1);
             whiteBg.setName('background-image');  // 🎨 [v1.0] 設置名稱以便後續查找
+
+            // 🔥 [v119.0] FIT 模式下無需註冊到 ResizeManager
+            // Phaser 會自動處理背景的縮放和位置
+            console.log('✅ GameScene: 白色背景已創建（FIT 模式自動處理）');
+
             console.log('⚠️ GameScene: 背景圖片未找到，使用白色背景');
         }
 
@@ -660,16 +685,9 @@ class GameScene extends Phaser.Scene {
         this.updateLayout();
         console.log('🎮 GameScene: updateLayout 完成');
 
-        // 🔥 v1.0 新增：初始化響應式管理器
-        this.responsiveManager = new ResponsiveManager(this, {
-            debounceMs: 300,
-            throttleMs: 100,
-            enableLogging: true
-        });
-        ResponsiveLogger.log('info', 'GameScene', '響應式管理器初始化完成', {
-            debounceMs: 300,
-            throttleMs: 100
-        });
+        // 🔥 [v119.0] FIT 模式下無需初始化 ResponsiveManager
+        // Phaser 會自動處理所有響應式邏輯
+        console.log('✅ GameScene: FIT 模式已啟用，無需 ResponsiveManager');
 
         // 🔥 v54.0: 改進的 resize 事件 - 保存已配對狀態和洗牌順序，重新創建卡片但保持詞彙數據和卡片順序
         // 監聽螢幕尺寸變化 - 重新創建卡片但保持已配對狀態和卡片順序
@@ -725,6 +743,9 @@ class GameScene extends Phaser.Scene {
         // 監聽設備方向變化
         window.addEventListener('orientationchange', this.handleOrientationChange.bind(this));
         console.log('✅ 已綁定 orientationchange 事件監聽器');
+
+        // 🔥 [v121.0] 初始化性能監控
+        this.initializePerformanceMonitoring();
 
         console.log('🎮 GameScene: create 方法完成');
     }
@@ -1042,9 +1063,20 @@ class GameScene extends Phaser.Scene {
 
     updateLayout() {
         console.log('🎮 GameScene: updateLayout 開始');
+
+        // 🔥 [v114.0] 使用實際的容器尺寸而不是 this.scale.width/height
+        // 在 Scale.NONE 模式下，this.scale.width/height 是只讀的，無法修改
+        // 所以我們使用 Handler 設置的 containerWidth/containerHeight
+        const layoutWidth = this.containerWidth || this.scale.width;
+        const layoutHeight = this.containerHeight || this.scale.height;
+
         console.log('🎮 GameScene: 當前場景尺寸', {
-            width: this.scale.width,
-            height: this.scale.height
+            scaleWidth: this.scale.width,
+            scaleHeight: this.scale.height,
+            containerWidth: this.containerWidth,
+            containerHeight: this.containerHeight,
+            layoutWidth,
+            layoutHeight
         });
 
         // 🔥 [v113.0] 詳細調試：記錄 matchedPairs 的狀態
@@ -1056,8 +1088,8 @@ class GameScene extends Phaser.Scene {
         // 🔥 [v74.0] 添加詳細的調適訊息
         console.log('🔍 [v74.0] ========== updateLayout 開始 ==========', {
             timestamp: new Date().toISOString(),
-            width: this.scale.width,
-            height: this.scale.height,
+            width: layoutWidth,
+            height: layoutHeight,
             itemCount: this.currentPagePairs ? this.currentPagePairs.length : 'unknown',
             currentPage: this.currentPage + 1,
             totalPages: this.totalPages
@@ -1814,27 +1846,17 @@ class GameScene extends Phaser.Scene {
             isIPad
         });
 
-        // 響應式卡片尺寸（根據螢幕寬度調整）
-        let cardWidth, cardHeight;
-        if (isIPad) {
-            // iPad：根據容器大小動態調整
-            // 分離佈局：左右各一列，所以卡片寬度 = 可用寬度 / 2 - 邊距
-            const maxCardWidth = (width - 60) * 0.4;  // 限制最大寬度為 40%
-            cardWidth = Math.max(140, Math.min(maxCardWidth, (width - 60) / 2 - 20));
-            cardHeight = Math.max(60, height * 0.12);  // 高度為螢幕高度的 12%
-            console.log('📱 [v46.0] iPad 動態卡片尺寸:', {
-                availableWidth: width - 60,
-                maxCardWidth: maxCardWidth.toFixed(1),
-                calculatedCardWidth: cardWidth.toFixed(1),
-                calculatedCardHeight: cardHeight.toFixed(1)
-            });
-        } else {
-            // 其他設備：使用固定比例
-            cardWidth = Math.max(150, Math.min(250, width * 0.2));
-            cardHeight = Math.max(50, Math.min(80, height * 0.1));
-        }
+        // 🔥 [v120.0] 響應式卡片尺寸計算 - 基於實際容器尺寸
+        const cardSizeConfig = this.calculateResponsiveCardSize(width, height, currentPagePairs.length);
+        const cardWidth = cardSizeConfig.cardWidth;
+        const cardHeight = cardSizeConfig.cardHeight;
+        const cardFontSize = cardSizeConfig.cardFontSize;
 
-        console.log('🎮 GameScene: 卡片尺寸', { cardWidth, cardHeight });
+        console.log('🎮 GameScene: 卡片尺寸', {
+            cardWidth: cardWidth.toFixed(1),
+            cardHeight: cardHeight.toFixed(1),
+            cardFontSize: cardFontSize.toFixed(1)
+        });
 
         // 🔥 [v10.0] 改進的響應式位置計算 - 三等分佈局 + 計時器間距
         // 容器佈局：左33% | 中33% | 右33%
@@ -2125,18 +2147,82 @@ class GameScene extends Phaser.Scene {
             cardHeight = Math.min(responsiveLayout.cardSize.height, maxCardHeightForAllItems);
             fontSize = responsiveLayout.fontSize;
 
-            // 🔥 [v32.0] 放大卡片 10%
-            cardWidth = cardWidth * 1.1;
-            cardHeight = cardHeight * 1.1;
-            fontSize = Math.round(fontSize * 1.1);
+            // 🔥 [v132.0] 根據容器大小動態調整卡片尺寸（包括垂直高度）
+            // 計算容器寬度和可用寬度
+            const containerWidth = width * 0.3333;  // 每個容器的寬度（33%）
+            const sideMarginForCalculation = 80;    // 初始邊距
+            const usableContainerWidthForCalculation = containerWidth - sideMarginForCalculation * 2;
 
-            console.log('✅ [v32.0] 使用響應式卡片大小（放大 10%）:', {
+            // 計算垂直利用率
+            const verticalUtilization = (cardHeight * itemCount + cardSpacingBetweenCards * (itemCount - 1)) / availableHeightForCards;
+
+            // 計算動態縮放因子：根據卡片是否超出容器
+            let dynamicScaleFactor = 1.0;
+            let horizontalScaleFactor = 1.0;
+            let verticalScaleFactor = 1.0;
+
+            // 1️⃣ 計算水平縮放因子
+            if (cardWidth > usableContainerWidthForCalculation) {
+                // 卡片超出容器，計算縮放因子使其適應容器
+                horizontalScaleFactor = usableContainerWidthForCalculation / cardWidth;
+                console.log('🔥 [v132.0] 卡片超出容器寬度，計算水平縮放因子:', {
+                    cardWidth: cardWidth.toFixed(0),
+                    usableContainerWidth: usableContainerWidthForCalculation.toFixed(0),
+                    horizontalScaleFactor: horizontalScaleFactor.toFixed(3)
+                });
+            } else {
+                // 卡片在容器內，根據容器利用率調整
+                const containerUtilization = cardWidth / usableContainerWidthForCalculation;
+
+                if (containerUtilization > 0.85) {
+                    horizontalScaleFactor = 1.0;
+                } else if (containerUtilization > 0.70) {
+                    horizontalScaleFactor = 0.95;
+                } else {
+                    horizontalScaleFactor = 0.85;
+                }
+            }
+
+            // 2️⃣ 計算垂直縮放因子（根據垂直高度利用率）
+            if (verticalUtilization > 0.95) {
+                // 垂直空間利用率 > 95%，卡片太高，需要縮小
+                verticalScaleFactor = 0.9;
+            } else if (verticalUtilization > 0.85) {
+                // 垂直空間利用率 85-95%，保持當前高度
+                verticalScaleFactor = 1.0;
+            } else if (verticalUtilization > 0.70) {
+                // 垂直空間利用率 70-85%，適度增加高度
+                verticalScaleFactor = 1.1;
+            } else if (verticalUtilization > 0.50) {
+                // 垂直空間利用率 50-70%，進一步增加高度
+                verticalScaleFactor = 1.2;
+            } else {
+                // 垂直空間利用率 < 50%，大幅增加高度
+                verticalScaleFactor = 1.3;
+            }
+
+            console.log('🔥 [v132.0] 垂直高度分析:', {
+                cardHeight: cardHeight.toFixed(0),
+                itemCount: itemCount,
+                cardSpacingBetweenCards: cardSpacingBetweenCards.toFixed(0),
+                availableHeightForCards: availableHeightForCards.toFixed(0),
+                verticalUtilization: (verticalUtilization * 100).toFixed(1) + '%',
+                verticalScaleFactor: verticalScaleFactor.toFixed(3)
+            });
+
+            // 3️⃣ 應用縮放因子（分別應用水平和垂直）
+            cardWidth = cardWidth * horizontalScaleFactor;
+            cardHeight = cardHeight * verticalScaleFactor;
+            fontSize = Math.round(fontSize * Math.max(horizontalScaleFactor, verticalScaleFactor));
+
+            console.log('✅ [v132.0] 使用響應式卡片大小（根據容器寬度和高度動態調整）:', {
                 cardWidth: cardWidth.toFixed(0),
                 cardHeight: cardHeight.toFixed(0),
                 fontSize: fontSize,
                 maxCardHeightForAllItems: maxCardHeightForAllItems.toFixed(0),
                 itemCount: itemCount,
-                scaleFactor: '1.1x (10% 放大)'
+                horizontalScaleFactor: horizontalScaleFactor.toFixed(3) + 'x',
+                verticalScaleFactor: verticalScaleFactor.toFixed(3) + 'x'
             });
         } else {
             // 備用方案：使用 SeparatedLayoutCalculator
@@ -2146,12 +2232,29 @@ class GameScene extends Phaser.Scene {
             cardHeight = Math.min(optimalSize.height, maxCardHeightForAllItems);
             fontSize = Math.max(Math.floor(cardHeight * 0.22), 12);
 
-            // 🔥 [v32.0] 放大卡片 10%
-            cardWidth = cardWidth * 1.1;
-            cardHeight = cardHeight * 1.1;
-            fontSize = Math.round(fontSize * 1.1);
+            // 🔥 [v126.0] 動態計算放大因子
+            const containerWidth = width * 0.3333;
+            let sideMargin = 80;
+            let usableContainerWidth = containerWidth - sideMargin * 2;
 
-            console.log('⚠️ 使用備用卡片大小計算（SeparatedResponsiveConfig 不可用）- 放大 10%');
+            if (cardWidth > usableContainerWidth) {
+                const excessWidth = cardWidth - usableContainerWidth;
+                sideMargin = Math.max(20, sideMargin - Math.ceil(excessWidth / 2));
+                usableContainerWidth = containerWidth - sideMargin * 2;
+            }
+
+            let scaleFactor = 1.0;
+            if (cardWidth > usableContainerWidth) {
+                scaleFactor = usableContainerWidth / cardWidth;
+            } else {
+                scaleFactor = 1.1;
+            }
+
+            cardWidth = cardWidth * scaleFactor;
+            cardHeight = cardHeight * scaleFactor;
+            fontSize = Math.round(fontSize * scaleFactor);
+
+            console.log('⚠️ 使用備用卡片大小計算（SeparatedResponsiveConfig 不可用）- v126.0 動態放大因子');
         }
 
         // 🎨 [v226.0] 計算內容大小 - 真正的響應式設計，按鈕根據設備類型動態調整
@@ -3330,10 +3433,10 @@ class GameScene extends Phaser.Scene {
         const availableHeight = height - topButtonArea - bottomButtonArea;
         const availableWidth = width;
 
-        // 🔥 計算網格佈局（2行 × 10列）
-        // 對於 20 個項目，使用 10 列 × 2 行
-        const columns = 10;
-        const rows = Math.ceil(itemCount / columns);
+        // 🔥 [v123.0] 動態計算列數（根據屏幕寬度和匹配數）
+        // 使用 UnifiedColumnCalculator 根據屏幕寬度、高度、項目數動態計算最優列數
+        const minCardWidth = 80;  // 最小卡片寬度
+        const minCardHeight = 40;
 
         // 🔥 計算單元尺寸
         // 🔥 [v80.0] 取消上下邊界，讓卡片高度變大
@@ -3341,6 +3444,18 @@ class GameScene extends Phaser.Scene {
         const verticalMargin = 0;  // 🔥 [v80.0] 取消上下邊界
         const horizontalSpacing = 8;
         const verticalSpacing = 8;
+
+        // 計算基於寬度的最大列數
+        const maxColsByWidth = Math.floor((availableWidth - horizontalMargin * 2 + horizontalSpacing) / (minCardWidth + horizontalSpacing));
+
+        // 計算基於高度的最大行數
+        const maxRowsByHeight = Math.floor((availableHeight + verticalSpacing) / (minCardHeight + verticalSpacing));
+
+        // 動態計算最優列數
+        let columns = Math.min(maxColsByWidth, Math.ceil(itemCount / maxRowsByHeight));
+        columns = Math.max(1, Math.min(columns, itemCount));  // 確保列數在 1 到 itemCount 之間
+
+        const rows = Math.ceil(itemCount / columns);
 
         const usableWidth = availableWidth - horizontalMargin * 2;
         const usableHeight = availableHeight - verticalMargin * 2;
@@ -3431,15 +3546,27 @@ class GameScene extends Phaser.Scene {
 
         const availableHeight = height - topButtonArea - bottomButtonArea - answerCardsHeight;
 
-        // 🔥 [v77.3] 計算行數和列數
-        // 對於 20 個項目，使用 2 列（10 行 × 2 列）
-        const columns = Math.max(2, Math.min(3, Math.ceil(Math.sqrt(itemCount / 2))));
+        // 🔥 [v123.0] 動態計算列數（根據屏幕寬度和匹配數）
+        // 不再使用固定的 2-3 列限制，而是根據屏幕寬度動態計算
+        const minCardWidth = 100;  // 最小卡片寬度
+        const horizontalMargin = 0;
+        const fixedHorizontalSpacing = 18;
+
+        // 計算基於寬度的最大列數
+        const maxColsByWidth = Math.floor((width - horizontalMargin * 2 + fixedHorizontalSpacing) / (minCardWidth + fixedHorizontalSpacing));
+
+        // 計算基於高度的最大行數
+        const minCardHeight = 50;
+        const maxRowsByHeight = Math.floor((availableHeight + verticalSpacingBetweenRows) / (minCardHeight + verticalSpacingBetweenRows));
+
+        // 動態計算最優列數
+        let columns = Math.min(maxColsByWidth, Math.ceil(itemCount / maxRowsByHeight));
+        columns = Math.max(1, Math.min(columns, itemCount));  // 確保列數在 1 到 itemCount 之間
+
         const rows = Math.ceil(itemCount / columns);
 
         // 🔥 [v77.3] 計算卡片尺寸
-        const horizontalMargin = 0;
         const availableWidth = width - horizontalMargin * 2;
-        const fixedHorizontalSpacing = 18;
         const totalSpacingWidth = (columns - 1) * fixedHorizontalSpacing;
         const cardWidth = (availableWidth - totalSpacingWidth) / columns;
         const cardHeight = (availableHeight - verticalSpacingBetweenRows - answerCardsBottomSpacing) / (rows * 2);
@@ -6969,6 +7096,170 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    // 🔥 [v120.0] 計算響應式 UI 尺寸
+    calculateResponsiveUISize() {
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 🔥 [v120.0] 基於屏幕尺寸的響應式計算
+        const minDimension = Math.min(width, height);
+
+        // 🔥 [v120.0] 計算縮放因子（相對於基準尺寸 960×540）
+        const baseSize = 960;
+        const scaleFactor = minDimension / baseSize;
+
+        // 🔥 [v120.0] 按鈕尺寸（確保最小觸摸目標 44×44px）
+        const buttonWidth = Math.max(44, Math.min(150, width * 0.15 * scaleFactor));
+        const buttonHeight = Math.max(44, Math.min(60, height * 0.08 * scaleFactor));
+        const buttonFontSize = Math.max(12, Math.min(20, width * 0.02 * scaleFactor));
+
+        // 🔥 [v120.0] 分頁選擇器尺寸
+        const selectorWidth = Math.max(60, Math.min(100, width * 0.1 * scaleFactor));
+        const selectorHeight = Math.max(30, Math.min(50, height * 0.06 * scaleFactor));
+        const selectorFontSize = Math.max(12, Math.min(18, width * 0.018 * scaleFactor));
+        const selectorButtonSize = Math.max(24, Math.min(40, Math.min(width, height) * 0.04 * scaleFactor));
+
+        // 🔥 [v120.0] 文字尺寸
+        const textFontSize = Math.max(12, Math.min(18, width * 0.016 * scaleFactor));
+
+        console.log('🔥 [v120.0] 響應式 UI 尺寸計算:', {
+            scaleFactor: scaleFactor.toFixed(2),
+            buttonWidth: buttonWidth.toFixed(1),
+            buttonHeight: buttonHeight.toFixed(1),
+            buttonFontSize: buttonFontSize.toFixed(1),
+            selectorWidth: selectorWidth.toFixed(1),
+            selectorHeight: selectorHeight.toFixed(1),
+            selectorFontSize: selectorFontSize.toFixed(1),
+            selectorButtonSize: selectorButtonSize.toFixed(1)
+        });
+
+        return {
+            buttonWidth,
+            buttonHeight,
+            buttonFontSize,
+            selectorWidth,
+            selectorHeight,
+            selectorFontSize,
+            selectorButtonSize,
+            textFontSize
+        };
+    }
+
+    // 🔥 [v120.0] 計算響應式卡片尺寸
+    calculateResponsiveCardSize(width, height, pairCount) {
+        // 🔥 [v120.0] 基於屏幕尺寸的響應式計算
+        const minDimension = Math.min(width, height);
+        const baseSize = 960;
+        const scaleFactor = minDimension / baseSize;
+
+        // 🔥 [v120.0] 檢測設備類型
+        const isDesktopXGA = width === 1024 && height === 768;
+        const isRealTablet = width >= 768 && width <= 1024 && height >= 600 && !isDesktopXGA;
+        const isMobile = width < 768;
+
+        // 🔥 [v120.0] 根據設備類型計算卡片尺寸
+        let cardWidth, cardHeight, cardFontSize;
+
+        if (isMobile) {
+            // 手機：更小的卡片
+            cardWidth = Math.max(100, Math.min(200, width * 0.25 * scaleFactor));
+            cardHeight = Math.max(40, Math.min(70, height * 0.08 * scaleFactor));
+            cardFontSize = Math.max(10, Math.min(14, width * 0.012 * scaleFactor));
+        } else if (isRealTablet) {
+            // 平板：中等卡片
+            cardWidth = Math.max(140, Math.min(250, width * 0.2 * scaleFactor));
+            cardHeight = Math.max(50, Math.min(90, height * 0.1 * scaleFactor));
+            cardFontSize = Math.max(12, Math.min(16, width * 0.014 * scaleFactor));
+        } else {
+            // 桌面：較大的卡片
+            cardWidth = Math.max(150, Math.min(300, width * 0.2 * scaleFactor));
+            cardHeight = Math.max(50, Math.min(100, height * 0.1 * scaleFactor));
+            cardFontSize = Math.max(12, Math.min(18, width * 0.016 * scaleFactor));
+        }
+
+        console.log('🔥 [v120.0] 響應式卡片尺寸計算:', {
+            deviceType: isMobile ? 'Mobile' : isRealTablet ? 'Tablet' : 'Desktop',
+            scaleFactor: scaleFactor.toFixed(2),
+            cardWidth: cardWidth.toFixed(1),
+            cardHeight: cardHeight.toFixed(1),
+            cardFontSize: cardFontSize.toFixed(1),
+            pairCount: pairCount
+        });
+
+        return {
+            cardWidth,
+            cardHeight,
+            cardFontSize
+        };
+    }
+
+    // 🔥 [v121.0] 初始化性能監控
+    initializePerformanceMonitoring() {
+        // 🔥 [v121.0] 記錄遊戲開始時間
+        this.gameStartTime = performance.now();
+
+        // 🔥 [v121.0] 創建性能監控文字
+        this.performanceStats = this.add.text(10, 10, '', {
+            font: '14px Arial',
+            fill: '#00ff00',
+            backgroundColor: '#000000',
+            padding: { x: 5, y: 5 }
+        });
+        this.performanceStats.setDepth(10000);
+        this.performanceStats.setScrollFactor(0);
+
+        // 🔥 [v121.0] 設置性能監控更新事件
+        this.time.addEvent({
+            delay: 1000,
+            callback: () => this.updatePerformanceStats(),
+            loop: true
+        });
+
+        console.log('🔥 [v121.0] 性能監控已初始化');
+    }
+
+    // 🔥 [v121.0] 更新性能統計
+    updatePerformanceStats() {
+        if (!this.performanceStats) return;
+
+        // 🔥 [v121.0] 計算 FPS
+        const fps = Math.round(this.game.loop.actualFps);
+
+        // 🔥 [v121.0] 計算內存使用
+        let memoryUsage = 'N/A';
+        if (performance.memory) {
+            memoryUsage = Math.round(performance.memory.usedJSHeapSize / 1048576) + 'MB';
+        }
+
+        // 🔥 [v121.0] 計算加載時間
+        const currentTime = performance.now();
+        const loadTime = ((currentTime - this.gameStartTime) / 1000).toFixed(1);
+
+        // 🔥 [v121.0] 計算卡片數量
+        const cardCount = this.leftCards.length + this.rightCards.length;
+
+        // 🔥 [v121.0] 更新文字
+        const fpsStatus = fps >= 60 ? '✅' : fps >= 30 ? '⚠️' : '❌';
+        const memoryStatus = memoryUsage !== 'N/A' && parseInt(memoryUsage) < 100 ? '✅' : '⚠️';
+
+        this.performanceStats.setText(
+            `${fpsStatus} FPS: ${fps}\n` +
+            `${memoryStatus} Memory: ${memoryUsage}\n` +
+            `⏱️ Load: ${loadTime}s\n` +
+            `🎴 Cards: ${cardCount}`
+        );
+
+        // 🔥 [v121.0] 記錄性能數據
+        if (fps < 60 || (memoryUsage !== 'N/A' && parseInt(memoryUsage) > 100)) {
+            console.warn('⚠️ [v121.0] 性能警告:', {
+                fps: fps,
+                memory: memoryUsage,
+                loadTime: loadTime,
+                cardCount: cardCount
+            });
+        }
+    }
+
     // 🔥 顯示「提交答案」按鈕
     showSubmitButton() {
         const width = this.scale.width;
@@ -6976,36 +7267,17 @@ class GameScene extends Phaser.Scene {
 
         console.log('🔍 顯示提交答案按鈕', { width, height });
 
-        // 🔥 智能判斷容器大小
-        const isSmallContainer = height < 600;
-        const isMediumContainer = height >= 600 && height < 800;
-        const isLargeContainer = height >= 800;
-
-        // 🔥 按鈕尺寸（根據容器大小調整）
-        let buttonWidth, buttonHeight, fontSize;
-
-        if (isSmallContainer) {
-            // 小容器：更小的按鈕
-            buttonWidth = Math.max(80, Math.min(120, width * 0.12));
-            buttonHeight = Math.max(30, Math.min(40, height * 0.06));
-            fontSize = Math.max(14, Math.min(18, width * 0.015));
-        } else if (isMediumContainer) {
-            // 中等容器：中等按鈕
-            buttonWidth = Math.max(100, Math.min(150, width * 0.15));
-            buttonHeight = Math.max(35, Math.min(50, height * 0.07));
-            fontSize = Math.max(16, Math.min(22, width * 0.02));
-        } else {
-            // 大容器：稍大的按鈕
-            buttonWidth = Math.max(120, Math.min(180, width * 0.12));
-            buttonHeight = Math.max(40, Math.min(55, height * 0.06));
-            fontSize = Math.max(18, Math.min(24, width * 0.02));
-        }
+        // 🔥 [v120.0] 使用響應式 UI 尺寸
+        const uiSize = this.calculateResponsiveUISize();
+        const buttonWidth = uiSize.buttonWidth;
+        const buttonHeight = uiSize.buttonHeight;
+        const fontSize = uiSize.buttonFontSize;
 
         // 🔥 按鈕位置（最底下中央，留出更多空間）
         const buttonX = width / 2;
         const buttonY = height - buttonHeight / 2 - 5;  // 距離底部 5px
 
-        console.log('🔍 按鈕位置', { buttonX, buttonY, buttonWidth, buttonHeight, isSmallContainer, isMediumContainer, isLargeContainer });
+        console.log('🔍 按鈕位置', { buttonX, buttonY, buttonWidth, buttonHeight });
 
         // 創建按鈕背景
         const buttonBg = this.add.rectangle(buttonX, buttonY, buttonWidth, buttonHeight, 0x4caf50);
@@ -8384,13 +8656,20 @@ class GameScene extends Phaser.Scene {
             this.pageSelectorComponents = null;
         }
 
+        // 🔥 [v120.0] 使用響應式 UI 尺寸
+        const uiSize = this.calculateResponsiveUISize();
+        const selectorFontSize = uiSize.selectorFontSize;
+        const selectorButtonSize = uiSize.selectorButtonSize;
+
         console.log('🔥 [v198.0] 分頁選擇器參數:', {
             x: x,
             y: y,
             width: width,
             height: height,
             currentPage: this.currentPage + 1,
-            totalPages: this.totalPages
+            totalPages: this.totalPages,
+            selectorFontSize: selectorFontSize.toFixed(1),
+            selectorButtonSize: selectorButtonSize.toFixed(1)
         });
 
         // 🔥 [v123.0] 檢查按鈕是否可用
@@ -8413,9 +8692,9 @@ class GameScene extends Phaser.Scene {
         selectorBg.setScrollFactor(0);
         console.log('🔥 [v123.0] ✅ 選擇器背景已創建');
 
-        // 🔥 [v123.0] 創建選擇器文字（顯示當前頁碼）- 更大更清晰
+        // 🔥 [v120.0] 創建選擇器文字（顯示當前頁碼）- 使用響應式字體大小
         const selectorText = this.add.text(x, y + height / 2, `${this.currentPage + 1}/${this.totalPages}`, {
-            fontSize: '18px',
+            fontSize: `${selectorFontSize}px`,
             color: '#2196F3',
             fontFamily: 'Arial',
             fontStyle: 'bold'
@@ -8423,23 +8702,23 @@ class GameScene extends Phaser.Scene {
         selectorText.setOrigin(0.5);
         selectorText.setDepth(3001);
         selectorText.setScrollFactor(0);
-        console.log('🔥 [v123.0] ✅ 選擇器文字已創建');
+        console.log('🔥 [v120.0] ✅ 選擇器文字已創建（響應式字體）');
 
-        // 🔥 [v197.0] 創建左側減少按鈕 - 始終保持啟用
-        const decreaseBtn = this.add.rectangle(x - width / 2 + 15, y + height / 2, 24, 24,
+        // 🔥 [v120.0] 創建左側減少按鈕 - 使用響應式尺寸
+        const decreaseBtn = this.add.rectangle(x - width / 2 + selectorButtonSize / 2 + 5, y + height / 2, selectorButtonSize, selectorButtonSize,
             canGoPrevious ? 0x2196F3 : 0xcccccc);
         // 🔥 [v197.0] 修復：始終啟用按鈕，不調用 disableInteractive()
         decreaseBtn.setInteractive(
-            new Phaser.Geom.Rectangle(0, 0, 24, 24),
+            new Phaser.Geom.Rectangle(0, 0, selectorButtonSize, selectorButtonSize),
             Phaser.Geom.Rectangle.Contains,
             { useHandCursor: true }
         );
         decreaseBtn.setDepth(3000);
         decreaseBtn.setScrollFactor(0);
-        console.log('🔥 [v197.0] ✅ 減少按鈕已創建（始終啟用）');
+        console.log('🔥 [v120.0] ✅ 減少按鈕已創建（響應式尺寸）');
 
-        const decreaseText = this.add.text(x - width / 2 + 15, y + height / 2, '−', {
-            fontSize: '16px',
+        const decreaseText = this.add.text(x - width / 2 + selectorButtonSize / 2 + 5, y + height / 2, '−', {
+            fontSize: `${selectorFontSize * 0.8}px`,
             color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
@@ -8448,21 +8727,21 @@ class GameScene extends Phaser.Scene {
         decreaseText.setDepth(3001);
         decreaseText.setScrollFactor(0);
 
-        // 🔥 [v197.0] 創建右側增加按鈕 - 始終保持啟用
-        const increaseBtn = this.add.rectangle(x + width / 2 - 15, y + height / 2, 24, 24,
+        // 🔥 [v120.0] 創建右側增加按鈕 - 使用響應式尺寸
+        const increaseBtn = this.add.rectangle(x + width / 2 - selectorButtonSize / 2 - 5, y + height / 2, selectorButtonSize, selectorButtonSize,
             canGoNext ? 0x4caf50 : 0xcccccc);
         // 🔥 [v197.0] 修復：始終啟用按鈕，不調用 disableInteractive()
         increaseBtn.setInteractive(
-            new Phaser.Geom.Rectangle(0, 0, 24, 24),
+            new Phaser.Geom.Rectangle(0, 0, selectorButtonSize, selectorButtonSize),
             Phaser.Geom.Rectangle.Contains,
             { useHandCursor: true }
         );
         increaseBtn.setDepth(3000);
         increaseBtn.setScrollFactor(0);
-        console.log('🔥 [v197.0] ✅ 增加按鈕已創建（始終啟用）');
+        console.log('🔥 [v120.0] ✅ 增加按鈕已創建（響應式尺寸）');
 
-        const increaseText = this.add.text(x + width / 2 - 15, y + height / 2, '+', {
-            fontSize: '16px',
+        const increaseText = this.add.text(x + width / 2 - selectorButtonSize / 2 - 5, y + height / 2, '+', {
+            fontSize: `${selectorFontSize * 0.8}px`,
             color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
@@ -10201,11 +10480,12 @@ class GameScene extends Phaser.Scene {
         if (text && text.trim() !== '' && text.trim() !== '<br>') {
             // 🔥 [v66.0] 文字大小從 boxHeight * 0.3 改為 boxHeight * 0.5（更大的文字）
             const fontSize = Math.max(16, Math.min(28, boxHeight * 0.5));
+            // 🔥 [v122.0] 調整 wordWrap 寬度，確保中文文字完全適應框的寬度（從 textWidth 改為 textWidth * 0.9）
             const textObj = this.add.text(textX, textY, text, {
                 font: `bold ${fontSize}px Arial`,
                 fill: '#000000',
                 align: 'left',
-                wordWrap: { width: textWidth }
+                wordWrap: { width: textWidth * 0.9 }  // 🔥 [v122.0] 減少 10% 以確保文字不會超出框
             });
             textObj.setOrigin(0, 0.5);  // 左對齐，垂直居中
             textObj.setDepth(3);  // 🔥 [v67.0] 從 5 改為 3，在左側卡片下方
@@ -10265,11 +10545,12 @@ class GameScene extends Phaser.Scene {
         if (text && text.trim() !== '' && text.trim() !== '<br>') {
             // 🔥 [v64.0] 文字大小從 boxHeight * 0.25 改為 boxHeight * 0.35（更大的文字）
             const fontSize = Math.max(14, Math.min(26, boxHeight * 0.35));
+            // 🔥 [v122.0] 調整 wordWrap 寬度，確保中文文字完全適應框的寬度（從 1.0 改為 0.85）
             const textObj = this.add.text(textX, textY, text, {
                 font: `bold ${fontSize}px Arial`,
                 fill: '#000000',
                 align: 'center',
-                wordWrap: { width: boxWidth * 1.0 }  // 🔥 [v64.0] 增加 wordWrap 寬度（從 0.9 改為 1.0）
+                wordWrap: { width: boxWidth * 0.85 }  // 🔥 [v122.0] 減少 15% 以確保文字不會超出框
             });
             textObj.setOrigin(0.5, 0);  // 水平居中，頂部對齐
             textObj.setDepth(5);

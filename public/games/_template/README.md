@@ -202,9 +202,34 @@ export default class GameScene extends BaseScene {
 
 ---
 
+## 🆕 v132.0 - 動態卡片尺寸調整系統
+
+### 📖 新功能說明
+
+模板現已支援 **v132.0 動態卡片尺寸調整系統**，可根據容器寬度和高度自動調整卡片尺寸。
+
+### 🎯 適用場景
+
+✅ 需要響應式卡片佈局的遊戲
+✅ 卡片數量可變的遊戲
+✅ 需要充分利用屏幕空間的遊戲
+
+### 📚 使用指南
+
+詳見：[動態卡片尺寸調整指南](./DYNAMIC_CARD_SIZING_GUIDE.md)
+
+### 🔄 版本更新
+
+- v132.0 (2025-11-23) - 雙軸動態縮放系統
+- v73.0 (2025-11-16) - Camera Zoom 修復
+
+---
+
 ## 📚 相關文件
 
 - [BaseScene 源碼](../shared/core/BaseScene.js)
 - [響應式系統說明](../shared/core/README.md)
 - [管理器使用指南](../shared/managers/README.md)
+- [動態卡片尺寸調整指南](./DYNAMIC_CARD_SIZING_GUIDE.md)
+- [模板系統更新 v132.0](../TEMPLATE_SYSTEM_UPDATE_v132.0_DYNAMIC_SIZING.md)
 
