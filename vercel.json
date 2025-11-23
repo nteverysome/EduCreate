@@ -105,6 +105,32 @@
           "value": "SAMEORIGIN"
         }
       ]
+    },
+    {
+      "source": "/games/dino-chrome-clone/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
+      ]
+    },
+    {
+      "source": "/games/platformer-game/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
+      ]
     }
   ],
   "redirects": [
@@ -313,6 +339,38 @@
     {
       "source": "/games/match-up-game/(.*)",
       "destination": "/games/match-up-game/$1"
+    },
+    {
+      "source": "/games/dino-chrome-clone",
+      "destination": "/games/dino-chrome-clone/dist/index.html"
+    },
+    {
+      "source": "/games/dino-chrome-clone/dist",
+      "destination": "/games/dino-chrome-clone/dist/index.html"
+    },
+    {
+      "source": "/games/dino-chrome-clone/dist/",
+      "destination": "/games/dino-chrome-clone/dist/index.html"
+    },
+    {
+      "source": "/games/dino-chrome-clone/(.*)",
+      "destination": "/games/dino-chrome-clone/$1"
+    },
+    {
+      "source": "/games/platformer-game",
+      "destination": "/games/platformer-game/dist/index.html"
+    },
+    {
+      "source": "/games/platformer-game/dist",
+      "destination": "/games/platformer-game/dist/index.html"
+    },
+    {
+      "source": "/games/platformer-game/dist/",
+      "destination": "/games/platformer-game/dist/index.html"
+    },
+    {
+      "source": "/games/platformer-game/(.*)",
+      "destination": "/games/platformer-game/$1"
     },
     {
       "source": "/mobile-test",
