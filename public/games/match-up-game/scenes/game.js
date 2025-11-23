@@ -1937,7 +1937,22 @@ class GameScene extends Phaser.Scene {
         const height = this.scale.height;
         const itemCount = currentPagePairs.length;
 
-        console.log(`🎮 [Phase 4] 創建分離佈局 - 匹配數: ${itemCount}`);
+        // 🔥 [v133.0] 手機設備檢測
+        const isMobileDevice = width < 600;
+        const isPortraitMode = height > width;  // 縱向模式
+
+        console.log(`🎮 [Phase 4] 創建分離佈局 - 匹配數: ${itemCount}`, {
+            isMobileDevice: isMobileDevice,
+            isPortraitMode: isPortraitMode,
+            screenSize: `${width.toFixed(0)}×${height.toFixed(0)}`
+        });
+
+        // 🔥 [v133.0] 手機縱向模式：改為上下分離佈局
+        if (isMobileDevice && isPortraitMode && itemCount <= 5) {
+            console.log('📐 [v133.0] 手機縱向模式 - 使用上下分離佈局（充分利用屏幕寬度）');
+            this.createTopBottomSingleRow(currentPagePairs, width, height);
+            return;
+        }
 
         // 🔥 根據 Wordwall 策略判斷佈局
         // 🔥 [v77.0] 刪除左右分離多行佈局（itemCount <= 20），統一使用上下分離佈局
@@ -2147,10 +2162,26 @@ class GameScene extends Phaser.Scene {
             cardHeight = Math.min(responsiveLayout.cardSize.height, maxCardHeightForAllItems);
             fontSize = responsiveLayout.fontSize;
 
+            // 🔥 [v133.0] 手機響應式修復 - 根據設備類型動態調整邊距
+            // 檢測是否是手機設備（屏幕寬度 < 600px）
+            const isMobileDevice = width < 600;
+
+            // 🔥 [v133.0] 動態邊距計算
+            // 手機：使用較小的邊距（5% 或最少 5px）
+            // 桌面：使用固定的 80px 邊距
+            const sideMarginForCalculation = isMobileDevice ?
+                Math.max(5, width * 0.05) :  // 手機：5% 寬度或最少 5px
+                80;                           // 桌面：固定 80px
+
+            console.log('🔥 [v133.0] 手機響應式檢測:', {
+                isMobileDevice: isMobileDevice,
+                screenWidth: width.toFixed(0),
+                sideMargin: sideMarginForCalculation.toFixed(0)
+            });
+
             // 🔥 [v132.0] 根據容器大小動態調整卡片尺寸（包括垂直高度）
             // 計算容器寬度和可用寬度
             const containerWidth = width * 0.3333;  // 每個容器的寬度（33%）
-            const sideMarginForCalculation = 80;    // 初始邊距
             const usableContainerWidthForCalculation = containerWidth - sideMarginForCalculation * 2;
 
             // 計算垂直利用率
