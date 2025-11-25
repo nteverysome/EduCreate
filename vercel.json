@@ -341,7 +341,11 @@
       "destination": "/games/match-up-game/$1"
     },
     {
-      "source": "/games/dino-chrome-clone",
+      "source": "/games/dino-chrome-clone/dist/:path*",
+      "destination": "/games/dino-chrome-clone/dist/:path*"
+    },
+    {
+      "source": "/games/dino-chrome-clone/dist/",
       "destination": "/games/dino-chrome-clone/dist/index.html"
     },
     {
@@ -349,7 +353,11 @@
       "destination": "/games/dino-chrome-clone/dist/index.html"
     },
     {
-      "source": "/games/dino-chrome-clone/dist/",
+      "source": "/games/dino-chrome-clone/",
+      "destination": "/games/dino-chrome-clone/dist/index.html"
+    },
+    {
+      "source": "/games/dino-chrome-clone",
       "destination": "/games/dino-chrome-clone/dist/index.html"
     },
     {
@@ -357,7 +365,11 @@
       "destination": "/games/dino-chrome-clone/$1"
     },
     {
-      "source": "/games/platformer-game",
+      "source": "/games/platformer-game/dist/:path*",
+      "destination": "/games/platformer-game/dist/:path*"
+    },
+    {
+      "source": "/games/platformer-game/dist/",
       "destination": "/games/platformer-game/dist/index.html"
     },
     {
@@ -365,7 +377,11 @@
       "destination": "/games/platformer-game/dist/index.html"
     },
     {
-      "source": "/games/platformer-game/dist/",
+      "source": "/games/platformer-game/",
+      "destination": "/games/platformer-game/dist/index.html"
+    },
+    {
+      "source": "/games/platformer-game",
       "destination": "/games/platformer-game/dist/index.html"
     },
     {
