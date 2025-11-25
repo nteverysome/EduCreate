@@ -154,6 +154,16 @@
       "source": "/performance",
       "destination": "/performance-dashboard",
       "permanent": true
+    },
+    {
+      "source": "/games/dino-chrome-clone/dist/",
+      "destination": "/games/dino-chrome-clone/dist/index.html",
+      "permanent": false
+    },
+    {
+      "source": "/games/platformer-game/dist/",
+      "destination": "/games/platformer-game/dist/index.html",
+      "permanent": false
     }
   ],
   "rewrites": [
