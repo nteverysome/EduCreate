@@ -313,12 +313,44 @@ const nextConfig = {
         source: '/games/match-up-game/:path*',
         destination: '/games/match-up-game/:path*'
       },
-      // Dino Chrome Clone 恐龍遊戲路由 - 由 vercel.json 處理
+      // Dino Chrome Clone 恐龍遊戲路由
+      {
+        source: '/games/dino-chrome-clone',
+        destination: '/games/dino-chrome-clone/dist/index.html'
+      },
+      {
+        source: '/games/dino-chrome-clone/',
+        destination: '/games/dino-chrome-clone/dist/index.html'
+      },
+      {
+        source: '/games/dino-chrome-clone/dist',
+        destination: '/games/dino-chrome-clone/dist/index.html'
+      },
+      {
+        source: '/games/dino-chrome-clone/dist/',
+        destination: '/games/dino-chrome-clone/dist/index.html'
+      },
       {
         source: '/games/dino-chrome-clone/:path*',
         destination: '/games/dino-chrome-clone/:path*'
       },
-      // Platformer 平台遊戲路由 - 由 vercel.json 處理
+      // Platformer 平台遊戲路由
+      {
+        source: '/games/platformer-game',
+        destination: '/games/platformer-game/dist/index.html'
+      },
+      {
+        source: '/games/platformer-game/',
+        destination: '/games/platformer-game/dist/index.html'
+      },
+      {
+        source: '/games/platformer-game/dist',
+        destination: '/games/platformer-game/dist/index.html'
+      },
+      {
+        source: '/games/platformer-game/dist/',
+        destination: '/games/platformer-game/dist/index.html'
+      },
       {
         source: '/games/platformer-game/:path*',
         destination: '/games/platformer-game/:path*'
