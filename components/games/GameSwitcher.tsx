@@ -360,9 +360,9 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
     case 'match-up-game':
       return '/games/match-up-game/';
     case 'dino-chrome-clone':
-      return '/games/dino-chrome-clone/dist/';
+      return '/games/dino-chrome-clone/dist/index.html';
     case 'platformer-game':
-      return '/games/platformer-game/dist/';
+      return '/games/platformer-game/dist/index.html';
     case 'speaking-cards':
       return '/play/speaking-cards';
     case 'matching-pairs':
