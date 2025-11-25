@@ -2,6 +2,7 @@
   "version": 2,
   "framework": "nextjs",
   "buildCommand": "npx prisma generate && next build",
+  "cleanUrls": false,
   "build": {
     "env": {
       "NODE_ENV": "production",
