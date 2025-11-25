@@ -51,11 +51,11 @@ node_modules/prisma/engines/
 *.dll.node
 *.exe
 
-# 構建輸出
+# 構建輸出（排除根目錄的 dist，但允許遊戲的 dist）
 .next/
 out/
 build/
-dist/
+/dist/
 # 但允許遊戲的 dist 目錄
 !public/games/*/dist/
 
