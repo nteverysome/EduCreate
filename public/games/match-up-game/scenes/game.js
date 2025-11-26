@@ -1947,13 +1947,6 @@ class GameScene extends Phaser.Scene {
             screenSize: `${width.toFixed(0)}×${height.toFixed(0)}`
         });
 
-        // 🔥 [v133.0] 手機縱向模式：改為上下分離佈局
-        if (isMobileDevice && isPortraitMode && itemCount <= 5) {
-            console.log('📐 [v133.0] 手機縱向模式 - 使用上下分離佈局（充分利用屏幕寬度）');
-            this.createTopBottomSingleRow(currentPagePairs, width, height);
-            return;
-        }
-
         // 🔥 根據 Wordwall 策略判斷佈局
         // 🔥 [v77.0] 刪除左右分離多行佈局（itemCount <= 20），統一使用上下分離佈局
         if (itemCount <= 5) {
