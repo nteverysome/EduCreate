@@ -16,14 +16,14 @@ if (typeof SeparatedResponsiveConfig === 'undefined') {
     class BreakpointSystem {
         constructor() {
             this.breakpoints = {
-                mobile: { 
-                    min: 0, 
-                    max: 767, 
-                    name: 'mobile', 
+                mobile: {
+                    min: 0,
+                    max: 767,
+                    name: 'mobile',
                     cols: 1,
-                    sideMargin: 8,
-                    spacing: 8,
-                    minCardSize: 100
+                    sideMargin: 6,        // 🔥 [v2.0] 從 8 減少到 6，增加可用寬度
+                    spacing: 6,           // 🔥 [v2.0] 從 8 減少到 6，減少卡片間距
+                    minCardSize: 110      // 🔥 [v2.0] 從 100 增加到 110，確保卡片更大
                 },
                 tablet: { 
                     min: 768, 
@@ -246,13 +246,33 @@ if (typeof SeparatedResponsiveConfig === 'undefined') {
 
             const cardHeight = CardSizeCalculator.calculateCardHeight(cardWidth, 1.2);
 
-            // 限制卡片大小
+            // 🔥 [v2.0] 限制卡片大小 - 改進 iPhone 14 顯示
+            // 對於分離模式，maxCardSize 應該更小（150 而不是 300）
+            // 這樣可以避免過度縮放
+            const maxCardSize = this.breakpoint === 'mobile' ? 150 : 300;
+
+            console.log('🔍 [v3.0] SeparatedResponsiveConfig.calculateLayout 調試:', {
+                width: this.width,
+                breakpoint: this.breakpoint,
+                availableWidth: availableWidth.toFixed(0),
+                cols: cols,
+                cardWidth_before: cardWidth.toFixed(0),
+                cardHeight_before: cardHeight.toFixed(0),
+                maxCardSize: maxCardSize,
+                minCardSize: this.bpInfo.minCardSize
+            });
+
             const constrainedSize = CardSizeCalculator.constrainCardSize(
                 cardWidth,
                 cardHeight,
                 this.bpInfo.minCardSize,
-                300
+                maxCardSize
             );
+
+            console.log('🔍 [v3.0] SeparatedResponsiveConfig.calculateLayout 約束後:', {
+                cardWidth_after: constrainedSize.width.toFixed(0),
+                cardHeight_after: constrainedSize.height.toFixed(0)
+            });
 
             // 計算字體大小
             const fontSize = FontSizeCalculator.calculateByWidth(this.width);

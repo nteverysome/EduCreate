@@ -1997,6 +1997,8 @@ class GameScene extends Phaser.Scene {
                     breakpoint: responsiveLayout.breakpoint,
                     cols: responsiveLayout.cols,
                     cardSize: responsiveLayout.cardSize,
+                    cardSize_width: responsiveLayout.cardSize.width,
+                    cardSize_height: responsiveLayout.cardSize.height,
                     fontSize: responsiveLayout.fontSize
                 });
             } catch (error) {

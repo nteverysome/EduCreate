@@ -20,30 +20,35 @@ if (typeof SeparatedModeConfig === 'undefined') {
          */
         static CONFIG = {
             'mobile-portrait': {
-                // 卡片尺寸配置 - 優化：增加卡片尺寸以更好利用空間
-                cardWidth: { min: 120, max: 200, ratio: 0.20 },
-                cardHeight: { min: 40, max: 65, ratio: 0.10 },
+                // 🔥 [v2.0] 卡片尺寸配置 - 優化 iPhone 14 顯示
+                // 增加卡片寬度比例從 0.20 到 0.25，高度從 0.10 到 0.12
+                // 這樣在 390px 寬度上，卡片寬度會從 78px 增加到 97.5px
+                cardWidth: { min: 130, max: 220, ratio: 0.25 },
+                cardHeight: { min: 50, max: 80, ratio: 0.12 },
 
                 // 位置配置（左右分離 - 單列）
+                // 🔥 [v2.0] 調整位置以適應更大的卡片
                 positions: {
-                    leftX: 0.42,
-                    rightX: 0.68,
-                    leftStartY: 0.18,  // 優化：減少頂部邊距
-                    rightStartY: 0.15
+                    leftX: 0.40,      // 從 0.42 調整到 0.40，給左側更多空間
+                    rightX: 0.70,     // 從 0.68 調整到 0.70，給右側更多空間
+                    leftStartY: 0.15, // 從 0.18 調整到 0.15，減少頂部邊距
+                    rightStartY: 0.12 // 從 0.15 調整到 0.12，對齐左側
                 },
 
                 // 間距配置 - 優化：減少間距以容納更多卡片
+                // 🔥 [v2.0] 減少垂直間距從 3 到 2，水平間距保持 8
                 spacing: {
                     horizontal: 8,
-                    vertical: 3
+                    vertical: 2
                 },
 
                 // 邊距配置 - 優化：減少邊距以增加可用空間
+                // 🔥 [v2.0] 減少邊距：top 從 20 到 15，left/right 從 12 到 8
                 margins: {
-                    top: 20,
-                    bottom: 20,
-                    left: 12,
-                    right: 12
+                    top: 15,
+                    bottom: 15,
+                    left: 8,
+                    right: 8
                 },
 
                 // 容器檢測
