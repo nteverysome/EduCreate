@@ -431,11 +431,8 @@ if (typeof SeparatedLayoutCalculator === 'undefined') {
             if (itemCount <= 5) {
                 // 單列佈局：1 列 × itemCount 行
                 layout = { columns: 1, rows: itemCount };
-                // 🔥 [v10.0] 改進 iPhone 14 顯示 - 動態調整最大卡片寬度
-                // 對於小屏幕（寬度 < 450px），限制最大卡片寬度到 150px
-                // 這樣可以避免過度縮放
-                const maxCardWidth = this.width < 450 ? 150 : 320;
-                cardWidth = Math.min(availableWidth, maxCardWidth);
+                // 🔥 [v9.0] 三等分佈局 - 卡片寬度調整到 320px
+                cardWidth = Math.min(availableWidth, 320); // 最大寬度調整到 320px
 
                 // 🔥 [v3.0] 動態計算卡片間距，確保均勻分布
                 const totalCardHeight = availableHeight;
@@ -495,9 +492,7 @@ if (typeof SeparatedLayoutCalculator === 'undefined') {
             }
 
             // 確保卡片大小在合理範圍內
-            // 🔥 [v10.0] 改進 iPhone 14 顯示 - 動態調整最大卡片寬度
-            const finalMaxCardWidth = this.width < 450 ? 150 : 320;
-            cardWidth = Math.min(cardWidth, finalMaxCardWidth);
+            cardWidth = Math.min(cardWidth, 320); // 🔥 [v9.0] 最大寬度調整到 320px
             cardHeight = Math.min(cardHeight, 150); // 最大高度 150px
 
             // 保存動態間距供後續使用

@@ -15,16 +15,13 @@
 
         body {
             background: #FFFFFF;  /* 🔥 修復：使用白色背景，與遊戲場景一致 */
-            overflow: visible;  /* 🔥 [v66.0] 修復：改為 visible，防止 iframe 內容被裁切 */
+            overflow: hidden;     /* 🔥 改為 hidden：防止滾動條 */
             font-family: Arial, sans-serif;
 
-            /* 🔥 強化網址列隱藏 - 動態視窗高度 */
-            height: 100vh;
-            height: 100dvh !important; /* 動態視窗高度，更準確 */
-            position: fixed;
-            width: 100%;
-            top: 0;
-            left: 0;
+            /* 🔥 適應 iframe 容器 */
+            height: 100%;         /* 🔥 改為 100%：相對於父容器 */
+            width: 100%;          /* 🔥 改為 100%：相對於父容器 */
+            position: relative;   /* 🔥 改為 relative：作為 #game-container 的定位參考 */
             margin: 0;
             padding: 0;
             /* 🔥 確保 body 不攔截觸控事件 */
@@ -32,11 +29,10 @@
         }
 
         html {
-            height: 100vh;
-            height: 100dvh !important;
-            overflow: visible;  /* 🔥 [v66.0] 修復：改為 visible，防止 iframe 內容被裁切 */
-            position: fixed;
-            width: 100%;
+            height: 100%;         /* 🔥 改為 100%：相對於父容器 */
+            width: 100%;          /* 🔥 改為 100%：相對於父容器 */
+            overflow: hidden;     /* 🔥 改為 hidden：防止滾動條 */
+            position: relative;   /* 🔥 改為 relative：作為 body 的定位參考 */
             margin: 0;
             padding: 0;
             /* 🔥 確保 html 不攔截觸控事件 */
@@ -46,27 +42,32 @@
         /* 🔥 針對手機瀏覽器的額外強化 */
         @media screen and (max-width: 768px) {
             body, html {
-                height: 100vh !important;
-                height: 100dvh !important;
-                overflow: visible !important;  /* 🔥 [v66.0] 修復：改為 visible，防止 iframe 內容被裁切 */
-                position: fixed !important;
+                height: 100% !important;      /* 🔥 改為 100%：相對於父容器 */
                 width: 100% !important;
-                top: 0 !important;
-                left: 0 !important;
+                overflow: hidden !important;  /* 🔥 改為 hidden：防止滾動條 */
+                position: relative !important;
+                margin: 0 !important;
+                padding: 0 !important;
                 /* 🔥 確保手機上 html 和 body 不攔截觸控事件 */
                 pointer-events: none !important;
             }
         }
 
         #game-container {
-            width: 100vw !important;
-            height: 100dvh !important;
+            width: 100% !important;       /* 🔥 改為 100%：相對於父容器，適應 iframe */
+            height: 100% !important;      /* 🔥 改為 100%：相對於父容器，適應 iframe */
             /* 🔥 確保遊戲容器能接收觸控事件 */
             pointer-events: auto !important;
             touch-action: manipulation !important;
-            position: fixed;
+            position: absolute;           /* 🔥 改為 absolute：脫離文檔流，相對於父容器定位 */
             top: 0;
             left: 0;
+            /* 🔥 [v1.0] 修復移動設備黑屏：確保最小尺寸 */
+            min-width: 100%;
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* 🔥 全螢幕樣式修復 - 跨瀏覽器支援 */
@@ -132,13 +133,13 @@
     <!-- Phaser 3 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
 
-    <!-- Responsive Design System (必須在 Game Scene 之前加載) -->
-    <script src="/games/match-up-game/responsive-config.js"></script>
-    <script src="/games/match-up-game/responsive-layout.js"></script>
-
-    <!-- 🔥 v1.0 新增：完整的響應式管理系統 -->
-    <script src="/games/match-up-game/responsive-manager.js"></script>
-    <script src="/games/match-up-game/responsive-test-suite.js"></script>
+    <!-- 🔥 [v119.0] 移除 ResponsiveManager 和 ResizeManager - FIT 模式會自動處理所有響應式邏輯 -->
+    <!-- 以下腳本已移除，因為 Phaser Scale.FIT 模式提供了業界標準的自動響應式縮放 -->
+    <!-- <script src="/games/match-up-game/responsive-config.js"></script> -->
+    <!-- <script src="/games/match-up-game/responsive-layout.js"></script> -->
+    <!-- <script src="/games/match-up-game/responsive-manager.js"></script> -->
+    <!-- <script src="/games/match-up-game/responsive-test-suite.js"></script> -->
+    <!-- <script src="/games/match-up-game/managers/ResizeManager.js"></script> -->
 
     <!-- 🔥 v48.0 新增：統一列數計算系統 -->
     <script src="/games/match-up-game/unified-column-calculator.js"></script>

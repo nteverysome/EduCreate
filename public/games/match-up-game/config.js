@@ -18,9 +18,14 @@ const config = {
     pauseOnBlur: false,  // ← 關鍵修復：禁用失焦時自動暫停
 
     scale: {
-        mode: Phaser.Scale.RESIZE,  // 動態調整尺寸
+        // 🔥 [v119.0] 改為 FIT 模式 - 業界標準，自動處理所有響應式邏輯
+        mode: Phaser.Scale.FIT,
         width: SIZE_WIDTH_SCREEN,
         height: SIZE_HEIGHT_SCREEN,
+        // 🔥 [v119.0] 自動居中和擴展父容器
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        expandParent: true,
+        // 🔥 [v119.0] 設置最小和最大尺寸以支持多設備
         min: {
             width: MIN_SIZE_WIDTH_SCREEN,
             height: MIN_SIZE_HEIGHT_SCREEN
@@ -29,9 +34,8 @@ const config = {
             width: MAX_SIZE_WIDTH_SCREEN,
             height: MAX_SIZE_HEIGHT_SCREEN
         },
-        fullscreenTarget: 'game-container',
-        expandParent: true,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        // 🔥 [v119.0] 添加 DPR 處理 - 支持高 DPI 設備
+        resolution: window.devicePixelRatio || 1
     },
     dom: {
         createContainer: true

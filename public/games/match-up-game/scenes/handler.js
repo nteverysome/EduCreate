@@ -30,6 +30,10 @@ class Handler extends Phaser.Scene {
         this.cameras.main.setBackgroundColor('#FFFFFF')
         console.log('🎮 Handler: 背景顏色設定為白色');
 
+        // 🔥 [v119.0] 移除 ResizeManager - FIT 模式會自動處理所有響應式邏輯
+        // ResizeManager 在 Scale.FIT 模式下不再需要
+        console.log('🎮 Handler: 使用 FIT 模式，無需 ResizeManager');
+
         // 🔥 v102.0: 監聽頁面可見性變化，防止場景重啟
         this.setupVisibilityHandling();
 
@@ -93,204 +97,47 @@ class Handler extends Phaser.Scene {
     /**
      * 響應式更新初始化方法 - 為指定場景設定響應式調整功能
      * @param {Phaser.Scene} scene - 需要設定響應式功能的場景實例
+     * 🔥 [v107.0] 改進：在 Scale.NONE 模式下同時調整 Canvas 和 Renderer 尺寸
      */
     updateResize(scene) {
-        // 監聽場景的 resize 事件，當視窗大小改變時調用 resize 方法
-        scene.scale.on('resize', this.resize, scene)
+        console.log('🔥 [v119.0] updateResize 方法開始執行（FIT 模式）');
 
-        // 獲取當前遊戲的實際顯示寬度
-        const scaleWidth = scene.scale.gameSize.width
-        // 獲取當前遊戲的實際顯示高度
-        const scaleHeight = scene.scale.gameSize.height
+        // 🔥 [v119.0] 在 FIT 模式下，Phaser 自動處理所有 resize 邏輯
+        // 我們只需要監聽 resize 事件並調用 GameScene 的 updateLayout
+        scene.scale.on('resize', (gameSize) => {
+            console.log('🔥 [v119.0] Resize 事件觸發:', {
+                width: gameSize.width,
+                height: gameSize.height
+            });
 
-        // 🔍 [v70.0] 記錄 updateResize 開始時的尺寸信息
-        console.log('🔍 [v70.0] ========== updateResize 開始 ==========', {
-            scaleWidth: scaleWidth,
-            scaleHeight: scaleHeight,
-            baseWidth: scene.game.screenBaseSize.width,
-            baseHeight: scene.game.screenBaseSize.height,
-            sceneScaleWidth: scene.scale.width,
-            sceneScaleHeight: scene.scale.height,
-            timestamp: new Date().toISOString()
-        });
-
-        // 創建父容器尺寸結構，用於響應式計算的基準
-        scene.parent = new Phaser.Structs.Size(scaleWidth, scaleHeight)
-        // 創建調整器尺寸結構，使用 FIT 模式確保內容適應容器
-        scene.sizer = new Phaser.Structs.Size(
-            scene.game.screenBaseSize.width,   // 使用基準寬度
-            scene.game.screenBaseSize.height,  // 使用基準高度
-            Phaser.Structs.Size.FIT,           // FIT 模式：保持比例並適應容器
-            scene.parent
-        )
-
-        // 設定父容器的實際尺寸
-        scene.parent.setSize(scaleWidth, scaleHeight)
-        // 設定調整器的實際尺寸
-        scene.sizer.setSize(scaleWidth, scaleHeight)
-
-        // 🔍 [v70.0] 記錄 FIT 模式計算後的尺寸
-        console.log('🔍 [v70.0] ========== FIT 模式計算結果 ==========', {
-            sizerWidth: scene.sizer.width,
-            sizerHeight: scene.sizer.height,
-            parentWidth: scene.parent.width,
-            parentHeight: scene.parent.height,
-            baseWidth: scene.game.screenBaseSize.width,
-            baseHeight: scene.game.screenBaseSize.height,
-            scaleWidth: scaleWidth,
-            scaleHeight: scaleHeight,
-            widthRatio: (scaleWidth / scene.game.screenBaseSize.width).toFixed(2),
-            heightRatio: (scaleHeight / scene.game.screenBaseSize.height).toFixed(2),
-            fitMode: 'FIT (保持比例)',
-            timestamp: new Date().toISOString()
-        });
-
-        // 立即更新攝影機設定以適應新的尺寸
-        this.updateCamera(scene)
-
-        // 🔍 [v67.0] 詳細調適訊息 - 追蹤 updateResize 調用
-        console.log('✅ [v67.0] Handler: updateResize 完成', {
-            scaleWidth,
-            scaleHeight,
-            baseWidth: scene.game.screenBaseSize.width,
-            baseHeight: scene.game.screenBaseSize.height,
-            timestamp: new Date().toISOString(),
-            caller: 'updateResize'
-        });
-    }
-
-    /**
-     * 視窗大小調整處理方法 - 當視窗大小改變時自動調用
-     * @param {Object} gameSize - 包含新的遊戲尺寸信息的物件
-     * 注意：這個方法中的 'this' 指向當前正在運行的場景實例
-     * 🔥 [v80.0] 設備自適應策略 - 支援橫向/直向偵測
-     */
-    resize(gameSize) {
-        // 檢查場景是否已停止，避免在場景停止後繼續處理調整
-        if (!this.sceneStopped) {
-            // 從 gameSize 物件中提取新的寬度
-            const width = gameSize.width
-            // 從 gameSize 物件中提取新的高度
-            const height = gameSize.height
-
-            // 更新父容器的尺寸以匹配新的視窗大小
-            this.parent.setSize(width, height)
-            // 更新調整器的尺寸以匹配新的視窗大小
-            this.sizer.setSize(width, height)
-
-            // 🔥 [v80.0] 設備自適應策略 - 支援橫向/直向偵測
-            // 攝影機更新邏輯
-            const camera = this.cameras.main
-
-            if (camera) {
-                // 計算水平和垂直方向的縮放比例
-                const scaleX = this.sizer.width / this.game.screenBaseSize.width
-                const scaleY = this.sizer.height / this.game.screenBaseSize.height
-
-                // 🔥 [v80.0] 使用較小的尺寸維度來判斷設備類型（支援橫向/直向）
-                const minDimension = Math.min(this.sizer.width, this.sizer.height)
-                const isMobile = minDimension < 768
-
-                let zoom
-                let strategy
-                let centerX, centerY
-
-                if (isMobile) {
-                    // 🔥 [v79.0] 手機端：Math.max + centerOn(baseSize/2) - v74 方法
-                    zoom = Math.max(scaleX, scaleY)
-                    strategy = 'Mobile - Math.max (v74 method)'
-                    centerX = this.game.screenBaseSize.width / 2
-                    centerY = this.game.screenBaseSize.height / 2
-                } else {
-                    // 🔥 [v79.0] 桌面端：zoom = 1 + centerOn(sizer/2) - v77 方法
-                    zoom = 1
-                    strategy = 'Desktop - zoom=1, centerOn(sizer/2) (v77 method)'
-                    centerX = this.sizer.width / 2
-                    centerY = this.sizer.height / 2
-                }
-
-                camera.setZoom(zoom)
-                camera.centerOn(centerX, centerY)
-
-                console.log('🔥 [v80.0] resize - Camera zoom 設置:', {
-                    width,
-                    height,
-                    scaleX: scaleX.toFixed(3),
-                    scaleY: scaleY.toFixed(3),
-                    zoom: zoom.toFixed(3),
-                    minDimension,
-                    isMobile,
-                    orientation: this.sizer.width > this.sizer.height ? 'landscape' : 'portrait',
-                    strategy,
-                    centerX: centerX.toFixed(1),
-                    centerY: centerY.toFixed(1)
-                });
+            // 獲取 GameScene 並調用 updateLayout
+            const gameScene = scene.scene.get('GameScene');
+            if (gameScene && gameScene.updateLayout) {
+                console.log('🔥 [v119.0] 調用 GameScene.updateLayout 重新佈局遊戲元素');
+                gameScene.updateLayout();
+            } else {
+                console.warn('⚠️ [v119.0] GameScene 不存在或沒有 updateLayout 方法！');
             }
-        }
+        });
+
+        console.log('✅ [v119.0] Handler: updateResize 初始化完成（FIT 模式）', {
+            scaleWidth: scene.scale.gameSize.width,
+            scaleHeight: scene.scale.gameSize.height,
+            baseWidth: scene.game.screenBaseSize.width,
+            baseHeight: scene.game.screenBaseSize.height,
+            timestamp: new Date().toISOString()
+        });
     }
 
     /**
-     * 攝影機更新方法 - 根據場景尺寸調整攝影機的縮放和位置
-     * @param {Phaser.Scene} scene - 需要更新攝影機的場景實例
-     * 🔥 [v80.0] 設備自適應策略 - 支援橫向/直向偵測
-     * - 桌面端（較小維度 >= 768）：zoom = 1, centerOn(sizer/2) - v77 方法（置中顯示）
-     * - 手機端（較小維度 < 768）：zoom = Math.max, centerOn(baseSize/2) - v74 方法（正常顯示）
-     * - 使用較小的尺寸維度判斷設備類型，支援手機橫向/直向模式
+     * 🔥 [v105.0] 舊的 resize 方法已被 ResizeManager 取代
+     * ResizeManager 現在完全控制所有元素的 resize 邏輯
      */
-    updateCamera(scene) {
-        // 獲取指定場景的主攝影機實例
-        const camera = scene.cameras.main
 
-        // 🛡️ 防禦性檢查：確保 camera 存在
-        if (!camera) {
-            console.warn('⚠️ updateCamera: camera 不存在，跳過縮放設置');
-            return;
-        }
-
-        // 🔥 [v80.0] 設備自適應策略 - 支援橫向/直向偵測
-        // 計算水平和垂直方向的縮放比例
-        const scaleX = scene.sizer.width / this.game.screenBaseSize.width
-        const scaleY = scene.sizer.height / this.game.screenBaseSize.height
-
-        // 🔥 [v80.0] 使用較小的尺寸維度來判斷設備類型（支援橫向/直向）
-        const minDimension = Math.min(scene.sizer.width, scene.sizer.height)
-        const isMobile = minDimension < 768
-
-        let zoom
-        let strategy
-        let centerX, centerY
-
-        if (isMobile) {
-            // 🔥 [v79.0] 手機端：Math.max + centerOn(baseSize/2) - v74 方法
-            zoom = Math.max(scaleX, scaleY)
-            strategy = 'Mobile - Math.max (v74 method)'
-            centerX = this.game.screenBaseSize.width / 2
-            centerY = this.game.screenBaseSize.height / 2
-        } else {
-            // 🔥 [v79.0] 桌面端：zoom = 1 + centerOn(sizer/2) - v77 方法
-            zoom = 1
-            strategy = 'Desktop - zoom=1, centerOn(sizer/2) (v77 method)'
-            centerX = scene.sizer.width / 2
-            centerY = scene.sizer.height / 2
-        }
-
-        camera.setZoom(zoom)
-        camera.centerOn(centerX, centerY)
-
-        console.log('🔥 [v80.0] updateCamera - Camera zoom 設置:', {
-            scaleX: scaleX.toFixed(3),
-            scaleY: scaleY.toFixed(3),
-            zoom: zoom.toFixed(3),
-            minDimension,
-            isMobile,
-            orientation: scene.sizer.width > scene.sizer.height ? 'landscape' : 'portrait',
-            strategy,
-            centerX: centerX.toFixed(1),
-            centerY: centerY.toFixed(1),
-            sizerSize: `${scene.sizer.width}×${scene.sizer.height}`,
-            baseSize: `${this.game.screenBaseSize.width}×${this.game.screenBaseSize.height}`
-        });
-    }
+    /**
+     * 🔥 [v105.0] 舊的 updateCamera 方法已被 ResizeManager 取代
+     * ResizeManager 現在完全控制所有元素的更新邏輯
+     */
 
 }
 

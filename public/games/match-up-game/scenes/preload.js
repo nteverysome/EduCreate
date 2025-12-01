@@ -107,95 +107,116 @@ class PreloadScene extends Phaser.Scene {
                 game: 'match-up-game'
             });
 
-            const response = await fetch(apiUrl, {
-                headers: { Accept: 'application/json' }
-            });
+            try {
+                // 🔥 添加超時機制 - 10 秒超時
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-            console.log('📡 [v80.0] PreloadScene: API 回應狀態', {
-                status: response.status,
-                statusText: response.statusText,
-                ok: response.ok,
-                contentType: response.headers.get('content-type')
-            });
+                const response = await fetch(apiUrl, {
+                    headers: { Accept: 'application/json' },
+                    signal: controller.signal
+                });
 
-            if (!response.ok) {
-                console.warn('⚠️ [v80.0] PreloadScene: 無法取得視覺風格資源，使用默認樣式', {
+                clearTimeout(timeoutId);
+
+                console.log('📡 [v80.0] PreloadScene: API 回應狀態', {
                     status: response.status,
-                    statusText: response.statusText
+                    statusText: response.statusText,
+                    ok: response.ok,
+                    contentType: response.headers.get('content-type')
                 });
-                return;
-            }
 
-            const data = await response.json();
-
-            console.log('📡 [v80.0] PreloadScene: API 回應數據', {
-                success: data?.success,
-                resourceCount: Object.keys(data?.resources || {}).length,
-                resources: data?.resources
-            });
-
-            // 🔥 [v81.0] 詳細的資源診斷訊息
-            const resourceCount = Object.keys(data?.resources || {}).length;
-            console.log('🔍 [v81.0] 視覺風格資源診斷', {
-                visualStyle,
-                resourceCount,
-                hasResources: resourceCount > 0,
-                resourceKeys: Object.keys(data?.resources || {}),
-                apiResponse: {
-                    success: data?.success,
-                    styleId: data?.styleId,
-                    timestamp: data?.timestamp
+                if (!response.ok) {
+                    console.warn('⚠️ [v80.0] PreloadScene: 無法取得視覺風格資源，使用默認樣式', {
+                        status: response.status,
+                        statusText: response.statusText
+                    });
+                    return;
                 }
-            });
 
-            if (resourceCount === 0) {
-                console.warn('⚠️ [v81.0] 視覺風格資源為空 - Vercel Blob Storage 中沒有上傳資源', {
-                    visualStyle,
-                    message: '請上傳視覺風格資源到 Vercel Blob Storage 的 visual-styles/{styleId}/ 目錄',
-                    blobStoragePath: `visual-styles/${visualStyle}/`
+                const data = await response.json();
+
+                console.log('📡 [v80.0] PreloadScene: API 回應數據', {
+                    success: data?.success,
+                    resourceCount: Object.keys(data?.resources || {}).length,
+                    resources: data?.resources
                 });
-            }
 
-            // 🔥 [v82.0] 詳細的資源加載驗證
-            console.log('🔍 [v82.0] 視覺風格資源加載驗證', {
-                visualStyle,
-                resourceCount,
-                resources: data?.resources,
-                hasColorConfig: data?.resources?.colors ? true : false,
-                hasFontConfig: data?.resources?.fonts ? true : false,
-                hasFullConfig: data?.resources?.config ? true : false
-            });
-
-            if (resourceCount > 0) {
-                console.log('✅ [v82.0] 視覺風格資源已成功加載！', {
+                // 🔥 [v81.0] 詳細的資源診斷訊息
+                const resourceCount = Object.keys(data?.resources || {}).length;
+                console.log('🔍 [v81.0] 視覺風格資源診斷', {
                     visualStyle,
                     resourceCount,
-                    colorUrl: data?.resources?.colors,
-                    fontUrl: data?.resources?.fonts,
-                    configUrl: data?.resources?.config
+                    hasResources: resourceCount > 0,
+                    resourceKeys: Object.keys(data?.resources || {}),
+                    apiResponse: {
+                        success: data?.success,
+                        styleId: data?.styleId,
+                        timestamp: data?.timestamp
+                    }
                 });
-            }
 
-            if (!data?.success || !data?.resources) {
-                console.warn('⚠️ [v80.0] PreloadScene: 視覺風格資源回應無效，使用默認樣式', data);
+                if (resourceCount === 0) {
+                    console.warn('⚠️ [v81.0] 視覺風格資源為空 - Vercel Blob Storage 中沒有上傳資源', {
+                        visualStyle,
+                        message: '請上傳視覺風格資源到 Vercel Blob Storage 的 visual-styles/{styleId}/ 目錄',
+                        blobStoragePath: `visual-styles/${visualStyle}/`
+                    });
+                }
+
+                // 🔥 [v82.0] 詳細的資源加載驗證
+                console.log('🔍 [v82.0] 視覺風格資源加載驗證', {
+                    visualStyle,
+                    resourceCount,
+                    resources: data?.resources,
+                    hasColorConfig: data?.resources?.colors ? true : false,
+                    hasFontConfig: data?.resources?.fonts ? true : false,
+                    hasFullConfig: data?.resources?.config ? true : false
+                });
+
+                if (resourceCount > 0) {
+                    console.log('✅ [v82.0] 視覺風格資源已成功加載！', {
+                        visualStyle,
+                        resourceCount,
+                        colorUrl: data?.resources?.colors,
+                        fontUrl: data?.resources?.fonts,
+                        configUrl: data?.resources?.config
+                    });
+                }
+
+                if (!data?.success || !data?.resources) {
+                    console.warn('⚠️ [v80.0] PreloadScene: 視覺風格資源回應無效，使用默認樣式', data);
+                    return;
+                }
+
+                this.visualStyleResources = data.resources;
+                if (this.game) {
+                    this.game.visualStyleResources = data.resources;
+                }
+
+                console.log('✅ [v80.0] PreloadScene: 視覺風格資源已設置', {
+                    resourceCount: Object.keys(data.resources).length
+                });
+
+                const queued = this.queueVisualStyleAssets(visualStyle, data.resources);
+
+                console.log('📋 [v80.0] PreloadScene: queueVisualStyleAssets 結果', {
+                    queued,
+                    resourceCount: Object.keys(data.resources).length
+                });
+            } catch (error) {
+                console.error('❌ [v80.0] PreloadScene: 載入視覺風格資源時發生錯誤', error);
+                if (error.name === 'AbortError') {
+                    console.error('⏱️ [v80.0] PreloadScene: API 請求超時（10秒）', { visualStyle });
+                } else {
+                    console.error('❌ [v80.0] PreloadScene: 錯誤詳情', {
+                        message: error.message,
+                        stack: error.stack
+                    });
+                }
+                // 繼續執行，使用默認樣式
                 return;
             }
-
-            this.visualStyleResources = data.resources;
-            if (this.game) {
-                this.game.visualStyleResources = data.resources;
-            }
-
-            console.log('✅ [v80.0] PreloadScene: 視覺風格資源已設置', {
-                resourceCount: Object.keys(data.resources).length
-            });
-
-            const queued = this.queueVisualStyleAssets(visualStyle, data.resources);
-
-            console.log('📋 [v80.0] PreloadScene: queueVisualStyleAssets 結果', {
-                queued,
-                resourceCount: Object.keys(data.resources).length
-            });
 
             if (!queued) {
                 console.log('ℹ️ [v80.0] PreloadScene: 無需額外載入視覺風格資源');
