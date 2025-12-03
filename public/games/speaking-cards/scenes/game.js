@@ -157,13 +157,13 @@ class SpeakingCardsGame extends Phaser.Scene {
 
         // 🔧 按鈕位置 - 橫向模式在 85% 高度，更大的按鈕
         const buttonY = isLandscape ? height * 0.85 : height * 0.90;
-        const buttonWidth = isLandscape ? 70 : 100;
-        const buttonHeight = isLandscape ? 36 : 44;
+        const buttonWidth = isLandscape ? 80 : 110;
+        const buttonHeight = isLandscape ? 40 : 48;
 
-        // 四個按鈕的間距計算
-        const totalWidth = buttonWidth * 4 + 30;  // 4個按鈕 + 3個間距
+        // 三個按鈕的間距計算
+        const totalWidth = buttonWidth * 3 + 40;  // 3個按鈕 + 2個間距
         const startX = (width - totalWidth) / 2 + buttonWidth / 2;
-        const gap = buttonWidth + 10;
+        const gap = buttonWidth + 20;
 
         // ◀ 上一張按鈕
         this.prevBtn = this.createButton(startX, buttonY, '◀', () => {
@@ -175,13 +175,8 @@ class SpeakingCardsGame extends Phaser.Scene {
             this.handleShuffle();
         }, buttonWidth, buttonHeight, 0x4b5563);
 
-        // ↶ 返回按鈕
-        this.undoBtn = this.createButton(startX + gap * 2, buttonY, '↶', () => {
-            this.handleUndo();
-        }, buttonWidth, buttonHeight, 0x4b5563);
-
         // ▶ 下一張按鈕
-        this.nextBtn = this.createButton(startX + gap * 3, buttonY, '▶', () => {
+        this.nextBtn = this.createButton(startX + gap * 2, buttonY, '▶', () => {
             this.handleNext();
         }, buttonWidth, buttonHeight, 0x10b981);
     }
