@@ -80,21 +80,35 @@ class SpeakingCardsGame extends Phaser.Scene {
     calculateResponsiveSize() {
         const { width, height } = this.scale;
         const isMobile = width < 768;
+        const isLandscape = width > height;
         const isPortrait = height > width;
-        
-        // 根據螢幕尺寸調整卡片大小
-        if (isMobile) {
+
+        // 🔧 手機橫向模式需要更小的卡片
+        if (isMobile && isLandscape) {
+            // 手機橫向：高度受限，卡片要小
+            this.cardWidth = Math.min(height * 0.5, 180);
+            this.cardHeight = this.cardWidth * 1.3;
+        } else if (isMobile) {
+            // 手機直向
             this.cardWidth = Math.min(width * 0.35, 240);
             this.cardHeight = this.cardWidth * 1.4;
         } else if (isPortrait) {
+            // 平板直向
             this.cardWidth = Math.min(width * 0.3, 280);
             this.cardHeight = this.cardWidth * 1.4;
         } else {
+            // 桌面/平板橫向
             this.cardWidth = Math.min(width * 0.2, 300);
             this.cardHeight = this.cardWidth * 1.4;
         }
-        
-        console.log('📐 卡片尺寸:', this.cardWidth, 'x', this.cardHeight);
+
+        // 計算安全區域邊距
+        this.isLandscape = isLandscape;
+        this.topPadding = isLandscape ? 15 : 30;
+        this.bottomPadding = isLandscape ? 35 : 60;
+
+        console.log('📐 卡片尺寸:', this.cardWidth, 'x', this.cardHeight,
+            '橫向:', isLandscape, '頂部邊距:', this.topPadding);
     }
 
     createBackground() {
@@ -108,60 +122,74 @@ class SpeakingCardsGame extends Phaser.Scene {
 
     createUI() {
         const { width, height } = this.scale;
-        const fontSize = Math.max(16, Math.min(32, width * 0.03));
-        
-        // 標題
-        this.titleText = this.add.text(width / 2, 30, this.activityTitle, {
+        const isLandscape = width > height;
+
+        // 🔧 橫向模式使用更小的字體
+        const fontSize = isLandscape
+            ? Math.max(12, Math.min(18, height * 0.04))
+            : Math.max(16, Math.min(32, width * 0.03));
+
+        // 標題 - 橫向模式放在更上面
+        this.titleText = this.add.text(width / 2, this.topPadding, this.activityTitle, {
             fontFamily: 'Arial',
-            fontSize: `${fontSize * 1.2}px`,
+            fontSize: `${fontSize * 1.1}px`,
             fontStyle: 'bold',
             color: '#1f2937'
         }).setOrigin(0.5).setDepth(100);
-        
-        // 進度文字
-        this.progressText = this.add.text(width / 2, 60, '卡片 0 / 0', {
+
+        // 進度文字 - 緊跟標題
+        const progressY = isLandscape ? this.topPadding + 18 : 60;
+        this.progressText = this.add.text(width / 2, progressY, '卡片 0 / 0', {
             fontFamily: 'Arial',
-            fontSize: `${fontSize * 0.8}px`,
+            fontSize: `${fontSize * 0.7}px`,
             color: '#6b7280'
         }).setOrigin(0.5).setDepth(100);
-        
+
         // 創建控制按鈕
         this.createControlButtons();
     }
 
     createControlButtons() {
         const { width, height } = this.scale;
-        const buttonY = height - 60;
-        const buttonSize = Math.max(40, Math.min(50, width * 0.05));
-        
+        const isLandscape = width > height;
+
+        // 🔧 按鈕位置 - 橫向模式放在更下面但確保可見
+        const buttonY = height - this.bottomPadding;
+        const buttonWidth = isLandscape ? 90 : 120;
+        const buttonHeight = isLandscape ? 30 : 40;
+        const buttonGap = isLandscape ? 60 : 80;
+
         // Shuffle 按鈕
-        this.shuffleBtn = this.createButton(width / 2 - 80, buttonY, '🔀 Shuffle', () => {
+        this.shuffleBtn = this.createButton(width / 2 - buttonGap, buttonY, '🔀 Shuffle', () => {
             this.handleShuffle();
-        });
-        
+        }, buttonWidth, buttonHeight);
+
         // Undo 按鈕
-        this.undoBtn = this.createButton(width / 2 + 80, buttonY, '↶ Undo', () => {
+        this.undoBtn = this.createButton(width / 2 + buttonGap, buttonY, '↶ Undo', () => {
             this.handleUndo();
-        });
+        }, buttonWidth, buttonHeight);
     }
 
-    createButton(x, y, label, callback) {
+    createButton(x, y, label, callback, btnWidth = 120, btnHeight = 40) {
         const btn = this.add.container(x, y);
+        const halfW = btnWidth / 2;
+        const halfH = btnHeight / 2;
 
         // 按鈕背景
         const bg = this.add.graphics();
         bg.fillStyle(0x4b5563, 1);
-        bg.fillRoundedRect(-60, -20, 120, 40, 8);
+        bg.fillRoundedRect(-halfW, -halfH, btnWidth, btnHeight, 6);
 
-        // 按鈕文字
+        // 按鈕文字 - 根據按鈕大小調整字體
+        const fontSize = Math.max(10, Math.min(14, btnHeight * 0.35));
         const text = this.add.text(0, 0, label, {
             fontFamily: 'Arial',
-            fontSize: '14px',
+            fontSize: `${fontSize}px`,
             color: '#ffffff'
         }).setOrigin(0.5);
 
         btn.add([bg, text]);
-        btn.setSize(120, 40);
+        btn.setSize(btnWidth, btnHeight);
         btn.setInteractive({ useHandCursor: true });
         btn.on('pointerdown', callback);
         btn.setDepth(100);
@@ -173,8 +201,23 @@ class SpeakingCardsGame extends Phaser.Scene {
     createCardDeck() {
         const { width, height } = this.scale;
         const isMobile = width < 768;
-        const deckX = isMobile ? width / 2 : width / 2 - this.cardWidth - 40;
-        const deckY = height / 2;
+        const isLandscape = width > height;
+
+        // 🔧 橫向模式兩張卡片並排
+        let deckX, deckY;
+        if (isLandscape) {
+            // 橫向：卡片堆在左側 1/3
+            deckX = width * 0.3;
+            deckY = height / 2;
+        } else if (isMobile) {
+            // 手機直向：卡片堆在上方
+            deckX = width / 2;
+            deckY = height * 0.35;
+        } else {
+            // 桌面：卡片堆在左側
+            deckX = width / 2 - this.cardWidth - 40;
+            deckY = height / 2;
+        }
 
         // 清除舊的卡片堆
         if (this.deckContainer) this.deckContainer.destroy();
@@ -228,8 +271,23 @@ class SpeakingCardsGame extends Phaser.Scene {
     createDealArea() {
         const { width, height } = this.scale;
         const isMobile = width < 768;
-        const dealX = isMobile ? width / 2 : width / 2 + this.cardWidth + 40;
-        const dealY = height / 2;
+        const isLandscape = width > height;
+
+        // 🔧 橫向模式發牌區在右側
+        let dealX, dealY;
+        if (isLandscape) {
+            // 橫向：發牌區在右側 2/3
+            dealX = width * 0.7;
+            dealY = height / 2;
+        } else if (isMobile) {
+            // 手機直向：發牌區在下方
+            dealX = width / 2;
+            dealY = height * 0.65;
+        } else {
+            // 桌面：發牌區在右側
+            dealX = width / 2 + this.cardWidth + 40;
+            dealY = height / 2;
+        }
 
         // 清除舊的發牌區
         if (this.dealContainer) this.dealContainer.destroy();
