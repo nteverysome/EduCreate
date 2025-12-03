@@ -225,13 +225,13 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     id: 'speaking-cards',
     name: 'speaking-cards',
     displayName: 'Speaking Cards 語音卡牌',
-    description: '通過翻卡學習，支援圖片、文字和語音的多感官記憶訓練',
-    type: 'component',
+    description: '通過翻卡學習，支援圖片、文字和語音的多感官記憶訓練（Phaser 版）',
+    type: 'iframe',  // 🔥 改為 iframe 使用 Phaser 遊戲
     memoryType: '語音聽覺記憶',
     geptLevels: ['elementary', 'intermediate', 'advanced'],
     status: 'completed',
     icon: '🎴',
-    estimatedLoadTime: 400,
+    estimatedLoadTime: 800,
     hidden: false  // 顯示在切換遊戲選單中
   },
   {
@@ -364,7 +364,7 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
     case 'platformer-game':
       return '/games/platformer-game/dist/index.html';
     case 'speaking-cards':
-      return '/play/speaking-cards';
+      return '/games/speaking-cards/';  // 🔥 改為 Phaser 遊戲路徑
     case 'matching-pairs':
       return '/games/matching-pairs';
     case 'quiz-game':

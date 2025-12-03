@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Speaking Cards Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            background: #f0f9ff;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            width: 100%;
+            position: relative;
+            margin: 0;
+            padding: 0;
+            pointer-events: none;
+        }
+
+        @media screen and (max-width: 768px) {
+            body, html {
+                height: 100% !important;
+                width: 100% !important;
+                overflow: hidden !important;
+                position: relative !important;
+                pointer-events: none !important;
+            }
+        }
+
+        #game-container {
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: auto !important;
+            touch-action: manipulation !important;
+            position: absolute;
+            top: 0;
+            left: 0;
+            min-width: 100%;
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #game-container:fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            background: #f0f9ff;
+        }
+
+        .fullscreen-btn {
+            position: fixed !important;
+            top: 0px !important;
+            right: 0px !important;
+            width: 25px;
+            height: 25px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: all !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s;
+            cursor: pointer;
+            z-index: 9999 !important;
+            display: block !important;
+            color: white;
+        }
+
+        .fullscreen-btn:active {
+            transform: scale(0.95);
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    <button class="fullscreen-btn">⛶</button>
+
+    <!-- Phaser 3 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+
+    <!-- EduCreate 結果收集器 -->
+    <script src="/games/shared/result-collector.js"></script>
+
+    <!-- 管理器系統 -->
+    <script src="/games/shimozurdo-game/managers/GEPTManager.js"></script>
+    <script src="/games/shimozurdo-game/managers/BilingualManager.js"></script>
+
+    <!-- Game Files -->
+    <script src="/games/speaking-cards/scenes/preload.js"></script>
+    <script src="/games/speaking-cards/scenes/game.js"></script>
+    <script src="/games/speaking-cards/config.js"></script>
+
+    <!-- 全螢幕控制 JavaScript -->
+    <script>
+        class FullscreenController {
+            constructor() {
+                this.fullscreenBtn = document.querySelector('.fullscreen-btn');
+                this.init();
+            }
+
+            init() {
+                if (!this.fullscreenBtn) return;
+                this.fullscreenBtn.addEventListener('click', this.toggleFullscreen.bind(this));
+                console.log('✅ Speaking Cards 全螢幕控制器初始化完成');
+            }
+
+            isMobileOrTablet() {
+                const isSmallScreen = window.matchMedia('(max-width: 1024px)').matches;
+                const hasTouchScreen = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+                const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+                return (isSmallScreen && hasTouchScreen) || mobileRegex.test(navigator.userAgent);
+            }
+
+            toggleFullscreen() {
+                if (this.isMobileOrTablet()) {
+                    this.toggleFullscreenViaPostMessage();
+                } else {
+                    this.toggleFullscreenNative();
+                }
+            }
+
+            toggleFullscreenViaPostMessage() {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'DUAL_FULLSCREEN_REQUEST',
+                        action: 'toggle',
+                        timestamp: Date.now(),
+                        source: 'speaking-cards-fullscreen-button'
+                    }, '*');
+                } else {
+                    this.toggleFullscreenNative();
+                }
+            }
+
+            toggleFullscreenNative() {
+                const gameContainer = document.getElementById('game-container');
+                if (!document.fullscreenElement) {
+                    (gameContainer || document.documentElement).requestFullscreen?.();
+                } else {
+                    document.exitFullscreen?.();
+                }
+            }
+        }
+
+        window.fullscreenController = new FullscreenController();
+        document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+        console.log('✅ Speaking Cards 遊戲初始化完成');
+    </script>
+</body>
+</html>
+
