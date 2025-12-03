@@ -155,37 +155,49 @@ class SpeakingCardsGame extends Phaser.Scene {
         const { width, height } = this.scale;
         const isLandscape = width > height;
 
-        // 🔧 按鈕位置 - 使用比例確保可見
-        // 橫向：按鈕在 88% 高度位置
-        // 直向：按鈕在 92% 高度位置
-        const buttonY = isLandscape ? height * 0.88 : height * 0.92;
-        const buttonWidth = isLandscape ? 80 : 120;
-        const buttonHeight = isLandscape ? 28 : 40;
-        const buttonGap = isLandscape ? 50 : 80;
+        // 🔧 按鈕位置 - 橫向模式在 85% 高度，更大的按鈕
+        const buttonY = isLandscape ? height * 0.85 : height * 0.90;
+        const buttonWidth = isLandscape ? 70 : 100;
+        const buttonHeight = isLandscape ? 36 : 44;
 
-        // Shuffle 按鈕
-        this.shuffleBtn = this.createButton(width / 2 - buttonGap, buttonY, '🔀', () => {
+        // 四個按鈕的間距計算
+        const totalWidth = buttonWidth * 4 + 30;  // 4個按鈕 + 3個間距
+        const startX = (width - totalWidth) / 2 + buttonWidth / 2;
+        const gap = buttonWidth + 10;
+
+        // ◀ 上一張按鈕
+        this.prevBtn = this.createButton(startX, buttonY, '◀', () => {
+            this.handlePrevious();
+        }, buttonWidth, buttonHeight, 0x6366f1);
+
+        // 🔀 洗牌按鈕
+        this.shuffleBtn = this.createButton(startX + gap, buttonY, '🔀', () => {
             this.handleShuffle();
-        }, buttonWidth, buttonHeight);
+        }, buttonWidth, buttonHeight, 0x4b5563);
 
-        // Undo 按鈕
-        this.undoBtn = this.createButton(width / 2 + buttonGap, buttonY, '↶', () => {
+        // ↶ 返回按鈕
+        this.undoBtn = this.createButton(startX + gap * 2, buttonY, '↶', () => {
             this.handleUndo();
-        }, buttonWidth, buttonHeight);
+        }, buttonWidth, buttonHeight, 0x4b5563);
+
+        // ▶ 下一張按鈕
+        this.nextBtn = this.createButton(startX + gap * 3, buttonY, '▶', () => {
+            this.handleNext();
+        }, buttonWidth, buttonHeight, 0x10b981);
     }
 
-    createButton(x, y, label, callback, btnWidth = 120, btnHeight = 40) {
+    createButton(x, y, label, callback, btnWidth = 120, btnHeight = 40, bgColor = 0x4b5563) {
         const btn = this.add.container(x, y);
         const halfW = btnWidth / 2;
         const halfH = btnHeight / 2;
 
-        // 按鈕背景
+        // 按鈕背景 - 使用傳入的顏色
         const bg = this.add.graphics();
-        bg.fillStyle(0x4b5563, 1);
-        bg.fillRoundedRect(-halfW, -halfH, btnWidth, btnHeight, 6);
+        bg.fillStyle(bgColor, 1);
+        bg.fillRoundedRect(-halfW, -halfH, btnWidth, btnHeight, 8);
 
-        // 按鈕文字 - 根據按鈕大小調整字體
-        const fontSize = Math.max(10, Math.min(14, btnHeight * 0.35));
+        // 按鈕文字 - 更大的字體
+        const fontSize = Math.max(16, Math.min(22, btnHeight * 0.5));
         const text = this.add.text(0, 0, label, {
             fontFamily: 'Arial',
             fontSize: `${fontSize}px`,
