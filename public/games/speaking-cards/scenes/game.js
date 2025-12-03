@@ -85,9 +85,9 @@ class SpeakingCardsGame extends Phaser.Scene {
 
         // 🔧 手機橫向模式需要更小的卡片
         if (isMobile && isLandscape) {
-            // 手機橫向：高度受限，卡片要小
-            this.cardWidth = Math.min(height * 0.5, 180);
-            this.cardHeight = this.cardWidth * 1.3;
+            // 手機橫向：高度受限，卡片要更小
+            this.cardWidth = Math.min(height * 0.4, 150);
+            this.cardHeight = this.cardWidth * 1.2;
         } else if (isMobile) {
             // 手機直向
             this.cardWidth = Math.min(width * 0.35, 240);
@@ -102,10 +102,12 @@ class SpeakingCardsGame extends Phaser.Scene {
             this.cardHeight = this.cardWidth * 1.4;
         }
 
-        // 計算安全區域邊距
+        // 🔧 計算安全區域邊距 - 使用比例而非固定值
         this.isLandscape = isLandscape;
-        this.topPadding = isLandscape ? 15 : 30;
-        this.bottomPadding = isLandscape ? 35 : 60;
+        // 橫向模式：頂部 8%，底部 15%
+        // 直向模式：頂部 5%，底部 12%
+        this.topPadding = isLandscape ? height * 0.08 : height * 0.05;
+        this.bottomPadding = isLandscape ? height * 0.15 : height * 0.12;
 
         console.log('📐 卡片尺寸:', this.cardWidth, 'x', this.cardHeight,
             '橫向:', isLandscape, '頂部邊距:', this.topPadding);
@@ -153,19 +155,21 @@ class SpeakingCardsGame extends Phaser.Scene {
         const { width, height } = this.scale;
         const isLandscape = width > height;
 
-        // 🔧 按鈕位置 - 橫向模式放在更下面但確保可見
-        const buttonY = height - this.bottomPadding;
-        const buttonWidth = isLandscape ? 90 : 120;
-        const buttonHeight = isLandscape ? 30 : 40;
-        const buttonGap = isLandscape ? 60 : 80;
+        // 🔧 按鈕位置 - 使用比例確保可見
+        // 橫向：按鈕在 88% 高度位置
+        // 直向：按鈕在 92% 高度位置
+        const buttonY = isLandscape ? height * 0.88 : height * 0.92;
+        const buttonWidth = isLandscape ? 80 : 120;
+        const buttonHeight = isLandscape ? 28 : 40;
+        const buttonGap = isLandscape ? 50 : 80;
 
         // Shuffle 按鈕
-        this.shuffleBtn = this.createButton(width / 2 - buttonGap, buttonY, '🔀 Shuffle', () => {
+        this.shuffleBtn = this.createButton(width / 2 - buttonGap, buttonY, '🔀', () => {
             this.handleShuffle();
         }, buttonWidth, buttonHeight);
 
         // Undo 按鈕
-        this.undoBtn = this.createButton(width / 2 + buttonGap, buttonY, '↶ Undo', () => {
+        this.undoBtn = this.createButton(width / 2 + buttonGap, buttonY, '↶', () => {
             this.handleUndo();
         }, buttonWidth, buttonHeight);
     }
