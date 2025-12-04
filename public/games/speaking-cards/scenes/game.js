@@ -492,8 +492,8 @@ class SpeakingCardsGame extends Phaser.Scene {
             this.dealContainer.removeAll(true);
             this.createEmptySlot();
 
-            // 翻開下一張
-            this.flipCard();
+            // 不直接翻開下一張，等待用戶點擊翻牌
+            // this.flipCard();
 
             this.updateProgress();
         }
