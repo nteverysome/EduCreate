@@ -488,11 +488,9 @@ class SpeakingCardsGame extends Phaser.Scene {
             this.currentCardIndex++;
             this.isFlipped = false;
 
-            // 清除發牌區
+            // 清除發牌區，顯示空位
             this.dealContainer.removeAll(true);
-
-            // 直接翻開下一張卡片
-            this.flipCard();
+            this.createEmptySlot();
 
             this.updateProgress();
         }
