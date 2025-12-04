@@ -553,16 +553,42 @@ class SpeakingCardsGame extends Phaser.Scene {
         const current = Math.min(this.currentCardIndex + 1, total);
         this.progressText.setText(`卡片 ${current} / ${total}`);
 
-        // 🎴 到達最後一張卡片時，隱藏左邊的卡片堆（透明顯示背景）
+        // 🎴 到達最後一張卡片時，左邊卡片堆改為空白佔位（跟右邊第一張一樣）
         if (this.deckContainer) {
             if (this.currentCardIndex === total - 1) {
-                // 最後一張：隱藏卡片堆
-                this.deckContainer.setAlpha(0);
-                this.deckContainer.setInteractive(false);
+                // 最後一張：清除卡片堆，顯示空白佔位
+                this.deckContainer.removeAll(true);
+
+                // 創建空白佔位（跟右邊一樣的樣式）
+                const bg = this.add.graphics();
+                bg.fillStyle(0xe5e7eb, 0.5);
+                bg.fillRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2,
+                    this.cardWidth, this.cardHeight, 12);
+                bg.lineStyle(3, 0x9ca3af, 1);
+                bg.strokeRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2,
+                    this.cardWidth, this.cardHeight, 12);
+
+                const hint = this.add.text(0, 0, '上一張', {
+                    fontFamily: 'Arial',
+                    fontSize: `${this.cardWidth * 0.08}px`,
+                    color: '#9ca3af'
+                }).setOrigin(0.5);
+
+                this.deckContainer.add([bg, hint]);
+
+                // 保留上一張的功能
+                this.deckContainer.setInteractive({ useHandCursor: true });
             } else {
-                // 不是最後一張：顯示卡片堆
-                this.deckContainer.setAlpha(1);
-                this.deckContainer.setInteractive(true);
+                // 不是最後一張：恢復卡片堆
+                this.deckContainer.removeAll(true);
+
+                // 重新創建堆疊效果 (3 層)
+                for (let i = 2; i >= 0; i--) {
+                    const cardBack = this.createCardBack(i * 8, i * 8);
+                    this.deckContainer.add(cardBack);
+                }
+
+                this.deckContainer.setInteractive({ useHandCursor: true });
             }
         }
     }
