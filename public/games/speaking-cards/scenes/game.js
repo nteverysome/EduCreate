@@ -114,12 +114,26 @@ class SpeakingCardsGame extends Phaser.Scene {
     }
 
     createBackground() {
-        // 漸層背景
+        // 🎨 精靈王國遊戲戰鬥背景
         const { width, height } = this.scale;
-        const bg = this.add.graphics();
-        bg.fillGradientStyle(0xdbeafe, 0xdbeafe, 0xf0f9ff, 0xf0f9ff, 1);
-        bg.fillRect(0, 0, width, height);
-        bg.setDepth(0);
+
+        if (this.textures.exists('game_background_3')) {
+            const bg = this.add.image(width / 2, height / 2, 'game_background_3');
+            bg.setDepth(0);
+            // 調整背景圖片大小以覆蓋整個遊戲區域
+            const scaleX = width / bg.width;
+            const scaleY = height / bg.height;
+            const scale = Math.max(scaleX, scaleY);
+            bg.setScale(scale);
+            console.log('✅ 背景圖片已加載');
+        } else {
+            // 備用：漸層背景
+            const bg = this.add.graphics();
+            bg.fillGradientStyle(0xdbeafe, 0xdbeafe, 0xf0f9ff, 0xf0f9ff, 1);
+            bg.fillRect(0, 0, width, height);
+            bg.setDepth(0);
+            console.log('⚠️ 使用備用漸層背景');
+        }
     }
 
     createUI() {

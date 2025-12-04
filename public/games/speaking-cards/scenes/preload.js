@@ -19,8 +19,8 @@ class PreloadScene extends Phaser.Scene {
         // 🎴 載入卡片正面背景
         this.load.image('card_front', '/games/speaking-cards/assets/card_front.png');
 
-        // 載入遊戲背景
-        this.load.image('game-bg', '/images/speaking-cards-bg.png');
+        // 🎨 載入遊戲背景 - 精靈王國戰鬥背景
+        this.load.image('game_background_3', '/games/speaking-cards/assets/game_background_3.png');
 
         // 載入按鈕圖標
         this.load.image('shuffle-icon', '/games/speaking-cards/assets/shuffle-icon.svg');
