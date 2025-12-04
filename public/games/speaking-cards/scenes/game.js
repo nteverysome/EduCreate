@@ -541,6 +541,21 @@ class SpeakingCardsGame extends Phaser.Scene {
             this.time.delayedCall(300, () => {
                 this.isAnimating = false;
             });
+        } else if (this.currentCardIndex === 0 && this.isFlipped) {
+            // 如果已經在第0張且卡片已翻開，點左邊卡片堆會回到未翻開狀態
+            this.isAnimating = true;
+            this.isFlipped = false;
+
+            // 清除發牌區，顯示空位
+            this.dealContainer.removeAll(true);
+            this.createEmptySlot();
+
+            this.updateProgress();
+
+            // 動畫完成後允許下一次操作
+            this.time.delayedCall(300, () => {
+                this.isAnimating = false;
+            });
         }
     }
 
