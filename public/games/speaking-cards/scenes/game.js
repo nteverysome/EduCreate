@@ -552,6 +552,19 @@ class SpeakingCardsGame extends Phaser.Scene {
         const total = this.shuffledCards.length;
         const current = Math.min(this.currentCardIndex + 1, total);
         this.progressText.setText(`卡片 ${current} / ${total}`);
+
+        // 🎴 到達最後一張卡片時，隱藏左邊的卡片堆（透明顯示背景）
+        if (this.deckContainer) {
+            if (this.currentCardIndex === total - 1) {
+                // 最後一張：隱藏卡片堆
+                this.deckContainer.setAlpha(0);
+                this.deckContainer.setInteractive(false);
+            } else {
+                // 不是最後一張：顯示卡片堆
+                this.deckContainer.setAlpha(1);
+                this.deckContainer.setInteractive(true);
+            }
+        }
     }
 
     playCardAudio(cardData) {
