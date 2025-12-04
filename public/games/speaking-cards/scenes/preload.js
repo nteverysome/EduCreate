@@ -22,16 +22,6 @@ class PreloadScene extends Phaser.Scene {
         // 🎨 載入遊戲背景 - 精靈王國戰鬥背景
         this.load.image('game_background_3', '/games/speaking-cards/assets/game_background_3.png');
 
-        // 載入按鈕圖標
-        this.load.image('shuffle-icon', '/games/speaking-cards/assets/shuffle-icon.svg');
-        this.load.image('undo-icon', '/games/speaking-cards/assets/undo-icon.svg');
-        this.load.image('sound-icon', '/games/speaking-cards/assets/sound-icon.svg');
-
-        // 載入音效
-        this.load.audio('card-flip', '/games/speaking-cards/assets/card-flip.mp3');
-        this.load.audio('card-deal', '/games/speaking-cards/assets/card-deal.mp3');
-        this.load.audio('success', '/games/speaking-cards/assets/success.mp3');
-
         // 監聽載入進度
         this.load.on('progress', (value) => {
             this.progressBar.clear();

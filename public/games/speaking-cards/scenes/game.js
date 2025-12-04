@@ -391,19 +391,32 @@ class SpeakingCardsGame extends Phaser.Scene {
     }
 
     loadCardImage(container, url, x, y, maxW, maxH) {
-        const key = 'card_img_' + this.currentCardIndex;
+        const key = 'card_img_' + Date.now() + '_' + Math.random();
+
+        // 檢查圖片是否已經載入
+        if (this.textures.exists(key)) {
+            const img = this.add.image(x, y, key);
+            const scale = Math.min(maxW / img.width, maxH / img.height);
+            img.setScale(scale);
+            container.add(img);
+            return;
+        }
 
         // 動態載入圖片
         this.load.image(key, url);
+
         this.load.once('complete', () => {
             if (this.textures.exists(key)) {
                 const img = this.add.image(x, y, key);
                 const scale = Math.min(maxW / img.width, maxH / img.height);
                 img.setScale(scale);
                 container.add(img);
-                container.sendToBack(img);
+                console.log('✅ 卡片圖片已加載:', url);
+            } else {
+                console.warn('⚠️ 圖片載入失敗:', url);
             }
         });
+
         this.load.start();
     }
 
