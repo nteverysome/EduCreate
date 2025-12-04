@@ -311,21 +311,31 @@ class SpeakingCardsGame extends Phaser.Scene {
     }
 
     createEmptySlot() {
-        const bg = this.add.graphics();
-        bg.fillStyle(0xe5e7eb, 0.5);
-        bg.fillRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2,
-            this.cardWidth, this.cardHeight, 12);
-        bg.lineStyle(3, 0x9ca3af, 1);
-        bg.strokeRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2,
-            this.cardWidth, this.cardHeight, 12);
+        // 檢查是否有上一張卡片可以預覽
+        const hasPreviousCard = this.currentCardIndex > 0;
 
-        const hint = this.add.text(0, 0, '點擊翻牌', {
-            fontFamily: 'Arial',
-            fontSize: `${this.cardWidth * 0.08}px`,
-            color: '#9ca3af'
-        }).setOrigin(0.5);
+        if (hasPreviousCard) {
+            // 顯示上一張卡片的預覽（卡片背面）
+            const cardBack = this.createCardBack(0, 0);
+            this.dealContainer.add(cardBack);
+        } else {
+            // 沒有上一張，顯示空位
+            const bg = this.add.graphics();
+            bg.fillStyle(0xe5e7eb, 0.5);
+            bg.fillRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2,
+                this.cardWidth, this.cardHeight, 12);
+            bg.lineStyle(3, 0x9ca3af, 1);
+            bg.strokeRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2,
+                this.cardWidth, this.cardHeight, 12);
 
-        this.dealContainer.add([bg, hint]);
+            const hint = this.add.text(0, 0, '點擊翻牌', {
+                fontFamily: 'Arial',
+                fontSize: `${this.cardWidth * 0.08}px`,
+                color: '#9ca3af'
+            }).setOrigin(0.5);
+
+            this.dealContainer.add([bg, hint]);
+        }
 
         // 設置交互
         this.dealContainer.setSize(this.cardWidth, this.cardHeight);
@@ -499,20 +509,11 @@ class SpeakingCardsGame extends Phaser.Scene {
     handlePrevious() {
         if (this.currentCardIndex > 0) {
             this.currentCardIndex--;
-            this.isFlipped = true;
+            this.isFlipped = false;
 
-            // 清除發牌區
+            // 清除發牌區，顯示空位
             this.dealContainer.removeAll(true);
-
-            // 顯示上一張卡片
-            const cardData = this.shuffledCards[this.currentCardIndex];
-            const cardFront = this.createCardFront(cardData);
-            this.dealContainer.add(cardFront);
-
-            // 🔊 只有沒有 audioUrl 時才自動播放
-            if (!cardData.audioUrl && (cardData.text || cardData.english)) {
-                this.playCardAudio(cardData);
-            }
+            this.createEmptySlot();
 
             this.updateProgress();
         }
