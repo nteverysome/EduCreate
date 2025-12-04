@@ -474,8 +474,11 @@ class SpeakingCardsGame extends Phaser.Scene {
             ease: 'Back.easeOut'
         });
 
-        // 播放音效
-        this.playCardAudio(cardData);
+        // 🔊 只有沒有 audioUrl 時才自動播放（使用 Web Speech API）
+        // 如果有 audioUrl，用戶需要點擊聲音按鈕才能播放
+        if (!cardData.audioUrl && (cardData.text || cardData.english)) {
+            this.playCardAudio(cardData);
+        }
 
         console.log('🎴 翻開卡片:', cardData);
     }
@@ -509,7 +512,11 @@ class SpeakingCardsGame extends Phaser.Scene {
             const cardFront = this.createCardFront(cardData);
             this.dealContainer.add(cardFront);
 
-            this.playCardAudio(cardData);
+            // 🔊 只有沒有 audioUrl 時才自動播放
+            if (!cardData.audioUrl && (cardData.text || cardData.english)) {
+                this.playCardAudio(cardData);
+            }
+
             this.updateProgress();
         }
     }
