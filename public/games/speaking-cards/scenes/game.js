@@ -254,27 +254,12 @@ class SpeakingCardsGame extends Phaser.Scene {
     createCardBack(offsetX = 0, offsetY = 0) {
         const container = this.add.container(offsetX, offsetY);
 
-        // 卡片背景
-        const bg = this.add.graphics();
-        bg.fillStyle(0xffffff, 1);
-        bg.fillRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2,
-            this.cardWidth, this.cardHeight, 12);
-        bg.lineStyle(4, 0x3b82f6, 1);
-        bg.strokeRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2,
-            this.cardWidth, this.cardHeight, 12);
+        // 🎴 卡片背面圖片
+        const bgImg = this.add.image(0, 0, 'card-back');
+        const scale = Math.min(this.cardWidth / bgImg.width, this.cardHeight / bgImg.height);
+        bgImg.setScale(scale);
+        container.add(bgImg);
 
-        // 卡片圖案
-        const pattern = this.add.graphics();
-        pattern.fillStyle(0x3b82f6, 0.1);
-        pattern.fillRoundedRect(-this.cardWidth / 2 + 10, -this.cardHeight / 2 + 10,
-            this.cardWidth - 20, this.cardHeight - 20, 8);
-
-        // 中心圖標
-        const icon = this.add.text(0, 0, '🎴', {
-            fontSize: `${this.cardWidth * 0.3}px`
-        }).setOrigin(0.5);
-
-        container.add([bg, pattern, icon]);
         return container;
     }
 
@@ -338,47 +323,43 @@ class SpeakingCardsGame extends Phaser.Scene {
     createCardFront(cardData) {
         const container = this.add.container(0, 0);
 
-        // 卡片背景
-        const bg = this.add.graphics();
-        bg.fillStyle(0xffffff, 1);
-        bg.fillRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2,
-            this.cardWidth, this.cardHeight, 12);
-        bg.lineStyle(4, 0x60a5fa, 1);
-        bg.strokeRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2,
-            this.cardWidth, this.cardHeight, 12);
-        container.add(bg);
+        // 🎴 卡片背景圖片
+        const bgImg = this.add.image(0, 0, 'card_front');
+        const scale = Math.min(this.cardWidth / bgImg.width, this.cardHeight / bgImg.height);
+        bgImg.setScale(scale);
+        container.add(bgImg);
 
-        let currentY = -this.cardHeight / 2 + 20;
-        const contentWidth = this.cardWidth - 40;
+        let currentY = -this.cardHeight / 2 + 30;
+        const contentWidth = this.cardWidth - 60;
 
         // 圖片 (如果有)
         if (cardData.imageUrl) {
-            const imgSize = this.cardHeight * 0.45;
+            const imgSize = this.cardHeight * 0.35;
             // 載入並顯示圖片
             this.loadCardImage(container, cardData.imageUrl, 0, currentY + imgSize / 2, contentWidth, imgSize);
-            currentY += imgSize + 15;
+            currentY += imgSize + 10;
         }
 
-        // 英文文字
+        // 英文文字 - 白色，更大
         if (cardData.text || cardData.english) {
-            const text = this.add.text(0, currentY + 20, cardData.text || cardData.english, {
+            const text = this.add.text(0, currentY + 15, cardData.text || cardData.english, {
                 fontFamily: 'Arial',
-                fontSize: `${this.cardWidth * 0.08}px`,
+                fontSize: `${this.cardWidth * 0.09}px`,
                 fontStyle: 'bold',
-                color: '#1f2937',
+                color: '#ffffff',
                 wordWrap: { width: contentWidth },
                 align: 'center'
             }).setOrigin(0.5, 0);
             container.add(text);
-            currentY += text.height + 10;
+            currentY += text.height + 8;
         }
 
-        // 中文翻譯
+        // 中文翻譯 - 淡黃色
         if (cardData.chinese) {
-            const chinese = this.add.text(0, currentY + 10, cardData.chinese, {
+            const chinese = this.add.text(0, currentY + 5, cardData.chinese, {
                 fontFamily: 'Arial',
-                fontSize: `${this.cardWidth * 0.06}px`,
-                color: '#6b7280',
+                fontSize: `${this.cardWidth * 0.07}px`,
+                color: '#fef3c7',
                 wordWrap: { width: contentWidth },
                 align: 'center'
             }).setOrigin(0.5, 0);
@@ -388,7 +369,7 @@ class SpeakingCardsGame extends Phaser.Scene {
         // 語音按鈕
         if (cardData.audioUrl || cardData.text || cardData.english) {
             const soundBtn = this.createSoundButton(cardData);
-            soundBtn.setPosition(0, this.cardHeight / 2 - 50);
+            soundBtn.setPosition(0, this.cardHeight / 2 - 40);
             container.add(soundBtn);
         }
 

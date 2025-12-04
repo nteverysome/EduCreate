@@ -13,12 +13,12 @@ class PreloadScene extends Phaser.Scene {
         // 創建載入進度條
         this.createLoadingBar();
 
-        // 載入卡片背面圖片
-        this.load.image('card-back', '/images/card-back.png');
-        
-        // 載入卡片正面背景
-        this.load.image('card-front-bg', '/images/card-front-bg.png');
-        
+        // 🎴 載入卡片背面圖片
+        this.load.image('card-back', '/games/speaking-cards/assets/card_back.png');
+
+        // 🎴 載入卡片正面背景
+        this.load.image('card_front', '/games/speaking-cards/assets/card_front.png');
+
         // 載入遊戲背景
         this.load.image('game-bg', '/images/speaking-cards-bg.png');
 
