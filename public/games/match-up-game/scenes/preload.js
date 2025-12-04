@@ -297,8 +297,8 @@ class PreloadScene extends Phaser.Scene {
     async loadFallbackBackground() {
         try {
             if (!this.textures.exists('game-background')) {
-                console.log('🖼️ PreloadScene: 加載備用背景圖片');
-                this.load.image('game-background', '/games/match-up-game/assets/game_background_4.png');
+                console.log('🖼️ PreloadScene: 加載備用背景圖片 - 精靈王國戰鬥背景 3');
+                this.load.image('game-background', '/games/match-up-game/assets/game_background_3.png');
 
                 await new Promise((resolve) => {
                     this.load.once('complete', () => {
