@@ -380,8 +380,8 @@ class SpeakingCardsGame extends Phaser.Scene {
             container.add(chinese);
         }
 
-        // 語音按鈕
-        if (cardData.audioUrl || cardData.text || cardData.english) {
+        // 🔊 語音按鈕 - 只有有 audioUrl 時才顯示
+        if (cardData.audioUrl) {
             const soundBtn = this.createSoundButton(cardData);
             soundBtn.setPosition(0, this.cardHeight / 2 - 40);
             container.add(soundBtn);
