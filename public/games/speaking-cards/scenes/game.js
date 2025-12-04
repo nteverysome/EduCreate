@@ -5,18 +5,19 @@
 class SpeakingCardsGame extends Phaser.Scene {
     constructor() {
         super({ key: 'SpeakingCardsGame' });
-        
+
         // 遊戲狀態
         this.cards = [];
         this.shuffledCards = [];
         this.currentCardIndex = 0;
         this.isFlipped = false;
+        this.isAnimating = false;  // 防止快速連點
         this.activityTitle = 'Speaking Cards';
-        
+
         // 卡片尺寸 (基於螢幕響應式計算)
         this.cardWidth = 300;
         this.cardHeight = 420;
-        
+
         // UI 元素
         this.deckContainer = null;
         this.dealContainer = null;
@@ -442,7 +443,7 @@ class SpeakingCardsGame extends Phaser.Scene {
 
     // ===== 遊戲邏輯 =====
     handleCardClick() {
-        if (this.shuffledCards.length === 0) return;
+        if (this.shuffledCards.length === 0 || this.isAnimating) return;
 
         if (this.isFlipped) {
             // 已翻開，進入下一張
@@ -456,6 +457,7 @@ class SpeakingCardsGame extends Phaser.Scene {
     flipCard() {
         if (this.currentCardIndex >= this.shuffledCards.length) return;
 
+        this.isAnimating = true;
         this.isFlipped = true;
         const cardData = this.shuffledCards[this.currentCardIndex];
 
@@ -471,7 +473,10 @@ class SpeakingCardsGame extends Phaser.Scene {
             targets: this.dealContainer,
             scaleX: [0, 1],
             duration: 300,
-            ease: 'Back.easeOut'
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                this.isAnimating = false;
+            }
         });
 
         // 🔊 只有沒有 audioUrl 時才自動播放（使用 Web Speech API）
@@ -485,6 +490,7 @@ class SpeakingCardsGame extends Phaser.Scene {
 
     handleNext() {
         if (this.currentCardIndex < this.shuffledCards.length - 1) {
+            this.isAnimating = true;
             this.currentCardIndex++;
             this.isFlipped = true;
 
@@ -502,11 +508,17 @@ class SpeakingCardsGame extends Phaser.Scene {
             }
 
             this.updateProgress();
+
+            // 動畫完成後允許下一次操作
+            this.time.delayedCall(300, () => {
+                this.isAnimating = false;
+            });
         }
     }
 
     handlePrevious() {
         if (this.currentCardIndex > 0) {
+            this.isAnimating = true;
             this.currentCardIndex--;
             this.isFlipped = true;
 
@@ -524,6 +536,11 @@ class SpeakingCardsGame extends Phaser.Scene {
             }
 
             this.updateProgress();
+
+            // 動畫完成後允許下一次操作
+            this.time.delayedCall(300, () => {
+                this.isAnimating = false;
+            });
         }
     }
 
