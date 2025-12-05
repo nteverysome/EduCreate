@@ -13,7 +13,7 @@ export default function SpeakingCardsVisualStylesAdminPage() {
   const [uploadedResources, setUploadedResources] = useState<Record<string, { exists: boolean; url?: string }>>({});
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Speaking Cards 遊戲的視覺風格列表（與 SpeakingCardsStyleSelector 統一）
+  // Speaking Cards 遊戲的視覺風格列表（與 SpeakingCardsStyleSelector 完全統一）
   const visualStyles = [
     { id: 'clouds', name: 'clouds', displayName: '☁️ 雲朵', description: '輕鬆愉快的雲朵主題，適合所有年齡層' },
     { id: 'videogame', name: 'videogame', displayName: '🎮 電子遊戲', description: '復古像素風格，適合遊戲愛好者' },

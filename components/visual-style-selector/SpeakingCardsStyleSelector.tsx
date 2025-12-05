@@ -16,7 +16,6 @@ export interface SpeakingCardsVisualStyle {
 }
 
 export const SPEAKING_CARDS_STYLES: SpeakingCardsVisualStyle[] = [
-  { id: 'default', name: 'default', displayName: '🎴 預設', description: '預設風格', preview: { emoji: '🎴', bgColor: '#f3f4f6', cardColor: '#3b82f6' } },
   { id: 'clouds', name: 'clouds', displayName: '☁️ 雲朵', description: '輕鬆愉快的雲朵主題，適合所有年齡層', preview: { emoji: '☁️', bgColor: '#e0f2fe', cardColor: '#38bdf8' } },
   { id: 'videogame', name: 'videogame', displayName: '🎮 電子遊戲', description: '復古像素風格，適合遊戲愛好者', preview: { emoji: '🎮', bgColor: '#1e1b4b', cardColor: '#a78bfa' } },
   { id: 'magiclibrary', name: 'magiclibrary', displayName: '📚 魔法圖書館', description: '神秘的魔法圖書館主題，充滿魔法氛圍', preview: { emoji: '📚', bgColor: '#422006', cardColor: '#fbbf24' } },
@@ -38,10 +37,8 @@ export default function SpeakingCardsStyleSelector({ selectedStyle, onChange }: 
   useEffect(() => {
     const fetchStyleResources = async () => {
       const resources: Record<string, { background?: string; card_back?: string; card_front?: string }> = {};
-      
+
       for (const style of SPEAKING_CARDS_STYLES) {
-        if (style.id === 'default') continue;
-        
         try {
           const response = await fetch(`/api/visual-styles/upload?styleId=${style.id}&game=speaking-cards`);
           if (response.ok) {
