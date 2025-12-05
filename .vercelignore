@@ -117,17 +117,6 @@ test-results/
 
 # 測試影片和 MCP 工具
 EduCreate-Test-Videos/
-games/airplane-game/node_modules/
-games/airplane-game/dist/
-games/airplane-game/src/
-games/airplane-game/public/
-games/airplane-game/scripts/
-games/airplane-game/assets/
-games/airplane-game/vite.config.ts
-games/airplane-game/package.json
-games/airplane-game/package-lock.json
-games/airplane-game/tsconfig.json
-games/airplane-game/index.html
 
 # 不相關的項目目錄
 EduCreate/autogen-microsoft/

@@ -260,19 +260,6 @@ export const MEDIUM_GAMES: GameConfig[] = [
 // 重型遊戲配置 (記憶體使用 >60MB, 載入時間 >1200ms, 使用 Phaser 或複雜動畫)
 export const HEAVYWEIGHT_GAMES: GameConfig[] = [
   {
-    id: 'airplane',
-    name: 'airplane',
-    displayName: '飛機碰撞遊戲 (Vite + Phaser3)',
-    type: 'heavyweight',
-    loadStrategy: 'iframe',
-    memoryLimit: 80,
-    estimatedLoadTime: 1200,
-    requiresPhaser: true,
-    requiresAudio: true,
-    iframeUrl: 'http://localhost:3004/games/airplane-game/', // 本地 Vite 開發服務器
-    componentPath: './VitePhaserGame'
-  },
-  {
     id: 'maze-chase',
     name: 'maze-chase',
     displayName: '迷宮追逐',

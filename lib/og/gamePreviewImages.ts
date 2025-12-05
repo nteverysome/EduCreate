@@ -21,23 +21,6 @@ export interface GamePreviewConfig {
  * 3. 默認漸變背景
  */
 export const GAME_PREVIEW_CONFIGS: { [key: string]: GamePreviewConfig } = {
-  // 飛機遊戲
-  'airplane': {
-    id: 'airplane',
-    name: 'airplane',
-    displayName: '飛機遊戲',
-    previewImage: '/games/airplane-vite/index.html', // 使用遊戲 URL
-    icon: '✈️',
-    gradient: { from: '#0ea5e9', to: '#3b82f6' }
-  },
-  'airplane-vite': {
-    id: 'airplane-vite',
-    name: 'airplane',
-    displayName: '飛機遊戲 (Vite版)',
-    previewImage: '/games/airplane-vite/index.html',
-    icon: '⚡',
-    gradient: { from: '#0ea5e9', to: '#3b82f6' }
-  },
 
   // Shimozurdo 雲朵遊戲
   'shimozurdo': {

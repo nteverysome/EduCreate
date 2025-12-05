@@ -1074,9 +1074,6 @@ const GameSwitcherPage: React.FC = () => {
     const gameNames: Record<string, string> = {
       'shimozurdo-game': 'Shimozurdo 雲朵遊戲',
       'shimozurdo-responsive': 'shimozurdo 響應式遊戲',
-      'airplane-vite': '飛機遊戲 (Vite版)',
-      'airplane-main': '飛機碰撞遊戲',
-      'airplane-iframe': '飛機遊戲 (iframe)',
       'matching-pairs': '配對遊戲',
       'quiz-game': '問答遊戲',
       'sequence-game': '序列遊戲',

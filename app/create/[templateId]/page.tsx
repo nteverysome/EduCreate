@@ -29,33 +29,6 @@ import type { VocabularyItem } from '@/lib/vocabulary/loadVocabularyData';
 
 // 實際遊戲配置（來自 /games/switcher）
 const gameTemplateConfig = {
-  'airplane-vite': {
-    name: '飛機遊戲 (Vite版)',
-    description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
-    icon: '⚡',
-    category: '動態反應記憶',
-    minItems: 3,
-    maxItems: 100,
-    inputType: 'vocabulary' // 單字類型
-  },
-  'airplane-game': {
-    name: '飛機碰撞遊戲',
-    description: '通過飛機碰撞雲朵學習英語詞彙，基於主動回憶和視覺記憶原理',
-    icon: '✈️',
-    category: '動態反應記憶',
-    minItems: 3,
-    maxItems: 100,
-    inputType: 'vocabulary'
-  },
-  'airplane-iframe': {
-    name: '飛機遊戲 (iframe版)',
-    description: 'Phaser 3 + Vite 完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
-    icon: '🎮',
-    category: '動態反應記憶',
-    minItems: 3,
-    maxItems: 100,
-    inputType: 'vocabulary'
-  },
   'blastemup-game': {
     name: 'Blastemup 太空射擊',
     description: '駕駛太空船在宇宙中戰鬥，射擊敵人和小行星。經典的太空射擊遊戲，訓練反應速度和手眼協調',
