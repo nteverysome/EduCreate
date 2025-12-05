@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import SpeakingCardsStyleSelector from '@/components/visual-style-selector/SpeakingCardsStyleSelector';
 
 export interface SpeakingCardsOptions {
   timer: {
@@ -12,6 +13,7 @@ export interface SpeakingCardsOptions {
   autoPlayAudio: boolean;  // 自動播放語音
   showTranslation: boolean;  // 顯示翻譯
   cardStyle: 'classic' | 'modern' | 'minimal';  // 卡片樣式
+  visualStyle: string;  // 視覺風格 ID
 }
 
 export const DEFAULT_SPEAKING_CARDS_OPTIONS: SpeakingCardsOptions = {
@@ -24,6 +26,7 @@ export const DEFAULT_SPEAKING_CARDS_OPTIONS: SpeakingCardsOptions = {
   autoPlayAudio: true,
   showTranslation: true,
   cardStyle: 'classic',
+  visualStyle: 'default',
 };
 
 interface SpeakingCardsOptionsPanelProps {
@@ -182,6 +185,14 @@ const SpeakingCardsOptionsPanel: React.FC<SpeakingCardsOptionsPanelProps> = ({
       {/* 詞彙數量提示 */}
       <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
         📚 當前詞彙數量：<strong>{totalVocabulary}</strong> 個單字
+      </div>
+
+      {/* 視覺風格選擇器 */}
+      <div className="mt-4">
+        <SpeakingCardsStyleSelector
+          selectedStyle={options.visualStyle || 'default'}
+          onChange={(styleId) => updateOptions({ visualStyle: styleId })}
+        />
       </div>
     </div>
   );

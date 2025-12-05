@@ -518,6 +518,10 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         url += `&shuffle=${speakingCardsOptions.shuffle}`;
         url += `&autoPlayAudio=${speakingCardsOptions.autoPlayAudio}`;
         url += `&showTranslation=${speakingCardsOptions.showTranslation}`;
+        // 添加視覺風格
+        if (speakingCardsOptions.visualStyle) {
+          url += `&visualStyle=${speakingCardsOptions.visualStyle}`;
+        }
         console.log('🎴 Speaking Cards 選項已添加到 URL:', speakingCardsOptions);
       }
     }
