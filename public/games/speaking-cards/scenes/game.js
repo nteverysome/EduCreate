@@ -36,6 +36,9 @@ class SpeakingCardsGame extends Phaser.Scene {
         this.timerEvent = null;
         this.timerText = null;
 
+        // 聲音狀態
+        this.isSoundEnabled = true;  // 聲音是否啟用
+
         // 卡片尺寸 (基於螢幕響應式計算)
         this.cardWidth = 300;
         this.cardHeight = 420;
@@ -519,7 +522,22 @@ class SpeakingCardsGame extends Phaser.Scene {
         btn.setInteractive({ useHandCursor: true });
         btn.on('pointerdown', (pointer) => {
             pointer.event.stopPropagation();
-            this.playCardAudio(cardData);
+            // 切換聲音狀態
+            this.isSoundEnabled = !this.isSoundEnabled;
+            console.log('🔊 聲音狀態:', this.isSoundEnabled ? '啟用' : '禁用');
+
+            // 發送消息給父窗口（React 選項面板）
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'SPEAKING_CARDS_SOUND_TOGGLE',
+                    soundEnabled: this.isSoundEnabled
+                }, '*');
+            }
+
+            // 如果聲音啟用，播放當前卡片語音
+            if (this.isSoundEnabled) {
+                this.playCardAudio(cardData);
+            }
         });
 
         return btn;
@@ -813,6 +831,12 @@ class SpeakingCardsGame extends Phaser.Scene {
     }
 
     playCardAudio(cardData) {
+        // 檢查聲音是否啟用
+        if (!this.isSoundEnabled) {
+            console.log('🔇 聲音已禁用，不播放');
+            return;
+        }
+
         // 優先使用 audioUrl
         if (cardData.audioUrl) {
             const audio = new Audio(cardData.audioUrl);
