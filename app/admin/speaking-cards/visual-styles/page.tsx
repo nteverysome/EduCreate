@@ -13,9 +13,9 @@ export default function SpeakingCardsVisualStylesAdminPage() {
   const [uploadedResources, setUploadedResources] = useState<Record<string, { exists: boolean; url?: string }>>({});
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Speaking Cards 遊戲的視覺風格列表
+  // Speaking Cards 遊戲的視覺風格列表（與 SpeakingCardsStyleSelector 統一）
   const visualStyles = [
-    { id: 'classic', name: 'classic', displayName: '🎴 經典', description: '經典優雅的卡片風格' },
+    { id: 'classic', name: 'classic', displayName: '🎩 經典', description: '經典優雅的卡片風格' },
     { id: 'modern', name: 'modern', displayName: '✨ 現代', description: '簡約現代的設計風格' },
     { id: 'kids', name: 'kids', displayName: '🧸 兒童', description: '適合兒童的可愛風格' },
     { id: 'nature', name: 'nature', displayName: '🌿 自然', description: '清新自然的綠色主題' },

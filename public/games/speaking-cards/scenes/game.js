@@ -110,21 +110,35 @@ class SpeakingCardsGame extends Phaser.Scene {
             console.log('📝 顯示翻譯:', this.options.showTranslation);
         }
 
-        console.log('🎮 遊戲選項:', this.options);
+        // 🎨 讀取視覺風格
+        const visualStyle = urlParams.get('visualStyle');
+        if (visualStyle && visualStyle !== 'default') {
+            this.options.visualStyle = visualStyle;
+            console.log('� 視覺風格:', visualStyle);
+        } else {
+            this.options.visualStyle = 'default';
+        }
+
+        console.log('�🎮 遊戲選項:', this.options);
     }
 
-    create() {
+    async create() {
         console.log('🎮 Speaking Cards: 創建遊戲場景');
-        
+
+        // 🎨 如果有自定義視覺風格，先載入資源
+        if (this.options.visualStyle && this.options.visualStyle !== 'default') {
+            await this.loadVisualStyleResources(this.options.visualStyle);
+        }
+
         // 計算響應式尺寸
         this.calculateResponsiveSize();
-        
+
         // 創建背景
         this.createBackground();
-        
+
         // 創建 UI
         this.createUI();
-        
+
         // 載入活動數據
         if (this.activityId && this.cards.length === 0) {
             this.loadActivity();
@@ -139,6 +153,78 @@ class SpeakingCardsGame extends Phaser.Scene {
 
         // 監聽視窗大小變化
         this.scale.on('resize', this.handleResize, this);
+    }
+
+    /**
+     * 🎨 載入視覺風格資源
+     */
+    async loadVisualStyleResources(styleId) {
+        console.log('🎨 載入視覺風格資源:', styleId);
+
+        try {
+            const response = await fetch(`/api/visual-styles/upload?styleId=${styleId}&game=speaking-cards`);
+            if (!response.ok) {
+                console.warn('⚠️ 獲取視覺風格資源失敗');
+                return;
+            }
+
+            const data = await response.json();
+            const resources = data.resources;
+            console.log('🎨 獲取到的資源:', resources);
+
+            // 動態載入並替換紋理
+            const loadPromises = [];
+
+            if (resources?.background?.exists && resources.background.url) {
+                console.log('🖼️ 載入自定義背景:', resources.background.url);
+                loadPromises.push(this.loadTextureFromUrl('game_background_3', resources.background.url));
+            }
+
+            if (resources?.card_back?.exists && resources.card_back.url) {
+                console.log('🎴 載入自定義卡片背面:', resources.card_back.url);
+                loadPromises.push(this.loadTextureFromUrl('card-back', resources.card_back.url));
+            }
+
+            if (resources?.card_front?.exists && resources.card_front.url) {
+                console.log('📄 載入自定義卡片正面:', resources.card_front.url);
+                loadPromises.push(this.loadTextureFromUrl('card_front', resources.card_front.url));
+            }
+
+            await Promise.all(loadPromises);
+            console.log('✅ 視覺風格資源載入完成');
+
+        } catch (error) {
+            console.error('❌ 載入視覺風格資源失敗:', error);
+        }
+    }
+
+    /**
+     * 🖼️ 從 URL 載入並替換紋理
+     */
+    loadTextureFromUrl(key, url) {
+        return new Promise((resolve, reject) => {
+            // 先移除舊的紋理
+            if (this.textures.exists(key)) {
+                this.textures.remove(key);
+            }
+
+            // 載入新紋理
+            this.load.image(key, url);
+
+            this.load.once('filecomplete-image-' + key, () => {
+                console.log('✅ 紋理載入完成:', key);
+                resolve();
+            });
+
+            this.load.once('loaderror', (file) => {
+                if (file.key === key) {
+                    console.warn('⚠️ 紋理載入失敗:', key);
+                    reject(new Error(`Failed to load texture: ${key}`));
+                }
+            });
+
+            this.load.start();
+        });
     }
 
     calculateResponsiveSize() {

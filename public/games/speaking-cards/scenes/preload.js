@@ -16,49 +16,16 @@ class PreloadScene extends Phaser.Scene {
         console.log('🎨 Speaking Cards: 視覺風格 =', this.visualStyle);
     }
 
-    async preload() {
+    preload() {
         console.log('📦 Speaking Cards: 開始預載入資源');
 
         // 創建載入進度條
         this.createLoadingBar();
 
-        // 如果不是預設風格，先獲取自定義資源 URL
-        if (this.visualStyle !== 'default') {
-            try {
-                const response = await fetch(`/api/visual-styles/upload?styleId=${this.visualStyle}&game=speaking-cards`);
-                if (response.ok) {
-                    const data = await response.json();
-                    this.styleResources = data.resources;
-                    console.log('🎨 已獲取視覺風格資源:', this.styleResources);
-                }
-            } catch (error) {
-                console.warn('⚠️ 獲取視覺風格資源失敗:', error);
-            }
-        }
-
-        // 🎴 載入卡片背面圖片
-        if (this.styleResources?.card_back?.exists && this.styleResources.card_back.url) {
-            this.load.image('card-back', this.styleResources.card_back.url);
-            console.log('🎴 載入自定義卡片背面:', this.styleResources.card_back.url);
-        } else {
-            this.load.image('card-back', '/games/speaking-cards/assets/card_back.png');
-        }
-
-        // 🎴 載入卡片正面背景
-        if (this.styleResources?.card_front?.exists && this.styleResources.card_front.url) {
-            this.load.image('card_front', this.styleResources.card_front.url);
-            console.log('🎴 載入自定義卡片正面:', this.styleResources.card_front.url);
-        } else {
-            this.load.image('card_front', '/games/speaking-cards/assets/card_front.png');
-        }
-
-        // 🎨 載入遊戲背景
-        if (this.styleResources?.background?.exists && this.styleResources.background.url) {
-            this.load.image('game_background_3', this.styleResources.background.url);
-            console.log('🎨 載入自定義背景:', this.styleResources.background.url);
-        } else {
-            this.load.image('game_background_3', '/games/speaking-cards/assets/game_background_3.png');
-        }
+        // 先載入預設資源
+        this.load.image('card-back', '/games/speaking-cards/assets/card_back.png');
+        this.load.image('card_front', '/games/speaking-cards/assets/card_front.png');
+        this.load.image('game_background_3', '/games/speaking-cards/assets/game_background_3.png');
 
         // 監聽載入進度
         this.load.on('progress', (value) => {
@@ -74,7 +41,7 @@ class PreloadScene extends Phaser.Scene {
 
         // 載入完成
         this.load.on('complete', () => {
-            console.log('✅ Speaking Cards: 資源載入完成');
+            console.log('✅ Speaking Cards: 預設資源載入完成');
         });
 
         // 處理載入錯誤
