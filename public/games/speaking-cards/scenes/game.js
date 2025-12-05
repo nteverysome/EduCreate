@@ -1,6 +1,11 @@
 /**
  * Speaking Cards - Main Game Scene
  * 語音卡片遊戲主場景
+ *
+ * 選項功能（參考 Wordwall）：
+ * - Timer: None / Count up / Count down
+ * - Number of deal places: 1-4
+ * - Shuffle: 開/關
  */
 class SpeakingCardsGame extends Phaser.Scene {
     constructor() {
@@ -14,6 +19,21 @@ class SpeakingCardsGame extends Phaser.Scene {
         this.isAnimating = false;  // 防止快速連點
         this.activityTitle = 'Speaking Cards';
 
+        // 🎮 遊戲選項（參考 Wordwall）
+        this.options = {
+            timer: 'none',           // 'none' | 'countUp' | 'countDown'
+            timerMinutes: 5,         // 倒計時分鐘
+            timerSeconds: 0,         // 倒計時秒數
+            dealPlaces: 1,           // 同時顯示卡片數量 1-4
+            shuffle: true            // 是否洗牌
+        };
+
+        // 計時器狀態
+        this.timerValue = 0;         // 當前計時值（秒）
+        this.timerRunning = false;
+        this.timerEvent = null;
+        this.timerText = null;
+
         // 卡片尺寸 (基於螢幕響應式計算)
         this.cardWidth = 300;
         this.cardHeight = 420;
@@ -21,10 +41,13 @@ class SpeakingCardsGame extends Phaser.Scene {
         // UI 元素
         this.deckContainer = null;
         this.dealContainer = null;
+        this.dealContainers = [];    // 多卡片模式
         this.currentCard = null;
         this.cardBack = null;
         this.titleText = null;
         this.progressText = null;
+        this.optionsPanel = null;
+        this.optionsVisible = false;
     }
 
     init(data) {
@@ -162,6 +185,19 @@ class SpeakingCardsGame extends Phaser.Scene {
             color: '#6b7280'
         }).setOrigin(0.5).setDepth(100);
 
+        // ⏱️ 計時器顯示 - 在右上角
+        const timerX = width - 80;
+        const timerY = isLandscape ? this.topPadding : 30;
+        this.timerText = this.add.text(timerX, timerY, '', {
+            fontFamily: 'Arial',
+            fontSize: `${fontSize}px`,
+            fontStyle: 'bold',
+            color: '#ef4444',
+            backgroundColor: '#fef2f2',
+            padding: { x: 10, y: 5 }
+        }).setOrigin(0.5).setDepth(100);
+        this.timerText.setVisible(false);
+
         // 創建控制按鈕
         this.createControlButtons();
     }
@@ -172,13 +208,13 @@ class SpeakingCardsGame extends Phaser.Scene {
 
         // 🔧 按鈕位置 - 橫向模式在 85% 高度，更大的按鈕
         const buttonY = isLandscape ? height * 0.85 : height * 0.90;
-        const buttonWidth = isLandscape ? 80 : 110;
-        const buttonHeight = isLandscape ? 40 : 48;
+        const buttonWidth = isLandscape ? 70 : 100;
+        const buttonHeight = isLandscape ? 36 : 44;
 
-        // 三個按鈕的間距計算
-        const totalWidth = buttonWidth * 3 + 40;  // 3個按鈕 + 2個間距
+        // 四個按鈕的間距計算
+        const totalWidth = buttonWidth * 4 + 45;  // 4個按鈕 + 3個間距
         const startX = (width - totalWidth) / 2 + buttonWidth / 2;
-        const gap = buttonWidth + 20;
+        const gap = buttonWidth + 15;
 
         // ◀ 上一張按鈕
         this.prevBtn = this.createButton(startX, buttonY, '◀', () => {
@@ -194,6 +230,11 @@ class SpeakingCardsGame extends Phaser.Scene {
         this.nextBtn = this.createButton(startX + gap * 2, buttonY, '▶', () => {
             this.handleNext();
         }, buttonWidth, buttonHeight, 0x10b981);
+
+        // ⚙️ 設置按鈕
+        this.settingsBtn = this.createButton(startX + gap * 3, buttonY, '⚙️', () => {
+            this.toggleOptionsPanel();
+        }, buttonWidth, buttonHeight, 0x8b5cf6);
     }
 
     createButton(x, y, label, callback, btnWidth = 120, btnHeight = 40, bgColor = 0x4b5563) {
@@ -566,7 +607,12 @@ class SpeakingCardsGame extends Phaser.Scene {
     }
 
     handleShuffle() {
-        this.shuffledCards = this.shuffleArray([...this.cards]);
+        if (!this.options.shuffle) {
+            // 如果洗牌關閉，恢復原始順序
+            this.shuffledCards = [...this.cards];
+        } else {
+            this.shuffledCards = this.shuffleArray([...this.cards]);
+        }
         this.currentCardIndex = 0;
         this.isFlipped = false;
 
@@ -574,12 +620,329 @@ class SpeakingCardsGame extends Phaser.Scene {
         this.dealContainer.removeAll(true);
         this.createEmptySlot();
 
+        // 重置計時器
+        this.resetTimer();
+
         this.updateProgress();
         console.log('🔀 重新洗牌');
     }
 
     handleUndo() {
         this.handlePrevious();
+    }
+
+    // ===== 計時器功能 =====
+    startTimer() {
+        if (this.options.timer === 'none') return;
+
+        this.timerRunning = true;
+        this.timerText.setVisible(true);
+
+        if (this.options.timer === 'countDown') {
+            this.timerValue = this.options.timerMinutes * 60 + this.options.timerSeconds;
+        } else {
+            this.timerValue = 0;
+        }
+
+        this.updateTimerDisplay();
+
+        // 每秒更新計時器
+        this.timerEvent = this.time.addEvent({
+            delay: 1000,
+            callback: this.updateTimer,
+            callbackScope: this,
+            loop: true
+        });
+    }
+
+    updateTimer() {
+        if (!this.timerRunning) return;
+
+        if (this.options.timer === 'countUp') {
+            this.timerValue++;
+        } else if (this.options.timer === 'countDown') {
+            this.timerValue--;
+            if (this.timerValue <= 0) {
+                this.timerValue = 0;
+                this.stopTimer();
+                this.onTimerEnd();
+            }
+        }
+
+        this.updateTimerDisplay();
+    }
+
+    updateTimerDisplay() {
+        const minutes = Math.floor(this.timerValue / 60);
+        const seconds = this.timerValue % 60;
+        const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        this.timerText.setText(`⏱️ ${display}`);
+
+        // 倒計時最後 30 秒變紅色
+        if (this.options.timer === 'countDown' && this.timerValue <= 30) {
+            this.timerText.setColor('#dc2626');
+        } else {
+            this.timerText.setColor('#1f2937');
+        }
+    }
+
+    stopTimer() {
+        this.timerRunning = false;
+        if (this.timerEvent) {
+            this.timerEvent.remove();
+            this.timerEvent = null;
+        }
+    }
+
+    resetTimer() {
+        this.stopTimer();
+        if (this.options.timer !== 'none') {
+            this.startTimer();
+        } else {
+            this.timerText.setVisible(false);
+        }
+    }
+
+    onTimerEnd() {
+        // 計時結束提示
+        console.log('⏱️ 時間到！');
+        // 可以添加音效或視覺提示
+    }
+
+    // ===== 選項面板 =====
+    toggleOptionsPanel() {
+        if (this.optionsVisible) {
+            this.hideOptionsPanel();
+        } else {
+            this.showOptionsPanel();
+        }
+    }
+
+    showOptionsPanel() {
+        if (this.optionsPanel) this.optionsPanel.destroy();
+
+        const { width, height } = this.scale;
+        const panelWidth = Math.min(350, width * 0.9);
+        const panelHeight = Math.min(400, height * 0.7);
+
+        this.optionsPanel = this.add.container(width / 2, height / 2);
+        this.optionsPanel.setDepth(200);
+
+        // 背景遮罩
+        const overlay = this.add.graphics();
+        overlay.fillStyle(0x000000, 0.5);
+        overlay.fillRect(-width / 2, -height / 2, width, height);
+        overlay.setInteractive(new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height), Phaser.Geom.Rectangle.Contains);
+        this.optionsPanel.add(overlay);
+
+        // 面板背景
+        const panelBg = this.add.graphics();
+        panelBg.fillStyle(0xffffff, 1);
+        panelBg.fillRoundedRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 16);
+        panelBg.lineStyle(2, 0xe5e7eb, 1);
+        panelBg.strokeRoundedRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 16);
+        this.optionsPanel.add(panelBg);
+
+        // 標題
+        const title = this.add.text(0, -panelHeight / 2 + 30, '⚙️ 遊戲設置', {
+            fontFamily: 'Arial',
+            fontSize: '20px',
+            fontStyle: 'bold',
+            color: '#1f2937'
+        }).setOrigin(0.5);
+        this.optionsPanel.add(title);
+
+        let currentY = -panelHeight / 2 + 70;
+
+        // === Timer 選項 ===
+        const timerLabel = this.add.text(-panelWidth / 2 + 20, currentY, '⏱️ 計時器', {
+            fontFamily: 'Arial', fontSize: '16px', fontStyle: 'bold', color: '#374151'
+        });
+        this.optionsPanel.add(timerLabel);
+        currentY += 30;
+
+        // Timer 選項按鈕
+        const timerOptions = [
+            { value: 'none', label: '無' },
+            { value: 'countUp', label: '正計時' },
+            { value: 'countDown', label: '倒計時' }
+        ];
+        const btnWidth = 80;
+        const startX = -panelWidth / 2 + 30;
+        timerOptions.forEach((opt, i) => {
+            const btn = this.createOptionButton(
+                startX + i * (btnWidth + 10) + btnWidth / 2, currentY + 15,
+                opt.label, btnWidth, 30,
+                this.options.timer === opt.value,
+                () => {
+                    this.options.timer = opt.value;
+                    this.refreshOptionsPanel();
+                }
+            );
+            this.optionsPanel.add(btn);
+        });
+        currentY += 55;
+
+        // 倒計時時間設置（只在 countDown 模式顯示）
+        if (this.options.timer === 'countDown') {
+            const timeLabel = this.add.text(-panelWidth / 2 + 20, currentY, '時間設置:', {
+                fontFamily: 'Arial', fontSize: '14px', color: '#6b7280'
+            });
+            this.optionsPanel.add(timeLabel);
+
+            // 分鐘 +/- 按鈕
+            const minLabel = this.add.text(startX + 100, currentY, `${this.options.timerMinutes} 分`, {
+                fontFamily: 'Arial', fontSize: '16px', color: '#1f2937'
+            });
+            this.optionsPanel.add(minLabel);
+
+            const minMinus = this.createSmallButton(startX + 70, currentY, '-', () => {
+                if (this.options.timerMinutes > 0) {
+                    this.options.timerMinutes--;
+                    this.refreshOptionsPanel();
+                }
+            });
+            const minPlus = this.createSmallButton(startX + 150, currentY, '+', () => {
+                if (this.options.timerMinutes < 30) {
+                    this.options.timerMinutes++;
+                    this.refreshOptionsPanel();
+                }
+            });
+            this.optionsPanel.add(minMinus);
+            this.optionsPanel.add(minPlus);
+
+            // 秒數 +/- 按鈕
+            const secLabel = this.add.text(startX + 220, currentY, `${this.options.timerSeconds} 秒`, {
+                fontFamily: 'Arial', fontSize: '16px', color: '#1f2937'
+            });
+            this.optionsPanel.add(secLabel);
+
+            const secMinus = this.createSmallButton(startX + 190, currentY, '-', () => {
+                if (this.options.timerSeconds > 0) {
+                    this.options.timerSeconds -= 10;
+                    this.refreshOptionsPanel();
+                }
+            });
+            const secPlus = this.createSmallButton(startX + 270, currentY, '+', () => {
+                if (this.options.timerSeconds < 50) {
+                    this.options.timerSeconds += 10;
+                    this.refreshOptionsPanel();
+                }
+            });
+            this.optionsPanel.add(secMinus);
+            this.optionsPanel.add(secPlus);
+
+            currentY += 40;
+        }
+
+        currentY += 20;
+
+        // === Shuffle 選項 ===
+        const shuffleLabel = this.add.text(-panelWidth / 2 + 20, currentY, '🔀 洗牌順序', {
+            fontFamily: 'Arial', fontSize: '16px', fontStyle: 'bold', color: '#374151'
+        });
+        this.optionsPanel.add(shuffleLabel);
+
+        const shuffleToggle = this.createToggleButton(
+            panelWidth / 2 - 60, currentY,
+            this.options.shuffle,
+            (value) => {
+                this.options.shuffle = value;
+                this.refreshOptionsPanel();
+            }
+        );
+        this.optionsPanel.add(shuffleToggle);
+        currentY += 50;
+
+        // === 關閉按鈕 ===
+        const closeBtn = this.createButton(0, panelHeight / 2 - 40, '✓ 確定', () => {
+            this.hideOptionsPanel();
+            this.applyOptions();
+        }, 120, 40, 0x10b981);
+        this.optionsPanel.add(closeBtn);
+
+        this.optionsVisible = true;
+    }
+
+    hideOptionsPanel() {
+        if (this.optionsPanel) {
+            this.optionsPanel.destroy();
+            this.optionsPanel = null;
+        }
+        this.optionsVisible = false;
+    }
+
+    refreshOptionsPanel() {
+        this.hideOptionsPanel();
+        this.showOptionsPanel();
+    }
+
+    applyOptions() {
+        // 應用洗牌設置
+        if (this.options.shuffle) {
+            this.shuffledCards = this.shuffleArray([...this.cards]);
+        } else {
+            this.shuffledCards = [...this.cards];
+        }
+
+        // 重置遊戲狀態
+        this.currentCardIndex = 0;
+        this.isFlipped = false;
+        this.dealContainer.removeAll(true);
+        this.createEmptySlot();
+        this.updateProgress();
+
+        // 應用計時器設置
+        this.resetTimer();
+
+        console.log('⚙️ 選項已應用:', this.options);
+    }
+
+    createOptionButton(x, y, label, w, h, isActive, callback) {
+        const btn = this.add.container(x, y);
+        const bg = this.add.graphics();
+        bg.fillStyle(isActive ? 0x3b82f6 : 0xe5e7eb, 1);
+        bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
+        const text = this.add.text(0, 0, label, {
+            fontFamily: 'Arial', fontSize: '14px',
+            color: isActive ? '#ffffff' : '#374151'
+        }).setOrigin(0.5);
+        btn.add([bg, text]);
+        btn.setSize(w, h);
+        btn.setInteractive({ useHandCursor: true });
+        btn.on('pointerdown', callback);
+        return btn;
+    }
+
+    createSmallButton(x, y, label, callback) {
+        const btn = this.add.container(x, y);
+        const bg = this.add.graphics();
+        bg.fillStyle(0xe5e7eb, 1);
+        bg.fillCircle(0, 0, 15);
+        const text = this.add.text(0, 0, label, {
+            fontFamily: 'Arial', fontSize: '16px', fontStyle: 'bold', color: '#374151'
+        }).setOrigin(0.5);
+        btn.add([bg, text]);
+        btn.setSize(30, 30);
+        btn.setInteractive({ useHandCursor: true });
+        btn.on('pointerdown', callback);
+        return btn;
+    }
+
+    createToggleButton(x, y, isOn, callback) {
+        const btn = this.add.container(x, y);
+        const w = 50, h = 26;
+        const bg = this.add.graphics();
+        bg.fillStyle(isOn ? 0x10b981 : 0xd1d5db, 1);
+        bg.fillRoundedRect(-w / 2, -h / 2, w, h, h / 2);
+        const circle = this.add.graphics();
+        circle.fillStyle(0xffffff, 1);
+        circle.fillCircle(isOn ? w / 2 - 13 : -w / 2 + 13, 0, 10);
+        btn.add([bg, circle]);
+        btn.setSize(w, h);
+        btn.setInteractive({ useHandCursor: true });
+        btn.on('pointerdown', () => callback(!isOn));
+        return btn;
     }
 
     // ===== 輔助方法 =====
