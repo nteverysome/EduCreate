@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 export interface SpeakingCardsOptions {
   timer: {
@@ -12,7 +12,6 @@ export interface SpeakingCardsOptions {
   autoPlayAudio: boolean;  // 自動播放語音
   showTranslation: boolean;  // 顯示翻譯
   cardStyle: 'classic' | 'modern' | 'minimal';  // 卡片樣式
-  soundEnabled?: boolean;  // 遊戲中的聲音是否啟用
 }
 
 export const DEFAULT_SPEAKING_CARDS_OPTIONS: SpeakingCardsOptions = {
@@ -25,7 +24,6 @@ export const DEFAULT_SPEAKING_CARDS_OPTIONS: SpeakingCardsOptions = {
   autoPlayAudio: true,
   showTranslation: true,
   cardStyle: 'classic',
-  soundEnabled: true,
 };
 
 interface SpeakingCardsOptionsPanelProps {
@@ -39,21 +37,6 @@ const SpeakingCardsOptionsPanel: React.FC<SpeakingCardsOptionsPanelProps> = ({
   onChange,
   totalVocabulary = 30,
 }) => {
-  const [soundEnabled, setSoundEnabled] = useState(options.soundEnabled ?? true);
-
-  // 監聽來自 Phaser 遊戲的聲音狀態變化
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === 'SPEAKING_CARDS_SOUND_TOGGLE') {
-        setSoundEnabled(event.data.soundEnabled);
-        console.log('📢 收到遊戲聲音狀態:', event.data.soundEnabled ? '啟用' : '禁用');
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
   const updateOptions = (updates: Partial<SpeakingCardsOptions>) => {
     onChange({ ...options, ...updates });
   };
@@ -191,25 +174,6 @@ const SpeakingCardsOptionsPanel: React.FC<SpeakingCardsOptionsPanelProps> = ({
                 />
                 <span>在卡片上顯示中文翻譯</span>
               </label>
-            </td>
-          </tr>
-
-          {/* 遊戲聲音狀態 */}
-          <tr className="border-b border-gray-200">
-            <td className="py-3 pr-4 font-medium">🔊 遊戲聲音</td>
-            <td className="py-3">
-              <div className="flex items-center gap-2">
-                <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                  soundEnabled
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-red-100 text-red-700'
-                }`}>
-                  {soundEnabled ? '✅ 啟用' : '❌ 禁用'}
-                </span>
-                <span className="text-sm text-gray-600">
-                  點擊遊戲中的 🔊 按鈕切換聲音
-                </span>
-              </div>
             </td>
           </tr>
         </tbody>
