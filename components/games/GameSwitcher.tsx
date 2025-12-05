@@ -54,20 +54,6 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
   {
     id: 'shimozurdo-game',
     name: 'shimozurdo',
-    displayName: '🎮 Shimozurdo 遊戲',
-    description: '記憶科學驅動的英語詞彙學習遊戲',
-    type: 'iframe',
-    memoryType: '動態反應記憶',
-    geptLevels: ['elementary', 'intermediate', 'advanced'],
-    status: 'completed',
-    icon: '⚡',
-    estimatedLoadTime: 600,
-    hidden: false  // 顯示在切換遊戲選單中
-  },
-
-  {
-    id: 'shimozurdo-game',
-    name: 'shimozurdo',
     displayName: 'Shimozurdo 雲朵遊戲',
     description: '雲朵碰撞遊戲，支援全螢幕和響應式設計，記憶科學驅動的英語學習',
     type: 'iframe',
