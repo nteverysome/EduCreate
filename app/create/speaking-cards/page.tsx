@@ -216,7 +216,7 @@ export default function SpeakingCardsCreatePage() {
 
       if (response.ok) {
         const savedActivity = await response.json();
-        router.push(`/play/speaking-cards?activityId=${savedActivity.id}`);
+        router.push(`/games/switcher?game=speaking-cards&activityId=${savedActivity.id}`);
       } else {
         const error = await response.json();
         alert(error.error || '保存失敗');
