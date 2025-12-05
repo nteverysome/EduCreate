@@ -889,6 +889,7 @@ class SpeakingCardsGame extends Phaser.Scene {
                 this.shuffledCards = this.shuffleArray([...this.cards]);
                 this.createCardDeck();
                 this.createDealArea();
+                this.resetTimer();  // 啟動計時器
                 this.updateProgress();
 
                 console.log('📚 載入活動成功:', this.cards.length, '張卡片');
@@ -911,6 +912,7 @@ class SpeakingCardsGame extends Phaser.Scene {
         this.shuffledCards = this.shuffleArray([...this.cards]);
         this.createCardDeck();
         this.createDealArea();
+        this.resetTimer();  // 啟動計時器
         this.updateProgress();
 
         console.log('📚 載入示範數據');
