@@ -582,8 +582,8 @@ class SpeakingCardsGame extends Phaser.Scene {
         });
 
         // 🔊 根據選項決定是否自動播放語音
-        // 如果 autoPlayAudio 開啟，且沒有 audioUrl 時使用 Web Speech API
-        if (this.options.autoPlayAudio && !cardData.audioUrl && (cardData.text || cardData.english)) {
+        // 只有當有 audioUrl 時才播放
+        if (this.options.autoPlayAudio && cardData.audioUrl) {
             this.playCardAudio(cardData);
         }
 
@@ -605,7 +605,8 @@ class SpeakingCardsGame extends Phaser.Scene {
             this.dealContainer.add(cardFront);
 
             // 🔊 根據選項決定是否自動播放語音
-            if (this.options.autoPlayAudio && !cardData.audioUrl && (cardData.text || cardData.english)) {
+            // 只有勾選自動播放且有 audioUrl 時才播放
+            if (this.options.autoPlayAudio && cardData.audioUrl) {
                 this.playCardAudio(cardData);
             }
 
@@ -633,7 +634,8 @@ class SpeakingCardsGame extends Phaser.Scene {
             this.dealContainer.add(cardFront);
 
             // 🔊 根據選項決定是否自動播放語音
-            if (this.options.autoPlayAudio && !cardData.audioUrl && (cardData.text || cardData.english)) {
+            // 只有當有 audioUrl 時才播放
+            if (this.options.autoPlayAudio && cardData.audioUrl) {
                 this.playCardAudio(cardData);
             }
 
