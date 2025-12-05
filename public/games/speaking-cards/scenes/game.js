@@ -271,10 +271,12 @@ class SpeakingCardsGame extends Phaser.Scene {
             this.handleNext();
         }, buttonWidth, buttonHeight, 0x10b981);
 
-        // 🔊 語音按鈕（播放當前卡片的語音）
-        this.audioBtn = this.createButton(startX + gap * 3, buttonY, '🔊', () => {
-            this.playCurrentCardAudio();
-        }, buttonWidth, buttonHeight, 0x8b5cf6);
+        // 🔊 語音按鈕（播放當前卡片的語音）- 只有當自動播放語音關閉時才顯示
+        if (!this.options.autoPlayAudio) {
+            this.audioBtn = this.createButton(startX + gap * 3, buttonY, '🔊', () => {
+                this.playCurrentCardAudio();
+            }, buttonWidth, buttonHeight, 0x8b5cf6);
+        }
     }
 
     createButton(x, y, label, callback, btnWidth = 120, btnHeight = 40, bgColor = 0x4b5563) {
