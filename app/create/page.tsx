@@ -20,17 +20,6 @@ const gameTemplates = [
     estimatedLoadTime: 800
   },
   {
-    id: 'airplane-vite',
-    name: '飛機遊戲 (Vite版)',
-    description: '完整版飛機碰撞遊戲，記憶科學驅動的英語詞彙學習',
-    icon: '⚡',
-    category: '動態反應記憶',
-    popular: true,
-    status: 'completed',
-    estimatedLoadTime: 600
-  },
-
-  {
     id: 'starshake-game',
     name: 'Starshake 太空冒險',
     description: '一個充滿樂趣的太空冒險動作遊戲',
