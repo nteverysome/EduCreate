@@ -19,13 +19,15 @@ class SpeakingCardsGame extends Phaser.Scene {
         this.isAnimating = false;  // 防止快速連點
         this.activityTitle = 'Speaking Cards';
 
-        // 🎮 遊戲選項（參考 Wordwall）
+        // 🎮 遊戲選項（從外部 React 選項面板傳入）
         this.options = {
             timer: 'none',           // 'none' | 'countUp' | 'countDown'
             timerMinutes: 5,         // 倒計時分鐘
             timerSeconds: 0,         // 倒計時秒數
             dealPlaces: 1,           // 同時顯示卡片數量 1-4
-            shuffle: true            // 是否洗牌
+            shuffle: true,           // 是否洗牌
+            autoPlayAudio: true,     // 自動播放語音
+            showTranslation: true    // 顯示翻譯
         };
 
         // 計時器狀態
@@ -46,8 +48,6 @@ class SpeakingCardsGame extends Phaser.Scene {
         this.cardBack = null;
         this.titleText = null;
         this.progressText = null;
-        this.optionsPanel = null;
-        this.optionsVisible = false;
     }
 
     init(data) {
@@ -60,7 +60,7 @@ class SpeakingCardsGame extends Phaser.Scene {
     parseUrlParams() {
         const urlParams = new URLSearchParams(window.location.search);
         this.activityId = urlParams.get('activityId');
-        
+
         // 嘗試從 URL 獲取詞彙數據
         const vocabParam = urlParams.get('vocabulary');
         if (vocabParam) {
@@ -71,6 +71,43 @@ class SpeakingCardsGame extends Phaser.Scene {
                 console.warn('⚠️ 解析詞彙參數失敗:', e);
             }
         }
+
+        // 🎮 從 URL 讀取遊戲選項（從外部 React 選項面板傳入）
+        const timerType = urlParams.get('timerType');
+        if (timerType) {
+            this.options.timer = timerType;
+            console.log('⏱️ 計時器類型:', timerType);
+        }
+
+        const timerMinutes = urlParams.get('timerMinutes');
+        if (timerMinutes) {
+            this.options.timerMinutes = parseInt(timerMinutes, 10);
+        }
+
+        const timerSeconds = urlParams.get('timerSeconds');
+        if (timerSeconds) {
+            this.options.timerSeconds = parseInt(timerSeconds, 10);
+        }
+
+        const shuffle = urlParams.get('shuffle');
+        if (shuffle !== null) {
+            this.options.shuffle = shuffle === 'true';
+            console.log('🔀 洗牌:', this.options.shuffle);
+        }
+
+        const autoPlayAudio = urlParams.get('autoPlayAudio');
+        if (autoPlayAudio !== null) {
+            this.options.autoPlayAudio = autoPlayAudio === 'true';
+            console.log('🔊 自動播放語音:', this.options.autoPlayAudio);
+        }
+
+        const showTranslation = urlParams.get('showTranslation');
+        if (showTranslation !== null) {
+            this.options.showTranslation = showTranslation === 'true';
+            console.log('📝 顯示翻譯:', this.options.showTranslation);
+        }
+
+        console.log('🎮 遊戲選項:', this.options);
     }
 
     create() {
@@ -231,9 +268,9 @@ class SpeakingCardsGame extends Phaser.Scene {
             this.handleNext();
         }, buttonWidth, buttonHeight, 0x10b981);
 
-        // ⚙️ 設置按鈕
-        this.settingsBtn = this.createButton(startX + gap * 3, buttonY, '⚙️', () => {
-            this.toggleOptionsPanel();
+        // 🔊 語音按鈕（播放當前卡片的語音）
+        this.audioBtn = this.createButton(startX + gap * 3, buttonY, '🔊', () => {
+            this.playCurrentCardAudio();
         }, buttonWidth, buttonHeight, 0x8b5cf6);
     }
 
@@ -415,8 +452,8 @@ class SpeakingCardsGame extends Phaser.Scene {
             currentY += text.height + 8;
         }
 
-        // 中文翻譯 - 淡黃色
-        if (cardData.chinese) {
+        // 中文翻譯 - 淡黃色（根據選項決定是否顯示）
+        if (cardData.chinese && this.options.showTranslation) {
             const fontSizeMultiplier = hasImage ? 0.07 : 0.12;  // 沒有圖片時字體增大到 0.12
             const chinese = this.add.text(0, currentY + 5, cardData.chinese, {
                 fontFamily: 'Arial',
@@ -526,9 +563,9 @@ class SpeakingCardsGame extends Phaser.Scene {
             }
         });
 
-        // 🔊 只有沒有 audioUrl 時才自動播放（使用 Web Speech API）
-        // 如果有 audioUrl，用戶需要點擊聲音按鈕才能播放
-        if (!cardData.audioUrl && (cardData.text || cardData.english)) {
+        // 🔊 根據選項決定是否自動播放語音
+        // 如果 autoPlayAudio 開啟，且沒有 audioUrl 時使用 Web Speech API
+        if (this.options.autoPlayAudio && !cardData.audioUrl && (cardData.text || cardData.english)) {
             this.playCardAudio(cardData);
         }
 
@@ -549,8 +586,8 @@ class SpeakingCardsGame extends Phaser.Scene {
             const cardFront = this.createCardFront(cardData);
             this.dealContainer.add(cardFront);
 
-            // 🔊 只有沒有 audioUrl 時才自動播放
-            if (!cardData.audioUrl && (cardData.text || cardData.english)) {
+            // 🔊 根據選項決定是否自動播放語音
+            if (this.options.autoPlayAudio && !cardData.audioUrl && (cardData.text || cardData.english)) {
                 this.playCardAudio(cardData);
             }
 
@@ -577,8 +614,8 @@ class SpeakingCardsGame extends Phaser.Scene {
             const cardFront = this.createCardFront(cardData);
             this.dealContainer.add(cardFront);
 
-            // 🔊 只有沒有 audioUrl 時才自動播放
-            if (!cardData.audioUrl && (cardData.text || cardData.english)) {
+            // 🔊 根據選項決定是否自動播放語音
+            if (this.options.autoPlayAudio && !cardData.audioUrl && (cardData.text || cardData.english)) {
                 this.playCardAudio(cardData);
             }
 
@@ -709,240 +746,15 @@ class SpeakingCardsGame extends Phaser.Scene {
         // 可以添加音效或視覺提示
     }
 
-    // ===== 選項面板 =====
-    toggleOptionsPanel() {
-        if (this.optionsVisible) {
-            this.hideOptionsPanel();
-        } else {
-            this.showOptionsPanel();
-        }
-    }
-
-    showOptionsPanel() {
-        if (this.optionsPanel) this.optionsPanel.destroy();
-
-        const { width, height } = this.scale;
-        const panelWidth = Math.min(350, width * 0.9);
-        const panelHeight = Math.min(400, height * 0.7);
-
-        this.optionsPanel = this.add.container(width / 2, height / 2);
-        this.optionsPanel.setDepth(200);
-
-        // 背景遮罩
-        const overlay = this.add.graphics();
-        overlay.fillStyle(0x000000, 0.5);
-        overlay.fillRect(-width / 2, -height / 2, width, height);
-        overlay.setInteractive(new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height), Phaser.Geom.Rectangle.Contains);
-        this.optionsPanel.add(overlay);
-
-        // 面板背景
-        const panelBg = this.add.graphics();
-        panelBg.fillStyle(0xffffff, 1);
-        panelBg.fillRoundedRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 16);
-        panelBg.lineStyle(2, 0xe5e7eb, 1);
-        panelBg.strokeRoundedRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 16);
-        this.optionsPanel.add(panelBg);
-
-        // 標題
-        const title = this.add.text(0, -panelHeight / 2 + 30, '⚙️ 遊戲設置', {
-            fontFamily: 'Arial',
-            fontSize: '20px',
-            fontStyle: 'bold',
-            color: '#1f2937'
-        }).setOrigin(0.5);
-        this.optionsPanel.add(title);
-
-        let currentY = -panelHeight / 2 + 70;
-
-        // === Timer 選項 ===
-        const timerLabel = this.add.text(-panelWidth / 2 + 20, currentY, '⏱️ 計時器', {
-            fontFamily: 'Arial', fontSize: '16px', fontStyle: 'bold', color: '#374151'
-        });
-        this.optionsPanel.add(timerLabel);
-        currentY += 30;
-
-        // Timer 選項按鈕
-        const timerOptions = [
-            { value: 'none', label: '無' },
-            { value: 'countUp', label: '正計時' },
-            { value: 'countDown', label: '倒計時' }
-        ];
-        const btnWidth = 80;
-        const startX = -panelWidth / 2 + 30;
-        timerOptions.forEach((opt, i) => {
-            const btn = this.createOptionButton(
-                startX + i * (btnWidth + 10) + btnWidth / 2, currentY + 15,
-                opt.label, btnWidth, 30,
-                this.options.timer === opt.value,
-                () => {
-                    this.options.timer = opt.value;
-                    this.refreshOptionsPanel();
-                }
-            );
-            this.optionsPanel.add(btn);
-        });
-        currentY += 55;
-
-        // 倒計時時間設置（只在 countDown 模式顯示）
-        if (this.options.timer === 'countDown') {
-            const timeLabel = this.add.text(-panelWidth / 2 + 20, currentY, '時間設置:', {
-                fontFamily: 'Arial', fontSize: '14px', color: '#6b7280'
-            });
-            this.optionsPanel.add(timeLabel);
-
-            // 分鐘 +/- 按鈕
-            const minLabel = this.add.text(startX + 100, currentY, `${this.options.timerMinutes} 分`, {
-                fontFamily: 'Arial', fontSize: '16px', color: '#1f2937'
-            });
-            this.optionsPanel.add(minLabel);
-
-            const minMinus = this.createSmallButton(startX + 70, currentY, '-', () => {
-                if (this.options.timerMinutes > 0) {
-                    this.options.timerMinutes--;
-                    this.refreshOptionsPanel();
-                }
-            });
-            const minPlus = this.createSmallButton(startX + 150, currentY, '+', () => {
-                if (this.options.timerMinutes < 30) {
-                    this.options.timerMinutes++;
-                    this.refreshOptionsPanel();
-                }
-            });
-            this.optionsPanel.add(minMinus);
-            this.optionsPanel.add(minPlus);
-
-            // 秒數 +/- 按鈕
-            const secLabel = this.add.text(startX + 220, currentY, `${this.options.timerSeconds} 秒`, {
-                fontFamily: 'Arial', fontSize: '16px', color: '#1f2937'
-            });
-            this.optionsPanel.add(secLabel);
-
-            const secMinus = this.createSmallButton(startX + 190, currentY, '-', () => {
-                if (this.options.timerSeconds > 0) {
-                    this.options.timerSeconds -= 10;
-                    this.refreshOptionsPanel();
-                }
-            });
-            const secPlus = this.createSmallButton(startX + 270, currentY, '+', () => {
-                if (this.options.timerSeconds < 50) {
-                    this.options.timerSeconds += 10;
-                    this.refreshOptionsPanel();
-                }
-            });
-            this.optionsPanel.add(secMinus);
-            this.optionsPanel.add(secPlus);
-
-            currentY += 40;
-        }
-
-        currentY += 20;
-
-        // === Shuffle 選項 ===
-        const shuffleLabel = this.add.text(-panelWidth / 2 + 20, currentY, '🔀 洗牌順序', {
-            fontFamily: 'Arial', fontSize: '16px', fontStyle: 'bold', color: '#374151'
-        });
-        this.optionsPanel.add(shuffleLabel);
-
-        const shuffleToggle = this.createToggleButton(
-            panelWidth / 2 - 60, currentY,
-            this.options.shuffle,
-            (value) => {
-                this.options.shuffle = value;
-                this.refreshOptionsPanel();
+    // ===== 播放當前卡片語音 =====
+    playCurrentCardAudio() {
+        if (this.currentCardIndex >= 0 && this.currentCardIndex < this.shuffledCards.length) {
+            const card = this.shuffledCards[this.currentCardIndex];
+            if (card) {
+                this.playCardAudio(card);
+                console.log('🔊 手動播放語音:', card.english || card.term);
             }
-        );
-        this.optionsPanel.add(shuffleToggle);
-        currentY += 50;
-
-        // === 關閉按鈕 ===
-        const closeBtn = this.createButton(0, panelHeight / 2 - 40, '✓ 確定', () => {
-            this.hideOptionsPanel();
-            this.applyOptions();
-        }, 120, 40, 0x10b981);
-        this.optionsPanel.add(closeBtn);
-
-        this.optionsVisible = true;
-    }
-
-    hideOptionsPanel() {
-        if (this.optionsPanel) {
-            this.optionsPanel.destroy();
-            this.optionsPanel = null;
         }
-        this.optionsVisible = false;
-    }
-
-    refreshOptionsPanel() {
-        this.hideOptionsPanel();
-        this.showOptionsPanel();
-    }
-
-    applyOptions() {
-        // 應用洗牌設置
-        if (this.options.shuffle) {
-            this.shuffledCards = this.shuffleArray([...this.cards]);
-        } else {
-            this.shuffledCards = [...this.cards];
-        }
-
-        // 重置遊戲狀態
-        this.currentCardIndex = 0;
-        this.isFlipped = false;
-        this.dealContainer.removeAll(true);
-        this.createEmptySlot();
-        this.updateProgress();
-
-        // 應用計時器設置
-        this.resetTimer();
-
-        console.log('⚙️ 選項已應用:', this.options);
-    }
-
-    createOptionButton(x, y, label, w, h, isActive, callback) {
-        const btn = this.add.container(x, y);
-        const bg = this.add.graphics();
-        bg.fillStyle(isActive ? 0x3b82f6 : 0xe5e7eb, 1);
-        bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
-        const text = this.add.text(0, 0, label, {
-            fontFamily: 'Arial', fontSize: '14px',
-            color: isActive ? '#ffffff' : '#374151'
-        }).setOrigin(0.5);
-        btn.add([bg, text]);
-        btn.setSize(w, h);
-        btn.setInteractive({ useHandCursor: true });
-        btn.on('pointerdown', callback);
-        return btn;
-    }
-
-    createSmallButton(x, y, label, callback) {
-        const btn = this.add.container(x, y);
-        const bg = this.add.graphics();
-        bg.fillStyle(0xe5e7eb, 1);
-        bg.fillCircle(0, 0, 15);
-        const text = this.add.text(0, 0, label, {
-            fontFamily: 'Arial', fontSize: '16px', fontStyle: 'bold', color: '#374151'
-        }).setOrigin(0.5);
-        btn.add([bg, text]);
-        btn.setSize(30, 30);
-        btn.setInteractive({ useHandCursor: true });
-        btn.on('pointerdown', callback);
-        return btn;
-    }
-
-    createToggleButton(x, y, isOn, callback) {
-        const btn = this.add.container(x, y);
-        const w = 50, h = 26;
-        const bg = this.add.graphics();
-        bg.fillStyle(isOn ? 0x10b981 : 0xd1d5db, 1);
-        bg.fillRoundedRect(-w / 2, -h / 2, w, h, h / 2);
-        const circle = this.add.graphics();
-        circle.fillStyle(0xffffff, 1);
-        circle.fillCircle(isOn ? w / 2 - 13 : -w / 2 + 13, 0, 10);
-        btn.add([bg, circle]);
-        btn.setSize(w, h);
-        btn.setInteractive({ useHandCursor: true });
-        btn.on('pointerdown', () => callback(!isOn));
-        return btn;
     }
 
     // ===== 輔助方法 =====

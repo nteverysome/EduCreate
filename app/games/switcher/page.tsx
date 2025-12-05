@@ -21,6 +21,7 @@ import SRSReviewDetails from '@/components/games/SRSReviewDetails';
 import GameOptionsPanel from '@/components/game-options';
 import VisualStyleSelector from '@/components/visual-style-selector';
 import MatchUpOptionsPanel, { MatchUpOptions, DEFAULT_MATCH_UP_OPTIONS } from '@/components/game-options/MatchUpOptionsPanel';
+import SpeakingCardsOptionsPanel, { SpeakingCardsOptions, DEFAULT_SPEAKING_CARDS_OPTIONS } from '@/components/game-options/SpeakingCardsOptionsPanel';
 import { GameOptions, DEFAULT_GAME_OPTIONS } from '@/types/game-options';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
@@ -68,6 +69,7 @@ const GameSwitcherPage: React.FC = () => {
   const [isCopying, setIsCopying] = useState<boolean>(false);
   const [gameOptions, setGameOptions] = useState<GameOptions>(DEFAULT_GAME_OPTIONS);
   const [matchUpOptions, setMatchUpOptions] = useState<MatchUpOptions>(DEFAULT_MATCH_UP_OPTIONS);
+  const [speakingCardsOptions, setSpeakingCardsOptions] = useState<SpeakingCardsOptions>(DEFAULT_SPEAKING_CARDS_OPTIONS);
   const [isSavingOptions, setIsSavingOptions] = useState<boolean>(false);
   const [gameKey, setGameKey] = useState<number>(0); // 用於強制重新渲染 GameSwitcher
 
@@ -1271,6 +1273,7 @@ const GameSwitcherPage: React.FC = () => {
             gameOptions={gameOptions}
             visualStyle={gameOptions.visualStyle}
             matchUpOptions={matchUpOptions}
+            speakingCardsOptions={speakingCardsOptions}
           />
         </div>
 
@@ -1534,6 +1537,15 @@ const GameSwitcherPage: React.FC = () => {
                 <MatchUpOptionsPanel
                   options={matchUpOptions}
                   onChange={setMatchUpOptions}
+                  totalVocabulary={customVocabulary.length}
+                />
+              )}
+
+              {/* Speaking Cards 遊戲專屬選項面板 - 只在 Speaking Cards 遊戲時顯示 */}
+              {currentGameId === 'speaking-cards' && (
+                <SpeakingCardsOptionsPanel
+                  options={speakingCardsOptions}
+                  onChange={setSpeakingCardsOptions}
                   totalVocabulary={customVocabulary.length}
                 />
               )}

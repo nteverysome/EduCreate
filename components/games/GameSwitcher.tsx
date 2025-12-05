@@ -46,6 +46,7 @@ interface GameSwitcherProps {
   gameOptions?: any; // 遊戲選項
   visualStyle?: string; // 視覺風格
   matchUpOptions?: any; // Match-up 遊戲專屬選項
+  speakingCardsOptions?: any; // Speaking Cards 遊戲專屬選項
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -395,7 +396,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   isAnonymous = false,
   gameOptions = null,
   visualStyle = null,
-  matchUpOptions = null
+  matchUpOptions = null,
+  speakingCardsOptions = null
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -504,6 +506,19 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         }
 
         console.log('🎮 Match-up 選項已添加到 URL:', matchUpOptions);
+      }
+
+      // 添加 Speaking Cards 選項到 URL
+      if (speakingCardsOptions && game.id === 'speaking-cards') {
+        url += `&timerType=${speakingCardsOptions.timer.type}`;
+        if (speakingCardsOptions.timer.type === 'countDown') {
+          url += `&timerMinutes=${speakingCardsOptions.timer.minutes || 5}`;
+          url += `&timerSeconds=${speakingCardsOptions.timer.seconds || 0}`;
+        }
+        url += `&shuffle=${speakingCardsOptions.shuffle}`;
+        url += `&autoPlayAudio=${speakingCardsOptions.autoPlayAudio}`;
+        url += `&showTranslation=${speakingCardsOptions.showTranslation}`;
+        console.log('🎴 Speaking Cards 選項已添加到 URL:', speakingCardsOptions);
       }
     }
 
