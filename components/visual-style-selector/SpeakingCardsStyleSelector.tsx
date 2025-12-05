@@ -17,13 +17,13 @@ export interface SpeakingCardsVisualStyle {
 
 export const SPEAKING_CARDS_STYLES: SpeakingCardsVisualStyle[] = [
   { id: 'default', name: 'default', displayName: '🎴 預設', description: '預設風格', preview: { emoji: '🎴', bgColor: '#f3f4f6', cardColor: '#3b82f6' } },
-  { id: 'classic', name: 'classic', displayName: '🎩 經典', description: '經典優雅的卡片風格', preview: { emoji: '🎩', bgColor: '#1e293b', cardColor: '#f59e0b' } },
-  { id: 'modern', name: 'modern', displayName: '✨ 現代', description: '簡約現代的設計風格', preview: { emoji: '✨', bgColor: '#f8fafc', cardColor: '#6366f1' } },
-  { id: 'kids', name: 'kids', displayName: '🧸 兒童', description: '適合兒童的可愛風格', preview: { emoji: '🧸', bgColor: '#fef3c7', cardColor: '#f472b6' } },
-  { id: 'nature', name: 'nature', displayName: '🌿 自然', description: '清新自然的綠色主題', preview: { emoji: '🌿', bgColor: '#ecfdf5', cardColor: '#10b981' } },
-  { id: 'ocean', name: 'ocean', displayName: '🌊 海洋', description: '藍色海洋主題', preview: { emoji: '🌊', bgColor: '#dbeafe', cardColor: '#0ea5e9' } },
-  { id: 'space', name: 'space', displayName: '🚀 太空', description: '神秘的太空主題', preview: { emoji: '🚀', bgColor: '#0f172a', cardColor: '#a855f7' } },
-  { id: 'candy', name: 'candy', displayName: '🍬 糖果', description: '甜美的糖果色主題', preview: { emoji: '🍬', bgColor: '#fdf2f8', cardColor: '#ec4899' } },
+  { id: 'clouds', name: 'clouds', displayName: '☁️ 雲朵', description: '輕鬆愉快的雲朵主題，適合所有年齡層', preview: { emoji: '☁️', bgColor: '#e0f2fe', cardColor: '#38bdf8' } },
+  { id: 'videogame', name: 'videogame', displayName: '🎮 電子遊戲', description: '復古像素風格，適合遊戲愛好者', preview: { emoji: '🎮', bgColor: '#1e1b4b', cardColor: '#a78bfa' } },
+  { id: 'magiclibrary', name: 'magiclibrary', displayName: '📚 魔法圖書館', description: '神秘的魔法圖書館主題，充滿魔法氛圍', preview: { emoji: '📚', bgColor: '#422006', cardColor: '#fbbf24' } },
+  { id: 'underwater', name: 'underwater', displayName: '🐠 水下', description: '神秘的海底世界主題', preview: { emoji: '🐠', bgColor: '#0c4a6e', cardColor: '#22d3ee' } },
+  { id: 'pets', name: 'pets', displayName: '🐶 寵物', description: '可愛的寵物主題，適合動物愛好者', preview: { emoji: '🐶', bgColor: '#fef3c7', cardColor: '#f59e0b' } },
+  { id: 'space', name: 'space', displayName: '🚀 太空', description: '神秘的外太空主題', preview: { emoji: '🚀', bgColor: '#0f172a', cardColor: '#a855f7' } },
+  { id: 'dinosaur', name: 'dinosaur', displayName: '🦕 恐龍', description: '史前恐龍主題，適合恐龍愛好者', preview: { emoji: '🦕', bgColor: '#365314', cardColor: '#84cc16' } },
 ];
 
 interface SpeakingCardsStyleSelectorProps {

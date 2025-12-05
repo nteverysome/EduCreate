@@ -15,13 +15,13 @@ export default function SpeakingCardsVisualStylesAdminPage() {
 
   // Speaking Cards 遊戲的視覺風格列表（與 SpeakingCardsStyleSelector 統一）
   const visualStyles = [
-    { id: 'classic', name: 'classic', displayName: '🎩 經典', description: '經典優雅的卡片風格' },
-    { id: 'modern', name: 'modern', displayName: '✨ 現代', description: '簡約現代的設計風格' },
-    { id: 'kids', name: 'kids', displayName: '🧸 兒童', description: '適合兒童的可愛風格' },
-    { id: 'nature', name: 'nature', displayName: '🌿 自然', description: '清新自然的綠色主題' },
-    { id: 'ocean', name: 'ocean', displayName: '🌊 海洋', description: '藍色海洋主題' },
-    { id: 'space', name: 'space', displayName: '🚀 太空', description: '神秘的太空主題' },
-    { id: 'candy', name: 'candy', displayName: '🍬 糖果', description: '甜美的糖果色主題' },
+    { id: 'clouds', name: 'clouds', displayName: '☁️ 雲朵', description: '輕鬆愉快的雲朵主題，適合所有年齡層' },
+    { id: 'videogame', name: 'videogame', displayName: '🎮 電子遊戲', description: '復古像素風格，適合遊戲愛好者' },
+    { id: 'magiclibrary', name: 'magiclibrary', displayName: '📚 魔法圖書館', description: '神秘的魔法圖書館主題，充滿魔法氛圍' },
+    { id: 'underwater', name: 'underwater', displayName: '🐠 水下', description: '神秘的海底世界主題' },
+    { id: 'pets', name: 'pets', displayName: '🐶 寵物', description: '可愛的寵物主題，適合動物愛好者' },
+    { id: 'space', name: 'space', displayName: '🚀 太空', description: '神秘的外太空主題' },
+    { id: 'dinosaur', name: 'dinosaur', displayName: '🦕 恐龍', description: '史前恐龍主題，適合恐龍愛好者' },
   ];
 
   // Speaking Cards 遊戲的資源類型

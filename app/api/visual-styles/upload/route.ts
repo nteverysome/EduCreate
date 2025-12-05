@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // 根據遊戲類型驗證視覺風格 ID
     let validStyleIds: string[];
     if (game === 'speaking-cards') {
-      validStyleIds = ['classic', 'modern', 'kids', 'nature', 'ocean', 'space', 'candy'];
+      validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     } else {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     }
@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
     // 根據遊戲類型驗證視覺風格 ID
     let validStyleIds: string[];
     if (game === 'speaking-cards') {
-      validStyleIds = ['classic', 'modern', 'kids', 'nature', 'ocean', 'space', 'candy'];
+      validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     } else {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     }
@@ -261,7 +261,7 @@ export async function DELETE(request: NextRequest) {
     // 根據遊戲類型驗證視覺風格 ID
     let validStyleIds: string[];
     if (game === 'speaking-cards') {
-      validStyleIds = ['classic', 'modern', 'kids', 'nature', 'ocean', 'space', 'candy'];
+      validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     } else {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     }
