@@ -347,8 +347,11 @@ class SpeakingCardsGame extends Phaser.Scene {
         let currentY = -this.cardHeight / 2 + 30;
         const contentWidth = this.cardWidth - 60;
 
+        // 判斷是否有圖片
+        const hasImage = cardData.imageUrl;
+
         // 圖片 (如果有)
-        if (cardData.imageUrl) {
+        if (hasImage) {
             const imgSize = this.cardHeight * 0.35;
             // 載入並顯示圖片
             this.loadCardImage(container, cardData.imageUrl, 0, currentY + imgSize / 2, contentWidth, imgSize);
@@ -356,10 +359,12 @@ class SpeakingCardsGame extends Phaser.Scene {
         }
 
         // 英文文字 - 白色，更大
+        // 如果沒有圖片，字體更大；如果有圖片，字體正常
         if (cardData.text || cardData.english) {
+            const fontSizeMultiplier = hasImage ? 0.09 : 0.15;  // 沒有圖片時字體增大到 0.15
             const text = this.add.text(0, currentY + 15, cardData.text || cardData.english, {
                 fontFamily: 'Arial',
-                fontSize: `${this.cardWidth * 0.09}px`,
+                fontSize: `${this.cardWidth * fontSizeMultiplier}px`,
                 fontStyle: 'bold',
                 color: '#ffffff',
                 wordWrap: { width: contentWidth },
@@ -371,9 +376,10 @@ class SpeakingCardsGame extends Phaser.Scene {
 
         // 中文翻譯 - 淡黃色
         if (cardData.chinese) {
+            const fontSizeMultiplier = hasImage ? 0.07 : 0.12;  // 沒有圖片時字體增大到 0.12
             const chinese = this.add.text(0, currentY + 5, cardData.chinese, {
                 fontFamily: 'Arial',
-                fontSize: `${this.cardWidth * 0.07}px`,
+                fontSize: `${this.cardWidth * fontSizeMultiplier}px`,
                 color: '#fef3c7',
                 wordWrap: { width: contentWidth },
                 align: 'center'
