@@ -20,6 +20,7 @@ import SRSLearningPanel from '@/components/games/SRSLearningPanel';
 import SRSReviewDetails from '@/components/games/SRSReviewDetails';
 import GameOptionsPanel from '@/components/game-options';
 import VisualStyleSelector from '@/components/visual-style-selector';
+import SpeakingCardsStyleSelector from '@/components/visual-style-selector/SpeakingCardsStyleSelector';
 import MatchUpOptionsPanel, { MatchUpOptions, DEFAULT_MATCH_UP_OPTIONS } from '@/components/game-options/MatchUpOptionsPanel';
 import SpeakingCardsOptionsPanel, { SpeakingCardsOptions, DEFAULT_SPEAKING_CARDS_OPTIONS } from '@/components/game-options/SpeakingCardsOptionsPanel';
 import { GameOptions, DEFAULT_GAME_OPTIONS } from '@/types/game-options';
@@ -1490,39 +1491,74 @@ const GameSwitcherPage: React.FC = () => {
           {/* 視覺風格和遊戲選項面板 - 只在有活動ID時顯示 */}
           {activityId && (
             <div className="stats-card md:col-span-2 lg:col-span-3">
-              {/* 視覺風格選擇器 */}
-              <VisualStyleSelector
-                selectedStyle={gameOptions.visualStyle}
-                onChange={async (styleId) => {
-                  // 更新本地狀態
-                  const newOptions = { ...gameOptions, visualStyle: styleId };
-                  setGameOptions(newOptions);
+              {/* 視覺風格選擇器 - Speaking Cards 使用專屬選擇器 */}
+              {currentGameId === 'speaking-cards' ? (
+                <SpeakingCardsStyleSelector
+                  selectedStyle={gameOptions.visualStyle}
+                  onChange={async (styleId) => {
+                    // 更新本地狀態
+                    const newOptions = { ...gameOptions, visualStyle: styleId };
+                    setGameOptions(newOptions);
 
-                  // 自動保存到資料庫
-                  try {
-                    console.log('🎨 自動保存視覺風格:', styleId);
-                    const response = await fetch(`/api/activities/${activityId}`, {
-                      method: 'PUT',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        gameOptions: newOptions,
-                      }),
-                    });
+                    // 自動保存到資料庫
+                    try {
+                      console.log('🎨 自動保存視覺風格 (Speaking Cards):', styleId);
+                      const response = await fetch(`/api/activities/${activityId}`, {
+                        method: 'PUT',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          gameOptions: newOptions,
+                        }),
+                      });
 
-                    if (response.ok) {
-                      console.log('✅ 視覺風格已自動保存');
-                      // 自動應用選項（重新載入遊戲）
-                      setGameKey(prev => prev + 1);
-                    } else {
-                      console.error('❌ 自動保存失敗');
+                      if (response.ok) {
+                        console.log('✅ 視覺風格已自動保存');
+                        // 自動應用選項（重新載入遊戲）
+                        setGameKey(prev => prev + 1);
+                      } else {
+                        console.error('❌ 自動保存失敗');
+                      }
+                    } catch (error) {
+                      console.error('❌ 自動保存時出錯:', error);
                     }
-                  } catch (error) {
-                    console.error('❌ 自動保存時出錯:', error);
-                  }
-                }}
-              />
+                  }}
+                />
+              ) : (
+                <VisualStyleSelector
+                  selectedStyle={gameOptions.visualStyle}
+                  onChange={async (styleId) => {
+                    // 更新本地狀態
+                    const newOptions = { ...gameOptions, visualStyle: styleId };
+                    setGameOptions(newOptions);
+
+                    // 自動保存到資料庫
+                    try {
+                      console.log('🎨 自動保存視覺風格:', styleId);
+                      const response = await fetch(`/api/activities/${activityId}`, {
+                        method: 'PUT',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          gameOptions: newOptions,
+                        }),
+                      });
+
+                      if (response.ok) {
+                        console.log('✅ 視覺風格已自動保存');
+                        // 自動應用選項（重新載入遊戲）
+                        setGameKey(prev => prev + 1);
+                      } else {
+                        console.error('❌ 自動保存失敗');
+                      }
+                    } catch (error) {
+                      console.error('❌ 自動保存時出錯:', error);
+                    }
+                  }}
+                />
+              )}
 
               {/* Shimozurdo 遊戲專屬選項面板 - 只在 Shimozurdo 遊戲時顯示 */}
               {currentGameId === 'shimozurdo-game' && (
