@@ -20,8 +20,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 驗證視覺風格 ID
-    const validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    // 根據遊戲類型驗證視覺風格 ID
+    let validStyleIds: string[];
+    if (game === 'speaking-cards') {
+      validStyleIds = ['classic', 'modern', 'kids', 'nature', 'ocean', 'space', 'candy'];
+    } else {
+      validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    }
+
     if (!validStyleIds.includes(styleId)) {
       return NextResponse.json(
         { error: '無效的視覺風格 ID' },
@@ -31,7 +37,9 @@ export async function POST(request: NextRequest) {
 
     // 根據遊戲類型驗證資源類型
     let validResourceTypes: string[];
-    if (game === 'match-up-game') {
+    if (game === 'speaking-cards') {
+      validResourceTypes = ['background', 'card_back', 'card_front'];
+    } else if (game === 'match-up-game') {
       validResourceTypes = ['background', 'card_background', 'card_border', 'colors', 'fonts', 'config'];
     } else {
       // shimozurdo-game
@@ -58,7 +66,9 @@ export async function POST(request: NextRequest) {
     let isAudio = false;
     let isJson = false;
 
-    if (game === 'match-up-game') {
+    if (game === 'speaking-cards') {
+      isImage = ['background', 'card_back', 'card_front'].includes(resourceType);
+    } else if (game === 'match-up-game') {
       isImage = ['background', 'card_background', 'card_border'].includes(resourceType);
       isJson = ['colors', 'fonts', 'config'].includes(resourceType);
     } else {
@@ -89,7 +99,9 @@ export async function POST(request: NextRequest) {
 
     // 構建 Blob 存儲路徑
     let blobPath: string;
-    if (game === 'match-up-game') {
+    if (game === 'speaking-cards') {
+      blobPath = `speaking-cards-styles/${styleId}/${resourceType}.${fileExtension}`;
+    } else if (game === 'match-up-game') {
       blobPath = `visual-styles/${styleId}/${resourceType}.${fileExtension}`;
     } else {
       blobPath = isAudio
@@ -142,8 +154,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 驗證視覺風格 ID
-    const validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    // 根據遊戲類型驗證視覺風格 ID
+    let validStyleIds: string[];
+    if (game === 'speaking-cards') {
+      validStyleIds = ['classic', 'modern', 'kids', 'nature', 'ocean', 'space', 'candy'];
+    } else {
+      validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    }
+
     if (!validStyleIds.includes(styleId)) {
       return NextResponse.json(
         { error: '無效的視覺風格 ID' },
@@ -152,14 +170,24 @@ export async function GET(request: NextRequest) {
     }
 
     // 從 Blob Storage 列出所有文件
+    const blobPrefix = game === 'speaking-cards'
+      ? `speaking-cards-styles/${styleId}/`
+      : `visual-styles/${styleId}/`;
+
     const { blobs } = await list({
-      prefix: `visual-styles/${styleId}/`,
+      prefix: blobPrefix,
     });
 
     // 根據遊戲類型初始化資源對象
     let resources: Record<string, { exists: boolean; url?: string }> = {};
 
-    if (game === 'match-up-game') {
+    if (game === 'speaking-cards') {
+      resources = {
+        background: { exists: false },
+        card_back: { exists: false },
+        card_front: { exists: false }
+      };
+    } else if (game === 'match-up-game') {
       resources = {
         background: { exists: false },
         card_background: { exists: false },
@@ -230,8 +258,14 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // 驗證視覺風格 ID
-    const validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    // 根據遊戲類型驗證視覺風格 ID
+    let validStyleIds: string[];
+    if (game === 'speaking-cards') {
+      validStyleIds = ['classic', 'modern', 'kids', 'nature', 'ocean', 'space', 'candy'];
+    } else {
+      validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    }
+
     if (!validStyleIds.includes(styleId)) {
       return NextResponse.json(
         { error: '無效的視覺風格 ID' },
@@ -241,7 +275,9 @@ export async function DELETE(request: NextRequest) {
 
     // 根據遊戲類型驗證資源類型
     let validResourceTypes: string[];
-    if (game === 'match-up-game') {
+    if (game === 'speaking-cards') {
+      validResourceTypes = ['background', 'card_back', 'card_front'];
+    } else if (game === 'match-up-game') {
       validResourceTypes = ['background', 'card_background', 'card_border', 'colors', 'fonts', 'config'];
     } else {
       validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
@@ -255,8 +291,12 @@ export async function DELETE(request: NextRequest) {
     }
 
     // 從 Blob Storage 列出所有文件，找到要刪除的文件
+    const blobPrefix = game === 'speaking-cards'
+      ? `speaking-cards-styles/${styleId}/`
+      : `visual-styles/${styleId}/`;
+
     const { blobs } = await list({
-      prefix: `visual-styles/${styleId}/`,
+      prefix: blobPrefix,
     });
 
     // 找到匹配的文件
