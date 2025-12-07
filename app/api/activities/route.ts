@@ -51,16 +51,19 @@ function getGameDisplayName(gameTemplateId: string): string {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: '未授權' }, { status: 401 });
     }
 
     const body = await request.json();
-    const { title, gameTemplateId, vocabularyItems, type, templateType } = body;
+    const { title, gameTemplateId, vocabularyItems, questions, type, templateType } = body;
 
-    // 驗證必要字段
-    if (!title || !gameTemplateId || !vocabularyItems || vocabularyItems.length === 0) {
+    // 驗證必要字段 - 支持 vocabularyItems 或 questions
+    const isFlyingFruit = gameTemplateId === 'flying-fruit-game';
+    const hasContent = isFlyingFruit ? (questions && questions.length > 0) : (vocabularyItems && vocabularyItems.length > 0);
+
+    if (!title || !gameTemplateId || !hasContent) {
       return NextResponse.json({ error: '缺少必要字段' }, { status: 400 });
     }
 
@@ -74,18 +77,21 @@ export async function POST(request: NextRequest) {
     }
 
     // 簡化創建邏輯 - 一次事務創建 Activity 和 VocabularyItem
+    // Flying Fruit 遊戲使用 questions 數據結構，其他遊戲使用 vocabularyItems
+    const contentData = isFlyingFruit ? questions : vocabularyItems;
+
     const activity = await prisma.activity.create({
       data: {
         userId: user.id,
         title: title,
         description: `使用 ${getGameDisplayName(gameTemplateId)} 遊戲學習詞彙`,
-        type: type || 'vocabulary_game',
-        templateType: templateType || 'vocabulary',
+        type: type || (isFlyingFruit ? 'quiz_game' : 'vocabulary_game'),
+        templateType: templateType || (isFlyingFruit ? 'quiz' : 'vocabulary'),
         content: {
           gameTemplateId,
-          vocabularyItems: vocabularyItems
+          [isFlyingFruit ? 'questions' : 'vocabularyItems']: contentData
         },
-        elements: vocabularyItems,
+        elements: isFlyingFruit ? [] : vocabularyItems,
         published: false,
         isPublic: false,
         isDraft: false,
@@ -93,34 +99,37 @@ export async function POST(request: NextRequest) {
         shareCount: 0,
         difficulty: 'EASY',
         estimatedTime: '5-10 分鐘',
-        tags: [gameTemplateId, 'vocabulary', 'learning'],
+        tags: [gameTemplateId, isFlyingFruit ? 'quiz' : 'vocabulary', 'learning'],
 
         // 新增：直接設置詞彙相關字段
         geptLevel: 'ELEMENTARY',
-        totalWords: vocabularyItems.length,
+        totalWords: contentData.length,
 
         // 新增：直接創建詞彙項目（包含所有圖片字段和語音字段）
-        vocabularyItems: {
-          create: vocabularyItems.map((item: any) => ({
-            english: item.english,
-            chinese: item.chinese,
-            phonetic: item.phonetic || null,
-            difficultyLevel: item.difficultyLevel || 1,
-            // 英文圖片字段
-            imageId: item.imageId || null,
-            imageUrl: item.imageUrl || null,
-            imageSize: item.imageSize || null,
-            // 中文圖片字段
-            chineseImageId: item.chineseImageId || null,
-            chineseImageUrl: item.chineseImageUrl || null,
-            chineseImageSize: item.chineseImageSize || null,
-            // 語音字段
-            audioUrl: item.audioUrl || null
-          }))
-        }
+        // Flying Fruit 不需要創建 vocabularyItems，因為它使用 questions 結構
+        ...(isFlyingFruit ? {} : {
+          vocabularyItems: {
+            create: vocabularyItems.map((item: any) => ({
+              english: item.english,
+              chinese: item.chinese,
+              phonetic: item.phonetic || null,
+              difficultyLevel: item.difficultyLevel || 1,
+              // 英文圖片字段
+              imageId: item.imageId || null,
+              imageUrl: item.imageUrl || null,
+              imageSize: item.imageSize || null,
+              // 中文圖片字段
+              chineseImageId: item.chineseImageId || null,
+              chineseImageUrl: item.chineseImageUrl || null,
+              chineseImageSize: item.chineseImageSize || null,
+              // 語音字段
+              audioUrl: item.audioUrl || null
+            }))
+          }
+        })
       },
       include: {
-        vocabularyItems: true
+        vocabularyItems: !isFlyingFruit
       }
     });
 
