@@ -83,7 +83,7 @@ class PreloadScene extends Phaser.Scene {
 
     async loadVisualStyleResources() {
         try {
-            let visualStyle = 'classic';
+            let visualStyle = 'clouds';  // 改為 'clouds' - 有效的視覺風格
 
             if (this.game?.gameOptions?.visualStyle) {
                 visualStyle = this.game.gameOptions.visualStyle;
@@ -93,7 +93,7 @@ class PreloadScene extends Phaser.Scene {
                 console.log('🎨 PreloadScene: 從 window.gameOptions 取得視覺風格', visualStyle);
             } else {
                 const urlParams = new URLSearchParams(window.location.search);
-                visualStyle = urlParams.get('visualStyle') || 'classic';
+                visualStyle = urlParams.get('visualStyle') || 'clouds';  // 改為 'clouds'
                 console.log('🎨 PreloadScene: 從 URL 取得視覺風格', visualStyle);
             }
 
