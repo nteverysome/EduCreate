@@ -7,6 +7,7 @@ import LoginPrompt from '@/components/Auth/LoginPrompt';
 import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 import { loadAndNormalizeVocabularyData, getSourceDisplayName } from '@/lib/vocabulary/loadVocabularyData';
 import SortableVocabularyItem from '@/components/vocabulary-item-with-image/SortableVocabularyItem';
+import FlyingFruitEditor, { QuestionItem, AnswerItem } from '@/components/editors/FlyingFruitEditor';
 import {
   DndContext,
   closestCenter,
@@ -147,6 +148,17 @@ export default function CreateGamePage() {
     { id: '2', english: '', chinese: '' },
     { id: '3', english: '', chinese: '' },
   ]);
+  // Flying Fruit 專用問答數據
+  const [flyingFruitQuestions, setFlyingFruitQuestions] = useState<QuestionItem[]>([
+    {
+      id: '1',
+      question: '',
+      answers: [
+        { id: 'a1', text: '', isCorrect: true },
+        { id: 'a2', text: '', isCorrect: false }
+      ]
+    }
+  ]);
   const [isLoading, setIsLoading] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -155,6 +167,9 @@ export default function CreateGamePage() {
   const [isAssignmentMode, setIsAssignmentMode] = useState(false);
   const [assignmentId, setAssignmentId] = useState<string | null>(null);
   const [studentName, setStudentName] = useState<string | null>(null);
+
+  // 檢查是否是 Flying Fruit 遊戲
+  const isFlyingFruitGame = templateId === 'flying-fruit-game';
 
   // 拖移排序 sensors
   const sensors = useSensors(
@@ -433,28 +448,41 @@ export default function CreateGamePage() {
   const saveActivity = async () => {
     setIsLoading(true);
     try {
-      // 修改過濾邏輯：只要有英文、中文或圖片任一項就算有效
-      const filteredVocabulary = vocabularyItems.filter(item =>
-        item.english.trim() || item.chinese.trim() || item.imageUrl || item.chineseImageUrl
-      );
+      // 根據遊戲類型處理數據
+      let activityData: any;
 
-      console.log('🔍 保存活動 - 詞彙數據:', filteredVocabulary);
-      console.log('🔍 保存活動 - 圖片字段檢查:', JSON.stringify(filteredVocabulary.map(item => ({
-        id: item.id,
-        english: item.english,
-        chinese: item.chinese,
-        imageId: item.imageId,
-        imageUrl: item.imageUrl,
-        imageSize: item.imageSize,
-        chineseImageId: item.chineseImageId,
-        chineseImageUrl: item.chineseImageUrl,
-        chineseImageSize: item.chineseImageSize
-      })), null, 2));
+      if (isFlyingFruitGame) {
+        // Flying Fruit 問答格式
+        const filteredQuestions = flyingFruitQuestions.filter(q =>
+          q.question.trim() !== '' && q.answers.some(a => a.text.trim() !== '')
+        );
+        activityData = {
+          title: activityTitle,
+          gameTemplateId: templateId,
+          questions: filteredQuestions,
+          type: 'quiz_game',
+          templateType: 'quiz',
+        };
+        console.log('🔍 保存 Flying Fruit 活動 - 問答數據:', filteredQuestions);
+      } else {
+        // 標準詞彙格式
+        const filteredVocabulary = vocabularyItems.filter(item =>
+          item.english.trim() || item.chinese.trim() || item.imageUrl || item.chineseImageUrl
+        );
+        activityData = {
+          title: activityTitle,
+          gameTemplateId: templateId,
+          vocabularyItems: filteredVocabulary,
+          type: 'vocabulary_game',
+          templateType: gameConfig.inputType,
+        };
+        console.log('🔍 保存活動 - 詞彙數據:', filteredVocabulary);
+      }
 
       if (isEditMode && editingActivityId) {
         // 🔥 編輯模式：使用活動的實際 gameTemplateId 而不是 URL 的 templateId
         const gameIdToUse = actualGameTemplateId || templateId;
-        console.log('💾 保存活動 - 使用 gameTemplateId:', gameIdToUse, '(actualGameTemplateId:', actualGameTemplateId, ', URL templateId:', templateId, ')');
+        console.log('💾 保存活動 - 使用 gameTemplateId:', gameIdToUse);
 
         // 編輯模式：更新現有活動
         const response = await fetch(`/api/activities/${editingActivityId}`, {
@@ -463,11 +491,8 @@ export default function CreateGamePage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            title: activityTitle,
-            gameTemplateId: gameIdToUse, // 🔥 使用實際的 gameTemplateId
-            vocabularyItems: filteredVocabulary,
-            type: 'vocabulary_game',
-            templateType: gameConfig.inputType,
+            ...activityData,
+            gameTemplateId: gameIdToUse,
           }),
         });
 
@@ -500,22 +525,14 @@ export default function CreateGamePage() {
         }
       } else {
         // 創建模式：創建新活動
-        const requestBody = {
-          title: activityTitle,
-          gameTemplateId: templateId,
-          vocabularyItems: filteredVocabulary,
-          type: 'vocabulary_game',
-          templateType: gameConfig.inputType,
-        };
-
-        console.log('🔍 發送到 API 的請求體:', JSON.stringify(requestBody, null, 2));
+        console.log('🔍 發送到 API 的請求體:', JSON.stringify(activityData, null, 2));
 
         const response = await fetch('/api/activities', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify(activityData),
         });
 
         if (response.ok) {
@@ -564,9 +581,17 @@ export default function CreateGamePage() {
     }
   };
 
-  // 驗證詞彙項目
+  // 驗證項目
   const validateItems = () => {
-    // 修改驗證邏輯：只要有英文、中文或圖片任一項就算有效
+    if (isFlyingFruitGame) {
+      // Flying Fruit 驗證：每個問題至少有一個正確答案和問題文字
+      const validQuestions = flyingFruitQuestions.filter(q =>
+        q.question.trim() !== '' &&
+        q.answers.some(a => a.isCorrect && a.text.trim() !== '')
+      );
+      return validQuestions.length >= gameConfig.minItems;
+    }
+    // 標準詞彙驗證
     const validItems = vocabularyItems.filter(item =>
       item.english.trim() !== '' || item.chinese.trim() !== '' || item.imageUrl || item.chineseImageUrl
     );
@@ -619,86 +644,99 @@ export default function CreateGamePage() {
           />
         </div>
 
-        {/* 詞彙輸入區域 */}
+        {/* 根據遊戲類型顯示不同的編輯器 */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          {/* 操作說明 */}
-          <div className="mb-4 sm:mb-6">
-            <button
-              onClick={() => setShowInstructions(!showInstructions)}
-              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm sm:text-base"
-            >
-              <span>📋</span>
-              <span>操作說明</span>
-            </button>
-            {showInstructions && (
-              <div className="mt-2 p-3 sm:p-4 bg-blue-50 rounded-lg text-xs sm:text-sm text-gray-700 space-y-1">
-                <p>1. 在左欄輸入英文單字，在右欄輸入對應的中文翻譯</p>
-                <p>2. 可以添加音標來幫助發音學習</p>
-                <p>3. 至少需要 {gameConfig.minItems} 個單字，最多 {gameConfig.maxItems} 個</p>
-                <p>4. 點擊「交換列」可以交換英文和中文的位置</p>
+          {isFlyingFruitGame ? (
+            /* Flying Fruit 專用問答編輯器 */
+            <FlyingFruitEditor
+              questions={flyingFruitQuestions}
+              onChange={setFlyingFruitQuestions}
+              minQuestions={gameConfig.minItems}
+              maxQuestions={gameConfig.maxItems}
+            />
+          ) : (
+            /* 標準詞彙編輯器 */
+            <>
+              {/* 操作說明 */}
+              <div className="mb-4 sm:mb-6">
+                <button
+                  onClick={() => setShowInstructions(!showInstructions)}
+                  className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm sm:text-base"
+                >
+                  <span>📋</span>
+                  <span>操作說明</span>
+                </button>
+                {showInstructions && (
+                  <div className="mt-2 p-3 sm:p-4 bg-blue-50 rounded-lg text-xs sm:text-sm text-gray-700 space-y-1">
+                    <p>1. 在左欄輸入英文單字，在右欄輸入對應的中文翻譯</p>
+                    <p>2. 可以添加音標來幫助發音學習</p>
+                    <p>3. 至少需要 {gameConfig.minItems} 個單字，最多 {gameConfig.maxItems} 個</p>
+                    <p>4. 點擊「交換列」可以交換英文和中文的位置</p>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* 欄位標題和交換按鈕 */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base">英文單字</h3>
-              <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">這些將在遊戲中顯示</p>
-            </div>
-            <button
-              onClick={swapColumns}
-              className="px-3 py-1.5 sm:py-1 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors whitespace-nowrap self-start sm:self-auto"
-            >
-              ⇄ 交換列
-            </button>
-            <div className="flex-1 min-w-0 sm:ml-4">
-              <h3 className="font-medium text-gray-900 text-sm sm:text-base">中文翻譯</h3>
-              <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">對應的中文意思</p>
-            </div>
-          </div>
-
-          {/* 詞彙項目列表 - 使用拖移排序 */}
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={vocabularyItems}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="space-y-4">
-                {vocabularyItems.map((item, index) => (
-                  <SortableVocabularyItem
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    onChange={(updatedItem) => updateItemFull(item.id, updatedItem)}
-                    onRemove={() => removeItem(item.id)}
-                    onDuplicate={() => duplicateItem(item.id)}
-                    minItems={gameConfig.minItems}
-                    totalItems={vocabularyItems.length}
-                  />
-                ))}
+              {/* 欄位標題和交換按鈕 */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-gray-900 text-sm sm:text-base">英文單字</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">這些將在遊戲中顯示</p>
+                </div>
+                <button
+                  onClick={swapColumns}
+                  className="px-3 py-1.5 sm:py-1 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors whitespace-nowrap self-start sm:self-auto"
+                >
+                  ⇄ 交換列
+                </button>
+                <div className="flex-1 min-w-0 sm:ml-4">
+                  <h3 className="font-medium text-gray-900 text-sm sm:text-base">中文翻譯</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">對應的中文意思</p>
+                </div>
               </div>
-            </SortableContext>
-          </DndContext>
 
-          {/* 新增項目按鈕 */}
-          <div className="mt-6">
-            <button
-              onClick={addNewItem}
-              disabled={vocabularyItems.length >= gameConfig.maxItems}
-              className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start"
-            >
-              <span className="text-lg">+</span>
-              <span>新增項目</span>
-              <span className="text-xs sm:text-sm text-gray-500">
-                最小{gameConfig.minItems} 最大{gameConfig.maxItems}
-              </span>
-            </button>
-          </div>
+              {/* 詞彙項目列表 - 使用拖移排序 */}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={vocabularyItems}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-4">
+                    {vocabularyItems.map((item, index) => (
+                      <SortableVocabularyItem
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        onChange={(updatedItem) => updateItemFull(item.id, updatedItem)}
+                        onRemove={() => removeItem(item.id)}
+                        onDuplicate={() => duplicateItem(item.id)}
+                        minItems={gameConfig.minItems}
+                        totalItems={vocabularyItems.length}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+
+              {/* 新增項目按鈕 */}
+              <div className="mt-6">
+                <button
+                  onClick={addNewItem}
+                  disabled={vocabularyItems.length >= gameConfig.maxItems}
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start"
+                >
+                  <span className="text-lg">+</span>
+                  <span>新增項目</span>
+                  <span className="text-xs sm:text-sm text-gray-500">
+                    最小{gameConfig.minItems} 最大{gameConfig.maxItems}
+                  </span>
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* 完成按鈕 */}
