@@ -456,9 +456,9 @@ export default function CreateGamePage() {
       let activityData: any;
 
       if (isFlyingFruitGame) {
-        // Flying Fruit 問答格式
+        // Flying Fruit 問答格式 - 支持文字或圖片答案
         const filteredQuestions = flyingFruitQuestions.filter(q =>
-          q.question.trim() !== '' && q.answers.some(a => a.text.trim() !== '')
+          q.question.trim() !== '' && q.answers.some(a => a.text.trim() !== '' || a.imageUrl)
         );
         activityData = {
           title: activityTitle,
@@ -588,10 +588,10 @@ export default function CreateGamePage() {
   // 驗證項目
   const validateItems = () => {
     if (isFlyingFruitGame) {
-      // Flying Fruit 驗證：每個問題至少有一個正確答案和問題文字
+      // Flying Fruit 驗證：每個問題至少有一個正確答案（文字或圖片）和問題文字
       const validQuestions = flyingFruitQuestions.filter(q =>
         q.question.trim() !== '' &&
-        q.answers.some(a => a.isCorrect && a.text.trim() !== '')
+        q.answers.some(a => a.isCorrect && (a.text.trim() !== '' || a.imageUrl))
       );
       return validQuestions.length >= gameConfig.minItems;
     }
