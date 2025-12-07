@@ -76,7 +76,7 @@ export default function FlyingFruitEditor({
     }
   };
 
-  // 添加新問題（默認 6 個答案）
+  // 添加新問題（默認 2 個答案：1 和 2）
   const addQuestion = () => {
     if (questions.length >= maxQuestions) return;
     const newQuestion: QuestionItem = {
@@ -84,10 +84,6 @@ export default function FlyingFruitEditor({
       question: '',
       answers: [
         { id: generateId(), text: '', isCorrect: true },
-        { id: generateId(), text: '', isCorrect: false },
-        { id: generateId(), text: '', isCorrect: false },
-        { id: generateId(), text: '', isCorrect: false },
-        { id: generateId(), text: '', isCorrect: false },
         { id: generateId(), text: '', isCorrect: false }
       ]
     };
@@ -564,8 +560,8 @@ function SortableQuestionItem({
       <div className="ml-8 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
         {question.answers.map((answer, aIndex) => (
           <div key={answer.id} className="flex items-center gap-2">
-            {/* 字母標籤 */}
-            <span className="text-gray-500 text-sm w-4">{String.fromCharCode(97 + aIndex)}</span>
+            {/* 數字標籤 */}
+            <span className="text-gray-500 text-sm w-4">{aIndex + 1}</span>
             {/* 正確/錯誤切換按鈕 */}
             <button
               onClick={() => onToggleCorrect(answer.id)}
@@ -612,7 +608,7 @@ function SortableQuestionItem({
               onClick={() => onRemoveAnswer(answer.id)}
               disabled={question.answers.length <= 2}
               className="p-1 hover:bg-gray-100 rounded text-gray-400 disabled:opacity-30 flex-shrink-0"
-              title="刪除答案"
+              title="最少需要 2 個答案"
             >
               ×
             </button>
@@ -621,7 +617,7 @@ function SortableQuestionItem({
       </div>
 
       {/* 添加更多答案按鈕 */}
-      {question.answers.length < 6 && (
+      {question.answers.length < 10 && (
         <div className="ml-8 mt-2">
           <button
             onClick={onAddAnswer}
