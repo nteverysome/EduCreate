@@ -141,6 +141,16 @@ const gameTemplates = [
     status: 'completed',
     estimatedLoadTime: 400
   },
+  {
+    id: 'flying-fruit-game',
+    name: 'Flying Fruit 飛行水果',
+    description: '水果從畫面中拋出，點擊正確答案的水果。訓練快速反應和詞彙記憶',
+    icon: '🍎',
+    category: '動態反應記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 900
+  },
   // 開發中的遊戲
   {
     id: 'matching-pairs',

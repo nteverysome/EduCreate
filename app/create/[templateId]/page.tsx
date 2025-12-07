@@ -110,6 +110,15 @@ const gameTemplateConfig = {
     maxItems: 30,
     inputType: 'vocabulary'
   },
+  'flying-fruit-game': {
+    name: 'Flying Fruit 飛行水果',
+    description: '水果從畫面中拋出，點擊正確答案的水果。訓練快速反應和詞彙記憶',
+    icon: '🍎',
+    category: '動態反應記憶',
+    minItems: 1,
+    maxItems: 30,
+    inputType: 'vocabulary'
+  },
   // 默認配置
   'default': {
     name: '未知遊戲',
