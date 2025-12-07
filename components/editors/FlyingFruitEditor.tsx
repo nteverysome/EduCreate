@@ -19,6 +19,10 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import InputWithImage from '../input-with-image';
+import ImagePicker from '../image-picker';
+import ImageEditor from '../image-editor';
+import AddSoundDialog from '../tts/AddSoundDialog';
+import AudioPreviewDialog from '../tts/AudioPreviewDialog';
 
 // 答案項目接口
 export interface AnswerItem {
@@ -269,6 +273,16 @@ function SortableQuestionItem({
   onToggleCorrect,
   canRemove
 }: SortableQuestionItemProps) {
+  // 圖片相關狀態
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [showImageEditor, setShowImageEditor] = useState(false);
+  const [baseImageUrl, setBaseImageUrl] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // 語音相關狀態
+  const [showAddSoundDialog, setShowAddSoundDialog] = useState(false);
+  const [showAudioPreview, setShowAudioPreview] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -284,16 +298,61 @@ function SortableQuestionItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // 處理圖片選擇（暫時用 alert 提示）
-  const handleImageClick = () => {
-    // TODO: 整合 ImagePicker 組件
-    alert('圖片功能開發中');
+  // 處理圖片選擇
+  const handleImageSelect = async (imageUrl: string, imageId?: string) => {
+    setShowImagePicker(false);
+    setBaseImageUrl(imageUrl);
+    onUpdateQuestionImage(imageUrl);
   };
 
-  // 處理語音選擇（暫時用 alert 提示）
-  const handleAudioClick = () => {
-    // TODO: 整合語音功能
-    alert('語音功能開發中');
+  // 處理圖片編輯
+  const handleImageEdit = async (editedBlob: Blob, editedUrl: string) => {
+    setShowImageEditor(false);
+    setIsGenerating(true);
+
+    try {
+      onUpdateQuestionImage(editedUrl);
+
+      // 上傳圖片到 Vercel Blob
+      const formData = new FormData();
+      formData.append('file', editedBlob, `flying-fruit-q-${question.id}-${Date.now()}.png`);
+
+      const uploadResponse = await fetch('/api/images/upload-test', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (uploadResponse.ok) {
+        const uploadData = await uploadResponse.json() as any;
+        const imageData = uploadData.image || uploadData;
+        onUpdateQuestionImage(imageData.url);
+        URL.revokeObjectURL(editedUrl);
+      } else {
+        console.error('❌ 圖片上傳失敗');
+      }
+    } catch (error) {
+      console.error('❌ 圖片處理失敗:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // 處理圖片移除
+  const handleImageRemove = () => {
+    onUpdateQuestionImage(undefined);
+    setShowImageEditor(false);
+  };
+
+  // 處理語音生成
+  const handleSoundGenerated = (audioUrl: string) => {
+    onUpdateQuestionAudio(audioUrl);
+    setShowAddSoundDialog(false);
+  };
+
+  // 處理語音移除
+  const handleAudioRemove = () => {
+    onUpdateQuestionAudio(undefined);
+    setShowAudioPreview(false);
   };
 
   return (
@@ -337,15 +396,60 @@ function SortableQuestionItem({
             onChange={onUpdateText}
             placeholder="輸入文字..."
             imageUrl={question.questionImageUrl}
-            onImageIconClick={handleImageClick}
-            onThumbnailClick={handleImageClick}
-            onAddSoundClick={handleAudioClick}
+            onImageIconClick={() => setShowImagePicker(true)}
+            onThumbnailClick={() => setShowImageEditor(true)}
+            onAddSoundClick={() => setShowAddSoundDialog(true)}
             hasAudio={!!question.questionAudioUrl}
             audioUrl={question.questionAudioUrl}
-            onAudioThumbnailClick={handleAudioClick}
+            onAudioThumbnailClick={() => setShowAudioPreview(true)}
+            disabled={isGenerating}
           />
         </div>
       </div>
+
+      {/* 圖片選擇器 */}
+      {showImagePicker && (
+        <ImagePicker
+          onSelect={handleImageSelect}
+          onClose={() => setShowImagePicker(false)}
+          multiple={false}
+          initialSearchQuery={question.question}
+        />
+      )}
+
+      {/* 圖片編輯器 */}
+      {showImageEditor && question.questionImageUrl && (
+        <ImageEditor
+          imageUrl={baseImageUrl || question.questionImageUrl}
+          onSave={handleImageEdit}
+          onClose={() => setShowImageEditor(false)}
+          onRemove={handleImageRemove}
+          enableTextOverlay={false}
+          onTextOverlayChange={() => {}}
+          textToOverlay=""
+        />
+      )}
+
+      {/* 語音添加對話框 */}
+      {showAddSoundDialog && (
+        <AddSoundDialog
+          isOpen={showAddSoundDialog}
+          onClose={() => setShowAddSoundDialog(false)}
+          text={question.question}
+          onSoundGenerated={handleSoundGenerated}
+        />
+      )}
+
+      {/* 語音預覽對話框 */}
+      {showAudioPreview && question.questionAudioUrl && (
+        <AudioPreviewDialog
+          isOpen={showAudioPreview}
+          onClose={() => setShowAudioPreview(false)}
+          audioUrl={question.questionAudioUrl}
+          text={question.question}
+          onRemove={handleAudioRemove}
+        />
+      )}
 
       {/* Answers 標籤 */}
       <div className="ml-8 mb-2">
