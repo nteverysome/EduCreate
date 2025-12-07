@@ -313,6 +313,19 @@ const nextConfig = {
         source: '/games/match-up-game/:path*',
         destination: '/games/match-up-game/:path*'
       },
+      // Flying Fruit 飛行水果遊戲路由
+      {
+        source: '/games/flying-fruit-game',
+        destination: '/games/flying-fruit-game/index.html'
+      },
+      {
+        source: '/games/flying-fruit-game/',
+        destination: '/games/flying-fruit-game/index.html'
+      },
+      {
+        source: '/games/flying-fruit-game/:path*',
+        destination: '/games/flying-fruit-game/:path*'
+      },
       // Dino Chrome Clone 恐龍遊戲路由 - 由 vercel.json 處理
       {
         source: '/games/dino-chrome-clone/:path*',
