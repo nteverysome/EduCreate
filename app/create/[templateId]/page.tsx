@@ -148,14 +148,18 @@ export default function CreateGamePage() {
     { id: '2', english: '', chinese: '' },
     { id: '3', english: '', chinese: '' },
   ]);
-  // Flying Fruit 專用問答數據
+  // Flying Fruit 專用問答數據（默認 6 個答案選項 a-f）
   const [flyingFruitQuestions, setFlyingFruitQuestions] = useState<QuestionItem[]>([
     {
       id: '1',
       question: '',
       answers: [
         { id: 'a1', text: '', isCorrect: true },
-        { id: 'a2', text: '', isCorrect: false }
+        { id: 'a2', text: '', isCorrect: false },
+        { id: 'a3', text: '', isCorrect: false },
+        { id: 'a4', text: '', isCorrect: false },
+        { id: 'a5', text: '', isCorrect: false },
+        { id: 'a6', text: '', isCorrect: false }
       ]
     }
   ]);

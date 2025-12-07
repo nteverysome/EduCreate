@@ -36,7 +36,7 @@ export default function FlyingFruitEditor({
 }: FlyingFruitEditorProps) {
   const [showInstruction, setShowInstruction] = useState(false);
 
-  // 添加新問題
+  // 添加新問題（默認 6 個答案）
   const addQuestion = () => {
     if (questions.length >= maxQuestions) return;
     const newQuestion: QuestionItem = {
@@ -44,6 +44,10 @@ export default function FlyingFruitEditor({
       question: '',
       answers: [
         { id: generateId(), text: '', isCorrect: true },
+        { id: generateId(), text: '', isCorrect: false },
+        { id: generateId(), text: '', isCorrect: false },
+        { id: generateId(), text: '', isCorrect: false },
+        { id: generateId(), text: '', isCorrect: false },
         { id: generateId(), text: '', isCorrect: false }
       ]
     };
@@ -76,10 +80,11 @@ export default function FlyingFruitEditor({
     onChange(questions.map(q => q.id === questionId ? { ...q, question: text } : q));
   };
 
-  // 添加答案
+  // 添加答案（最多 6 個）
   const addAnswer = (questionId: string) => {
     onChange(questions.map(q => {
       if (q.id !== questionId) return q;
+      if (q.answers.length >= 6) return q; // 最多 6 個答案
       return {
         ...q,
         answers: [...q.answers, { id: generateId(), text: '', isCorrect: false }]
@@ -261,12 +266,15 @@ function QuestionCard({
             </div>
           ))}
         </div>
-        <button
-          onClick={onAddAnswer}
-          className="mt-2 text-blue-600 hover:text-blue-800 text-sm"
-        >
-          + Add more answers
-        </button>
+        {/* 只有答案數少於 6 個時才顯示添加按鈕 */}
+        {question.answers.length < 6 && (
+          <button
+            onClick={onAddAnswer}
+            className="mt-2 text-blue-600 hover:text-blue-800 text-sm"
+          >
+            + Add more answers
+          </button>
+        )}
       </div>
     </div>
   );
