@@ -299,10 +299,32 @@ function SortableQuestionItem({
   };
 
   // 處理圖片選擇
-  const handleImageSelect = async (imageUrl: string, imageId?: string) => {
-    setShowImagePicker(false);
-    setBaseImageUrl(imageUrl);
-    onUpdateQuestionImage(imageUrl);
+  const handleImageSelect = async (images: any[]) => {
+    if (images.length > 0) {
+      const selectedImage = images[0];
+      setShowImagePicker(false);
+
+      // 使用圖片 URL（Unsplash 或上傳的圖片）
+      const imageUrl = selectedImage.url;
+
+      // 為了避免 CORS 問題，我們通過代理下載圖片
+      try {
+        const response = await fetch(imageUrl);
+        if (response.ok) {
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          setBaseImageUrl(blobUrl);
+        } else {
+          // 如果代理失敗，直接使用原始 URL
+          setBaseImageUrl(imageUrl);
+        }
+      } catch (error) {
+        console.warn('圖片代理失敗，使用原始 URL:', error);
+        setBaseImageUrl(imageUrl);
+      }
+
+      onUpdateQuestionImage(imageUrl);
+    }
   };
 
   // 處理圖片編輯
@@ -311,6 +333,7 @@ function SortableQuestionItem({
     setIsGenerating(true);
 
     try {
+      // 立即更新預覽
       onUpdateQuestionImage(editedUrl);
 
       // 上傳圖片到 Vercel Blob
@@ -325,13 +348,18 @@ function SortableQuestionItem({
       if (uploadResponse.ok) {
         const uploadData = await uploadResponse.json() as any;
         const imageData = uploadData.image || uploadData;
+        console.log('✅ 圖片上傳成功:', imageData);
         onUpdateQuestionImage(imageData.url);
         URL.revokeObjectURL(editedUrl);
       } else {
-        console.error('❌ 圖片上傳失敗');
+        console.error('❌ 圖片上傳失敗:', uploadResponse.status);
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        console.error('❌ 錯誤詳情:', errorData);
+        alert(`圖片上傳失敗: ${(errorData as any).error || '未知錯誤'}`);
       }
     } catch (error) {
       console.error('❌ 圖片處理失敗:', error);
+      alert('圖片處理失敗，請重試');
     } finally {
       setIsGenerating(false);
     }
