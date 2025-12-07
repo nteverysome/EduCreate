@@ -88,21 +88,21 @@ export default class GameScene extends Phaser.Scene {
         this.spawnLoopTimers = [];  // 追蹤所有的生成計時器
     }
 
-    create() {
+    async create() {
         console.log('🎮 GameScene: 創建遊戲場景');
-        
+
         // 創建背景
         this.createBackground();
-        
+
         // 創建 UI
         this.createUI();
-        
-        // 載入詞彙
-        this.loadVocabulary();
-        
+
+        // 載入詞彙（異步操作）
+        await this.loadVocabulary();
+
         // 創建開始按鈕
         this.createStartButton();
-        
+
         // 設置輸入事件
         this.setupInput();
     }
@@ -405,28 +405,76 @@ export default class GameScene extends Phaser.Scene {
         }
     }
 
-    loadVocabulary() {
-        // 嘗試從 GEPTManager 載入詞彙
-        if (this.registry.get('geptManagerReady') && window.GEPTManager) {
-            const options = this.registry.get('gameOptions');
-            const level = options.geptLevel || 'all';
-            const count = options.wordCount || 10;
+    async loadVocabulary() {
+        try {
+            // 首先嘗試從 API 加載活動數據
+            const urlParams = new URLSearchParams(window.location.search);
+            const activityId = urlParams.get('activityId');
 
-            try {
-                this.vocabulary = window.GEPTManager.getRandomWords(level, count);
-                console.log('📚 從 GEPTManager 載入詞彙:', this.vocabulary.length);
-            } catch (e) {
-                console.warn('⚠️ GEPTManager 載入失敗，使用內建詞彙');
+            if (activityId) {
+                console.log('🔄 嘗試從 API 加載活動數據:', activityId);
+                const response = await fetch(`/api/activities/${activityId}`);
+
+                if (response.ok) {
+                    const activity = await response.json();
+                    console.log('✅ 活動數據載入成功:', activity);
+
+                    // 檢查是否有 questions 數據（Flying Fruit 格式）
+                    let questionsData = [];
+
+                    if (activity.content && activity.content.questions && Array.isArray(activity.content.questions)) {
+                        questionsData = activity.content.questions;
+                        console.log('📝 從 content.questions 載入問題:', questionsData.length, '個');
+                    }
+
+                    // 如果有 questions 數據，轉換為詞彙格式
+                    if (questionsData.length > 0) {
+                        this.vocabulary = questionsData.map((q, index) => ({
+                            english: q.question || '',
+                            chinese: q.answers.find(a => a.isCorrect)?.text || '',
+                            questionImageUrl: q.questionImageUrl || null,
+                            questionAudioUrl: q.questionAudioUrl || null,
+                            answers: q.answers || []
+                        }));
+                        console.log('✅ 從活動數據轉換詞彙:', this.vocabulary.length, '個');
+
+                        // 打亂順序
+                        const options = this.registry.get('gameOptions');
+                        if (options.shuffle) {
+                            Phaser.Utils.Array.Shuffle(this.vocabulary);
+                        }
+                        return;
+                    }
+                } else {
+                    console.warn('⚠️ API 請求失敗，狀態碼:', response.status);
+                }
+            }
+
+            // 如果沒有 activityId 或 API 加載失敗，嘗試從 GEPTManager 載入
+            if (this.registry.get('geptManagerReady') && window.GEPTManager) {
+                const options = this.registry.get('gameOptions');
+                const level = options.geptLevel || 'all';
+                const count = options.wordCount || 10;
+
+                try {
+                    this.vocabulary = window.GEPTManager.getRandomWords(level, count);
+                    console.log('📚 從 GEPTManager 載入詞彙:', this.vocabulary.length);
+                } catch (e) {
+                    console.warn('⚠️ GEPTManager 載入失敗，使用內建詞彙');
+                    this.useBuiltInVocabulary();
+                }
+            } else {
                 this.useBuiltInVocabulary();
             }
-        } else {
-            this.useBuiltInVocabulary();
-        }
 
-        // 打亂順序
-        const options = this.registry.get('gameOptions');
-        if (options.shuffle) {
-            Phaser.Utils.Array.Shuffle(this.vocabulary);
+            // 打亂順序
+            const options = this.registry.get('gameOptions');
+            if (options.shuffle) {
+                Phaser.Utils.Array.Shuffle(this.vocabulary);
+            }
+        } catch (error) {
+            console.error('❌ 加載詞彙時出錯:', error);
+            this.useBuiltInVocabulary();
         }
     }
 
@@ -591,27 +639,43 @@ export default class GameScene extends Phaser.Scene {
     }
 
     generateAnswerOptions() {
-        // 正確答案 - 包含英文用於查找圖片
-        this.answerOptions = [{
-            text: this.currentQuestion.chinese,
-            english: this.currentQuestion.english,
-            isCorrect: true
-        }];
-
-        // 生成錯誤答案 - 生成 3 個錯誤答案
-        const wrongAnswers = this.vocabulary
-            .filter(v => v.chinese !== this.currentQuestion.chinese)
-            .map(v => ({
-                text: v.chinese,
-                english: v.english,
-                isCorrect: false
+        // 檢查當前問題是否有預定義的答案（來自 API）
+        if (this.currentQuestion.answers && Array.isArray(this.currentQuestion.answers) && this.currentQuestion.answers.length > 0) {
+            // 使用 API 中的答案
+            console.log('📝 使用 API 答案:', this.currentQuestion.answers.length, '個');
+            this.answerOptions = this.currentQuestion.answers.map(answer => ({
+                text: answer.text || '',
+                imageUrl: answer.imageUrl || null,
+                isCorrect: answer.isCorrect,
+                english: this.currentQuestion.english
             }));
 
-        Phaser.Utils.Array.Shuffle(wrongAnswers);
-        this.answerOptions.push(...wrongAnswers.slice(0, 3));  // 取 3 個錯誤答案
+            // 打亂所有選項
+            Phaser.Utils.Array.Shuffle(this.answerOptions);
+        } else {
+            // 使用默認生成邏輯（向後兼容）
+            // 正確答案 - 包含英文用於查找圖片
+            this.answerOptions = [{
+                text: this.currentQuestion.chinese,
+                english: this.currentQuestion.english,
+                isCorrect: true
+            }];
 
-        // 打亂所有選項
-        Phaser.Utils.Array.Shuffle(this.answerOptions);
+            // 生成錯誤答案 - 生成 3 個錯誤答案
+            const wrongAnswers = this.vocabulary
+                .filter(v => v.chinese !== this.currentQuestion.chinese)
+                .map(v => ({
+                    text: v.chinese,
+                    english: v.english,
+                    isCorrect: false
+                }));
+
+            Phaser.Utils.Array.Shuffle(wrongAnswers);
+            this.answerOptions.push(...wrongAnswers.slice(0, 3));  // 取 3 個錯誤答案
+
+            // 打亂所有選項
+            Phaser.Utils.Array.Shuffle(this.answerOptions);
+        }
     }
 
     spawnFruits() {
@@ -691,15 +755,28 @@ export default class GameScene extends Phaser.Scene {
             fruitBg.fillCircle(px, py, 3);
         }
 
-        // 小圖片（代表答案的水果）
-        const word = option.english ? option.english.toLowerCase() : '';
-        const fruitEmoji = this.fruitImages[word] || this.fruitEmojis[index % this.fruitEmojis.length];
-        const smallImage = this.add.text(-25, -5, fruitEmoji, {
-            fontSize: '28px'
-        }).setOrigin(0.5);
+        // 小圖片（代表答案的水果或圖片）
+        let smallImage;
 
-        // 答案文字（中文）
-        const answerText = this.add.text(15, -5, option.text, {
+        if (option.imageUrl) {
+            // 使用 API 中的圖片
+            smallImage = this.add.image(-25, -5, null);
+            smallImage.setDisplaySize(28, 28);
+
+            // 異步加載圖片
+            this.textures.addBase64(option.imageUrl, option.imageUrl);
+            smallImage.setTexture(option.imageUrl);
+        } else {
+            // 使用 emoji 作為備選
+            const word = option.english ? option.english.toLowerCase() : '';
+            const fruitEmoji = this.fruitImages[word] || this.fruitEmojis[index % this.fruitEmojis.length];
+            smallImage = this.add.text(-25, -5, fruitEmoji, {
+                fontSize: '28px'
+            }).setOrigin(0.5);
+        }
+
+        // 答案文字（中文）- 如果有圖片，文字可選
+        const answerText = this.add.text(15, -5, option.text || '', {
             fontSize: '18px',
             fontFamily: 'Arial, sans-serif',
             color: '#000000',
