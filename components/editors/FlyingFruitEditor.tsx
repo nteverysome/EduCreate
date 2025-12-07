@@ -569,7 +569,7 @@ function SortableQuestionItem({
             {/* 正確/錯誤切換按鈕 */}
             <button
               onClick={() => onToggleCorrect(answer.id)}
-              className={`w-7 h-7 flex items-center justify-center rounded border-2 font-bold transition-colors ${
+              className={`w-7 h-7 flex items-center justify-center rounded border-2 font-bold transition-colors flex-shrink-0 ${
                 answer.isCorrect
                   ? 'bg-green-100 border-green-500 text-green-600'
                   : 'bg-red-100 border-red-500 text-red-600'
@@ -584,24 +584,24 @@ function SortableQuestionItem({
                   setBaseAnswerImageUrl(answer.imageUrl || null);
                   setShowAnswerImageEditor(answer.id);
                 }}
-                className="relative w-8 h-8 rounded border border-gray-300 overflow-hidden hover:border-blue-500 transition-colors"
+                className="relative w-8 h-8 rounded border border-gray-300 overflow-hidden hover:border-blue-500 transition-colors flex-shrink-0"
                 title="編輯圖片"
               >
                 <img src={answer.imageUrl} alt="answer" className="w-full h-full object-cover" />
               </button>
             )}
-            {/* 答案輸入框 */}
+            {/* 答案輸入框 - 可選 */}
             <input
               type="text"
               value={answer.text}
               onChange={(e) => onUpdateAnswer(answer.id, { text: e.target.value })}
-              placeholder="輸入答案..."
+              placeholder={answer.imageUrl ? "可選文字..." : "輸入答案..."}
               className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             />
             {/* 圖片按鈕 */}
             <button
               onClick={() => setShowAnswerImagePicker(answer.id)}
-              className="p-1 hover:bg-gray-100 rounded text-gray-400"
+              className="p-1 hover:bg-gray-100 rounded text-gray-400 flex-shrink-0"
               title="添加圖片"
               disabled={isGenerating}
             >
@@ -611,7 +611,7 @@ function SortableQuestionItem({
             <button
               onClick={() => onRemoveAnswer(answer.id)}
               disabled={question.answers.length <= 2}
-              className="p-1 hover:bg-gray-100 rounded text-gray-400 disabled:opacity-30"
+              className="p-1 hover:bg-gray-100 rounded text-gray-400 disabled:opacity-30 flex-shrink-0"
               title="刪除答案"
             >
               ×
