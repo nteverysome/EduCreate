@@ -51,6 +51,20 @@ interface GameSwitcherProps {
 
 // 基礎遊戲配置數據 (不包含動態 URL)
 const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
+  // ⭐ 模板參考遊戲 - Match-up 是遊戲模板的基礎架構
+  {
+    id: 'match-up-game',
+    name: 'match-up',
+    displayName: 'Match up 配對遊戲 ⭐',
+    description: '拖動左側卡片到右側對應的答案框進行配對（模板參考遊戲）',
+    type: 'iframe',
+    memoryType: '關聯配對記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🎯',
+    estimatedLoadTime: 500,
+    hidden: false  // 顯示在切換遊戲選單中
+  },
   {
     id: 'shimozurdo-game',
     name: 'shimozurdo',
@@ -128,19 +142,6 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     status: 'completed',
     icon: '🔢',
     estimatedLoadTime: 1100,
-    hidden: false  // 顯示在切換遊戲選單中
-  },
-  {
-    id: 'match-up-game',
-    name: 'match-up',
-    displayName: 'Match up 配對遊戲',
-    description: '拖動左側卡片到右側對應的答案框進行配對',
-    type: 'iframe',
-    memoryType: '關聯配對記憶',
-    geptLevels: ['elementary', 'intermediate', 'advanced'],
-    status: 'completed',
-    icon: '🎯',
-    estimatedLoadTime: 500,
     hidden: false  // 顯示在切換遊戲選單中
   },
   {
@@ -247,6 +248,19 @@ const BASE_GAMES_CONFIG: Omit<GameConfig, 'url'>[] = [
     estimatedLoadTime: 1000,
     hidden: false  // 顯示在切換遊戲選單中
   },
+  {
+    id: 'flying-fruit-game',
+    name: 'flying-fruit',
+    displayName: '🍎 Flying Fruit 飛行水果',
+    description: '水果從右側飛入，點擊正確答案的水果！訓練快速反應和詞彙記憶',
+    type: 'iframe',
+    memoryType: '動態反應記憶',
+    geptLevels: ['elementary', 'intermediate', 'advanced'],
+    status: 'completed',
+    icon: '🍎',
+    estimatedLoadTime: 800,
+    hidden: false  // 顯示在切換遊戲選單中
+  },
   // 未來遊戲預留位置
   {
     id: 'matching-pairs',
@@ -344,6 +358,8 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
       return '/games/dino-chrome-clone/dist/index.html';
     case 'platformer-game':
       return '/games/platformer-game/dist/index.html';
+    case 'flying-fruit-game':
+      return '/games/flying-fruit-game/';
     case 'speaking-cards':
       return '/games/speaking-cards/';  // 🔥 改為 Phaser 遊戲路徑
     case 'matching-pairs':

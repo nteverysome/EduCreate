@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='chrome=1'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1'>
+    <meta name='apple-mobile-web-app-capable' content='yes'>
+    <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
+    <title>Flying Fruit - EduCreate</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100vh; height: 100dvh;
+            overflow: hidden; position: fixed; top: 0; left: 0;
+            background: #1a1a2e; pointer-events: none;
+        }
+        #game-container {
+            width: 100vw !important; height: 100dvh !important;
+            pointer-events: auto !important; touch-action: manipulation !important;
+            position: fixed; top: 0; left: 0;
+        }
+        .fullscreen-btn {
+            position: fixed; top: 10px; right: 10px;
+            width: 40px; height: 40px;
+            background: rgba(0, 0, 0, 0.6); border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 8px; cursor: pointer; z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease; pointer-events: auto !important;
+        }
+        .fullscreen-btn:hover { background: rgba(0, 0, 0, 0.8); transform: scale(1.1); }
+        .fullscreen-btn:active { transform: scale(0.95); }
+        .fullscreen-btn svg { width: 20px; height: 20px; fill: white; }
+        .fullscreen-btn.is-fullscreen svg.enter-icon { display: none; }
+        .fullscreen-btn.is-fullscreen svg.exit-icon { display: block; }
+        .fullscreen-btn:not(.is-fullscreen) svg.enter-icon { display: block; }
+        .fullscreen-btn:not(.is-fullscreen) svg.exit-icon { display: none; }
+        @media screen and (max-width: 768px) {
+            html, body { height: 100vh !important; height: 100dvh !important; overflow: hidden !important; position: fixed !important; }
+            .fullscreen-btn { width: 44px; height: 44px; }
+        }
+    </style>
+</head>
+<body>
+    <div id='game-container'></div>
+    <button class="fullscreen-btn" title="全螢幕">
+        <svg class="enter-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+        <svg class="exit-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+        </svg>
+    </button>
+
+    <!-- Phaser 引擎 -->
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.53.1/dist/phaser.min.js"></script>
+    <!-- EduCreate 共享模組 -->
+    <script src="/games/shared/result-collector.js"></script>
+    <script src="/games/shared/utils/sm2.js"></script>
+    <script src="/games/shared/managers/GEPTManager.js"></script>
+    <script src="/games/shared/managers/BilingualManager.js"></script>
+    <script src="/games/shared/managers/SRSManager.js"></script>
+    <!-- 遊戲主入口 -->
+    <script type="module" src="./main.js"></script>
+
+    <script>
+        // 全螢幕控制器
+        class FullscreenController {
+            constructor() {
+                this.fullscreenBtn = document.querySelector('.fullscreen-btn');
+                this.isFullscreen = false;
+                this.init();
+            }
+            init() {
+                if (!this.fullscreenBtn) return;
+                this.fullscreenBtn.addEventListener('click', this.toggleFullscreen.bind(this));
+                document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
+                document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange.bind(this));
+                window.addEventListener('message', this.handleParentMessage.bind(this));
+            }
+            isMobileOrTablet() {
+                const isSmallScreen = window.matchMedia('(max-width: 1024px)').matches;
+                const hasTouchScreen = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+                const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+                return (isSmallScreen && hasTouchScreen) || mobileRegex.test(navigator.userAgent);
+            }
+            toggleFullscreen() {
+                if (this.isMobileOrTablet()) {
+                    this.toggleFullscreenViaPostMessage();
+                } else {
+                    this.toggleFullscreenNative();
+                }
+            }
+            toggleFullscreenViaPostMessage() {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'DUAL_FULLSCREEN_REQUEST', action: 'toggle', timestamp: Date.now(), source: 'flying-fruit-fullscreen-button' }, '*');
+                } else {
+                    this.toggleFullscreenNative();
+                }
+            }
+            toggleFullscreenNative() {
+                const gameContainer = document.getElementById('game-container');
+                if (!document.fullscreenElement) {
+                    if (gameContainer?.requestFullscreen) gameContainer.requestFullscreen().catch(() => document.documentElement.requestFullscreen?.());
+                    else if (gameContainer?.webkitRequestFullscreen) gameContainer.webkitRequestFullscreen();
+                } else {
+                    document.exitFullscreen?.() || document.webkitExitFullscreen?.();
+                }
+            }
+            handleFullscreenChange() {
+                this.isFullscreen = !!document.fullscreenElement;
+                this.updateButtonState();
+            }
+            handleParentMessage(event) {
+                if (event.data?.type === 'FULLSCREEN_STATE_CHANGE') {
+                    this.isFullscreen = event.data.isFullscreen;
+                    this.updateButtonState();
+                }
+            }
+            updateButtonState() {
+                this.fullscreenBtn?.classList.toggle('is-fullscreen', this.isFullscreen);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => { window.fullscreenController = new FullscreenController(); });
+        window.addEventListener('gameReady', () => console.log('🎉 Flying Fruit 遊戲準備就緒'));
+        window.addEventListener('error', (e) => console.error('❌ 頁面錯誤:', e.error));
+        setTimeout(() => { if (!window.game) console.warn('⚠️ 遊戲載入超時'); }, 15000);
+        console.log('✅ Flying Fruit 遊戲模板已載入');
+    </script>
+</body>
+</html>
+

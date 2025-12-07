@@ -6,9 +6,9 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1'>
     <meta name='apple-mobile-web-app-capable' content='yes'>
     <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
-    
+
     <title>EduCreate Game</title>
-    
+
     <style>
         * {
             margin: 0;
@@ -38,6 +38,57 @@
             left: 0;
         }
 
+        /* 🔥 全螢幕按鈕樣式（Match-up 標準） */
+        .fullscreen-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            pointer-events: auto !important;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+
+        .fullscreen-btn:active {
+            transform: scale(0.95);
+        }
+
+        .fullscreen-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        /* 全螢幕時的退出圖標 */
+        .fullscreen-btn.is-fullscreen svg.enter-icon {
+            display: none;
+        }
+
+        .fullscreen-btn.is-fullscreen svg.exit-icon {
+            display: block;
+        }
+
+        .fullscreen-btn:not(.is-fullscreen) svg.enter-icon {
+            display: block;
+        }
+
+        .fullscreen-btn:not(.is-fullscreen) svg.exit-icon {
+            display: none;
+        }
+
         /* Mobile 優化 */
         @media screen and (max-width: 768px) {
             html, body {
@@ -46,12 +97,29 @@
                 overflow: hidden !important;
                 position: fixed !important;
             }
+
+            .fullscreen-btn {
+                width: 44px;
+                height: 44px;
+            }
         }
     </style>
 </head>
 
 <body>
     <div id='game-container'></div>
+
+    <!-- 🔥 全螢幕按鈕（Match-up 標準） -->
+    <button class="fullscreen-btn" title="全螢幕">
+        <!-- 進入全螢幕圖標 -->
+        <svg class="enter-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+        <!-- 退出全螢幕圖標 -->
+        <svg class="exit-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+        </svg>
+    </button>
 
     <!-- ===== 依賴載入 ===== -->
     
@@ -81,8 +149,129 @@
     <script type="module" src="./config.js"></script>
 
     <!-- ===== 初始化腳本 ===== -->
-    
+
     <script>
+        // 🔥 全螢幕控制器 - 混合策略（桌面用原生 API，手機/平板用 PostMessage）
+        class FullscreenController {
+            constructor() {
+                this.fullscreenBtn = document.querySelector('.fullscreen-btn');
+                this.isFullscreen = false;
+                this.init();
+            }
+
+            init() {
+                if (!this.fullscreenBtn) {
+                    console.warn('⚠️ 全螢幕按鈕未找到');
+                    return;
+                }
+
+                this.fullscreenBtn.addEventListener('click', this.toggleFullscreen.bind(this));
+
+                // 監聽全螢幕狀態變化
+                document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
+                document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange.bind(this));
+
+                // 監聽父頁面消息（用於同步全螢幕狀態）
+                window.addEventListener('message', this.handleParentMessage.bind(this));
+
+                console.log('✅ 全螢幕控制器初始化完成');
+            }
+
+            // 🔥 檢測設備類型
+            isMobileOrTablet() {
+                const isSmallScreen = window.matchMedia('(max-width: 1024px)').matches;
+                const hasTouchScreen = navigator.maxTouchPoints > 0 || 'ontouchstart' in window;
+                const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+                const isMobileUA = mobileRegex.test(navigator.userAgent);
+                return (isSmallScreen && hasTouchScreen) || isMobileUA;
+            }
+
+            toggleFullscreen() {
+                console.log('🖥️ 全螢幕按鈕點擊');
+
+                if (this.isMobileOrTablet()) {
+                    console.log('📱 檢測到手機/平板，使用 PostMessage 通信');
+                    this.toggleFullscreenViaPostMessage();
+                } else {
+                    console.log('🖥️ 檢測到桌面設備，使用原生 Fullscreen API');
+                    this.toggleFullscreenNative();
+                }
+            }
+
+            // 🔥 方法 1：PostMessage 通信（手機/平板 - 通知父頁面）
+            toggleFullscreenViaPostMessage() {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'DUAL_FULLSCREEN_REQUEST',
+                        action: 'toggle',
+                        timestamp: Date.now(),
+                        source: 'template-fullscreen-button'
+                    }, '*');
+                    console.log('✅ 已發送 DUAL_FULLSCREEN_REQUEST 到父頁面');
+                } else {
+                    console.warn('⚠️ 不在 iframe 內，退回到原生 Fullscreen API');
+                    this.toggleFullscreenNative();
+                }
+            }
+
+            // 🔥 方法 2：原生 Fullscreen API（桌面）
+            toggleFullscreenNative() {
+                const gameContainer = document.getElementById('game-container');
+
+                if (!document.fullscreenElement) {
+                    console.log('📱 進入全螢幕模式（原生 API）');
+                    if (gameContainer && gameContainer.requestFullscreen) {
+                        gameContainer.requestFullscreen().catch(err => {
+                            console.warn('⚠️ 全螢幕失敗:', err);
+                            if (document.documentElement.requestFullscreen) {
+                                document.documentElement.requestFullscreen();
+                            }
+                        });
+                    } else if (gameContainer.webkitRequestFullscreen) {
+                        gameContainer.webkitRequestFullscreen();
+                    }
+                } else {
+                    console.log('🚪 退出全螢幕模式（原生 API）');
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                }
+            }
+
+            // 處理全螢幕狀態變化
+            handleFullscreenChange() {
+                this.isFullscreen = !!document.fullscreenElement;
+                this.updateButtonState();
+                console.log('🖥️ 全螢幕狀態變化:', this.isFullscreen ? '進入' : '退出');
+            }
+
+            // 處理父頁面消息
+            handleParentMessage(event) {
+                if (event.data && event.data.type === 'FULLSCREEN_STATE_CHANGE') {
+                    this.isFullscreen = event.data.isFullscreen;
+                    this.updateButtonState();
+                }
+            }
+
+            // 更新按鈕狀態
+            updateButtonState() {
+                if (this.fullscreenBtn) {
+                    if (this.isFullscreen) {
+                        this.fullscreenBtn.classList.add('is-fullscreen');
+                    } else {
+                        this.fullscreenBtn.classList.remove('is-fullscreen');
+                    }
+                }
+            }
+        }
+
+        // 初始化全螢幕控制器
+        document.addEventListener('DOMContentLoaded', () => {
+            window.fullscreenController = new FullscreenController();
+        });
+
         // 遊戲準備就緒事件
         window.addEventListener('gameReady', function(event) {
             console.log('🎉 遊戲準備就緒');

@@ -8,6 +8,18 @@ import UnifiedNavigation from '@/components/navigation/UnifiedNavigation';
 
 // 從 /games/switcher 整合的實際遊戲數據
 const gameTemplates = [
+  // ⭐ 主要參考遊戲（Match-up 是遊戲模板的基礎架構）
+  {
+    id: 'match-up-game',
+    name: 'Match up 配對遊戲 ⭐',
+    description: '拖動左側卡片到右側對應的答案框進行配對（模板參考遊戲）',
+    icon: '🎯',
+    category: '關聯配對記憶',
+    popular: true,
+    status: 'completed',
+    estimatedLoadTime: 500,
+    isTemplateReference: true  // 標記為模板參考遊戲
+  },
   // 已完成的遊戲（可直接遊玩）
   {
     id: 'shimozurdo-game',
@@ -118,16 +130,6 @@ const gameTemplates = [
     popular: false,
     status: 'completed',
     estimatedLoadTime: 1200
-  },
-  {
-    id: 'match-up-game',
-    name: 'Match up 配對遊戲',
-    description: '拖動左側卡片到右側對應的答案框進行配對',
-    icon: '🎯',
-    category: '關聯配對記憶',
-    popular: true,
-    status: 'completed',
-    estimatedLoadTime: 500
   },
   {
     id: 'speaking-cards',
