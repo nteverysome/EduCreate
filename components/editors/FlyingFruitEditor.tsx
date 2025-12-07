@@ -18,8 +18,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import DragHandle from '../drag-handle';
-import DuplicateButton from '../duplicate-button';
+import InputWithImage from '../input-with-image';
 
 // 答案項目接口
 export interface AnswerItem {
@@ -34,6 +33,7 @@ export interface QuestionItem {
   id: string;
   question: string;
   questionImageUrl?: string;
+  questionAudioUrl?: string;
   answers: AnswerItem[];
 }
 
@@ -162,6 +162,16 @@ export default function FlyingFruitEditor({
     }));
   };
 
+  // 更新問題圖片
+  const updateQuestionImage = (questionId: string, imageUrl?: string) => {
+    onChange(questions.map(q => q.id === questionId ? { ...q, questionImageUrl: imageUrl } : q));
+  };
+
+  // 更新問題語音
+  const updateQuestionAudio = (questionId: string, audioUrl?: string) => {
+    onChange(questions.map(q => q.id === questionId ? { ...q, questionAudioUrl: audioUrl } : q));
+  };
+
   return (
     <div className="space-y-2">
       {/* 操作說明 */}
@@ -200,6 +210,8 @@ export default function FlyingFruitEditor({
                 question={question}
                 index={qIndex}
                 onUpdateText={(text) => updateQuestionText(question.id, text)}
+                onUpdateQuestionImage={(imageUrl) => updateQuestionImage(question.id, imageUrl)}
+                onUpdateQuestionAudio={(audioUrl) => updateQuestionAudio(question.id, audioUrl)}
                 onRemove={() => removeQuestion(question.id)}
                 onDuplicate={() => duplicateQuestion(question.id)}
                 onAddAnswer={() => addAnswer(question.id)}
@@ -232,6 +244,8 @@ interface SortableQuestionItemProps {
   question: QuestionItem;
   index: number;
   onUpdateText: (text: string) => void;
+  onUpdateQuestionImage: (imageUrl?: string) => void;
+  onUpdateQuestionAudio: (audioUrl?: string) => void;
   onRemove: () => void;
   onDuplicate: () => void;
   onAddAnswer: () => void;
@@ -245,6 +259,8 @@ function SortableQuestionItem({
   question,
   index,
   onUpdateText,
+  onUpdateQuestionImage,
+  onUpdateQuestionAudio,
   onRemove,
   onDuplicate,
   onAddAnswer,
@@ -266,6 +282,18 @@ function SortableQuestionItem({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+  };
+
+  // 處理圖片選擇（暫時用 alert 提示）
+  const handleImageClick = () => {
+    // TODO: 整合 ImagePicker 組件
+    alert('圖片功能開發中');
+  };
+
+  // 處理語音選擇（暫時用 alert 提示）
+  const handleAudioClick = () => {
+    // TODO: 整合語音功能
+    alert('語音功能開發中');
   };
 
   return (
@@ -300,18 +328,23 @@ function SortableQuestionItem({
         </div>
       </div>
 
-      {/* 問題輸入框行 */}
+      {/* 問題輸入框行 - 使用 InputWithImage 組件 */}
       <div className="flex items-center gap-2 mb-3">
         <span className="text-gray-600 font-medium w-6">{index + 1}.</span>
-        <input
-          type="text"
-          value={question.question}
-          onChange={(e) => onUpdateText(e.target.value)}
-          placeholder="輸入問題..."
-          className="flex-1 px-3 py-2 bg-cyan-50 border border-cyan-200 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
-        />
-        <button className="p-2 hover:bg-gray-100 rounded text-gray-500" title="編輯">✏️</button>
-        <button className="p-2 hover:bg-gray-100 rounded text-gray-500" title="圖片">🖼️</button>
+        <div className="flex-1">
+          <InputWithImage
+            value={question.question}
+            onChange={onUpdateText}
+            placeholder="輸入文字..."
+            imageUrl={question.questionImageUrl}
+            onImageIconClick={handleImageClick}
+            onThumbnailClick={handleImageClick}
+            onAddSoundClick={handleAudioClick}
+            hasAudio={!!question.questionAudioUrl}
+            audioUrl={question.questionAudioUrl}
+            onAudioThumbnailClick={handleAudioClick}
+          />
+        </div>
       </div>
 
       {/* Answers 標籤 */}
