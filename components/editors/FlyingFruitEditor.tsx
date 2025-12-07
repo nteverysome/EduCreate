@@ -273,7 +273,7 @@ function SortableQuestionItem({
   onToggleCorrect,
   canRemove
 }: SortableQuestionItemProps) {
-  // 圖片相關狀態
+  // 問題圖片相關狀態
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [baseImageUrl, setBaseImageUrl] = useState<string | null>(null);
@@ -282,6 +282,11 @@ function SortableQuestionItem({
   // 語音相關狀態
   const [showAddSoundDialog, setShowAddSoundDialog] = useState(false);
   const [showAudioPreview, setShowAudioPreview] = useState(false);
+
+  // 答案圖片相關狀態
+  const [showAnswerImagePicker, setShowAnswerImagePicker] = useState<string | null>(null);
+  const [showAnswerImageEditor, setShowAnswerImageEditor] = useState<string | null>(null);
+  const [baseAnswerImageUrl, setBaseAnswerImageUrl] = useState<string | null>(null);
 
   const {
     attributes,
@@ -381,6 +386,77 @@ function SortableQuestionItem({
   const handleAudioRemove = () => {
     onUpdateQuestionAudio(undefined);
     setShowAudioPreview(false);
+  };
+
+  // 處理答案圖片選擇
+  const handleAnswerImageSelect = async (images: any[], answerId: string) => {
+    if (images.length > 0) {
+      const selectedImage = images[0];
+      setShowAnswerImagePicker(null);
+
+      const imageUrl = selectedImage.url;
+
+      // 為了避免 CORS 問題，我們通過代理下載圖片
+      try {
+        const response = await fetch(imageUrl);
+        if (response.ok) {
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          setBaseAnswerImageUrl(blobUrl);
+        } else {
+          setBaseAnswerImageUrl(imageUrl);
+        }
+      } catch (error) {
+        console.warn('圖片代理失敗，使用原始 URL:', error);
+        setBaseAnswerImageUrl(imageUrl);
+      }
+
+      onUpdateAnswer(answerId, { imageUrl });
+    }
+  };
+
+  // 處理答案圖片編輯
+  const handleAnswerImageEdit = async (editedBlob: Blob, editedUrl: string, answerId: string) => {
+    setShowAnswerImageEditor(null);
+    setIsGenerating(true);
+
+    try {
+      // 立即更新預覽
+      onUpdateAnswer(answerId, { imageUrl: editedUrl });
+
+      // 上傳圖片到 Vercel Blob
+      const formData = new FormData();
+      formData.append('file', editedBlob, `flying-fruit-a-${answerId}-${Date.now()}.png`);
+
+      const uploadResponse = await fetch('/api/images/upload-test', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (uploadResponse.ok) {
+        const uploadData = await uploadResponse.json() as any;
+        const imageData = uploadData.image || uploadData;
+        console.log('✅ 答案圖片上傳成功:', imageData);
+        onUpdateAnswer(answerId, { imageUrl: imageData.url });
+        URL.revokeObjectURL(editedUrl);
+      } else {
+        console.error('❌ 答案圖片上傳失敗:', uploadResponse.status);
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        console.error('❌ 錯誤詳情:', errorData);
+        alert(`圖片上傳失敗: ${(errorData as any).error || '未知錯誤'}`);
+      }
+    } catch (error) {
+      console.error('❌ 答案圖片處理失敗:', error);
+      alert('圖片處理失敗，請重試');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // 處理答案圖片移除
+  const handleAnswerImageRemove = (answerId: string) => {
+    onUpdateAnswer(answerId, { imageUrl: undefined });
+    setShowAnswerImageEditor(null);
   };
 
   return (
@@ -501,6 +577,19 @@ function SortableQuestionItem({
             >
               {answer.isCorrect ? '✓' : '✗'}
             </button>
+            {/* 圖片縮圖 */}
+            {answer.imageUrl && (
+              <button
+                onClick={() => {
+                  setBaseAnswerImageUrl(answer.imageUrl || null);
+                  setShowAnswerImageEditor(answer.id);
+                }}
+                className="relative w-8 h-8 rounded border border-gray-300 overflow-hidden hover:border-blue-500 transition-colors"
+                title="編輯圖片"
+              >
+                <img src={answer.imageUrl} alt="answer" className="w-full h-full object-cover" />
+              </button>
+            )}
             {/* 答案輸入框 */}
             <input
               type="text"
@@ -510,14 +599,23 @@ function SortableQuestionItem({
               className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             />
             {/* 圖片按鈕 */}
-            <button className="p-1 hover:bg-gray-100 rounded text-gray-400" title="圖片">🖼️</button>
+            <button
+              onClick={() => setShowAnswerImagePicker(answer.id)}
+              className="p-1 hover:bg-gray-100 rounded text-gray-400"
+              title="添加圖片"
+              disabled={isGenerating}
+            >
+              🖼️
+            </button>
             {/* 刪除答案按鈕 */}
             <button
               onClick={() => onRemoveAnswer(answer.id)}
               disabled={question.answers.length <= 2}
               className="p-1 hover:bg-gray-100 rounded text-gray-400 disabled:opacity-30"
               title="刪除答案"
-            >×</button>
+            >
+              ×
+            </button>
           </div>
         ))}
       </div>
@@ -532,6 +630,29 @@ function SortableQuestionItem({
             + Add more answers
           </button>
         </div>
+      )}
+
+      {/* 答案圖片選擇器 */}
+      {showAnswerImagePicker && (
+        <ImagePicker
+          onSelect={(images) => handleAnswerImageSelect(images, showAnswerImagePicker)}
+          onClose={() => setShowAnswerImagePicker(null)}
+          multiple={false}
+          initialSearchQuery={question.answers.find(a => a.id === showAnswerImagePicker)?.text || ''}
+        />
+      )}
+
+      {/* 答案圖片編輯器 */}
+      {showAnswerImageEditor && (
+        <ImageEditor
+          imageUrl={baseAnswerImageUrl || question.answers.find(a => a.id === showAnswerImageEditor)?.imageUrl || ''}
+          onSave={(blob, url) => handleAnswerImageEdit(blob, url, showAnswerImageEditor)}
+          onClose={() => setShowAnswerImageEditor(null)}
+          onRemove={() => handleAnswerImageRemove(showAnswerImageEditor)}
+          enableTextOverlay={false}
+          onTextOverlayChange={() => {}}
+          textToOverlay=""
+        />
       )}
     </div>
   );
