@@ -33,7 +33,9 @@ export default class HandlerScene extends Phaser.Scene {
         if (urlParams.has('wordCount')) {
             options.wordCount = parseInt(urlParams.get('wordCount')) || 10;
         }
-        if (urlParams.has('style')) {
+        if (urlParams.has('visualStyle')) {
+            options.visualStyle = urlParams.get('visualStyle');
+        } else if (urlParams.has('style')) {
             options.visualStyle = urlParams.get('style');
         }
         if (urlParams.has('shuffle')) {
