@@ -105,11 +105,12 @@ export default function InputWithImage({
           disabled={disabled}
           className={`
             absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2
-            w-9 h-9 sm:w-8 sm:h-8 rounded overflow-hidden
+            w-9 h-9 sm:w-8 sm:h-8 rounded overflow-hidden flex-shrink-0
             border-2 border-gray-300 hover:border-blue-500
             transition-all duration-200
             ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
             focus:outline-none focus:ring-2 focus:ring-blue-500
+            flex items-center justify-center
           `}
           title="點擊編輯圖片"
           aria-label="編輯圖片"
@@ -117,7 +118,7 @@ export default function InputWithImage({
           <img
             src={imageUrl}
             alt="preview"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover flex-shrink-0"
           />
         </button>
       )}
