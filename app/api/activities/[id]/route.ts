@@ -395,50 +395,66 @@ export async function PUT(
       updatedAt: new Date()
     };
 
-    // 如果有 title，更新 title 和詞彙數據
+    // 🔥 檢查是否是 Flying Fruit 遊戲
+    const isFlyingFruit = body.gameTemplateId === 'flying-fruit-game';
+
+    // 如果有 title，更新 title 和詞彙/問題數據
     if (body.title !== undefined) {
       updateData.title = body.title;
-      updateData.type = 'vocabulary';
-      updateData.content = {
-        gameTemplateId: body.gameTemplateId, // 存儲在 content 中
-        vocabularyItems: body.vocabularyItems || []
-      };
 
-      // 🔥 同時更新關聯表中的詞彙數據（包含圖片字段）
-      if (body.vocabularyItems && Array.isArray(body.vocabularyItems)) {
-        console.log('🔍 更新關聯表詞彙數據:', body.vocabularyItems.length, '個詞彙');
+      if (isFlyingFruit) {
+        // Flying Fruit 遊戲：保存 questions 數據
+        updateData.type = 'quiz_game';
+        updateData.templateType = 'quiz';
+        updateData.content = {
+          gameTemplateId: body.gameTemplateId,
+          questions: body.questions || []
+        };
+        console.log('🔍 更新 Flying Fruit questions 數據:', body.questions?.length, '個問題');
+      } else {
+        // 標準詞彙遊戲：保存 vocabularyItems 數據
+        updateData.type = 'vocabulary';
+        updateData.content = {
+          gameTemplateId: body.gameTemplateId, // 存儲在 content 中
+          vocabularyItems: body.vocabularyItems || []
+        };
 
-        // 使用事務確保數據一致性
-        await prisma.$transaction(async (tx) => {
-          // 1. 刪除舊的詞彙項目
-          await tx.vocabularyItem.deleteMany({
-            where: { activityId }
-          });
+        // 🔥 同時更新關聯表中的詞彙數據（包含圖片字段）
+        if (body.vocabularyItems && Array.isArray(body.vocabularyItems)) {
+          console.log('🔍 更新關聯表詞彙數據:', body.vocabularyItems.length, '個詞彙');
 
-          // 2. 創建新的詞彙項目（包含所有圖片字段）
-          if (body.vocabularyItems.length > 0) {
-            await tx.vocabularyItem.createMany({
-              data: body.vocabularyItems.map((item: any) => ({
-                activityId,
-                english: item.english || '',
-                chinese: item.chinese || '',
-                phonetic: item.phonetic || null,
-                imageId: item.imageId || null,           // ✅ 保存 imageId
-                imageUrl: item.imageUrl || null,         // ✅ 保存 imageUrl
-                imageSize: item.imageSize || null,       // ✅ 保存 imageSize
-                chineseImageId: item.chineseImageId || null,     // ✅ 保存 chineseImageId
-                chineseImageUrl: item.chineseImageUrl || null,   // ✅ 保存 chineseImageUrl
-                chineseImageSize: item.chineseImageSize || null, // ✅ 保存 chineseImageSize
-                audioUrl: item.audioUrl || null,
-                partOfSpeech: item.partOfSpeech || null,
-                difficultyLevel: item.difficultyLevel || 1,
-                exampleSentence: item.exampleSentence || null,
-                notes: item.notes || null
-              }))
+          // 使用事務確保數據一致性
+          await prisma.$transaction(async (tx) => {
+            // 1. 刪除舊的詞彙項目
+            await tx.vocabularyItem.deleteMany({
+              where: { activityId }
             });
-            console.log('✅ 關聯表詞彙數據更新成功');
-          }
-        });
+
+            // 2. 創建新的詞彙項目（包含所有圖片字段）
+            if (body.vocabularyItems.length > 0) {
+              await tx.vocabularyItem.createMany({
+                data: body.vocabularyItems.map((item: any) => ({
+                  activityId,
+                  english: item.english || '',
+                  chinese: item.chinese || '',
+                  phonetic: item.phonetic || null,
+                  imageId: item.imageId || null,           // ✅ 保存 imageId
+                  imageUrl: item.imageUrl || null,         // ✅ 保存 imageUrl
+                  imageSize: item.imageSize || null,       // ✅ 保存 imageSize
+                  chineseImageId: item.chineseImageId || null,     // ✅ 保存 chineseImageId
+                  chineseImageUrl: item.chineseImageUrl || null,   // ✅ 保存 chineseImageUrl
+                  chineseImageSize: item.chineseImageSize || null, // ✅ 保存 chineseImageSize
+                  audioUrl: item.audioUrl || null,
+                  partOfSpeech: item.partOfSpeech || null,
+                  difficultyLevel: item.difficultyLevel || 1,
+                  exampleSentence: item.exampleSentence || null,
+                  notes: item.notes || null
+                }))
+              });
+              console.log('✅ 關聯表詞彙數據更新成功');
+            }
+          });
+        }
       }
     }
 
