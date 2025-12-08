@@ -584,12 +584,24 @@ export default class GameScene extends Phaser.Scene {
 
         if (options.timer.type === 'none') return;
 
+        // 🔥 先初始化計時器值，再啟動計時器事件
+        if (options.timer.type === 'countDown') {
+            this.timer = (options.timer.minutes || 5) * 60 + (options.timer.seconds || 0);
+            console.log('⏱️ 倒數計時初始化:', this.timer, '秒');
+        } else {
+            this.timer = 0;
+        }
+
+        // 顯示初始計時器
+        this.updateTimerDisplay();
+
+        // 啟動計時器事件
         this.timerEvent = this.time.addEvent({
             delay: 1000,
             callback: () => {
                 if (options.timer.type === 'countUp') {
                     this.timer++;
-                } else {
+                } else if (options.timer.type === 'countDown') {
                     this.timer--;
                     if (this.timer <= 0) {
                         this.endGame('timeout');
@@ -599,12 +611,6 @@ export default class GameScene extends Phaser.Scene {
             },
             loop: true
         });
-
-        // 初始化計時器
-        if (options.timer.type === 'countDown') {
-            this.timer = options.timer.minutes * 60 + options.timer.seconds;
-        }
-        this.updateTimerDisplay();
     }
 
     updateTimerDisplay() {
