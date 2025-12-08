@@ -623,19 +623,66 @@ export default class GameScene extends Phaser.Scene {
     }
 
     updateCenterImage() {
-        // 根據當前單字獲取對應的圖片/emoji
-        const word = this.currentQuestion.english.toLowerCase();
-        const emoji = this.fruitImages[word] || '❓';
-        this.questionImage.setText(emoji);
+        // 🔥 優先使用 API 返回的問題圖片 URL
+        if (this.currentQuestion.questionImageUrl) {
+            console.log('📸 使用 API 問題圖片:', this.currentQuestion.questionImageUrl);
 
-        // 圖片出現動畫
-        this.questionImage.setScale(0);
-        this.tweens.add({
-            targets: this.questionImage,
-            scale: 1,
-            duration: 300,
-            ease: 'Back.easeOut'
-        });
+            // 移除舊的文字圖片
+            if (this.questionImage) {
+                this.questionImage.destroy();
+            }
+
+            // 創建新的圖片物件
+            const { width, height } = this.cameras.main;
+            const centerY = height / 2;
+
+            // 使用 Phaser 的圖片物件顯示 URL 圖片
+            this.questionImage = this.add.image(width / 2, centerY, '');
+            this.questionImage.setOrigin(0.5);
+            this.questionImage.setDisplaySize(120, 120);
+
+            // 異步加載圖片
+            this.load.image('questionImg', this.currentQuestion.questionImageUrl);
+            this.load.once('complete', () => {
+                this.questionImage.setTexture('questionImg');
+                console.log('✅ 問題圖片加載成功');
+            });
+            this.load.start();
+
+            // 圖片出現動畫
+            this.questionImage.setScale(0);
+            this.tweens.add({
+                targets: this.questionImage,
+                scale: 1,
+                duration: 300,
+                ease: 'Back.easeOut'
+            });
+        } else {
+            // 回退到 emoji 顯示
+            const word = this.currentQuestion.english.toLowerCase();
+            const emoji = this.fruitImages[word] || '❓';
+
+            // 如果是圖片物件，轉換回文字物件
+            if (this.questionImage && this.questionImage.type === 'Image') {
+                this.questionImage.destroy();
+                const { width, height } = this.cameras.main;
+                const centerY = height / 2;
+                this.questionImage = this.add.text(width / 2, centerY, emoji, {
+                    fontSize: '80px'
+                }).setOrigin(0.5);
+            } else {
+                this.questionImage.setText(emoji);
+            }
+
+            // 圖片出現動畫
+            this.questionImage.setScale(0);
+            this.tweens.add({
+                targets: this.questionImage,
+                scale: 1,
+                duration: 300,
+                ease: 'Back.easeOut'
+            });
+        }
     }
 
     generateAnswerOptions() {
