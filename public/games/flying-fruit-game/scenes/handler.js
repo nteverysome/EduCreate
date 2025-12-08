@@ -19,7 +19,7 @@ export default class HandlerScene extends Phaser.Scene {
     parseUrlParams() {
         const urlParams = new URLSearchParams(window.location.search);
         const options = window.FLYING_FRUIT_OPTIONS || {};
-        
+
         // 從 URL 參數覆蓋默認設定
         if (urlParams.has('lives')) {
             options.lives = Math.min(5, Math.max(1, parseInt(urlParams.get('lives')) || 3));
@@ -41,10 +41,31 @@ export default class HandlerScene extends Phaser.Scene {
         if (urlParams.has('shuffle')) {
             options.shuffle = urlParams.get('shuffle') === 'true';
         }
-        
+
+        // 🔥 從 URL 讀取計時器選項
+        if (urlParams.has('timerType')) {
+            const timerType = urlParams.get('timerType');
+            options.timer = options.timer || {};
+            options.timer.type = timerType;
+
+            if (timerType === 'countDown') {
+                options.timer.minutes = parseInt(urlParams.get('timerMinutes')) || 5;
+                options.timer.seconds = parseInt(urlParams.get('timerSeconds')) || 0;
+            }
+            console.log('⏱️ 計時器選項已從 URL 讀取:', options.timer);
+        }
+
+        // 🔥 從 URL 讀取其他遊戲選項
+        if (urlParams.has('retryOnWrong')) {
+            options.retryOnIncorrect = urlParams.get('retryOnWrong') === 'true';
+        }
+        if (urlParams.has('showAnswers')) {
+            options.showAnswersAtEnd = urlParams.get('showAnswers') === 'true';
+        }
+
         // 更新全局選項
         window.FLYING_FRUIT_OPTIONS = options;
-        
+
         console.log('📋 遊戲選項:', options);
     }
 
