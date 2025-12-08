@@ -1081,8 +1081,9 @@ export default class GameScene extends Phaser.Scene {
         // 顯示正確提示
         this.showFeedback('✅ 正確！', 0x4CAF50);
 
-        // 記錄結果
-        this.recordResult(true);
+        // 記錄結果（傳入選擇的選項）
+        const selectedOption = fruitContainer.getData('option');
+        this.recordResult(true, selectedOption);
 
         // 清除其他水果並進入下一題
         this.time.delayedCall(600, () => {
@@ -1117,8 +1118,9 @@ export default class GameScene extends Phaser.Scene {
         // 點擊錯誤水果扣血
         this.takeDamage();
 
-        // 記錄結果
-        this.recordResult(false);
+        // 記錄結果（傳入選擇的選項）
+        const selectedOption = fruitContainer.getData('option');
+        this.recordResult(false, selectedOption);
 
         // 延遲後移除錯誤的水果
         this.time.delayedCall(300, () => {
@@ -1160,11 +1162,21 @@ export default class GameScene extends Phaser.Scene {
         });
     }
 
-    recordResult(isCorrect) {
+    recordResult(isCorrect, selectedOption = null) {
         const results = this.registry.get('results') || [];
+
+        // 找到正確答案
+        const correctAnswer = this.answerOptions.find(opt => opt.isCorrect);
+
         results.push({
+            questionNumber: results.length + 1,
             question: this.currentQuestion.english,
-            answer: this.currentQuestion.chinese,
+            questionChinese: this.currentQuestion.chinese,
+            questionImageUrl: this.currentQuestion.questionImageUrl || null,
+            correctAnswer: correctAnswer ? correctAnswer.text : this.currentQuestion.chinese,
+            correctAnswerImageUrl: correctAnswer ? correctAnswer.imageUrl : null,
+            selectedAnswer: selectedOption ? selectedOption.text : (isCorrect ? this.currentQuestion.chinese : '未知'),
+            selectedAnswerImageUrl: selectedOption ? selectedOption.imageUrl : null,
             isCorrect: isCorrect,
             timestamp: Date.now()
         });
@@ -1402,18 +1414,232 @@ export default class GameScene extends Phaser.Scene {
         this.scene.restart();
     }
 
-    // 🔥 顯示答案回顧（顯示對錯）
+    // 🔥 顯示答案回顧（顯示對錯）- 類似 Wordwall 風格
     showAnswersReview() {
         console.log('📋 顯示答案回顧');
-        // TODO: 實現答案回顧功能
-        alert('答案回顧功能開發中...');
+
+        const results = this.registry.get('results') || [];
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 創建半透明背景
+        const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x1a3a1a, 0.95);
+        overlay.setDepth(8000);
+
+        // 創建可滾動的容器
+        const containerWidth = Math.min(900, width * 0.95);
+        const containerHeight = height - 80;
+        const startY = 60;
+
+        // 標題
+        const title = this.add.text(width / 2, 30, 'Show answers', {
+            fontSize: '28px',
+            color: '#90EE90',
+            fontFamily: 'Arial, sans-serif',
+            fontStyle: 'italic'
+        }).setOrigin(0.5).setDepth(8001);
+
+        // 創建答案列表容器
+        const answersContainer = this.add.container(width / 2, startY).setDepth(8001);
+
+        // 每行高度
+        const rowHeight = 80;
+        const rowWidth = containerWidth - 40;
+        let currentY = 20;
+
+        // 遍歷所有結果
+        results.forEach((result, index) => {
+            // 行背景（交替顏色）
+            const rowBg = this.add.rectangle(0, currentY + rowHeight / 2, rowWidth, rowHeight - 4,
+                index % 2 === 0 ? 0x2d5a2d : 0x1a4a1a, 0.8);
+            answersContainer.add(rowBg);
+
+            // 題號
+            const numText = this.add.text(-rowWidth / 2 + 30, currentY + rowHeight / 2, `${result.questionNumber}`, {
+                fontSize: '24px',
+                color: '#ffffff',
+                fontFamily: 'Arial, sans-serif',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            answersContainer.add(numText);
+
+            // 音頻按鈕
+            const audioBtn = this.add.container(-rowWidth / 2 + 70, currentY + rowHeight / 2);
+            const audioBg = this.add.rectangle(0, 0, 40, 40, 0x555555, 0.8).setStrokeStyle(1, 0x888888);
+            const audioIcon = this.add.text(0, 0, '🔊', { fontSize: '20px' }).setOrigin(0.5);
+            audioBtn.add([audioBg, audioIcon]);
+            audioBtn.setInteractive(new Phaser.Geom.Rectangle(-20, -20, 40, 40), Phaser.Geom.Rectangle.Contains);
+            audioBtn.on('pointerdown', () => {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(result.question);
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.8;
+                    speechSynthesis.speak(utterance);
+                }
+            });
+            answersContainer.add(audioBtn);
+
+            // 問題圖片
+            if (result.questionImageUrl) {
+                const imgKey = 'resultImg_' + index + '_' + Date.now();
+                this.load.image(imgKey, result.questionImageUrl);
+                this.load.once('complete', () => {
+                    const qImg = this.add.image(-rowWidth / 2 + 130, currentY + rowHeight / 2, imgKey);
+                    qImg.setDisplaySize(50, 50);
+                    qImg.setDepth(8002);
+                    answersContainer.add(qImg);
+                });
+                this.load.start();
+            }
+
+            // 英文單字（問題）
+            const questionText = this.add.text(-rowWidth / 2 + 200, currentY + rowHeight / 2, result.question, {
+                fontSize: '22px',
+                color: '#ffffff',
+                fontFamily: 'Arial, sans-serif',
+                fontStyle: 'bold'
+            }).setOrigin(0, 0.5);
+            answersContainer.add(questionText);
+
+            // 右側答案區域
+            const answerStartX = 100;
+
+            // 如果答錯了，顯示錯誤答案（紅色 X）
+            if (!result.isCorrect) {
+                // 錯誤答案葉子背景
+                const wrongLeafBg = this.add.ellipse(answerStartX, currentY + rowHeight / 2, 100, 50, 0x2d5a2d);
+                answersContainer.add(wrongLeafBg);
+
+                // 錯誤答案文字
+                const wrongText = this.add.text(answerStartX, currentY + rowHeight / 2 - 5, result.selectedAnswer, {
+                    fontSize: '16px',
+                    color: '#ffffff',
+                    fontFamily: 'Arial, sans-serif'
+                }).setOrigin(0.5);
+                answersContainer.add(wrongText);
+
+                // 紅色 X 標記
+                const wrongMark = this.add.text(answerStartX, currentY + rowHeight / 2 + 18, '✗', {
+                    fontSize: '16px',
+                    color: '#ff4444',
+                    fontFamily: 'Arial, sans-serif',
+                    fontStyle: 'bold'
+                }).setOrigin(0.5);
+                answersContainer.add(wrongMark);
+            }
+
+            // 正確答案（綠色 ✓）
+            const correctX = result.isCorrect ? answerStartX : answerStartX + 120;
+
+            // 正確答案葉子背景
+            const correctLeafBg = this.add.ellipse(correctX, currentY + rowHeight / 2, 100, 50, 0x3d7a3d);
+            answersContainer.add(correctLeafBg);
+
+            // 正確答案圖片（如果有）
+            if (result.correctAnswerImageUrl) {
+                const correctImgKey = 'correctImg_' + index + '_' + Date.now();
+                this.load.image(correctImgKey, result.correctAnswerImageUrl);
+                this.load.once('complete', () => {
+                    const cImg = this.add.image(correctX + 50, currentY + rowHeight / 2, correctImgKey);
+                    cImg.setDisplaySize(35, 35);
+                    cImg.setDepth(8002);
+                    answersContainer.add(cImg);
+                });
+                this.load.start();
+            }
+
+            // 正確答案文字
+            const correctText = this.add.text(correctX, currentY + rowHeight / 2 - 5, result.correctAnswer, {
+                fontSize: '16px',
+                color: '#ffffff',
+                fontFamily: 'Arial, sans-serif'
+            }).setOrigin(0.5);
+            answersContainer.add(correctText);
+
+            // 綠色 ✓ 標記
+            const correctMark = this.add.text(correctX, currentY + rowHeight / 2 + 18, '✓', {
+                fontSize: '16px',
+                color: '#44ff44',
+                fontFamily: 'Arial, sans-serif',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            answersContainer.add(correctMark);
+
+            currentY += rowHeight;
+        });
+
+        // 關閉按鈕
+        const closeBtn = this.add.container(width / 2, height - 40).setDepth(8001);
+        const closeBg = this.add.rectangle(0, 0, 150, 40, 0x4a7c4a).setStrokeStyle(2, 0x6a9c6a);
+        const closeText = this.add.text(0, 0, '返回', {
+            fontSize: '18px',
+            color: '#ffffff',
+            fontFamily: 'Arial, sans-serif'
+        }).setOrigin(0.5);
+        closeBtn.add([closeBg, closeText]);
+        closeBtn.setInteractive(new Phaser.Geom.Rectangle(-75, -20, 150, 40), Phaser.Geom.Rectangle.Contains);
+        closeBtn.on('pointerover', () => closeBg.setFillStyle(0x5a8c5a));
+        closeBtn.on('pointerout', () => closeBg.setFillStyle(0x4a7c4a));
+        closeBtn.on('pointerdown', () => {
+            // 清除所有元素
+            overlay.destroy();
+            title.destroy();
+            answersContainer.destroy();
+            closeBtn.destroy();
+            // 重新顯示遊戲結束模態框
+            this.showGameCompleteModal();
+        });
+
+        // 滾動支援（如果內容超出螢幕）
+        const totalHeight = currentY + 40;
+        if (totalHeight > containerHeight) {
+            // 添加滾動指示
+            const scrollHint = this.add.text(width - 30, height / 2, '⬆\n⬇', {
+                fontSize: '20px',
+                color: '#88aa88'
+            }).setOrigin(0.5).setDepth(8001);
+
+            // 簡單的拖動滾動
+            let isDragging = false;
+            let startDragY = 0;
+            let startContainerY = 0;
+
+            overlay.setInteractive();
+            overlay.on('pointerdown', (pointer) => {
+                isDragging = true;
+                startDragY = pointer.y;
+                startContainerY = answersContainer.y;
+            });
+            overlay.on('pointermove', (pointer) => {
+                if (isDragging) {
+                    const deltaY = pointer.y - startDragY;
+                    const newY = startContainerY + deltaY;
+                    const minY = height - totalHeight - 40;
+                    const maxY = startY;
+                    answersContainer.y = Math.max(minY, Math.min(maxY, newY));
+                }
+            });
+            overlay.on('pointerup', () => isDragging = false);
+        }
     }
 
     // 🔥 顯示所有正確答案
     showAllCorrectAnswers() {
         console.log('📋 顯示所有正確答案');
-        // TODO: 實現顯示所有正確答案功能
-        alert('顯示所有正確答案功能開發中...');
+
+        // 使用相同的邏輯，但標記所有答案為正確
+        const results = this.registry.get('results') || [];
+        const allCorrectResults = results.map(r => ({
+            ...r,
+            isCorrect: true,
+            selectedAnswer: r.correctAnswer
+        }));
+
+        // 暫時替換結果並顯示
+        this.registry.set('results', allCorrectResults);
+        this.showAnswersReview();
+        // 恢復原始結果
+        this.registry.set('results', results);
     }
 
     // 🔥 顯示輸入名稱頁面（排行榜）
