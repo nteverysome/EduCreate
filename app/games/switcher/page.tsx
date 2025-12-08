@@ -23,6 +23,7 @@ import VisualStyleSelector from '@/components/visual-style-selector';
 import SpeakingCardsStyleSelector from '@/components/visual-style-selector/SpeakingCardsStyleSelector';
 import MatchUpOptionsPanel, { MatchUpOptions, DEFAULT_MATCH_UP_OPTIONS } from '@/components/game-options/MatchUpOptionsPanel';
 import SpeakingCardsOptionsPanel, { SpeakingCardsOptions, DEFAULT_SPEAKING_CARDS_OPTIONS } from '@/components/game-options/SpeakingCardsOptionsPanel';
+import FlyingFruitOptionsPanel, { FlyingFruitOptions, DEFAULT_FLYING_FRUIT_OPTIONS } from '@/components/game-options/FlyingFruitOptionsPanel';
 import { GameOptions, DEFAULT_GAME_OPTIONS } from '@/types/game-options';
 import { BookOpenIcon, LinkIcon, QrCodeIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import '@/styles/responsive-game-switcher.css';
@@ -71,6 +72,7 @@ const GameSwitcherPage: React.FC = () => {
   const [gameOptions, setGameOptions] = useState<GameOptions>(DEFAULT_GAME_OPTIONS);
   const [matchUpOptions, setMatchUpOptions] = useState<MatchUpOptions>(DEFAULT_MATCH_UP_OPTIONS);
   const [speakingCardsOptions, setSpeakingCardsOptions] = useState<SpeakingCardsOptions>(DEFAULT_SPEAKING_CARDS_OPTIONS);
+  const [flyingFruitOptions, setFlyingFruitOptions] = useState<FlyingFruitOptions>(DEFAULT_FLYING_FRUIT_OPTIONS);
   const [isSavingOptions, setIsSavingOptions] = useState<boolean>(false);
   const [gameKey, setGameKey] = useState<number>(0); // 用於強制重新渲染 GameSwitcher
 
@@ -1592,6 +1594,15 @@ const GameSwitcherPage: React.FC = () => {
                   totalVocabulary={customVocabulary.length}
                 />
               )}
+
+              {/* Flying Fruit 遊戲專屬選項面板 - 只在 Flying Fruit 遊戲時顯示 */}
+              {currentGameId === 'flying-fruit-game' && (
+                <FlyingFruitOptionsPanel
+                  options={flyingFruitOptions}
+                  onChange={setFlyingFruitOptions}
+                  totalVocabulary={customVocabulary.length}
+                />
+              )}
               {/* 應用選項按鈕 */}
               <div className="mt-4 flex justify-end gap-2">
                 <button
@@ -1603,6 +1614,7 @@ const GameSwitcherPage: React.FC = () => {
                     try {
                       console.log('🔍 開始保存遊戲選項:', gameOptions);
                       console.log('🔍 開始保存 Match-up 選項:', matchUpOptions);
+                      console.log('🔍 開始保存 Flying Fruit 選項:', flyingFruitOptions);
 
                       const response = await fetch(`/api/activities/${activityId}`, {
                         method: 'PUT',
@@ -1612,6 +1624,7 @@ const GameSwitcherPage: React.FC = () => {
                         body: JSON.stringify({
                           gameOptions,
                           matchUpOptions,
+                          flyingFruitOptions,
                         }),
                       });
 
@@ -1655,6 +1668,16 @@ const GameSwitcherPage: React.FC = () => {
                             `📝 顯示答案: ${matchUpOptions.showAnswers ? '開啟' : '關閉'}\n` +
                             `📄 每頁匹配數: ${matchUpOptions.itemsPerPage}\n` +
                             `⏭️ 自動繼續: ${matchUpOptions.autoProceed ? '開啟' : '關閉'}`;
+                        }
+
+                        // 如果是 Flying Fruit 遊戲，顯示 Flying Fruit 選項
+                        if (currentGameId === 'flying-fruit-game') {
+                          successMessage += `⏱️ 計時器: ${flyingFruitOptions.timer.type === 'none' ? '無' : flyingFruitOptions.timer.type === 'countUp' ? '正計時' : `倒計時 ${flyingFruitOptions.timer.minutes}:${flyingFruitOptions.timer.seconds}`}\n` +
+                            `❤️ 生命值: ${flyingFruitOptions.lives}\n` +
+                            `⚡ 速度: ${flyingFruitOptions.speed}\n` +
+                            `🔄 答錯重試: ${flyingFruitOptions.retryOnWrong ? '開啟' : '關閉'}\n` +
+                            `🎲 隨機順序: ${flyingFruitOptions.shuffle ? '開啟' : '關閉'}\n` +
+                            `📝 顯示答案: ${flyingFruitOptions.showAnswers ? '開啟' : '關閉'}`;
                         }
 
                         alert(successMessage);
