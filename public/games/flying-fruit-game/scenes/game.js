@@ -650,8 +650,9 @@ export default class GameScene extends Phaser.Scene {
                 // 創建新的圖片物件
                 this.questionImage = this.add.image(width / 2, centerY, '');
                 this.questionImage.setOrigin(0.5);
-                // 設置圖片大小為 90x90（適合白色框內）
-                this.questionImage.setDisplaySize(90, 90);
+                // 設置圖片大小為 150x150（填滿白色框）
+                this.questionImage.setDisplaySize(150, 150);
+                this.questionImage.setDepth(5); // 確保在白框下層
 
                 // 異步加載圖片
                 this.load.image('questionImg', this.currentQuestion.questionImageUrl);
@@ -684,6 +685,7 @@ export default class GameScene extends Phaser.Scene {
                 this.questionImage = this.add.text(width / 2, centerY, emoji, {
                     fontSize: '80px'
                 }).setOrigin(0.5);
+                this.questionImage.setDepth(5); // 確保在白框下層
             } else {
                 this.questionImage.setText(emoji);
             }
