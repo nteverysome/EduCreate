@@ -1284,6 +1284,7 @@ const GameSwitcherPage: React.FC = () => {
             visualStyle={gameOptions.visualStyle}
             matchUpOptions={matchUpOptions}
             speakingCardsOptions={speakingCardsOptions}
+            flyingFruitOptions={flyingFruitOptions}
           />
         </div>
 

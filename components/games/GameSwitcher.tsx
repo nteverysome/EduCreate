@@ -47,6 +47,7 @@ interface GameSwitcherProps {
   visualStyle?: string; // 視覺風格
   matchUpOptions?: any; // Match-up 遊戲專屬選項
   speakingCardsOptions?: any; // Speaking Cards 遊戲專屬選項
+  flyingFruitOptions?: any; // Flying Fruit 遊戲專屬選項
 }
 
 // 基礎遊戲配置數據 (不包含動態 URL)
@@ -393,7 +394,8 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
   gameOptions = null,
   visualStyle = null,
   matchUpOptions = null,
-  speakingCardsOptions = null
+  speakingCardsOptions = null,
+  flyingFruitOptions = null
 }) => {
   // 狀態管理
   const [currentGameId, setCurrentGameId] = useState<string>(defaultGame);
@@ -519,6 +521,21 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
           url += `&visualStyle=${speakingCardsOptions.visualStyle}`;
         }
         console.log('🎴 Speaking Cards 選項已添加到 URL:', speakingCardsOptions);
+      }
+
+      // 添加 Flying Fruit 選項到 URL
+      if (flyingFruitOptions && game.id === 'flying-fruit-game') {
+        url += `&timerType=${flyingFruitOptions.timer.type}`;
+        if (flyingFruitOptions.timer.type === 'countDown') {
+          url += `&timerMinutes=${flyingFruitOptions.timer.minutes || 5}`;
+          url += `&timerSeconds=${flyingFruitOptions.timer.seconds || 0}`;
+        }
+        url += `&lives=${flyingFruitOptions.lives || 3}`;
+        url += `&speed=${flyingFruitOptions.speed || 2}`;
+        url += `&retryOnWrong=${flyingFruitOptions.retryOnWrong}`;
+        url += `&shuffle=${flyingFruitOptions.shuffle}`;
+        url += `&showAnswers=${flyingFruitOptions.showAnswers}`;
+        console.log('🍎 Flying Fruit 選項已添加到 URL:', flyingFruitOptions);
       }
     }
 
