@@ -321,13 +321,13 @@ export default class GameScene extends Phaser.Scene {
         // 白色圖片框背景
         this.imageBg = this.add.rectangle(width / 2, centerY, 150, 150, 0xffffff);
         this.imageBg.setStrokeStyle(3, 0xcccccc);
-        this.imageBg.setDepth(10); // 確保白框在上層
+        this.imageBg.setDepth(1); // 白框背景在下層
 
         // 大圖片/emoji（會根據當前問題更新）
         this.questionImage = this.add.text(width / 2, centerY, '🍎', {
             fontSize: '80px'
         }).setOrigin(0.5);
-        this.questionImage.setDepth(5); // 圖片在白框下層
+        this.questionImage.setDepth(2); // 圖片在白框上層
     }
 
     createStatusArea() {
@@ -635,6 +635,7 @@ export default class GameScene extends Phaser.Scene {
             // 如果已有圖片物件，直接更新；否則創建新的
             if (this.questionImage && this.questionImage.type === 'Image') {
                 // 已經是圖片物件，直接更新紋理
+                this.questionImage.setDepth(2); // 圖片在白框上層
                 this.load.image('questionImg', this.currentQuestion.questionImageUrl);
                 this.load.once('complete', () => {
                     this.questionImage.setTexture('questionImg');
@@ -652,7 +653,7 @@ export default class GameScene extends Phaser.Scene {
                 this.questionImage.setOrigin(0.5);
                 // 設置圖片大小為 150x150（填滿白色框）
                 this.questionImage.setDisplaySize(150, 150);
-                this.questionImage.setDepth(5); // 確保在白框下層
+                this.questionImage.setDepth(2); // 圖片在白框上層
 
                 // 異步加載圖片
                 this.load.image('questionImg', this.currentQuestion.questionImageUrl);
@@ -685,7 +686,7 @@ export default class GameScene extends Phaser.Scene {
                 this.questionImage = this.add.text(width / 2, centerY, emoji, {
                     fontSize: '80px'
                 }).setOrigin(0.5);
-                this.questionImage.setDepth(5); // 確保在白框下層
+                this.questionImage.setDepth(2); // 圖片在白框上層
             } else {
                 this.questionImage.setText(emoji);
             }
