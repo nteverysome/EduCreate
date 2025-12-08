@@ -1480,11 +1480,15 @@ export default class GameScene extends Phaser.Scene {
         page.add(inputText);
 
         // 創建虛擬鍵盤
-        const keyboardY = -pageHeight / 2 + 220;
+        const keyboardY = -pageHeight / 2 + 180;
         this.createVirtualKeyboard(page, 0, keyboardY, inputText);
 
-        // 底部按鈕區域
-        const buttonY = pageHeight / 2 - 60;
+        // 底部按鈕區域（Skip 和 Enter 按鈕）
+        // 虛擬鍵盤有 4 行（3 行字母/數字 + 1 行底部按鈕）
+        // 每行高度 = 40 + 4 = 44px
+        // 總高度 = 44 * 4 = 176px
+        // 加上鍵盤起始位置的偏移
+        const buttonY = pageHeight / 2 - 30;
 
         // Skip 按鈕
         this.createModalButton(page, -120, buttonY, 'Skip', () => {
