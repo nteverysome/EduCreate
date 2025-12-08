@@ -1519,46 +1519,78 @@ export default class GameScene extends Phaser.Scene {
 
     // 🔥 創建虛擬鍵盤
     createVirtualKeyboard(container, x, y, inputText) {
-        const keys = [
+        // 初始化鍵盤狀態
+        if (!this.keyboardState) {
+            this.keyboardState = { isNumeric: false };
+        }
+
+        // 字母鍵盤
+        const letterKeys = [
             ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
             ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
             ['↑', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '←']
         ];
 
-        const keyWidth = 40;
-        const keyHeight = 40;
-        const keySpacing = 5;
+        // 數字鍵盤
+        const numberKeys = [
+            ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+            ['-', '/', ':', ';', '(', ')', '$', '&', '@', '"'],
+            ['↑', '.', ',', '?', '!', "'", '←']
+        ];
 
-        keys.forEach((row, rowIndex) => {
+        const keyWidth = 35;
+        const keyHeight = 40;
+        const keySpacing = 4;
+
+        // 保存鍵盤容器引用
+        if (!this.keyboardContainer) {
+            this.keyboardContainer = this.add.container(0, 0);
+            container.add(this.keyboardContainer);
+        } else {
+            this.keyboardContainer.removeAll(true);
+        }
+
+        // 根據狀態選擇鍵盤
+        const keysToDisplay = this.keyboardState.isNumeric ? numberKeys : letterKeys;
+
+        // 創建鍵盤按鈕
+        keysToDisplay.forEach((row, rowIndex) => {
             const rowWidth = row.length * (keyWidth + keySpacing) - keySpacing;
             const startX = x - rowWidth / 2 + keyWidth / 2;
             const keyY = y + rowIndex * (keyHeight + keySpacing);
 
             row.forEach((key, colIndex) => {
                 const keyX = startX + colIndex * (keyWidth + keySpacing);
-                this.createKeyButton(container, keyX, keyY, key, keyWidth, keyHeight, inputText);
+                this.createKeyButton(this.keyboardContainer, keyX, keyY, key, keyWidth, keyHeight, inputText);
             });
         });
 
-        // 空格鍵
-        const spaceY = y + 3 * (keyHeight + keySpacing);
-        this.createKeyButton(container, x, spaceY, 'Space', 200, keyHeight, inputText);
+        // 底部按鈕行（空格和模式切換）
+        const bottomY = y + keysToDisplay.length * (keyHeight + keySpacing);
 
-        // 123 按鈕（切換到數字鍵盤）
-        this.createKeyButton(container, x - 120, spaceY, '123', 80, keyHeight, inputText);
+        // 模式切換按鈕（左側）
+        const modeButtonText = this.keyboardState.isNumeric ? 'ABC' : '123';
+        this.createKeyButton(this.keyboardContainer, x - 110, bottomY, modeButtonText, 70, keyHeight, inputText, true);
+
+        // 空格鍵（中間）
+        this.createKeyButton(this.keyboardContainer, x, bottomY, 'Space', 160, keyHeight, inputText);
+
+        // 完成按鈕（右側）
+        this.createKeyButton(this.keyboardContainer, x + 110, bottomY, '✓', 70, keyHeight, inputText, true);
     }
 
     // 🔥 創建鍵盤按鈕
-    createKeyButton(container, x, y, key, width, height, inputText) {
+    createKeyButton(container, x, y, key, width, height, inputText, isSpecialButton = false) {
         // 按鈕背景
-        const buttonBg = this.add.rectangle(x, y, width, height, 0x4c4c4c);
+        const buttonColor = isSpecialButton ? 0x3c3c3c : 0x4c4c4c;
+        const buttonBg = this.add.rectangle(x, y, width, height, buttonColor);
         buttonBg.setStrokeStyle(2, 0x000000);
         buttonBg.setInteractive({ useHandCursor: true });
         container.add(buttonBg);
 
         // 按鈕文字
         const buttonText = this.add.text(x, y, key, {
-            fontSize: '18px',
+            fontSize: isSpecialButton ? '16px' : '18px',
             color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
@@ -1566,24 +1598,56 @@ export default class GameScene extends Phaser.Scene {
         container.add(buttonText);
 
         // 點擊事件
-        buttonBg.on('pointerdown', () => this.handleKeyPress(key, inputText));
+        buttonBg.on('pointerdown', () => {
+            if (isSpecialButton) {
+                if (key === 'ABC' || key === '123') {
+                    this.toggleKeyboardMode(inputText);
+                } else if (key === '✓') {
+                    this.submitPlayerName();
+                }
+            } else {
+                this.handleKeyPress(key, inputText);
+            }
+        });
 
         // 懸停效果
-        buttonBg.on('pointerover', () => buttonBg.setFillStyle(0x5c5c5c));
-        buttonBg.on('pointerout', () => buttonBg.setFillStyle(0x4c4c4c));
+        buttonBg.on('pointerover', () => {
+            buttonBg.setFillStyle(isSpecialButton ? 0x4c4c4c : 0x5c5c5c);
+        });
+        buttonBg.on('pointerout', () => {
+            buttonBg.setFillStyle(isSpecialButton ? 0x3c3c3c : 0x4c4c4c);
+        });
+    }
+
+    // 🔥 切換鍵盤模式（字母 ↔ 數字）
+    toggleKeyboardMode(inputText) {
+        this.keyboardState.isNumeric = !this.keyboardState.isNumeric;
+        console.log('🎮 切換鍵盤模式:', this.keyboardState.isNumeric ? '數字' : '字母');
+
+        // 重新創建虛擬鍵盤
+        const width = this.scale.width;
+        const height = this.scale.height;
+        const pageHeight = Math.min(500, height * 0.8);
+        const keyboardY = -pageHeight / 2 + 220;
+
+        this.createVirtualKeyboard(this.enterNamePage.page, 0, keyboardY, inputText);
     }
 
     // 🔥 處理按鍵輸入
     handleKeyPress(key, inputText) {
         if (key === '←') {
+            // 退格鍵
             this.playerName = this.playerName.slice(0, -1);
         } else if (key === '↑') {
+            // 大小寫切換（暫時不實現）
             console.log('🎮 切換大小寫');
         } else if (key === 'Space') {
-            this.playerName += ' ';
-        } else if (key === '123') {
-            console.log('🎮 切換到數字鍵盤');
+            // 空格鍵
+            if (this.playerName.length < 20) {
+                this.playerName += ' ';
+            }
         } else {
+            // 普通字符（字母、數字、符號）
             if (this.playerName.length < 20) {
                 this.playerName += key;
             }
