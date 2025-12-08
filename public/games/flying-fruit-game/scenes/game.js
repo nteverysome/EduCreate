@@ -92,19 +92,29 @@ export default class GameScene extends Phaser.Scene {
         console.log('🎮 GameScene: 創建遊戲場景');
 
         // 創建背景
+        console.log('🎨 創建背景...');
         this.createBackground();
+        console.log('✅ 背景創建完成');
 
         // 創建 UI
+        console.log('🎨 創建 UI...');
         this.createUI();
+        console.log('✅ UI 創建完成');
 
         // 載入詞彙（異步操作）
+        console.log('📚 開始載入詞彙...');
         await this.loadVocabulary();
+        console.log('✅ 詞彙載入完成');
 
         // 創建開始按鈕
+        console.log('🔘 創建開始按鈕...');
         this.createStartButton();
+        console.log('✅ 開始按鈕創建完成');
 
         // 設置輸入事件
+        console.log('⌨️ 設置輸入事件...');
         this.setupInput();
+        console.log('✅ GameScene 創建完成！');
     }
 
     createBackground() {
