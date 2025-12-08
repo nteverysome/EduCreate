@@ -334,10 +334,11 @@ export default class GameScene extends Phaser.Scene {
         this.imageBg.setDepth(1); // 白框背景在下層
 
         // 大圖片/emoji（會根據當前問題更新）
-        // 使用 150px 字體大小使 emoji 填滿白框
+        // 使用 80px 字體，然後縮放 1.8 倍使其填滿 150x150 白框
         this.questionImage = this.add.text(width / 2, centerY, '🍎', {
-            fontSize: '150px'
+            fontSize: '80px'
         }).setOrigin(0.5);
+        this.questionImage.setScale(1.8); // 縮放 1.8 倍
         this.questionImage.setDepth(2); // 圖片在白框上層
     }
 
@@ -696,13 +697,15 @@ export default class GameScene extends Phaser.Scene {
             // 如果是圖片物件，轉換回文字物件
             if (this.questionImage && this.questionImage.type === 'Image') {
                 this.questionImage.destroy();
-                // 使用 150px 字體大小使 emoji 填滿白框
+                // 使用 80px 字體，然後縮放 1.8 倍使其填滿 150x150 白框
                 this.questionImage = this.add.text(width / 2, centerY, emoji, {
-                    fontSize: '150px'
+                    fontSize: '80px'
                 }).setOrigin(0.5);
+                this.questionImage.setScale(1.8); // 縮放 1.8 倍
                 this.questionImage.setDepth(2); // 圖片在白框上層
             } else {
                 this.questionImage.setText(emoji);
+                this.questionImage.setScale(1.8); // 確保縮放保持一致
             }
 
             // 圖片出現動畫
