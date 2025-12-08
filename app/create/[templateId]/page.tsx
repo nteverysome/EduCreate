@@ -214,6 +214,18 @@ export default function CreateGamePage() {
           gameTemplateId?: string; // 🔥 新增：讀取活動的 gameTemplateId
           content?: {
             gameTemplateId?: string; // 🔥 新增：也可能存儲在 content 中
+            questions?: Array<{
+              id?: string;
+              question?: string;
+              questionImageUrl?: string;
+              questionAudioUrl?: string;
+              answers?: Array<{
+                id?: string;
+                text?: string;
+                imageUrl?: string;
+                isCorrect?: boolean;
+              }>;
+            }>;
             vocabularyItems?: Array<{
               english?: string;
               word?: string;
@@ -241,16 +253,36 @@ export default function CreateGamePage() {
         setActualGameTemplateId(realGameTemplateId);
         console.log('🎮 活動的實際 gameTemplateId:', realGameTemplateId, '(URL templateId:', templateId, ')');
 
-        // 載入詞彙數據 - 支援新舊架構
-        // 使用統一的詞彙載入工具函數
-        const { vocabularyItems: loadedVocabulary, source, count } = loadAndNormalizeVocabularyData(activity);
-
-        if (count > 0) {
-          setVocabularyItems(loadedVocabulary);
-          console.log(`✅ 從 ${getSourceDisplayName(source)} 載入詞彙數據:`, count, '個詞彙');
-          console.log('✅ 詞彙數據載入成功:', loadedVocabulary);
+        // 🔥 檢查是否是 Flying Fruit 遊戲並加載 questions 數據
+        if (realGameTemplateId === 'flying-fruit-game' && activity.content?.questions) {
+          console.log('📝 載入 Flying Fruit questions 數據:', activity.content.questions);
+          // 轉換數據以確保所有必需的字段都存在
+          const convertedQuestions: QuestionItem[] = activity.content.questions.map((q: any) => ({
+            id: q.id || Math.random().toString(36).substring(2, 11),
+            question: q.question || '',
+            questionImageUrl: q.questionImageUrl,
+            questionAudioUrl: q.questionAudioUrl,
+            answers: (q.answers || []).map((a: any) => ({
+              id: a.id || Math.random().toString(36).substring(2, 11),
+              text: a.text || '',
+              isCorrect: a.isCorrect || false,
+              imageUrl: a.imageUrl
+            }))
+          }));
+          setFlyingFruitQuestions(convertedQuestions);
+          console.log('✅ Flying Fruit 問題數據載入成功:', convertedQuestions.length, '個問題');
         } else {
-          console.log('⚠️ 未找到詞彙數據');
+          // 載入詞彙數據 - 支援新舊架構
+          // 使用統一的詞彙載入工具函數
+          const { vocabularyItems: loadedVocabulary, source, count } = loadAndNormalizeVocabularyData(activity);
+
+          if (count > 0) {
+            setVocabularyItems(loadedVocabulary);
+            console.log(`✅ 從 ${getSourceDisplayName(source)} 載入詞彙數據:`, count, '個詞彙');
+            console.log('✅ 詞彙數據載入成功:', loadedVocabulary);
+          } else {
+            console.log('⚠️ 未找到詞彙數據');
+          }
         }
 
         console.log('📝 載入編輯活動成功:', activity.title);
