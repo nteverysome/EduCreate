@@ -1418,9 +1418,374 @@ export default class GameScene extends Phaser.Scene {
 
     // 🔥 顯示輸入名稱頁面（排行榜）
     showEnterNamePage() {
-        console.log('🏆 顯示輸入名稱頁面');
-        // TODO: 實現排行榜輸入名稱功能
-        alert('排行榜功能開發中...');
+        console.log('🎮 顯示輸入名稱頁面');
+
+        // 隱藏遊戲結束模態框
+        if (this.gameCompleteModal) {
+            this.gameCompleteModal.overlay.setVisible(false);
+            this.gameCompleteModal.modal.setVisible(false);
+        }
+
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 創建半透明背景（遮罩）
+        const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7);
+        overlay.setDepth(7000);
+
+        // 創建輸入名稱頁面容器
+        const pageWidth = Math.min(600, width * 0.9);
+        const pageHeight = Math.min(500, height * 0.8);
+        const page = this.add.container(width / 2, height / 2);
+        page.setDepth(7001);
+
+        // 頁面背景
+        const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
+        pageBg.setStrokeStyle(4, 0x000000);
+        page.add(pageBg);
+
+        // 標題：ENTER YOUR NAME
+        const title = this.add.text(0, -pageHeight / 2 + 40, 'ENTER YOUR NAME', {
+            fontSize: '24px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        page.add(title);
+
+        // 副標題：You're 1st on the leaderboard
+        const subtitle = this.add.text(0, -pageHeight / 2 + 80, "You're 1st on the leaderboard", {
+            fontSize: '16px',
+            color: '#cccccc',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5);
+        page.add(subtitle);
+
+        // 輸入框
+        const inputWidth = pageWidth * 0.8;
+        const inputHeight = 50;
+        const inputY = -pageHeight / 2 + 130;
+
+        const inputBg = this.add.rectangle(0, inputY, inputWidth, inputHeight, 0xffffff);
+        inputBg.setStrokeStyle(2, 0x000000);
+        page.add(inputBg);
+
+        // 輸入文字
+        this.playerName = '';
+        const inputText = this.add.text(0, inputY, '', {
+            fontSize: '24px',
+            color: '#000000',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5);
+        page.add(inputText);
+
+        // 創建虛擬鍵盤
+        const keyboardY = -pageHeight / 2 + 220;
+        this.createVirtualKeyboard(page, 0, keyboardY, inputText);
+
+        // 底部按鈕區域
+        const buttonY = pageHeight / 2 - 60;
+
+        // Skip 按鈕
+        this.createModalButton(page, -120, buttonY, 'Skip', () => {
+            console.log('🎮 點擊 Skip 按鈕');
+            this.hideEnterNamePage();
+        });
+
+        // Enter 按鈕
+        this.createModalButton(page, 120, buttonY, 'Enter', () => {
+            console.log('🎮 點擊 Enter 按鈕，名稱:', this.playerName);
+            this.submitPlayerName();
+        });
+
+        // 保存頁面引用
+        this.enterNamePage = { overlay, page, inputText };
+    }
+
+    // 🔥 隱藏輸入名稱頁面
+    hideEnterNamePage() {
+        if (this.enterNamePage) {
+            this.enterNamePage.overlay.destroy();
+            this.enterNamePage.page.destroy();
+            this.enterNamePage = null;
+        }
+
+        // 顯示遊戲結束模態框
+        if (this.gameCompleteModal) {
+            this.gameCompleteModal.overlay.setVisible(true);
+            this.gameCompleteModal.modal.setVisible(true);
+        }
+    }
+
+    // 🔥 創建虛擬鍵盤
+    createVirtualKeyboard(container, x, y, inputText) {
+        const keys = [
+            ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+            ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+            ['↑', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '←']
+        ];
+
+        const keyWidth = 40;
+        const keyHeight = 40;
+        const keySpacing = 5;
+
+        keys.forEach((row, rowIndex) => {
+            const rowWidth = row.length * (keyWidth + keySpacing) - keySpacing;
+            const startX = x - rowWidth / 2 + keyWidth / 2;
+            const keyY = y + rowIndex * (keyHeight + keySpacing);
+
+            row.forEach((key, colIndex) => {
+                const keyX = startX + colIndex * (keyWidth + keySpacing);
+                this.createKeyButton(container, keyX, keyY, key, keyWidth, keyHeight, inputText);
+            });
+        });
+
+        // 空格鍵
+        const spaceY = y + 3 * (keyHeight + keySpacing);
+        this.createKeyButton(container, x, spaceY, 'Space', 200, keyHeight, inputText);
+
+        // 123 按鈕（切換到數字鍵盤）
+        this.createKeyButton(container, x - 120, spaceY, '123', 80, keyHeight, inputText);
+    }
+
+    // 🔥 創建鍵盤按鈕
+    createKeyButton(container, x, y, key, width, height, inputText) {
+        // 按鈕背景
+        const buttonBg = this.add.rectangle(x, y, width, height, 0x4c4c4c);
+        buttonBg.setStrokeStyle(2, 0x000000);
+        buttonBg.setInteractive({ useHandCursor: true });
+        container.add(buttonBg);
+
+        // 按鈕文字
+        const buttonText = this.add.text(x, y, key, {
+            fontSize: '18px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        container.add(buttonText);
+
+        // 點擊事件
+        buttonBg.on('pointerdown', () => this.handleKeyPress(key, inputText));
+
+        // 懸停效果
+        buttonBg.on('pointerover', () => buttonBg.setFillStyle(0x5c5c5c));
+        buttonBg.on('pointerout', () => buttonBg.setFillStyle(0x4c4c4c));
+    }
+
+    // 🔥 處理按鍵輸入
+    handleKeyPress(key, inputText) {
+        if (key === '←') {
+            this.playerName = this.playerName.slice(0, -1);
+        } else if (key === '↑') {
+            console.log('🎮 切換大小寫');
+        } else if (key === 'Space') {
+            this.playerName += ' ';
+        } else if (key === '123') {
+            console.log('🎮 切換到數字鍵盤');
+        } else {
+            if (this.playerName.length < 20) {
+                this.playerName += key;
+            }
+        }
+        inputText.setText(this.playerName);
+        console.log('🎮 當前名稱:', this.playerName);
+    }
+
+    // 🔥 提交玩家名稱
+    async submitPlayerName() {
+        if (!this.playerName || this.playerName.trim() === '') {
+            console.log('🎮 名稱為空，跳過提交');
+            this.hideEnterNamePage();
+            return;
+        }
+
+        console.log('🎮 提交玩家名稱:', this.playerName);
+
+        // 計算總分數
+        const totalCorrect = this.correctCount;
+        const totalQuestions = this.vocabulary.length;
+
+        // 獲取 activityId
+        const urlParams = new URLSearchParams(window.location.search);
+        const activityId = urlParams.get('activityId');
+
+        // 準備排行榜數據
+        const leaderboardData = {
+            activityId: activityId,
+            playerName: this.playerName.trim(),
+            score: totalCorrect,
+            correctCount: totalCorrect,
+            totalCount: totalQuestions,
+            accuracy: totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0,
+            timeSpent: this.timer,
+            gameData: {
+                results: this.registry.get('results'),
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        console.log('🎮 排行榜數據:', leaderboardData);
+
+        try {
+            const response = await fetch('/api/leaderboard', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(leaderboardData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('✅ 排行榜數據已保存:', result);
+                this.hideEnterNamePage();
+                this.showLeaderboard();
+            } else {
+                console.error('❌ 保存排行榜數據失敗:', response.status);
+                this.hideEnterNamePage();
+            }
+        } catch (error) {
+            console.error('❌ 保存排行榜數據錯誤:', error);
+            this.hideEnterNamePage();
+        }
+    }
+
+    // 🔥 顯示排行榜
+    async showLeaderboard() {
+        console.log('🎮 顯示排行榜');
+
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 獲取 activityId
+        const urlParams = new URLSearchParams(window.location.search);
+        const activityId = urlParams.get('activityId');
+
+        // 創建半透明背景（遮罩）
+        const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7);
+        overlay.setDepth(8000);
+
+        // 創建排行榜頁面容器
+        const pageWidth = Math.min(600, width * 0.9);
+        const pageHeight = Math.min(700, height * 0.9);
+        const page = this.add.container(width / 2, height / 2);
+        page.setDepth(8001);
+
+        // 頁面背景
+        const pageBg = this.add.rectangle(0, 0, pageWidth, pageHeight, 0x2c2c2c);
+        pageBg.setStrokeStyle(4, 0x000000);
+        page.add(pageBg);
+
+        // 標題：LEADERBOARD
+        const title = this.add.text(0, -pageHeight / 2 + 40, 'LEADERBOARD', {
+            fontSize: '32px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        page.add(title);
+
+        // 載入排行榜數據
+        try {
+            const response = await fetch(`/api/leaderboard?activityId=${activityId}&limit=10`);
+            if (response.ok) {
+                const result = await response.json();
+                const leaderboardData = result.data || [];
+                console.log('✅ 排行榜數據:', leaderboardData);
+
+                const startY = -pageHeight / 2 + 100;
+                const rowHeight = 50;
+
+                leaderboardData.slice(0, 10).forEach((entry, index) => {
+                    const y = startY + index * rowHeight;
+                    const rank = index + 1;
+                    const isCurrentPlayer = entry.playerName === this.playerName;
+
+                    // 排名
+                    const rankText = this.add.text(-pageWidth / 2 + 50, y, `${rank}.`, {
+                        fontSize: '20px',
+                        color: isCurrentPlayer ? '#ffeb3b' : '#ffffff',
+                        fontFamily: 'Arial',
+                        fontStyle: 'bold'
+                    }).setOrigin(0, 0.5);
+                    page.add(rankText);
+
+                    // 玩家名稱
+                    const nameText = this.add.text(-pageWidth / 2 + 100, y, entry.playerName, {
+                        fontSize: '20px',
+                        color: isCurrentPlayer ? '#ffeb3b' : '#ffffff',
+                        fontFamily: 'Arial'
+                    }).setOrigin(0, 0.5);
+                    page.add(nameText);
+
+                    // 分數
+                    const scoreText = this.add.text(pageWidth / 2 - 150, y, `${entry.score}/${entry.totalCount}`, {
+                        fontSize: '20px',
+                        color: isCurrentPlayer ? '#ffeb3b' : '#ffffff',
+                        fontFamily: 'Arial'
+                    }).setOrigin(1, 0.5);
+                    page.add(scoreText);
+
+                    // 時間
+                    const timeText = this.add.text(pageWidth / 2 - 50, y, this.formatGameTime(entry.timeSpent), {
+                        fontSize: '20px',
+                        color: isCurrentPlayer ? '#ffeb3b' : '#ffffff',
+                        fontFamily: 'Arial'
+                    }).setOrigin(1, 0.5);
+                    page.add(timeText);
+                });
+
+                if (leaderboardData.length === 0) {
+                    const noDataText = this.add.text(0, 0, '暫無排行榜數據', {
+                        fontSize: '20px',
+                        color: '#aaaaaa',
+                        fontFamily: 'Arial'
+                    }).setOrigin(0.5);
+                    page.add(noDataText);
+                }
+            } else {
+                console.error('❌ 獲取排行榜數據失敗:', response.status);
+            }
+        } catch (error) {
+            console.error('❌ 獲取排行榜數據錯誤:', error);
+        }
+
+        // 底部按鈕
+        const buttonY = pageHeight / 2 - 60;
+        this.createModalButton(page, 0, buttonY, 'Back', () => {
+            console.log('🎮 點擊 Back 按鈕');
+            this.hideLeaderboard();
+        });
+
+        // 保存頁面引用
+        this.leaderboardPage = { overlay, page };
+    }
+
+    // 🔥 隱藏排行榜
+    hideLeaderboard() {
+        if (this.leaderboardPage) {
+            this.leaderboardPage.overlay.destroy();
+            this.leaderboardPage.page.destroy();
+            this.leaderboardPage = null;
+        }
+
+        // 顯示遊戲結束模態框
+        if (this.gameCompleteModal) {
+            this.gameCompleteModal.overlay.setVisible(true);
+            this.gameCompleteModal.modal.setVisible(true);
+        }
+    }
+
+    // 🔥 格式化遊戲時間
+    formatGameTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        const decimal = Math.floor((seconds % 1) * 10);
+
+        if (mins > 0) {
+            return `${mins}:${secs.toString().padStart(2, '0')}.${decimal}`;
+        } else {
+            return `${secs}.${decimal}s`;
+        }
     }
 }
 
