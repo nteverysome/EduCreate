@@ -1480,8 +1480,18 @@ export default class GameScene extends Phaser.Scene {
         const height = this.scale.height;
         let currentY = startY;
 
-        // 遍歷所有結果
-        results.forEach((result, index) => {
+        // 去重複：相同題目只顯示一次（保留第一次出現的結果）
+        const uniqueResults = [];
+        const seenQuestions = new Set();
+        results.forEach(result => {
+            if (!seenQuestions.has(result.question)) {
+                seenQuestions.add(result.question);
+                uniqueResults.push(result);
+            }
+        });
+
+        // 遍歷去重後的結果
+        uniqueResults.forEach((result, index) => {
             const rowCenterY = currentY + rowHeight / 2;
 
             // 行背景（交替顏色）
@@ -1492,8 +1502,8 @@ export default class GameScene extends Phaser.Scene {
             // === 左側區域：題號 + 音頻 + 圖片 + 英文 ===
             let leftX = -rowWidth / 2 + 25;
 
-            // 題號
-            const numText = this.add.text(leftX, rowCenterY, `${result.questionNumber}`, {
+            // 題號（使用去重後的索引 + 1）
+            const numText = this.add.text(leftX, rowCenterY, `${index + 1}`, {
                 fontSize: '22px',
                 color: '#ffffff',
                 fontFamily: 'Arial, sans-serif',
