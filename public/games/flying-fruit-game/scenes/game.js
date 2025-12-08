@@ -1237,8 +1237,8 @@ export default class GameScene extends Phaser.Scene {
         // 計算最終結果
         const finalResults = {
             score: this.score,
-            correctAnswers: this.registry.get('correctAnswers'),
-            wrongAnswers: this.registry.get('wrongAnswers'),
+            correctAnswers: this.registry.get('correctAnswers') || this.correctCount,
+            wrongAnswers: this.registry.get('wrongAnswers') || 0,
             totalQuestions: this.vocabulary.length,
             timeSpent: this.timer,
             endReason: reason,
@@ -1247,10 +1247,180 @@ export default class GameScene extends Phaser.Scene {
 
         this.registry.set('finalResults', finalResults);
 
-        // 進入結果場景
-        this.time.delayedCall(1000, () => {
-            this.scene.start('HubScene');
+        // 🔥 顯示遊戲結束模態框（類似 Match-up 風格）
+        this.time.delayedCall(500, () => {
+            this.showGameCompleteModal();
         });
+    }
+
+    // 🔥 顯示遊戲結束模態框（Match-up 風格）
+    showGameCompleteModal() {
+        // 防止重複調用
+        if (this.gameCompleteModalShown) {
+            console.log('⚠️ 模態框已經顯示，跳過重複調用');
+            return;
+        }
+        this.gameCompleteModalShown = true;
+
+        const width = this.scale.width;
+        const height = this.scale.height;
+
+        // 計算分數
+        const totalCorrect = this.correctCount;
+        const totalQuestions = this.vocabulary.length;
+
+        console.log('🎮 顯示遊戲結束模態框', {
+            totalCorrect,
+            totalQuestions,
+            timeSpent: this.timer
+        });
+
+        // 創建半透明背景（遮罩）
+        const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7);
+        overlay.setDepth(5000);
+
+        // 創建模態框容器
+        const modalWidth = Math.min(500, width * 0.85);
+        const modalHeight = Math.min(380, height * 0.7);
+        const modal = this.add.container(width / 2, height / 2);
+        modal.setDepth(5001);
+
+        // 模態框背景
+        const modalBg = this.add.rectangle(0, 0, modalWidth, modalHeight, 0x2c2c2c);
+        modalBg.setStrokeStyle(4, 0x000000);
+        modal.add(modalBg);
+
+        // 標題：GAME COMPLETE
+        const title = this.add.text(0, -modalHeight / 2 + 30, 'GAME COMPLETE', {
+            fontSize: '32px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        modal.add(title);
+
+        // Score 標籤
+        const scoreLabel = this.add.text(0, -modalHeight / 2 + 65, 'Score', {
+            fontSize: '18px',
+            color: '#4a9eff',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5);
+        modal.add(scoreLabel);
+
+        // 分數顯示
+        const scoreText = this.add.text(0, -modalHeight / 2 + 95, `${totalCorrect}/${totalQuestions}`, {
+            fontSize: '36px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        modal.add(scoreText);
+
+        // 排名提示
+        const rankText = this.add.text(0, -modalHeight / 2 + 130, "YOU'RE 1ST ON THE LEADERBOARD", {
+            fontSize: '14px',
+            color: '#aaaaaa',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5);
+        modal.add(rankText);
+
+        // 按鈕配置
+        const buttonSpacing = 45;
+        const firstButtonY = -modalHeight / 2 + 175;
+
+        // Leaderboard 按鈕
+        this.createModalButton(modal, 0, firstButtonY, 'Leaderboard', () => {
+            console.log('🎮 點擊 Leaderboard 按鈕');
+            this.showEnterNamePage();
+        });
+
+        // Show answers 按鈕
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing, 'Show answers', () => {
+            console.log('🎮 點擊 Show answers 按鈕');
+            overlay.destroy();
+            modal.destroy();
+            this.gameCompleteModal = null;
+            this.showAnswersReview();
+        });
+
+        // Show all answers 按鈕
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 2, 'Show all answers', () => {
+            console.log('🎮 點擊 Show all answers 按鈕');
+            overlay.destroy();
+            modal.destroy();
+            this.gameCompleteModal = null;
+            this.showAllCorrectAnswers();
+        });
+
+        // Start again 按鈕
+        this.createModalButton(modal, 0, firstButtonY + buttonSpacing * 3, 'Start again', () => {
+            console.log('🎮 點擊 Start again 按鈕');
+            overlay.destroy();
+            modal.destroy();
+            this.gameCompleteModal = null;
+            this.restartGame();
+        });
+
+        // 保存模態框引用
+        this.gameCompleteModal = { overlay, modal };
+    }
+
+    // 🔥 創建模態框按鈕
+    createModalButton(container, x, y, text, callback) {
+        const buttonWidth = 280;
+        const buttonHeight = 40;
+
+        // 按鈕背景
+        const buttonBg = this.add.rectangle(x, y, buttonWidth, buttonHeight, 0x3c3c3c);
+        buttonBg.setStrokeStyle(2, 0x000000);
+        buttonBg.setInteractive({ useHandCursor: true });
+        container.add(buttonBg);
+
+        // 按鈕文字
+        const buttonText = this.add.text(x, y, text, {
+            fontSize: '20px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        container.add(buttonText);
+
+        // 點擊事件
+        buttonBg.on('pointerdown', callback);
+
+        // 懸停效果
+        buttonBg.on('pointerover', () => buttonBg.setFillStyle(0x4c4c4c));
+        buttonBg.on('pointerout', () => buttonBg.setFillStyle(0x3c3c3c));
+
+        return { buttonBg, buttonText };
+    }
+
+    // 🔥 重新開始遊戲
+    restartGame() {
+        console.log('🔄 重新開始遊戲');
+        this.gameCompleteModalShown = false;
+        this.scene.restart();
+    }
+
+    // 🔥 顯示答案回顧（顯示對錯）
+    showAnswersReview() {
+        console.log('📋 顯示答案回顧');
+        // TODO: 實現答案回顧功能
+        alert('答案回顧功能開發中...');
+    }
+
+    // 🔥 顯示所有正確答案
+    showAllCorrectAnswers() {
+        console.log('📋 顯示所有正確答案');
+        // TODO: 實現顯示所有正確答案功能
+        alert('顯示所有正確答案功能開發中...');
+    }
+
+    // 🔥 顯示輸入名稱頁面（排行榜）
+    showEnterNamePage() {
+        console.log('🏆 顯示輸入名稱頁面');
+        // TODO: 實現排行榜輸入名稱功能
+        alert('排行榜功能開發中...');
     }
 }
 
