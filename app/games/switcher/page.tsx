@@ -98,6 +98,7 @@ const GameSwitcherPage: React.FC = () => {
     createdAt: string;
     deadline?: string;
     templateType?: string;
+    gameTemplateId?: string; // 🔥 添加遊戲模板 ID
     author?: {
       id: string;
       name: string;
@@ -311,8 +312,9 @@ const GameSwitcherPage: React.FC = () => {
         console.log('✅ 活動複製成功:', data);
         alert('活動已成功複製到您的活動列表！');
 
-        // 跳轉到新複製的活動編輯頁面
-        router.push(`/create/${activityInfo.templateType}?edit=${data.newActivityId}`);
+        // 跳轉到新複製的活動編輯頁面 - 使用 gameTemplateId 或 templateType
+        const editTemplateId = activityInfo.gameTemplateId || activityInfo.templateType;
+        router.push(`/create/${editTemplateId}?edit=${data.newActivityId}`);
       } else {
         const error = await response.json();
         console.error('❌ 複製失敗:', error);
@@ -404,6 +406,9 @@ const GameSwitcherPage: React.FC = () => {
           communityCategory?: string;
           geptLevel?: string;
           templateType?: string;
+          content?: {
+            gameTemplateId?: string;
+          };
           gameOptions?: GameOptions;
           matchUpOptions?: MatchUpOptions;  // 🔥 添加 Match-up 選項類型
           user?: {
@@ -415,6 +420,10 @@ const GameSwitcherPage: React.FC = () => {
           originalAuthorName?: string;
           copiedFromActivityId?: string;
         };
+
+        // 🔥 從 content.gameTemplateId 提取遊戲模板 ID
+        const gameTemplateId = data.content?.gameTemplateId;
+
         setActivityInfo({
           title: data.title || '未命名活動',
           participantCount: data.participantCount || 0,
@@ -424,6 +433,7 @@ const GameSwitcherPage: React.FC = () => {
           tags: data.communityTags || data.tags || [],
           geptLevel: data.geptLevel,
           templateType: data.templateType,
+          gameTemplateId: gameTemplateId, // 🔥 添加遊戲模板 ID
           author: data.user ? {
             id: data.user.id,
             name: data.user.name,
@@ -1463,7 +1473,7 @@ const GameSwitcherPage: React.FC = () => {
           <EnhancedActivityInfoBox
             activityId={activityId}
             activityTitle={activityInfo.title}
-            templateType={activityInfo.templateType}
+            templateType={activityInfo.gameTemplateId || activityInfo.templateType}
             author={activityInfo.author}
             originalAuthor={activityInfo.originalAuthor}
             copiedFromActivityId={activityInfo.copiedFromActivityId}
