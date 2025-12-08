@@ -1443,32 +1443,71 @@ export default class GameScene extends Phaser.Scene {
         const answersContainer = this.add.container(width / 2, startY).setDepth(8001);
 
         // 每行高度
-        const rowHeight = 80;
+        const rowHeight = 70;
         const rowWidth = containerWidth - 40;
         let currentY = 20;
 
+        // 收集所有需要加載的圖片
+        const imagesToLoad = [];
+        results.forEach((result, index) => {
+            if (result.questionImageUrl) {
+                imagesToLoad.push({ key: `qImg_${index}`, url: result.questionImageUrl, type: 'question', index });
+            }
+            if (result.correctAnswerImageUrl) {
+                imagesToLoad.push({ key: `cImg_${index}`, url: result.correctAnswerImageUrl, type: 'correct', index });
+            }
+        });
+
+        // 先加載所有圖片，然後再渲染
+        if (imagesToLoad.length > 0) {
+            imagesToLoad.forEach(img => {
+                if (!this.textures.exists(img.key)) {
+                    this.load.image(img.key, img.url);
+                }
+            });
+            this.load.once('complete', () => {
+                this.renderAnswerRows(answersContainer, results, rowWidth, rowHeight, currentY, overlay, title);
+            });
+            this.load.start();
+        } else {
+            this.renderAnswerRows(answersContainer, results, rowWidth, rowHeight, currentY, overlay, title);
+        }
+    }
+
+    // 渲染答案行
+    renderAnswerRows(answersContainer, results, rowWidth, rowHeight, startY, overlay, title) {
+        const width = this.scale.width;
+        const height = this.scale.height;
+        let currentY = startY;
+
         // 遍歷所有結果
         results.forEach((result, index) => {
+            const rowCenterY = currentY + rowHeight / 2;
+
             // 行背景（交替顏色）
-            const rowBg = this.add.rectangle(0, currentY + rowHeight / 2, rowWidth, rowHeight - 4,
+            const rowBg = this.add.rectangle(0, rowCenterY, rowWidth, rowHeight - 4,
                 index % 2 === 0 ? 0x2d5a2d : 0x1a4a1a, 0.8);
             answersContainer.add(rowBg);
 
+            // === 左側區域：題號 + 音頻 + 圖片 + 英文 ===
+            let leftX = -rowWidth / 2 + 25;
+
             // 題號
-            const numText = this.add.text(-rowWidth / 2 + 30, currentY + rowHeight / 2, `${result.questionNumber}`, {
-                fontSize: '24px',
+            const numText = this.add.text(leftX, rowCenterY, `${result.questionNumber}`, {
+                fontSize: '22px',
                 color: '#ffffff',
                 fontFamily: 'Arial, sans-serif',
                 fontStyle: 'bold'
             }).setOrigin(0.5);
             answersContainer.add(numText);
+            leftX += 35;
 
             // 音頻按鈕
-            const audioBtn = this.add.container(-rowWidth / 2 + 70, currentY + rowHeight / 2);
-            const audioBg = this.add.rectangle(0, 0, 40, 40, 0x555555, 0.8).setStrokeStyle(1, 0x888888);
-            const audioIcon = this.add.text(0, 0, '🔊', { fontSize: '20px' }).setOrigin(0.5);
+            const audioBtn = this.add.container(leftX, rowCenterY);
+            const audioBg = this.add.rectangle(0, 0, 36, 36, 0x555555, 0.8).setStrokeStyle(1, 0x888888);
+            const audioIcon = this.add.text(0, 0, '🔊', { fontSize: '18px' }).setOrigin(0.5);
             audioBtn.add([audioBg, audioIcon]);
-            audioBtn.setInteractive(new Phaser.Geom.Rectangle(-20, -20, 40, 40), Phaser.Geom.Rectangle.Contains);
+            audioBtn.setInteractive(new Phaser.Geom.Rectangle(-18, -18, 36, 36), Phaser.Geom.Rectangle.Contains);
             audioBtn.on('pointerdown', () => {
                 if ('speechSynthesis' in window) {
                     const utterance = new SpeechSynthesisUtterance(result.question);
@@ -1478,49 +1517,80 @@ export default class GameScene extends Phaser.Scene {
                 }
             });
             answersContainer.add(audioBtn);
+            leftX += 35;
 
-            // 問題圖片
-            if (result.questionImageUrl) {
-                const imgKey = 'resultImg_' + index + '_' + Date.now();
-                this.load.image(imgKey, result.questionImageUrl);
-                this.load.once('complete', () => {
-                    const qImg = this.add.image(-rowWidth / 2 + 130, currentY + rowHeight / 2, imgKey);
-                    qImg.setDisplaySize(50, 50);
-                    qImg.setDepth(8002);
-                    answersContainer.add(qImg);
-                });
-                this.load.start();
+            // 問題圖片（如果有）
+            const qImgKey = `qImg_${index}`;
+            if (result.questionImageUrl && this.textures.exists(qImgKey)) {
+                const qImg = this.add.image(leftX, rowCenterY, qImgKey);
+                qImg.setDisplaySize(45, 45);
+                answersContainer.add(qImg);
+                leftX += 50;
             }
 
-            // 英文單字（問題）
-            const questionText = this.add.text(-rowWidth / 2 + 200, currentY + rowHeight / 2, result.question, {
-                fontSize: '22px',
+            // 英文單字
+            const questionText = this.add.text(leftX, rowCenterY, result.question, {
+                fontSize: '20px',
                 color: '#ffffff',
                 fontFamily: 'Arial, sans-serif',
                 fontStyle: 'bold'
             }).setOrigin(0, 0.5);
             answersContainer.add(questionText);
 
-            // 右側答案區域
-            const answerStartX = 100;
+            // === 右側區域：答案選項 ===
+            let rightX = rowWidth / 2 - 80;
 
-            // 如果答錯了，顯示錯誤答案（紅色 X）
+            // 正確答案（綠色 ✓）- 放在最右邊
+            const correctLeafBg = this.add.ellipse(rightX, rowCenterY, 90, 45, 0x3d7a3d);
+            answersContainer.add(correctLeafBg);
+
+            // 正確答案內容（圖片+文字）
+            const cImgKey = `cImg_${index}`;
+            if (result.correctAnswerImageUrl && this.textures.exists(cImgKey)) {
+                const cImg = this.add.image(rightX - 25, rowCenterY, cImgKey);
+                cImg.setDisplaySize(30, 30);
+                answersContainer.add(cImg);
+
+                const correctText = this.add.text(rightX + 10, rowCenterY - 5, result.correctAnswer, {
+                    fontSize: '14px',
+                    color: '#ffffff',
+                    fontFamily: 'Arial, sans-serif'
+                }).setOrigin(0.5);
+                answersContainer.add(correctText);
+            } else {
+                const correctText = this.add.text(rightX, rowCenterY - 5, result.correctAnswer, {
+                    fontSize: '14px',
+                    color: '#ffffff',
+                    fontFamily: 'Arial, sans-serif'
+                }).setOrigin(0.5);
+                answersContainer.add(correctText);
+            }
+
+            // 綠色 ✓ 標記
+            const correctMark = this.add.text(rightX, rowCenterY + 15, '✓', {
+                fontSize: '14px',
+                color: '#44ff44',
+                fontFamily: 'Arial, sans-serif',
+                fontStyle: 'bold'
+            }).setOrigin(0.5);
+            answersContainer.add(correctMark);
+
+            // 如果答錯了，顯示錯誤答案（紅色 X）- 放在正確答案左邊
             if (!result.isCorrect) {
-                // 錯誤答案葉子背景
-                const wrongLeafBg = this.add.ellipse(answerStartX, currentY + rowHeight / 2, 100, 50, 0x2d5a2d);
+                rightX -= 100;
+
+                const wrongLeafBg = this.add.ellipse(rightX, rowCenterY, 90, 45, 0x5a3d3d);
                 answersContainer.add(wrongLeafBg);
 
-                // 錯誤答案文字
-                const wrongText = this.add.text(answerStartX, currentY + rowHeight / 2 - 5, result.selectedAnswer, {
-                    fontSize: '16px',
+                const wrongText = this.add.text(rightX, rowCenterY - 5, result.selectedAnswer, {
+                    fontSize: '14px',
                     color: '#ffffff',
                     fontFamily: 'Arial, sans-serif'
                 }).setOrigin(0.5);
                 answersContainer.add(wrongText);
 
-                // 紅色 X 標記
-                const wrongMark = this.add.text(answerStartX, currentY + rowHeight / 2 + 18, '✗', {
-                    fontSize: '16px',
+                const wrongMark = this.add.text(rightX, rowCenterY + 15, '✗', {
+                    fontSize: '14px',
                     color: '#ff4444',
                     fontFamily: 'Arial, sans-serif',
                     fontStyle: 'bold'
@@ -1528,55 +1598,18 @@ export default class GameScene extends Phaser.Scene {
                 answersContainer.add(wrongMark);
             }
 
-            // 正確答案（綠色 ✓）
-            const correctX = result.isCorrect ? answerStartX : answerStartX + 120;
-
-            // 正確答案葉子背景
-            const correctLeafBg = this.add.ellipse(correctX, currentY + rowHeight / 2, 100, 50, 0x3d7a3d);
-            answersContainer.add(correctLeafBg);
-
-            // 正確答案圖片（如果有）
-            if (result.correctAnswerImageUrl) {
-                const correctImgKey = 'correctImg_' + index + '_' + Date.now();
-                this.load.image(correctImgKey, result.correctAnswerImageUrl);
-                this.load.once('complete', () => {
-                    const cImg = this.add.image(correctX + 50, currentY + rowHeight / 2, correctImgKey);
-                    cImg.setDisplaySize(35, 35);
-                    cImg.setDepth(8002);
-                    answersContainer.add(cImg);
-                });
-                this.load.start();
-            }
-
-            // 正確答案文字
-            const correctText = this.add.text(correctX, currentY + rowHeight / 2 - 5, result.correctAnswer, {
-                fontSize: '16px',
-                color: '#ffffff',
-                fontFamily: 'Arial, sans-serif'
-            }).setOrigin(0.5);
-            answersContainer.add(correctText);
-
-            // 綠色 ✓ 標記
-            const correctMark = this.add.text(correctX, currentY + rowHeight / 2 + 18, '✓', {
-                fontSize: '16px',
-                color: '#44ff44',
-                fontFamily: 'Arial, sans-serif',
-                fontStyle: 'bold'
-            }).setOrigin(0.5);
-            answersContainer.add(correctMark);
-
             currentY += rowHeight;
         });
 
         // 關閉按鈕
         const closeBtn = this.add.container(width / 2, height - 40).setDepth(8001);
         const closeBg = this.add.rectangle(0, 0, 150, 40, 0x4a7c4a).setStrokeStyle(2, 0x6a9c6a);
-        const closeText = this.add.text(0, 0, '返回', {
+        const closeBtnText = this.add.text(0, 0, '返回', {
             fontSize: '18px',
             color: '#ffffff',
             fontFamily: 'Arial, sans-serif'
         }).setOrigin(0.5);
-        closeBtn.add([closeBg, closeText]);
+        closeBtn.add([closeBg, closeBtnText]);
         closeBtn.setInteractive(new Phaser.Geom.Rectangle(-75, -20, 150, 40), Phaser.Geom.Rectangle.Contains);
         closeBtn.on('pointerover', () => closeBg.setFillStyle(0x5a8c5a));
         closeBtn.on('pointerout', () => closeBg.setFillStyle(0x4a7c4a));
@@ -1591,14 +1624,9 @@ export default class GameScene extends Phaser.Scene {
         });
 
         // 滾動支援（如果內容超出螢幕）
+        const containerHeight = height - 80;
         const totalHeight = currentY + 40;
         if (totalHeight > containerHeight) {
-            // 添加滾動指示
-            const scrollHint = this.add.text(width - 30, height / 2, '⬆\n⬇', {
-                fontSize: '20px',
-                color: '#88aa88'
-            }).setOrigin(0.5).setDepth(8001);
-
             // 簡單的拖動滾動
             let isDragging = false;
             let startDragY = 0;
@@ -1615,7 +1643,7 @@ export default class GameScene extends Phaser.Scene {
                     const deltaY = pointer.y - startDragY;
                     const newY = startContainerY + deltaY;
                     const minY = height - totalHeight - 40;
-                    const maxY = startY;
+                    const maxY = 60;
                     answersContainer.y = Math.max(minY, Math.min(maxY, newY));
                 }
             });
