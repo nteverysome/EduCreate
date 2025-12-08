@@ -58,15 +58,43 @@ image.setDisplaySize(150, 150);
 container.add(image);
 ```
 
-## 推薦實現
+## 推薦實現 ✅ 已實現
 
-**使用 setDisplaySize() 統一處理**：
-- 文字物件：使用 scale 或 fontSize
+**使用 setScale() 統一處理**：
+- 文字物件（emoji）：使用 setScale(1.8) 縮放 1.8 倍
 - 圖片物件：使用 setDisplaySize(150, 150)
 - 確保兩者都能填滿 150x150 白框
 
+## 實現結果
+
+### Emoji 顯示
+- **原始大小**：104x73（80px 字體）
+- **縮放後**：187x131（scale 1.8）
+- **效果**：emoji 現在填滿白框，視覺效果更好
+
+### 圖片顯示
+- **大小**：150x150（使用 setDisplaySize）
+- **效果**：圖片完全填滿白框
+
 ## 關鍵代碼位置
 
-- `createCenterImageArea()` - 第 327-341 行
-- `updateCenterImage()` - 第 637-710 行
+- `createCenterImageArea()` - 第 327-343 行
+- `updateCenterImage()` - 第 656-710 行
+
+## 技術細節
+
+### 為什麼使用 scale 而不是 fontSize？
+1. **Text 物件的 displayWidth/displayHeight 是動態計算的**
+   - 基於實際渲染的文字大小
+   - 不能直接用 setDisplaySize() 設置
+
+2. **scale 是最簡單的解決方案**
+   - 直接縮放整個物件
+   - 保持文字清晰度
+   - 易於調整比例
+
+3. **計算方式**
+   - 原始大小：104x73
+   - 目標大小：150x150
+   - 縮放比例：150/104 ≈ 1.44（但 1.8 視覺效果更好）
 
