@@ -276,7 +276,8 @@ export default class GameScene extends Phaser.Scene {
         this.createAudioButton();
 
         // 問題文字（英文單字）- 頂部中央
-        this.questionText = this.add.text(width / 2, 70, 'apple', {
+        // 初始為空，遊戲開始時會更新
+        this.questionText = this.add.text(width / 2, 70, '', {
             fontSize: '42px',
             fontFamily: 'Arial, sans-serif',
             color: '#ffffff',
@@ -322,6 +323,9 @@ export default class GameScene extends Phaser.Scene {
         audioBg.on('pointerdown', () => this.playCurrentWordAudio());
         audioBg.on('pointerover', () => audioBg.setFillStyle(0x888888));
         audioBg.on('pointerout', () => audioBg.setFillStyle(0x666666));
+
+        // 初始隱藏音頻按鈕，遊戲開始時顯示
+        this.audioButton.setVisible(false);
     }
 
     createCenterImageArea() {
@@ -332,6 +336,8 @@ export default class GameScene extends Phaser.Scene {
         this.imageBg = this.add.rectangle(width / 2, centerY, 150, 150, 0xffffff);
         this.imageBg.setStrokeStyle(3, 0xcccccc);
         this.imageBg.setDepth(1); // 白框背景在下層
+        // 初始隱藏，遊戲開始時顯示
+        this.imageBg.setVisible(false);
 
         // 大圖片/emoji（會根據當前問題更新）
         // 使用 80px 字體，然後縮放 1.8 倍使其填滿 150x150 白框
@@ -340,6 +346,8 @@ export default class GameScene extends Phaser.Scene {
         }).setOrigin(0.5);
         this.questionImage.setScale(1.8); // 縮放 1.8 倍
         this.questionImage.setDepth(2); // 圖片在白框上層
+        // 初始隱藏，遊戲開始時顯示
+        this.questionImage.setVisible(false);
     }
 
     createStatusArea() {
@@ -554,6 +562,11 @@ export default class GameScene extends Phaser.Scene {
 
         // 隱藏開始按鈕
         this.startButton.setVisible(false);
+
+        // 顯示問題相關的 UI 元素
+        this.audioButton.setVisible(true);
+        this.imageBg.setVisible(true);
+        this.questionImage.setVisible(true);
 
         // 設置遊戲狀態
         this.gameState = 'playing';
