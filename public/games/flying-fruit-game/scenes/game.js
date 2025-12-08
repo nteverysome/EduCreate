@@ -334,8 +334,9 @@ export default class GameScene extends Phaser.Scene {
         this.imageBg.setDepth(1); // 白框背景在下層
 
         // 大圖片/emoji（會根據當前問題更新）
+        // 使用 150px 字體大小使 emoji 填滿白框
         this.questionImage = this.add.text(width / 2, centerY, '🍎', {
-            fontSize: '80px'
+            fontSize: '150px'
         }).setOrigin(0.5);
         this.questionImage.setDepth(2); // 圖片在白框上層
     }
@@ -669,7 +670,9 @@ export default class GameScene extends Phaser.Scene {
                 this.load.image('questionImg', this.currentQuestion.questionImageUrl);
                 this.load.once('complete', () => {
                     this.questionImage.setTexture('questionImg');
-                    console.log('✅ 問題圖片加載成功');
+                    // 確保圖片大小保持 150x150
+                    this.questionImage.setDisplaySize(150, 150);
+                    console.log('✅ 問題圖片加載成功，大小: 150x150');
                 });
                 this.load.start();
             }
@@ -693,8 +696,9 @@ export default class GameScene extends Phaser.Scene {
             // 如果是圖片物件，轉換回文字物件
             if (this.questionImage && this.questionImage.type === 'Image') {
                 this.questionImage.destroy();
+                // 使用 150px 字體大小使 emoji 填滿白框
                 this.questionImage = this.add.text(width / 2, centerY, emoji, {
-                    fontSize: '80px'
+                    fontSize: '150px'
                 }).setOrigin(0.5);
                 this.questionImage.setDepth(2); // 圖片在白框上層
             } else {
