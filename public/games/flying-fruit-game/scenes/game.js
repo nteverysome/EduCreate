@@ -644,48 +644,37 @@ export default class GameScene extends Phaser.Scene {
             const { width, height } = this.cameras.main;
             const centerY = height / 2;
 
-            // 如果已有圖片物件，直接更新；否則創建新的
-            if (this.questionImage && this.questionImage.type === 'Image') {
-                // 已經是圖片物件，直接更新紋理
-                this.questionImage.setDepth(2); // 圖片在白框上層
-                this.load.image('questionImg', this.currentQuestion.questionImageUrl);
-                this.load.once('complete', () => {
-                    this.questionImage.setTexture('questionImg');
-                    console.log('✅ 問題圖片加載成功');
-                });
-                this.load.start();
-            } else {
-                // 需要從文字轉換為圖片
-                if (this.questionImage) {
-                    this.questionImage.destroy();
-                }
-
-                // 創建新的圖片物件
-                this.questionImage = this.add.image(width / 2, centerY, '');
-                this.questionImage.setOrigin(0.5);
-                // 設置圖片大小為 150x150（填滿白色框）
-                this.questionImage.setDisplaySize(150, 150);
-                this.questionImage.setDepth(2); // 圖片在白框上層
-
-                // 異步加載圖片
-                this.load.image('questionImg', this.currentQuestion.questionImageUrl);
-                this.load.once('complete', () => {
-                    this.questionImage.setTexture('questionImg');
-                    // 確保圖片大小保持 150x150
-                    this.questionImage.setDisplaySize(150, 150);
-                    console.log('✅ 問題圖片加載成功，大小: 150x150');
-                });
-                this.load.start();
+            // 需要從文字轉換為圖片
+            if (this.questionImage) {
+                this.questionImage.destroy();
             }
 
-            // 圖片出現動畫
-            this.questionImage.setScale(0);
-            this.tweens.add({
-                targets: this.questionImage,
-                scale: 1,
-                duration: 300,
-                ease: 'Back.easeOut'
+            // 創建新的圖片物件
+            this.questionImage = this.add.image(width / 2, centerY, '');
+            this.questionImage.setOrigin(0.5);
+            this.questionImage.setDepth(2); // 圖片在白框上層
+
+            // 異步加載圖片
+            const imageKey = 'questionImg_' + Date.now(); // 使用唯一 key 避免緩存問題
+            this.load.image(imageKey, this.currentQuestion.questionImageUrl);
+            this.load.once('complete', () => {
+                if (this.questionImage) {
+                    this.questionImage.setTexture(imageKey);
+                    // 🔥 關鍵：在紋理加載後設置 displaySize 為 150x150
+                    this.questionImage.setDisplaySize(150, 150);
+                    console.log('✅ 問題圖片加載成功，大小設置為 150x150');
+
+                    // 圖片出現動畫（使用 alpha 而不是 scale，避免覆蓋 displaySize）
+                    this.questionImage.setAlpha(0);
+                    this.tweens.add({
+                        targets: this.questionImage,
+                        alpha: 1,
+                        duration: 300,
+                        ease: 'Power2'
+                    });
+                }
             });
+            this.load.start();
         } else {
             // 回退到 emoji 顯示
             const word = this.currentQuestion.english.toLowerCase();
@@ -708,13 +697,13 @@ export default class GameScene extends Phaser.Scene {
                 this.questionImage.setScale(1.8); // 確保縮放保持一致
             }
 
-            // 圖片出現動畫
-            this.questionImage.setScale(0);
+            // 圖片出現動畫（使用 alpha 避免干擾 scale）
+            this.questionImage.setAlpha(0);
             this.tweens.add({
                 targets: this.questionImage,
-                scale: 1,
+                alpha: 1,
                 duration: 300,
-                ease: 'Back.easeOut'
+                ease: 'Power2'
             });
         }
     }
