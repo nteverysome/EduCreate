@@ -639,7 +639,8 @@ export default class GameScene extends Phaser.Scene {
             // 使用 Phaser 的圖片物件顯示 URL 圖片
             this.questionImage = this.add.image(width / 2, centerY, '');
             this.questionImage.setOrigin(0.5);
-            this.questionImage.setDisplaySize(120, 120);
+            // 設置圖片大小為 90x90（適合白色框內）
+            this.questionImage.setDisplaySize(90, 90);
 
             // 異步加載圖片
             this.load.image('questionImg', this.currentQuestion.questionImageUrl);
