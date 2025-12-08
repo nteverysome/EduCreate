@@ -757,15 +757,36 @@ export default class GameScene extends Phaser.Scene {
 
         // 小圖片（代表答案的水果或圖片）
         let smallImage;
+        const imageKey = `answer_img_${index}_${Date.now()}`;
 
         if (option.imageUrl) {
-            // 使用 API 中的圖片
-            smallImage = this.add.image(-25, -5, null);
-            smallImage.setDisplaySize(28, 28);
+            // 使用 API 中的圖片 - 先顯示 emoji，然後異步加載圖片
+            const word = option.english ? option.english.toLowerCase() : '';
+            const fallbackEmoji = this.fruitImages[word] || this.fruitEmojis[index % this.fruitEmojis.length];
+
+            // 先創建一個佔位的 emoji
+            smallImage = this.add.text(-25, -5, fallbackEmoji, {
+                fontSize: '28px'
+            }).setOrigin(0.5);
 
             // 異步加載圖片
-            this.textures.addBase64(option.imageUrl, option.imageUrl);
-            smallImage.setTexture(option.imageUrl);
+            this.load.image(imageKey, option.imageUrl);
+            this.load.once('complete', () => {
+                if (fruitContainer && fruitContainer.active) {
+                    // 移除 emoji，添加圖片
+                    const imgSprite = this.add.image(-25, -5, imageKey);
+                    imgSprite.setDisplaySize(40, 40);
+                    imgSprite.setOrigin(0.5);
+
+                    // 替換容器中的 emoji
+                    const emojiIndex = fruitContainer.list.indexOf(smallImage);
+                    if (emojiIndex !== -1) {
+                        fruitContainer.remove(smallImage, true);
+                        fruitContainer.addAt(imgSprite, emojiIndex);
+                    }
+                }
+            });
+            this.load.start();
         } else {
             // 使用 emoji 作為備選
             const word = option.english ? option.english.toLowerCase() : '';
@@ -775,13 +796,19 @@ export default class GameScene extends Phaser.Scene {
             }).setOrigin(0.5);
         }
 
-        // 答案文字（中文）- 如果有圖片，文字可選
-        const answerText = this.add.text(15, -5, option.text || '', {
+        // 答案文字（中文）
+        const displayText = option.text || '';
+        const answerText = this.add.text(15, -5, displayText, {
             fontSize: '18px',
             fontFamily: 'Arial, sans-serif',
             color: '#000000',
             fontStyle: 'bold'
         }).setOrigin(0, 0.5);
+
+        // 存儲引用以便後續檢查
+        fruitContainer.text = answerText;
+        fruitContainer.imageUrl = option.imageUrl;
+        fruitContainer.sprite = smallImage;
 
         fruitContainer.add([fruitBg, smallImage, answerText]);
 
