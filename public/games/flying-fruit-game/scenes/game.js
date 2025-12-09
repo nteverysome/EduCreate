@@ -941,8 +941,8 @@ export default class GameScene extends Phaser.Scene {
         // 🚀 速度映射：1-10 → 更大的差距
         // speed=1 → 倍率 0.2x (最慢)
         // speed=5 → 倍率 1.0x (中等)
-        // speed=10 → 倍率 2.0x (最快)
-        const speedMultiplier = (this.speed - 1) / 4.5;  // 將 1-10 映射到 0-2
+        // speed=10 → 倍率 4.0x (最快 - 快 2 倍)
+        const speedMultiplier = (this.speed - 1) / 2.25;  // 將 1-10 映射到 0-4
         const baseUpVelocity = -35 - (speedMultiplier * 15);   // 初始向上速度 - 使用倍率
         const gravity = 1.5 + (speedMultiplier * 1.5);        // 重力加速度 - 使用倍率
         const windSpeed = Phaser.Math.Between(-0.2, 0.2); // 風力影響 - 幾乎沒有
