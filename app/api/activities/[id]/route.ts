@@ -403,6 +403,36 @@ export async function PUT(
           code: (error as any)?.code,
           meta: (error as any)?.meta
         });
+
+        // 🔥 如果是因為 flyingFruitOptions 列不存在，嘗試只保存 matchUpOptions
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        if (errorMsg.includes('flyingFruitOptions') && errorMsg.includes('does not exist')) {
+          console.log('⚠️ flyingFruitOptions 列不存在，嘗試只保存 matchUpOptions...');
+          try {
+            const updateData: any = { updatedAt: new Date() };
+            if (body.matchUpOptions !== undefined) {
+              updateData.matchUpOptions = body.matchUpOptions;
+            }
+
+            const updatedActivity = await prisma.activity.update({
+              where: { id: activityId },
+              data: updateData
+            });
+
+            console.log('✅ matchUpOptions 保存成功（flyingFruitOptions 跳過）');
+            return NextResponse.json({
+              success: true,
+              activity: updatedActivity,
+              matchUpOptions: updatedActivity.matchUpOptions,
+              warning: 'flyingFruitOptions 列還未準備好，請稍後重試'
+            }, {
+              headers: corsHeaders,
+            });
+          } catch (fallbackError) {
+            console.error('❌ 備用保存也失敗:', fallbackError);
+          }
+        }
+
         return NextResponse.json(
           {
             error: '保存遊戲選項失敗',
