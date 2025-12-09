@@ -885,9 +885,9 @@ export default class GameScene extends Phaser.Scene {
             }).setOrigin(0.5);
         }
 
-        // 答案文字（中文）
+        // 答案文字（中文）- 位置調整使其不超過水果邊界
         const displayText = option.text || '';
-        const answerText = this.add.text(15, -5, displayText, {
+        const answerText = this.add.text(15, 5, displayText, {
             fontSize: '18px',
             fontFamily: 'Arial, sans-serif',
             color: '#000000',
