@@ -45,74 +45,95 @@ const FlyingFruitOptionsPanel: React.FC<FlyingFruitOptionsPanelProps> = ({
 
   return (
     <div className="bg-white border border-gray-300 rounded-lg p-4 sm:p-6 mt-4">
-      <h3 className="text-lg font-semibold mb-4">🍎 Flying Fruit 遊戲選項</h3>
+      <h3 className="text-lg font-semibold mb-4">選項</h3>
 
       <table className="w-full">
         <tbody>
-          {/* 計時器選項 */}
+          {/* Timer 選項 */}
           <tr className="border-b border-gray-200">
-            <td className="py-3 pr-4 font-medium align-top w-24">定時器</td>
+            <td className="py-3 pr-4 font-medium align-top">計時器</td>
             <td className="py-3">
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-col gap-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
-                    name="flying-timer"
+                    name="timer"
                     checked={options.timer.type === 'none'}
-                    onChange={() => updateOptions({ timer: { ...options.timer, type: 'none' } })}
+                    onChange={() => updateOptions({
+                      timer: { ...options.timer, type: 'none' }
+                    })}
                     className="cursor-pointer"
                   />
-                  <span>沒有任何</span>
+                  <span>無</span>
                 </label>
+
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
-                    name="flying-timer"
+                    name="timer"
                     checked={options.timer.type === 'countUp'}
-                    onChange={() => updateOptions({ timer: { ...options.timer, type: 'countUp' } })}
+                    onChange={() => updateOptions({
+                      timer: { ...options.timer, type: 'countUp' }
+                    })}
                     className="cursor-pointer"
                   />
-                  <span>數起來</span>
+                  <span>正向計時</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+
+                <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="radio"
-                    name="flying-timer"
+                    name="timer"
                     checked={options.timer.type === 'countDown'}
-                    onChange={() => updateOptions({ timer: { ...options.timer, type: 'countDown' } })}
-                    className="cursor-pointer"
+                    onChange={() => updateOptions({
+                      timer: { ...options.timer, type: 'countDown' }
+                    })}
+                    className="cursor-pointer mt-1"
                   />
-                  <span>倒數計時</span>
-                </label>
-                {options.timer.type === 'countDown' && (
-                  <div className="flex items-center gap-1">
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      value={options.timer.minutes || 5}
-                      onChange={(e) => updateOptions({ timer: { ...options.timer, minutes: Number(e.target.value) } })}
-                      className="w-14 px-2 py-1 border border-gray-300 rounded text-center"
-                    />
-                    <span>分</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      value={options.timer.seconds || 0}
-                      onChange={(e) => updateOptions({ timer: { ...options.timer, seconds: Number(e.target.value) } })}
-                      className="w-14 px-2 py-1 border border-gray-300 rounded text-center"
-                    />
-                    <span>s</span>
+                  <div className="flex flex-col gap-2">
+                    <span>倒數計時</span>
+
+                    {options.timer.type === 'countDown' && (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min="0"
+                          max="59"
+                          value={options.timer.minutes || 5}
+                          onChange={(e) => updateOptions({
+                            timer: {
+                              ...options.timer,
+                              minutes: Number(e.target.value)
+                            }
+                          })}
+                          className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
+                        />
+                        <span className="text-gray-600">m</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="59"
+                          value={options.timer.seconds || 0}
+                          onChange={(e) => updateOptions({
+                            timer: {
+                              ...options.timer,
+                              seconds: Number(e.target.value)
+                            }
+                          })}
+                          className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
+                        />
+                        <span className="text-gray-600">s</span>
+                      </div>
+                    )}
                   </div>
-                )}
+                </label>
               </div>
             </td>
           </tr>
 
-          {/* 生命值 */}
+          {/* Lives 選項 */}
           <tr className="border-b border-gray-200">
-            <td className="py-3 pr-4 font-medium">生命</td>
+            <td className="py-3 pr-4 font-medium">生命值</td>
             <td className="py-3">
               <div className="flex items-center gap-3">
                 <input
@@ -121,21 +142,14 @@ const FlyingFruitOptionsPanel: React.FC<FlyingFruitOptionsPanelProps> = ({
                   max="5"
                   value={options.lives}
                   onChange={(e) => updateOptions({ lives: Number(e.target.value) })}
-                  className="w-48 cursor-pointer"
+                  className="flex-1 cursor-pointer"
                 />
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={options.lives}
-                  onChange={(e) => updateOptions({ lives: Math.min(5, Math.max(1, Number(e.target.value))) })}
-                  className="w-14 px-2 py-1 border border-gray-300 rounded text-center"
-                />
+                <span className="w-8 text-center font-semibold text-lg">{options.lives}</span>
               </div>
             </td>
           </tr>
 
-          {/* 速度 */}
+          {/* Speed 選項 */}
           <tr className="border-b border-gray-200">
             <td className="py-3 pr-4 font-medium">速度</td>
             <td className="py-3">
@@ -146,54 +160,47 @@ const FlyingFruitOptionsPanel: React.FC<FlyingFruitOptionsPanelProps> = ({
                   max="5"
                   value={options.speed}
                   onChange={(e) => updateOptions({ speed: Number(e.target.value) })}
-                  className="w-48 cursor-pointer"
+                  className="flex-1 cursor-pointer"
                 />
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={options.speed}
-                  onChange={(e) => updateOptions({ speed: Math.min(5, Math.max(1, Number(e.target.value))) })}
-                  className="w-14 px-2 py-1 border border-gray-300 rounded text-center"
-                />
+                <span className="w-8 text-center font-semibold text-lg">{options.speed}</span>
               </div>
             </td>
           </tr>
 
-          {/* 答錯後重試 */}
+          {/* Retry 選項 */}
           <tr className="border-b border-gray-200">
-            <td className="py-3 pr-4 font-medium"></td>
+            <td className="py-3 pr-4 font-medium">答錯重試</td>
             <td className="py-3">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={options.retryOnWrong}
                   onChange={(e) => updateOptions({ retryOnWrong: e.target.checked })}
-                  className="cursor-pointer w-4 h-4"
+                  className="cursor-pointer"
                 />
-                <span>答錯後嘗重試</span>
+                <span>開啟</span>
               </label>
             </td>
           </tr>
 
-          {/* 隨機順序 */}
+          {/* Random 選項 */}
           <tr className="border-b border-gray-200">
-            <td className="py-3 pr-4 font-medium">隨機的</td>
+            <td className="py-3 pr-4 font-medium">隨機</td>
             <td className="py-3">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={options.shuffle}
                   onChange={(e) => updateOptions({ shuffle: e.target.checked })}
-                  className="cursor-pointer w-4 h-4"
+                  className="cursor-pointer"
                 />
-                <span>打亂問題順序</span>
+                <span>打亂題目順序</span>
               </label>
             </td>
           </tr>
 
-          {/* 遊戲結束顯示答案 */}
-          <tr className="border-b border-gray-200">
+          {/* End of game 選項 */}
+          <tr>
             <td className="py-3 pr-4 font-medium">遊戲結束</td>
             <td className="py-3">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -201,7 +208,7 @@ const FlyingFruitOptionsPanel: React.FC<FlyingFruitOptionsPanelProps> = ({
                   type="checkbox"
                   checked={options.showAnswers}
                   onChange={(e) => updateOptions({ showAnswers: e.target.checked })}
-                  className="cursor-pointer w-4 h-4"
+                  className="cursor-pointer"
                 />
                 <span>顯示答案</span>
               </label>
@@ -209,11 +216,6 @@ const FlyingFruitOptionsPanel: React.FC<FlyingFruitOptionsPanelProps> = ({
           </tr>
         </tbody>
       </table>
-
-      {/* 詞彙數量提示 */}
-      <div className="mt-4 p-3 bg-green-50 rounded-lg text-sm text-green-700">
-        🍎 當前詞彙數量：<strong>{totalVocabulary}</strong> 個單字
-      </div>
     </div>
   );
 };
