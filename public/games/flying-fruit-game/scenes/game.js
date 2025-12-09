@@ -970,8 +970,9 @@ export default class GameScene extends Phaser.Scene {
     updateFruitPhysics(deltaTime) {
         if (this.gameState !== 'playing') return;
 
-        const { height } = this.cameras.main;
+        const { width, height } = this.cameras.main;
         const multiplier = deltaTime / 200;  // 參考 Gorilla Game 的時間倍率
+        const fruitRadius = 50;  // 水果容器的半徑（橢圓形寬度 100，所以半徑 50）
 
         // 遍歷所有飛行中的水果
         for (let i = this.flyingFruits.length - 1; i >= 0; i--) {
@@ -1012,10 +1013,25 @@ export default class GameScene extends Phaser.Scene {
                 this.removeFruit(fruit);
             }
 
-            // ⬆️ 檢查是否飛出螢幕頂部太高（限制最高點）
-            if (fruit.y < -200) {
+            // ⬆️ 檢查是否飛出螢幕頂部（限制最高點 - 不超出容器）
+            if (fruit.y < fruitRadius) {
                 // 限制最高點，讓水果開始下落
+                fruit.y = fruitRadius;
                 fruit.setData('velocityY', Math.abs(velocityY));
+            }
+
+            // ⬅️ 檢查是否飛出左邊界（限制左邊界）
+            if (fruit.x < fruitRadius) {
+                fruit.x = fruitRadius;
+                velocityX = Math.abs(velocityX);  // 反彈向右
+                fruit.setData('velocityX', velocityX);
+            }
+
+            // ➡️ 檢查是否飛出右邊界（限制右邊界）
+            if (fruit.x > width - fruitRadius) {
+                fruit.x = width - fruitRadius;
+                velocityX = -Math.abs(velocityX);  // 反彈向左
+                fruit.setData('velocityX', velocityX);
             }
         }
     }
