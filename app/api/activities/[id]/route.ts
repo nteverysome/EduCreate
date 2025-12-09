@@ -118,14 +118,39 @@ export async function GET(
 
     // 🔥 修復：支持公開訪問（當活動是公開的時）
     // 首先嘗試獲取活動（不限制用戶）
+    // 使用 select 而不是 include，以避免訪問不存在的列
     const activity = await prisma.activity.findUnique({
       where: {
         id: activityId
       },
-      include: {
-        vocabularyItems: true,  // 包含詞彙項目
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        elements: true,
+        content: true,
+        gameOptions: true,
+        matchUpOptions: true,
+        createdAt: true,
+        updatedAt: true,
+        participantCount: true,
+        deadline: true,
+        communityDescription: true,
+        communityTags: true,
+        communityCategory: true,
+        geptLevel: true,
+        templateType: true,
+        tags: true,
+        category: true,
+        copiedFromActivityId: true,
+        originalAuthorId: true,
+        originalAuthorName: true,
+        isPublic: true,
+        shareToken: true,
+        gameSettings: true,
+        vocabularyItems: true,
         versions: {
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: 'desc' as const }
         },
         user: {
           select: {
@@ -134,7 +159,6 @@ export async function GET(
             image: true
           }
         },
-        gameSettings: true,  // 包含遊戲設置
         _count: {
           select: {
             versions: true
@@ -200,12 +224,23 @@ export async function GET(
     }
 
     // 返回活動數據，包含 gameOptions、matchUpOptions 和 flyingFruitOptions
-    const responseData = {
+    const responseData: any = {
       ...activity,
       gameOptions,
       matchUpOptions: activity.matchUpOptions || null,  // 🔥 添加 matchUpOptions
-      flyingFruitOptions: (activity as any).flyingFruitOptions || null  // 🔥 添加 flyingFruitOptions
     };
+
+    // 🔥 安全地添加 flyingFruitOptions（如果數據庫列存在）
+    try {
+      if ((activity as any).flyingFruitOptions) {
+        responseData.flyingFruitOptions = (activity as any).flyingFruitOptions;
+      } else {
+        responseData.flyingFruitOptions = null;
+      }
+    } catch (e) {
+      // 如果列不存在，設置為 null
+      responseData.flyingFruitOptions = null;
+    }
 
     return NextResponse.json(responseData, {
       headers: corsHeaders,
