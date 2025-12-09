@@ -845,7 +845,7 @@ export default class GameScene extends Phaser.Scene {
         }
 
         // 小圖片（代表答案的水果或圖片）
-        let smallImage;
+        let smallImage = null;
         const imageKey = `answer_img_${index}_${Date.now()}`;
 
         if (option.imageUrl) {
@@ -876,14 +876,8 @@ export default class GameScene extends Phaser.Scene {
                 }
             });
             this.load.start();
-        } else {
-            // 使用 emoji 作為備選
-            const word = option.english ? option.english.toLowerCase() : '';
-            const fruitEmoji = this.fruitImages[word] || this.fruitEmojis[index % this.fruitEmojis.length];
-            smallImage = this.add.text(-25, -5, fruitEmoji, {
-                fontSize: '28px'
-            }).setOrigin(0.5);
         }
+        // 如果沒有圖片，就不顯示 emoji，只顯示單字文字
 
         // 答案文字（中文）- 位置調整使其不超過水果邊界
         const displayText = option.text || '';
@@ -899,7 +893,13 @@ export default class GameScene extends Phaser.Scene {
         fruitContainer.imageUrl = option.imageUrl;
         fruitContainer.sprite = smallImage;
 
-        fruitContainer.add([fruitBg, smallImage, answerText]);
+        // 只添加存在的元素到容器
+        const containerElements = [fruitBg];
+        if (smallImage) {
+            containerElements.push(smallImage);
+        }
+        containerElements.push(answerText);
+        fruitContainer.add(containerElements);
 
         // 存儲數據
         fruitContainer.setData('option', option);
