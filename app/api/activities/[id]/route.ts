@@ -398,8 +398,16 @@ export async function PUT(
         });
       } catch (error) {
         console.error('❌ [v53.0] 保存遊戲選項失敗:', error);
+        console.error('❌ 錯誤詳情:', {
+          message: error instanceof Error ? error.message : String(error),
+          code: (error as any)?.code,
+          meta: (error as any)?.meta
+        });
         return NextResponse.json(
-          { error: '保存遊戲選項失敗' },
+          {
+            error: '保存遊戲選項失敗',
+            details: error instanceof Error ? error.message : String(error)
+          },
           { status: 500, headers: corsHeaders }
         );
       }
