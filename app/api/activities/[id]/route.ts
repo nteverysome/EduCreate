@@ -404,14 +404,24 @@ export async function PUT(
           meta: (error as any)?.meta
         });
 
-        // 🔥 如果是因為 flyingFruitOptions 列不存在，嘗試只保存 matchUpOptions
+        // 🔥 如果是因為 flyingFruitOptions 列不存在，嘗試添加列
         const errorMsg = error instanceof Error ? error.message : String(error);
         if (errorMsg.includes('flyingFruitOptions') && errorMsg.includes('does not exist')) {
-          console.log('⚠️ flyingFruitOptions 列不存在，嘗試只保存 matchUpOptions...');
+          console.log('⚠️ flyingFruitOptions 列不存在，嘗試添加列...');
           try {
+            // 嘗試添加 flyingFruitOptions 列
+            await (prisma as any).$executeRawUnsafe(
+              'ALTER TABLE "Activity" ADD COLUMN IF NOT EXISTS "flyingFruitOptions" JSONB'
+            );
+            console.log('✅ flyingFruitOptions 列已添加');
+
+            // 重新嘗試保存
             const updateData: any = { updatedAt: new Date() };
             if (body.matchUpOptions !== undefined) {
               updateData.matchUpOptions = body.matchUpOptions;
+            }
+            if (body.flyingFruitOptions !== undefined) {
+              updateData.flyingFruitOptions = body.flyingFruitOptions;
             }
 
             const updatedActivity = await prisma.activity.update({
@@ -419,17 +429,42 @@ export async function PUT(
               data: updateData
             });
 
-            console.log('✅ matchUpOptions 保存成功（flyingFruitOptions 跳過）');
+            console.log('✅ 遊戲選項保存成功（在添加列後）');
             return NextResponse.json({
               success: true,
               activity: updatedActivity,
               matchUpOptions: updatedActivity.matchUpOptions,
-              warning: 'flyingFruitOptions 列還未準備好，請稍後重試'
+              flyingFruitOptions: (updatedActivity as any).flyingFruitOptions
             }, {
               headers: corsHeaders,
             });
           } catch (fallbackError) {
-            console.error('❌ 備用保存也失敗:', fallbackError);
+            console.error('❌ 添加列或備用保存失敗:', fallbackError);
+
+            // 最後的備用方案：只保存 matchUpOptions
+            try {
+              const updateData: any = { updatedAt: new Date() };
+              if (body.matchUpOptions !== undefined) {
+                updateData.matchUpOptions = body.matchUpOptions;
+              }
+
+              const updatedActivity = await prisma.activity.update({
+                where: { id: activityId },
+                data: updateData
+              });
+
+              console.log('✅ matchUpOptions 保存成功（flyingFruitOptions 跳過）');
+              return NextResponse.json({
+                success: true,
+                activity: updatedActivity,
+                matchUpOptions: updatedActivity.matchUpOptions,
+                warning: 'flyingFruitOptions 列還未準備好，請稍後重試'
+              }, {
+                headers: corsHeaders,
+              });
+            } catch (finalError) {
+              console.error('❌ 最終備用保存也失敗:', finalError);
+            }
           }
         }
 
