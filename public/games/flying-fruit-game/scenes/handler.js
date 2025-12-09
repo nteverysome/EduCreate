@@ -25,7 +25,7 @@ export default class HandlerScene extends Phaser.Scene {
             options.lives = Math.min(5, Math.max(1, parseInt(urlParams.get('lives')) || 3));
         }
         if (urlParams.has('speed')) {
-            options.speed = Math.min(5, Math.max(1, parseInt(urlParams.get('speed')) || 2));
+            options.speed = Math.min(10, Math.max(1, parseInt(urlParams.get('speed')) || 2));
         }
         if (urlParams.has('geptLevel')) {
             options.geptLevel = urlParams.get('geptLevel');
