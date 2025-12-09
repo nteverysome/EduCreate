@@ -9,7 +9,7 @@ export interface FlyingFruitOptions {
     seconds?: number;
   };
   lives: number;  // 生命值 1-5
-  speed: number;  // 速度 1-5
+  speed: number;  // 速度 1-10
   retryOnWrong: boolean;  // 答錯後重試
   shuffle: boolean;  // 打亂問題順序
   showAnswers: boolean;  // 遊戲結束顯示答案
@@ -22,7 +22,7 @@ export const DEFAULT_FLYING_FRUIT_OPTIONS: FlyingFruitOptions = {
     seconds: 0,
   },
   lives: 3,
-  speed: 2,
+  speed: 10,
   retryOnWrong: true,
   shuffle: true,
   showAnswers: true,
@@ -157,7 +157,7 @@ const FlyingFruitOptionsPanel: React.FC<FlyingFruitOptionsPanelProps> = ({
                 <input
                   type="range"
                   min="1"
-                  max="5"
+                  max="10"
                   value={options.speed}
                   onChange={(e) => updateOptions({ speed: Number(e.target.value) })}
                   className="flex-1 cursor-pointer"
