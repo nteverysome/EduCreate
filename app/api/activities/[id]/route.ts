@@ -182,8 +182,11 @@ export async function GET(
       hasContent: !!activity.content
     });
 
-    // 轉換 GameSettings 到 gameOptions 格式
+    // 轉換 GameSettings 到 gameOptions 格式（用於 Shimozurdo）
     let gameOptions = null;
+    // 🔥 [v55.0] 同時從 GameSettings 轉換 flyingFruitOptions（用於 Flying Fruit）
+    let flyingFruitOptions = null;
+
     if (activity.gameSettings) {
       const gs = activity.gameSettings;
 
@@ -207,36 +210,37 @@ export async function GET(
         };
       }
 
+      // Shimozurdo 遊戲選項格式
       gameOptions = {
         timer,
         lives: gs.livesCount || 5,
-        speed: gs.speed || 3,  // 從 GameSettings 讀取 speed
+        speed: gs.speed || 3,
         random: gs.shuffleQuestions ?? true,
         showAnswers: gs.showAnswers ?? true,
-        visualStyle: gs.visualStyle || 'clouds'  // 從 GameSettings 讀取 visualStyle
+        visualStyle: gs.visualStyle || 'clouds'
+      };
+
+      // 🔥 Flying Fruit 遊戲選項格式（從同一個 GameSettings 讀取）
+      flyingFruitOptions = {
+        timer,
+        lives: gs.livesCount || 3,
+        speed: gs.speed || 2,
+        shuffle: gs.shuffleQuestions ?? true,
+        showAnswers: gs.showAnswers ?? true,
+        retryOnWrong: gs.allowRetry ?? true
       };
 
       console.log('✅ [GET] GameSettings 轉換為 gameOptions:', gameOptions);
+      console.log('✅ [GET] GameSettings 轉換為 flyingFruitOptions:', flyingFruitOptions);
     }
 
     // 返回活動數據，包含 gameOptions、matchUpOptions 和 flyingFruitOptions
     const responseData: any = {
       ...activity,
       gameOptions,
-      matchUpOptions: activity.matchUpOptions || null,  // 🔥 添加 matchUpOptions
+      matchUpOptions: activity.matchUpOptions || null,
+      flyingFruitOptions  // 🔥 從 GameSettings 讀取，不再依賴單獨的列
     };
-
-    // 🔥 安全地添加 flyingFruitOptions（如果數據庫列存在）
-    try {
-      if ((activity as any).flyingFruitOptions) {
-        responseData.flyingFruitOptions = (activity as any).flyingFruitOptions;
-      } else {
-        responseData.flyingFruitOptions = null;
-      }
-    } catch (e) {
-      // 如果列不存在，設置為 null
-      responseData.flyingFruitOptions = null;
-    }
 
     return NextResponse.json(responseData, {
       headers: corsHeaders,
@@ -353,14 +357,15 @@ export async function PUT(
     const activityId = params.id;
     const body = await request.json();
 
-    // 🔥 [v53.0] 允許未登錄用戶保存遊戲選項（matchUpOptions 或 flyingFruitOptions）
-    // 但不允許編輯活動內容（title, vocabularyItems）
+    // 🔥 [v55.0] 允許未登錄用戶保存遊戲選項
+    // matchUpOptions -> 存入 Activity.matchUpOptions (Json 字段)
+    // flyingFruitOptions -> 存入 GameSettings 表 (與 Shimozurdo 相同)
     const isOnlyGameOptions = (body.matchUpOptions !== undefined || body.flyingFruitOptions !== undefined) &&
                               !body.title &&
                               !body.vocabularyItems;
 
     if (isOnlyGameOptions) {
-      console.log('🎮 [v53.0] 允許未登錄用戶保存遊戲選項:', {
+      console.log('🎮 [v55.0] 允許未登錄用戶保存遊戲選項:', {
         activityId,
         matchUpOptions: body.matchUpOptions,
         flyingFruitOptions: body.flyingFruitOptions,
@@ -368,106 +373,108 @@ export async function PUT(
       });
 
       try {
-        // 直接保存到 Activity 的選項字段
-        const updateData: any = { updatedAt: new Date() };
+        let savedMatchUpOptions = null;
+        let savedFlyingFruitOptions = null;
+
+        // 1. 保存 matchUpOptions 到 Activity.matchUpOptions 字段
         if (body.matchUpOptions !== undefined) {
-          updateData.matchUpOptions = body.matchUpOptions;
+          const updatedActivity = await prisma.activity.update({
+            where: { id: activityId },
+            data: {
+              matchUpOptions: body.matchUpOptions,
+              updatedAt: new Date()
+            }
+          });
+          savedMatchUpOptions = updatedActivity.matchUpOptions;
+          console.log('✅ matchUpOptions 保存成功');
         }
+
+        // 2. 🔥 保存 flyingFruitOptions 到 GameSettings 表（與 Shimozurdo 相同）
         if (body.flyingFruitOptions !== undefined) {
-          updateData.flyingFruitOptions = body.flyingFruitOptions;
+          const ffOptions = body.flyingFruitOptions;
+
+          // 轉換 flyingFruitOptions 到 GameSettings 格式
+          const gameSettingsData: any = {
+            activityId: activityId,
+            updatedAt: new Date()
+          };
+
+          // Timer 設置
+          if (ffOptions.timer) {
+            if (ffOptions.timer.type === 'none') {
+              gameSettingsData.timerType = 'NONE';
+              gameSettingsData.timerDuration = null;
+            } else if (ffOptions.timer.type === 'countUp') {
+              gameSettingsData.timerType = 'COUNT_UP';
+              const totalSeconds = (ffOptions.timer.minutes || 0) * 60 + (ffOptions.timer.seconds || 0);
+              gameSettingsData.timerDuration = totalSeconds;
+            } else if (ffOptions.timer.type === 'countDown') {
+              gameSettingsData.timerType = 'COUNT_DOWN';
+              const totalSeconds = (ffOptions.timer.minutes || 0) * 60 + (ffOptions.timer.seconds || 0);
+              gameSettingsData.timerDuration = totalSeconds;
+            }
+          }
+
+          // Lives 設置
+          if (ffOptions.lives !== undefined) {
+            gameSettingsData.livesCount = ffOptions.lives;
+          }
+
+          // Speed 設置
+          if (ffOptions.speed !== undefined) {
+            gameSettingsData.speed = ffOptions.speed;
+          }
+
+          // Shuffle 設置
+          if (ffOptions.shuffle !== undefined) {
+            gameSettingsData.shuffleQuestions = ffOptions.shuffle;
+          }
+
+          // Show Answers 設置
+          if (ffOptions.showAnswers !== undefined) {
+            gameSettingsData.showAnswers = ffOptions.showAnswers;
+          }
+
+          // Retry On Wrong 設置
+          if (ffOptions.retryOnWrong !== undefined) {
+            gameSettingsData.allowRetry = ffOptions.retryOnWrong;
+          }
+
+          // 使用 upsert 創建或更新 GameSettings
+          const result = await prisma.gameSettings.upsert({
+            where: { activityId: activityId },
+            update: gameSettingsData,
+            create: gameSettingsData
+          });
+
+          console.log('✅ flyingFruitOptions 保存到 GameSettings 成功:', result.id);
+
+          // 將結果轉換回 flyingFruitOptions 格式返回
+          savedFlyingFruitOptions = {
+            timer: {
+              type: result.timerType === 'NONE' ? 'none' : result.timerType === 'COUNT_UP' ? 'countUp' : 'countDown',
+              minutes: result.timerDuration ? Math.floor(result.timerDuration / 60) : 5,
+              seconds: result.timerDuration ? result.timerDuration % 60 : 0
+            },
+            lives: result.livesCount || 3,
+            speed: result.speed || 2,
+            shuffle: result.shuffleQuestions ?? true,
+            showAnswers: result.showAnswers ?? true,
+            retryOnWrong: result.allowRetry ?? true
+          };
         }
 
-        const updatedActivity = await prisma.activity.update({
-          where: { id: activityId },
-          data: updateData
-        });
-
-        console.log('✅ [v53.0] 遊戲選項保存成功:', {
-          activityId,
-          matchUpOptions: updatedActivity.matchUpOptions,
-          flyingFruitOptions: (updatedActivity as any).flyingFruitOptions
-        });
+        console.log('✅ [v55.0] 遊戲選項保存成功');
 
         return NextResponse.json({
           success: true,
-          activity: updatedActivity,
-          matchUpOptions: updatedActivity.matchUpOptions,
-          flyingFruitOptions: (updatedActivity as any).flyingFruitOptions
+          matchUpOptions: savedMatchUpOptions,
+          flyingFruitOptions: savedFlyingFruitOptions
         }, {
           headers: corsHeaders,
         });
       } catch (error) {
-        console.error('❌ [v53.0] 保存遊戲選項失敗:', error);
-        console.error('❌ 錯誤詳情:', {
-          message: error instanceof Error ? error.message : String(error),
-          code: (error as any)?.code,
-          meta: (error as any)?.meta
-        });
-
-        // 🔥 如果是因為 flyingFruitOptions 列不存在，嘗試添加列
-        const errorMsg = error instanceof Error ? error.message : String(error);
-        if (errorMsg.includes('flyingFruitOptions') && errorMsg.includes('does not exist')) {
-          console.log('⚠️ flyingFruitOptions 列不存在，嘗試添加列...');
-          try {
-            // 嘗試添加 flyingFruitOptions 列
-            await (prisma as any).$executeRawUnsafe(
-              'ALTER TABLE "Activity" ADD COLUMN IF NOT EXISTS "flyingFruitOptions" JSONB'
-            );
-            console.log('✅ flyingFruitOptions 列已添加');
-
-            // 重新嘗試保存
-            const updateData: any = { updatedAt: new Date() };
-            if (body.matchUpOptions !== undefined) {
-              updateData.matchUpOptions = body.matchUpOptions;
-            }
-            if (body.flyingFruitOptions !== undefined) {
-              updateData.flyingFruitOptions = body.flyingFruitOptions;
-            }
-
-            const updatedActivity = await prisma.activity.update({
-              where: { id: activityId },
-              data: updateData
-            });
-
-            console.log('✅ 遊戲選項保存成功（在添加列後）');
-            return NextResponse.json({
-              success: true,
-              activity: updatedActivity,
-              matchUpOptions: updatedActivity.matchUpOptions,
-              flyingFruitOptions: (updatedActivity as any).flyingFruitOptions
-            }, {
-              headers: corsHeaders,
-            });
-          } catch (fallbackError) {
-            console.error('❌ 添加列或備用保存失敗:', fallbackError);
-
-            // 最後的備用方案：只保存 matchUpOptions
-            try {
-              const updateData: any = { updatedAt: new Date() };
-              if (body.matchUpOptions !== undefined) {
-                updateData.matchUpOptions = body.matchUpOptions;
-              }
-
-              const updatedActivity = await prisma.activity.update({
-                where: { id: activityId },
-                data: updateData
-              });
-
-              console.log('✅ matchUpOptions 保存成功（flyingFruitOptions 跳過）');
-              return NextResponse.json({
-                success: true,
-                activity: updatedActivity,
-                matchUpOptions: updatedActivity.matchUpOptions,
-                warning: 'flyingFruitOptions 列還未準備好，請稍後重試'
-              }, {
-                headers: corsHeaders,
-              });
-            } catch (finalError) {
-              console.error('❌ 最終備用保存也失敗:', finalError);
-            }
-          }
-        }
-
+        console.error('❌ [v55.0] 保存遊戲選項失敗:', error);
         return NextResponse.json(
           {
             error: '保存遊戲選項失敗',
