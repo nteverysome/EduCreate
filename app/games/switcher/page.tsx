@@ -479,6 +479,20 @@ const GameSwitcherPage: React.FC = () => {
           console.log('ℹ️ 使用默認 Match-up 選項');
         }
 
+        // 🔥 載入 Flying Fruit 遊戲選項
+        if ((data as any).flyingFruitOptions) {
+          // 合併數據庫選項和默認選項，確保所有字段都有值
+          const mergedFlyingFruitOptions = {
+            ...DEFAULT_FLYING_FRUIT_OPTIONS,
+            ...(data as any).flyingFruitOptions,
+          };
+          setFlyingFruitOptions(mergedFlyingFruitOptions);
+          console.log('✅ Flying Fruit 選項已載入:', mergedFlyingFruitOptions);
+        } else {
+          setFlyingFruitOptions(DEFAULT_FLYING_FRUIT_OPTIONS);
+          console.log('ℹ️ 使用默認 Flying Fruit 選項');
+        }
+
         // 判斷是否是所有者
         console.log('🔍 檢查所有者身份:', {
           hasSession: !!session,

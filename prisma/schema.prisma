@@ -167,9 +167,10 @@ model Activity {
   versions        ActivityVersion[]
   versionLogs     ActivityVersionLog[]
   assignments     Assignment[]
-  gameSettings    GameSettings?
-  matchUpOptions  Json?            // 🔥 Match-up 遊戲選項
-  vocabularyItems VocabularyItem[]
+  gameSettings       GameSettings?
+  matchUpOptions     Json?            // 🔥 Match-up 遊戲選項
+  flyingFruitOptions Json?            // 🔥 Flying Fruit 遊戲選項
+  vocabularyItems    VocabularyItem[]
 
   // 社區功能關聯
   likes     ActivityLike[]

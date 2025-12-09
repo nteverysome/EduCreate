@@ -199,11 +199,12 @@ export async function GET(
       console.log('✅ [GET] GameSettings 轉換為 gameOptions:', gameOptions);
     }
 
-    // 返回活動數據，包含 gameOptions 和 matchUpOptions
+    // 返回活動數據，包含 gameOptions、matchUpOptions 和 flyingFruitOptions
     const responseData = {
       ...activity,
       gameOptions,
-      matchUpOptions: activity.matchUpOptions || null  // 🔥 添加 matchUpOptions
+      matchUpOptions: activity.matchUpOptions || null,  // 🔥 添加 matchUpOptions
+      flyingFruitOptions: (activity as any).flyingFruitOptions || null  // 🔥 添加 flyingFruitOptions
     };
 
     return NextResponse.json(responseData, {
@@ -321,39 +322,51 @@ export async function PUT(
     const activityId = params.id;
     const body = await request.json();
 
-    // 🔥 [v53.0] 允許未登錄用戶保存遊戲選項（matchUpOptions）
+    // 🔥 [v53.0] 允許未登錄用戶保存遊戲選項（matchUpOptions 或 flyingFruitOptions）
     // 但不允許編輯活動內容（title, vocabularyItems）
-    if (body.matchUpOptions !== undefined && !body.title && !body.vocabularyItems && !body.gameOptions) {
-      console.log('🎮 [v53.0] 允許未登錄用戶保存 Match-up 遊戲選項:', {
+    const isOnlyGameOptions = (body.matchUpOptions !== undefined || body.flyingFruitOptions !== undefined) &&
+                              !body.title &&
+                              !body.vocabularyItems;
+
+    if (isOnlyGameOptions) {
+      console.log('🎮 [v53.0] 允許未登錄用戶保存遊戲選項:', {
         activityId,
         matchUpOptions: body.matchUpOptions,
+        flyingFruitOptions: body.flyingFruitOptions,
         isAuthenticated: !!session?.user?.id
       });
 
       try {
-        // 直接保存到 Activity 的 matchUpOptions 字段
+        // 直接保存到 Activity 的選項字段
+        const updateData: any = { updatedAt: new Date() };
+        if (body.matchUpOptions !== undefined) {
+          updateData.matchUpOptions = body.matchUpOptions;
+        }
+        if (body.flyingFruitOptions !== undefined) {
+          updateData.flyingFruitOptions = body.flyingFruitOptions;
+        }
+
         const updatedActivity = await prisma.activity.update({
           where: { id: activityId },
-          data: {
-            matchUpOptions: body.matchUpOptions,
-            updatedAt: new Date()
-          }
+          data: updateData
         });
 
-        console.log('✅ [v53.0] Match-up 遊戲選項保存成功:', {
+        console.log('✅ [v53.0] 遊戲選項保存成功:', {
           activityId,
-          matchUpOptions: updatedActivity.matchUpOptions
+          matchUpOptions: updatedActivity.matchUpOptions,
+          flyingFruitOptions: (updatedActivity as any).flyingFruitOptions
         });
 
         return NextResponse.json({
           success: true,
           activity: updatedActivity,
-          matchUpOptions: updatedActivity.matchUpOptions
+          matchUpOptions: updatedActivity.matchUpOptions,
+          flyingFruitOptions: (updatedActivity as any).flyingFruitOptions
         }, {
           headers: corsHeaders,
         });
       } catch (error) {
-        console.error('❌ [v53.0] 保存 Match-up 遊戲選項失敗:', error);
+        console.error('❌ [v53.0] 保存遊戲選項失敗:', error);
         return NextResponse.json(
           { error: '保存遊戲選項失敗' },
           { status: 500, headers: corsHeaders }
