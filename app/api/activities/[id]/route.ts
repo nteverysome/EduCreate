@@ -129,7 +129,6 @@ export async function GET(
         description: true,
         elements: true,
         content: true,
-        gameOptions: true,
         matchUpOptions: true,
         createdAt: true,
         updatedAt: true,
