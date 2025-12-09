@@ -896,11 +896,11 @@ export default class GameScene extends Phaser.Scene {
         fruitContainer.sprite = smallImage;
 
         // 只添加存在的元素到容器
-        const containerElements = [fruitBg];
+        // 順序：背景 -> 文字 -> 圖片（圖片深度淺，在文字後面）
+        const containerElements = [fruitBg, answerText];
         if (smallImage) {
             containerElements.push(smallImage);
         }
-        containerElements.push(answerText);
         fruitContainer.add(containerElements);
 
         // 存儲數據
