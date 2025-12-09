@@ -879,14 +879,16 @@ export default class GameScene extends Phaser.Scene {
         }
         // 如果沒有圖片，就不顯示 emoji，只顯示單字文字
 
-        // 答案文字（中文）- 位置調整使其不超過水果邊界
+        // 答案文字（中文）- 位置根據是否有圖片調整
         const displayText = option.text || '';
-        const answerText = this.add.text(15, 5, displayText, {
+        const textX = option.imageUrl ? 15 : 0;  // 有圖片時靠右，沒有圖片時居中
+        const textOriginX = option.imageUrl ? 0 : 0.5;  // 有圖片時左對齐，沒有圖片時中心對齐
+        const answerText = this.add.text(textX, 5, displayText, {
             fontSize: '18px',
             fontFamily: 'Arial, sans-serif',
             color: '#000000',
             fontStyle: 'bold'
-        }).setOrigin(0, 0.5);
+        }).setOrigin(textOriginX, 0.5);
 
         // 存儲引用以便後續檢查
         fruitContainer.text = answerText;
