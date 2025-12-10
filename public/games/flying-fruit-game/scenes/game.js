@@ -1014,18 +1014,18 @@ export default class GameScene extends Phaser.Scene {
             const word = option.english ? option.english.toLowerCase() : '';
             const fallbackEmoji = this.fruitImages[word] || this.fruitEmojis[index % this.fruitEmojis.length];
 
-            // 先創建一個佔位的 emoji（放大一倍）
-            smallImage = this.add.text(-50, -10, fallbackEmoji, {
-                fontSize: '56px'
+            // 先創建一個佔位的 emoji（縮小以適應背景圖）
+            smallImage = this.add.text(-40, -8, fallbackEmoji, {
+                fontSize: '40px'
             }).setOrigin(0.5);
 
             // 異步加載圖片
             this.load.image(imageKey, option.imageUrl);
             this.load.once('complete', () => {
                 if (fruitContainer && fruitContainer.active) {
-                    // 移除 emoji，添加圖片（放大一倍）
-                    const imgSprite = this.add.image(-50, -10, imageKey);
-                    imgSprite.setDisplaySize(80, 80);
+                    // 移除 emoji，添加圖片（縮小以適應背景圖 200x120）
+                    const imgSprite = this.add.image(-40, -8, imageKey);
+                    imgSprite.setDisplaySize(60, 60);
                     imgSprite.setOrigin(0.5);
 
                     // 替換容器中的 emoji
@@ -1040,12 +1040,12 @@ export default class GameScene extends Phaser.Scene {
         }
         // 如果沒有圖片，就不顯示 emoji，只顯示單字文字
 
-        // 答案文字（中文）- 位置根據是否有圖片調整（放大一倍）
+        // 答案文字（中文）- 位置根據是否有圖片調整（縮小以適應背景圖）
         const displayText = option.text || '';
-        const textX = option.imageUrl ? 30 : 0;  // 有圖片時靠右，沒有圖片時居中
+        const textX = option.imageUrl ? 25 : 0;  // 有圖片時靠右，沒有圖片時居中
         const textOriginX = option.imageUrl ? 0 : 0.5;  // 有圖片時左對齐，沒有圖片時中心對齐
-        const answerText = this.add.text(textX, 10, displayText, {
-            fontSize: '36px',
+        const answerText = this.add.text(textX, 8, displayText, {
+            fontSize: '24px',
             fontFamily: 'Arial, sans-serif',
             color: '#000000',
             fontStyle: 'bold'
