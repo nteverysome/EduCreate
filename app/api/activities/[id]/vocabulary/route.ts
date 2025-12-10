@@ -76,23 +76,44 @@ export async function GET(
     } else if (content?.questions && Array.isArray(content.questions) && content.questions.length > 0) {
       // 🔥 Flying Fruit 格式支持：從 content.questions 轉換為標準 vocabularyItems 格式
       console.log('📝 從 content.questions 轉換詞彙 (Flying Fruit 格式)');
-      vocabularyItems = content.questions.map((q: any, index: number) => {
-        // 找到正確答案
-        const correctAnswer = q.answers?.find((a: any) => a.isCorrect);
-        return {
-          id: q.id || `q_${index}`,
-          english: q.question || '',
-          chinese: correctAnswer?.text || '',
-          // 英文圖片使用問題圖片
-          imageUrl: q.questionImageUrl || null,
-          // 中文圖片使用正確答案的圖片
-          chineseImageUrl: correctAnswer?.imageUrl || null,
-          // 語音使用問題語音
-          audioUrl: q.questionAudioUrl || null,
-          // 保留原始答案數據以便某些遊戲使用
-          answers: q.answers || []
-        };
+
+      // 🔥 新邏輯：將所有答案選項都轉換為詞彙項（包括錯誤答案）
+      // 這樣其他遊戲（如 Shimozurdo、Match-Up）就有多個詞彙可以使用
+      const allVocabularyItems: any[] = [];
+
+      content.questions.forEach((q: any, qIndex: number) => {
+        if (q.answers && Array.isArray(q.answers)) {
+          q.answers.forEach((answer: any, aIndex: number) => {
+            if (answer.isCorrect) {
+              // 正確答案：使用問題作為英文
+              allVocabularyItems.push({
+                id: answer.id || `q${qIndex}_a${aIndex}`,
+                english: q.question || '',
+                chinese: answer.text || '',
+                imageUrl: q.questionImageUrl || null,
+                chineseImageUrl: answer.imageUrl || null,
+                audioUrl: q.questionAudioUrl || null,
+                isCorrectAnswer: true
+              });
+            } else {
+              // 🔥 錯誤答案：也轉換為詞彙項（中文 -> 中文，讓遊戲可以使用）
+              // 由於沒有對應英文，使用中文本身作為標識
+              allVocabularyItems.push({
+                id: answer.id || `q${qIndex}_a${aIndex}`,
+                english: answer.text || '',  // 使用中文作為英文（干擾項）
+                chinese: answer.text || '',
+                imageUrl: answer.imageUrl || null,
+                chineseImageUrl: answer.imageUrl || null,
+                audioUrl: null,
+                isCorrectAnswer: false
+              });
+            }
+          });
+        }
       });
+
+      vocabularyItems = allVocabularyItems;
+      console.log(`📝 轉換完成：${vocabularyItems.length} 個詞彙項（包含正確和錯誤答案）`);
     } else {
       // 向後兼容：從舊的存儲方式獲取詞彙
       const vocabularySetId = content?.vocabularySetId;

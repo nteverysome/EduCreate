@@ -131,23 +131,49 @@ class GEPTManager {
         // 清空現有詞彙數據庫
         this.wordDatabase.clear();
 
-        // 將 questions 轉換為詞彙格式
-        const customWords = questions.map((q, index) => {
-          const correctAnswer = q.answers?.find(a => a.isCorrect);
-          return {
-            id: q.id || `q_${index}`,
-            english: q.question || '',
-            chinese: correctAnswer?.text || '',
-            level: 'elementary',
-            difficulty: 1,
-            frequency: 90,
-            category: 'custom',
-            partOfSpeech: 'NOUN',
-            image: q.questionImageUrl,
-            imageUrl: q.questionImageUrl,
-            chineseImageUrl: correctAnswer?.imageUrl || null,
-            audioUrl: q.questionAudioUrl
-          };
+        // 🔥 新邏輯：將所有答案選項都轉換為詞彙（包括錯誤答案）
+        const customWords = [];
+
+        questions.forEach((q, qIndex) => {
+          if (q.answers && Array.isArray(q.answers)) {
+            q.answers.forEach((answer, aIndex) => {
+              if (answer.isCorrect) {
+                // 正確答案：使用問題作為英文
+                customWords.push({
+                  id: answer.id || `q${qIndex}_a${aIndex}`,
+                  english: q.question || '',
+                  chinese: answer.text || '',
+                  level: 'elementary',
+                  difficulty: 1,
+                  frequency: 90,
+                  category: 'custom',
+                  partOfSpeech: 'NOUN',
+                  image: q.questionImageUrl,
+                  imageUrl: q.questionImageUrl,
+                  chineseImageUrl: answer.imageUrl || null,
+                  audioUrl: q.questionAudioUrl,
+                  isCorrectAnswer: true
+                });
+              } else {
+                // 🔥 錯誤答案：也加入詞彙庫（使用中文作為英文）
+                customWords.push({
+                  id: answer.id || `q${qIndex}_a${aIndex}`,
+                  english: answer.text || '',  // 使用中文作為干擾項
+                  chinese: answer.text || '',
+                  level: 'elementary',
+                  difficulty: 1,
+                  frequency: 90,
+                  category: 'custom',
+                  partOfSpeech: 'NOUN',
+                  image: answer.imageUrl,
+                  imageUrl: answer.imageUrl,
+                  chineseImageUrl: answer.imageUrl || null,
+                  audioUrl: null,
+                  isCorrectAnswer: false
+                });
+              }
+            });
+          }
         });
 
         // 只設置初級詞彙，其他級別為空
@@ -155,7 +181,7 @@ class GEPTManager {
         this.wordDatabase.set('intermediate', []);
         this.wordDatabase.set('high-intermediate', []);
 
-        console.log(`✅ Flying Fruit 詞彙轉換完成，總共 ${customWords.length} 個詞彙`);
+        console.log(`✅ Flying Fruit 詞彙轉換完成，總共 ${customWords.length} 個詞彙（包含正確和錯誤答案）`);
         return true;
       }
 
