@@ -1515,7 +1515,7 @@ const GameSwitcherPage: React.FC = () => {
           {/* 視覺風格和遊戲選項面板 - 只在有活動ID時顯示 */}
           {activityId && (
             <div className="stats-card md:col-span-2 lg:col-span-3">
-              {/* 視覺風格選擇器 - Speaking Cards 使用專屬選擇器 */}
+              {/* 視覺風格選擇器 - Speaking Cards 使用專屬選擇器，Flying Fruit 在自己的選項面板中有專屬選擇器 */}
               {currentGameId === 'speaking-cards' ? (
                 <SpeakingCardsStyleSelector
                   selectedStyle={gameOptions.visualStyle}
@@ -1549,7 +1549,7 @@ const GameSwitcherPage: React.FC = () => {
                     }
                   }}
                 />
-              ) : (
+              ) : currentGameId !== 'flying-fruit-game' ? (
                 <VisualStyleSelector
                   selectedStyle={gameOptions.visualStyle}
                   onChange={async (styleId) => {
@@ -1582,7 +1582,7 @@ const GameSwitcherPage: React.FC = () => {
                     }
                   }}
                 />
-              )}
+              ) : null}
 
               {/* Shimozurdo 遊戲專屬選項面板 - 只在 Shimozurdo 遊戲時顯示 */}
               {currentGameId === 'shimozurdo-game' && (
