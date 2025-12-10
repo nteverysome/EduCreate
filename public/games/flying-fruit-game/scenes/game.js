@@ -591,16 +591,14 @@ export default class GameScene extends Phaser.Scene {
                     const activity = await response.json();
                     console.log('✅ 活動數據載入成功:', activity);
 
-                    // 檢查是否有 questions 數據（Flying Fruit 格式）
-                    let questionsData = [];
+                    // 🔥 檢查多種數據來源
+                    let vocabularyLoaded = false;
 
-                    if (activity.content && activity.content.questions && Array.isArray(activity.content.questions)) {
-                        questionsData = activity.content.questions;
-                        console.log('📝 從 content.questions 載入問題:', questionsData.length, '個');
-                    }
+                    // 1️⃣ Flying Fruit 格式：content.questions
+                    if (activity.content && activity.content.questions && Array.isArray(activity.content.questions) && activity.content.questions.length > 0) {
+                        const questionsData = activity.content.questions;
+                        console.log('📝 從 content.questions 載入問題 (Flying Fruit 格式):', questionsData.length, '個');
 
-                    // 如果有 questions 數據，轉換為詞彙格式
-                    if (questionsData.length > 0) {
                         this.vocabulary = questionsData.map((q, index) => ({
                             english: q.question || '',
                             chinese: q.answers.find(a => a.isCorrect)?.text || '',
@@ -608,6 +606,72 @@ export default class GameScene extends Phaser.Scene {
                             questionAudioUrl: q.questionAudioUrl || null,
                             answers: q.answers || []
                         }));
+                        vocabularyLoaded = true;
+                    }
+                    // 2️⃣ 標準格式：vocabularyItems（match-up-game, shimozurdo-game 等創建的活動）
+                    else if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems) && activity.vocabularyItems.length > 0) {
+                        console.log('📝 從 vocabularyItems 載入詞彙 (標準格式):', activity.vocabularyItems.length, '個');
+
+                        // 將標準格式轉換為 Flying Fruit 需要的格式（帶 answers 數組）
+                        this.vocabulary = activity.vocabularyItems.map((item, index) => {
+                            // 從其他詞彙中隨機選取 3 個作為錯誤答案
+                            const otherItems = activity.vocabularyItems.filter((_, i) => i !== index);
+                            const shuffledOthers = Phaser.Utils.Array.Shuffle([...otherItems]).slice(0, 3);
+
+                            const answers = [
+                                { id: `correct_${index}`, text: item.chinese || '', isCorrect: true, imageUrl: item.chineseImageUrl || null },
+                                ...shuffledOthers.map((other, i) => ({
+                                    id: `wrong_${index}_${i}`,
+                                    text: other.chinese || '',
+                                    isCorrect: false,
+                                    imageUrl: other.chineseImageUrl || null
+                                }))
+                            ];
+
+                            // 打亂答案順序
+                            Phaser.Utils.Array.Shuffle(answers);
+
+                            return {
+                                english: item.english || '',
+                                chinese: item.chinese || '',
+                                questionImageUrl: item.imageUrl || null,
+                                questionAudioUrl: item.audioUrl || null,
+                                answers: answers
+                            };
+                        });
+                        vocabularyLoaded = true;
+                    }
+                    // 3️⃣ 舊格式：content.vocabularyItems
+                    else if (activity.content && activity.content.vocabularyItems && Array.isArray(activity.content.vocabularyItems) && activity.content.vocabularyItems.length > 0) {
+                        console.log('📝 從 content.vocabularyItems 載入詞彙:', activity.content.vocabularyItems.length, '個');
+
+                        this.vocabulary = activity.content.vocabularyItems.map((item, index) => {
+                            const otherItems = activity.content.vocabularyItems.filter((_, i) => i !== index);
+                            const shuffledOthers = Phaser.Utils.Array.Shuffle([...otherItems]).slice(0, 3);
+
+                            const answers = [
+                                { id: `correct_${index}`, text: item.chinese || '', isCorrect: true },
+                                ...shuffledOthers.map((other, i) => ({
+                                    id: `wrong_${index}_${i}`,
+                                    text: other.chinese || '',
+                                    isCorrect: false
+                                }))
+                            ];
+
+                            Phaser.Utils.Array.Shuffle(answers);
+
+                            return {
+                                english: item.english || '',
+                                chinese: item.chinese || '',
+                                questionImageUrl: item.imageUrl || null,
+                                questionAudioUrl: item.audioUrl || null,
+                                answers: answers
+                            };
+                        });
+                        vocabularyLoaded = true;
+                    }
+
+                    if (vocabularyLoaded) {
                         console.log('✅ 從活動數據轉換詞彙:', this.vocabulary.length, '個');
 
                         // 打亂順序
@@ -616,6 +680,8 @@ export default class GameScene extends Phaser.Scene {
                             Phaser.Utils.Array.Shuffle(this.vocabulary);
                         }
                         return;
+                    } else {
+                        console.warn('⚠️ 活動中沒有找到詞彙數據');
                     }
                 } else {
                     console.warn('⚠️ API 請求失敗，狀態碼:', response.status);
