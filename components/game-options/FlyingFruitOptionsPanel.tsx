@@ -13,7 +13,22 @@ export interface FlyingFruitOptions {
   retryOnWrong: boolean;  // 答錯後重試
   shuffle: boolean;  // 打亂問題順序
   showAnswers: boolean;  // 遊戲結束顯示答案
+  visualStyle: string;  // 視覺風格
 }
+
+// 10 種視覺風格選項
+export const VISUAL_STYLE_OPTIONS = [
+  { id: 'jungle', name: '🌴 叢林', description: '熱帶叢林主題' },
+  { id: 'clouds', name: '☁️ 雲朵', description: '輕鬆天空主題' },
+  { id: 'space', name: '🚀 太空', description: '神秘宇宙主題' },
+  { id: 'underwater', name: '🐠 海底', description: '海底世界主題' },
+  { id: 'celebration', name: '🎉 慶典', description: '歡樂派對主題' },
+  { id: 'farm', name: '🚜 農場', description: '田園風光主題' },
+  { id: 'candy', name: '🍬 糖果', description: '甜蜜夢幻主題' },
+  { id: 'dinosaur', name: '🦕 恐龍', description: '史前冒險主題' },
+  { id: 'winter', name: '❄️ 冬季', description: '銀白雪景主題' },
+  { id: 'rainbow', name: '🌈 彩虹', description: '七彩繽紛主題' },
+];
 
 export const DEFAULT_FLYING_FRUIT_OPTIONS: FlyingFruitOptions = {
   timer: {
@@ -26,6 +41,7 @@ export const DEFAULT_FLYING_FRUIT_OPTIONS: FlyingFruitOptions = {
   retryOnWrong: true,
   shuffle: true,
   showAnswers: true,
+  visualStyle: 'jungle',
 };
 
 interface FlyingFruitOptionsPanelProps {
@@ -200,7 +216,7 @@ const FlyingFruitOptionsPanel: React.FC<FlyingFruitOptionsPanelProps> = ({
           </tr>
 
           {/* End of game 選項 */}
-          <tr>
+          <tr className="border-b border-gray-200">
             <td className="py-3 pr-4 font-medium">遊戲結束</td>
             <td className="py-3">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -212,6 +228,31 @@ const FlyingFruitOptionsPanel: React.FC<FlyingFruitOptionsPanelProps> = ({
                 />
                 <span>顯示答案</span>
               </label>
+            </td>
+          </tr>
+
+          {/* Visual Style 選項 */}
+          <tr>
+            <td className="py-3 pr-4 font-medium align-top">視覺風格</td>
+            <td className="py-3">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {VISUAL_STYLE_OPTIONS.map((style) => (
+                  <button
+                    key={style.id}
+                    type="button"
+                    onClick={() => updateOptions({ visualStyle: style.id })}
+                    className={`p-2 rounded-lg border-2 transition-all text-center ${
+                      options.visualStyle === style.id
+                        ? 'border-orange-500 bg-orange-50 shadow-md'
+                        : 'border-gray-200 hover:border-orange-300 hover:bg-gray-50'
+                    }`}
+                    title={style.description}
+                  >
+                    <div className="text-xl">{style.name.split(' ')[0]}</div>
+                    <div className="text-xs text-gray-600">{style.name.split(' ')[1]}</div>
+                  </button>
+                ))}
+              </div>
             </td>
           </tr>
         </tbody>

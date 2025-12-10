@@ -535,6 +535,7 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
         url += `&retryOnWrong=${flyingFruitOptions.retryOnWrong}`;
         url += `&shuffle=${flyingFruitOptions.shuffle}`;
         url += `&showAnswers=${flyingFruitOptions.showAnswers}`;
+        url += `&visualStyle=${flyingFruitOptions.visualStyle || 'jungle'}`;
         console.log('🍎 Flying Fruit 選項已添加到 URL:', flyingFruitOptions);
       }
     }

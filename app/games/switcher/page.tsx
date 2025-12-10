@@ -1687,12 +1687,18 @@ const GameSwitcherPage: React.FC = () => {
 
                         // 如果是 Flying Fruit 遊戲，顯示 Flying Fruit 選項
                         if (currentGameId === 'flying-fruit-game') {
+                          const styleNames: Record<string, string> = {
+                            jungle: '🌴 叢林', clouds: '☁️ 雲朵', space: '🚀 太空',
+                            underwater: '🐠 海底', celebration: '🎉 慶典', farm: '🚜 農場',
+                            candy: '🍬 糖果', dinosaur: '🦕 恐龍', winter: '❄️ 冬季', rainbow: '🌈 彩虹'
+                          };
                           successMessage += `⏱️ 計時器: ${flyingFruitOptions.timer.type === 'none' ? '無' : flyingFruitOptions.timer.type === 'countUp' ? '正計時' : `倒計時 ${flyingFruitOptions.timer.minutes}:${flyingFruitOptions.timer.seconds}`}\n` +
                             `❤️ 生命值: ${flyingFruitOptions.lives}\n` +
                             `⚡ 速度: ${flyingFruitOptions.speed}\n` +
                             `🔄 答錯重試: ${flyingFruitOptions.retryOnWrong ? '開啟' : '關閉'}\n` +
                             `🎲 隨機順序: ${flyingFruitOptions.shuffle ? '開啟' : '關閉'}\n` +
-                            `📝 顯示答案: ${flyingFruitOptions.showAnswers ? '開啟' : '關閉'}`;
+                            `📝 顯示答案: ${flyingFruitOptions.showAnswers ? '開啟' : '關閉'}\n` +
+                            `🎨 視覺風格: ${styleNames[flyingFruitOptions.visualStyle] || flyingFruitOptions.visualStyle}`;
                         }
 
                         alert(successMessage);
