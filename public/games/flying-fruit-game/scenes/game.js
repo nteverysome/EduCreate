@@ -824,6 +824,7 @@ export default class GameScene extends Phaser.Scene {
 
         // 創建水果容器
         const fruitContainer = this.add.container(spawnX, startY);
+        fruitContainer.setDepth(10);  // 設置深度，確保水果在中央圖片前面
 
         // 橢圓形水果背景（類似 Wordwall 的刺果外觀）
         const bgColor = this.fruitBgColors[index % this.fruitBgColors.length];
