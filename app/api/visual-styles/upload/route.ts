@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
     let validStyleIds: string[];
     if (game === 'speaking-cards') {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    } else if (game === 'flying-fruit-game') {
+      validStyleIds = ['jungle', 'clouds', 'space', 'underwater', 'celebration', 'farm', 'candy', 'dinosaur', 'winter', 'rainbow'];
     } else {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     }
@@ -41,6 +43,8 @@ export async function POST(request: NextRequest) {
       validResourceTypes = ['background', 'card_back', 'card_front'];
     } else if (game === 'match-up-game') {
       validResourceTypes = ['background', 'card_background', 'card_border', 'colors', 'fonts', 'config'];
+    } else if (game === 'flying-fruit-game') {
+      validResourceTypes = ['fruit_bg', 'decoration_1', 'decoration_2', 'bg_layer', 'background', 'correct', 'wrong', 'success'];
     } else {
       // shimozurdo-game
       validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
@@ -71,6 +75,9 @@ export async function POST(request: NextRequest) {
     } else if (game === 'match-up-game') {
       isImage = ['background', 'card_background', 'card_border'].includes(resourceType);
       isJson = ['colors', 'fonts', 'config'].includes(resourceType);
+    } else if (game === 'flying-fruit-game') {
+      isImage = ['fruit_bg', 'decoration_1', 'decoration_2', 'bg_layer'].includes(resourceType);
+      isAudio = ['background', 'correct', 'wrong', 'success'].includes(resourceType);
     } else {
       isImage = ['spaceship', 'cloud1', 'cloud2', 'bg_layer'].includes(resourceType);
       isAudio = ['background', 'hit', 'success'].includes(resourceType);
@@ -103,6 +110,10 @@ export async function POST(request: NextRequest) {
       blobPath = `speaking-cards-styles/${styleId}/${resourceType}.${fileExtension}`;
     } else if (game === 'match-up-game') {
       blobPath = `visual-styles/${styleId}/${resourceType}.${fileExtension}`;
+    } else if (game === 'flying-fruit-game') {
+      blobPath = isAudio
+        ? `flying-fruit-styles/${styleId}/sounds/${resourceType}.${fileExtension}`
+        : `flying-fruit-styles/${styleId}/${resourceType}.${fileExtension}`;
     } else {
       blobPath = isAudio
         ? `visual-styles/${styleId}/sounds/${resourceType}.${fileExtension}`
@@ -158,6 +169,8 @@ export async function GET(request: NextRequest) {
     let validStyleIds: string[];
     if (game === 'speaking-cards') {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    } else if (game === 'flying-fruit-game') {
+      validStyleIds = ['jungle', 'clouds', 'space', 'underwater', 'celebration', 'farm', 'candy', 'dinosaur', 'winter', 'rainbow'];
     } else {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     }
@@ -170,9 +183,14 @@ export async function GET(request: NextRequest) {
     }
 
     // 從 Blob Storage 列出所有文件
-    const blobPrefix = game === 'speaking-cards'
-      ? `speaking-cards-styles/${styleId}/`
-      : `visual-styles/${styleId}/`;
+    let blobPrefix: string;
+    if (game === 'speaking-cards') {
+      blobPrefix = `speaking-cards-styles/${styleId}/`;
+    } else if (game === 'flying-fruit-game') {
+      blobPrefix = `flying-fruit-styles/${styleId}/`;
+    } else {
+      blobPrefix = `visual-styles/${styleId}/`;
+    }
 
     const { blobs } = await list({
       prefix: blobPrefix,
@@ -195,6 +213,17 @@ export async function GET(request: NextRequest) {
         colors: { exists: false },
         fonts: { exists: false },
         config: { exists: false }
+      };
+    } else if (game === 'flying-fruit-game') {
+      resources = {
+        fruit_bg: { exists: false },
+        decoration_1: { exists: false },
+        decoration_2: { exists: false },
+        bg_layer: { exists: false },
+        background: { exists: false },
+        correct: { exists: false },
+        wrong: { exists: false },
+        success: { exists: false }
       };
     } else {
       resources = {
@@ -262,6 +291,8 @@ export async function DELETE(request: NextRequest) {
     let validStyleIds: string[];
     if (game === 'speaking-cards') {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    } else if (game === 'flying-fruit-game') {
+      validStyleIds = ['jungle', 'clouds', 'space', 'underwater', 'celebration', 'farm', 'candy', 'dinosaur', 'winter', 'rainbow'];
     } else {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     }
@@ -279,6 +310,8 @@ export async function DELETE(request: NextRequest) {
       validResourceTypes = ['background', 'card_back', 'card_front'];
     } else if (game === 'match-up-game') {
       validResourceTypes = ['background', 'card_background', 'card_border', 'colors', 'fonts', 'config'];
+    } else if (game === 'flying-fruit-game') {
+      validResourceTypes = ['fruit_bg', 'decoration_1', 'decoration_2', 'bg_layer', 'background', 'correct', 'wrong', 'success'];
     } else {
       validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
     }
@@ -291,9 +324,14 @@ export async function DELETE(request: NextRequest) {
     }
 
     // 從 Blob Storage 列出所有文件，找到要刪除的文件
-    const blobPrefix = game === 'speaking-cards'
-      ? `speaking-cards-styles/${styleId}/`
-      : `visual-styles/${styleId}/`;
+    let blobPrefix: string;
+    if (game === 'speaking-cards') {
+      blobPrefix = `speaking-cards-styles/${styleId}/`;
+    } else if (game === 'flying-fruit-game') {
+      blobPrefix = `flying-fruit-styles/${styleId}/`;
+    } else {
+      blobPrefix = `visual-styles/${styleId}/`;
+    }
 
     const { blobs } = await list({
       prefix: blobPrefix,
