@@ -980,10 +980,10 @@ export default class GameScene extends Phaser.Scene {
         let fruitBg;
 
         if (this.customResources.fruit_bg && this.textures.exists('custom_fruit_bg')) {
-            // 使用自定義水果背景圖片
+            // 使用自定義水果背景圖片（放大一倍：200x120）
             fruitBg = this.add.image(0, 0, 'custom_fruit_bg');
-            fruitBg.setDisplaySize(100, 60);
-            console.log('🍎 使用自定義水果背景圖片');
+            fruitBg.setDisplaySize(200, 120);
+            console.log('🍎 使用自定義水果背景圖片 (200x120)');
         } else {
             // 使用默認橢圓形水果背景（類似 Wordwall 的刺果外觀）
             const bgColor = this.fruitBgColors[index % this.fruitBgColors.length];
@@ -1014,18 +1014,18 @@ export default class GameScene extends Phaser.Scene {
             const word = option.english ? option.english.toLowerCase() : '';
             const fallbackEmoji = this.fruitImages[word] || this.fruitEmojis[index % this.fruitEmojis.length];
 
-            // 先創建一個佔位的 emoji
-            smallImage = this.add.text(-25, -5, fallbackEmoji, {
-                fontSize: '28px'
+            // 先創建一個佔位的 emoji（放大一倍）
+            smallImage = this.add.text(-50, -10, fallbackEmoji, {
+                fontSize: '56px'
             }).setOrigin(0.5);
 
             // 異步加載圖片
             this.load.image(imageKey, option.imageUrl);
             this.load.once('complete', () => {
                 if (fruitContainer && fruitContainer.active) {
-                    // 移除 emoji，添加圖片
-                    const imgSprite = this.add.image(-25, -5, imageKey);
-                    imgSprite.setDisplaySize(40, 40);
+                    // 移除 emoji，添加圖片（放大一倍）
+                    const imgSprite = this.add.image(-50, -10, imageKey);
+                    imgSprite.setDisplaySize(80, 80);
                     imgSprite.setOrigin(0.5);
 
                     // 替換容器中的 emoji
@@ -1040,12 +1040,12 @@ export default class GameScene extends Phaser.Scene {
         }
         // 如果沒有圖片，就不顯示 emoji，只顯示單字文字
 
-        // 答案文字（中文）- 位置根據是否有圖片調整
+        // 答案文字（中文）- 位置根據是否有圖片調整（放大一倍）
         const displayText = option.text || '';
-        const textX = option.imageUrl ? 15 : 0;  // 有圖片時靠右，沒有圖片時居中
+        const textX = option.imageUrl ? 30 : 0;  // 有圖片時靠右，沒有圖片時居中
         const textOriginX = option.imageUrl ? 0 : 0.5;  // 有圖片時左對齐，沒有圖片時中心對齐
-        const answerText = this.add.text(textX, 5, displayText, {
-            fontSize: '18px',
+        const answerText = this.add.text(textX, 10, displayText, {
+            fontSize: '36px',
             fontFamily: 'Arial, sans-serif',
             color: '#000000',
             fontStyle: 'bold'
@@ -1069,8 +1069,8 @@ export default class GameScene extends Phaser.Scene {
         fruitContainer.setData('isCorrect', option.isCorrect);
         fruitContainer.setData('startX', spawnX);
 
-        // 創建一個可點擊的透明區域（因為 Graphics 需要特殊處理）
-        const hitArea = this.add.rectangle(0, 0, 100, 60, 0xffffff, 0);
+        // 創建一個可點擊的透明區域（因為 Graphics 需要特殊處理）（放大一倍：200x120）
+        const hitArea = this.add.rectangle(0, 0, 200, 120, 0xffffff, 0);
         hitArea.setInteractive({ useHandCursor: true });
         hitArea.on('pointerdown', () => this.onFruitClick(fruitContainer));
         hitArea.on('pointerover', () => {
