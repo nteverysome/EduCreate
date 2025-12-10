@@ -12,6 +12,7 @@ const corsHeaders = {
 /**
  * GET /api/visual-styles/resources
  * 獲取指定視覺風格的所有資源 URL（從 Vercel Blob Storage）
+ * 支持多種遊戲：shimozurdo-game, flying-fruit-game 等
  */
 export async function GET(request: NextRequest) {
   try {
@@ -32,12 +33,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 驗證視覺風格 ID
-    const validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+    // 根據遊戲類型驗證視覺風格 ID 和設置存儲路徑
+    let validStyleIds: string[];
+    let blobPrefix: string;
+
+    if (game === 'flying-fruit-game') {
+      validStyleIds = ['jungle', 'clouds', 'space', 'underwater', 'celebration', 'farm', 'candy', 'dinosaur', 'winter', 'rainbow'];
+      blobPrefix = `flying-fruit-styles/${styleId}/`;
+    } else if (game === 'speaking-cards') {
+      validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+      blobPrefix = `speaking-cards-styles/${styleId}/`;
+    } else {
+      // shimozurdo-game 和其他遊戲
+      validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
+      blobPrefix = `visual-styles/${styleId}/`;
+    }
+
     if (!validStyleIds.includes(styleId)) {
-      console.error('❌ [visual-styles/resources] 無效的視覺風格 ID:', styleId);
+      console.error('❌ [visual-styles/resources] 無效的視覺風格 ID:', styleId, '遊戲:', game);
       return NextResponse.json(
-        { error: '無效的視覺風格 ID', validIds: validStyleIds },
+        { error: '無效的視覺風格 ID', validIds: validStyleIds, game },
         {
           status: 400,
           headers: corsHeaders,
@@ -46,10 +61,10 @@ export async function GET(request: NextRequest) {
     }
 
     // 從 Blob Storage 列出所有文件
-    console.log('📂 [visual-styles/resources] 從 Blob Storage 列出文件:', { styleId, game });
+    console.log('📂 [visual-styles/resources] 從 Blob Storage 列出文件:', { styleId, game, blobPrefix });
 
     const { blobs } = await list({
-      prefix: `visual-styles/${styleId}/`,
+      prefix: blobPrefix,
     });
 
     console.log('✅ [visual-styles/resources] 找到', blobs.length, '個文件');
@@ -61,7 +76,9 @@ export async function GET(request: NextRequest) {
     const timestamp = Date.now();
 
     blobs.forEach((blob) => {
-      const fileName = blob.pathname.split('/').pop() || '';
+      // 處理可能包含子目錄的路徑 (如 sounds/background.mp3)
+      const pathParts = blob.pathname.replace(blobPrefix, '').split('/');
+      const fileName = pathParts[pathParts.length - 1] || '';
       const resourceType = fileName.split('.')[0];
       // 在 URL 中添加時間戳參數以破壞緩存
       resources[resourceType] = `${blob.url}?v=${timestamp}`;

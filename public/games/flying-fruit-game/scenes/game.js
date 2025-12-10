@@ -102,10 +102,12 @@ export default class GameScene extends Phaser.Scene {
 
     /**
      * 從 API 載入自定義視覺資源
+     * 使用 /api/visual-styles/resources 端點（與 Shimozurdo 遊戲相同）
      */
     async loadCustomVisualResources() {
         try {
-            const apiUrl = `/api/visual-styles/upload?styleId=${this.visualStyle}&game=flying-fruit-game`;
+            // 使用 /api/visual-styles/resources 端點（返回直接的 URL 字符串）
+            const apiUrl = `${window.location.origin}/api/visual-styles/resources?styleId=${this.visualStyle}&game=flying-fruit-game`;
             console.log('🔍 正在載入自定義資源，API URL:', apiUrl);
             console.log('🎨 當前視覺風格:', this.visualStyle);
 
@@ -123,14 +125,15 @@ export default class GameScene extends Phaser.Scene {
             if (data.success && data.resources) {
                 console.log('📦 開始處理自定義資源...');
 
-                // 更新自定義資源
+                // 更新自定義資源（/api/visual-styles/resources 返回的是直接 URL）
                 for (const [key, value] of Object.entries(data.resources)) {
                     console.log(`🔍 檢查資源 ${key}:`, value);
-                    if (value && value.exists && value.url) {
-                        this.customResources[key] = value.url;
-                        console.log(`✅ 載入自定義資源 ${key}: ${value.url}`);
+                    // resources API 返回的是直接 URL 字符串
+                    if (value && typeof value === 'string' && value.startsWith('http')) {
+                        this.customResources[key] = value;
+                        console.log(`✅ 載入自定義資源 ${key}: ${value}`);
                     } else {
-                        console.log(`⏭️ 跳過資源 ${key} (exists: ${value?.exists})`);
+                        console.log(`⏭️ 跳過資源 ${key} (無效 URL)`);
                     }
                 }
 
