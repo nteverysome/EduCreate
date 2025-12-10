@@ -86,10 +86,55 @@ export default class GameScene extends Phaser.Scene {
         this.fruits = [];
         this.flyingFruits = [];  // 拋物線飛行的水果
         this.spawnLoopTimers = [];  // 追蹤所有的生成計時器
+
+        // 自定義視覺資源（從 API 載入）
+        this.customResources = {
+            fruit_bg: null,
+            decoration_1: null,
+            decoration_2: null,
+            bg_layer: null,
+            background: null,  // 背景音樂
+            correct: null,     // 正確音效
+            wrong: null,       // 錯誤音效
+            success: null      // 成功音效
+        };
+    }
+
+    /**
+     * 從 API 載入自定義視覺資源
+     */
+    async loadCustomVisualResources() {
+        try {
+            const response = await fetch(`/api/visual-styles/upload?styleId=${this.visualStyle}&game=flying-fruit-game`);
+            if (!response.ok) {
+                console.log('📭 沒有找到自定義資源，使用默認配置');
+                return;
+            }
+
+            const data = await response.json();
+            if (data.success && data.resources) {
+                console.log('📦 載入自定義資源:', data.resources);
+
+                // 更新自定義資源
+                for (const [key, value] of Object.entries(data.resources)) {
+                    if (value && value.exists && value.url) {
+                        this.customResources[key] = value.url;
+                        console.log(`✅ 載入自定義資源 ${key}: ${value.url}`);
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ 載入自定義視覺資源失敗:', error);
+        }
     }
 
     async create() {
         console.log('🎮 GameScene: 創建遊戲場景');
+
+        // 先載入自定義視覺資源
+        console.log('🎨 載入自定義視覺資源...');
+        await this.loadCustomVisualResources();
+        console.log('✅ 自定義視覺資源載入完成');
 
         // 創建背景
         console.log('🎨 創建背景...');
@@ -117,39 +162,111 @@ export default class GameScene extends Phaser.Scene {
         console.log('✅ GameScene 創建完成！');
     }
 
+    /**
+     * 載入自定義裝飾圖片
+     */
+    loadCustomDecorations() {
+        const { width, height } = this.cameras.main;
+
+        // 載入裝飾圖 1
+        if (this.customResources.decoration_1) {
+            this.load.image('custom_deco1', this.customResources.decoration_1);
+            this.load.once('complete', () => {
+                const deco1 = this.add.image(80, 80, 'custom_deco1');
+                deco1.setScale(0.5);
+                deco1.setDepth(-5);
+                this.decorations.push(deco1);
+
+                // 輕微擺動動畫
+                this.tweens.add({
+                    targets: deco1,
+                    angle: 5,
+                    duration: 2000,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            });
+            this.load.start();
+        }
+
+        // 載入裝飾圖 2
+        if (this.customResources.decoration_2) {
+            this.load.image('custom_deco2', this.customResources.decoration_2);
+            this.load.once('complete', () => {
+                const deco2 = this.add.image(width - 80, height - 80, 'custom_deco2');
+                deco2.setScale(0.5);
+                deco2.setDepth(-5);
+                this.decorations.push(deco2);
+
+                // 輕微浮動動畫
+                this.tweens.add({
+                    targets: deco2,
+                    y: deco2.y - 10,
+                    duration: 1500,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+            });
+            this.load.start();
+        }
+    }
+
     createBackground() {
         const { width, height } = this.cameras.main;
-        
-        // 漸層背景
-        const graphics = this.add.graphics();
-        
-        // 根據視覺風格選擇顏色
-        const styleColors = {
-            jungle: { top: 0x2d5a27, bottom: 0x1a3a15 },
-            clouds: { top: 0x87ceeb, bottom: 0x4a90d9 },
-            space: { top: 0x0f0f23, bottom: 0x1a1a3e },
-            underwater: { top: 0x006994, bottom: 0x003d5c },
-            celebration: { top: 0xff6b6b, bottom: 0xffa502 }
-        };
-        
-        const colors = styleColors[this.visualStyle] || styleColors.jungle;
-        
-        // 繪製漸層
-        for (let y = 0; y < height; y++) {
-            const ratio = y / height;
-            const r = Phaser.Math.Interpolation.Linear([((colors.top >> 16) & 0xff), ((colors.bottom >> 16) & 0xff)], ratio);
-            const g = Phaser.Math.Interpolation.Linear([((colors.top >> 8) & 0xff), ((colors.bottom >> 8) & 0xff)], ratio);
-            const b = Phaser.Math.Interpolation.Linear([(colors.top & 0xff), (colors.bottom & 0xff)], ratio);
-            graphics.fillStyle(Phaser.Display.Color.GetColor(r, g, b));
-            graphics.fillRect(0, y, width, 1);
+
+        // 檢查是否有自定義背景圖片
+        if (this.customResources.bg_layer) {
+            // 使用自定義背景圖片
+            this.load.image('custom_bg', this.customResources.bg_layer);
+            this.load.once('complete', () => {
+                const bg = this.add.image(width / 2, height / 2, 'custom_bg');
+                bg.setDisplaySize(width, height);
+                bg.setDepth(-10);
+                console.log('✅ 自定義背景圖片已載入');
+            });
+            this.load.start();
+        } else {
+            // 使用漸層背景
+            const graphics = this.add.graphics();
+
+            // 根據視覺風格選擇顏色
+            const styleColors = {
+                jungle: { top: 0x2d5a27, bottom: 0x1a3a15 },
+                clouds: { top: 0x87ceeb, bottom: 0x4a90d9 },
+                space: { top: 0x0f0f23, bottom: 0x1a1a3e },
+                underwater: { top: 0x006994, bottom: 0x003d5c },
+                celebration: { top: 0xff6b6b, bottom: 0xffa502 },
+                farm: { top: 0x87ceeb, bottom: 0x90EE90 },
+                candy: { top: 0xffc0cb, bottom: 0xffb6c1 },
+                dinosaur: { top: 0x8B4513, bottom: 0x556B2F },
+                winter: { top: 0xb3e5fc, bottom: 0xe1f5fe },
+                rainbow: { top: 0x9c27b0, bottom: 0x2196f3 }
+            };
+
+            const colors = styleColors[this.visualStyle] || styleColors.jungle;
+
+            // 繪製漸層
+            for (let y = 0; y < height; y++) {
+                const ratio = y / height;
+                const r = Phaser.Math.Interpolation.Linear([((colors.top >> 16) & 0xff), ((colors.bottom >> 16) & 0xff)], ratio);
+                const g = Phaser.Math.Interpolation.Linear([((colors.top >> 8) & 0xff), ((colors.bottom >> 8) & 0xff)], ratio);
+                const b = Phaser.Math.Interpolation.Linear([(colors.top & 0xff), (colors.bottom & 0xff)], ratio);
+                graphics.fillStyle(Phaser.Display.Color.GetColor(r, g, b));
+                graphics.fillRect(0, y, width, 1);
+            }
         }
-        
+
         // 添加裝飾元素
         this.createDecorations();
     }
 
     createDecorations() {
         const { width, height } = this.cameras.main;
+
+        // 載入自定義裝飾圖片
+        this.loadCustomDecorations();
 
         if (this.visualStyle === 'jungle') {
             // 叢林主題裝飾 - 類似 Wordwall
