@@ -390,11 +390,46 @@ class GameScene extends Phaser.Scene {
                 // 舊架構：從 content 中獲取詞彙數據
                 vocabularyData = activity.content.vocabularyItems;
                 console.log('📝 從 content.vocabularyItems 載入詞彙:', vocabularyData.length, '個');
+            } else if (activity.content && activity.content.questions && Array.isArray(activity.content.questions) && activity.content.questions.length > 0) {
+                // 🔥 Flying Fruit 格式支持：從 content.questions 轉換詞彙
+                console.log('📝 從 content.questions 載入詞彙 (Flying Fruit 格式)');
+                const questions = activity.content.questions;
+
+                // 將所有答案選項都轉換為詞彙（包括錯誤答案）
+                questions.forEach((q, qIndex) => {
+                    if (q.answers && Array.isArray(q.answers)) {
+                        q.answers.forEach((answer, aIndex) => {
+                            if (answer.isCorrect) {
+                                // 正確答案：使用問題作為英文
+                                vocabularyData.push({
+                                    id: answer.id || `q${qIndex}_a${aIndex}`,
+                                    english: q.question || '',
+                                    chinese: answer.text || '',
+                                    imageUrl: q.questionImageUrl || null,
+                                    chineseImageUrl: answer.imageUrl || null,
+                                    audioUrl: q.questionAudioUrl || null
+                                });
+                            } else {
+                                // 錯誤答案：使用中文作為英文（干擾項）
+                                vocabularyData.push({
+                                    id: answer.id || `q${qIndex}_a${aIndex}`,
+                                    english: answer.text || '',
+                                    chinese: answer.text || '',
+                                    imageUrl: answer.imageUrl || null,
+                                    chineseImageUrl: answer.imageUrl || null,
+                                    audioUrl: null
+                                });
+                            }
+                        });
+                    }
+                });
+                console.log('📝 Flying Fruit 轉換完成:', vocabularyData.length, '個詞彙');
             } else {
                 console.error('❌ 無法找到詞彙數據:', {
                     hasVocabularyItems: !!activity.vocabularyItems,
                     hasElements: !!activity.elements,
-                    hasContent: !!activity.content
+                    hasContent: !!activity.content,
+                    hasQuestions: !!(activity.content && activity.content.questions)
                 });
             }
 
