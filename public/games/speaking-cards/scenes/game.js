@@ -967,22 +967,72 @@ class SpeakingCardsGame extends Phaser.Scene {
                 this.activityTitle = activity.title;
                 this.titleText.setText(activity.title);
 
-                this.cards = activity.vocabularyItems.map(item => ({
-                    id: item.id,
-                    text: item.english || '',
-                    english: item.english || '',
-                    chinese: item.chinese || '',
-                    imageUrl: item.imageUrl,
-                    audioUrl: item.audioUrl
-                }));
+                // 🔥 檢查多種數據來源
+                let vocabularyData = [];
 
-                this.shuffledCards = this.shuffleArray([...this.cards]);
-                this.createCardDeck();
-                this.createDealArea();
-                this.resetTimer();  // 啟動計時器
-                this.updateProgress();
+                if (activity.vocabularyItems && Array.isArray(activity.vocabularyItems) && activity.vocabularyItems.length > 0) {
+                    // 標準格式：vocabularyItems
+                    vocabularyData = activity.vocabularyItems;
+                    console.log('📝 從 vocabularyItems 載入:', vocabularyData.length, '個');
+                } else if (activity.content && activity.content.questions && Array.isArray(activity.content.questions) && activity.content.questions.length > 0) {
+                    // 🔥 Flying Fruit 格式支持：從 content.questions 轉換
+                    console.log('📝 從 content.questions 載入 (Flying Fruit 格式)');
+                    const questions = activity.content.questions;
 
-                console.log('📚 載入活動成功:', this.cards.length, '張卡片');
+                    // 將所有答案選項都轉換為卡片（包括錯誤答案）
+                    questions.forEach((q, qIndex) => {
+                        if (q.answers && Array.isArray(q.answers)) {
+                            q.answers.forEach((answer, aIndex) => {
+                                if (answer.isCorrect) {
+                                    // 正確答案：使用問題作為英文
+                                    vocabularyData.push({
+                                        id: answer.id || `q${qIndex}_a${aIndex}`,
+                                        english: q.question || '',
+                                        chinese: answer.text || '',
+                                        imageUrl: q.questionImageUrl || null,
+                                        audioUrl: q.questionAudioUrl || null
+                                    });
+                                } else {
+                                    // 錯誤答案：使用中文作為英文（干擾項）
+                                    vocabularyData.push({
+                                        id: answer.id || `q${qIndex}_a${aIndex}`,
+                                        english: answer.text || '',
+                                        chinese: answer.text || '',
+                                        imageUrl: answer.imageUrl || null,
+                                        audioUrl: null
+                                    });
+                                }
+                            });
+                        }
+                    });
+                    console.log('📝 Flying Fruit 轉換完成:', vocabularyData.length, '個詞彙');
+                } else if (activity.content && activity.content.vocabularyItems && Array.isArray(activity.content.vocabularyItems)) {
+                    // 舊格式：content.vocabularyItems
+                    vocabularyData = activity.content.vocabularyItems;
+                    console.log('📝 從 content.vocabularyItems 載入:', vocabularyData.length, '個');
+                }
+
+                if (vocabularyData.length > 0) {
+                    this.cards = vocabularyData.map(item => ({
+                        id: item.id,
+                        text: item.english || '',
+                        english: item.english || '',
+                        chinese: item.chinese || '',
+                        imageUrl: item.imageUrl,
+                        audioUrl: item.audioUrl
+                    }));
+
+                    this.shuffledCards = this.shuffleArray([...this.cards]);
+                    this.createCardDeck();
+                    this.createDealArea();
+                    this.resetTimer();  // 啟動計時器
+                    this.updateProgress();
+
+                    console.log('📚 載入活動成功:', this.cards.length, '張卡片');
+                } else {
+                    console.warn('⚠️ 沒有找到詞彙數據，載入示範數據');
+                    this.loadDemoData();
+                }
             }
         } catch (error) {
             console.error('❌ 載入活動失敗:', error);
