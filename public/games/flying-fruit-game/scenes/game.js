@@ -105,23 +105,38 @@ export default class GameScene extends Phaser.Scene {
      */
     async loadCustomVisualResources() {
         try {
-            const response = await fetch(`/api/visual-styles/upload?styleId=${this.visualStyle}&game=flying-fruit-game`);
+            const apiUrl = `/api/visual-styles/upload?styleId=${this.visualStyle}&game=flying-fruit-game`;
+            console.log('🔍 正在載入自定義資源，API URL:', apiUrl);
+            console.log('🎨 當前視覺風格:', this.visualStyle);
+
+            const response = await fetch(apiUrl);
+            console.log('📡 API 響應狀態:', response.status);
+
             if (!response.ok) {
                 console.log('📭 沒有找到自定義資源，使用默認配置');
                 return;
             }
 
             const data = await response.json();
+            console.log('📦 API 返回數據:', JSON.stringify(data, null, 2));
+
             if (data.success && data.resources) {
-                console.log('📦 載入自定義資源:', data.resources);
+                console.log('📦 開始處理自定義資源...');
 
                 // 更新自定義資源
                 for (const [key, value] of Object.entries(data.resources)) {
+                    console.log(`🔍 檢查資源 ${key}:`, value);
                     if (value && value.exists && value.url) {
                         this.customResources[key] = value.url;
                         console.log(`✅ 載入自定義資源 ${key}: ${value.url}`);
+                    } else {
+                        console.log(`⏭️ 跳過資源 ${key} (exists: ${value?.exists})`);
                     }
                 }
+
+                console.log('📦 最終自定義資源:', this.customResources);
+            } else {
+                console.log('⚠️ API 返回數據格式不正確:', data);
             }
         } catch (error) {
             console.warn('⚠️ 載入自定義視覺資源失敗:', error);
