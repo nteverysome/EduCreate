@@ -335,7 +335,7 @@ export default class GameScene extends Phaser.Scene {
         // 白色圖片框背景
         this.imageBg = this.add.rectangle(width / 2, centerY, 150, 150, 0xffffff);
         this.imageBg.setStrokeStyle(3, 0xcccccc);
-        this.imageBg.setDepth(1); // 白框背景在下層
+        this.imageBg.setDepth(-1); // 白框背景在下層（負深度，在水果後面）
         // 初始隱藏，遊戲開始時顯示
         this.imageBg.setVisible(false);
 
@@ -345,7 +345,7 @@ export default class GameScene extends Phaser.Scene {
             fontSize: '80px'
         }).setOrigin(0.5);
         this.questionImage.setScale(1.8); // 縮放 1.8 倍
-        this.questionImage.setDepth(2); // 圖片在白框上層
+        this.questionImage.setDepth(-1); // 圖片深度與白框相同，在水果後面
         // 初始隱藏，遊戲開始時顯示
         this.questionImage.setVisible(false);
     }
