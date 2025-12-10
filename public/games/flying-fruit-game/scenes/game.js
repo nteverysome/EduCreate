@@ -138,6 +138,19 @@ export default class GameScene extends Phaser.Scene {
                 }
 
                 console.log('📦 最終自定義資源:', this.customResources);
+
+                // 預加載 fruit_bg 圖片（如果存在）
+                if (this.customResources.fruit_bg) {
+                    console.log('🍎 預加載自定義水果背景圖片...');
+                    await new Promise((resolve) => {
+                        this.load.image('custom_fruit_bg', this.customResources.fruit_bg);
+                        this.load.once('complete', () => {
+                            console.log('✅ 自定義水果背景圖片預加載完成');
+                            resolve();
+                        });
+                        this.load.start();
+                    });
+                }
             } else {
                 console.log('⚠️ API 返回數據格式不正確:', data);
             }
@@ -961,23 +974,33 @@ export default class GameScene extends Phaser.Scene {
         const fruitContainer = this.add.container(spawnX, startY);
         fruitContainer.setDepth(10);  // 設置深度，確保水果在中央圖片前面
 
-        // 橢圓形水果背景（類似 Wordwall 的刺果外觀）
-        const bgColor = this.fruitBgColors[index % this.fruitBgColors.length];
+        // 水果背景 - 優先使用自定義圖片，否則使用橢圓形
+        let fruitBg;
 
-        // 使用 Graphics 繪製橢圓形
-        const fruitBg = this.add.graphics();
-        fruitBg.fillStyle(bgColor.fill, 1);
-        fruitBg.lineStyle(3, bgColor.stroke, 1);
-        fruitBg.fillEllipse(0, 0, 100, 60);
-        fruitBg.strokeEllipse(0, 0, 100, 60);
+        if (this.customResources.fruit_bg && this.textures.exists('custom_fruit_bg')) {
+            // 使用自定義水果背景圖片
+            fruitBg = this.add.image(0, 0, 'custom_fruit_bg');
+            fruitBg.setDisplaySize(100, 60);
+            console.log('🍎 使用自定義水果背景圖片');
+        } else {
+            // 使用默認橢圓形水果背景（類似 Wordwall 的刺果外觀）
+            const bgColor = this.fruitBgColors[index % this.fruitBgColors.length];
 
-        // 添加一些小點模擬刺果紋理
-        fruitBg.fillStyle(bgColor.stroke, 0.5);
-        for (let i = 0; i < 8; i++) {
-            const angle = (i / 8) * Math.PI * 2;
-            const px = Math.cos(angle) * 35;
-            const py = Math.sin(angle) * 20;
-            fruitBg.fillCircle(px, py, 3);
+            // 使用 Graphics 繪製橢圓形
+            fruitBg = this.add.graphics();
+            fruitBg.fillStyle(bgColor.fill, 1);
+            fruitBg.lineStyle(3, bgColor.stroke, 1);
+            fruitBg.fillEllipse(0, 0, 100, 60);
+            fruitBg.strokeEllipse(0, 0, 100, 60);
+
+            // 添加一些小點模擬刺果紋理
+            fruitBg.fillStyle(bgColor.stroke, 0.5);
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const px = Math.cos(angle) * 35;
+                const py = Math.sin(angle) * 20;
+                fruitBg.fillCircle(px, py, 3);
+            }
         }
 
         // 小圖片（代表答案的水果或圖片）
