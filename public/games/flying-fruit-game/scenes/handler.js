@@ -33,8 +33,11 @@ export default class HandlerScene extends Phaser.Scene {
         if (urlParams.has('wordCount')) {
             options.wordCount = parseInt(urlParams.get('wordCount')) || 10;
         }
+        // 🔥 修復：使用 getAll 獲取所有 visualStyle 參數，取最後一個（最新的）
         if (urlParams.has('visualStyle')) {
-            options.visualStyle = urlParams.get('visualStyle');
+            const allVisualStyles = urlParams.getAll('visualStyle');
+            options.visualStyle = allVisualStyles[allVisualStyles.length - 1]; // 取最後一個
+            console.log('🎨 視覺風格參數:', allVisualStyles, '使用:', options.visualStyle);
         } else if (urlParams.has('style')) {
             options.visualStyle = urlParams.get('style');
         }
