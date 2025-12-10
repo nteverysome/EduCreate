@@ -107,11 +107,13 @@ export default class GameScene extends Phaser.Scene {
     async loadCustomVisualResources() {
         try {
             // 使用 /api/visual-styles/resources 端點（返回直接的 URL 字符串）
-            const apiUrl = `${window.location.origin}/api/visual-styles/resources?styleId=${this.visualStyle}&game=flying-fruit-game`;
+            // 添加時間戳參數避免緩存
+            const timestamp = Date.now();
+            const apiUrl = `${window.location.origin}/api/visual-styles/resources?styleId=${this.visualStyle}&game=flying-fruit-game&t=${timestamp}`;
             console.log('🔍 正在載入自定義資源，API URL:', apiUrl);
             console.log('🎨 當前視覺風格:', this.visualStyle);
 
-            const response = await fetch(apiUrl);
+            const response = await fetch(apiUrl, { cache: 'no-store' });
             console.log('📡 API 響應狀態:', response.status);
 
             if (!response.ok) {
