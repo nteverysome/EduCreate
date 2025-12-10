@@ -88,7 +88,7 @@ class GEPTManager {
       console.log('📡 雲端 API 響應:', result);
 
       // 處理學生遊戲模式或社區分享模式的響應格式 { activity: { vocabularyItems: [...] } }
-      if (activityId && result.activity && result.activity.vocabularyItems) {
+      if (activityId && result.activity && result.activity.vocabularyItems && result.activity.vocabularyItems.length > 0) {
         const vocabularyItems = result.activity.vocabularyItems;
         const mode = assignmentId ? '學生遊戲' : '分享活動';
         console.log(`🎓 載入${mode}詞彙: ${result.activity.title} (${vocabularyItems.length} 個詞彙)`);
@@ -120,6 +120,42 @@ class GEPTManager {
         console.log(`✅ ${mode}詞彙載入完成，總共 ${customWords.length} 個詞彙`);
         console.log('📊 自定義詞彙數據庫統計:');
         console.log(`  - 自定義: ${customWords.length} 個詞彙`);
+        return true;
+      }
+
+      // 🔥 Flying Fruit 格式支持：從 content.questions 轉換詞彙
+      if (activityId && result.activity && result.activity.content && result.activity.content.questions && result.activity.content.questions.length > 0) {
+        const questions = result.activity.content.questions;
+        console.log(`🎯 載入 Flying Fruit 活動詞彙: ${result.activity.title} (${questions.length} 個問題)`);
+
+        // 清空現有詞彙數據庫
+        this.wordDatabase.clear();
+
+        // 將 questions 轉換為詞彙格式
+        const customWords = questions.map((q, index) => {
+          const correctAnswer = q.answers?.find(a => a.isCorrect);
+          return {
+            id: q.id || `q_${index}`,
+            english: q.question || '',
+            chinese: correctAnswer?.text || '',
+            level: 'elementary',
+            difficulty: 1,
+            frequency: 90,
+            category: 'custom',
+            partOfSpeech: 'NOUN',
+            image: q.questionImageUrl,
+            imageUrl: q.questionImageUrl,
+            chineseImageUrl: correctAnswer?.imageUrl || null,
+            audioUrl: q.questionAudioUrl
+          };
+        });
+
+        // 只設置初級詞彙，其他級別為空
+        this.wordDatabase.set('elementary', customWords);
+        this.wordDatabase.set('intermediate', []);
+        this.wordDatabase.set('high-intermediate', []);
+
+        console.log(`✅ Flying Fruit 詞彙轉換完成，總共 ${customWords.length} 個詞彙`);
         return true;
       }
 

@@ -73,6 +73,26 @@ export async function GET(
         // 語音字段
         audioUrl: item.audioUrl
       }));
+    } else if (content?.questions && Array.isArray(content.questions) && content.questions.length > 0) {
+      // 🔥 Flying Fruit 格式支持：從 content.questions 轉換為標準 vocabularyItems 格式
+      console.log('📝 從 content.questions 轉換詞彙 (Flying Fruit 格式)');
+      vocabularyItems = content.questions.map((q: any, index: number) => {
+        // 找到正確答案
+        const correctAnswer = q.answers?.find((a: any) => a.isCorrect);
+        return {
+          id: q.id || `q_${index}`,
+          english: q.question || '',
+          chinese: correctAnswer?.text || '',
+          // 英文圖片使用問題圖片
+          imageUrl: q.questionImageUrl || null,
+          // 中文圖片使用正確答案的圖片
+          chineseImageUrl: correctAnswer?.imageUrl || null,
+          // 語音使用問題語音
+          audioUrl: q.questionAudioUrl || null,
+          // 保留原始答案數據以便某些遊戲使用
+          answers: q.answers || []
+        };
+      });
     } else {
       // 向後兼容：從舊的存儲方式獲取詞彙
       const vocabularySetId = content?.vocabularySetId;
