@@ -1515,7 +1515,7 @@ const GameSwitcherPage: React.FC = () => {
           {/* 視覺風格和遊戲選項面板 - 只在有活動ID時顯示 */}
           {activityId && (
             <div className="stats-card md:col-span-2 lg:col-span-3">
-              {/* 視覺風格選擇器 - Speaking Cards 使用專屬選擇器，Flying Fruit 在自己的選項面板中有專屬選擇器 */}
+              {/* 視覺風格選擇器 - Speaking Cards 和 Flying Fruit 使用專屬選擇器 */}
               {currentGameId === 'speaking-cards' ? (
                 <SpeakingCardsStyleSelector
                   selectedStyle={gameOptions.visualStyle}
@@ -1549,7 +1549,63 @@ const GameSwitcherPage: React.FC = () => {
                     }
                   }}
                 />
-              ) : currentGameId !== 'flying-fruit-game' ? (
+              ) : currentGameId === 'flying-fruit-game' ? (
+                /* Flying Fruit 專屬視覺風格選擇器 - 10 種風格 */
+                <div className="bg-white border border-gray-300 rounded-lg p-4 sm:p-6">
+                  <h3 className="text-lg font-semibold mb-4">視覺風格</h3>
+                  <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+                    {[
+                      { id: 'jungle', name: '🌴 叢林' },
+                      { id: 'clouds', name: '☁️ 雲朵' },
+                      { id: 'space', name: '🚀 太空' },
+                      { id: 'underwater', name: '🐠 海底' },
+                      { id: 'celebration', name: '🎉 慶典' },
+                      { id: 'farm', name: '🚜 農場' },
+                      { id: 'candy', name: '🍬 糖果' },
+                      { id: 'dinosaur', name: '🦕 恐龍' },
+                      { id: 'winter', name: '❄️ 冬季' },
+                      { id: 'rainbow', name: '🌈 彩虹' },
+                    ].map((style) => (
+                      <button
+                        key={style.id}
+                        type="button"
+                        onClick={async () => {
+                          // 更新本地狀態
+                          const newFlyingFruitOptions = { ...flyingFruitOptions, visualStyle: style.id };
+                          setFlyingFruitOptions(newFlyingFruitOptions);
+
+                          // 自動保存到資料庫
+                          try {
+                            console.log('🎨 自動保存視覺風格 (Flying Fruit):', style.id);
+                            const response = await fetch(`/api/activities/${activityId}`, {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ flyingFruitOptions: newFlyingFruitOptions }),
+                            });
+                            if (response.ok) {
+                              console.log('✅ 視覺風格已自動保存');
+                              setGameKey(prev => prev + 1);
+                            } else {
+                              console.error('❌ 自動保存失敗');
+                            }
+                          } catch (error) {
+                            console.error('❌ 自動保存時出錯:', error);
+                          }
+                        }}
+                        className={`p-2 rounded-lg border-2 transition-all text-center ${
+                          flyingFruitOptions.visualStyle === style.id
+                            ? 'border-orange-500 bg-orange-50 shadow-md'
+                            : 'border-gray-200 hover:border-orange-300 hover:bg-gray-50'
+                        }`}
+                        title={style.name}
+                      >
+                        <div className="text-xl">{style.name.split(' ')[0]}</div>
+                        <div className="text-xs text-gray-600">{style.name.split(' ')[1]}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
                 <VisualStyleSelector
                   selectedStyle={gameOptions.visualStyle}
                   onChange={async (styleId) => {
@@ -1582,7 +1638,7 @@ const GameSwitcherPage: React.FC = () => {
                     }
                   }}
                 />
-              ) : null}
+              )}
 
               {/* Shimozurdo 遊戲專屬選項面板 - 只在 Shimozurdo 遊戲時顯示 */}
               {currentGameId === 'shimozurdo-game' && (

@@ -216,7 +216,7 @@ const FlyingFruitOptionsPanel: React.FC<FlyingFruitOptionsPanelProps> = ({
           </tr>
 
           {/* End of game 選項 */}
-          <tr className="border-b border-gray-200">
+          <tr>
             <td className="py-3 pr-4 font-medium">遊戲結束</td>
             <td className="py-3">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -228,31 +228,6 @@ const FlyingFruitOptionsPanel: React.FC<FlyingFruitOptionsPanelProps> = ({
                 />
                 <span>顯示答案</span>
               </label>
-            </td>
-          </tr>
-
-          {/* Visual Style 選項 */}
-          <tr>
-            <td className="py-3 pr-4 font-medium align-top">視覺風格</td>
-            <td className="py-3">
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                {VISUAL_STYLE_OPTIONS.map((style) => (
-                  <button
-                    key={style.id}
-                    type="button"
-                    onClick={() => updateOptions({ visualStyle: style.id })}
-                    className={`p-2 rounded-lg border-2 transition-all text-center ${
-                      options.visualStyle === style.id
-                        ? 'border-orange-500 bg-orange-50 shadow-md'
-                        : 'border-gray-200 hover:border-orange-300 hover:bg-gray-50'
-                    }`}
-                    title={style.description}
-                  >
-                    <div className="text-xl">{style.name.split(' ')[0]}</div>
-                    <div className="text-xs text-gray-600">{style.name.split(' ')[1]}</div>
-                  </button>
-                ))}
-              </div>
             </td>
           </tr>
         </tbody>
