@@ -291,8 +291,8 @@ export default class GameScene extends Phaser.Scene {
             }
         }
 
-        // 添加裝飾元素
-        this.createDecorations();
+        // 不添加裝飾元素（已移除蝴蝶、青蛙、草等）
+        // this.createDecorations();
     }
 
     createDecorations() {
