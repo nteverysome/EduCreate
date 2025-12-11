@@ -114,6 +114,10 @@ export async function POST(request: NextRequest) {
       blobPath = isAudio
         ? `flying-fruit-styles/${styleId}/sounds/${resourceType}.${fileExtension}`
         : `flying-fruit-styles/${styleId}/${resourceType}.${fileExtension}`;
+    } else if (game === 'runner-game') {
+      blobPath = isAudio
+        ? `runner-game-styles/${styleId}/sounds/${resourceType}.${fileExtension}`
+        : `runner-game-styles/${styleId}/${resourceType}.${fileExtension}`;
     } else {
       blobPath = isAudio
         ? `visual-styles/${styleId}/sounds/${resourceType}.${fileExtension}`
@@ -171,6 +175,8 @@ export async function GET(request: NextRequest) {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     } else if (game === 'flying-fruit-game') {
       validStyleIds = ['jungle', 'clouds', 'space', 'underwater', 'celebration', 'farm', 'candy', 'dinosaur', 'winter', 'rainbow'];
+    } else if (game === 'runner-game') {
+      validStyleIds = ['clouds', 'videogame', 'space', 'underwater', 'dinosaur', 'forest', 'candy'];
     } else {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     }
@@ -188,6 +194,8 @@ export async function GET(request: NextRequest) {
       blobPrefix = `speaking-cards-styles/${styleId}/`;
     } else if (game === 'flying-fruit-game') {
       blobPrefix = `flying-fruit-styles/${styleId}/`;
+    } else if (game === 'runner-game') {
+      blobPrefix = `runner-game-styles/${styleId}/`;
     } else {
       blobPrefix = `visual-styles/${styleId}/`;
     }
@@ -224,6 +232,18 @@ export async function GET(request: NextRequest) {
         correct: { exists: false },
         wrong: { exists: false },
         success: { exists: false }
+      };
+    } else if (game === 'runner-game') {
+      resources = {
+        player: { exists: false },
+        enemy: { exists: false },
+        coin: { exists: false },
+        background: { exists: false },
+        ground: { exists: false },
+        theme: { exists: false },
+        jump: { exists: false },
+        coin_sound: { exists: false },
+        dead: { exists: false }
       };
     } else {
       resources = {
