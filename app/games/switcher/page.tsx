@@ -1811,16 +1811,52 @@ const GameSwitcherPage: React.FC = () => {
                   {isSavingOptions ? '💾 保存中...' : '💾 保存選項'}
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     // 🔄 重新載入遊戲以應用選項
-                    // 通過更新 key 來強制重新渲染 GameSwitcher 組件
-                    // 這會重新創建 iframe 並應用新的 gameOptions
-                    setGameKey(prev => prev + 1);
-                    console.log('🔄 應用選項：重新載入遊戲');
+                    // 先保存選項到數據庫，然後重新載入遊戲
+                    if (isSavingOptions) return; // 防止重複點擊
+
+                    setIsSavingOptions(true);
+                    try {
+                      console.log('🔍 開始保存並應用遊戲選項:', gameOptions);
+
+                      const response = await fetch(`/api/activities/${activityId}`, {
+                        method: 'PUT',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          gameOptions,
+                          matchUpOptions,
+                          flyingFruitOptions,
+                        }),
+                      });
+
+                      if (response.ok) {
+                        console.log('✅ 選項已保存，現在應用到遊戲');
+                        // 保存成功後，重新載入遊戲以應用新選項
+                        setGameKey(prev => prev + 1);
+                        console.log('🔄 應用選項：重新載入遊戲');
+                      } else {
+                        const errorData = await response.json() as { error?: string };
+                        console.error('❌ 保存失敗:', errorData);
+                        alert(`❌ 保存失敗\n\n錯誤原因: ${errorData.error || '未知錯誤'}`);
+                      }
+                    } catch (error) {
+                      console.error('❌ 應用選項時出錯:', error);
+                      alert('❌ 應用失敗\n\n可能的原因：\n• 網絡連接中斷\n• 伺服器暫時無法訪問\n\n請檢查網絡連接後重試。');
+                    } finally {
+                      setIsSavingOptions(false);
+                    }
                   }}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                  disabled={isSavingOptions}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    isSavingOptions
+                      ? 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'
+                      : 'text-white bg-blue-600 hover:bg-blue-700'
+                  }`}
                 >
-                  🔄 應用選項
+                  {isSavingOptions ? '🔄 應用中...' : '🔄 應用選項'}
                 </button>
               </div>
             </div>
