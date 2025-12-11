@@ -26,6 +26,8 @@ export async function POST(request: NextRequest) {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     } else if (game === 'flying-fruit-game') {
       validStyleIds = ['jungle', 'clouds', 'space', 'underwater', 'celebration', 'farm', 'candy', 'dinosaur', 'winter', 'rainbow'];
+    } else if (game === 'runner-game') {
+      validStyleIds = ['clouds', 'videogame', 'space', 'underwater', 'dinosaur', 'forest', 'candy'];
     } else {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     }
@@ -45,6 +47,8 @@ export async function POST(request: NextRequest) {
       validResourceTypes = ['background', 'card_background', 'card_border', 'colors', 'fonts', 'config'];
     } else if (game === 'flying-fruit-game') {
       validResourceTypes = ['fruit_bg', 'decoration_1', 'decoration_2', 'bg_layer', 'background', 'correct', 'wrong', 'success'];
+    } else if (game === 'runner-game') {
+      validResourceTypes = ['player', 'enemy', 'coin', 'background', 'ground', 'theme', 'jump', 'coin_sound', 'dead'];
     } else {
       // shimozurdo-game
       validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
@@ -78,6 +82,9 @@ export async function POST(request: NextRequest) {
     } else if (game === 'flying-fruit-game') {
       isImage = ['fruit_bg', 'decoration_1', 'decoration_2', 'bg_layer'].includes(resourceType);
       isAudio = ['background', 'correct', 'wrong', 'success'].includes(resourceType);
+    } else if (game === 'runner-game') {
+      isImage = ['player', 'enemy', 'coin', 'background', 'ground'].includes(resourceType);
+      isAudio = ['theme', 'jump', 'coin_sound', 'dead'].includes(resourceType);
     } else {
       isImage = ['spaceship', 'cloud1', 'cloud2', 'bg_layer'].includes(resourceType);
       isAudio = ['background', 'hit', 'success'].includes(resourceType);
@@ -313,6 +320,8 @@ export async function DELETE(request: NextRequest) {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     } else if (game === 'flying-fruit-game') {
       validStyleIds = ['jungle', 'clouds', 'space', 'underwater', 'celebration', 'farm', 'candy', 'dinosaur', 'winter', 'rainbow'];
+    } else if (game === 'runner-game') {
+      validStyleIds = ['clouds', 'videogame', 'space', 'underwater', 'dinosaur', 'forest', 'candy'];
     } else {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
     }
@@ -332,6 +341,8 @@ export async function DELETE(request: NextRequest) {
       validResourceTypes = ['background', 'card_background', 'card_border', 'colors', 'fonts', 'config'];
     } else if (game === 'flying-fruit-game') {
       validResourceTypes = ['fruit_bg', 'decoration_1', 'decoration_2', 'bg_layer', 'background', 'correct', 'wrong', 'success'];
+    } else if (game === 'runner-game') {
+      validResourceTypes = ['player', 'enemy', 'coin', 'background', 'ground', 'theme', 'jump', 'coin_sound', 'dead'];
     } else {
       validResourceTypes = ['spaceship', 'cloud1', 'cloud2', 'bg_layer', 'background', 'hit', 'success'];
     }
@@ -349,6 +360,8 @@ export async function DELETE(request: NextRequest) {
       blobPrefix = `speaking-cards-styles/${styleId}/`;
     } else if (game === 'flying-fruit-game') {
       blobPrefix = `flying-fruit-styles/${styleId}/`;
+    } else if (game === 'runner-game') {
+      blobPrefix = `runner-game-styles/${styleId}/`;
     } else {
       blobPrefix = `visual-styles/${styleId}/`;
     }
