@@ -1664,6 +1664,14 @@ const GameSwitcherPage: React.FC = () => {
                 />
               )}
 
+              {/* Runner 遊戲專屬選項面板 - 只在 Runner 遊戲時顯示 */}
+              {currentGameId === 'runner-game' && (
+                <GameOptionsPanel
+                  options={gameOptions}
+                  onChange={setGameOptions}
+                />
+              )}
+
               {/* Match-up 遊戲專屬選項面板 - 只在 Match-up 遊戲時顯示 */}
               {currentGameId === 'match-up-game' && (
                 <MatchUpOptionsPanel
