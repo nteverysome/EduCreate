@@ -36,6 +36,24 @@ export default function RunnerGameVisualStylesAdminPage() {
     { id: 'dead', name: '死亡音效', accept: 'audio/mpeg,audio/wav,audio/ogg', emoji: '💀' },
   ];
 
+  useEffect(() => {
+    const fetchUploadedResources = async () => {
+      try {
+        // 添加時間戳以破壞緩存
+        const timestamp = Date.now();
+        const response = await fetch(`/api/visual-styles/upload?styleId=${selectedStyle}&game=runner-game&t=${timestamp}`);
+        if (response.ok) {
+          const data = await response.json();
+          setUploadedResources(data.resources || {});
+        }
+      } catch (error) {
+        console.error('獲取資源列表失敗:', error);
+      }
+    };
+
+    fetchUploadedResources();
+  }, [selectedStyle]);
+
   const fetchUploadedResources = async () => {
     try {
       // 添加時間戳以破壞緩存
@@ -49,10 +67,6 @@ export default function RunnerGameVisualStylesAdminPage() {
       console.error('獲取資源列表失敗:', error);
     }
   };
-
-  useEffect(() => {
-    fetchUploadedResources();
-  }, [selectedStyle]);
 
   const handleFileUpload = async (resourceType: string, file: File) => {
     setUploading(true);

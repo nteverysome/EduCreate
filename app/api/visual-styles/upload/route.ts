@@ -270,8 +270,13 @@ export async function GET(request: NextRequest) {
       const resourceType = fileName.split('.')[0];
 
       if (resources[resourceType]) {
-        // 添加時間戳到 URL 以破壞緩存（使用 blob 的修改時間）
-        const blobTimestamp = blob.uploadedAt?.getTime() || Date.now();
+        // 添加時間戳到 URL 以破壞緩存
+        // 使用 blob 的上傳時間或當前時間
+        let blobTimestamp = Date.now();
+        if (blob.uploadedAt) {
+          const uploadedTime = new Date(blob.uploadedAt);
+          blobTimestamp = uploadedTime.getTime();
+        }
         const urlWithTimestamp = `${blob.url}?v=${blobTimestamp}`;
         resources[resourceType] = {
           exists: true,
