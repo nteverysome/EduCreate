@@ -43,6 +43,9 @@ export async function GET(request: NextRequest) {
     } else if (game === 'speaking-cards') {
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
       blobPrefix = `speaking-cards-styles/${styleId}/`;
+    } else if (game === 'runner-game') {
+      validStyleIds = ['clouds', 'videogame', 'space', 'underwater', 'dinosaur', 'forest', 'candy'];
+      blobPrefix = `runner-game-styles/${styleId}/`;
     } else {
       // shimozurdo-game 和其他遊戲
       validStyleIds = ['clouds', 'videogame', 'magiclibrary', 'underwater', 'pets', 'space', 'dinosaur'];
