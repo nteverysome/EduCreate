@@ -369,24 +369,102 @@ export async function PUT(
     const activityId = params.id;
     const body = await request.json();
 
-    // 🔥 [v55.0] 允許未登錄用戶保存遊戲選項
+    // 🔥 [v56.0] 允許未登錄用戶保存遊戲選項（包括 gameOptions, matchUpOptions, flyingFruitOptions）
+    // gameOptions -> 存入 GameSettings 表 (用於 Shimozurdo、Runner 等遊戲)
     // matchUpOptions -> 存入 Activity.matchUpOptions (Json 字段)
     // flyingFruitOptions -> 存入 GameSettings 表 (與 Shimozurdo 相同)
-    const isOnlyGameOptions = (body.matchUpOptions !== undefined || body.flyingFruitOptions !== undefined) &&
+    const isOnlyGameOptions = (body.gameOptions !== undefined || body.matchUpOptions !== undefined || body.flyingFruitOptions !== undefined) &&
                               !body.title &&
                               !body.vocabularyItems;
 
     if (isOnlyGameOptions) {
-      console.log('🎮 [v55.0] 允許未登錄用戶保存遊戲選項:', {
+      console.log('🎮 [v56.0] 允許未登錄用戶保存遊戲選項:', {
         activityId,
+        gameOptions: body.gameOptions,
         matchUpOptions: body.matchUpOptions,
         flyingFruitOptions: body.flyingFruitOptions,
         isAuthenticated: !!session?.user?.id
       });
 
       try {
+        let savedGameOptions = null;
         let savedMatchUpOptions = null;
         let savedFlyingFruitOptions = null;
+
+        // 0. 🔥 [v56.0] 保存 gameOptions 到 GameSettings 表（用於 Shimozurdo、Runner 等）
+        if (body.gameOptions !== undefined) {
+          const gameOptions = body.gameOptions;
+
+          // 轉換 gameOptions 到 GameSettings 格式
+          const gameSettingsData: any = {
+            activityId: activityId,
+            updatedAt: new Date()
+          };
+
+          // Timer 設置
+          if (gameOptions.timer) {
+            if (gameOptions.timer.type === 'none') {
+              gameSettingsData.timerType = 'NONE';
+              gameSettingsData.timerDuration = null;
+            } else if (gameOptions.timer.type === 'countUp') {
+              gameSettingsData.timerType = 'COUNT_UP';
+              const totalSeconds = (gameOptions.timer.minutes || 0) * 60 + (gameOptions.timer.seconds || 0);
+              gameSettingsData.timerDuration = totalSeconds;
+            } else if (gameOptions.timer.type === 'countDown') {
+              gameSettingsData.timerType = 'COUNT_DOWN';
+              const totalSeconds = (gameOptions.timer.minutes || 0) * 60 + (gameOptions.timer.seconds || 0);
+              gameSettingsData.timerDuration = totalSeconds;
+            }
+          }
+
+          // Lives 設置
+          if (gameOptions.lives !== undefined) {
+            gameSettingsData.livesCount = gameOptions.lives;
+          }
+
+          // Speed 設置
+          if (gameOptions.speed !== undefined) {
+            gameSettingsData.speed = gameOptions.speed;
+          }
+
+          // Random (Shuffle Questions) 設置
+          if (gameOptions.random !== undefined) {
+            gameSettingsData.shuffleQuestions = gameOptions.random;
+          }
+
+          // Show Answers 設置
+          if (gameOptions.showAnswers !== undefined) {
+            gameSettingsData.showAnswers = gameOptions.showAnswers;
+          }
+
+          // Visual Style 設置
+          if (gameOptions.visualStyle !== undefined) {
+            gameSettingsData.visualStyle = gameOptions.visualStyle;
+          }
+
+          // 使用 upsert 創建或更新 GameSettings
+          const result = await prisma.gameSettings.upsert({
+            where: { activityId: activityId },
+            update: gameSettingsData,
+            create: gameSettingsData
+          });
+
+          console.log('✅ [v56.0] gameOptions 保存到 GameSettings 成功:', result.id);
+
+          // 將結果轉換回 gameOptions 格式返回
+          savedGameOptions = {
+            timer: {
+              type: result.timerType === 'NONE' ? 'none' : result.timerType === 'COUNT_UP' ? 'countUp' : 'countDown',
+              minutes: result.timerDuration ? Math.floor(result.timerDuration / 60) : 5,
+              seconds: result.timerDuration ? result.timerDuration % 60 : 0
+            },
+            lives: result.livesCount || 5,
+            speed: result.speed || 3,
+            random: result.shuffleQuestions ?? true,
+            showAnswers: result.showAnswers ?? true,
+            visualStyle: result.visualStyle || 'clouds'
+          };
+        }
 
         // 1. 保存 matchUpOptions 到 Activity.matchUpOptions 字段
         if (body.matchUpOptions !== undefined) {
@@ -476,17 +554,18 @@ export async function PUT(
           };
         }
 
-        console.log('✅ [v55.0] 遊戲選項保存成功');
+        console.log('✅ [v56.0] 遊戲選項保存成功');
 
         return NextResponse.json({
           success: true,
+          gameOptions: savedGameOptions,
           matchUpOptions: savedMatchUpOptions,
           flyingFruitOptions: savedFlyingFruitOptions
         }, {
           headers: corsHeaders,
         });
       } catch (error) {
-        console.error('❌ [v55.0] 保存遊戲選項失敗:', error);
+        console.error('❌ [v56.0] 保存遊戲選項失敗:', error);
         return NextResponse.json(
           {
             error: '保存遊戲選項失敗',

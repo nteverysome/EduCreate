@@ -1746,8 +1746,8 @@ const GameSwitcherPage: React.FC = () => {
                         // 視覺風格（所有遊戲共用）
                         successMessage += `🎨 視覺風格: ${gameOptions.visualStyle}\n`;
 
-                        // 如果是 Shimozurdo 遊戲，顯示 Shimozurdo 選項
-                        if (currentGameId === 'shimozurdo-game') {
+                        // 如果是 Shimozurdo 或 Runner 遊戲，顯示 gameOptions 選項
+                        if (currentGameId === 'shimozurdo-game' || currentGameId === 'runner-game') {
                           successMessage += `⏱️ 計時器: ${gameOptions.timer.type === 'none' ? '無' : gameOptions.timer.type === 'countUp' ? '正計時' : '倒計時'}\n` +
                             `❤️ 生命值: ${gameOptions.lives} 條命\n` +
                             `⚡ 速度: ${gameOptions.speed}\n` +
