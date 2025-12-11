@@ -38,7 +38,9 @@ export default function RunnerGameVisualStylesAdminPage() {
 
   const fetchUploadedResources = async () => {
     try {
-      const response = await fetch(`/api/visual-styles/upload?styleId=${selectedStyle}&game=runner-game`);
+      // 添加時間戳以破壞緩存
+      const timestamp = Date.now();
+      const response = await fetch(`/api/visual-styles/upload?styleId=${selectedStyle}&game=runner-game&t=${timestamp}`);
       if (response.ok) {
         const data = await response.json();
         setUploadedResources(data.resources || {});
@@ -88,8 +90,13 @@ export default function RunnerGameVisualStylesAdminPage() {
       });
       if (!response.ok) throw new Error('刪除失敗');
       setMessage(`✅ ${resourceType} 刪除成功！`);
-      await fetchUploadedResources();
-      setRefreshKey(Date.now());
+
+      // 延遲後重新獲取資源列表，確保 Blob Storage 已更新
+      setTimeout(async () => {
+        await fetchUploadedResources();
+        setRefreshKey(Date.now());
+      }, 500);
+
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       setMessage(`❌ 刪除失敗: ${error instanceof Error ? error.message : '未知錯誤'}`);

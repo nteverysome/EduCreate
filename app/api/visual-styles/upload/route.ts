@@ -265,14 +265,14 @@ export async function GET(request: NextRequest) {
     }
 
     // 遍歷 Blob 列表，匹配資源類型
-    const timestamp = Date.now();
     blobs.forEach((blob) => {
       const fileName = blob.pathname.split('/').pop() || '';
       const resourceType = fileName.split('.')[0];
 
       if (resources[resourceType]) {
-        // 添加時間戳到 URL 以破壞緩存
-        const urlWithTimestamp = `${blob.url}?v=${timestamp}`;
+        // 添加時間戳到 URL 以破壞緩存（使用 blob 的修改時間）
+        const blobTimestamp = blob.uploadedAt?.getTime() || Date.now();
+        const urlWithTimestamp = `${blob.url}?v=${blobTimestamp}`;
         resources[resourceType] = {
           exists: true,
           url: urlWithTimestamp
