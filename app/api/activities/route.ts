@@ -61,7 +61,8 @@ export async function POST(request: NextRequest) {
 
     // 驗證必要字段 - 支持 vocabularyItems 或 questions
     const isFlyingFruit = gameTemplateId === 'flying-fruit-game';
-    const hasContent = isFlyingFruit ? (questions && questions.length > 0) : (vocabularyItems && vocabularyItems.length > 0);
+    // 允許空詞彙列表（minItems: 0 的遊戲如 runner-game）
+    const hasContent = isFlyingFruit ? (questions && questions.length > 0) : true;
 
     if (!title || !gameTemplateId || !hasContent) {
       return NextResponse.json({ error: '缺少必要字段' }, { status: 400 });

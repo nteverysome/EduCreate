@@ -337,8 +337,8 @@ class SpeakingCardsGame extends Phaser.Scene {
         const buttonWidth = isLandscape ? 70 : 100;
         const buttonHeight = isLandscape ? 36 : 44;
 
-        // 四個按鈕的間距計算
-        const totalWidth = buttonWidth * 4 + 45;  // 4個按鈕 + 3個間距
+        // 五個按鈕的間距計算（添加完成按鈕）
+        const totalWidth = buttonWidth * 5 + 60;  // 5個按鈕 + 4個間距
         const startX = (width - totalWidth) / 2 + buttonWidth / 2;
         const gap = buttonWidth + 15;
 
@@ -363,6 +363,11 @@ class SpeakingCardsGame extends Phaser.Scene {
                 this.playCurrentCardAudio();
             }, buttonWidth, buttonHeight, 0x8b5cf6);
         }
+
+        // 🏁 完成按鈕 - 新增
+        this.finishBtn = this.createButton(startX + gap * 4, buttonY, '🏁', () => {
+            this.finishGame();
+        }, buttonWidth, buttonHeight, 0xf59e0b);
     }
 
     createButton(x, y, label, callback, btnWidth = 120, btnHeight = 40, bgColor = 0x4b5563) {
@@ -851,7 +856,218 @@ class SpeakingCardsGame extends Phaser.Scene {
     onTimerEnd() {
         // 計時結束提示
         console.log('⏱️ 時間到！');
-        // 可以添加音效或視覺提示
+        // 🔥 時間到時完成遊戲
+        this.finishGame();
+    }
+
+    // ===== 遊戲完成邏輯 =====
+    finishGame() {
+        console.log('🎮 遊戲完成');
+
+        // 停止計時器
+        this.stopTimer();
+
+        // 計算統計信息
+        const totalCards = this.shuffledCards.length;
+        const cardsViewed = Math.min(this.currentCardIndex + 1, totalCards);
+        const timeSpent = this.timerValue;
+
+        // 顯示遊戲完成模態框
+        this.showGameCompleteModal({
+            totalCards: totalCards,
+            cardsViewed: cardsViewed,
+            timeSpent: timeSpent
+        });
+    }
+
+    // ===== 顯示遊戲完成模態框 =====
+    showGameCompleteModal(stats) {
+        // 創建半透明背景
+        const overlay = this.add.rectangle(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY,
+            this.cameras.main.width,
+            this.cameras.main.height,
+            0x000000,
+            0.7
+        );
+        overlay.setScrollFactor(0);
+        overlay.setDepth(1000);
+
+        // 創建模態框容器
+        const modal = this.add.container(
+            this.cameras.main.centerX,
+            this.cameras.main.centerY
+        );
+        modal.setScrollFactor(0);
+        modal.setDepth(1001);
+
+        // 模態框背景
+        const modalBg = this.add.rectangle(0, 0, 500, 400, 0xffffff);
+        modalBg.setStrokeStyle(3, 0x333333);
+        modal.add(modalBg);
+
+        // 標題
+        const title = this.add.text(0, -150, '🎉 遊戲完成！', {
+            fontSize: '32px',
+            color: '#333333',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        modal.add(title);
+
+        // 統計信息
+        const statsText = this.add.text(0, -80,
+            `卡片數量: ${stats.totalCards}\n` +
+            `已查看: ${stats.cardsViewed}\n` +
+            `用時: ${this.formatTime(stats.timeSpent)}`,
+            {
+                fontSize: '18px',
+                color: '#666666',
+                fontFamily: 'Arial',
+                align: 'center'
+            }
+        ).setOrigin(0.5);
+        modal.add(statsText);
+
+        // 排行榜按鈕
+        const leaderboardBtn = this.add.rectangle(0, 80, 200, 50, 0x3c3c3c);
+        leaderboardBtn.setStrokeStyle(2, 0x000000);
+        leaderboardBtn.setInteractive({ useHandCursor: true });
+        modal.add(leaderboardBtn);
+
+        const leaderboardText = this.add.text(0, 80, '🏆 排行榜', {
+            fontSize: '18px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        modal.add(leaderboardText);
+
+        leaderboardBtn.on('pointerdown', async () => {
+            console.log('🎮 點擊排行榜按鈕');
+            // 先保存分數到排行榜
+            await this.saveScoreToLeaderboard(stats);
+            // 然後通知父頁面顯示排行榜
+            this.notifyParentShowLeaderboard();
+        });
+
+        leaderboardBtn.on('pointerover', () => {
+            leaderboardBtn.setFillStyle(0x4c4c4c);
+        });
+
+        leaderboardBtn.on('pointerout', () => {
+            leaderboardBtn.setFillStyle(0x3c3c3c);
+        });
+
+        // 重新開始按鈕
+        const restartBtn = this.add.rectangle(0, 150, 200, 50, 0x3c3c3c);
+        restartBtn.setStrokeStyle(2, 0x000000);
+        restartBtn.setInteractive({ useHandCursor: true });
+        modal.add(restartBtn);
+
+        const restartText = this.add.text(0, 150, '🔄 重新開始', {
+            fontSize: '18px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        modal.add(restartText);
+
+        restartBtn.on('pointerdown', () => {
+            console.log('🎮 點擊重新開始按鈕');
+            overlay.destroy();
+            modal.destroy();
+            this.scene.restart();
+        });
+
+        restartBtn.on('pointerover', () => {
+            restartBtn.setFillStyle(0x4c4c4c);
+        });
+
+        restartBtn.on('pointerout', () => {
+            restartBtn.setFillStyle(0x3c3c3c);
+        });
+
+        // 保存分數到排行榜
+        this.saveScoreToLeaderboard(stats);
+    }
+
+    // ===== 保存分數到排行榜 =====
+    async saveScoreToLeaderboard(stats) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activityId = urlParams.get('activityId');
+
+        if (!activityId) {
+            console.warn('⚠️ 缺少 activityId，無法保存排行榜');
+            return;
+        }
+
+        // 生成隨機玩家名稱（如果沒有輸入）
+        const playerName = this.playerName || `Player_${Math.random().toString(36).substring(2, 11)}`;
+
+        // 準備排行榜數據
+        const leaderboardData = {
+            activityId: activityId,
+            playerName: playerName,
+            score: stats.cardsViewed,  // 以查看的卡片數作為分數
+            correctCount: stats.cardsViewed,
+            totalCount: stats.totalCards,
+            accuracy: stats.totalCards > 0 ? (stats.cardsViewed / stats.totalCards) * 100 : 0,
+            timeSpent: stats.timeSpent,
+            gameData: {
+                totalCards: stats.totalCards,
+                cardsViewed: stats.cardsViewed,
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        console.log('🎮 排行榜數據:', leaderboardData);
+
+        try {
+            const response = await fetch('/api/leaderboard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(leaderboardData),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save score');
+            }
+
+            const result = await response.json();
+            console.log('💾 分數已保存到數據庫:', result.data);
+        } catch (error) {
+            console.error('❌ 保存排行榜失敗:', error);
+        }
+    }
+
+    // ===== 通知父頁面顯示排行榜 =====
+    notifyParentShowLeaderboard() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activityId = urlParams.get('activityId');
+
+        console.log('🎮 通知父頁面顯示排行榜:', activityId);
+
+        // 直接發送 PostMessage
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+                type: 'SHOW_LEADERBOARD',
+                activityId: activityId,
+                timestamp: Date.now(),
+                source: 'speaking-cards'
+            }, '*');
+            console.log('📤 已發送 SHOW_LEADERBOARD 到父頁面');
+        }
+    }
+
+    // ===== 格式化時間 =====
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}分${secs}秒`;
     }
 
     // ===== 播放當前卡片語音 =====

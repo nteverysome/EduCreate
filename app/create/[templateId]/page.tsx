@@ -53,7 +53,7 @@ const gameTemplateConfig = {
     description: '一個刺激的跑酷遊戲，通過跳躍和收集金幣來挑戰高分，基於 Phaser 3 引擎開發',
     icon: '🏃',
     category: '動態反應記憶',
-    minItems: 5,
+    minItems: 0,
     maxItems: 100,
     inputType: 'vocabulary'
   },
@@ -627,6 +627,10 @@ export default function CreateGamePage() {
     const validItems = vocabularyItems.filter(item =>
       item.english.trim() !== '' || item.chinese.trim() !== '' || item.imageUrl || item.chineseImageUrl
     );
+    // 如果 minItems 為 0，允許空詞彙列表
+    if (gameConfig.minItems === 0) {
+      return true;
+    }
     return validItems.length >= gameConfig.minItems;
   };
 

@@ -423,8 +423,8 @@ const GameSwitcherPage: React.FC = () => {
           copiedFromActivityId?: string;
         };
 
-        // 🔥 從 content.gameTemplateId 提取遊戲模板 ID
-        const gameTemplateId = data.content?.gameTemplateId;
+        // 🔥 從 content.gameTemplateId 或頂層 gameTemplateId 提取遊戲模板 ID
+        const gameTemplateId = (data as any).gameTemplateId || (data as any).content?.gameTemplateId;
 
         setActivityInfo({
           title: data.title || '未命名活動',
@@ -448,6 +448,12 @@ const GameSwitcherPage: React.FC = () => {
           copiedFromActivityId: data.copiedFromActivityId,
           category: data.communityCategory || undefined,
         });
+
+        // 🔥 [v102.6] 根據活動的 gameTemplateId 自動切換遊戲
+        if (gameTemplateId) {
+          console.log('🎮 [v102.6] 根據活動自動切換遊戲:', gameTemplateId);
+          setCurrentGameId(gameTemplateId);
+        }
 
         // 載入遊戲選項
         if (data.gameOptions) {
@@ -890,8 +896,18 @@ const GameSwitcherPage: React.FC = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
-    // 監聽來自 iframe 的全螢幕請求
+    // 監聽來自 iframe 的全螢幕請求和排行榜請求
     const handleFullscreenMessage = (event: MessageEvent) => {
+      // 🔥 處理排行榜請求
+      if (event.data && event.data.type === 'SHOW_LEADERBOARD') {
+        console.log('📨 收到來自遊戲的排行榜請求:', event.data.activityId);
+        // 載入並顯示排行榜
+        if (event.data.activityId) {
+          loadActivityLeaderboard(event.data.activityId);
+        }
+        return;
+      }
+
       if (event.data && event.data.type === 'REQUEST_FULLSCREEN' && event.data.source === 'shimozurdo-game') {
         console.log('📨 收到來自遊戲的全螢幕請求');
 

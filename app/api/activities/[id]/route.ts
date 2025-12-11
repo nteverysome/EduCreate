@@ -234,13 +234,25 @@ export async function GET(
       console.log('✅ [GET] GameSettings 轉換為 flyingFruitOptions:', flyingFruitOptions);
     }
 
+    // 🔥 從 content.gameTemplateId 提取 gameTemplateId（如果存在）
+    const gameTemplateId = activity.content?.gameTemplateId;
+
     // 返回活動數據，包含 gameOptions、matchUpOptions 和 flyingFruitOptions
     const responseData: any = {
       ...activity,
+      gameTemplateId: gameTemplateId,  // 🔥 添加 gameTemplateId 到頂層
       gameOptions,
       matchUpOptions: activity.matchUpOptions || null,
       flyingFruitOptions  // 🔥 從 GameSettings 讀取，不再依賴單獨的列
     };
+
+    console.log('✅ [GET] 返回活動數據:', {
+      activityId: activity.id,
+      title: activity.title,
+      gameTemplateId: gameTemplateId,
+      contentGameTemplateId: activity.content?.gameTemplateId,
+      templateType: activity.templateType
+    });
 
     return NextResponse.json(responseData, {
       headers: corsHeaders,

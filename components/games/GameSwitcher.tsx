@@ -418,17 +418,14 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 🔥 v102.4: 當 customVocabulary 改變時，添加 customVocabulary=true 參數到 URL
-  // 這樣 iframe 會重新加載，遊戲會重新初始化，卡片會動態調整為新詞彙
-  // 但 gameKey 不改變，所以 GameSwitcher 組件不會卸載/重新掛載
-  const [vocabUpdateTrigger, setVocabUpdateTrigger] = useState(0);
+  // 🔥 v102.7: 移除 vocabUpdateTrigger，改為使用 localStorage 傳遞詞彙
+  // 這樣當 customVocabulary 改變時，iframe 不會重新加載，遊戲不會閃爍
 
   useEffect(() => {
     if (customVocabulary.length > 0) {
-      console.log('🔄 [v102.4] customVocabulary 已改變，觸發 iframe 重新加載:', customVocabulary.length, '個詞彙');
-      // 改變 vocabUpdateTrigger 以觸發 iframe src 改變
-      setVocabUpdateTrigger(prev => prev + 1);
-      // 同時存儲到 localStorage 作為備份
+      console.log('🔄 [v102.7] customVocabulary 已改變，存儲到 localStorage:', customVocabulary.length, '個詞彙');
+      // 🔥 v102.7: 移除 setVocabUpdateTrigger，防止 iframe 重新加載
+      // 改為：直接存儲到 localStorage，遊戲會自動從 localStorage 加載詞彙
       localStorage.setItem('gameCustomVocabulary', JSON.stringify(customVocabulary));
     }
   }, [customVocabulary]);
@@ -442,11 +439,12 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       const separator = url.includes('?') ? '&' : '?';
       url += `${separator}activityId=${activityId}`;
 
-      // 🔥 v102.4: 添加 customVocabulary=true 參數到 URL
-      // 這樣當 customVocabulary 改變時，iframe src 會改變，iframe 會重新加載
-      if (customVocabulary.length > 0) {
-        url += `&customVocabulary=true&vocabUpdateTrigger=${vocabUpdateTrigger}`;
-      }
+      // 🔥 v102.8: 完全移除 customVocabulary 參數，防止 iframe 重新加載
+      // 原因：當 customVocabulary 從空數組變為有內容時，URL 會從不包含 customVocabulary=true 變為包含
+      // 這會導致 iframe src 改變，iframe 重新加載，遊戲閃爍
+      // 改為：完全不添加 customVocabulary 參數，使用 localStorage 來傳遞詞彙
+      // 遊戲會自動從 localStorage 加載詞彙，這樣 iframe 不會重新加載，遊戲不會閃爍
+      // (不再添加 customVocabulary=true 參數)
 
       // 優先檢查是否為學生遊戲模式（有 assignmentId）
       if (assignmentId) {
@@ -1349,6 +1347,19 @@ const GameSwitcher: React.FC<GameSwitcherProps> = ({
       } else if (data.type === 'GAME_STATE_CHANGE') {
         // 處理遊戲狀態變化消息
         console.log('📊 遊戲狀態變化:', data.state);
+      } else if (data.type === 'SHOW_LEADERBOARD') {
+        // 🔥 處理顯示排行榜消息
+        console.log('🏆 遊戲請求顯示排行榜:', data.activityId);
+        // 通知父頁面顯示排行榜
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({
+            type: 'SHOW_LEADERBOARD',
+            activityId: data.activityId,
+            timestamp: Date.now(),
+            source: 'game-switcher'
+          }, '*');
+          console.log('📤 已轉發 SHOW_LEADERBOARD 到父頁面');
+        }
       }
     } catch (error) {
       console.warn('處理 iframe 消息時出錯:', error);
