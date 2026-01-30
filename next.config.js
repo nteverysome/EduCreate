@@ -273,15 +273,11 @@ const nextConfig = {
       // Blastemup 太空射擊遊戲路由
       {
         source: '/games/blastemup-game',
-        destination: '/games/blastemup-game/dist/index.html'
+        destination: '/games/blastemup-game/index.html'
       },
       {
-        source: '/games/blastemup-game/dist',
-        destination: '/games/blastemup-game/dist/index.html'
-      },
-      {
-        source: '/games/blastemup-game/dist/',
-        destination: '/games/blastemup-game/dist/index.html'
+        source: '/games/blastemup-game/',
+        destination: '/games/blastemup-game/index.html'
       },
       {
         source: '/games/blastemup-game/:path*',

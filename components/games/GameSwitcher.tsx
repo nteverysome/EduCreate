@@ -350,7 +350,7 @@ const getGameUrl = (gameId: string, isLocalhost: boolean): string => {
     case 'dungeon-game':
       return '/games/dungeon-game/dist/';
     case 'blastemup-game':
-      return '/games/blastemup-game/dist/';
+      return '/games/blastemup-game/';
     case 'math-attack-game':
       return '/games/math-attack-game/';
     case 'match-up-game':
