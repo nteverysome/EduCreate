@@ -32,15 +32,38 @@ class Player extends Phaser.GameObjects.Sprite {
 
   update(timestep, delta) {
     if (this.death) return;
-    if (this.cursor.left.isDown) {
-      this.body.setAngularVelocity(-150);
+
+    // 🎮 檢查虛擬搖桿輸入
+    let touchState = null;
+    if (typeof window !== 'undefined' && window.touchControls) {
+      touchState = window.touchControls.getInputState();
+    }
+
+    // 旋轉控制 - 優先使用虛擬搖桿，否則使用鍵盤
+    let rotationInput = 0;
+    if (touchState && Math.abs(touchState.direction.x) > 0.1) {
+      rotationInput = touchState.direction.x;
+    } else if (this.cursor.left.isDown) {
+      rotationInput = -1;
     } else if (this.cursor.right.isDown) {
-      this.body.setAngularVelocity(150);
+      rotationInput = 1;
+    }
+
+    if (rotationInput !== 0) {
+      this.body.setAngularVelocity(rotationInput * 150);
     } else {
       this.body.setAngularVelocity(0);
     }
 
-    if (this.cursor.up.isDown) {
+    // 推進控制 - 優先使用虛擬搖桿，否則使用鍵盤
+    let thrustInput = false;
+    if (touchState && Math.abs(touchState.direction.y) > 0.1 && touchState.direction.y < 0) {
+      thrustInput = true;
+    } else if (this.cursor.up.isDown) {
+      thrustInput = true;
+    }
+
+    if (thrustInput) {
       this.upDelta += delta;
       if (this.upDelta > 200) {
         this.upDelta = 0;

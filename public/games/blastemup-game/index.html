@@ -107,6 +107,137 @@
                 padding: 0 !important;
             }
         }
+
+        /* 🔥 虛擬搖桿樣式 */
+        #touch-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        #touch-joystick {
+            position: fixed;
+            bottom: 80px;
+            left: 80px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: auto;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            z-index: 1001;
+        }
+
+        #joystick-knob {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(255, 255, 255, 1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: background-color 0.1s ease;
+            pointer-events: none;
+        }
+
+        /* 射擊按鈕樣式 */
+        #touch-shoot {
+            position: fixed;
+            bottom: 120px;
+            right: 80px;
+            width: 80px;
+            height: 80px;
+            background: #ff4757;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+        }
+
+        #touch-shoot:active {
+            transform: scale(0.9);
+            background: #ff6b6b;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 480px) {
+            #touch-joystick {
+                bottom: 60px;
+                left: 60px;
+                width: 100px;
+                height: 100px;
+            }
+
+            #joystick-knob {
+                width: 35px;
+                height: 35px;
+            }
+
+            #touch-shoot {
+                bottom: 100px;
+                right: 60px;
+                width: 70px;
+                height: 70px;
+                font-size: 20px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            #touch-joystick {
+                bottom: 40px;
+                left: 40px;
+            }
+
+            #touch-shoot {
+                bottom: 60px;
+                right: 40px;
+            }
+        }
+
+        /* 橫向模式調整 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            #touch-joystick {
+                bottom: 30px;
+                left: 30px;
+                width: 90px;
+                height: 90px;
+            }
+
+            #joystick-knob {
+                width: 30px;
+                height: 30px;
+            }
+
+            #touch-shoot {
+                bottom: 40px;
+                right: 30px;
+                width: 60px;
+                height: 60px;
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -114,6 +245,14 @@
 
     <!-- 全螢幕按鈕 -->
     <button class="fullscreen-btn">⛶</button>
+
+    <!-- 虛擬搖桿控制 -->
+    <div id="touch-controls">
+        <div id="touch-joystick">
+            <div id="joystick-knob"></div>
+        </div>
+        <button id="touch-shoot">🔫</button>
+    </div>
 
     <!-- Phaser 庫 -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.js"></script>
@@ -133,6 +272,163 @@
 
     <!-- 全螢幕控制 JavaScript -->
     <script>
+        // 🔥 虛擬搖桿控制器
+        class TouchControls {
+            constructor() {
+                this.joystick = document.getElementById('touch-joystick');
+                this.knob = document.getElementById('joystick-knob');
+                this.shootBtn = document.getElementById('touch-shoot');
+
+                this.joystickActive = false;
+                this.joystickCenter = { x: 0, y: 0 };
+                this.currentDirection = { x: 0, y: 0 };
+                this.shooting = false;
+
+                this.init();
+            }
+
+            init() {
+                if (!this.joystick || !this.knob || !this.shootBtn) {
+                    console.warn('⚠️ 虛擬搖桿元素未找到');
+                    return;
+                }
+
+                // 搖桿控制 - 觸摸事件
+                this.joystick.addEventListener('touchstart', this.onJoystickStart.bind(this), { passive: false });
+                this.joystick.addEventListener('touchmove', this.onJoystickMove.bind(this), { passive: false });
+                this.joystick.addEventListener('touchend', this.onJoystickEnd.bind(this), { passive: false });
+                this.joystick.addEventListener('touchcancel', this.onJoystickEnd.bind(this), { passive: false });
+
+                // 搖桿控制 - 鼠標事件（用於桌面測試）
+                this.joystick.addEventListener('mousedown', this.onJoystickStartMouse.bind(this));
+                this.joystick.addEventListener('mousemove', this.onJoystickMoveMouse.bind(this));
+                this.joystick.addEventListener('mouseup', this.onJoystickEndMouse.bind(this));
+                this.joystick.addEventListener('mouseleave', this.onJoystickEndMouse.bind(this));
+
+                // 射擊按鈕 - 觸摸事件
+                this.shootBtn.addEventListener('touchstart', this.onShootStart.bind(this), { passive: false });
+                this.shootBtn.addEventListener('touchend', this.onShootEnd.bind(this), { passive: false });
+
+                // 射擊按鈕 - 鼠標事件
+                this.shootBtn.addEventListener('mousedown', this.onShootStartMouse.bind(this));
+                this.shootBtn.addEventListener('mouseup', this.onShootEndMouse.bind(this));
+
+                // 防止默認觸摸行為
+                document.addEventListener('touchmove', (e) => {
+                    if (e.target.closest('#touch-controls')) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+
+                console.log('✅ 虛擬搖桿控制器初始化完成');
+            }
+
+            onJoystickStart(e) {
+                e.preventDefault();
+                this.joystickActive = true;
+                const rect = this.joystick.getBoundingClientRect();
+                this.joystickCenter = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+
+            onJoystickStartMouse(e) {
+                e.preventDefault();
+                this.joystickActive = true;
+                const rect = this.joystick.getBoundingClientRect();
+                this.joystickCenter = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+
+            onJoystickMove(e) {
+                if (!this.joystickActive) return;
+                e.preventDefault();
+
+                const touch = e.touches[0];
+                if (!touch) return;
+
+                this.updateJoystickPosition(touch.clientX, touch.clientY);
+            }
+
+            onJoystickMoveMouse(e) {
+                if (!this.joystickActive) return;
+                e.preventDefault();
+
+                this.updateJoystickPosition(e.clientX, e.clientY);
+            }
+
+            updateJoystickPosition(clientX, clientY) {
+                const deltaX = clientX - this.joystickCenter.x;
+                const deltaY = clientY - this.joystickCenter.y;
+
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const maxDistance = 40;
+
+                if (distance <= maxDistance) {
+                    this.knob.style.transform = `translate(${deltaX - 20}px, ${deltaY - 20}px)`;
+                    this.currentDirection = {
+                        x: deltaX / maxDistance,
+                        y: deltaY / maxDistance
+                    };
+                } else {
+                    const angle = Math.atan2(deltaY, deltaX);
+                    const limitedX = Math.cos(angle) * maxDistance;
+                    const limitedY = Math.sin(angle) * maxDistance;
+
+                    this.knob.style.transform = `translate(${limitedX - 20}px, ${limitedY - 20}px)`;
+                    this.currentDirection = {
+                        x: Math.cos(angle),
+                        y: Math.sin(angle)
+                    };
+                }
+            }
+
+            onJoystickEnd(e) {
+                e.preventDefault();
+                this.joystickActive = false;
+                this.knob.style.transform = 'translate(-50%, -50%)';
+                this.currentDirection = { x: 0, y: 0 };
+            }
+
+            onJoystickEndMouse(e) {
+                e.preventDefault();
+                this.joystickActive = false;
+                this.knob.style.transform = 'translate(-50%, -50%)';
+                this.currentDirection = { x: 0, y: 0 };
+            }
+
+            onShootStart(e) {
+                e.preventDefault();
+                this.shooting = true;
+            }
+
+            onShootStartMouse(e) {
+                e.preventDefault();
+                this.shooting = true;
+            }
+
+            onShootEnd(e) {
+                e.preventDefault();
+                this.shooting = false;
+            }
+
+            onShootEndMouse(e) {
+                e.preventDefault();
+                this.shooting = false;
+            }
+
+            // 獲取當前輸入狀態
+            getInputState() {
+                return {
+                    direction: this.currentDirection,
+                    shooting: this.shooting
+                };
+            }
+        }
+
         // 🔥 全域攔截層清理函數
         function cleanupGlobalInterceptLayers() {
             console.log('🧹 執行全域攔截層清理');
@@ -287,6 +583,9 @@
 
         // 🔥 頁面載入時立即清理攔截層
         cleanupGlobalInterceptLayers();
+
+        // 🔥 初始化虛擬搖桿控制器
+        window.touchControls = new TouchControls();
 
         // 🔥 初始化全螢幕控制器
         window.fullscreenController = new FullscreenController();
