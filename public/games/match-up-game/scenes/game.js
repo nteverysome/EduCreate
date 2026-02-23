@@ -9260,6 +9260,9 @@ class GameScene extends Phaser.Scene {
             overlay.destroy();
             modal.destroy();
             this.gameCompleteModal = null;
+            // 🔥 [v226.0] 重置 gameCompleteModalShown 標誌，允許再次顯示 modal
+            this.gameCompleteModalShown = false;
+            console.log('🔥 [v226.0] 已重置 gameCompleteModalShown = false');
             this.showAnswersOnCards();
         });
 
@@ -9270,6 +9273,9 @@ class GameScene extends Phaser.Scene {
             overlay.destroy();
             modal.destroy();
             this.gameCompleteModal = null;
+            // 🔥 [v226.0] 重置 gameCompleteModalShown 標誌，允許再次顯示 modal
+            this.gameCompleteModalShown = false;
+            console.log('🔥 [v226.0] 已重置 gameCompleteModalShown = false');
             this.showAllCorrectAnswers();
         });
 
@@ -9280,6 +9286,9 @@ class GameScene extends Phaser.Scene {
             overlay.destroy();
             modal.destroy();
             this.gameCompleteModal = null;
+            // 🔥 [v226.0] 重置 gameCompleteModalShown 標誌，允許再次顯示 modal
+            this.gameCompleteModalShown = false;
+            console.log('🔥 [v226.0] 已重置 gameCompleteModalShown = false');
             this.restartGame();
         });
 
@@ -9456,6 +9465,11 @@ class GameScene extends Phaser.Scene {
         this.isShowingAllAnswers = false;
         this.allPagesShowAllAnswersState = {};
         console.log('🔥 [v1.3] 已重置 Show all answers 狀態');
+
+        // 🔥 [v226.0] 重置 showAnswersMode 標誌
+        this.showAnswersMode = false;
+        this.gameCompleteModalShown = false;
+        console.log('🔥 [v226.0] 已重置 showAnswersMode 和 gameCompleteModalShown 標誌');
 
         // 🔥 [v230.2] 改變策略：只重置遊戲狀態，讓 updateLayout() 自己清除卡片
         // 原因：updateLayout() 中的清除邏輯依賴於 this.leftCards 等數組
