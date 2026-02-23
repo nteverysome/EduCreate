@@ -1393,6 +1393,12 @@ class GameScene extends Phaser.Scene {
                                     cardParentContainerType: card.parentContainer ? card.parentContainer.constructor.name : 'none'
                                 });
 
+                                // 🔥 [v224.0] 修復：在移動卡片到容器前先禁用交互，避免 hitAreaCallback 錯誤
+                                if (card.input && card.input.enabled) {
+                                    card.disableInteractive();
+                                    console.log('🔥 [v224.0] 已禁用卡片交互（避免 hitAreaCallback 錯誤）:', { pairId });
+                                }
+
                                 // 🔥 [v223.0] 如果卡片已經有父容器，先移除
                                 if (card.parentContainer) {
                                     console.log('🔥 [v223.0] 卡片已有父容器，準備移除:', {
@@ -9755,6 +9761,12 @@ class GameScene extends Phaser.Scene {
                             visible: card.visible,
                             alpha: card.alpha
                         });
+
+                        // 🔥 [v224.0] 修復：在移動卡片到容器前先禁用交互，避免 hitAreaCallback 錯誤
+                        if (card.input && card.input.enabled) {
+                            card.disableInteractive();
+                            console.log('🔥 [v224.0] 已禁用卡片交互（避免 hitAreaCallback 錯誤）:', { pairId });
+                        }
 
                         // 🔥 [v222.0] 如果卡片已經有父容器，先移除
                         if (card.parentContainer) {
