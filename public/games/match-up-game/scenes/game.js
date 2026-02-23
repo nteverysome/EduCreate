@@ -8476,6 +8476,10 @@ class GameScene extends Phaser.Scene {
             this.currentPage++;
             console.log('📄 進入下一頁:', this.currentPage + 1);
 
+            // 🔥 [v226.0] 重置 showAnswersMode 標誌，防止導航時出現問題
+            this.showAnswersMode = false;
+            console.log('🔥 [v226.0] 已重置 showAnswersMode = false（進入下一頁）');
+
             // 🔥 [v115.0] 詳細調適訊息：頁面轉換後
             console.log('🔥 [v115.0] 頁面轉換後:', {
                 currentPage: this.currentPage,
@@ -8585,6 +8589,10 @@ class GameScene extends Phaser.Scene {
 
             this.currentPage--;
             console.log('📄 進入上一頁:', this.currentPage + 1);
+
+            // 🔥 [v226.0] 重置 showAnswersMode 標誌，防止導航時出現問題
+            this.showAnswersMode = false;
+            console.log('🔥 [v226.0] 已重置 showAnswersMode = false（進入上一頁）');
 
             // 🔥 詳細調適訊息：頁面轉換後
             console.log('🔥 [v117.0] 頁面轉換後:', {
