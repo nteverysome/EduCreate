@@ -555,6 +555,7 @@ class GameScene extends Phaser.Scene {
         this.gameCompleteModal = null;  // 🔥 遊戲完成模態框
         this.pageCompleteModal = null;  // 🔥 [v94.0] 頁面完成模態框
         this.gameCompleteModalShown = false;  // 🔥 [v65.0] 防止重複顯示遊戲完成模態框
+        this.showAnswersMode = false;  // 🔥 [v225.0] 標誌：用戶已點擊 "Show all answers" 或 "Show answer"，提交時應顯示 game complete modal
 
         // 顯示載入提示
         const width = this.scale.width;
@@ -7740,21 +7741,31 @@ class GameScene extends Phaser.Scene {
             totalCount: correctCount + incorrectCount + unmatchedCount
         });
 
-        // 🔥 檢查是否所有頁面都已完成
-        const isLastPage = this.currentPage === this.totalPages - 1;
-        if (isLastPage) {
-            // 遊戲結束
+        // 🔥 [v225.0] 檢查用戶是否點擊了 "Show all answers" 或 "Show answer"
+        if (this.showAnswersMode) {
+            // 用戶已點擊 "Show all answers" 或 "Show answer"，直接顯示 game complete modal
+            console.log('🔥 [v225.0] 檢測到 showAnswersMode = true，直接顯示 game complete modal');
             this.gameEndTime = Date.now();
             this.totalGameTime = (this.gameEndTime - this.gameStartTime) / 1000; // 秒
             this.gameState = 'completed';
-
-            console.log('🎮 遊戲結束！總時間:', this.totalGameTime, '秒');
-
-            // 顯示遊戲結束模態框
             this.showGameCompleteModal();
         } else {
-            // 顯示當前頁面的總結
-            this.showMatchSummary(correctCount, incorrectCount, unmatchedCount);
+            // 原有邏輯：檢查是否所有頁面都已完成
+            const isLastPage = this.currentPage === this.totalPages - 1;
+            if (isLastPage) {
+                // 遊戲結束
+                this.gameEndTime = Date.now();
+                this.totalGameTime = (this.gameEndTime - this.gameStartTime) / 1000; // 秒
+                this.gameState = 'completed';
+
+                console.log('🎮 遊戲結束！總時間:', this.totalGameTime, '秒');
+
+                // 顯示遊戲結束模態框
+                this.showGameCompleteModal();
+            } else {
+                // 顯示當前頁面的總結
+                this.showMatchSummary(correctCount, incorrectCount, unmatchedCount);
+            }
         }
     }
 
@@ -9529,6 +9540,10 @@ class GameScene extends Phaser.Scene {
     showAnswersOnCards() {
         console.log('🎮 [v88.0] 顯示所有卡片上的勾勾和叉叉，以及正確的配對物件');
 
+        // 🔥 [v225.0] 設置標誌：用戶已點擊 "Show answer"，提交時應顯示 game complete modal
+        this.showAnswersMode = true;
+        console.log('🔥 [v225.0] 已設置 showAnswersMode = true，提交答案時將顯示 game complete modal');
+
         // 🔥 [v202.0] 移除特定的延遲調用，而不是所有事件
         if (this.summaryDelayedCall) {
             this.summaryDelayedCall.remove();
@@ -9567,6 +9582,10 @@ class GameScene extends Phaser.Scene {
     // 🔥 [v137.0] 改進：添加狀態標誌，在每一頁都能保存正確移動的卡片
     showAllCorrectAnswers() {
         console.log('🎮 [v137.0] 顯示所有卡片的正確名稱 - 英文卡片移動到匹配的中文位置');
+
+        // 🔥 [v225.0] 設置標誌：用戶已點擊 "Show all answers"，提交時應顯示 game complete modal
+        this.showAnswersMode = true;
+        console.log('🔥 [v225.0] 已設置 showAnswersMode = true，提交答案時將顯示 game complete modal');
 
         // 🔥 [v203.1] 調適訊息：記錄初始狀態
         console.log('🔥 [v203.1] ========== showAllCorrectAnswers 開始 ==========');
@@ -10995,4 +11014,3 @@ class GameScene extends Phaser.Scene {
         console.log('🔥 [v156.0] ========== 恢復卡片位置完成 ==========');
     }
 }
-
