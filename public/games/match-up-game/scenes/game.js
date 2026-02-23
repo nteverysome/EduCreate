@@ -7750,7 +7750,7 @@ class GameScene extends Phaser.Scene {
             this.gameState = 'completed';
             this.showGameCompleteModal();
         } else {
-            // 原有邏輯：檢查是否所有頁面都已完成
+            // 原有邏輯：檢查是否為最後一頁
             const isLastPage = this.currentPage === this.totalPages - 1;
             if (isLastPage) {
                 // 遊戲結束
@@ -9294,9 +9294,6 @@ class GameScene extends Phaser.Scene {
             overlay.destroy();
             modal.destroy();
             this.gameCompleteModal = null;
-            // 🔥 [v226.0] 重置 gameCompleteModalShown 標誌，允許再次顯示 modal
-            this.gameCompleteModalShown = false;
-            console.log('🔥 [v226.0] 已重置 gameCompleteModalShown = false');
             this.restartGame();
         });
 
@@ -9923,39 +9920,44 @@ class GameScene extends Phaser.Scene {
         checkMark.setOrigin(0.5);
         checkMark.setDepth(2000);  // 🔥 [v154.0] 提升深度到 2000，確保勾勾顯示在最上方
 
-        // 🔥 [v227.0] 修復：將勾勾添加到卡片容器中，而不是場景中
-        // 這樣勾勾會跟隨卡片的位置，不會出現在框外
+        // 🔥 [v179.0] 修復：計算正確的世界座標（考慮卡片是否在容器中）
         if (background) {
-            // 相對於卡片容器的位置
-            const markX = background.width / 2 - 32;
-            const markY = -background.height / 2 + 32;
-            checkMark.setPosition(markX, markY);
-            // 將勾勾添加到卡片容器中
-            card.add(checkMark);
+            // 🔥 [v179.0] 改進：使用 getWorldTransformMatrix 獲取世界座標
+            // 這樣即使卡片在容器中，也能正確計算世界座標
+            const worldTransform = card.getWorldTransformMatrix();
+            const worldX = worldTransform.tx + background.width / 2 - 32;
+            const worldY = worldTransform.ty - background.height / 2 + 32;
+            checkMark.setPosition(worldX, worldY);
 
-            console.log('✅ [v227.0] 勾勾已添加到卡片容器（相對座標）:', {
+            console.log('✅ [v179.0] 勾勾已添加到場景（使用世界座標）:', {
                 pairId: card.getData('pairId'),
-                markX: markX.toFixed(0),
-                markY: markY.toFixed(0),
+                worldX: worldX.toFixed(0),
+                worldY: worldY.toFixed(0),
                 markDepth: checkMark.depth,
+                cardLocalPos: { x: card.x, y: card.y },
+                cardWorldPos: { x: worldTransform.tx.toFixed(0), y: worldTransform.ty.toFixed(0) },
                 backgroundSize: { width: background.width, height: background.height },
                 isInContainer: !!card.parentContainer
             });
         } else {
-            // 後備邏輯：背景不存在時，使用相對座標
-            console.warn('⚠️ [v227.0] 背景不存在，使用相對座標顯示勾勾');
-            checkMark.setPosition(0, 0);
-            card.add(checkMark);
+            // 🔥 [v179.0] 後備邏輯：背景不存在時，使用世界座標
+            const worldTransform = card.getWorldTransformMatrix();
+            console.warn('⚠️ [v179.0] 背景不存在，使用世界座標顯示勾勾');
+            checkMark.setPosition(worldTransform.tx, worldTransform.ty);
 
-            console.log('✅ [v227.0] 勾勾已添加到卡片容器（相對座標）:', {
+            console.log('✅ [v179.0] 勾勾已添加到場景（使用世界座標）:', {
                 pairId: card.getData('pairId'),
-                markX: 0,
-                markY: 0,
+                worldX: worldTransform.tx.toFixed(0),
+                worldY: worldTransform.ty.toFixed(0),
                 markDepth: checkMark.depth,
                 isInContainer: !!card.parentContainer
             });
         }
 
+        // 🔥 [v155.0] 改進：直接添加到場景中，而不是容器中
+        // 這樣勾勾就不會受到容器座標系統的影響
+        // 🔥 [v174.0] 修復：確保勾勾被添加到場景中
+        this.add.existing(checkMark);  // 添加到場景中
         card.checkMark = checkMark;
     }
 
@@ -10002,39 +10004,44 @@ class GameScene extends Phaser.Scene {
         xMark.setOrigin(0.5);
         xMark.setDepth(2000);  // 🔥 [v154.0] 提升深度到 2000，確保叉叉顯示在最上方
 
-        // 🔥 [v227.0] 修復：將叉叉添加到卡片容器中，而不是場景中
-        // 這樣叉叉會跟隨卡片的位置，不會出現在框外
+        // 🔥 [v179.0] 修復：計算正確的世界座標（考慮卡片是否在容器中）
         if (background) {
-            // 相對於卡片容器的位置
-            const markX = background.width / 2 - 32;
-            const markY = -background.height / 2 + 32;
-            xMark.setPosition(markX, markY);
-            // 將叉叉添加到卡片容器中
-            card.add(xMark);
+            // 🔥 [v179.0] 改進：使用 getWorldTransformMatrix 獲取世界座標
+            // 這樣即使卡片在容器中，也能正確計算世界座標
+            const worldTransform = card.getWorldTransformMatrix();
+            const worldX = worldTransform.tx + background.width / 2 - 32;
+            const worldY = worldTransform.ty - background.height / 2 + 32;
+            xMark.setPosition(worldX, worldY);
 
-            console.log('✅ [v227.0] 叉叉已添加到卡片容器（相對座標）:', {
+            console.log('✅ [v179.0] 叉叉已添加到場景（使用世界座標）:', {
                 pairId: card.getData('pairId'),
-                markX: markX.toFixed(0),
-                markY: markY.toFixed(0),
+                worldX: worldX.toFixed(0),
+                worldY: worldY.toFixed(0),
                 markDepth: xMark.depth,
+                cardLocalPos: { x: card.x, y: card.y },
+                cardWorldPos: { x: worldTransform.tx.toFixed(0), y: worldTransform.ty.toFixed(0) },
                 backgroundSize: { width: background.width, height: background.height },
                 isInContainer: !!card.parentContainer
             });
         } else {
-            // 後備邏輯：背景不存在時，使用相對座標
-            console.warn('⚠️ [v227.0] 背景不存在，使用相對座標顯示叉叉');
-            xMark.setPosition(0, 0);
-            card.add(xMark);
+            // 🔥 [v179.0] 後備邏輯：背景不存在時，使用世界座標
+            const worldTransform = card.getWorldTransformMatrix();
+            console.warn('⚠️ [v179.0] 背景不存在，使用世界座標顯示叉叉');
+            xMark.setPosition(worldTransform.tx, worldTransform.ty);
 
-            console.log('✅ [v227.0] 叉叉已添加到卡片容器（相對座標）:', {
+            console.log('✅ [v179.0] 叉叉已添加到場景（使用世界座標）:', {
                 pairId: card.getData('pairId'),
-                markX: 0,
-                markY: 0,
+                worldX: worldTransform.tx.toFixed(0),
+                worldY: worldTransform.ty.toFixed(0),
                 markDepth: xMark.depth,
                 isInContainer: !!card.parentContainer
             });
         }
 
+        // 🔥 [v155.0] 改進：直接添加到場景中，而不是容器中
+        // 這樣叉叉就不會受到容器座標系統的影響
+        // 🔥 [v174.0] 修復：確保叉叉被添加到場景中
+        this.add.existing(xMark);  // 添加到場景中
         card.xMark = xMark;
     }
 
@@ -11026,3 +11033,4 @@ class GameScene extends Phaser.Scene {
         console.log('🔥 [v156.0] ========== 恢復卡片位置完成 ==========');
     }
 }
+
